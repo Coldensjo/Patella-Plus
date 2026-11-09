@@ -966,8 +966,8 @@ namespace {
 // Patella-Plus, the option Drag Full Stacks (General Options). Whether a pile
 // dropped on a slot asks for the count (the Move Objects dialog) instead of
 // moving whole: without the option unless Ctrl (0x400) is held, as the
-// original; with it only when Ctrl is held. A drop on the floor
-// (TMapWindow::LeftButtonUp) keeps the original's rule on purpose.
+// original; with it only when Ctrl is held. TMapWindow::LeftButtonUp has the
+// floor's own rule.
 bool AsksForCount(int Flags)
 {
 	const bool Ctrl = (Flags & 0x400) != 0;
