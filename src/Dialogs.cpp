@@ -2364,27 +2364,36 @@ void TOptionsDialog::HandleEvent(int Event)
 TGeneralOptionsDialog::TGeneralOptionsDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
-	TComponent::SetSize(SkinProperties().Data12EC, SkinProperties().Data12F0);
+	// Patella-Plus: Drag Full Stacks is a sixth row below the original five, one row's pitch further down. The body
+	// grows by that pitch, and TDialog fits itself and its bottom-anchored buttons around the body.
+	const int RowPitch = SkinProperties().Data1304.y - SkinProperties().Data12F4.y;
+	TRect DragFullStacksArea = SkinProperties().Data1324;
+	DragFullStacksArea.y += RowPitch;
+	TComponent::SetSize(SkinProperties().Data12EC, SkinProperties().Data12F0 + RowPitch);
 	ClassicControl = new TCheckBox("Tibia Classic Control");
 	AutoChaseOff = new TCheckBox("Auto Chase Off");
 	ShowHints = new TCheckBox("Show Hints");
 	CreatureNames = new TCheckBox("Show Names of Creatures");
 	TextualEffects = new TCheckBox("Show Textual Effects");
+	DragFullStacks = new TCheckBox("Drag Full Stacks");
 	InsertChild(ClassicControl);
 	InsertChild(AutoChaseOff);
 	InsertChild(ShowHints);
 	InsertChild(CreatureNames);
 	InsertChild(TextualEffects);
+	InsertChild(DragFullStacks);
 	SetChildArea(ClassicControl, SkinProperties().Data12F4);
 	SetChildArea(AutoChaseOff, SkinProperties().Data1304);
 	SetChildArea(ShowHints, SkinProperties().Data1314);
 	SetChildArea(CreatureNames, SkinProperties().Data1334);
 	SetChildArea(TextualEffects, SkinProperties().Data1324);
+	SetChildArea(DragFullStacks, DragFullStacksArea);
 	ClassicControl->SetChecked(GetClassicControl());
 	AutoChaseOff->SetChecked(GetAutoChaseOff());
 	ShowHints->SetChecked(GetShowNewHints());
 	CreatureNames->SetChecked(GetCreatureInfo() != 0);
 	TextualEffects->SetChecked(GetTextualEffects());
+	DragFullStacks->SetChecked(GetDragFullStacks());
 	Arrange();
 }
 
@@ -2399,6 +2408,7 @@ void TGeneralOptionsDialog::HandleEvent(int Event)
 		SetShowNewHints(ShowHints->IsChecked());
 		SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
 		SetTextualEffects(TextualEffects->IsChecked());
+		SetDragFullStacks(DragFullStacks->IsChecked());
 		SetActionState(0);
 		break;
 	case 2:

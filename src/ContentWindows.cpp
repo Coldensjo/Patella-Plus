@@ -961,9 +961,24 @@ void TSmallInventoryWindow::Draw(int Surface, int x, int y)
 			1, TRGBColor(255, 255, 255));
 }
 
+namespace {
+
+// Patella-Plus, the option Drag Full Stacks (General Options). Whether a pile
+// dropped on a slot asks for the count (the Move Objects dialog) instead of
+// moving whole: without the option unless Ctrl (0x400) is held, as the
+// original; with it only when Ctrl is held. A drop on the floor
+// (TMapWindow::LeftButtonUp) keeps the original's rule on purpose.
+bool AsksForCount(int Flags)
+{
+	const bool Ctrl = (Flags & 0x400) != 0;
+	return GetDragFullStacks() ? Ctrl : !Ctrl;
+}
+
+} // namespace
+
 // 0x42a300, line 1127. An object dropped on the area goes into the
 // inventory (0xffff, 0, 0: the first free slot); a pile asks for the count
-// unless Ctrl (0x400, all) or Shift (0x200, one) is held.
+// or moves whole (AsksForCount), and Shift (0x200) moves one.
 bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TContentWindow::LeftButtonUp(x, y, Flags);
@@ -973,7 +988,7 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 		const TObject *Obj = GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
 		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & 0x200) != 0) {
 			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, 0xffff, 0, 0, 1);
-		} else if ((Flags & 0x400) == 0) {
+		} else if (AsksForCount(Flags)) {
 			SetDragTarget(0xffff, 0, 0);
 			AddMessage(13, 0, 0);
 		} else {
@@ -1069,8 +1084,8 @@ bool TInventoryView::LeftButtonDown(int x, int y, int Flags)
 
 // 0x437b30, lines 1251-1277. Action state 7 uses the use object with the
 // slot's object, 8 asks for a player, 6 drops the dragged object into the
-// slot (a pile asks for the count unless Ctrl or Shift is held); a release
-// with flags is a right click.
+// slot (a pile asks for the count or moves whole, AsksForCount, and Shift
+// moves one); a release with flags is a right click.
 bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
@@ -1096,7 +1111,7 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 			if (DragX != 0xffff || DragY != Slot) {
 				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & 0x200) != 0) {
 					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, 0xffff, Slot, 0, 1);
-				} else if ((Flags & 0x400) == 0) {
+				} else if (AsksForCount(Flags)) {
 					SetDragTarget(0xffff, Slot, 0);
 					AddMessage(13, 0, 0);
 					return true;
@@ -1556,7 +1571,7 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & 0x200) != 0) {
 					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, 0xffff, Container + 0x40, Position,
 						1);
-				} else if ((Flags & 0x400) == 0) {
+				} else if (AsksForCount(Flags)) {
 					SetDragTarget(0xffff, Container + 0x40, Position);
 					AddMessage(13, 0, 0);
 					return true;

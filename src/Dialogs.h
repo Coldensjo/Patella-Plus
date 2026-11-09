@@ -631,6 +631,7 @@ public:
 	TCheckBox *ClassicControl;        // +0x38
 	TCheckBox *AutoChaseOff;          // +0x3c
 	void (*OpenURL)(const char *URL); // +0x40, the Help button (701)
+	TCheckBox *DragFullStacks;        // Patella-Plus, not in the original
 };
 
 // "Graphics Options" (vtable 0x5624b8, 0x4c bytes): fullscreen and its
