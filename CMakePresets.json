@@ -1,0 +1,234 @@
+{
+	"version": 6,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 30,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "base",
+			"hidden": true,
+			"generator": "Ninja Multi-Config",
+			"binaryDir": "${sourceDir}/build/${presetName}",
+			"cacheVariables": {
+				"CMAKE_CONFIGURATION_TYPES": "Release;Debug",
+				"CMAKE_DEFAULT_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "windows-base",
+			"hidden": true,
+			"inherits": "base",
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			},
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "cl",
+				"CMAKE_CXX_COMPILER": "cl"
+			}
+		},
+		{
+			"name": "windows-x64",
+			"displayName": "windows-x64: the Windows product (MSVC x64, SDL3): the client",
+			"description": "Needs MSVC for x64 set up (vcvarsall.bat x64): python -I tools/build.py windows-x64 does it. Needs Tibia.exe in the root (or PATELLA_TIBIA_EXE) for the client's resources, and Python; PATELLA_CLIENT=OFF builds only the portable libraries; without Tibia.exe PATELLA_PLACEHOLDER_RESOURCES=ON builds the client with neutral pictures (the hosted CI's build).",
+			"inherits": "windows-base",
+			"architecture": {
+				"value": "x64",
+				"strategy": "external"
+			},
+			"toolset": {
+				"value": "host=x64",
+				"strategy": "external"
+			},
+			"cacheVariables": {
+				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+			}
+		},
+		{
+			"name": "linux-base",
+			"hidden": true,
+			"inherits": "base",
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Linux"
+			},
+			"cacheVariables": {
+				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+			}
+		},
+		{
+			"name": "linux-x64-gcc",
+			"displayName": "linux-x64-gcc: GCC 16 on Linux x64: the Linux client (Patella; issue #131)",
+			"description": "Needs GCC 16 (gcc, g++) on PATH and SDL3's X11/Wayland build dependencies; the Docker image of docker/linux-x64 has them. On Windows: python -I tools/build.py linux-x64-gcc runs it in that image, with the local Tibia.exe's cursors (mounted read-only). PATELLA_CLIENT=OFF: only the portable libraries; PATELLA_PLACEHOLDER_RESOURCES=ON: neutral pictures, the hosted CI's build.",
+			"inherits": "linux-base",
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "gcc",
+				"CMAKE_CXX_COMPILER": "g++"
+			}
+		},
+		{
+			"name": "package-windows-x64",
+			"displayName": "package-windows-x64: the Windows zip (issue #135, cmake/Package.cmake): the client with the placeholder pictures",
+			"description": "A folder without Tibia.exe: the placeholders are refused where a Tibia.exe exists, and PATELLA_PACKAGE is refused without them.",
+			"inherits": "windows-x64",
+			"cacheVariables": {
+				"PATELLA_PLACEHOLDER_RESOURCES": "ON",
+				"PATELLA_PACKAGE": "ON"
+			}
+		},
+		{
+			"name": "package-linux-x64",
+			"displayName": "package-linux-x64: the Linux tarball and AppImage (issue #135, cmake/Package.cmake): the client with the placeholder pictures",
+			"description": "A folder without Tibia.exe, in the image of docker/linux-x64: the placeholders are refused where a Tibia.exe exists, and PATELLA_PACKAGE is refused without them.",
+			"inherits": "linux-x64-gcc",
+			"cacheVariables": {
+				"PATELLA_PLACEHOLDER_RESOURCES": "ON",
+				"PATELLA_PACKAGE": "ON"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "windows-x64",
+			"configurePreset": "windows-x64",
+			"configuration": "Release"
+		},
+		{
+			"name": "windows-x64-debug",
+			"configurePreset": "windows-x64",
+			"configuration": "Debug"
+		},
+		{
+			"name": "linux-x64-gcc",
+			"configurePreset": "linux-x64-gcc",
+			"configuration": "Release"
+		},
+		{
+			"name": "linux-x64-gcc-debug",
+			"configurePreset": "linux-x64-gcc",
+			"configuration": "Debug"
+		},
+		{
+			"name": "package-windows-x64",
+			"configurePreset": "package-windows-x64",
+			"configuration": "Release",
+			"targets": ["Patella"]
+		},
+		{
+			"name": "package-linux-x64",
+			"configurePreset": "package-linux-x64",
+			"configuration": "Release",
+			"targets": ["Patella"]
+		}
+	],
+	"workflowPresets": [
+		{
+			"name": "windows-x64",
+			"displayName": "windows-x64: configure, build Release",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "windows-x64"
+				},
+				{
+					"type": "build",
+					"name": "windows-x64"
+				}
+			]
+		},
+		{
+			"name": "windows-x64-debug",
+			"displayName": "windows-x64-debug: configure, build Debug",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "windows-x64"
+				},
+				{
+					"type": "build",
+					"name": "windows-x64-debug"
+				}
+			]
+		},
+		{
+			"name": "linux-x64-gcc",
+			"displayName": "linux-x64-gcc: configure, build Release",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "linux-x64-gcc"
+				},
+				{
+					"type": "build",
+					"name": "linux-x64-gcc"
+				}
+			]
+		},
+		{
+			"name": "linux-x64-gcc-debug",
+			"displayName": "linux-x64-gcc-debug: configure, build Debug",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "linux-x64-gcc"
+				},
+				{
+					"type": "build",
+					"name": "linux-x64-gcc-debug"
+				}
+			]
+		},
+		{
+			"name": "package-windows-x64",
+			"displayName": "package-windows-x64: configure, build Patella.exe, the zip (placeholders only)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "package-windows-x64"
+				},
+				{
+					"type": "build",
+					"name": "package-windows-x64"
+				},
+				{
+					"type": "package",
+					"name": "package-windows-x64"
+				}
+			]
+		},
+		{
+			"name": "package-linux-x64",
+			"displayName": "package-linux-x64: configure, build Patella, the tarball and the AppImage (placeholders only)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "package-linux-x64"
+				},
+				{
+					"type": "build",
+					"name": "package-linux-x64"
+				},
+				{
+					"type": "package",
+					"name": "package-linux-x64"
+				}
+			]
+		}
+	],
+	"packagePresets": [
+		{
+			"name": "package-windows-x64",
+			"configurePreset": "package-windows-x64",
+			"configurations": ["Release"]
+		},
+		{
+			"name": "package-linux-x64",
+			"configurePreset": "package-linux-x64",
+			"configurations": ["Release"]
+		}
+	]
+}

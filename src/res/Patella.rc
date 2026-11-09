@@ -1,0 +1,59 @@
+// Resource script of Patella, the reconstruction of the Tibia 7.72 client.
+//
+// Every entry has the type, ID and language of Tibia.exe's .rsrc section and compiles to
+// the same bytes (tools/compare_resources.py; notes/resources.md lists the entries and
+// their users), except the version block's strings (issue #166, the owner's choice).
+// The pictures (cursors, icon, bitmaps) are not in the repository: run
+//	python -I tools/extract_resources.py Tibia.exe build/res
+// and compile with build/res on the include path (CMake does both, into build/<preset>/res).
+//
+// Order matters: rc.exe numbers the RT_CURSOR and RT_ICON images with one counter in the
+// order of this script, and the original's numbers (cursors 1-2, icons 3-4, cursors 5-20)
+// come out only in this order. It is also the order of the data in Tibia.exe.
+//
+// Since issue #127 only the client's own resources: MFC's half (MFC 7.1's afxres.rc as Tibia.exe has it) went with MFC.
+
+#include "resource.h"
+#include <winresrc.h>
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany): the client's cursors
+
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+
+IDC_CROSSHAIR           CURSOR                  "cursor_132.cur"
+IDC_MAGNIFIER           CURSOR                  "cursor_137.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States): the client's icon and version information
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+IDR_MAINFRAME           ICON                    "icon_128.ico"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 7,7,2,0
+ PRODUCTVERSION 7,7,2,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "000004b0"
+		BEGIN
+			VALUE "FileDescription", "Patella"
+			VALUE "FileVersion", "7.72"
+			VALUE "InternalName", "Patella"
+			VALUE "OriginalFilename", "Patella.exe"
+			VALUE "ProductName", "Patella"
+			VALUE "ProductVersion", "7.72"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x0, 1200
+	END
+END

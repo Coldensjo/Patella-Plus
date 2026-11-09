@@ -1,0 +1,63 @@
+# The hosted build: GitHub's runners, nothing that reads a CipSoft file. Two jobs, both compile only: the Windows client
+# (MSVC x64) and the Linux client (GCC 16 in the image of docker/linux-x64), with neutral generated pictures
+# (PATELLA_PLACEHOLDER_RESOURCES), since the real ones come from Tibia.exe, which CI never has.
+#
+# It runs on pull requests too: it uses no secrets. Third-party actions are pinned by commit. CMake is 4.4.5 in both jobs:
+# the Windows job unpacks Kitware's zip (tools/build.py --install-cmake, its SHA-256 checked), the Linux job has the image's.
+
+name: hosted
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hosted-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE: patella-modern/linux-x64:gcc16.2-clang23.1-libstdcxx16-cmake4.4.5-ninja1.13.2-sdl3-mesa25.0.7
+
+jobs:
+  windows-client:
+    name: windows-x64 (MSVC), the client (placeholders)
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: CMake 4.4.5 (Kitware's release, SHA-256 checked)
+        shell: pwsh
+        run: |
+          python -I tools/build.py --install-cmake "$env:RUNNER_TEMP\cmake"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "PATELLA_CMAKE_DIR=$env:RUNNER_TEMP\cmake" >> $env:GITHUB_ENV
+          & "$env:RUNNER_TEMP\cmake\bin\cmake.exe" --version
+      # tools/build.py sets up MSVC x64 (vcvarsall.bat) and fails on any compiler or linker warning. cmake --workflow
+      # takes no -D, so the steps one by one. The option refuses where a Tibia.exe exists. The configure fetches the
+      # pinned Vulkan dependencies and SDL3. The build compiles patella_core with MSVC's code analysis, /analyze: a
+      # finding fails it like a warning.
+      - name: Configure (PATELLA_PLACEHOLDER_RESOURCES=ON)
+        run: python -I tools/build.py --env windows-x64 cmake --preset windows-x64 -DPATELLA_PLACEHOLDER_RESOURCES=ON
+      - name: Build Release
+        run: python -I tools/build.py --env windows-x64 cmake --build --preset windows-x64
+
+  linux-client:
+    name: linux-x64-gcc (Docker), the client (placeholders)
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the image (docker/linux-x64)
+        run: docker build -t "$IMAGE" docker/linux-x64
+      # On Linux tools/build.py runs cmake --workflow itself, with its warning check. linux-x64-gcc compiles patella_core
+      # with GCC's static analyzer, -fanalyzer: a finding fails the build like a warning.
+      - name: Build Release
+        run: docker run --rm -e PATELLA_PLACEHOLDER_RESOURCES=1 -v "$GITHUB_WORKSPACE:/work" -w /work "$IMAGE" python3 -I tools/build.py linux-x64-gcc
