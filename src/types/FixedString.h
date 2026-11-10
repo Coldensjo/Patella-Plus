@@ -26,16 +26,14 @@
 // there (at N - 1 without a NUL). Assign(const char *) reads a null pointer as strcpy did (it faults). A source
 // inside the buffer itself is allowed (memmove).
 //
-// Format and AppendFormat take std::format's language: std::format_to_n on the product presets, the C++17
-// stand-in of compat/format.h in the oracle (PATELLA_HAS_FORMAT 0), with the same output. A TFixedString passed to
-// them is its text.
+// Format and AppendFormat take std::format's language (std::format_to_n). A TFixedString passed to them is its
+// text.
 
 #pragma once
 
-#include "compat/format.h"
-
 #include <cstddef>
 #include <cstring>
+#include <format>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -96,7 +94,6 @@ public:
 		return Start + Write(Start, Text, BoundedLength(Text, Capacity - 1 - Start));
 	}
 
-#if PATELLA_HAS_FORMAT
 	// What sprintf wrote into Chars, with std::format's language. Returns the characters written.
 	template <typename... Arguments>
 	std::size_t Format(std::format_string<TFormatArgument<Arguments>...> Text, Arguments &&...Values)
@@ -112,19 +109,6 @@ public:
 		return Start
 			+ Terminate(Start, std::format_to_n(Chars + Start, Limit(Start), Text, PassFormatArgument(std::forward<Arguments>(Values))...).out);
 	}
-#else
-	template <typename... Arguments>
-	std::size_t Format(std::string_view Text, const Arguments &...Values)
-	{
-		return Terminate(0, patella::compat::FormatToNStandIn(Chars, Limit(0), Text, Values...).Out);
-	}
-	template <typename... Arguments>
-	std::size_t AppendFormat(std::string_view Text, const Arguments &...Values)
-	{
-		const std::size_t Start = End();
-		return Start + Terminate(Start, patella::compat::FormatToNStandIn(Chars + Start, Limit(Start), Text, Values...).Out);
-	}
-#endif
 
 private:
 	char *Chars;
@@ -201,7 +185,6 @@ struct TFixedString {
 	std::size_t Append(std::string_view Text) noexcept { return Buffer().Append(Text); }
 	std::size_t Append(const char *Text) noexcept { return Buffer().Append(Text); }
 
-#if PATELLA_HAS_FORMAT
 	template <typename... Arguments>
 	std::size_t Format(std::format_string<TFormatArgument<Arguments>...> Text, Arguments &&...Values)
 	{
@@ -212,18 +195,6 @@ struct TFixedString {
 	{
 		return Buffer().AppendFormat(Text, std::forward<Arguments>(Values)...);
 	}
-#else
-	template <typename... Arguments>
-	std::size_t Format(std::string_view Text, const Arguments &...Values)
-	{
-		return Buffer().Format(Text, Values...);
-	}
-	template <typename... Arguments>
-	std::size_t AppendFormat(std::string_view Text, const Arguments &...Values)
-	{
-		return Buffer().AppendFormat(Text, Values...);
-	}
-#endif
 };
 
 // The layout the frozen structures rely on: exactly char[N].

@@ -13,7 +13,7 @@
 // Descriptor is _fileno/fileno (the descriptor under the FILE, for _eof). Nothing throws, nothing reports: the
 // callers check the results and raise their own errors (TERROR texts, frozen until M5), as they did. Print
 // writes a text formatted with std::format's language (fprintf with the client's conversions, which give the same
-// characters: notes/decisions.md, issue #64); on the oracle's C++17 through the stand-in of compat/format.h.
+// characters: notes/decisions.md, issue #64).
 //
 // The bytes on the disk are the original's on every platform:
 //	- TContent::Binary ("b"): the bytes as written.
@@ -31,7 +31,6 @@
 
 #pragma once
 
-#include "compat/format.h"
 #include "types/Cp1252.h"
 #include "types/FixedString.h" // IWYU pragma: keep (std::format's branch of Print: TFormatArgument)
 
@@ -40,7 +39,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
-#include <string> // IWYU pragma: keep (the stand-in's branch of Print)
+#include <format>
+#include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -165,23 +165,12 @@ public:
 	int GetChar() noexcept { return std::getc(Handle); }
 	int UngetChar(int Character) noexcept { return std::ungetc(Character, Handle); }
 
-#if PATELLA_HAS_FORMAT
 	// fprintf with std::format's language: the number of characters, or -1 where they were not all written.
 	template <typename... Arguments>
 	int Print(std::format_string<TFormatArgument<Arguments>...> Format, Arguments &&...Values)
 	{
 		return PutFormatted(std::format(Format, PassFormatArgument(std::forward<Arguments>(Values))...));
 	}
-#else
-	template <typename... Arguments>
-	int Print(std::string_view Format, const Arguments &...Values)
-	{
-		const std::ptrdiff_t Size = patella::compat::FormatToNStandIn(nullptr, 0, Format, Values...).Size;
-		std::string Text(static_cast<std::size_t>(Size), '\0');
-		patella::compat::FormatToNStandIn(Text.data(), Size, Format, Values...);
-		return PutFormatted(Text);
-	}
-#endif
 
 	// fseek (Seek(0, SEEK_SET) for rewind, which reports nothing), fflush.
 	int Seek(long Offset, int Origin) noexcept { return std::fseek(Handle, Offset, Origin); }

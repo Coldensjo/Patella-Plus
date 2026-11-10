@@ -13,9 +13,8 @@
 // (log/LogSettings.h, the x64 client: LogLevel, LogFile); without them, or where nothing reads them (the tests),
 // the log is at info and writes to stderr only.
 //
-// The text comes from std::format where the library has it (PATELLA_HAS_FORMAT), elsewhere (a C++17 library and
-// tests_unit_cxx26_standin) from compat/format.h's stand-in, as compat/print.h and TFile::Print do. Nothing here
-// throws: a message that cannot be formatted (the stand-in's TFormatError, std::bad_alloc) is dropped, and a failed
+// The text comes from std::format, as compat/print.h's and TFile::Print's do. Nothing here throws: a message that
+// cannot be formatted (std::bad_alloc) is dropped, and a failed
 // write is ignored (a GUI client's stderr is valid only when it is redirected). The file is opened for appending, in
 // binary ('\n' line ends on every platform); stderr's own mode does the rest (the Microsoft C runtime writes "\r\n").
 // Each line is flushed at once: the next thing the fatal path does may be the end of the process.
@@ -32,7 +31,6 @@
 
 #pragma once
 
-#include "compat/format.h"
 #include "platform/FileSystem.h"
 #include "types/Cp1252.h"
 #include "types/File.h"
@@ -41,12 +39,12 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdio>
+#include <format>
 #include <mutex>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <utility> // IWYU pragma: keep (std::format's branch below)
-#include <version> // IWYU pragma: keep (the feature-test macro of the #if line)
+#include <utility>
 
 #if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L
 #define PATELLA_HAS_STACKTRACE 1
@@ -181,7 +179,6 @@ public:
 		}
 	}
 
-#if PATELLA_HAS_FORMAT
 	template <typename... Arguments>
 	void Print(TLevel LineLevel, std::format_string<TFormatArgument<Arguments>...> Format, Arguments &&...Values) noexcept
 	{
@@ -213,42 +210,6 @@ public:
 	{
 		Print(TLevel::Debug, Format, std::forward<Arguments>(Values)...);
 	}
-#else
-	template <typename... Arguments>
-	void Print(TLevel LineLevel, std::string_view Format, const Arguments &...Values) noexcept
-	{
-		if (!Enabled(LineLevel))
-			return;
-		try {
-			const std::ptrdiff_t Size = patella::compat::FormatToNStandIn(nullptr, 0, Format, Values...).Size;
-			std::string Text(static_cast<std::size_t>(Size), '\0');
-			patella::compat::FormatToNStandIn(Text.data(), Size, Format, Values...);
-			Write(LineLevel, Text);
-		} catch (...) { // NOLINT(bugprone-empty-catch): the stand-in's TFormatError or std::bad_alloc; dropped
-		}
-	}
-
-	template <typename... Arguments>
-	void Error(std::string_view Format, const Arguments &...Values) noexcept
-	{
-		Print(TLevel::Error, Format, Values...);
-	}
-	template <typename... Arguments>
-	void Warn(std::string_view Format, const Arguments &...Values) noexcept
-	{
-		Print(TLevel::Warn, Format, Values...);
-	}
-	template <typename... Arguments>
-	void Info(std::string_view Format, const Arguments &...Values) noexcept
-	{
-		Print(TLevel::Info, Format, Values...);
-	}
-	template <typename... Arguments>
-	void Debug(std::string_view Format, const Arguments &...Values) noexcept
-	{
-		Print(TLevel::Debug, Format, Values...);
-	}
-#endif
 
 private:
 	std::mutex Mutex;
@@ -269,7 +230,6 @@ inline bool Enabled(TLevel Level) noexcept
 	return Log().Enabled(Level);
 }
 
-#if PATELLA_HAS_FORMAT
 template <typename... Arguments>
 void Error(std::format_string<TFormatArgument<Arguments>...> Format, Arguments &&...Values) noexcept
 {
@@ -290,28 +250,6 @@ void Debug(std::format_string<TFormatArgument<Arguments>...> Format, Arguments &
 {
 	Log().Print(TLevel::Debug, Format, std::forward<Arguments>(Values)...);
 }
-#else
-template <typename... Arguments>
-void Error(std::string_view Format, const Arguments &...Values) noexcept
-{
-	Log().Print(TLevel::Error, Format, Values...);
-}
-template <typename... Arguments>
-void Warn(std::string_view Format, const Arguments &...Values) noexcept
-{
-	Log().Print(TLevel::Warn, Format, Values...);
-}
-template <typename... Arguments>
-void Info(std::string_view Format, const Arguments &...Values) noexcept
-{
-	Log().Print(TLevel::Info, Format, Values...);
-}
-template <typename... Arguments>
-void Debug(std::string_view Format, const Arguments &...Values) noexcept
-{
-	Log().Print(TLevel::Debug, Format, Values...);
-}
-#endif
 
 // The stack of the caller (Skip frames of it left out: 0, the caller's own frame first), as std::stacktrace's
 // to_string writes it; nothing where the standard library has no std::stacktrace or the text cannot be made.
