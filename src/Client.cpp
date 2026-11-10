@@ -1,4 +1,5 @@
-// Client.cpp: the one TClient and the subsystems' accessors (Client.h).
+// Client.cpp: the one TClient, the subsystems' accessors (Client.h), and the adapters through which a subsystem calls
+// one that is made after it.
 
 #include "Client.h"
 
