@@ -389,7 +389,7 @@ TDialog *CreateIgnoreListDialog()
 // exists while one is open).
 TDialog *CreateReportDialog()
 {
-	if (GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1) != nullptr) {
+	if (Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1) != nullptr) {
 		SetStatusMessage(TextRequestAlreadySubmitted, false);
 		return nullptr;
 	}
@@ -1286,10 +1286,10 @@ TIgnoreListDialog::TIgnoreListDialog()
 	IgnorePrivate = new TCheckBox("Ignore Private Messages");
 	InsertChild(IgnorePrivate);
 	SetChildArea(IgnorePrivate, SkinProperties().IgnoreListDialog.IgnorePrivate);
-	IgnoreListCheckBox->SetChecked(GetIgnoreListEnabled());
-	IgnoreYelling->SetChecked(IsModeIgnored(TALK_YELL));
-	IgnorePrivate->SetChecked(IsModeIgnored(TALK_PRIVATE_MESSAGE));
-	char *Text = GetIgnoreListText();
+	IgnoreListCheckBox->SetChecked(Talk().GetIgnoreListEnabled());
+	IgnoreYelling->SetChecked(Talk().IsModeIgnored(TALK_YELL));
+	IgnorePrivate->SetChecked(Talk().IsModeIgnored(TALK_PRIVATE_MESSAGE));
+	char *Text = Talk().GetIgnoreListText();
 	if (Text != nullptr) {
 		const int Length = (int)strlen(Text);
 		int AllocationNumber = 0;
@@ -1315,7 +1315,7 @@ TIgnoreListDialog::TIgnoreListDialog()
 		qsort(static_cast<void *>(Names), Number, sizeof(char *), CompareNames);
 		for (int i = 0; i < Number; i++) {
 			CopyString(patella::TSpan<char>(IgnoreEntries(i).Name.Chars).first(29), Names[i]);
-			IgnoreEntries(i).Permanent = IsPermanentIgnore(Names[i]);
+			IgnoreEntries(i).Permanent = Talk().IsPermanentIgnore(Names[i]);
 			TFont Font;
 			if (IgnoreEntries(i).Permanent)
 				Font.Color = SkinProperties().IgnoreListDialog.PermanentColor;
@@ -1352,9 +1352,9 @@ TIgnoreListDialog::TIgnoreListDialog()
 	AllowBuddies = new TCheckBox("Allow VIPs to message you");
 	InsertChild(AllowBuddies);
 	SetChildArea(AllowBuddies, SkinProperties().IgnoreListDialog.AllowBuddies);
-	WhiteListCheckBox->SetChecked(GetIgnoreEnabled());
-	AllowBuddies->SetChecked(GetBuddyIgnore());
-	Text = GetBuddyIgnoreText();
+	WhiteListCheckBox->SetChecked(Talk().GetIgnoreEnabled());
+	AllowBuddies->SetChecked(Talk().GetBuddyIgnore());
+	Text = Talk().GetBuddyIgnoreText();
 	if (Text != nullptr) {
 		const int Length = (int)strlen(Text);
 		int AllocationNumber = 0;
@@ -1380,7 +1380,7 @@ TIgnoreListDialog::TIgnoreListDialog()
 		qsort(static_cast<void *>(Names), Number, sizeof(char *), CompareNames);
 		for (int i = 0; i < Number; i++) {
 			CopyString(patella::TSpan<char>(WhiteEntries(i).Name.Chars).first(29), Names[i]);
-			WhiteEntries(i).Permanent = IsPermanentBuddyIgnore(Names[i]);
+			WhiteEntries(i).Permanent = Talk().IsPermanentBuddyIgnore(Names[i]);
 			TFont Font;
 			if (WhiteEntries(i).Permanent)
 				Font.Color = SkinProperties().IgnoreListDialog.PermanentColor;
@@ -1414,32 +1414,32 @@ void TIgnoreListDialog::HandleEvent(int Event)
 {
 	if (Event == EVENT_IGNORE_LIST_OK) {
 		IgnoreList->StopEdit();
-		ClearIgnoreList();
+		Talk().ClearIgnoreList();
 		for (int i = 0; i < IgnoreList->GetNumberOfLines(); i++) {
 			TFont Font;
 			const char *Name = IgnoreList->GetLine(i, &Font);
 			if (strlen(Name) != 0 && strcmp(Name, "new entry") != 0)
-				IgnoreName(Name, IgnoreEntries(i).Permanent);
+				Talk().IgnoreName(Name, IgnoreEntries(i).Permanent);
 		}
-		SetIgnoreListEnabled(IgnoreListCheckBox->IsChecked());
+		Talk().SetIgnoreListEnabled(IgnoreListCheckBox->IsChecked());
 		if (IgnoreYelling->IsChecked())
-			IgnoreMode(TALK_YELL);
+			Talk().IgnoreMode(TALK_YELL);
 		else
-			UnignoreMode(TALK_YELL);
+			Talk().UnignoreMode(TALK_YELL);
 		if (IgnorePrivate->IsChecked())
-			IgnoreMode(TALK_PRIVATE_MESSAGE);
+			Talk().IgnoreMode(TALK_PRIVATE_MESSAGE);
 		else
-			UnignoreMode(TALK_PRIVATE_MESSAGE);
+			Talk().UnignoreMode(TALK_PRIVATE_MESSAGE);
 		WhiteList->StopEdit();
-		ClearBuddyIgnore();
+		Talk().ClearBuddyIgnore();
 		for (int i = 0; i < WhiteList->GetNumberOfLines(); i++) {
 			TFont Font;
 			const char *Name = WhiteList->GetLine(i, &Font);
 			if (strlen(Name) != 0 && strcmp(Name, "new entry") != 0)
-				AddBuddyIgnore(Name, WhiteEntries(i).Permanent);
+				Talk().AddBuddyIgnore(Name, WhiteEntries(i).Permanent);
 		}
-		SetIgnoreEnabled(WhiteListCheckBox->IsChecked());
-		SetBuddyIgnore(AllowBuddies->IsChecked());
+		Talk().SetIgnoreEnabled(WhiteListCheckBox->IsChecked());
+		Talk().SetBuddyIgnore(AllowBuddies->IsChecked());
 	}
 	if (Event == EVENT_IGNORE_ADD) {
 		WhiteList->StopEdit();

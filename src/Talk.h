@@ -315,60 +315,7 @@ inline bool TTalkBuffer::IsDefault()
 }
 
 // Talk.cpp's functions: each calls TTalk's member of the same name on Talk().
-bool TakeTalkChanged();
-int GetNumberOfTalkboxes();
-const char *GetStatusMessage();
-void SetIgnoreEnabled(bool Value);
-bool GetIgnoreEnabled();
-void SetBuddyIgnore(bool Value);
-bool GetBuddyIgnore();
-void SetIgnoreListEnabled(bool Value);
-bool GetIgnoreListEnabled();
-bool IsTalkThrottled();
-bool TakeConsoleChanged();
-TRGBColor *GetTalkColor(TRGBColor *Color, int TalkMode);
-int GetTalkboxMode(int Number);
-void GetTalkboxPosition(int Number, int *x, int *y, int *z);
-void GetTalkboxRectangle(int Number, int *x, int *y, int *Width, int *Height);
-TRGBColor *GetTalkboxColor(TRGBColor *Color, int Number);
-int GetTalkboxLines(int Number);
-const char *GetTalkboxLine(int Number, int Line);
-void SetTalkboxRectangle(int Number, int x, int y, int Width, int Height);
-void RemoveOldestTalkbox();
-char *GetBuddyIgnoreText();
-void ClearBuddyIgnore();
-void AddBuddyIgnore(const char *Addressee, bool Permanent);
-bool IsPermanentBuddyIgnore(const char *Addressee);
-char *GetIgnoreListText();
-bool IsModeIgnored(int Mode);
-void IgnoreMode(int Mode);
-void IgnoreName(const char *Addressee, bool Permanent);
-bool IsPermanentIgnore(const char *Addressee);
-void UnignoreMode(int Mode);
-void UnignoreName(const char *Addressee);
-void ClearTextBuffer(TTalkBuffer *TextBuffer);
-bool HasOwnPrivateChannel();
-void AddChannelNotice(const char *Addressee, const char *Text, int Mode, const char *Name, int Channel);
-void DeleteTextBuffer(TTalkBuffer *TextBuffer);
-TTalkBuffer *CreateTextBuffer(int ReceiveTalkMode, int SendTalkMode, const char *Name, int Channel);
-
-void SetTalkChanged();
-void StartTalkThrottle();
 void SetConsoleChanged();
-void AddTalkbox(int Mode, const char *Speaker, int x, int y, int z, const char *Text);
-void AddMessageTalkbox(int Mode, const char *Text);
-void UpdateTalkboxes();
 void SetStatusMessage(const char *Message, bool Permanent);
-void UpdateStatusMessage();
-bool IsTalkIgnored(int Mode, const char *Name, int Channel);
-void AddTemporaryIgnore(const char *Addressee);
-void RemoveTemporaryIgnore(const char *Addressee);
-void ClearIgnoreList();
-void ShowPermanentIgnoreWarning();
 void AddTextBufferLine(TTalkBuffer *TargetBuffer, uint32 StatementID, const char *Text,
 	int TalkMode, const char *Name, int Time);
-void AddConsoleText(uint32 StatementID, const char *Text, int TalkMode, const char *Name, int Channel, int Time);
-TTalkBuffer *GetTextBuffer(int Mode, const char *Name, int Channel);
-void ResetTalk();
-void InitTalk();
-void ExitTalk();

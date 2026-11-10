@@ -430,11 +430,11 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 				TFixedString<50> Text;
 				Text.Format("Message to {}", Creature->Name);
 				AddEntry(EVENT_MENU_PRIVATE_MESSAGE, Text, nullptr);
-				if (HasOwnPrivateChannel())
+				if (Talk().HasOwnPrivateChannel())
 					AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
 				if (!Creatures().IsBuddy(Creature->Name))
 					AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-				Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
+				Text.Format("{} {}", Talk().IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 				AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
 				switch (PlayerState().GetPlayerPartyFlag()) {
 				case PARTY_NONE:
@@ -560,10 +560,10 @@ void TObjectContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_IGNORE: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr) {
-			if (IsTalkIgnored(TALK_NONE, Creature->Name, -1))
-				UnignoreName(Creature->Name);
+			if (Talk().IsTalkIgnored(TALK_NONE, Creature->Name, -1))
+				Talk().UnignoreName(Creature->Name);
 			else
-				IgnoreName(Creature->Name, false);
+				Talk().IgnoreName(Creature->Name, false);
 		}
 		break;
 	}
@@ -637,11 +637,12 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 		TFixedString<50> Text;
 		Text.Format("Message to {}", Creature->Name);
 		AddEntry(EVENT_MENU_PRIVATE_MESSAGE, Text, nullptr);
-		if (HasOwnPrivateChannel())
+		if (Talk().HasOwnPrivateChannel())
 			AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
 		if (!Creatures().IsBuddy(Creature->Name))
 			AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-		Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
+		Text.Format("{} {}", Talk().IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore",
+			Creature->Name);
 		AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
 		switch (PlayerState().GetPlayerPartyFlag()) {
 		case PARTY_NONE:
@@ -728,10 +729,10 @@ void TCreatureContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_IGNORE: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr) {
-			if (!IsTalkIgnored(TALK_NONE, Creature->Name, -1))
-				IgnoreName(Creature->Name, false);
+			if (!Talk().IsTalkIgnored(TALK_NONE, Creature->Name, -1))
+				Talk().IgnoreName(Creature->Name, false);
 			else
-				UnignoreName(Creature->Name);
+				Talk().UnignoreName(Creature->Name);
 		}
 		break;
 	}
@@ -798,7 +799,7 @@ TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int Pare
 			Text.Format("Message to {}", Creatures().GetBuddyListName(Position));
 			AddEntry(EVENT_MENU_MESSAGE_VIP, Text, nullptr);
 		}
-		if (HasOwnPrivateChannel())
+		if (Talk().HasOwnPrivateChannel())
 			AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
 		Separator = true;
 	}
@@ -906,14 +907,14 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 			Text.Format("Message to {}", Speaker);
 			AddEntry(EVENT_MENU_PRIVATE_MESSAGE, Text, nullptr);
 			if (TextWindow->TextBuffer->IsSelected() && TextWindow->TextBuffer->IsPrivateChannel()) {
-				if (HasOwnPrivateChannel())
+				if (Talk().HasOwnPrivateChannel())
 					AddEntry(EVENT_MENU_EXCLUDE_PRIVATE, "Exclude from private chat", nullptr);
-			} else if (HasOwnPrivateChannel()) {
+			} else if (Talk().HasOwnPrivateChannel()) {
 				AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
 			}
 			if (!Creatures().IsBuddy(Speaker))
 				AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-			Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Speaker, -1) ? "Unignore" : "Ignore", Speaker);
+			Text.Format("{} {}", Talk().IsTalkIgnored(TALK_NONE, Speaker, -1) ? "Unignore" : "Ignore", Speaker);
 			AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
 			Separator = true;
 		}
@@ -951,15 +952,15 @@ void TTextContextMenu::HandleEvent(int Event)
 		if (Speaker != nullptr) {
 			TFixedString<200> Text;
 			const char *Format;
-			if (!IsTalkIgnored(TALK_NONE, Speaker, -1)) {
-				IgnoreName(Speaker, false);
+			if (!Talk().IsTalkIgnored(TALK_NONE, Speaker, -1)) {
+				Talk().IgnoreName(Speaker, false);
 				Format = "You are now ignoring player %s.";
 			} else {
-				UnignoreName(Speaker);
+				Talk().UnignoreName(Speaker);
 				Format = "You are no longer ignoring player %s.";
 			}
 			MsvcSnprintf(Text, 200, Format, Speaker);
-			AddConsoleText(0, Text, TALK_STATUS_MESSAGE, nullptr, 0, 0);
+			Talk().AddConsoleText(0, Text, TALK_STATUS_MESSAGE, nullptr, 0, 0);
 		}
 		break;
 	case EVENT_MENU_INVITE_PRIVATE:
@@ -1041,7 +1042,7 @@ void TRequestContextMenu::HandleEvent(int Event)
 			TFixedString<220> Title;
 			Title.Format("{}'s Report", Name);
 			ConsoleWindow->OpenChannel(TALK_PLAYER_ANSWER, TALK_GAMEMASTER_ANSWER, Name, -1, Title);
-			TTalkBuffer *TextBuffer = GetTextBuffer(TALK_PLAYER_ANSWER, Name, -1);
+			TTalkBuffer *TextBuffer = Talk().GetTextBuffer(TALK_PLAYER_ANSWER, Name, -1);
 			PATELLA_ASSERT(TextBuffer!=nullptr);
 			TextBuffer->Clear();
 			AddTextBufferLine(TextBuffer, Line->StatementID, Line->Text, TALK_PLAYER_ANSWER, Name, 0);
@@ -1121,7 +1122,7 @@ void TChannelContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_CLEAR_WINDOW: {
 		TTalkBuffer *TextBuffer = ConsoleWindow->GetTextBuffer();
 		PATELLA_ASSERT(TextBuffer!=nullptr);
-		ClearTextBuffer(TextBuffer);
+		Talk().ClearTextBuffer(TextBuffer);
 		break;
 	}
 	default:

@@ -95,7 +95,7 @@ TMapWindow::TMapWindow()
 
 void TMapWindow::SetSize(int Width, int Height)
 {
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	TWindow::SetSize(Width, Height);
 	Arrange();
 }
@@ -218,7 +218,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	int FieldX, FieldY, FieldZ;
 	GetField(x, y, &FieldX, &FieldY, &FieldZ);
 	if ((!In(FieldX - 8, -1, 1) || !In(FieldY - 6, -1, 1)) && Light[FieldX][FieldY].R == 0) {
-		AddMessageTalkbox(TALK_INFO_MESSAGE, "You can't see anything.");
+		Talk().AddMessageTalkbox(TALK_INFO_MESSAGE, "You can't see anything.");
 		return true;
 	}
 	Interaction().SetTradeObject(TObject(), 0, 0, 0, 0);
@@ -312,7 +312,7 @@ void TMapWindow::HandleEvent(int Event)
 	if (Event == EVENT_CREATURE_INFO)
 		SetCreatureInfo((GetCreatureInfo() + 1) % 3);
 	if (Event == EVENT_REMOVE_TALKBOX)
-		RemoveOldestTalkbox();
+		Talk().RemoveOldestTalkbox();
 	if (Event == EVENT_MAP_HINT) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;
@@ -670,29 +670,30 @@ void TMapWindow::Draw(int Surface, int x, int y)
 
 	// The talkboxes (their positions follow the walk unless they stick to
 	// an edge) and the status message.
-	if (TakeTalkChanged())
+	if (Talk().TakeTalkChanged())
 		ArrangeTalkboxes();
-	const int Talkboxes = GetNumberOfTalkboxes();
+	const int Talkboxes = Talk().GetNumberOfTalkboxes();
 	for (int Talkbox = 1; Talkbox <= Talkboxes; Talkbox++) {
 		int tx, ty, Alignment, Fixed;
-		GetTalkboxRectangle(Talkbox, &tx, &ty, &Alignment, &Fixed);
+		Talk().GetTalkboxRectangle(Talkbox, &tx, &ty, &Alignment, &Fixed);
 		if ((Fixed & 1) == 0)
 			tx -= GetNoStretching() ? Player->GetDeltaX() : Player->GetDeltaX() * Width / 480;
 		if ((Fixed & 2) == 0)
 			ty -= GetNoStretching() ? Player->GetDeltaY() : Player->GetDeltaY() * Height / 352;
-		const int Lines = GetTalkboxLines(Talkbox);
+		const int Lines = Talk().GetTalkboxLines(Talkbox);
 		TRGBColor Color;
-		GetTalkboxColor(&Color, Talkbox);
+		Talk().GetTalkboxColor(&Color, Talkbox);
 		for (int Line = 0; Line < Lines; Line++)
 			Graphics().PrintTextClipped(Surface, tx + x, Line * Graphics().GetFontLineHeight(FONT_BORDERED) + ty + y,
-				FONT_BORDERED, Color, GetTalkboxLine(Talkbox, Line), Alignment, TRect(x, y, ScreenWidth, ScreenHeight));
+				FONT_BORDERED, Color, Talk().GetTalkboxLine(Talkbox, Line), Alignment,
+				TRect(x, y, ScreenWidth, ScreenHeight));
 	}
-	if (GetStatusMessage() != nullptr) {
+	if (Talk().GetStatusMessage() != nullptr) {
 		const int MessageWidth = Width, MessageHeight = Height;
-		const int Length = Graphics().GetFittingTextLength(FONT_BORDERED, GetStatusMessage(), MessageWidth);
+		const int Length = Graphics().GetFittingTextLength(FONT_BORDERED, Talk().GetStatusMessage(), MessageWidth);
 		Graphics().PrintTextPart(Surface, MessageWidth / 2 + x,
 			MessageHeight - Graphics().GetFontHeight(FONT_BORDERED) + y, FONT_BORDERED,
-			TRGBColor(255, 255, 255), GetStatusMessage(), Length, 1);
+			TRGBColor(255, 255, 255), Talk().GetStatusMessage(), Length, 1);
 	}
 
 	// The animated texts of visible fields and of the player's level.
@@ -1331,18 +1332,18 @@ void TMapWindow::ArrangeTalkboxes()
 {
 	std::array<int, TALKBOXES> BoxWidth;
 	std::array<int, TALKBOXES> BoxHeight;
-	const int Talkboxes = GetNumberOfTalkboxes();
+	const int Talkboxes = Talk().GetNumberOfTalkboxes();
 	for (int Talkbox = 1; Talkbox <= Talkboxes; Talkbox++) {
 		BoxWidth[Talkbox - 1] = 0;
-		const int Lines = GetTalkboxLines(Talkbox);
+		const int Lines = Talk().GetTalkboxLines(Talkbox);
 		for (int Line = 0; Line < Lines; Line++) {
-			const int LineWidth = Graphics().GetTextWidth(FONT_BORDERED, GetTalkboxLine(Talkbox, Line));
+			const int LineWidth = Graphics().GetTextWidth(FONT_BORDERED, Talk().GetTalkboxLine(Talkbox, Line));
 			BoxWidth[Talkbox - 1] = BoxWidth[Talkbox - 1] > LineWidth ? BoxWidth[Talkbox - 1] : LineWidth;
 		}
 		BoxHeight[Talkbox - 1] = Graphics().GetFontLineHeight(FONT_BORDERED) * Lines;
 	}
 	int StatusHeight;
-	if (GetStatusMessage() == nullptr)
+	if (Talk().GetStatusMessage() == nullptr)
 		StatusHeight = 0;
 	else
 		StatusHeight = Graphics().GetFontHeight(FONT_BORDERED) + 10;
@@ -1360,7 +1361,7 @@ void TMapWindow::ArrangeTalkboxes()
 	for (int Talkbox = 1; Talkbox <= Talkboxes; Talkbox++) {
 		const int i = Talkbox - 1;
 		int x, y, z;
-		GetTalkboxPosition(Talkbox, &x, &y, &z);
+		Talk().GetTalkboxPosition(Talkbox, &x, &y, &z);
 		int CentreY;
 		if (x != 0) {
 			Map().WorldToMap(&x, &y, &z);
@@ -1375,7 +1376,7 @@ void TMapWindow::ArrangeTalkboxes()
 				cy = y * 32 - BorderY - 32;
 			else
 				cy = (y - 1) * Height / 11;
-			cy -= GetTalkboxLines(Talkbox) * Graphics().GetFontLineHeight(FONT_BORDERED) / 2;
+			cy -= Talk().GetTalkboxLines(Talkbox) * Graphics().GetFontLineHeight(FONT_BORDERED) / 2;
 			CentreY = cy;
 			const int HalfWidth = BoxWidth[i] / 2;
 			MinX[i] = HalfWidth + 1 > cx - HalfWidth ? HalfWidth + 1 : cx - HalfWidth;
@@ -1390,7 +1391,7 @@ void TMapWindow::ArrangeTalkboxes()
 			const int cx = Width / 2;
 			CentreX[i] = cx;
 			int cy;
-			switch (GetTalkboxMode(Talkbox)) {
+			switch (Talk().GetTalkboxMode(Talkbox)) {
 			case TALK_INFO_MESSAGE:
 				cy = Height / 2 - BoxHeight[i] / 2 - 5;
 				break;
@@ -1404,7 +1405,7 @@ void TMapWindow::ArrangeTalkboxes()
 				cy = Height / 4;
 				break;
 			default:
-				TERROR1("unknown talk box mode", GetTalkboxMode(Talkbox));
+				TERROR1("unknown talk box mode", Talk().GetTalkboxMode(Talkbox));
 			}
 			CentreY = cy;
 			const int HalfWidth = BoxWidth[i] / 2;
@@ -1495,11 +1496,11 @@ void TMapWindow::ArrangeTalkboxes()
 		const int Quarter = BoxWidth[i] / 4;
 		const int Top = PosY[i] - HalfHeight;
 		if (PosX[i] < CentreX[i] - Quarter)
-			SetTalkboxRectangle(Talkbox, PosX[i] + HalfWidth, Top, 2, Fixed[i]);
+			Talk().SetTalkboxRectangle(Talkbox, PosX[i] + HalfWidth, Top, 2, Fixed[i]);
 		else if (PosX[i] > CentreX[i] + Quarter)
-			SetTalkboxRectangle(Talkbox, PosX[i] - HalfWidth, Top, 0, Fixed[i]);
+			Talk().SetTalkboxRectangle(Talkbox, PosX[i] - HalfWidth, Top, 0, Fixed[i]);
 		else
-			SetTalkboxRectangle(Talkbox, PosX[i], Top, 1, Fixed[i]);
+			Talk().SetTalkboxRectangle(Talkbox, PosX[i], Top, 1, Fixed[i]);
 	}
 }
 

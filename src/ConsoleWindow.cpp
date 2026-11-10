@@ -313,7 +313,7 @@ void TTextWindow::FormatLines()
 		TTalkLine *TextLine = TextBuffer->GetFirst();
 		while (TextLine != nullptr) {
 			TRGBColor Color;
-			GetTalkColor(&Color, TextLine->Mode);
+			Talk().GetTalkColor(&Color, TextLine->Mode);
 			int NextIndent = 10;
 			if (TextLine->Mode >= TALK_ADMIN_MESSAGE && TextLine->Mode <= TALK_INFO_MESSAGE)
 				NextIndent = 0;
@@ -733,7 +733,7 @@ void TTab::OnClose()
 		if (TextBuffer->CanWrite())
 			SendLeaveChannel(TextBuffer->GetChannelID());
 	}
-	DeleteTextBuffer(TextBuffer);
+	Talk().DeleteTextBuffer(TextBuffer);
 	TextBuffer = nullptr;
 	TElement::OnClose();
 }
@@ -1268,7 +1268,7 @@ void TConsoleWindow::SetSize(int Width, int Height)
 // skin shows the talk throttle; the buttons follow the tab bar's changes.
 void TConsoleWindow::Draw(int Surface, int x, int y)
 {
-	if (TakeConsoleChanged()) {
+	if (Talk().TakeConsoleChanged()) {
 		TabBar->Arrange();
 		PATELLA_ASSERT(CurrentConsole!=nullptr);
 		TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
@@ -1277,7 +1277,7 @@ void TConsoleWindow::Draw(int Surface, int x, int y)
 		SetActive(TextBuffer->CanWrite());
 		Input->SetDisabled(!TextBuffer->CanWrite());
 	}
-	IgnoreButton->SetSkins(IsTalkThrottled() ? SKIN_IGNORE_BUTTON_UP_THROTTLED : SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN);
+	IgnoreButton->SetSkins(Talk().IsTalkThrottled() ? SKIN_IGNORE_BUTTON_UP_THROTTLED : SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN);
 	const bool Changed = TabBar->Changed;
 	TabBar->Changed = false;
 	if (Changed)
@@ -1589,9 +1589,9 @@ void TConsoleWindow::OpenDefaultChannel(TTalkBuffer *TextBuffer, const char *Cap
 TTalkBuffer *TConsoleWindow::OpenChannel(int RecvMode, int SendMode, const char *Name, int Channel,
 	const char *Caption)
 {
-	TTalkBuffer *TextBuffer = CreateTextBuffer(RecvMode, SendMode, Name, Channel);
+	TTalkBuffer *TextBuffer = Talk().CreateTextBuffer(RecvMode, SendMode, Name, Channel);
 	if (TextBuffer == nullptr) {
-		TextBuffer = ::GetTextBuffer(RecvMode, Name, Channel);
+		TextBuffer = Talk().GetTextBuffer(RecvMode, Name, Channel);
 		PATELLA_ASSERT(TextBuffer!=nullptr);
 	}
 	AddChannel(TextBuffer, Caption);
@@ -1653,7 +1653,7 @@ void TConsoleWindow::CloseChannel()
 // the player is told to wait.
 void TConsoleWindow::ReportRuleViolation(const char *Question)
 {
-	TTalkBuffer *TextBuffer = ::GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
+	TTalkBuffer *TextBuffer = Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
 	if (TextBuffer != nullptr) {
 		TTab *NewTab = TabBar->FindTab(TextBuffer);
 		PATELLA_ASSERT(NewTab!=nullptr);
@@ -1664,7 +1664,7 @@ void TConsoleWindow::ReportRuleViolation(const char *Question)
 	PATELLA_ASSERT(Question!=nullptr);
 	PATELLA_ASSERT(strlen(Question)>0);
 	OpenChannel(TALK_GAMEMASTER_ANSWER, TALK_PLAYER_ANSWER, nullptr, -1, TextReportRuleViolation);
-	TextBuffer = ::GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
+	TextBuffer = Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
 	PATELLA_ASSERT(TextBuffer!=nullptr);
 	PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
 	AddTextBufferLine(TextBuffer, 0, Question, TALK_PLAYER_ANSWER,
@@ -1729,7 +1729,7 @@ void TConsoleWindow::SendInput()
 		SetStatusMessage("This is not a chat channel.", false);
 		Text = nullptr;
 	}
-	if (HasOwnPrivateChannel() && Text != nullptr && strlen(Text) != 0) {
+	if (Talk().HasOwnPrivateChannel() && Text != nullptr && strlen(Text) != 0) {
 		if (MessageSeparator == 'I')
 			SendInviteToPrivateChannel(Text);
 		if (MessageSeparator == 'X')
@@ -1751,8 +1751,8 @@ void TConsoleWindow::SendInput()
 		case TALK_ANONYMOUS_MESSAGE:
 			PATELLA_ASSERT(Addressee!=nullptr);
 			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
-			AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text, TalkMode, Addressee,
-				ChannelID);
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text, TalkMode,
+				Addressee, ChannelID);
 			if (CompareStrings(Addressee, Creatures().GetCreature(PlayerState().GetPlayerID())->Name, -1) != 0)
 				SendTalk(TalkMode, Addressee, Text);
 			break;
@@ -1766,14 +1766,14 @@ void TConsoleWindow::SendInput()
 			PATELLA_ASSERT(Addressee!=nullptr);
 			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
 			SendTalk(TALK_GAMEMASTER_ANSWER, Addressee, Text);
-			AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text, TALK_PLAYER_ANSWER,
-				Addressee, -1);
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text,
+				TALK_PLAYER_ANSWER, Addressee, -1);
 			break;
 		case TALK_PLAYER_ANSWER:
 			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
 			SendTalk(TALK_PLAYER_ANSWER, Text);
-			AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text, TALK_GAMEMASTER_ANSWER,
-				"", -1);
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text,
+				TALK_GAMEMASTER_ANSWER, "", -1);
 			break;
 		default:
 			TERROR1("unknown talk mode", TalkMode);

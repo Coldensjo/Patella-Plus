@@ -263,8 +263,8 @@ void patella::TGUI::EnterGame()
 	Map().ClearMap();
 	Inventory().InitInventory();
 	Creatures().ResetCreatures();
-	ResetTalk();
-	ShowPermanentIgnoreWarning();
+	Talk.ResetTalk();
+	Talk.ShowPermanentIgnoreWarning();
 	Map().SetAmbientLight(-1, 0);
 }
 
@@ -788,8 +788,8 @@ void patella::TGUI::TimerEvent()
 			Interaction.SetMouseOverTextPosition(Interaction.GetMouseX(), TextY);
 		}
 	}
-	UpdateTalkboxes();
-	UpdateStatusMessage();
+	Talk.UpdateTalkboxes();
+	Talk.UpdateStatusMessage();
 	if (GetActionNumber() % 10 == 0)
 		Map().UpdateAmbientLight();
 	Map().ProcessEffects();
@@ -931,11 +931,11 @@ void patella::TGUI::ProcessEvents()
 			ModalWindow = CreateEditBuddyDialog((int)Param1);
 			break;
 		case MESSAGE_TEMPORARY_IGNORE:
-			AddTemporaryIgnore(reinterpret_cast<const char *>(Param1));
+			Talk.AddTemporaryIgnore(reinterpret_cast<const char *>(Param1));
 			delete[] reinterpret_cast<char *>(Param1);
 			break;
 		case MESSAGE_TEMPORARY_UNIGNORE:
-			RemoveTemporaryIgnore(reinterpret_cast<const char *>(Param1));
+			Talk.RemoveTemporaryIgnore(reinterpret_cast<const char *>(Param1));
 			delete[] reinterpret_cast<char *>(Param1);
 			break;
 		case MESSAGE_INFO_DIALOG:
@@ -1131,7 +1131,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		::Interaction().InitStatus(Gamemaster, ::LinkCopyWarning);
 		::Help().InitHelp();
 		InitPreferences();
-		InitTalk();
+		::Talk().InitTalk();
 		Graphics().InitGraphics(0xa00000);
 		SkinData().InitSkins();
 		InitSkinProperties();
@@ -1164,7 +1164,7 @@ void patella::TGUI::ExitControl()
 		Current->ExitSurfaces();
 	GraphicsEngine().SurfaceExitInstance();
 	ExitPreferences();
-	ExitTalk();
+	::Talk().ExitTalk();
 	::Help().ExitHelp();
 	::Interaction().ExitStatus();
 	Creatures().ExitCreatures();

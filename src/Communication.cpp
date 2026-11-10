@@ -944,7 +944,7 @@ void patella::TCommunication::ReceiveMap()
 	Map.ClearMap();
 	Creatures.HideAllCreatures();
 	ReadMap(0, 0, 17, 13);
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	PlayerState.StopPlayer();
 	Help().CheckEventHelpPosition(PlayerX, PlayerY, PlayerZ);
 }
@@ -953,7 +953,7 @@ void patella::TCommunication::ReceiveMapNorth()
 {
 	Map.ShiftMap(0, 1);
 	ReadMap(0, 0, 17, 0);
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	int x;
 	int y;
 	int z;
@@ -965,7 +965,7 @@ void patella::TCommunication::ReceiveMapEast()
 {
 	Map.ShiftMap(-1, 0);
 	ReadMap(17, 0, 17, 13);
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	int x;
 	int y;
 	int z;
@@ -977,7 +977,7 @@ void patella::TCommunication::ReceiveMapSouth()
 {
 	Map.ShiftMap(0, -1);
 	ReadMap(0, 13, 17, 13);
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	int x;
 	int y;
 	int z;
@@ -989,7 +989,7 @@ void patella::TCommunication::ReceiveMapWest()
 {
 	Map.ShiftMap(1, 0);
 	ReadMap(0, 0, 0, 13);
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	int x;
 	int y;
 	int z;
@@ -1664,22 +1664,22 @@ void patella::TCommunication::ReceiveTalk()
 		const int y = Network.GetWord();
 		const int z = Network.GetByte();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
-		if (IsTalkIgnored(Mode, Name, -1)) {
-			StartTalkThrottle();
+		if (Talk().IsTalkIgnored(Mode, Name, -1)) {
+			Talk().StartTalkThrottle();
 			return;
 		}
-		AddTalkbox(Mode, Name, x, y, z, Text);
+		Talk().AddTalkbox(Mode, Name, x, y, z, Text);
 		break;
 	}
 	case TALK_PRIVATE_MESSAGE:
 	case TALK_GAMEMASTER_BROADCAST:
 	case TALK_GAMEMASTER_MESSAGE:
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
-		if (IsTalkIgnored(Mode, Name, -1)) {
-			StartTalkThrottle();
+		if (Talk().IsTalkIgnored(Mode, Name, -1)) {
+			Talk().StartTalkThrottle();
 			return;
 		}
-		AddTalkbox(Mode, Name, 0, 0, 0, Text);
+		Talk().AddTalkbox(Mode, Name, 0, 0, 0, Text);
 		break;
 	case TALK_CHANNEL_CALL:
 	case TALK_GAMEMASTER_CHANNELCALL:
@@ -1687,8 +1687,8 @@ void patella::TCommunication::ReceiveTalk()
 	case TALK_ANONYMOUS_CHANNELCALL:
 		Channel = Network.GetWord();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
-		if (IsTalkIgnored(Mode, Name, -1)) {
-			StartTalkThrottle();
+		if (Talk().IsTalkIgnored(Mode, Name, -1)) {
+			Talk().StartTalkThrottle();
 			return;
 		}
 		TargetChannel = Channel;
@@ -1707,17 +1707,17 @@ void patella::TCommunication::ReceiveTalk()
 		const int y = Network.GetWord();
 		const int z = Network.GetByte();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
-		if (!IsTalkIgnored(Mode, Name, -1)) {
-			AddTalkbox(Mode, Name, x, y, z, Text);
+		if (!Talk().IsTalkIgnored(Mode, Name, -1)) {
+			Talk().AddTalkbox(Mode, Name, x, y, z, Text);
 			return;
 		}
-		StartTalkThrottle();
+		Talk().StartTalkThrottle();
 		return;
 	}
 	default:
 		TERROR1_REASON("unknown talk mode", Mode, "[bug0000649]");
 	}
-	AddConsoleText(StatementID, Text, Mode, Name, TargetChannel, Time);
+	Talk().AddConsoleText(StatementID, Text, Mode, Name, TargetChannel, Time);
 }
 
 void patella::TCommunication::ReceiveChannelList()
@@ -1760,9 +1760,9 @@ void patella::TCommunication::ReceiveRuleViolationChannel()
 {
 	int ChannelID = 0;
 	ChannelID = Network.GetWord();
-	const TTalkBuffer *Channel = CreateTextBuffer(TALK_GAMEMASTER_REQUEST, TALK_SAY, nullptr, ChannelID);
+	const TTalkBuffer *Channel = Talk().CreateTextBuffer(TALK_GAMEMASTER_REQUEST, TALK_SAY, nullptr, ChannelID);
 	if (Channel == nullptr)
-		Channel = GetTextBuffer(TALK_GAMEMASTER_REQUEST, nullptr, -1);
+		Channel = Talk().GetTextBuffer(TALK_GAMEMASTER_REQUEST, nullptr, -1);
 	AddMessage(MESSAGE_RULE_VIOLATION_CHANNEL, reinterpret_cast<std::intptr_t>(Channel), 0);
 }
 
@@ -1770,7 +1770,7 @@ void patella::TCommunication::ReceiveRemoveRuleViolation()
 {
 	TFixedString<44> Name;
 	Network.GetString(patella::TSpan<char>(Name.Chars).first(30));
-	TTalkBuffer *Channel = GetTextBuffer(TALK_GAMEMASTER_REQUEST, nullptr, -1);
+	TTalkBuffer *Channel = Talk().GetTextBuffer(TALK_GAMEMASTER_REQUEST, nullptr, -1);
 	if (Channel != nullptr) {
 		Channel->cursor = Channel->first;
 		TTalkLine *Statement = Channel->first;
@@ -1789,7 +1789,7 @@ void patella::TCommunication::ReceiveCancelRuleViolation()
 {
 	TFixedString<44> Name;
 	Network.GetString(patella::TSpan<char>(Name.Chars).first(30));
-	TTalkBuffer *Channel = GetTextBuffer(TALK_PLAYER_ANSWER, Name, -1);
+	TTalkBuffer *Channel = Talk().GetTextBuffer(TALK_PLAYER_ANSWER, Name, -1);
 	if (Channel != nullptr) {
 		TFixedString<444> Text;
 		Text.Format("{} has finished the request.", Name);
@@ -1800,7 +1800,7 @@ void patella::TCommunication::ReceiveCancelRuleViolation()
 
 void patella::TCommunication::ReceiveLockRuleViolation()
 {
-	TTalkBuffer *Channel = GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
+	TTalkBuffer *Channel = Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
 	if (Channel != nullptr) {
 		const char *Text = TextRequestClosed;
 		AddTextBufferLine(Channel, 0, Text, TALK_ADMIN_MESSAGE, nullptr, 0);
@@ -1822,7 +1822,7 @@ void patella::TCommunication::ReceiveCloseChannel()
 {
 	int ChannelID = 0;
 	ChannelID = Network.GetWord();
-	TTalkBuffer *Channel = GetTextBuffer(TALK_CHANNEL_CALL, nullptr, ChannelID);
+	TTalkBuffer *Channel = Talk().GetTextBuffer(TALK_CHANNEL_CALL, nullptr, ChannelID);
 	if (Channel != nullptr) {
 		const char *Text = TextChannelClosed;
 		AddTextBufferLine(Channel, 0, Text, TALK_ADMIN_MESSAGE, nullptr, 0);
@@ -1838,11 +1838,11 @@ void patella::TCommunication::ReceiveTextMessage()
 	TFixedString<632> Text;
 	Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
 	if (Mode == TALK_ADMIN_MESSAGE || Mode == TALK_EVENT_MESSAGE || Mode == TALK_INFO_MESSAGE)
-		AddMessageTalkbox(Mode, Text);
+		Talk().AddMessageTalkbox(Mode, Text);
 	if (Mode == TALK_STATUS_ONLY_MESSAGE || Mode == TALK_STATUS_MESSAGE || Mode == TALK_EVENT_STATUS_MESSAGE)
 		SetStatusMessage(Text, false);
 	if (Mode != TALK_STATUS_ONLY_MESSAGE)
-		AddConsoleText(0, Text, Mode, nullptr, -1, 0);
+		Talk().AddConsoleText(0, Text, Mode, nullptr, -1, 0);
 }
 
 void patella::TCommunication::ReceiveCancelWalk()
@@ -1899,7 +1899,7 @@ void patella::TCommunication::ReceiveFloorUp()
 		SkipFields = 0;
 		ReadFloor(4);
 	}
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	PlayerState.StopPlayer();
 	Help().CheckEventHelpPosition(x, y, z);
 	for (int rx = 0; rx < 18; rx++) {
@@ -1931,7 +1931,7 @@ void patella::TCommunication::ReceiveFloorDown()
 		if (z < 14)
 			ReadFloor(0);
 	}
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	PlayerState.StopPlayer();
 	Help().CheckEventHelpPosition(x, y, z);
 	for (int rx = 0; rx < 18; rx++) {
