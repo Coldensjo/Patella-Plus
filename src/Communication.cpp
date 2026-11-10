@@ -819,7 +819,7 @@ void patella::TCommunication::ReceiveGameLogin()
 	Creatures.SetBeat(Beat);
 	const uint8 value = Network.GetByte();
 	Session.SetRight(40, value);
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // 0x40c000, lines 1232-1232

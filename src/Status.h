@@ -246,13 +246,14 @@ bool CheckAnyRight();
 void ClearRights();
 int GetActionNumber();
 void IncrementActionNumber();
-// The action state of no action (name from MainWindow.cpp's
-// "GetActionState()==ACTIONSTATE_NONE"). The other states are named below,
-// from what the code does with them; 1, left button down, stays a number. 4
-// and 5: both buttons were down (classic control) and one has gone up; the
-// release of the other sends the left button up of BOTH_BUTTONS_RELEASED.
-inline constexpr int ACTIONSTATE_NONE = 0;
+// The action states. ACTIONSTATE_NONE, no action, is the original's name
+// (MainWindow.cpp's "GetActionState()==ACTIONSTATE_NONE"); the other states
+// are named from what the code does with them. 4 and 5: both buttons were
+// down (classic control) and one has gone up; the release of the other
+// sends the left button up of BOTH_BUTTONS_RELEASED.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	ACTIONSTATE_NONE = 0,
+	ACTIONSTATE_LEFT_BUTTON_DOWN = 1, // on the main window; moving the mouse may start a drag (CheckDragStart)
 	ACTIONSTATE_RIGHT_BUTTON_DOWN = 2,
 	ACTIONSTATE_BOTH_BUTTONS_DOWN = 3,
 	ACTIONSTATE_RIGHT_RELEASED = 4, // the left button is still down

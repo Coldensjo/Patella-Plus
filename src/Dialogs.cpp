@@ -199,7 +199,7 @@ TDialog *CreateMoveObjectsDialog()
 		Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
 		return Dialog;
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 	return nullptr;
 }
 
@@ -664,7 +664,7 @@ bool TDialog::LeftButtonUp(int x, int y, int Flags)
 // dialog, and so does every other.
 void TDialog::HandleEvent([[maybe_unused]] int Event)
 {
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TQuestionLabel, TLogoutLabel ----------------------------------------------
@@ -683,12 +683,12 @@ void TLogoutLabel::KeyPress(int Key)
 {
 	if (Key == 13 || Key == 'l' || Key == 'L') {
 		LogoutCallback.Send();
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	}
 	if (Key == 'e' || Key == 'E')
 		ExitCallback.Send();
 	if (Key == 27 || Key == 'c' || Key == 'C')
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TWaitLabel ---------------------------------------------------------------------
@@ -709,7 +709,7 @@ void TWaitLabel::HandleEvent(int Event)
 	} else if (Event == EVENT_ABORT && ClearOnAbort) {
 		ClearMessages();
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // 0x46e2b0, line 1011
@@ -760,7 +760,7 @@ void TReconnectWindow::Draw(int Surface, int x, int y)
 {
 	TWindow::Draw(Surface, x, y);
 	if (PeekMessageType() != 0)
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 }
 
 // 0x46ea60, line 1122. When the time is up it logs out of a running game
@@ -786,7 +786,7 @@ void TReconnectWindow::HandleEvent(int Event)
 			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
 			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -840,7 +840,7 @@ void TLoginDialog::HandleEvent(int Event)
 		AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
 		AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TCharacterListDialog ------------------------------------------------------
@@ -958,7 +958,7 @@ void TCharacterListDialog::HandleEvent(int Event)
 	} else if (Event == EVENT_TIMER && !Timer->IsExpired()) {
 		return;
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // 0x470490, line 1374
@@ -1042,7 +1042,7 @@ void TMoveObjectsDialog::HandleEvent(int Event)
 			SendMoveObject(SourceX, SourceY, SourceZ, DraggedObject.Type, SourceIndex, DestinationX, DestinationY,
 				DestinationZ, Count);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TOutfitDialog ------------------------------------------------------------------
@@ -1145,9 +1145,9 @@ void TOutfitDialog::HandleEvent(int Event)
 		OutfitIcon->Arrange();
 	} else if (Event == 1) {
 		SendOutfit(Outfit, Colors.data());
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	} else if (Event == EVENT_CANCEL) {
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -1184,7 +1184,7 @@ void TTextDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
 		SendEditText(ObjectNumber, EditText->Text.get());
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TEditListDialog ----------------------------------------------------------
@@ -1226,7 +1226,7 @@ void TEditListDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
 		SendEditHouseText(Type, Identifier, EditText->Text.get());
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TIgnoreListDialog --------------------------------------------------------
@@ -1519,7 +1519,7 @@ void TIgnoreListDialog::HandleEvent(int Event)
 			AllowPermanently->SetChecked(WhiteEntries(Selection).Permanent);
 		}
 	} else {
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -1592,7 +1592,7 @@ void TBugReportDialog::HandleEvent(int Event)
 		if (strlen(Text) != 0)
 			SendBugReport(Text);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TNewChannelDialog -----------------------------------------------------------
@@ -1670,7 +1670,7 @@ void TNewChannelDialog::HandleEvent(int Event)
 				SendJoinChannel(ChannelID);
 		}
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TPrivateChannelDialog -------------------------------------------------------
@@ -1713,7 +1713,7 @@ void TPrivateChannelDialog::HandleEvent(int Event)
 				SendExcludeFromPrivateChannel(Name);
 		}
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TReportDialog ----------------------------------------------------------------
@@ -1753,7 +1753,7 @@ void TReportDialog::HandleEvent(int Event)
 		TStringBuffer(Text, Size).Assign(TextEdit->Text.get());
 		AddMessage(MESSAGE_REPORT_RULE_VIOLATION, reinterpret_cast<std::intptr_t>(Text), 0);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TAddBuddyDialog ------------------------------------------------------------
@@ -1791,7 +1791,7 @@ void TAddBuddyDialog::HandleEvent(int Event)
 		if (strlen(Name) != 0)
 			SendAddBuddy(Name);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TEditBuddyDialog -----------------------------------------------------------
@@ -1855,7 +1855,7 @@ void TEditBuddyDialog::HandleEvent(int Event)
 		}
 		EditBuddy(CharacterID, Icon, Description->Text.get(), Notify->IsChecked());
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TUpdateDialog -----------------------------------------------------------------
@@ -1926,32 +1926,32 @@ void THelpDialog::HandleEvent(int Event)
 	switch (Event) {
 	case 1:
 	case EVENT_CANCEL:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_HELP_MODE:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_HINTS:
 		AddMessage(MESSAGE_HINTS_DIALOG, 0, 0);
 		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_TUTOR_HELP:
 		SendJoinChannel(7);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_REPORT:
 		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_MANUAL:
 		OpenURL(TextManualURL);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_FAQ:
 		OpenURL(TextFAQURL);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -2008,7 +2008,7 @@ void THintsDialog::HandleEvent(int Event)
 		AddMessageFirst(MESSAGE_HINTS_DIALOG, 0, 0);
 		AddMessageFirst(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TRuleViolationDialog --------------------------------------------------------
@@ -2140,7 +2140,7 @@ void TRuleViolationDialog::HandleEvent(int Event)
 	default:
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // 0x47eae0, line 3158. The actions the reason allows; the statement line
@@ -2258,7 +2258,7 @@ void TEditMarkDialog::HandleEvent(int Event)
 	} else if (Event != EVENT_CANCEL) {
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TOptionsDialog -----------------------------------------------------------------
@@ -2355,7 +2355,7 @@ void TOptionsDialog::HandleEvent(int Event)
 	default:
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TGeneralOptionsDialog ------------------------------------------------------
@@ -2409,10 +2409,10 @@ void TGeneralOptionsDialog::HandleEvent(int Event)
 		SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
 		SetTextualEffects(TextualEffects->IsChecked());
 		SetDragFullStacks(DragFullStacks->IsChecked());
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_CANCEL:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_HELP:
 		OpenURL(TextOptionsURL);
@@ -2515,7 +2515,7 @@ void TGraphicsOptionsDialog::HandleEvent(int Event)
 		OpenURL(TextGraphicsOptionsURL);
 		return;
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TAdvancedGraphicsDialog ------------------------------------------------------
@@ -2684,7 +2684,7 @@ void TAdvancedGraphicsDialog::HandleEvent(int Event)
 	} else if (Event == EVENT_CANCEL) {
 		GetSurface()->SetFramerateLimit(GetConfineFramerate());
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TConsoleOptionsDialog --------------------------------------------------------
@@ -2731,7 +2731,7 @@ void TConsoleOptionsDialog::HandleEvent(int Event)
 		OpenURL(TextConsoleOptionsURL);
 		return;
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TNetworkOptionsDialog ---------------------------------------------------------
@@ -2757,7 +2757,7 @@ void TNetworkOptionsDialog::HandleEvent(int Event)
 		OpenURL(TextNetworkOptionsURL);
 		return;
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- THotkeyDialog -------------------------------------------------------------------
@@ -2854,12 +2854,12 @@ void THotkeyDialog::HandleEvent(int Event)
 			AutoSend[Selected] = AutoSendCheckBox->IsChecked();
 		for (int i = 0; i < HOTKEYS; i++)
 			SetHotkey(i, Texts[i], AutoSend[i]);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		if (PeekMessageType() != MESSAGE_OPTIONS_DIALOG)
 			SavePreferences();
 		break;
 	case EVENT_CANCEL:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_LIST_SELECTED:
 		if (Selected != -1)

@@ -105,7 +105,7 @@ void patella::TGUI::Resize(int Width, int Height)
 		if (GetActionState() == ACTIONSTATE_CONTEXT_MENU) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
-			SetActionState(0);
+			SetActionState(ACTIONSTATE_NONE);
 			MainWindow->SetConsoleActive(true);
 		}
 		if (ModalWindow != nullptr && GetActionState() == ACTIONSTATE_DIALOG)
@@ -291,7 +291,7 @@ PATELLA_NOINLINE void patella::TGUI::EnterGame() const
 {
 	MainWindow->ChangeMode(true);
 	if (ModalWindow == nullptr) {
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		MainWindow->SetConsoleActive(true);
 	}
 	ClearMap();
@@ -311,7 +311,7 @@ void patella::TGUI::LeaveGame()
 		ModalWindow = nullptr;
 		MainWindow->SetConsoleActive(true);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 	SavePreferences();
 	if (!Network.Reconnect)
 		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
@@ -324,7 +324,7 @@ void patella::TGUI::MouseMove(int x, int y)
 	SetMousePosition(x, y);
 	SetMouseCursor(CURSOR_ARROW);
 	switch (GetActionState()) {
-	case 1:
+	case ACTIONSTATE_LEFT_BUTTON_DOWN:
 		CheckDragStart(x, y);
 		[[fallthrough]];
 	default:
@@ -363,10 +363,10 @@ void patella::TGUI::MouseMove(int x, int y)
 void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		SetDragStart(x, y);
 		MainWindow->LeftButtonDown(x, y, Flags);
-		SetActionState(1);
+		SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		if (GetClassicControl())
@@ -390,7 +390,7 @@ void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		if (MainWindow->GetCapture() != nullptr) {
 			MainWindow->LeftButtonUp(x, y, Flags);
 			MainWindow->StopDragging();
@@ -401,20 +401,20 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 		break;
 	case ACTIONSTATE_RIGHT_RELEASED:
 		MainWindow->LeftButtonUp(x, y, BOTH_BUTTONS_RELEASED);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
-	case 1:
+	case ACTIONSTATE_LEFT_BUTTON_DOWN:
 	case ACTIONSTATE_DRAGGING:
 	case ACTIONSTATE_USE_WITH:
 	case ACTIONSTATE_TRADE_WITH:
 		MainWindow->LeftButtonUp(x, y, Flags);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->LeftButtonUp(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == 0 || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
+		if (GetActionState() == ACTIONSTATE_NONE || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -423,7 +423,7 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 	case ACTIONSTATE_HELP:
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		break;
@@ -437,10 +437,10 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		SetDragStart(x, y);
 		MainWindow->LeftButtonDoubleClick(x, y, Flags);
-		SetActionState(1);
+		SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		if (GetClassicControl())
@@ -450,7 +450,7 @@ void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->LeftButtonDoubleClick(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == 0 || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
+		if (GetActionState() == ACTIONSTATE_NONE || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -469,10 +469,10 @@ void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 void patella::TGUI::RightButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		SetActionState(ACTIONSTATE_RIGHT_BUTTON_DOWN);
 		break;
-	case 1:
+	case ACTIONSTATE_LEFT_BUTTON_DOWN:
 		if (GetClassicControl())
 			SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
 		break;
@@ -488,26 +488,26 @@ void patella::TGUI::RightButtonDown([[maybe_unused]] int x, [[maybe_unused]] int
 void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		if (MainWindow->GetCapture() != nullptr)
 			MainWindow->StopDragging();
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		MainWindow->RightButtonUp(x, y, Flags);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_BOTH_BUTTONS_DOWN:
 		SetActionState(ACTIONSTATE_RIGHT_RELEASED);
 		break;
 	case ACTIONSTATE_LEFT_RELEASED:
 		MainWindow->LeftButtonUp(x, y, BOTH_BUTTONS_RELEASED);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->RightButtonUp(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == 0) {
+		if (GetActionState() == ACTIONSTATE_NONE) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -516,11 +516,11 @@ void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 	case ACTIONSTATE_HELP:
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_USE_WITH:
 	case ACTIONSTATE_TRADE_WITH:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		break;
@@ -556,10 +556,10 @@ void patella::TGUI::KeyPress(int Key)
 		return;
 	}
 	if (GetActionState() == ACTIONSTATE_HELP)
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	if (ModalWindow != nullptr) {
 		ModalWindow->KeyPress(Key);
-		if (GetActionState() == 0) {
+		if (GetActionState() == ACTIONSTATE_NONE) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -605,7 +605,7 @@ void patella::TGUI::HandleEvents()
 // 0x448290, line 1155. Callback for InitStatus.
 void patella::TGUI::LinkCopyWarning()
 {
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 	AddMessage(MESSAGE_LINK_COPY_WARNING, reinterpret_cast<std::intptr_t>("Link Copy Warning"), 0);
 }
 
@@ -635,7 +635,7 @@ void patella::TGUI::ConnectionEstablished()
 	}
 	SetConnectionState(CONNECTION_OFFLINE);
 	Disconnect(true);
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // 0x44a900, lines 1208-1280. The receive handler for InitNetwork. The
@@ -865,10 +865,10 @@ void patella::TGUI::TimerEvent() const
 void patella::TGUI::ProcessEvents()
 {
 	int Type = 0;
-	if (ModalWindow != nullptr && GetActionState() == 0) {
+	if (ModalWindow != nullptr && GetActionState() == ACTIONSTATE_NONE) {
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		MainWindow->SetConsoleActive(true);
 		Redraw(false);
 	}

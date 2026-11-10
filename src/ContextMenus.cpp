@@ -336,14 +336,14 @@ void TContextMenu::Arrange()
 bool TContextMenu::LeftButtonUp(int x, int y, int Flags)
 {
 	TWindow::LeftButtonUp(x, y, Flags);
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 	return true;
 }
 
 // 0x43eea0, line 449
 bool TContextMenu::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 	return true;
 }
 
@@ -351,7 +351,7 @@ bool TContextMenu::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y,
 void TContextMenu::KeyPress(int Key)
 {
 	if (Key == 27)
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 }
 
 // 0x442de0, lines 486-498. Opens the menu at x, y, or left of and above it

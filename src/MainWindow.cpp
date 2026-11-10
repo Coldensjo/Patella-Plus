@@ -126,7 +126,7 @@ void patella::TGUI::ExitMainWindow()
 	MainWindow.reset();
 	if (ModalWindow != nullptr) {
 		DeleteComponent(ModalWindow);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	}
 	ModalWindow = nullptr;
 }
@@ -239,7 +239,7 @@ void TMainWindow::HandleEvent(int Event)
 		CopyTaintedClipboardText();
 		[[fallthrough]];
 	case EVENT_CANCEL:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_EXIT_PROGRAM:
 		GUI.ExitProgramCallback();
@@ -295,7 +295,7 @@ void TMainWindow::HandleEvent(int Event)
 			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
 		SetConnectionState(CONNECTION_OFFLINE);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_STOP:
 		ClearPlayerSteps();
@@ -322,7 +322,7 @@ void TMainWindow::HandleEvent(int Event)
 		}
 		break;
 	case EVENT_LOGOUT:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		SendLogout();
 		break;
 	case EVENT_LEAVE_QUESTION: {
@@ -342,7 +342,7 @@ void TMainWindow::HandleEvent(int Event)
 		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
 		break;
 	case EVENT_HELP_MODE:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_TUTOR_HELP:

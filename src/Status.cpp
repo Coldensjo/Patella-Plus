@@ -708,7 +708,7 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	UseObject.Data = 0;
 	UseObject.Data2 = 0;
 	TradeInfo = 0;
-	ActionState = 0;
+	ActionState = ACTIONSTATE_NONE;
 	MouseOverText = nullptr;
 	PendingActionState = 0;
 	PendingActionNumber = 0;
