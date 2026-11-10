@@ -192,13 +192,13 @@ public:
 	void GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY) const;
 	void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY) const;
 
-	void ReleaseObjects();
-	void LoadObjects(const char *FileName);
-	void InitObjects();
-	void ExitObjects();
+	void Release();
+	void Load(const char *FileName);
+	void Init();
+	void Exit();
 
 private:
-	// The four tables own their arrays (std::unique_ptr; the entries' Sprites stay raw, freed by ReleaseObjects).
+	// The four tables own their arrays (std::unique_ptr; the entries' Sprites stay raw, freed by Release).
 	std::unique_ptr<array<TProperties>> MissileProperties;
 	std::unique_ptr<array<TProperties>> EffectProperties;
 	std::unique_ptr<array<TProperties>> OutfitProperties;

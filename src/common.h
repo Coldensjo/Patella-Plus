@@ -72,7 +72,7 @@ inline void Limit(int *Value, int Min, int Max)
 // exception type, TProgramError. The enumerator names are ours, after
 // GetErrorText's texts and the sites that throw them.
 enum class PROGRAM_ERROR : int {
-	OBJECTS_FILE = 1,  // "Cannot find file "Tibia.dat"." (InitObjects)
+	OBJECTS_FILE = 1,  // "Cannot find file "Tibia.dat"." (TObjectTypes::Init)
 	SPRITES_FILE = 2,  // "Cannot find file "Tibia.spr"." (the sprite offsets)
 	PICTURES_FILE = 3, // "Cannot find file "Tibia.pic"."
 	SPRITES_DATA = 4,  // "Cannot open file "Tibia.spr"." (a sprite's pixels)

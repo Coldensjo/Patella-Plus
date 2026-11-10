@@ -411,7 +411,7 @@ void patella::TObjectTypes::GetHangPattern(TObject &Obj, int *PatternX, int *Pat
 // --- Loading -------------------------------------------------------------------
 
 // Frees the four arrays and their sprite tables.
-void patella::TObjectTypes::ReleaseObjects()
+void patella::TObjectTypes::Release()
 {
 	if (ObjectProperties != nullptr) {
 		for (int i = ObjectProperties->low(); i <= ObjectProperties->high(); i++)
@@ -509,7 +509,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 	Entry->Phases = File->readByte();
 	const int Count = Entry->Width * Entry->Height * Entry->Layers * Entry->PatternWidth * Entry->PatternHeight
 		* Entry->PatternDepth * Entry->Phases;
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the entry's sprite table, deleted by ReleaseObjects
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the entry's sprite table, deleted by TObjectTypes::Release
 	Entry->Sprites = new uint16[Count];
 	for (int i = 0; i < Count; i++)
 		Entry->Sprites[i] = File->readWord();
@@ -520,10 +520,10 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 // Header: signature, then the highest object type (types start at 100)
 // and the numbers of outfits, effects and missiles. The file is closed
 // twice: by close() and by the destructor.
-void patella::TObjectTypes::LoadObjects(const char *FileName)
+void patella::TObjectTypes::Load(const char *FileName)
 {
 	PATELLA_ASSERT(FileName!=nullptr);
-	ReleaseObjects();
+	Release();
 	TReadBinaryFile File;
 	File.open(FileName);
 	DatSignature = File.readQuad();
@@ -532,7 +532,7 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 	const int Effects = File.readWord();
 	const int Missiles = File.readWord();
 	// A deliberate difference from the original: every entry's sprite table starts empty, each table's as soon as it is
-	// allocated, so ReleaseObjects, after a file that ends before the last entry (or a count of 0, which the next
+	// allocated, so Release, after a file that ends before the last entry (or a count of 0, which the next
 	// table's constructor refuses), deletes only the tables LoadProperties allocated. The original left the entries'
 	// Sprites indeterminate and deleted them.
 	const auto ClearSprites = [](array<TProperties> &Table) {
@@ -565,8 +565,8 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 // An exception while loading becomes PROGRAM_ERROR 1; InitControl then shuts
 // down. Every exception is caught, not only a TMyException: LoadProperties'
 // new[] of a size from Tibia.dat can throw std::bad_array_new_length or
-// std::bad_alloc (LoadObjects throws no PROGRAM_ERROR).
-void patella::TObjectTypes::InitObjects()
+// std::bad_alloc (TObjectTypes::Load throws no PROGRAM_ERROR).
+void patella::TObjectTypes::Init()
 {
 	// Cleared, not freed, as the original does (release, not reset).
 	static_cast<void>(ObjectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
@@ -574,13 +574,13 @@ void patella::TObjectTypes::InitObjects()
 	static_cast<void>(EffectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
 	static_cast<void>(MissileProperties.release()); // NOLINT(bugprone-unused-return-value): the leak is the original's
 	try {
-		LoadObjects("Tibia.dat");
+		Load("Tibia.dat");
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::OBJECTS_FILE};
 	}
 }
 
-void patella::TObjectTypes::ExitObjects()
+void patella::TObjectTypes::Exit()
 {
-	ReleaseObjects();
+	Release();
 }
