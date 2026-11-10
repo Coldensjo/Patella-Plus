@@ -604,7 +604,7 @@ bool TAutomapView::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	if (Result == 1)
 		SendWalk();
 	else if (Result == 2)
-		SendStop();
+		SendStopWalk();
 	return true;
 }
 

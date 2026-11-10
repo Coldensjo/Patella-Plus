@@ -1211,7 +1211,7 @@ void TMarkContextMenu::HandleEvent(int Event)
 				SendWalk();
 				break;
 			case 2:
-				SendStop();
+				SendStopWalk();
 				break;
 			default:
 				break;

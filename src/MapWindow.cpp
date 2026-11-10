@@ -213,7 +213,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 			SendWalk();
 			break;
 		case 2:
-			SendStop();
+			SendStopWalk();
 			return true;
 		default:
 			break;

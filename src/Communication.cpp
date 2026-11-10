@@ -239,10 +239,12 @@ void patella::TCommunication::SendWalk()
 	Network.SendCommand(true);
 }
 
-void patella::TCommunication::SendStop()
+// The server ends the walk it carries out for the player: the steps of the last SendWalk that it has not taken yet.
+// Sent when a new destination is set while those steps are still being walked (SetPlayerDestination's result 2).
+void patella::TCommunication::SendStopWalk()
 {
 	PrepareMovement();
-	Network.BeginCommand(GAME_SEND_STOP);
+	Network.BeginCommand(GAME_SEND_STOP_WALK);
 	Network.SendCommand(true);
 }
 
@@ -583,9 +585,12 @@ void patella::TCommunication::SendLeaveParty()
 	Network.SendCommand(true);
 }
 
-void patella::TCommunication::SendCancel()
+// The server ends the player's attack or following and the walk. The callers (the Stop button, Escape, and a walk
+// the server keeps refusing on one field) clear the same on the client's side first. The code shows only what the
+// client clears; that the server ends all of it is known from the 7.72 protocol.
+void patella::TCommunication::SendStopAttackAndWalk()
 {
-	Network.BeginCommand(GAME_SEND_CANCEL);
+	Network.BeginCommand(GAME_SEND_STOP_ATTACK_AND_WALK);
 	Network.SendCommand(true);
 }
 
@@ -1876,7 +1881,7 @@ void patella::TCommunication::ReceiveCancelWalk()
 	if (CancelCount > 15) {
 		PlayerState.ClearPlayerSteps();
 		Creatures.SetAttackID(0);
-		SendCancel();
+		SendStopAttackAndWalk();
 		CancelCount = 0;
 	}
 	if (PlayerState.CancelPlayerWalk(Direction))
@@ -2034,9 +2039,9 @@ void SendWalk()
 	patella::bridge::Communication().SendWalk();
 }
 
-void SendStop()
+void SendStopWalk()
 {
-	patella::bridge::Communication().SendStop();
+	patella::bridge::Communication().SendStopWalk();
 }
 
 void SendTurnNorth()
@@ -2234,9 +2239,9 @@ void SendLeaveParty()
 	patella::bridge::Communication().SendLeaveParty();
 }
 
-void SendCancel()
+void SendStopAttackAndWalk()
 {
-	patella::bridge::Communication().SendCancel();
+	patella::bridge::Communication().SendStopAttackAndWalk();
 }
 
 void SendRequestOutfit()

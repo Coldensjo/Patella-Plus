@@ -296,7 +296,7 @@ void TMainWindow::HandleEvent(int Event)
 	case EVENT_STOP:
 		ClearPlayerSteps();
 		SetAttackID(0);
-		SendCancel();
+		SendStopAttackAndWalk();
 		break;
 	case EVENT_TOGGLE_FULLSCREEN:
 		if (GetFullscreenMode()->Width != 0) {
@@ -543,7 +543,7 @@ void TMainWindow::Walk(int dx, int dy, bool Diagonal)
 		SendWalk();
 		break;
 	case 2:
-		SendStop();
+		SendStopWalk();
 		break;
 	default:
 		break;
