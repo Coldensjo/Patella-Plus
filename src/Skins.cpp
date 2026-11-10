@@ -4,9 +4,7 @@
 #include "common.h" // IWYU pragma: keep
 #include "Skins.h"
 
-// The data (NumberOfSkins, Skins) is TSkins' (Skins.h): a part of TGraphics, with GUI.cpp's SkinProperties. The
-// original's free functions InitSkins and ExitSkins forward to the members from graphics.cpp (the client's;
-// this file is patella_core's, which has no bridge).
+// The data (NumberOfSkins, Skins) is TSkins' (Skins.h): a part of TGraphics, with GUI.cpp's SkinProperties.
 
 // The table is a std::unique_ptr. TSkin has no destructor, so a table still set when FatalError calls exit(1)
 // is only memory freed during static destruction.

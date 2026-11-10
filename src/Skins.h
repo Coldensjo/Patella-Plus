@@ -2,8 +2,7 @@
 // the window graphics' positions, sizes, colours and fonts, which GUI.cpp's InitSkinProperties fills.
 //
 // TSkins holds both: a part of TGraphics (graphics.h), declared here and defined in Skins.cpp, as TSession is
-// Status.cpp's inside TCommunication. Portable (patella_core): the bridge accessor and the free functions are the
-// client's (graphics.cpp), since patella_core has no TClient.
+// Status.cpp's inside TCommunication.
 
 #pragma once
 
@@ -932,8 +931,3 @@ inline std::unique_ptr<TSkin[]> &Skins()
 {
 	return SkinData().Skins;
 }
-
-// The original's free functions (graphics.cpp's: they call the bridge, which patella_core does not have), forwarding to
-// TSkins' members.
-void InitSkins();
-void ExitSkins();

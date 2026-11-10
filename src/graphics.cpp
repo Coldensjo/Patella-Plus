@@ -1292,15 +1292,4 @@ void GetTextPosition(int *TextX, int *TextY, int x, int y, int Width, int Height
 	Graphics().GetTextPosition(TextX, TextY, x, y, Width, Height, Format);
 }
 
-// Skins.cpp's free functions (Skins.h), here because Skins.cpp is patella_core's, which has no TClient: each calls its
-// member on the one TClient's TSkins. Control.cpp calls them, the golden tests call and fake them.
-void InitSkins()
-{
-	SkinData().InitSkins();
-}
-
-void ExitSkins()
-{
-	SkinData().ExitSkins();
-}
 // NOLINTEND(cppcoreguidelines-owning-memory)
