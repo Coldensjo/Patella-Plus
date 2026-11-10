@@ -62,9 +62,8 @@ struct TEdgeRect {
 };
 
 // The data the engines share with the client: Surface.cpp's (TGraphicsEngine's since issue #116, which derives from
-// this since issue #138). The engine sets the cache surfaces' size. The main window and the available engines are
-// Surface.cpp's file-local values: TGraphicsEngine sets them (SurfaceInitInstance), TSurface reads them (TestEngine,
-// GetAvailableEngines).
+// this since issue #138). The engine sets the cache surfaces' size. The main window is Surface.cpp's file-local
+// value: TGraphicsEngine sets it (SurfaceInitInstance), TSurface reads it (TestEngine).
 class TSurfaceShared {
 public:
 	TSurfaceShared(const TSurfaceShared &) = delete;
@@ -83,9 +82,6 @@ protected:
 public:
 	int CacheSurfaceWidth = 256; // the size of a video cache surface (256 at start)
 	int CacheSurfaceHeight = 256;
-
-protected:
-	std::uint8_t AvailableEngines{}; // bit 0 OpenGL works, bit 1 DirectX 9 passed TestEngine
 };
 
 } // namespace patella::platform
@@ -164,7 +160,6 @@ public:
 	virtual void InitSurfaces() = 0;
 	virtual void ExitSurfaces() = 0;
 	virtual bool TestEngine();
-	std::uint8_t GetAvailableEngines(); // the engines found at start-up (bit 0 OpenGL, bit 1 DirectX 9)
 
 	// The members the engines share.
 	patella::platform::TWindowHandle hWindow; // the main window (TestEngine, SurfaceInitInstance)

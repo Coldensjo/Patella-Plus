@@ -60,13 +60,6 @@ void TSurface::SetColorKey(int Surface, TRGBColor ColorKey)
 
 TSurface::~TSurface() = default;
 
-// A member (Dialogs.cpp calls it on GetSurface()) that reads only the global
-// (TGraphicsEngine's since issue #116, the engine's shared data since issue #138).
-uint8 TSurface::GetAvailableEngines() // NOLINT(readability-make-member-function-const): the golden corpus's table takes it as a pointer to this non-const member
-{
-	return Shared.AvailableEngines;
-}
-
 // The Vulkan engine is the only engine, whatever number the preferences or the command line hold. The
 // preferences' Engine keeps one of the original's three numbers, which only this function reads: the
 // command line's "engine N" (0-2) and a number 0-2 from the preferences are stored as they are, and no
@@ -75,10 +68,10 @@ uint8 TSurface::GetAvailableEngines() // NOLINT(readability-make-member-function
 // (issue #31; vulkan/DeviceSettings.h: PATELLA_VULKAN, else Patella.ini, else automatic), read first;
 // the advanced options' buttons choose it (Control.cpp ChangeEngine). When the chosen device fails the
 // test (a GPU that is gone, a CPU driver that is missing), the engine runs on the automatic choice, as
-// the original falls back to another engine; Patella.ini keeps the choice. AvailableEngines is set as
-// the original's on a machine with Direct3D 9 and OpenGL when the test passes. Without a Vulkan device
-// there is no engine to fall back to: the engine's InitSurfaces or CreateSurfaces
-// fails with PROGRAM_ERROR 12, as the original's Direct3D 9 device would.
+// the original falls back to another engine; Patella.ini keeps the choice. The automatic choice is
+// tested too, though nothing asks how that ends: without a Vulkan device there is no engine to fall
+// back to, and the engine's InitSurfaces or CreateSurfaces fails with PROGRAM_ERROR 12, as the
+// original's Direct3D 9 device would.
 void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Window)
 {
 	SurfaceWindow = Window;
@@ -94,13 +87,10 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	try {
 		if (IsVulkanInstalled()) {
 			GetSurface()->hWindow = Window;
-			bool Works = GetSurface()->TestEngine();
-			if (!Works && GetDeviceChoice().Kind != patella::vulkan::TDeviceKind::Automatic) {
+			if (!GetSurface()->TestEngine() && GetDeviceChoice().Kind != patella::vulkan::TDeviceKind::Automatic) {
 				SetDeviceChoice(patella::vulkan::TDeviceChoice{});
-				Works = GetSurface()->TestEngine();
+				GetSurface()->TestEngine();
 			}
-			if (Works)
-				AvailableEngines |= 3;
 			if (Surface != nullptr)
 				delete Surface;
 			Surface = nullptr;
