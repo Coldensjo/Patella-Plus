@@ -680,7 +680,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 				// other line breaks become spaces.
 				Script.readSymbol('(');
 				const int Number = Script.readNumber();
-				if (Number < 0 || Number > HOTKEYS - 1)
+				if (Number < 0 || Number >= HOTKEYS)
 					Script.error("Illegal number");
 				Script.readSymbol(',');
 				char *Text = Hotkeys[Number];

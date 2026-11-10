@@ -256,7 +256,7 @@ TDialog *CreateMoveObjectsDialog()
 {
 	int Unused;
 	const TObject *Obj = GetDragObject(&Unused, &Unused, &Unused, &Unused);
-	if (*Obj != 0 && Obj->Data > 0 && Obj->Data < 101) {
+	if (*Obj != 0 && Obj->Data >= 1 && Obj->Data <= 100) {
 		TMoveObjectsDialog *Body = new TMoveObjectsDialog();
 		TDialog *Dialog = new TDialog("Move Objects", Body);
 		Dialog->SetOkButton("Ok", TCallback(Body, 1));

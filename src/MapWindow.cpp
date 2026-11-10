@@ -939,7 +939,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		}
 	}
 	for (const int EffectNumber : TMapEffects(FieldX, FieldY, FieldZ)) {
-		if (EffectNumber < 0 || EffectNumber > EFFECTS - 1) {
+		if (EffectNumber < 0 || EffectNumber >= EFFECTS) {
 			std::stringstream s;
 			s << "EffectNumber: " << EffectNumber << " X: " << FieldX << " Y: " << FieldY << " Z: " << FieldZ;
 			const TCreature *Player = GetCreature(GetPlayerID());

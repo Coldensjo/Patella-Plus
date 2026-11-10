@@ -2473,7 +2473,7 @@ void TListBox::KeyPress(int _Key)
 			StopEdit();
 		Selected = Selected + 1;
 	} else if (!Editing) {
-		if ((Code > 0x60 && Code < 0x7b) || (Code > 0x40 && Code < 0x5b)) {
+		if ((Code >= 'a' && Code <= 'z') || (Code >= 'A' && Code <= 'Z')) {
 			const char c = ToLower(Code);
 			for (int i = LineText.min; i <= LineText.max; i++) {
 				if (LineText(i) != nullptr && (char)ToLower(*LineText(i)) >= c) {
