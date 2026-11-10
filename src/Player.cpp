@@ -307,7 +307,7 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 // line, creates the frame window and the surfaces, and refuses to run twice
 // (except for gamemasters). Odd behaviour kept: "host" and "port" are
 // recognised but their values are dropped (the test server is always
-// BuildConfig.h's, by default test.cipsoft.com:7172), and after an error InitInstance still returns TRUE.
+// BuildConfig.h's, by default 127.0.0.1:7171), and after an error InitInstance still returns TRUE.
 // A PROGRAM_ERROR shows its code, any other error is turned into a
 // TMyException for HandleException (patella::ThrowTopLevelError, TMyException.h:
 // the original's handlers). The original read error.txt first and

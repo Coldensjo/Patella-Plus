@@ -2,6 +2,7 @@
 
 #include "settings/PreferenceKeys.h"
 
+#include "BuildConfig.h"
 #include "settings/Settings.h"
 #include "types/Cp1252.h"
 
@@ -357,6 +358,31 @@ std::optional<std::vector<TField>> ParseFields(std::string_view Value, TEncoding
 bool HasPreferences(const TSettingsFile &File)
 {
 	return File.Get(PreferencesVersionKey).has_value();
+}
+
+std::vector<std::string> ReadServerValues(const TSettingsFile &File, TServerValues &Values)
+{
+	std::vector<std::string> Problems;
+	TReader Read(File, Problems);
+	if (const std::optional<std::string> Address = File.Get("ServerAddress"); Address && !Address->empty()) {
+		if (patella::buildconfig::check::IsHost(Address->c_str()))
+			Values.Address = *Address;
+		else
+			Read.Problem("ServerAddress=" + ClientText(File, *Address) + ": not an address of at most 99 ASCII characters without spaces; ignored");
+	}
+	if (const auto Fields = Read.Fields("ServerPort", "n")) {
+		if (const int Port = (*Fields)[0].Number; patella::buildconfig::check::IsPort(Port))
+			Values.Port = Port;
+		else
+			Read.Problem("ServerPort=" + std::to_string(Port) + ": not a port from 1 to 65535; ignored");
+	}
+	if (const std::optional<std::string> Modulus = File.Get("RsaModulus"); Modulus && !Modulus->empty()) {
+		if (patella::buildconfig::check::IsModulus(Modulus->c_str()))
+			Values.RsaModulus = *Modulus;
+		else
+			Read.Problem("RsaModulus: not 306 to 309 decimal digits; ignored");
+	}
+	return Problems;
 }
 
 void WritePreferences(TSettingsFile &File, const TPreferenceValues &Values)

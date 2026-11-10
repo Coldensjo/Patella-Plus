@@ -191,6 +191,7 @@ public:
 
 private:
 	void DropFrame(TFrameDrop Reason, int FrameEnd);
+	void ApplyServerOverride();
 
 	TPreferences &Preferences;
 	TNetworkSession &Session;
