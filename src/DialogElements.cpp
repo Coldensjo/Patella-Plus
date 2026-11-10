@@ -1167,7 +1167,7 @@ void TEditLine::Draw(int Surface, int x, int y)
 				SkinProperties().EditLine.SelectionColor);
 		}
 		Graphics().PrintFormattedTextPart(Surface, TextX, TextY, Font, Text.get() + FirstVisible, Visible);
-		if (Active && GetActionNumber() / 5 % 2 == 0)
+		if (Active && Interaction().GetActionNumber() / 5 % 2 == 0)
 			GraphicsEngine().GetSurface()->DrawVerticalLine(Surface,
 				TextX + Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible, Cursor - FirstVisible), TextY, Graphics().GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
 	}
@@ -1258,7 +1258,7 @@ bool TEditLine::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags) && !IsDisabled() && Interaction().GetActionState() != ACTIONSTATE_DIALOG
 		&& Interaction().GetActionState() != ACTIONSTATE_CONTEXT_MENU)
-		AddMessage(MESSAGE_EDIT_MENU, reinterpret_cast<std::intptr_t>(this), 0);
+		Interaction().AddMessage(MESSAGE_EDIT_MENU, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }
 
@@ -1568,7 +1568,7 @@ void TEditText::Draw(int Surface, int x, int y)
 			}
 			const int LineY = i * LineHeight + TextY;
 			Graphics().PrintFormattedTextPart(Surface, TextX, LineY, Font, Text.get() + Start, End - Start);
-			if (Active && !ReadOnly && GetActionNumber() / 5 % 2 == 0) {
+			if (Active && !ReadOnly && Interaction().GetActionNumber() / 5 % 2 == 0) {
 				if ((Cursor >= Start && Cursor <= End - 1)
 					|| (Line == Lines - 1 && Cursor == (int)strlen(Text.get())))
 					GraphicsEngine().GetSurface()->DrawVerticalLine(Surface,

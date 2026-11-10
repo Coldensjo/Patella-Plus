@@ -390,7 +390,7 @@ TDialog *CreateIgnoreListDialog()
 TDialog *CreateReportDialog()
 {
 	if (Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1) != nullptr) {
-		SetStatusMessage(TextRequestAlreadySubmitted, false);
+		Talk().SetStatusMessage(TextRequestAlreadySubmitted, false);
 		return nullptr;
 	}
 	TReportDialog *Body = new TReportDialog();
@@ -809,17 +809,17 @@ void TReconnectWindow::HandleEvent(int Event)
 			ProgressBar->SetCurrent(Timeout - Time);
 			SetTime(Time + 10);
 			TimeLabel->SetText(Text, false);
-		} else if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
-			AddMessage(MESSAGE_RECONNECT, 0, 0);
+		} else if (Session().GetConnectionState() == CONNECTION_IN_GAME || Session().GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
+			Interaction().AddMessage(MESSAGE_RECONNECT, 0, 0);
 			Communication().SendLogout();
 		} else {
-			AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
-			AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
+			Interaction().AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
+			Interaction().AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
 		}
 	} else {
 		if (Event == EVENT_ABORT) {
-			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
-			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
+			Interaction().AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
+			Interaction().AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
@@ -870,8 +870,8 @@ void TLoginDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
 		Session().SetAccount(atoi(Account->Text.get()), Password->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
-		AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
-		AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
+		Interaction().AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 	}
 	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
@@ -897,8 +897,8 @@ TCharacterListDialog::TCharacterListDialog()
 		Line.Format("{} ({})", Session().GetCharacterName(i), Session().GetCharacterWorld(i));
 		ListBox->AddLine(Line);
 	}
-	if (GetConnectionState() == CONNECTION_IN_GAME && GetActiveCharacter() < Characters)
-		ListBox->SetSelection(GetActiveCharacter());
+	if (Session().GetConnectionState() == CONNECTION_IN_GAME && Session().GetActiveCharacter() < Characters)
+		ListBox->SetSelection(Session().GetActiveCharacter());
 	else
 		ListBox->SetSelection(0);
 	TFixedString<256> Status;
@@ -977,12 +977,13 @@ void TCharacterListDialog::HandleEvent(int Event)
 		const int Selection = ListBox->GetSelection();
 		if (Selection >= 0) {
 			Session().SetActiveCharacter(Selection);
-			if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
-				AddMessage(MESSAGE_RECONNECT, 0, 0);
+			if (Session().GetConnectionState() == CONNECTION_IN_GAME
+				|| Session().GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
+				Interaction().AddMessage(MESSAGE_RECONNECT, 0, 0);
 				Communication().SendLogout();
 			} else {
-				AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
-				AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
+				Interaction().AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
+				Interaction().AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
 			}
 		}
 	} else if (Event == EVENT_TIMER && !Timer->IsExpired()) {
@@ -1669,7 +1670,7 @@ void TNewChannelDialog::HandleEvent(int Event)
 			TCreature *Creature = Creatures().GetCreature(PlayerState().GetPlayerID());
 			PATELLA_ASSERT(Creature!=nullptr);
 			if (CompareStrings(Creature->Name, Name, -1) == 0)
-				SetStatusMessage(TextNoPrivateChannelWithYourself, false);
+				Talk().SetStatusMessage(TextNoPrivateChannelWithYourself, false);
 			else
 				Communication().SendOpenPrivateConversation(Name);
 		} else {
@@ -1761,7 +1762,7 @@ void TReportDialog::HandleEvent(int Event)
 		const std::size_t Size = strlen(TextEdit->Text.get()) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(TextEdit->Text.get());
-		AddMessage(MESSAGE_REPORT_RULE_VIOLATION, reinterpret_cast<std::intptr_t>(Text), 0);
+		Interaction().AddMessage(MESSAGE_REPORT_RULE_VIOLATION, reinterpret_cast<std::intptr_t>(Text), 0);
 	}
 	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
@@ -1929,11 +1930,11 @@ void THelpDialog::HandleEvent(int Event)
 		break;
 	case EVENT_HELP_MODE:
 		Interaction().SetActionState(ACTIONSTATE_NONE);
-		AddMessage(MESSAGE_HELP_MODE, 0, 0);
+		Interaction().AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_HINTS:
-		AddMessage(MESSAGE_HINTS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_HINTS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_TUTOR_HELP:
@@ -1941,7 +1942,7 @@ void THelpDialog::HandleEvent(int Event)
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_REPORT:
-		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_MANUAL:
@@ -2098,27 +2099,27 @@ void TRuleViolationDialog::HandleEvent(int Event)
 		const int Reason = GetReason();
 		const int Action = GetAction();
 		if (strlen(NameEdit->Text.get()) == 0) {
-			SetStatusMessage(TextNoPlayerName, false);
+			Talk().SetStatusMessage(TextNoPlayerName, false);
 			Valid = false;
 		}
 		if (Reason == -1) {
-			SetStatusMessage(TextNoReason, false);
+			Talk().SetStatusMessage(TextNoReason, false);
 			Valid = false;
 		}
 		if (Action == -1) {
-			SetStatusMessage(TextNoAction, false);
+			Talk().SetStatusMessage(TextNoAction, false);
 			Valid = false;
 		}
 		if (strlen(CommentEdit->Text.get()) == 0) {
-			SetStatusMessage(TextNoComment, false);
+			Talk().SetStatusMessage(TextNoComment, false);
 			Valid = false;
 		}
 		if (Action == 6) {
 			if (strlen(StatementEdit->Text.get()) == 0) {
-				SetStatusMessage(TextNoStatement, false);
+				Talk().SetStatusMessage(TextNoStatement, false);
 				Valid = false;
 			} else if (StatementID == 0) {
-				SetStatusMessage(TextCannotReportStatement, false);
+				Talk().SetStatusMessage(TextCannotReportStatement, false);
 				Valid = false;
 			}
 		}
@@ -2322,28 +2323,28 @@ void TOptionsDialog::HandleEvent(int Event)
 		Preferences().SavePreferences(Talk());
 		break;
 	case EVENT_OPTIONS_NETWORK:
-		AddMessage(MESSAGE_NETWORK_OPTIONS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_NETWORK_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_GRAPHICS:
-		AddMessage(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_CONSOLE:
-		AddMessage(MESSAGE_CONSOLE_OPTIONS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_CONSOLE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_HOTKEYS:
-		AddMessage(MESSAGE_HOTKEY_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_HOTKEY_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_GENERAL:
-		AddMessage(MESSAGE_GENERAL_OPTIONS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_GENERAL_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_MOTD:
-		AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -2689,7 +2690,7 @@ void TConsoleOptionsDialog::HandleEvent(int Event)
 		Preferences().SetStatusMessages(StatusMessages->IsChecked());
 		Preferences().SetTimeStamps(TimeStamps->IsChecked());
 		Preferences().SetPrivateMessages(PrivateMessages->IsChecked());
-		SetConsoleChanged();
+		Talk().SetConsoleChanged();
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextConsoleOptionsURL);
 		return;

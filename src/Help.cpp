@@ -393,15 +393,3 @@ const char *patella::THelp::GetCurrentHelpText()
 void patella::THelp::ExitHelp()
 {
 }
-
-// The functions of the original: each calls its member on the one TClient's THelp.
-
-void AddEventHelp(int Number)
-{
-	Help().AddEventHelp(Number);
-}
-
-void CheckEventHelpName(const char *Name)
-{
-	Help().CheckEventHelpName(Name);
-}

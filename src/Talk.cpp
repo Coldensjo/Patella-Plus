@@ -1012,22 +1012,4 @@ void patella::TTalk::ExitTalk()
 	DefaultTextBuffer = nullptr;
 }
 
-// The functions of the original: each calls its member on the one TClient's TTalk.
-
-void SetConsoleChanged()
-{
-	Talk().SetConsoleChanged();
-}
-
-void SetStatusMessage(const char *Message, bool Permanent)
-{
-	Talk().SetStatusMessage(Message, Permanent);
-}
-
-void AddTextBufferLine(TTalkBuffer *TargetBuffer, uint32 StatementID, const char *Text,
-	int TalkMode, const char *Name, int Time)
-{
-	Talk().AddTextBufferLine(TargetBuffer, StatementID, Text, TalkMode, Name, Time);
-}
-
 // NOLINTEND(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)

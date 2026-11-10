@@ -182,7 +182,7 @@ void TMainWindow::SetSize(int Width, int Height)
 // every other key goes to the console.
 void TMainWindow::KeyPress(int Key)
 {
-	if (GetConnectionState() != CONNECTION_IN_GAME)
+	if (Session().GetConnectionState() != CONNECTION_IN_GAME)
 		return;
 	switch (Key) {
 	case KEY_UP: Walk(0, -1, false); break;
@@ -223,7 +223,7 @@ void TMainWindow::HandleEvent(int Event)
 		GUI.ExitProgramCallback();
 		break;
 	case EVENT_OPTIONS:
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_REARRANGE:
 		SetSize(Width, Height);
@@ -268,11 +268,11 @@ void TMainWindow::HandleEvent(int Event)
 	}
 	case EVENT_ABORT:
 		Network().Disconnect(false);
-		if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER || GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
-			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
-			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
+		if (Session().GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER || Session().GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
+			Interaction().AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
+			Interaction().AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
-		SetConnectionState(CONNECTION_OFFLINE);
+		Session().SetConnectionState(CONNECTION_OFFLINE);
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_STOP:
@@ -294,9 +294,9 @@ void TMainWindow::HandleEvent(int Event)
 		break;
 	case EVENT_BUG_REPORT:
 		if (!Session().CheckRight(40, -1)) {
-			SetStatusMessage(TextNoBugReportRight, false);
-		} else if (GetConnectionState() == CONNECTION_IN_GAME && GUI.ModalWindow == nullptr) {
-			AddMessage(MESSAGE_BUG_REPORT_DIALOG, 0, 0);
+			Talk().SetStatusMessage(TextNoBugReportRight, false);
+		} else if (Session().GetConnectionState() == CONNECTION_IN_GAME && GUI.ModalWindow == nullptr) {
+			Interaction().AddMessage(MESSAGE_BUG_REPORT_DIALOG, 0, 0);
 		}
 		break;
 	case EVENT_LOGOUT:
@@ -310,28 +310,28 @@ void TMainWindow::HandleEvent(int Event)
 		Data[1] = reinterpret_cast<std::intptr_t>("Are you sure you want to leave Tibia?");
 		Data[2] = reinterpret_cast<std::intptr_t>(this);
 		Data[3] = EVENT_LOGOUT;
-		AddMessage(MESSAGE_QUESTION_DIALOG, reinterpret_cast<std::intptr_t>(Data), 0);
+		Interaction().AddMessage(MESSAGE_QUESTION_DIALOG, reinterpret_cast<std::intptr_t>(Data), 0);
 		break;
 	}
 	case EVENT_CHARACTER_LIST:
-		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
+		Interaction().AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		break;
 	case EVENT_HELP:
-		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
 		break;
 	case EVENT_HELP_MODE:
 		Interaction().SetActionState(ACTIONSTATE_NONE);
-		AddMessage(MESSAGE_HELP_MODE, 0, 0);
+		Interaction().AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_TUTOR_HELP:
 		Communication().SendJoinChannel(7);
 		break;
 	case EVENT_REPORT:
-		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
 		break;
 	case EVENT_RULE_VIOLATION:
 		if (Session().CheckAnyRight())
-			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
+			Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 		break;
 	case EVENT_DEVICE_AUTOMATIC:
 		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Automatic); // Control.cpp's
@@ -679,17 +679,17 @@ void TStartWindow::SetSize(int Width, int Height)
 void TStartWindow::HandleEvent(int Event)
 {
 	const patella::TGUI &GUI = ::GUI();
-	if (GetConnectionState() != CONNECTION_OFFLINE)
+	if (Session().GetConnectionState() != CONNECTION_OFFLINE)
 		return;
 	switch (Event) {
 	case EVENT_ENTER_GAME:
-		AddMessage(MESSAGE_LOGIN_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_LOGIN_DIALOG, 0, 0);
 		break;
 	case EVENT_INFO:
-		AddMessage(MESSAGE_INFO_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_INFO_DIALOG, 0, 0);
 		break;
 	case EVENT_START_OPTIONS:
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_EXIT_PROGRAM:
 		GUI.ExitProgramCallback();

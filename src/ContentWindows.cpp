@@ -613,7 +613,7 @@ bool TAutomapView::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	Data->Coordinate.y = (y - Height / 2) * 2 / Window->Zoom + Window->ViewY;
 	Data->Coordinate.z = Window->ViewZ;
 	Data->Mark = GetMark(x, y);
-	AddMessage(MESSAGE_MARK_MENU, reinterpret_cast<std::intptr_t>(Data), 0);
+	Interaction().AddMessage(MESSAGE_MARK_MENU, reinterpret_cast<std::intptr_t>(Data), 0);
 	return true;
 }
 
@@ -994,7 +994,7 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 			Communication().SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, 1);
 		} else if (AsksForCount(Flags)) {
 			Interaction().SetDragTarget(POSITION_NOT_ON_MAP, 0, 0);
-			AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
+			Interaction().AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 		} else {
 			Communication().SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, Obj->Data);
 		}
@@ -1107,7 +1107,7 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 				return true;
 			}
 		} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
-			SetStatusMessage("Select a player to trade with.", false);
+			Talk().SetStatusMessage("Select a player to trade with.", false);
 			return true;
 		} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 			int DragIndex, DragX, DragY, DragZ;
@@ -1118,7 +1118,7 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 						POSITION_NOT_ON_MAP, Slot, 0, 1);
 				} else if (AsksForCount(Flags)) {
 					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Slot, 0);
-					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
+					Interaction().AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
 					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex,
@@ -1153,9 +1153,9 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 					Communication().SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) != 0)
-					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+					Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 				else if (ObjectTypes().GetObjectFlag(Obj->Type, MULTIUSE))
-					AddMessage(MESSAGE_USE_WITH, 0, 0);
+					Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
 					Communication().SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0,
 						Inventory().GetFreeContainer());
@@ -1163,9 +1163,9 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 					Communication().SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) == 0)
-					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+					Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 				else if (ObjectTypes().GetObjectFlag(Obj->Type, MULTIUSE))
-					AddMessage(MESSAGE_USE_WITH, 0, 0);
+					Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
 					Communication().SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0,
 						Inventory().GetFreeContainer());
@@ -1557,7 +1557,7 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 				}
 			}
 		} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
-			SetStatusMessage("Select a player to trade with.", false);
+			Talk().SetStatusMessage("Select a player to trade with.", false);
 		} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 			const int Position = GetSlotAt(x, y, false);
 			int DragIndex, DragX, DragY, DragZ;
@@ -1568,7 +1568,7 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 						1);
 				} else if (AsksForCount(Flags)) {
 					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
-					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
+					Interaction().AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
 					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
@@ -1603,9 +1603,9 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 				Communication().SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type,
 					Position);
 			else if ((Flags & KEY_CONTROL) != 0)
-				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+				Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			else if (ObjectTypes().GetObjectFlag(Obj.Type, MULTIUSE))
-				AddMessage(MESSAGE_USE_WITH, 0, 0);
+				Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
 				Communication().SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
 		} else {
@@ -1613,9 +1613,9 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 				Communication().SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type,
 					Position);
 			else if ((Flags & KEY_CONTROL) == 0)
-				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+				Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			else if (ObjectTypes().GetObjectFlag(Obj.Type, MULTIUSE))
-				AddMessage(MESSAGE_USE_WITH, 0, 0);
+				Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
 				Communication().SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
 		}
@@ -1864,7 +1864,7 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 // Opens the skill menu (Control.cpp's message 60).
 bool TSkillsWindowBody::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
-	AddMessage(MESSAGE_SKILL_MENU, reinterpret_cast<std::intptr_t>(this), 0);
+	Interaction().AddMessage(MESSAGE_SKILL_MENU, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }
 
@@ -2236,7 +2236,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 							Creature->CreatureID);
 						return true;
 					}
-					SetStatusMessage("You are not allowed to shoot directly on players.", false);
+					Talk().SetStatusMessage("You are not allowed to shoot directly on players.", false);
 				} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
 					int TradeIndex, TradeX, TradeY, TradeZ;
 					const TObject &Obj = *Interaction().GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
@@ -2246,7 +2246,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 							Creature->CreatureID);
 						return true;
 					}
-					SetStatusMessage("Select a player to trade with.", false);
+					Talk().SetStatusMessage("Select a player to trade with.", false);
 				} else if (Interaction().GetActionState() != ACTIONSTATE_DRAGGING) {
 					if (Flags != 0)
 						RightButtonUp(x, y, Flags);
@@ -2275,7 +2275,7 @@ bool TBattleWindowBody::RightButtonUp(int x, int y, int Flags)
 				} else if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					Communication().SendLook(Creature->RealX, Creature->RealY, Creature->RealZ, CREATURE, 0);
 				} else {
-					AddMessage(MESSAGE_CREATURE_MENU, Creature->CreatureID, 0);
+					Interaction().AddMessage(MESSAGE_CREATURE_MENU, Creature->CreatureID, 0);
 				}
 			}
 		}
@@ -2807,7 +2807,7 @@ bool TBuddylistWindowBody::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
 		const int Position = GetBuddyAt(x, y);
-		AddMessage(MESSAGE_BUDDY_MENU, Position == -1 ? 0 : Creatures().GetBuddyListID(Position), 0);
+		Interaction().AddMessage(MESSAGE_BUDDY_MENU, Position == -1 ? 0 : Creatures().GetBuddyListID(Position), 0);
 	}
 	return true;
 }

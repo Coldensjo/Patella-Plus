@@ -162,7 +162,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 			Communication().SendRequestTrade(TradeX, TradeY, TradeZ, TradeObject.Type, TradeIndex, CreatureID);
 			return true;
 		}
-		SetStatusMessage(TextSelectPlayerToTrade, false);
+		Talk().SetStatusMessage(TextSelectPlayerToTrade, false);
 		return true;
 	} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 		int DragIndex, DragX, DragY, DragZ;
@@ -180,7 +180,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 					return true;
 				}
 				Interaction().SetDragTarget(DestX, DestY, DestZ);
-				AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
+				Interaction().AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 				return true;
 			}
 			Communication().SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, 1);
@@ -249,7 +249,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			return true;
 		}
 		if ((Flags & KEY_CONTROL) && Interaction().GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
-			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+			Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			return true;
 		}
 		const uint32 Target = Interaction().GetTradeInfo();
@@ -264,7 +264,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			return true;
 		PATELLA_ASSERT(UseObj!=CREATURE);
 		if (ObjectTypes().GetObjectFlag(UseObj, MULTIUSE)) {
-			AddMessage(MESSAGE_USE_WITH, 0, 0);
+			Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 			return true;
 		}
 		Communication().SendUseObject(ox, oy, oz, UseObj.Type, Index, Inventory().GetFreeContainer());
@@ -290,14 +290,14 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 				return true;
 			PATELLA_ASSERT(UseObj!=CREATURE);
 			if (ObjectTypes().GetObjectFlag(UseObj, MULTIUSE)) {
-				AddMessage(MESSAGE_USE_WITH, 0, 0);
+				Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 				return true;
 			}
 			Communication().SendUseObject(ox, oy, oz, UseObj.Type, Index, Inventory().GetFreeContainer());
 			return true;
 		}
 		if (Interaction().GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0)
-			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+			Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 		return true;
 	}
 }
@@ -321,7 +321,7 @@ void TMapWindow::HandleEvent(int Event)
 		const std::size_t Size = strlen(Help().GetEventHelpText(Hint)) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(Help().GetEventHelpText(Hint));
-		AddMessage(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(Help().GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
+		Interaction().AddMessage(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(Help().GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
 	}
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
@@ -899,7 +899,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			if (Creatures[i]->Colors[0] == 0) {
 				// An invisible creature: the sparkles of effect 13.
 				const int SpriteNumber = ObjectTypes().GetEffectSpriteNumber(13, 1, 1, 1,
-					GetActionNumber() / 3 % 3 + 2);
+					Interaction().GetActionNumber() / 3 % 3 + 2);
 				const int sx = ox + ShiftX[i], sy = oy + ShiftY[i];
 				const int cx = (ScrollX - Elevation + sx + posx - 8) / 32, cy = (ScrollY - Elevation + sy + posy - 8) / 32;
 				FlushField(cx, cy);
@@ -1018,7 +1018,7 @@ void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, i
 	int PatternX = x % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternWidth(Obj.Type)) + 1;
 	int PatternY = y % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternHeight(Obj.Type)) + 1;
 	const int PatternZ = z % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternDepth(Obj.Type)) + 1;
-	const int Phase = GetActionNumber() / 5 % PATELLA_DIVISOR(ObjectTypes().GetObjectPhases(Obj.Type)) + 1;
+	const int Phase = Interaction().GetActionNumber() / 5 % PATELLA_DIVISOR(ObjectTypes().GetObjectPhases(Obj.Type)) + 1;
 	if (ObjectTypes().GetObjectFlag(Obj, CUMULATIVE))
 		ObjectTypes().GetCumulativePattern(Obj, &PatternX, &PatternY);
 	if (ObjectTypes().GetObjectFlag(Obj, LIQUIDPOOL) || ObjectTypes().GetObjectFlag(Obj, LIQUIDCONTAINER))
@@ -1067,7 +1067,7 @@ void TMapWindow::DrawCreature(int posx, int posy, int Level, TCreature *Creature
 	}
 	int Phase;
 	if (ObjectTypes().GetOutfitFlag(OutfitType, ANIMATEALWAYS))
-		Phase = GetActionNumber() / 3 % PATELLA_DIVISOR(ObjectTypes().GetOutfitPhases(OutfitType)) + 1;
+		Phase = Interaction().GetActionNumber() / 3 % PATELLA_DIVISOR(ObjectTypes().GetOutfitPhases(OutfitType)) + 1;
 	else
 		Phase = Creature->GetAnimationPhase(ObjectTypes().GetOutfitPhases(OutfitType));
 	for (int X = 1; X <= ObjectTypes().GetOutfitWidth(OutfitType); X++) {

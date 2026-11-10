@@ -45,8 +45,8 @@ class TPreferences;
 
 // What Network.cpp calls in the files above it: Status.cpp's connection state and the active character's address
 // (TCommunication's session), and the message queue (TGUI's). TNetwork reaches them only through this, so that it does
-// not depend on those files; the functions are Status.h's of the same names. Client.cpp's adapter implements it with
-// Status.cpp's functions.
+// not depend on those files; the functions are TSession's and TInteraction's of the same names (Status.h), which
+// Client.cpp's adapter calls.
 class TNetworkSession {
 public:
 	TNetworkSession() = default;

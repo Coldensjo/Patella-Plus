@@ -772,7 +772,7 @@ void patella::TGraphics::DrawObject(int Surface, int x, int y, int Size, TObject
 		ObjectTypes().GetCumulativePattern(Obj, &PatternX, &PatternY);
 	if (ObjectTypes().GetObjectFlag(Obj.Type, LIQUIDPOOL) || ObjectTypes().GetObjectFlag(Obj.Type, LIQUIDCONTAINER))
 		ObjectTypes().GetLiquidPattern(Obj, &PatternX, &PatternY);
-	const int Action = GetActionNumber();
+	const int Action = Interaction().GetActionNumber();
 	const int Phase = Action / 5 % PATELLA_DIVISOR(ObjectTypes().GetObjectPhases(Obj.Type)) + 1;
 	const int Scale = Size * 32 / PATELLA_DIVISOR(ObjectTypes().GetObjectExactSize(Obj.Type));
 	for (int Layer = 1; Layer <= ObjectTypes().GetObjectLayers(Obj.Type); Layer++) {

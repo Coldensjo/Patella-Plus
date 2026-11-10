@@ -828,22 +828,23 @@ void OnCaptureChanged()
 void OnHostResolved(int Error)
 {
 	if (Error == 0) {
-		if (GetConnectionState() != CONNECTION_RESOLVING_LOGIN_SERVER) {
+		if (Session().GetConnectionState() != CONNECTION_RESOLVING_LOGIN_SERVER) {
 			Network().SetConnectionTimeout(0);
-			SetConnectionState(CONNECTION_OFFLINE);
+			Session().SetConnectionState(CONNECTION_OFFLINE);
 			Network().Disconnect(true);
 			// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue, freed with its message
 			char *Text = new char[1024];
 			Network().GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Text, ERROR_MESSAGE_SIZE), -1, 1);
-			AddMessage(1, reinterpret_cast<INT_PTR>("Connection failed"), reinterpret_cast<INT_PTR>(Text));
+			Interaction().AddMessage(1, reinterpret_cast<INT_PTR>("Connection failed"),
+				reinterpret_cast<INT_PTR>(Text));
 			return;
 		}
 		Network().SetConnectionTimeout(0);
 		Network().SetServerIPAddress(Network().GetResolvedIPAddress());
-		SetConnectionState(CONNECTION_CONNECTING_LOGIN_SERVER);
+		Session().SetConnectionState(CONNECTION_CONNECTING_LOGIN_SERVER);
 	} else {
 		Network().SetConnectionTimeout(0);
-		SetConnectionState(CONNECTION_OFFLINE);
+		Session().SetConnectionState(CONNECTION_OFFLINE);
 		Network().SetServerError(Error);
 	}
 	Network().ConnectToLoginServer();

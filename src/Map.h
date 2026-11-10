@@ -168,8 +168,8 @@ namespace patella {
 class TObjectTypes;
 
 // The default console, where TMap reports an automap file it could not read or save: Talk.cpp's, TGUI's, a later
-// subsystem than TMapState, so TMap reaches it only through this interface; Client.cpp implements it with Talk.cpp's
-// free functions. HasDefaultConsole is the original's check of DefaultTextBuffer before the message is made,
+// subsystem than TMapState, so TMap reaches it only through this interface; Client.cpp's adapter implements it with
+// TTalk's members. HasDefaultConsole is the original's check of DefaultTextBuffer before the message is made,
 // AddDefaultConsoleLine its AddTextBufferLine(DefaultTextBuffer, 0, Message, 20, NULL, 0) and SetConsoleChanged.
 class TMapConsole {
 public:

@@ -297,8 +297,7 @@ class TCommunication; // Communication.h
 // and the data of GUI.cpp (the timers and hotkeys), ContentWindows.cpp (the two mouse-over texts), Control.cpp (the
 // window, the callbacks, the mouse's last move, the frame counter's switch) and MainWindow.cpp (ModalWindow, MainWindow
 // and the callbacks). GUI.cpp's timer and hotkey functions, Control.cpp's and MainWindow.cpp's functions are its
-// members of the same names; the free functions forward to them. SkinProperties is TGraphics' (with Skins.cpp's table,
-// TSkins: Skins.h).
+// members of the same names. SkinProperties is TGraphics' (with Skins.cpp's table, TSkins: Skins.h).
 //
 // Control.cpp, the controller above the windows, is TGUI's: the windows' calls into it (the device buttons of the main
 // window's options, MainWindow.cpp, and the graphics options' fullscreen switch, Dialogs.cpp) are calls of TGUI's
@@ -342,7 +341,7 @@ public:
 	void RightButtonUp(int x, int y, int Flags);
 	void MouseWheel(int x, int y, int Direction);
 	void KeyPress(int Key);
-	[[nodiscard]] bool CloseRequest() const;
+	[[nodiscard]] bool CloseRequest();
 	static void LinkCopyWarning();
 	void ConnectionEstablished();
 	void ReceivePackets();

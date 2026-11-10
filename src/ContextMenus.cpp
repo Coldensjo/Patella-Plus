@@ -497,7 +497,7 @@ void TObjectContextMenu::HandleEvent(int Event)
 		Communication().SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, 0);
 		break;
 	case EVENT_MENU_USE_WITH:
-		AddMessage(MESSAGE_USE_WITH, 0, 0);
+		Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 		break;
 	case EVENT_MENU_ROTATE:
 		Communication().SendRotateObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex);
@@ -538,7 +538,7 @@ void TObjectContextMenu::HandleEvent(int Event)
 			Inventory().GetFreeContainer());
 		break;
 	case EVENT_MENU_TRADE_WITH:
-		AddMessage(MESSAGE_TRADE_WITH, 0, 0);
+		Interaction().AddMessage(MESSAGE_TRADE_WITH, 0, 0);
 		break;
 	case EVENT_MENU_ADD_VIP: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
@@ -608,7 +608,7 @@ void TObjectContextMenu::HandleEvent(int Event)
 		if (Creature != nullptr && Session().CheckAnyRight()) {
 			char *Name = new char[30];
 			TStringBuffer(Name, 30).Assign(Creature->Name);
-			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
+			Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
 		}
 		break;
 	}
@@ -772,7 +772,7 @@ void TCreatureContextMenu::HandleEvent(int Event)
 		if (Creature != nullptr && Session().CheckAnyRight()) {
 			char *Name = new char[30];
 			TStringBuffer(Name, 30).Assign(Creature->Name);
-			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
+			Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
 		}
 		break;
 	}
@@ -831,7 +831,7 @@ void TBuddyContextMenu::HandleEvent(int Event)
 		if (Position != -1 && Session().CheckAnyRight()) {
 			char *Name = new char[30];
 			TStringBuffer(Name, 30).Assign(Creatures().GetBuddyListName(Position));
-			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
+			Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
 		}
 		break;
 	}
@@ -852,10 +852,10 @@ void TBuddyContextMenu::HandleEvent(int Event)
 		Communication().SendRemoveBuddy(CharacterID);
 		break;
 	case EVENT_MENU_NEW_VIP:
-		AddMessage(MESSAGE_ADD_BUDDY_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_ADD_BUDDY_DIALOG, 0, 0);
 		break;
 	case EVENT_MENU_EDIT_VIP:
-		AddMessage(MESSAGE_EDIT_BUDDY_DIALOG, CharacterID, 0);
+		Interaction().AddMessage(MESSAGE_EDIT_BUDDY_DIALOG, CharacterID, 0);
 		break;
 	case EVENT_MENU_MESSAGE_VIP: {
 		const int Position = Creatures().GetBuddyPosition(CharacterID);
@@ -997,9 +997,9 @@ void TTextContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_RULE_VIOLATION:
 		if (Session().CheckAnyRight()) {
 			if (Line == nullptr) {
-				AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
+				Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 			} else {
-				AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0,
+				Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0,
 					reinterpret_cast<std::intptr_t>(new TTalkLine(Line->StatementID, Line->Mode, Line->Addressee,
 						Line->Text, 0)));
 			}
@@ -1047,7 +1047,7 @@ void TRequestContextMenu::HandleEvent(int Event)
 			TTalkBuffer *TextBuffer = Talk().GetTextBuffer(TALK_PLAYER_ANSWER, Name, -1);
 			PATELLA_ASSERT(TextBuffer!=nullptr);
 			TextBuffer->Clear();
-			AddTextBufferLine(TextBuffer, Line->StatementID, Line->Text, TALK_PLAYER_ANSWER, Name, 0);
+			Talk().AddTextBufferLine(TextBuffer, Line->StatementID, Line->Text, TALK_PLAYER_ANSWER, Name, 0);
 			TextBuffer->SetWriteEnabled(true);
 			Communication().SendProcessRuleViolation(Name);
 			break;
@@ -1063,7 +1063,7 @@ void TRequestContextMenu::HandleEvent(int Event)
 			break;
 		case EVENT_MENU_RULE_VIOLATION:
 			if (Session().CheckAnyRight()) {
-				AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, reinterpret_cast<std::intptr_t>(new TTalkLine(Line->StatementID, Line->Mode, Name, Line->Text, 0)));
+				Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, reinterpret_cast<std::intptr_t>(new TTalkLine(Line->StatementID, Line->Mode, Name, Line->Text, 0)));
 			}
 			break;
 		default:
@@ -1110,10 +1110,10 @@ void TChannelContextMenu::HandleEvent(int Event)
 		ConsoleWindow->CloseChannel();
 		break;
 	case EVENT_MENU_INVITE_PRIVATE:
-		AddMessage(MESSAGE_INVITE_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_INVITE_DIALOG, 0, 0);
 		break;
 	case EVENT_MENU_EXCLUDE_PRIVATE:
-		AddMessage(MESSAGE_EXCLUDE_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_EXCLUDE_DIALOG, 0, 0);
 		break;
 	case EVENT_MENU_SERVER_MESSAGES:
 		ConsoleWindow->SetServerMessages(ShowServerMessages);
@@ -1202,10 +1202,11 @@ void TMarkContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_MENU_SET_MARK:
-		AddMessage(MESSAGE_SET_MARK_DIALOG, reinterpret_cast<std::intptr_t>(new TCoordinate(Data.Coordinate)), 0);
+		Interaction().AddMessage(MESSAGE_SET_MARK_DIALOG,
+			reinterpret_cast<std::intptr_t>(new TCoordinate(Data.Coordinate)), 0);
 		break;
 	case EVENT_MENU_EDIT_MARK:
-		AddMessage(MESSAGE_EDIT_MARK_DIALOG, reinterpret_cast<std::intptr_t>(new TCoordinate(Data.Coordinate)), reinterpret_cast<std::intptr_t>(new TMark(Data.Mark)));
+		Interaction().AddMessage(MESSAGE_EDIT_MARK_DIALOG, reinterpret_cast<std::intptr_t>(new TCoordinate(Data.Coordinate)), reinterpret_cast<std::intptr_t>(new TMark(Data.Mark)));
 		break;
 	case EVENT_MENU_GO_TO_MARK:
 		if (Data.Mark.x != 0 && Data.Mark.y != 0) {

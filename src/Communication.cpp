@@ -263,7 +263,7 @@ void patella::TCommunication::SendTurnWest()
 void patella::TCommunication::SendMoveObject(int x, int y, int z, int ObjectType, int Position, int DestinationX, int DestinationY, int DestinationZ, int Count)
 {
 	if (ObjectTypes.GetObjectFlag(ObjectType, 13)) {
-		SetStatusMessage("You cannot move this object.", false);
+		Talk().SetStatusMessage("You cannot move this object.", false);
 		return;
 	}
 	if (x != POSITION_NOT_ON_MAP)
@@ -659,7 +659,7 @@ void patella::TCommunication::SendRuleViolationReport(const char *Name, uint8 Re
 void patella::TCommunication::ReceiveLoginError()
 {
 	const char *Text = Network.GetString();
-	AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
+	Interaction().AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
 	Network.Disconnect(false);
 	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
@@ -667,14 +667,15 @@ void patella::TCommunication::ReceiveLoginError()
 void patella::TCommunication::ReceiveLoginMessage()
 {
 	const char *Text = Network.GetString();
-	AddMessage(1, reinterpret_cast<std::intptr_t>("For Your Information"), reinterpret_cast<std::intptr_t>(Text));
+	Interaction().AddMessage(1, reinterpret_cast<std::intptr_t>("For Your Information"),
+		reinterpret_cast<std::intptr_t>(Text));
 }
 
 void patella::TCommunication::ReceiveMessageOfTheDay()
 {
 	const char *Text = Network.GetString();
 	if (Preferences().SetMessageOfTheDay(Text))
-		AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
+		Interaction().AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): GetString's text, the caller's
 	delete[] Text;
 }
@@ -693,7 +694,7 @@ void patella::TCommunication::ReceiveUpdateRequest()
 	char *Text = new char[TextUpdateRefused.size() + 1];
 	memcpy(Text, TextUpdateRefused.data(), TextUpdateRefused.size());
 	Text[TextUpdateRefused.size()] = 0;
-	AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
+	Interaction().AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
 	Network.Disconnect(false);
 	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
@@ -716,7 +717,7 @@ void patella::TCommunication::ReceiveCharacterList()
 	}
 	const int PremiumDays = Network.GetWord();
 	Session.SetPremiumDays(PremiumDays);
-	AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
+	Interaction().AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 }
 
 void patella::TCommunication::ReceiveLoginServerOverloaded()
@@ -753,7 +754,7 @@ void patella::TCommunication::ReceiveGamemasterActions()
 void patella::TCommunication::ReceiveGameError()
 {
 	const char *Text = Network.GetString();
-	AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
+	Interaction().AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
 	Network.Disconnect(false);
 	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
@@ -761,14 +762,15 @@ void patella::TCommunication::ReceiveGameError()
 void patella::TCommunication::ReceiveGameMessage()
 {
 	const char *Text = Network.GetString();
-	AddMessage(1, reinterpret_cast<std::intptr_t>("For Your Information"), reinterpret_cast<std::intptr_t>(Text));
+	Interaction().AddMessage(1, reinterpret_cast<std::intptr_t>("For Your Information"),
+		reinterpret_cast<std::intptr_t>(Text));
 }
 
 void patella::TCommunication::ReceiveLoginWait()
 {
 	const char *Text = Network.GetString();
 	const int Delay = Network.GetByte();
-	AddMessage(MESSAGE_RECONNECT_DIALOG, reinterpret_cast<std::intptr_t>(Text), Delay);
+	Interaction().AddMessage(MESSAGE_RECONNECT_DIALOG, reinterpret_cast<std::intptr_t>(Text), Delay);
 }
 
 void patella::TCommunication::ReceivePing()
@@ -1590,7 +1592,8 @@ void patella::TCommunication::ReceiveEditText()
 	char **Strings = new char *[2];
 	Strings[0] = Writer;
 	Strings[1] = Text;
-	AddMessage(MESSAGE_TEXT_DIALOG, reinterpret_cast<std::intptr_t>(Info), reinterpret_cast<std::intptr_t>(Strings));
+	Interaction().AddMessage(MESSAGE_TEXT_DIALOG, reinterpret_cast<std::intptr_t>(Info),
+		reinterpret_cast<std::intptr_t>(Strings));
 }
 
 void patella::TCommunication::ReceiveEditHouseText()
@@ -1600,7 +1603,8 @@ void patella::TCommunication::ReceiveEditHouseText()
 	Info[0] = Network.GetByte();
 	Info[1] = Network.GetQuad();
 	const char *Text = Network.GetString();
-	AddMessage(MESSAGE_EDIT_LIST_DIALOG, reinterpret_cast<std::intptr_t>(Info), reinterpret_cast<std::intptr_t>(Text));
+	Interaction().AddMessage(MESSAGE_EDIT_LIST_DIALOG, reinterpret_cast<std::intptr_t>(Info),
+		reinterpret_cast<std::intptr_t>(Text));
 }
 
 void patella::TCommunication::ReceivePlayerStats()
@@ -1735,7 +1739,7 @@ void patella::TCommunication::ReceiveChannelList()
 		Channels[i + 1] = Network.GetWord();
 		Network.GetString(patella::TSpan<char>(Names + i * 30, 30));
 	}
-	AddMessage(MESSAGE_NEW_CHANNEL_DIALOG, reinterpret_cast<std::intptr_t>(Channels), reinterpret_cast<std::intptr_t>(Names));
+	Interaction().AddMessage(MESSAGE_NEW_CHANNEL_DIALOG, reinterpret_cast<std::intptr_t>(Channels), reinterpret_cast<std::intptr_t>(Names));
 }
 
 void patella::TCommunication::ReceiveOpenChannel()
@@ -1745,7 +1749,7 @@ void patella::TCommunication::ReceiveOpenChannel()
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char *Name = new char[30];
 	Network.GetString(patella::TSpan<char>(Name, 30));
-	AddMessage(MESSAGE_OPEN_CHANNEL, ChannelID, reinterpret_cast<std::intptr_t>(Name));
+	Interaction().AddMessage(MESSAGE_OPEN_CHANNEL, ChannelID, reinterpret_cast<std::intptr_t>(Name));
 }
 
 void patella::TCommunication::ReceiveOpenPrivateConversation()
@@ -1753,7 +1757,7 @@ void patella::TCommunication::ReceiveOpenPrivateConversation()
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char *Name = new char[30];
 	Network.GetString(patella::TSpan<char>(Name, 30));
-	AddMessage(MESSAGE_OPEN_PRIVATE_CONVERSATION, 0, reinterpret_cast<std::intptr_t>(Name));
+	Interaction().AddMessage(MESSAGE_OPEN_PRIVATE_CONVERSATION, 0, reinterpret_cast<std::intptr_t>(Name));
 }
 
 void patella::TCommunication::ReceiveRuleViolationChannel()
@@ -1763,7 +1767,7 @@ void patella::TCommunication::ReceiveRuleViolationChannel()
 	const TTalkBuffer *Channel = Talk().CreateTextBuffer(TALK_GAMEMASTER_REQUEST, TALK_SAY, nullptr, ChannelID);
 	if (Channel == nullptr)
 		Channel = Talk().GetTextBuffer(TALK_GAMEMASTER_REQUEST, nullptr, -1);
-	AddMessage(MESSAGE_RULE_VIOLATION_CHANNEL, reinterpret_cast<std::intptr_t>(Channel), 0);
+	Interaction().AddMessage(MESSAGE_RULE_VIOLATION_CHANNEL, reinterpret_cast<std::intptr_t>(Channel), 0);
 }
 
 void patella::TCommunication::ReceiveRemoveRuleViolation()
@@ -1781,7 +1785,7 @@ void patella::TCommunication::ReceiveRemoveRuleViolation()
 				Channel->Remove(Current);
 			}
 		}
-		SetConsoleChanged();
+		Talk().SetConsoleChanged();
 	}
 }
 
@@ -1793,7 +1797,7 @@ void patella::TCommunication::ReceiveCancelRuleViolation()
 	if (Channel != nullptr) {
 		TFixedString<444> Text;
 		Text.Format("{} has finished the request.", Name);
-		AddTextBufferLine(Channel, 0, Text, TALK_ADMIN_MESSAGE, nullptr, 0);
+		Talk().AddTextBufferLine(Channel, 0, Text, TALK_ADMIN_MESSAGE, nullptr, 0);
 		Channel->SetWriteEnabled(false);
 	}
 }
@@ -1803,7 +1807,7 @@ void patella::TCommunication::ReceiveLockRuleViolation()
 	TTalkBuffer *Channel = Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
 	if (Channel != nullptr) {
 		const char *Text = TextRequestClosed;
-		AddTextBufferLine(Channel, 0, Text, TALK_ADMIN_MESSAGE, nullptr, 0);
+		Talk().AddTextBufferLine(Channel, 0, Text, TALK_ADMIN_MESSAGE, nullptr, 0);
 		Channel->SetWriteEnabled(false);
 	}
 }
@@ -1815,7 +1819,7 @@ void patella::TCommunication::ReceiveOwnChannel()
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char *Name = new char[40];
 	Network.GetString(patella::TSpan<char>(Name, 40));
-	AddMessage(MESSAGE_OPEN_OWN_CHANNEL, ChannelID, reinterpret_cast<std::intptr_t>(Name));
+	Interaction().AddMessage(MESSAGE_OPEN_OWN_CHANNEL, ChannelID, reinterpret_cast<std::intptr_t>(Name));
 }
 
 void patella::TCommunication::ReceiveCloseChannel()
@@ -1825,7 +1829,7 @@ void patella::TCommunication::ReceiveCloseChannel()
 	TTalkBuffer *Channel = Talk().GetTextBuffer(TALK_CHANNEL_CALL, nullptr, ChannelID);
 	if (Channel != nullptr) {
 		const char *Text = TextChannelClosed;
-		AddTextBufferLine(Channel, 0, Text, TALK_ADMIN_MESSAGE, nullptr, 0);
+		Talk().AddTextBufferLine(Channel, 0, Text, TALK_ADMIN_MESSAGE, nullptr, 0);
 		Channel->SetWriteEnabled(false);
 	}
 }
@@ -1840,7 +1844,7 @@ void patella::TCommunication::ReceiveTextMessage()
 	if (Mode == TALK_ADMIN_MESSAGE || Mode == TALK_EVENT_MESSAGE || Mode == TALK_INFO_MESSAGE)
 		Talk().AddMessageTalkbox(Mode, Text);
 	if (Mode == TALK_STATUS_ONLY_MESSAGE || Mode == TALK_STATUS_MESSAGE || Mode == TALK_EVENT_STATUS_MESSAGE)
-		SetStatusMessage(Text, false);
+		Talk().SetStatusMessage(Text, false);
 	if (Mode != TALK_STATUS_ONLY_MESSAGE)
 		Talk().AddConsoleText(0, Text, Mode, nullptr, -1, 0);
 }
@@ -1951,7 +1955,7 @@ void patella::TCommunication::ReceiveOutfit()
 	Outfit[4] = Network.GetByte();
 	Outfit[5] = Network.GetWord();
 	Outfit[6] = Network.GetWord();
-	AddMessage(MESSAGE_OUTFIT_DIALOG, reinterpret_cast<std::intptr_t>(Outfit), 0);
+	Interaction().AddMessage(MESSAGE_OUTFIT_DIALOG, reinterpret_cast<std::intptr_t>(Outfit), 0);
 }
 
 // Only the byte value 1 means online, not every nonzero value.
@@ -1964,7 +1968,7 @@ void patella::TCommunication::ReceiveBuddy()
 	const int State = Network.GetByte();
 	Creatures.AddBuddy(CharacterID, Name, State == 1);
 	const char *Copy = MsvcStrdup(Name);
-	AddMessage(MESSAGE_TEMPORARY_IGNORE, reinterpret_cast<std::intptr_t>(Copy), 0);
+	Interaction().AddMessage(MESSAGE_TEMPORARY_IGNORE, reinterpret_cast<std::intptr_t>(Copy), 0);
 }
 
 void patella::TCommunication::ReceiveBuddyLogin()

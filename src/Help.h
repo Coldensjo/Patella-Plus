@@ -124,7 +124,3 @@ private:
 
 // The one client's help (Client.cpp).
 patella::THelp &Help();
-
-// Help.cpp's functions: each calls THelp's member of the same name on Help().
-void AddEventHelp(int Number);
-void CheckEventHelpName(const char *Name);

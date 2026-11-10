@@ -114,10 +114,9 @@ struct TVideoCacheItem {
 #pragma clang diagnostic pop
 #endif
 
-// TGraphics, the fifth of TClient's subsystems: graphics.cpp's data and functions (its members of the same names; the
-// free functions below forward to them), Surface.cpp's TGraphicsEngine (Surface.h) and Skins.cpp's TSkins with
-// GUI.cpp's SkinProperties (Skins.h). Of graphics.cpp's data the two signatures are public: the login packets send
-// them.
+// TGraphics, the fifth of TClient's subsystems: graphics.cpp's data and functions (its members of the same names),
+// Surface.cpp's TGraphicsEngine (Surface.h) and Skins.cpp's TSkins with GUI.cpp's SkinProperties (Skins.h). Of
+// graphics.cpp's data the two signatures are public: the login packets send them.
 namespace patella {
 
 class TGraphics {

@@ -676,43 +676,4 @@ void patella::TSession::ExitSession()
 	Characters = nullptr;
 }
 
-// The session's functions of the original: each calls its member on the one TClient's TSession.
-
-void SetConnectionState(int State)
-{
-	Session().SetConnectionState(State);
-}
-
-int GetConnectionState()
-{
-	return Session().GetConnectionState();
-}
-
-int GetActiveCharacter()
-{
-	return Session().GetActiveCharacter();
-}
-
-const char *GetCharacterIPAddress(int Number)
-{
-	return Session().GetCharacterIPAddress(Number);
-}
-
-int GetCharacterPort(int Number)
-{
-	return Session().GetCharacterPort(Number);
-}
-
-// The functions of the original: each calls its member on the one TClient's TInteraction.
-
-int GetActionNumber()
-{
-	return Interaction().GetActionNumber();
-}
-
-void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2)
-{
-	Interaction().AddMessage(Type, Param1, Param2);
-}
-
 // NOLINTEND(cppcoreguidelines-owning-memory)

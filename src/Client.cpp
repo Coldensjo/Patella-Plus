@@ -25,21 +25,21 @@ namespace patella {
 
 namespace {
 
-// Status.cpp's session and message queue for TNetwork (TNetworkSession). TSession (TCommunication's) and TGUI's
-// TInteraction are made after TNetwork, so it stays an adapter (a reference to them would point up). It was kept rather
-// than an interface TClient wires into TNetwork after construction: that would be a pointer TNetwork holds unset
-// between its construction and TClient's (a two-phase start the golden runner, the unit tests and the test mode would
-// each have to reach), and the golden Network test fakes Status.cpp's free functions, which this adapter calls. It goes
-// with the bridge or with the ISocket events. Stateless: each member calls Status.cpp's function of its name (from
-// another object file than Network.cpp's, so the golden Network test's fakes of those functions are reached as before).
+// The session and the message queue for TNetwork (TNetworkSession). TSession (TCommunication's) and TInteraction
+// (TGUI's) are made after TNetwork, which therefore cannot be given a reference to them: it is given this adapter. An
+// interface that TClient wired into TNetwork after construction would be a pointer TNetwork holds unset until then.
+// Stateless: each member calls the member of its name on the session or the interaction, through the accessor.
 class TNetworkSessionAdapter final : public TNetworkSession {
 public:
-	void SetConnectionState(int State) override { ::SetConnectionState(State); }
-	int GetConnectionState() override { return ::GetConnectionState(); }
-	int GetActiveCharacter() override { return ::GetActiveCharacter(); }
-	const char *GetCharacterIPAddress(int Number) override { return ::GetCharacterIPAddress(Number); }
-	int GetCharacterPort(int Number) override { return ::GetCharacterPort(Number); }
-	void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2) override { ::AddMessage(Type, Param1, Param2); }
+	void SetConnectionState(int State) override { Session().SetConnectionState(State); }
+	int GetConnectionState() override { return Session().GetConnectionState(); }
+	int GetActiveCharacter() override { return Session().GetActiveCharacter(); }
+	const char *GetCharacterIPAddress(int Number) override { return Session().GetCharacterIPAddress(Number); }
+	int GetCharacterPort(int Number) override { return Session().GetCharacterPort(Number); }
+	void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2) override
+	{
+		Interaction().AddMessage(Type, Param1, Param2);
+	}
 };
 
 // Made on first use, as TClient is (a static initialiser of another file may make TClient first).
@@ -49,27 +49,30 @@ TNetworkSession &NetworkSessionAdapter()
 	return Session;
 }
 
-// Talk.cpp's default console for TMap (TMapConsole) and Talk.cpp's, Help.cpp's and Status.cpp's functions for
-// TCreatures and TPlayerState (TCreaturesGUI): TGUI's, made after TMapState, so adapters as TNetworkSessionAdapter is.
-// Stateless: each member calls the free functions of the original's code (from another object file than Map.cpp's and
-// Creatures.cpp's, so the golden tests' fakes of those functions are reached as before).
+// The talk's default console for TMap (TMapConsole), and the talk's, the help's and the interaction's functions for
+// TCreatures and TPlayerState (TCreaturesGUI): all three are TGUI's, which is made after TMapState, so adapters as
+// TNetworkSessionAdapter is. Stateless: each member calls the members of TTalk, THelp or TInteraction through the
+// accessors.
 class TMapConsoleAdapter final : public TMapConsole {
 public:
 	bool HasDefaultConsole() override { return Talk().DefaultTextBuffer != nullptr; }
 	void AddDefaultConsoleLine(const char *Message) override
 	{
-		::AddTextBufferLine(Talk().DefaultTextBuffer, 0, Message, TALK_EVENT_STATUS_MESSAGE, nullptr, 0);
-		::SetConsoleChanged();
+		Talk().AddTextBufferLine(Talk().DefaultTextBuffer, 0, Message, TALK_EVENT_STATUS_MESSAGE, nullptr, 0);
+		Talk().SetConsoleChanged();
 	}
 };
 
 class TCreaturesGUIAdapter final : public TCreaturesGUI {
 public:
-	void SetStatusMessage(const char *Message, bool Permanent) override { ::SetStatusMessage(Message, Permanent); }
-	void AddEventHelp(int Number) override { ::AddEventHelp(Number); }
-	void CheckEventHelpName(const char *Name) override { ::CheckEventHelpName(Name); }
-	void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2) override { ::AddMessage(Type, Param1, Param2); }
-	int GetActionNumber() override { return ::GetActionNumber(); }
+	void SetStatusMessage(const char *Message, bool Permanent) override { Talk().SetStatusMessage(Message, Permanent); }
+	void AddEventHelp(int Number) override { Help().AddEventHelp(Number); }
+	void CheckEventHelpName(const char *Name) override { Help().CheckEventHelpName(Name); }
+	void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2) override
+	{
+		Interaction().AddMessage(Type, Param1, Param2);
+	}
+	int GetActionNumber() override { return Interaction().GetActionNumber(); }
 };
 
 // TGraphics' signatures for TCommunication's login packet (TLoginSignatures): TGraphics is made after TCommunication,

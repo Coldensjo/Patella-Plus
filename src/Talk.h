@@ -313,9 +313,3 @@ inline bool TTalkBuffer::IsDefault()
 {
 	return this == Talk().DefaultTextBuffer;
 }
-
-// Talk.cpp's functions: each calls TTalk's member of the same name on Talk().
-void SetConsoleChanged();
-void SetStatusMessage(const char *Message, bool Permanent);
-void AddTextBufferLine(TTalkBuffer *TargetBuffer, uint32 StatementID, const char *Text,
-	int TalkMode, const char *Name, int Time);

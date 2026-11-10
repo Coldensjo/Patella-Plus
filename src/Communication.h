@@ -185,8 +185,8 @@ public:
 	void ReceiveBuddyLogin();
 	void ReceiveBuddyLogout();
 
-	// Data. Public: Control.cpp writes OutfitRequested and the packet types (ReceivePackets, InitWindow); Status.cpp's
-	// functions reach Session through Session().
+	// Data. Public: Control.cpp writes OutfitRequested and the packet types (ReceivePackets, InitWindow), and Session
+	// is what the accessor Session() gives.
 	bool OutfitRequested{};                  // also reset by Control.cpp
 	int LastPacketIndex{};                   // Control.cpp's: next slot in LastPacketTypes
 	std::array<uint8, 10> LastPacketTypes{}; // Control.cpp's: the last ten packet types, a ring

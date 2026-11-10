@@ -136,8 +136,8 @@ protected:
 
 // What TCreatures and TPlayerState ask of the GUI: Talk.cpp's status message, Help.cpp's hints, Status.cpp's message
 // queue and action number, all TGUI's, a later subsystem than TMapState, so they reach them only through this
-// interface. Client.cpp implements it with those files' free functions. Each member is the original's call of the same
-// name and parameters.
+// interface. Client.cpp's adapter implements it: each member calls TTalk's, THelp's or TInteraction's member of the
+// same name and parameters.
 class TCreaturesGUI {
 public:
 	TCreaturesGUI() = default;

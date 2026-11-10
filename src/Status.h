@@ -4,10 +4,9 @@
 // the clipboard link check.
 //
 // The session (the connection state, the account, the character list, the rights) is TSession's, which TCommunication
-// owns (Communication.h); the free functions of the original's names are the bridge that the callers use until they
-// hold the object (Session(), defined in Client.cpp). The rest of the file's data, the user interaction (the
-// action, drag, trade and use state, the mouse, the message queue, the blink, the mouse-over text, the clipboard's link
-// check), is TInteraction's, which TGUI owns (GUI.h); Interaction() the same way.
+// owns (Communication.h). The rest of the file's data, the user interaction (the action, drag, trade and use state,
+// the mouse, the message queue, the blink, the mouse-over text, the clipboard's link check), is TInteraction's, which
+// TGUI owns (GUI.h). A caller that holds neither calls Session() or Interaction() (Client.cpp).
 
 #pragma once
 
@@ -209,9 +208,6 @@ private:
 patella::TSession &Session();
 patella::TInteraction &Interaction();
 
-// The session's functions: each calls TSession's member of the same name on Session(); the others are
-// Status.cpp's own.
-int GetActionNumber();
 // The action states. ACTIONSTATE_NONE, no action, is the original's name
 // (MainWindow.cpp's "GetActionState()==ACTIONSTATE_NONE"); the other states
 // are named from what the code does with them. 4 and 5: both buttons were
@@ -243,14 +239,8 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	CURSOR_DRAG = 5,      // dragging: the crosshair's picture, as skin and as Windows cursor
 	CURSOR_MAGNIFIER = 6, // help mode
 };
-void SetConnectionState(int State);
-int GetConnectionState();
-int GetActiveCharacter();
 const char *GetRightName(int rightid);
 const char *GetActionName(int actionid);
-void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2);
-const char *GetCharacterIPAddress(int Number);
-int GetCharacterPort(int Number);
 
 
 // Events.h, the message and event numbers, comes last on purpose: included at the top of this file, its enumerators

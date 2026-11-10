@@ -12,9 +12,9 @@ namespace patella {
 // (the blit statistics, the screen, the cache surfaces' size, the main window: platform::TSurfaceShared, the base,
 // which the engine's surface gets at its construction), with the same initial values. A part of TGraphics (graphics.h,
 // its member Engine), declared here and defined in Surface.cpp, as TSession is Status.cpp's inside TCommunication.
-// Surface.cpp's functions are its members of the same names; the free functions forward to them. The data the other
-// files read or write is public (Player.cpp; the Vulkan engine through its TSurfaceShared); the surface object is
-// private, and the main window is the base's, read by TSurface's TestEngine.
+// Surface.cpp's functions are its members of the same names. The data the other files read or write is public
+// (Player.cpp; the Vulkan engine through its TSurfaceShared); the surface object is private, and the main window is the
+// base's, read by TSurface's TestEngine.
 class TGraphicsEngine final : public platform::TSurfaceShared {
 public:
 	TGraphicsEngine() = default;
