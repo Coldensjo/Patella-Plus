@@ -27,7 +27,6 @@
 #include "DialogElements.h"
 #include "Map.h"         // TCoordinate, TMark
 #include "Preferences.h" // TFullscreenMode, HOTKEYS
-#include "Text.h"        // TReconnectBody::SetTime reads TextTryingToReconnect
 #include <array>
 #include <cstddef>
 #include <memory>
@@ -191,16 +190,7 @@ public:
 	void Draw(int Surface, int x, int y) override;
 	void HandleEvent(int Event) override;
 	// Time in tenths of a second.
-	void SetTime(int Time)
-	{
-		if (Time > 600) {
-			const int Minutes = Time / 600 + 1;
-			MsvcSnprintf(Text, sizeof(Text), TextTryingToReconnect, Minutes, Minutes < 2 ? "minute" : "minutes");
-		} else {
-			MsvcSnprintf(Text, sizeof(Text), TextTryingToReconnect, Time / 10,
-				Time / 10 < 2 ? "second" : "seconds");
-		}
-	}
+	void SetTime(int Time);
 
 	int Timeout;                   // +0x2c, tenths of a second
 	TFixedString<512> Text;        // +0x30, the time left

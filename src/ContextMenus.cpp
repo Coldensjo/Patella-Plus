@@ -23,7 +23,6 @@
 #include "Status.h"
 #include "Surface.h"
 #include "Talk.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "Utils.h"
 #include "graphics.h"
 #include "sysinc.h"

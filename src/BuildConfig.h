@@ -7,7 +7,7 @@
 // verb on Windows, so a link that is a program path or a file: address would be started by a button.
 //
 // These are the only copies of the values in the product (the test build's PATELLA_LOGIN_SERVER has its own default port, issue #158): the login servers and port (Network.cpp), the RSA modulus (Preferences.cpp
-// GetRsaModulus), the test server (Player.cpp), the links (Text.h), Info's caption (Dialogs.cpp), the site named in texts (Network.cpp,
+// GetRsaModulus), the test server (Player.cpp), the links (Dialogs.cpp, MainWindow.cpp), Info's caption (Dialogs.cpp), the site named in texts (Network.cpp,
 // Help.cpp), the bug report address (sysinc.cpp). The values are plain text in the program: someone with a hex editor can still
 // change them, and only the server can enforce anything. notes/decisions.md, "#169".
 //

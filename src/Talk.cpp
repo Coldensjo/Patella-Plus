@@ -1,7 +1,6 @@
 // Talk.cpp: reconstructed from Tibia.exe 7.72, in assertion/catch line order.
 // Header COMDATs are in Talk.h; Container.h supplies the filter-list vector.
 #include "Talk.h"
-#include "Text.h"
 #include "Utils.h"
 #include "graphics.h"
 #include "sysinc.h"
@@ -21,6 +20,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextPermanentlyIgnoring = "You are permanently ignoring players."; // 134
+
+} // namespace
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
 // the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):

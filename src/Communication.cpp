@@ -23,7 +23,6 @@
 #include "Preferences.h"
 #include "Status.h"
 #include "Talk.h"
-#include "Text.h"
 #include "common.h"
 #include "compat/span.h"
 #include "types/FixedString.h"
@@ -36,6 +35,15 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextRequestClosed = "Your request has been closed.";                                                    // 126
+const char *TextChannelClosed = "The channel has been closed. You need to re-join the channel if you get invited."; // 127
+
+} // namespace
 
 // The data is TCommunication's (Communication.h, issue #105), in the original's order with its addresses.
 

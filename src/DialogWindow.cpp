@@ -25,7 +25,6 @@
 #include "Preferences.h"
 #include "Skins.h"
 #include "Surface.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "GUI.h"
 #include "common.h"
 

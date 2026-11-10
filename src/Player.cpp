@@ -25,7 +25,6 @@
 #include "SdlFrame.h"
 #include "Status.h"
 #include "Surface.h"
-#include "Text.h"
 #include "Utils.h"
 #include "sysinc.h"
 #include "common.h"
@@ -42,6 +41,17 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+// 116: the first sentence of the original's text (Patella-Modern issue #74, decision D2: there is no error file).
+// The original went on: "\r\n\r\nA detailed error report has been written to the error file which\r\nyou are asked
+// to submit at your next login." 117 and 118, the error report dialog's texts, are gone with that dialog.
+const char *TextCriticalError = "The Tibia client encountered a critical error and had to be stopped.";
+
+} // namespace
 
 namespace {
 

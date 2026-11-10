@@ -41,7 +41,6 @@
 #include "Status.h"
 #include "Surface.h"
 #include "Talk.h"
-#include "Text.h"
 #include "sysinc.h"
 #include "GUI.h"
 #include "common.h"
@@ -55,6 +54,26 @@
 #include <cstring>
 #include "vulkan/DeviceSettings.h"
 #include "vulkan/DeviceChoice.h"
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextCharacterListLoading = "Your character list is being loaded. Please wait."; // 109
+const char *TextConnectingGameWorld = "Connecting to the game world. Please wait.";         // 110
+const char *TextWaitForCharacterList = "Please wait for your character list.";              // 111
+const char *TextLinkCopyWarning =                                                           // 114
+	"Warning!\n"
+	"You are about to copy a link. Keep in mind that unofficial\n"
+	"websites may be used to hack your account! Continue?";
+const char *TextNeverGiveAccount = // 115
+	"Warning!\n"
+	"Never give your account number or your password to anybody!\n"
+	"Not even gamemasters or CipSoft members will need this data.\n"
+	"People asking you for this information are trying to hack you!";
+const char *TextRuleViolations = "Rule Violations"; // 145
+
+} // namespace
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
 // the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,

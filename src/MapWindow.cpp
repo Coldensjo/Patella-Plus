@@ -31,7 +31,6 @@
 #include "Status.h"
 #include "Surface.h"
 #include "Talk.h"
-#include "Text.h"
 #include "Utils.h"
 #include "graphics.h"
 #include "GUI.h"
@@ -44,6 +43,15 @@
 #include <sstream>
 #include <cstddef>
 #include <cstring>
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextReceiveHint = "Receive hint";                           // 51
+const char *TextSelectPlayerToTrade = "Select a player to trade with."; // 125
+
+} // namespace
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
 // the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,

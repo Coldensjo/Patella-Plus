@@ -11,8 +11,6 @@
 
 #include "GUI.h"
 #include "Skins.h"
-#include "Status.h" // IWYU pragma: keep (uses nothing from it, but GUI.obj has its LinkPattern copy)
-#include "Text.h"   // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "sysinc.h"
 #include "Help.h"
 #include "common.h"

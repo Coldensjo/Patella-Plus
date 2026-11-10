@@ -38,7 +38,6 @@ const char *TextUseCpuDevice = "CPU (compatibility): draw without the graphics c
 #include "Status.h"
 #include "Surface.h"
 #include "Talk.h"
-#include "Text.h"
 #include "Utils.h"
 #include "DialogElements.h"
 #include "GUI.h"
@@ -50,6 +49,81 @@ const char *TextUseCpuDevice = "CPU (compatibility): draw without the graphics c
 #include "graphics.h"
 #include <cstddef>
 #include <memory>
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextAccountNumber = "Account number:";                                                                          // 58
+const char *TextPassword = "Password:";                                                                                     // 59
+const char *TextNoAccountYet = "If you don't have\nan account yet:";                                                        // 60
+const char *TextSelectCharacter = "Select character:";                                                                      // 61
+const char *TextTryingToReconnect = "Trying to reconnect in %d %s.";                                                        // 62
+const char *TextSetNumberOfItems = "Set the number of\nitems you want to move:";                                            // 63
+const char *TextChooseOutfit = "Choose an outfit and determine the colours of the various\nparts of your character's body"; // 64
+const char *TextSelectChannel = "Select a channel:";                                                                        // 65
+const char *TextOpenPrivateChannel = "Open a private message channel:";                                                     // 66
+const char *TextEnterCharacterName = "Please enter a character name:";                                                      // 67
+const char *TextStateRuleViolation =                                                                                        // 68
+	"Please state the rule violation in one\n"
+	"clear sentence and wait for a reply\n"
+	"from a gamemaster.\n"
+	"Please note that your message will\n"
+	"disappear if you close this channel.";
+const char *TextReportBugsOnly = "Please use this dialog only to report bugs.\nDo not report rule violations here!"; // 69
+const char *TextSelectType = "Select a type:";                                                                       // 70
+const char *TextEnterCharacterName2 = "Please enter a character name:";                                              // 71
+const char *TextEnterShortDescription = "Enter a short description:";                                                // 72
+const char *TextClientInfo = "Click here to get\ninfo on the client.";                                               // 77
+const char *TextShowPreviousHints = "Show previous hints";                                                           // 78
+const char *TextAskTutor = "Ask a tutor for help";                                                                   // 79
+const char *TextReportRuleViolations = "Report rule violations";                                                     // 80
+const char *TextReadManual = "Read the manual on\nthe website";                                                      // 81
+const char *TextReadFAQ = "Read the FAQ on\nthe website.";                                                           // 82
+const char *TextAvailableHints = "Available hints:";                                                                 // 83
+const char *TextChangeGeneralOptions = "Change general\ngame options";                                               // 84
+const char *TextChangeGraphicsOptions = "Change graphics and\nperformance settings";                                 // 85
+const char *TextCustomiseConsole = "Customise the console";                                                          // 86
+const char *TextChangeNetworkSettings = "Change network settings";                                                   // 87
+const char *TextEditHotkeys = "Edit your hotkey texts";                                                              // 88
+const char *TextShowMotD = "Show the most recent\nMessage of the Day";                                               // 89
+const char *TextAdvancedSettings = "Advanced settings";                                                              // 92
+const char *TextAvailableResolutions = "Available resolutions:";                                                     // 93
+const char *TextAvailableHotkeys = "Available hotkeys:";                                                             // 95
+const char *TextEditHotkeyText = "Edit hotkey text:";                                                                // 96
+const char *TextClientVersion = "Patella\nVersion 7.72";                                                             // 97
+const char *TextOfficialWebsite = "Official Website";                                                                // 98
+const char *TextCharactersToIgnore = "Characters you wish to ignore:";                                               // 99
+const char *TextGlobalIgnoreSettings = "Global settings for ignoring messages:";                                     // 100
+const char *TextCharactersToAllow = "Characters you allow to message you:";                                          // 101
+const char *TextGlobalAllowSettings = "Global settings for allowing messages:";                                      // 102
+const char *TextEnterOneNamePerLine = "Enter one name per line.";                                                    // 103
+const char *TextItIsEmpty = "It is empty.";                                                                          // 104
+const char *TextItIsCurrentlyEmpty = "It is currently empty.";                                                       // 105
+const char *TextYouReadTheFollowing = "You read the following.";                                                     // 106
+const char *TextYouCanEnterNewText = "You can enter new text.";                                                      // 107
+const char *TextYouReadWrittenBy = "You read the following, written by";                                             // 108
+const char *TextSelectType2 = "Select a type:";                                                                      // 112
+const char *TextEnterShortDescription2 = "Enter a short description:";                                               // 113
+const char *TextRequestAlreadySubmitted = "You have already submitted a request. Please close the current request."; // 121
+const char *TextNoPrivateChannelWithYourself = "You cannot set up a private message channel with yourself.";         // 123
+const char *TextNoPlayerName = "No playername given.";                                                               // 128
+const char *TextNoReason = "No reason has been selected.";                                                           // 129
+const char *TextNoAction = "No action has been selected.";                                                           // 130
+const char *TextNoComment = "You must enter a comment.";                                                             // 131
+const char *TextNoStatement = "No statement has been selected.";                                                     // 132
+const char *TextCannotReportStatement = "You cannot report this statement.";                                         // 133
+const char *TextTibiaURL = patella::buildconfig::LinkWebsite;                                                        // 135
+const char *TextManualURL = patella::buildconfig::LinkManual;                                                        // 136
+const char *TextFAQURL = patella::buildconfig::LinkFAQ;                                                              // 137
+const char *TextOptionsURL = patella::buildconfig::LinkOptionsHelp;                                                  // 138
+const char *TextGraphicsOptionsURL = patella::buildconfig::LinkGraphicsHelp;                                         // 139
+const char *TextAdvancedGraphicsURL = patella::buildconfig::LinkGraphicsHelp;                                        // 140
+const char *TextConsoleOptionsURL = patella::buildconfig::LinkConsoleHelp;                                           // 141
+const char *TextNetworkOptionsURL = patella::buildconfig::LinkNetworkHelp;                                           // 142
+const char *TextSignupURL = patella::buildconfig::LinkSignup;                                                        // 144
+
+} // namespace
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
 // the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
@@ -717,6 +791,16 @@ TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 	ProgressBar->SetMaximum(Timeout);
 	ProgressBar->SetCurrent(0);
 	Arrange();
+}
+
+void TReconnectWindow::SetTime(int Time)
+{
+	if (Time > 600) {
+		const int Minutes = Time / 600 + 1;
+		MsvcSnprintf(Text, sizeof(Text), TextTryingToReconnect, Minutes, Minutes < 2 ? "minute" : "minutes");
+	} else {
+		MsvcSnprintf(Text, sizeof(Text), TextTryingToReconnect, Time / 10, Time / 10 < 2 ? "second" : "seconds");
+	}
 }
 
 void TReconnectWindow::Draw(int Surface, int x, int y)

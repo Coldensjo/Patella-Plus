@@ -36,16 +36,25 @@
 #include "Status.h"
 #include "Surface.h"
 #include "Talk.h"
-#include "Text.h"
 #include "graphics.h"
 #include "DialogWindow.h"
 #include "GUI.h"
+#include "BuildConfig.h"
 #include "common.h"
 
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
 #include <utility>
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextNoBugReportRight = "You are not authorised to send bug reports."; // 124
+const char *TextAccountURL = patella::buildconfig::LinkAccount;                   // 143
+
+} // namespace
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
 // the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):

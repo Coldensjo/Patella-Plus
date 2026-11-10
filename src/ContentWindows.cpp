@@ -22,7 +22,6 @@
 #include "Skins.h"
 #include "Status.h"
 #include "Surface.h"
-#include "Text.h"
 #include "Utils.h"
 #include "graphics.h"
 #include "DialogElements.h"
@@ -40,6 +39,59 @@
 #include <cstring>
 #include <memory>
 #include <vector>
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextPoisoned = "You are poisoned";                                  // 0
+const char *TextOnFire = "You are on fire";                                     // 1
+const char *TextMagicShield = "You are protected by a magic shield";            // 2
+const char *TextParalysed = "You are paralysed";                                // 3
+const char *TextHasted = "You are hasted";                                      // 4
+const char *TextNoLogoutInFight = "You may not logout during a fight";          // 5
+const char *TextDrunk = "You are drunk";                                        // 6
+const char *TextStruckByEnergy = "You are struck by magical energy";            // 7
+const char *TextMayBeAttacked = "You may be attacked by other players";         // 8
+const char *TextPartyMember = "You are a member of a party";                    // 9
+const char *TextAttackedUnmarked = "You have attacked an unmarked player";      // 10
+const char *TextKilledTooMany = "You have killed too many unmarked players";    // 11
+const char *TextMaximiseInventory = "Maximise inventory";                       // 20
+const char *TextMinimiseInventory = "Minimise inventory";                       // 21
+const char *TextCloseWindow = "Close this window";                              // 22
+const char *TextMaximiseOrMinimise = "Maximise or minimise window";             // 23
+const char *TextShowHigherContainer = "Show higher container";                  // 24
+const char *TextOpenSkillsWindow = "Open skills window (Ctrl+S)";               // 25
+const char *TextCloseSkillsWindow = "Close skills window (Ctrl+S)";             // 26
+const char *TextOpenBattleWindow = "Open battle window (Ctrl+B)";               // 27
+const char *TextCloseBattleWindow = "Close battle window (Ctrl+B)";             // 28
+const char *TextOpenVIPWindow = "Open VIP window (Ctrl+P)";                     // 29
+const char *TextCloseVIPWindow = "Close VIP window (Ctrl+P)";                   // 30
+const char *TextLeaveGame = "Leave the game (Ctrl+Q or Ctrl+L)";                // 31
+const char *TextCentreAroundPlayer = "Centre around player";                    // 32
+const char *TextShowHigherFloor = "Show higher floor (Alt+PageUp)";             // 33
+const char *TextShowLowerFloor = "Show lower floor (Alt+PageDown)";             // 34
+const char *TextZoomIn = "Zoom in (Alt+End)";                                   // 35
+const char *TextZoomOut = "Zoom out (Alt+Home)";                                // 36
+const char *TextScrollAutomap = "Scroll automap (Alt+Cursor)";                  // 37
+const char *TextOffensiveFighting = "Offensive fighting";                       // 38
+const char *TextBalancedFighting = "Balanced fighting";                         // 39
+const char *TextDefensiveFighting = "Defensive fighting";                       // 40
+const char *TextStandWhileFighting = "Stand while fighting";                    // 41
+const char *TextChaseOpponent = "Chase opponent";                               // 42
+const char *TextCannotAttackUnmarked = "You cannot attack unmarked characters"; // 43
+const char *TextCanAttackAny = "You can attack any character";                  // 44
+const char *TextStopCurrentAction = "Stop current action (ESC)";                // 45
+const char *TextOpenOptions = "Open options";                                   // 46
+const char *TextOpenHelpMenu = "Open help menu";                                // 47
+const char *TextCancelOffer = "Cancel offer";                                   // 48
+const char *TextRejectOffer = "Reject offer";                                   // 49
+const char *TextAcceptOffer = "Accept offer";                                   // 50
+const char *TextPercentToGo = "You have %d percent to go";                      // 52
+const char *TextWaitForCounterOffer = "Please wait for a\ncounteroffer";        // 56
+const char *TextWaitForPartner = "Please wait for \nyour partner to accept.";   // 57
+
+} // namespace
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
 // the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,

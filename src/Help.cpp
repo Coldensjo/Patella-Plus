@@ -9,7 +9,6 @@
 #include "Help.h"
 #include "BuildConfig.h"
 #include "Preferences.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "common.h"
 #include "types/FixedString.h"
 #include <cstring>

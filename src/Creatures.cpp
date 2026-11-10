@@ -15,7 +15,6 @@
 #include "Map.h"
 #include "Objects.h"
 #include "Preferences.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "sysinc.h"
 #include "common.h"
 #include "platform/Platform.h"

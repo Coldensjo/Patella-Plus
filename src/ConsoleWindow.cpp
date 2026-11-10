@@ -18,7 +18,6 @@
 #include "Status.h"
 #include "Surface.h"
 #include "Talk.h"
-#include "Text.h"
 #include "Utils.h"
 #include "graphics.h"
 #include "compat/crt71.h"
@@ -36,6 +35,31 @@
 #include <cstdio>
 #include <memory>
 #include <type_traits>
+
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextCloseChannel = "Close this Channel (Ctrl+E)";                                  // 12
+const char *TextShowServerMessages = "Show server messages in this channel (Ctrl+M)";          // 13
+const char *TextHideServerMessages = "Hide server messages in this channel (Ctrl+M)";          // 14
+const char *TextIgnorePlayers = "Ignore and unignore other players (Ctrl+I)";                  // 15
+const char *TextOpenNewChannel = "Open new channel (Ctrl+O)";                                  // 16
+const char *TextAdjustVolume = "Adjust volume";                                                // 17
+const char *TextMoveChannelsRight = "Move channels to the right";                              // 18
+const char *TextMoveChannelsLeft = "Move channels to the left";                                // 19
+const char *TextWaitForGamemaster = "Please wait patiently for a gamemaster to reply.";        // 119
+const char *TextRequestSubmitted = "You have already submitted a request. Please be patient."; // 120
+const char *TextHelpChannelWelcome =                                                           // 122
+	"Welcome to the help channel! Feel free to ask questions concerning client controls, "
+	"general game play, use of accounts and the official homepage. In-depth questions about "
+	"the content of the game will not be answered. Experienced players will be glad to help "
+	"you to the best of their knowledge. Keep in mind that this is not a chat channel for "
+	"general conversations. Therefore please limit your statements to relevant questions and "
+	"answers.";
+const char *TextReportRuleViolation = "Report Rule Violation"; // 146
+
+} // namespace
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
 // the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
