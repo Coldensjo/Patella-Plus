@@ -1,5 +1,5 @@
-# The editor settings of the repository (issue #8): tabs of four columns, LF line ends (as
-# .gitattributes stores them), UTF-8. The C++ style itself is .clang-format.
+# The editor settings of the repository: tabs of four columns, LF line ends (as .gitattributes
+# stores them), UTF-8. The C++ style itself is .clang-format.
 root = true
 
 [*]
@@ -20,8 +20,8 @@ end_of_line = crlf
 indent_style = space
 indent_size = 2
 
-# Markdown: list continuations are indented with spaces, as the notes have them; a line break at
-# the end of a line is two trailing spaces.
+# Markdown: list continuations are indented with spaces; a line break at the end of a line is two
+# trailing spaces.
 [*.md]
 indent_style = space
 indent_size = 2

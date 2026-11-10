@@ -1,14 +1,12 @@
-# The code style of src/ (issue #8; notes/decisions.md, "Compiler settings, warnings and code style
-# (issue #8)"): the style the reconstruction was written in. clang-format 22 (Visual Studio's
-# VC\Tools\Llvm\x64\bin), checked with
+# The code style of src/. clang-format 22 (Visual Studio's VC\Tools\Llvm\x64\bin), checked with
 #	clang-format --dry-run --Werror <files>
-# src/Extern keeps its own style (.clang-format-ignore).
+# (python -I tools/source_check.py format runs it on the changed sources). src/Extern keeps its own style
+# (.clang-format-ignore).
 #
 # The arguments of PATELLA_ASSERT*, TERROR* and TMYEXCEPTION are stringized into the exception messages:
-# clang-format leaves them exactly as written (WhitespaceSensitiveMacros). The list names every such
-# macro of src/, the local ones of single files included; a new one is added here. Until issue #76
-# (November 5, 2026) the oracle's tests compared those messages (notes/modernization-plan.md, 4.2, retired);
-# the list stays, so that a reformat does not change the client's messages by the way.
+# clang-format leaves them exactly as written (WhitespaceSensitiveMacros), so that a reformat does not
+# change the client's messages. The list names every such macro of src/, the local ones of single files
+# included; a new one is added here.
 Language: Cpp
 BasedOnStyle: LLVM
 Standard: Latest
@@ -44,7 +42,7 @@ AllowShortEnumsOnASingleLine: true
 PointerAlignment: Right
 ReferenceAlignment: Pointer
 
-# Trailing comments (the addresses and offsets of the original) are aligned over consecutive lines.
+# Trailing comments are aligned over consecutive lines.
 AlignTrailingComments:
   Kind: Always
   OverEmptyLines: 0
@@ -59,15 +57,8 @@ KeepEmptyLines:
   AtStartOfBlock: true
   AtStartOfFile: true
 
-# PATELLA_TEST_IDLE and the other PATELLA_TEST_ statements (src/TestHooks.h) are the test mode's calls,
-# nothing at all outside the test build.
 StatementMacros:
   - PATELLA_MSVC_WARNING
-  - PATELLA_TEST_IDLE
-  - PATELLA_TEST_RSA_BLOCK
-  - PATELLA_TEST_PACKET_SENT
-  - PATELLA_TEST_PACKET_RECEIVED
-  - PATELLA_TEST_FRAME_OBSERVERS
 WhitespaceSensitiveMacros:
   - PATELLA_ASSERT
   - PATELLA_ASSERT_VALUES
