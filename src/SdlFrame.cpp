@@ -27,7 +27,6 @@
 #include "Network.h"
 #include "Preferences.h"
 #include "Status.h"
-#include "Surface.h"
 #include "common.h"
 #include "compat/span.h"
 #include "log/Log.h"
@@ -1182,8 +1181,7 @@ void SetDisplayMode(int ViewMode)
 		Redraw(false);
 		SDL_SetWindowFullscreen(Window, true);
 		SDL_SyncWindow(Window);
-		if (patella::bridge::GraphicsEngine().curEngine == ENGINE_DIRECTX9)
-			Resize(0, 0);
+		Resize(0, 0);
 	} else {
 		SetFrameStyle(0, WS_EX_APPWINDOW | WS_EX_CLIENTEDGE);
 		Redraw(false);

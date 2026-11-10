@@ -213,26 +213,11 @@ void patella::TGUI::Redraw(bool Force)
 			SkinProperties().TooltipFont, Tooltip);
 	}
 	if (ShowFPS) {
-		TFixedString<4> Engine; // _snprintf(Engine, 4, "DX5") until issue #64: three characters and the NUL
-		switch (patella::bridge::GraphicsEngine().curEngine) {
-		case ENGINE_DIRECTX5:
-			Engine.Assign("DX5");
-			break;
-		case ENGINE_OPENGL:
-			Engine.Assign("OGL");
-			break;
-		case ENGINE_DIRECTX9:
-			Engine.Assign("DX9");
-			break;
-		default:
-			Engine.Assign("<?>");
-			break;
-		}
 		const double FPS = GetSurface()->GetFPS();
 		TFixedString<64> Text;
 		// Stays _snprintf: printf's %f and std::format's differ for NaN ("-nan(ind)"), and a rate with more
 		// than 10 digits fills the 20 characters (no NUL), which the type would cut (issue #64).
-		MsvcSnprintf(Text, 20, "%s %.02f fps", Engine.Chars, FPS);
+		MsvcSnprintf(Text, 20, "DX9 %.02f fps", FPS);
 		const TRGBColor Color = {200, 200, 200};
 		PrintText(1, 4, 4, FONT_BORDERED, Color, Text, 0);
 	}

@@ -2501,10 +2501,10 @@ void TGraphicsOptionsDialog::KeyPress(int Key)
 }
 
 // OK stores the selected mode and switches the display mode when the
-// fullscreen setting changed (to fullscreen only with a selected mode); the
-// OpenGL engine (2) is resized for fullscreen. Advanced (407) closes and
-// opens the advanced options and this dialog again; Help (701) keeps it
-// open.
+// fullscreen setting changed (to fullscreen only with a selected mode); with
+// fullscreen checked the windows are then arranged for the screen's size.
+// Advanced (407) closes and opens the advanced options and this dialog again;
+// Help (701) keeps it open.
 void TGraphicsOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -2515,7 +2515,7 @@ void TGraphicsOptionsDialog::HandleEvent(int Event)
 		if ((ViewMode == 2) != FullscreenChecked
 			&& (!Fullscreen->IsChecked() || ResolutionList->GetSelection() != -1))
 			SetDisplayMode(Fullscreen->IsChecked() + 1);
-		if (patella::bridge::GraphicsEngine().curEngine == ENGINE_DIRECTX9 && Fullscreen->IsChecked())
+		if (Fullscreen->IsChecked())
 			patella::bridge::GUI().Resize(0, 0); // Control.cpp's (issues #107, #118)
 	} else if (Event == EVENT_OPTIONS_ADVANCED) {
 		AddMessageFirst(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
@@ -2529,9 +2529,9 @@ void TGraphicsOptionsDialog::HandleEvent(int Event)
 
 // --- TAdvancedGraphicsDialog ------------------------------------------------------
 
-// Fullscreen allows no engine switch; otherwise the engines the surface
-// reports are enabled and the current one selected (curEngine 0 DirectX
-// 5, 1 OpenGL, 2 DirectX 9).
+// Fullscreen allows no change of the graphics device; otherwise the GPU
+// button needs a GPU and the CPU button the CPU driver. ShowDevice selects
+// the button of the device choice.
 TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *URL), TComponent *_Receiver)
 {
 	OpenURL = _OpenURL;
@@ -2592,27 +2592,13 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 			DirectX9Button->SetEnabled(false);
 		if (GetCpuDriverManifest().empty())
 			OpenGLButton->SetEnabled(false);
-		switch (patella::bridge::GraphicsEngine().curEngine) {
-		case ENGINE_DIRECTX5:
-			EngineGroup->Selected = DirectX5Button;
-			break;
-		case ENGINE_OPENGL:
-			EngineGroup->Selected = OpenGLButton;
-			break;
-		case ENGINE_DIRECTX9:
-			EngineGroup->Selected = DirectX9Button;
-			break;
-		default:
-			break;
-		}
 	}
 	ShowDevice();
 	Arrange();
 }
 
-// The x64 client (issue #31): the device choice's button selected, after the original's selection of
-// the current engine's (curEngine is always 2 there), and the line above the buttons naming the device
-// in use, when that changed.
+// The device choice's button selected, and the line above the buttons naming the device in use, when
+// that changed.
 void TAdvancedGraphicsDialog::ShowDevice()
 {
 	switch (patella::vulkan::ButtonOf(GetDeviceChoice())) {
@@ -2638,8 +2624,8 @@ void TAdvancedGraphicsDialog::ShowDevice()
 	DeviceLabel->SetText(Text, true);
 }
 
-// Draws the frame rate texts over the children and shows the current
-// engine as selected.
+// Draws the frame rate texts over the children and shows the device
+// choice's button as selected and the device in use (ShowDevice).
 void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 {
 	TWindow::Draw(Surface, x, y);
@@ -2654,19 +2640,6 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 	Text.Format("Current framerate: {:2.2f}", FPS);
 	PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.x + x, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.y + y,
 		SkinProperties().Dialog.TextFont, Text);
-	switch (patella::bridge::GraphicsEngine().curEngine) {
-	case ENGINE_DIRECTX5:
-		EngineGroup->Selected = DirectX5Button;
-		break;
-	case ENGINE_OPENGL:
-		EngineGroup->Selected = OpenGLButton;
-		break;
-	case ENGINE_DIRECTX9:
-		EngineGroup->Selected = DirectX9Button;
-		break;
-	default:
-		break;
-	}
 	ShowDevice();
 }
 

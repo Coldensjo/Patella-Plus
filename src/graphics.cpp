@@ -604,8 +604,7 @@ void patella::TGraphics::InsertVideoItem(int Position, int HashValue)
 	VideoHashTable[HashValue] = Position;
 }
 
-// OpenGL and DirectX 9 (engines 1 and 2) get the colour key of the slot's
-// surface first.
+// The slot's surface gets the sprite's colour key first.
 TVideoCacheItem *patella::TGraphics::GetVideoSprite(int SpriteNumber)
 {
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
@@ -616,8 +615,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoSprite(int SpriteNumber)
 		Position = LeastRecentVideoItem;
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemorySprite(SpriteNumber);
-		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
-			GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
+		GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
 		GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
 		Item.Type = SPRITE_ITEM;
 		Item.Number = SpriteNumber;
@@ -640,8 +638,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoMaskedSprite(int SpriteNumber, int 
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemorySprite(SpriteNumber);
 		const TMemoryCacheItem *Mask = GetMemorySprite(MaskNumber);
-		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
-			GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
+		GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
 		GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, Mask->Data,
 			Colors);
 		Item.MaskNumber = MaskNumber;
@@ -668,13 +665,11 @@ TVideoCacheItem *patella::TGraphics::GetVideoPicture(int PictureNumber, int Tile
 		Position = LeastRecentVideoItem;
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemoryPicture(PictureNumber, TileX, TileY);
-		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9) {
-			// NOLINTNEXTLINE(bugprone-branch-clone): the original's two identical branches (both the previous picture's key)
-			if (Pictures[PictureNumber].ColorKey != TRGBColor(1, 1, 1))
-				GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
-			else
-				GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
-		}
+		// NOLINTNEXTLINE(bugprone-branch-clone): the original's two identical branches (both the previous picture's key)
+		if (Pictures[PictureNumber].ColorKey != TRGBColor(1, 1, 1))
+			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
+		else
+			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
 		GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
 		Item.Tile.TileY = TileY;
 		Item.TileX = TileX;
@@ -702,8 +697,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoFontChar(int FontNumber, int TileX,
 		const TMemoryCacheItem *Tile = GetMemoryPicture(PictureNumber, TileX, TileY);
 		std::array<TRGBColor, 4> Colors = {Color, Pictures[PictureNumber - 1].ColorKey, TRGBColor(0, 0, 0),
 			TRGBColor(0, 0, 0)};
-		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
-			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
+		GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
 		GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, nullptr,
 			Colors.data());
 		Item.TileX = TileX;
