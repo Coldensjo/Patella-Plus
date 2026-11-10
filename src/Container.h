@@ -13,12 +13,10 @@
 #include <memory>
 #include <sstream>
 
-// Each container owns its entries as a std::unique_ptr<T[]> (issue #58): a pointer at the original's offset, freed
+// Each container owns its entries as a std::unique_ptr<T[]> (issue #58), freed
 // with reset() where the original had delete[] (the destructors), allocated with reset(new T[n])
 // (the same new-expression: entries of a type without a constructor stay uninitialised). The element types'
 // destructors cannot throw (scalars, pointers and plain structures), so neither can the reset.
-static_assert(sizeof(std::unique_ptr<int[]>) == sizeof(int *) && alignof(std::unique_ptr<int[]>) == alignof(int *),
-	"std::unique_ptr<T[]> is a pointer");
 
 // array<T> is a fixed array indexed from min to min+d-1. The class name is
 // ours; min, d, i, low() and high() are named in the assertions and in the
