@@ -1,6 +1,6 @@
-// EntryLinux.cpp: the Linux client's entry point (EntryWin32.cpp's counterpart). The golden tests, which have main, do
-// not compile it. The command line is passed on as WinMain's was (one string, joined with spaces, for InitInstance's
-// tokens), and the words (--data, the test mode's) as the list of platform::Arguments.
+// EntryLinux.cpp: the Linux client's entry point (EntryWin32.cpp's counterpart). The command line is passed on as
+// WinMain's is (one string, joined with spaces, for InitInstance's tokens), and the words (--data) as the list of
+// platform::Arguments.
 
 #include "Player.h"
 #include "common.h"

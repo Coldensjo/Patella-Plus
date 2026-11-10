@@ -1,11 +1,9 @@
-// Clock.h: IClock, the platform's clocks. Not part of the original source. Portable: no platform header.
+// Clock.h: IClock, the platform's clocks. Portable: no platform header.
 //
 // The client reads three clocks: timeGetTime (sysinc.cpp's GetMilliseconds and the seed of rand, the frame timer), the
 // wall clock (time, 64 bits: the talk lines' stamps, the skull times, the saved channels) and the frame timer's Sleep
-// (WaitForNextFrame). Every one goes through the process's IClock (platform/Platform.h):
-//
-//	TWin32Clock    timeGetTime, time and Sleep (platform/Win32Platform.h): Patella.exe's, and the golden runner's
-//	TVirtualClock  the test mode's clock of a scripted run: the test build's with --test-script
+// (WaitForNextFrame). Every one goes through the process's IClock (platform/Platform.h): TWin32Clock
+// (platform/Win32Platform.h) on Windows, TLinuxClock (platform/LinuxPlatform.cpp) on Linux.
 
 #pragma once
 

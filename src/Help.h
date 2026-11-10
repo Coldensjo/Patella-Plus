@@ -1,6 +1,4 @@
 // Help.h: the help bubble of the help mode and the event helps (hints).
-// Names are ours except EVENTHELPS, Handle, Number and Name, which are in
-// the assertions and catch strings.
 
 #pragma once
 

@@ -1,21 +1,20 @@
 // SurfaceVulkan.cpp: the Vulkan engine's surface on the client's window (SurfaceVulkan.h).
 //
-// Every function follows its counterpart in surfaceDX9.cpp (the comments name it), with the Direct3D 9
-// calls replaced: ColorFill by TRenderer::Fill, the dynamic vertex buffer by TRenderer::Draw, LockRect by
-// TRenderer::Upload, ApplyColorKey's read-back by TRenderer::ReplaceColor, Present by TRenderer::Present.
-// The state surfaceDX9.cpp keeps in file statics (the current target and texture numbers, the colour
-// keys, the queued vertices, the frame counter) is kept the same way, so it outlives the surface
-// object as there. Not new code paths for the error reports: no PATELLA_ASSERT (an index out of range is
-// ignored), and the Vulkan back end's failures become PROGRAM_ERROR 12, as Direct3D's device failures.
+// Every function follows its counterpart in the original's Direct3D 9 engine, surfaceDX9.cpp (the comments name it),
+// with the Direct3D 9 calls replaced: ColorFill by TRenderer::Fill, the dynamic vertex buffer by TRenderer::Draw,
+// LockRect by TRenderer::Upload, ApplyColorKey's read-back by TRenderer::ReplaceColor, Present by TRenderer::Present.
+// The state surfaceDX9.cpp keeps in file statics (the current target and texture numbers, the colour keys, the queued
+// vertices, the frame counter) is kept the same way, so it outlives the surface object as there. No PATELLA_ASSERT
+// (an index out of range is ignored), and the Vulkan back end's failures become PROGRAM_ERROR 12, as Direct3D's
+// device failures.
 //
 // The window system (vulkan/WindowSystem.h): the main window's client area, the screen's size and each device's
 // surface come from SDL3 (SDL_Vulkan_CreateSurface). Still Win32: the devices' own windows (PresentWindow.h). The
 // fullscreen display mode is the platform's IWindow::SetFullscreenMode (SDL3's SDL_SetWindowFullscreenMode on every
 // system).
 //
-// Headless (platform/Window.h IWindow::Headless, the test build's --test-headless): the device gets no surface
-// (TRenderer renders into its images and presents nothing), and fullscreen mode does not change the display's mode.
-// The devices' windows are made as always.
+// Headless (platform/Window.h IWindow::Headless): the device gets no surface (TRenderer renders into its images and
+// presents nothing), and fullscreen mode does not change the display's mode. The devices' windows are made as always.
 
 #include "common.h"
 #include "vulkan/SurfaceVulkan.h"

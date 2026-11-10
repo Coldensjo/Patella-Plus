@@ -1,9 +1,8 @@
 // compat/win32_types.h: the types and constants of the Windows API that the client's own code names, for where there is
-// no <windows.h> (the golden runner's stand-ins, tests/golden/linux/windows.h, which includes this file; the Linux
-// client's platform layer, PATELLA_WIN32_TYPES of common.h). Types and constants only: no function is declared here,
-// so a Windows call that was missed fails the Linux client's build instead of linking to nothing. The types have the
-// Windows x64 sizes (LONG and DWORD 4 bytes, where Linux's long has 8; the handles and the *_PTR types 8), the
-// constants the Windows SDK's values.
+// no <windows.h>: the Linux client (PATELLA_WIN32_TYPES of common.h). Types and constants only: no function is
+// declared here, so a Windows call that was missed fails the Linux client's build instead of linking to nothing. The
+// types have the Windows x64 sizes (LONG and DWORD 4 bytes, where Linux's long has 8; the handles and the *_PTR types
+// 8), the constants the Windows SDK's values.
 
 #pragma once
 

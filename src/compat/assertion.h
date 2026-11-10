@@ -1,26 +1,25 @@
-// assertion.h: PATELLA_ASSERT, the client's assertions. Not part of the original source.
+// assertion.h: PATELLA_ASSERT, the client's assertions.
 //
-// - PATELLA_ASSERT(Expression): when the expression is false, throws the TMyException the old macros threw:
+// - PATELLA_ASSERT(Expression): when the expression is false, throws a TMyException:
 //   "<file> <line>: assertion failed, reason:\n<Expression>", with the expression's source text.
 // - PATELLA_ASSERT_VALUES(Expression, Value1[, Value2]): the same with one or two values in the message,
 //   "<file> <line>: assertion failed (<Value1's text> = <value>)[ (<Value2's text> = <value>)], reason:\n...", each
-//   value converted to int (static_cast) as the old macros' (int) cast did.
+//   value converted to int (static_cast).
 // - PATELLA_DIVISOR(Value): an integer divisor from input; zero throws a TMyException instead of trapping (at the end
 //   of this file).
 //
-// The expression is evaluated exactly once, the values only when it is false (after it, in an unspecified order, as
-// the old macros' arguments were). The file and line are the assertion's own (std::source_location::current()), no
-// longer the original's line. Each is an expression of type void, so it is one statement anywhere a statement fits
-// (an if without braces, an else: no dangling else), and nothing is compiled out in any build: assertions on packets
-// and files stay checked.
+// The expression is evaluated exactly once, the values only when it is false (after it, in an unspecified order).
+// The file and line are the assertion's own (std::source_location::current()). Each is an expression of type void,
+// so it is one statement anywhere a statement fits (an if without braces, an else: no dangling else), and nothing is
+// compiled out in any build: assertions on packets and files stay checked.
 //
-// Not contract_assert, on any compiler: the outcome of a failed assertion must stay a TMyException (the golden corpus
-// compares the kind), and a contract assertion gives it only through a throwing replaceable violation handler, one
+// Not contract_assert, on any compiler: the outcome of a failed assertion must stay a TMyException (the client's
+// handlers catch that), and a contract assertion gives it only through a throwing replaceable violation handler, one
 // for the whole program (CONTRACT_ASSERT's, compat/cxx26.h, would throw too), whose semantic a compiler flag changes
 // (ignore compiles the check out), which may evaluate the predicate more than once, and in which GCC 16.2 cannot tell
 // a predicate that threw from a false one.
 //
-// The location is a std::source_location. The failure functions are TMyException.cpp's.
+// The failure functions are TMyException.cpp's.
 
 #pragma once
 

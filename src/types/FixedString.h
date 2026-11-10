@@ -1,6 +1,5 @@
 // FixedString.h: TFixedString<N>, the client's fixed text buffers (char[N]) with bounded writes, and
-// TStringBuffer, the same writes into a buffer the code has only a pointer to and knows the size of. Not part of
-// the original source.
+// TStringBuffer, the same writes into a buffer the code has only a pointer to and knows the size of.
 //
 // TFixedString<N> is exactly char[N]: its only member is that array, so it has the array's size and alignment
 // (1), it is standard layout, trivially copyable and an aggregate (no constructor: a local is as uninitialised as

@@ -13,14 +13,6 @@
 // edit line (TEditContextMenu), of an automap point (TMarkContextMenu) and of
 // the skill window (TSkillContextMenu). Every click or Escape ends the action
 // state, and Control.cpp deletes the menu.
-//
-// Names from the binary: the members LookedObject,
-// LookedObjectX, UsedObjectX, UsedObjectY, LastEntry and the parameter names
-// in the assertions and catch blocks (HelpText, Text, Shortcut, Event,
-// Surface, Width, Height, x, y, Key, CreatureID, _CharacterID, _TextWindow,
-// _LineNumber, _ConsoleWindow, _Edit, _Data, _SkillsWindow, TextBuffer). The
-// class names (those of Control.cpp's earlier sketches) and the other names
-// are ours.
 
 #pragma once
 

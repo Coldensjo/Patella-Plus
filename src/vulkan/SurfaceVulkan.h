@@ -1,15 +1,13 @@
-// SurfaceVulkan.h: the Vulkan engine's surface on the client's window.
+// SurfaceVulkan.h: the Vulkan engine's surface on the client's window, the client's only engine (Surface.cpp).
 //
-// TSurfaceVulkan does what surfaceDX9.cpp's TSurfaceDX9 does, call for call, the reference engine of the frames: the
+// TSurfaceVulkan does what the original's Direct3D 9 engine did (surfaceDX9.cpp's TSurfaceDX9), call for call: the
 // same surfaces and sizes, the same batching of quads (drawn when the texture or the target changes, when 9,600
-// vertices are queued, and at the end of the frame), the same colour fills, uploads, colour key and light, and the
-// same statistics. Instead of Direct3D 9 it drives the Vulkan back end (Renderer.h); the display modes come from the
-// platform's list (SDL3's), in the order and with the filter DirectDraw 4 gave surfaceDX9.cpp. Windows x64 client only
-// (cmake/Vulkan.cmake).
+// vertices are queued, and at the end of the frame), the same colour fills, uploads, colour key and light. Instead of
+// Direct3D 9 it drives the Vulkan back end (Renderer.h); the display modes come from the platform's list (SDL3's), in
+// the order and with the filter DirectDraw 4 gave surfaceDX9.cpp.
 //
-// The engine is the x64 client's only engine (Surface.cpp). Its device is the graphics device choice of
-// DeviceSettings.h: the advanced options' buttons, Patella.ini's Device, PATELLA_VULKAN. Its window system (the client
-// area, the screen, the surfaces) is SDL3's, vulkan/WindowSystem.h.
+// Its device is the graphics device choice of DeviceSettings.h: the advanced options' buttons, Patella.ini's Device,
+// PATELLA_VULKAN. Its window system (the client area, the screen, the surfaces) is SDL3's, vulkan/WindowSystem.h.
 
 #pragma once
 

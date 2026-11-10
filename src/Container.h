@@ -1,10 +1,6 @@
-// Container.h: CipSoft's container templates (c:\mud\tibiaplayer\Container.h).
-//
-// The assertion texts and line numbers come from the binary's
-// instances; member names other than space and block are ours.
-//
-// The original file's growable vector<T> is TIndexedVector<T> of src/types/IndexedVector.h, the same semantics over a
-// std::vector.
+// Container.h: the fixed containers array<T>, matrix<T> and matrix3d<T>, arrays of one, two and three dimensions that
+// are indexed from a minimum and check every index in operator(). The growable vector that belongs with them is
+// TIndexedVector<T> (src/types/IndexedVector.h).
 
 #pragma once
 

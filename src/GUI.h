@@ -1,13 +1,6 @@
-// GUI.h: the window system's base classes, timers, hotkeys and the skin
-// properties (c:\mud\tibiaplayer\GUI.h; GUI.cpp is .\GUI.cpp).
-//
-// Names from the binary: SkinProperties and the member paths in its
-// assertions (PlayerStates.NumberOfIcons, BuddylistWindow.Logo,
-// Buttons.Texture, CheckBox.Item, StatusWindow.HitpointsBar/ManaBar),
-// DrawingList (and DrawingListLength, skin, srcx, srcy from an error text),
-// Parent, FirstChild, Capture, GetWidth, GetHeight, OffsetX/OffsetY (from
-// the parameters _OffsetX/_OffsetY), Width, Height and the parameter names.
-// The class names and the other member names are ours.
+// GUI.h: the window system's base classes (TComponent, TElement, TWindow),
+// the names of the modifier flags and key codes, the timers, the hotkeys, and
+// TGUI, which holds the GUI's state.
 
 #pragma once
 

@@ -1,4 +1,4 @@
-// Events.h: the numbers of the message queue and of the windows' events, named. Not part of the original source.
+// Events.h: the numbers of the message queue and of the windows' events, named.
 //
 // MESSAGE_* are the Type of AddMessage and AddMessageFirst (Status.cpp), which Control.cpp's ProcessEvents handles.
 // MESSAGE_NONE and MESSAGE_STARTPATCHER, the original's names, are in Status.h. Type 1, a message box, stays a number.

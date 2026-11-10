@@ -1,4 +1,5 @@
-// TMyException.cpp: reconstructed from Tibia.exe 7.72. The constructors' formatting is ErrorText's (TMyException.h).
+// TMyException.cpp: TMyException, the texts of its messages (ErrorText), and the functions that make the exceptions of
+// the error macros and the assertions (TMyException.h).
 
 #include "TMyException.h"
 #include "compat/assertion.h"

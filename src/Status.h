@@ -1,9 +1,7 @@
-// Status.cpp: the client's shared state. Account, character list and
-// connection state; the message queue that the network code and the GUI use
-// to talk to the main loop; mouse and drag state; the player's rights; the
-// clipboard link check.
-//
-// Names are ours unless a comment says they come from the binary.
+// Status.h: the client's shared state (Status.cpp). Account, character list
+// and connection state; the message queue that the network code and the GUI
+// use to talk to the main loop; mouse and drag state; the player's rights;
+// the clipboard link check.
 //
 // The session (the connection state, the account, the character list, the rights) is TSession's, which TCommunication
 // owns (Communication.h); the free functions of the original's names are the bridge that the callers use until they

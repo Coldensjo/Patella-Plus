@@ -1,15 +1,6 @@
-// DialogWindow.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The columns of content windows (TDialogWindow), their base class
-// (TContentWindow) and the windows with a body and a frame (TSubWindow); see
-// DialogWindow.h. The object opens with six functions without exception
-// frames or line evidence; they stay at the start, where the binary has them.
-// GetFrameHeight and TContentWindow's constructor are called by
-// ContentWindows.obj, which comes earlier in the link order, so they are not
-// inline header code (a header copy would have been kept from that object).
-// The other functions follow in line order. The binary moves four of them to
-// the end of the object (Arrange, Shrink, Grow, Rearrange): each calls a
-// function defined further down.
+// DialogWindow.cpp: the columns of content windows (TDialogWindow), their
+// base class (TContentWindow) and the windows with a body and a frame
+// (TSubWindow); see DialogWindow.h.
 //
 // A column lays its children out from the top of Area, each as wide as the
 // column. Rearrange is called after every change with a strategy: when a

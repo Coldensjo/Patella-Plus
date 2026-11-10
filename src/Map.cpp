@@ -1,11 +1,4 @@
-// Map.cpp: the map points and their objects, the effects, the automap and
-// the path finder (c:\mud\tibiaplayer\Map.cpp).
-//
-// Functions in source order (assertion and catch lines). The functions of the
-// MainWindow/Map gap (the map position and the ambient
-// light) have no line evidence and come first, where the binary has them.
-//
-// Names: see Map.h.
+// Map.cpp: the map points and their objects, the effects, the automap and the path finder.
 
 #include "Map.h"
 #include "Objects.h"

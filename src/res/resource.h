@@ -1,7 +1,5 @@
-// Resource IDs of Patella (Tibia 7.72 client), the values of Tibia.exe's .rsrc section.
-// The names are ours; the original resource.h is not known. Only the client's own
-// resources are named here: the MFC resources in Patella.rc keep their numbers (their
-// afxres.h names are in comments there), so this header never clashes with afxres.h.
+// Resource IDs of Patella, the values of Tibia.exe's .rsrc section: the client's icon and its
+// two cursors (Patella.rc). The names are ours; the original's resource.h is not known.
 
 #ifndef PATELLA_RESOURCE_H
 #define PATELLA_RESOURCE_H

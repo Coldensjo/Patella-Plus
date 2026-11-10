@@ -1,14 +1,6 @@
-// Script.cpp: reconstructed from Tibia.exe 7.72.
+// Script.cpp: the tokenizer of script files (Tibia.cfg) and the reading and writing of binary files.
 //
-// The script-file tokenizer and binary file access; the patching of the data files
-// with patches from the login server is gone. In line order, which is also binary
-// order, except that the compiler placed readString of TReadBinaryFile and the
-// readIdentifier, readNumber, readString and readSymbol helpers (no line evidence)
-// after InstallPatch (gone). readString is here in line order; the helpers stay at
-// the end, where the binary has them.
-//
-// Most errors are TERRORs thrown at the start of a function. The original's catch wrappers (common.h) around the calls
-// to other members are gone.
+// Most errors are TERRORs thrown at the start of a function.
 
 #include "Script.h"
 #include "compat/msvc_io.h"

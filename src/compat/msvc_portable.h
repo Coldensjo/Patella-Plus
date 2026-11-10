@@ -1,7 +1,5 @@
 // msvc_portable.h: the Microsoft CRT's semantics of compat/msvc.h written with the C library, for the platforms
-// without the Microsoft CRT. Not part of the original source. compat/msvc.h includes it off Windows, where its
-// Msvc* functions are these; tests/unit/core_msvc_test.cpp includes it everywhere and holds it against the
-// Microsoft functions on Windows. The client's Windows translation units do not include it (compat/msvc.h says why).
+// without the Microsoft CRT. compat/msvc.h includes it off Windows, where its Msvc* functions are these.
 
 #pragma once
 

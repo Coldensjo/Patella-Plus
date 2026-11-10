@@ -1,9 +1,5 @@
-// MapWindow.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The map view (TMapWindow) and its frame (TMapFrame); see MapWindow.h. The inline
-// members of TMapWindow (destructor, minimum size, IsFieldVisible, SetLightColor)
-// are in the header. The functions follow in line order; TMapFrame::Arrange has no
-// line evidence and stays at the end, where the binary has it.
+// MapWindow.cpp: the map view (TMapWindow) and its frame (TMapFrame); see
+// MapWindow.h.
 //
 // The drawing works on two surfaces: 2 is the map surface (480x352, the
 // visible 15x11 fields of the 18x14 map), 4 the cache of 16x12 field tiles.
@@ -13,9 +9,6 @@
 // animated ones directly onto the map surface after the tiles below them were
 // blitted (FlushField). Light sources add up in Light[][], which is drawn
 // last as shaded rectangles or as darkness tiles of picture 7.
-//
-// The functions here have no handlers apart from AddLightSource's, which names
-// the object whose flag could not be read.
 
 #include "MapWindow.h"
 #include "Communication.h"

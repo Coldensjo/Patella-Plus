@@ -1,7 +1,5 @@
-// Preferences.cpp: the options stored in Tibia.cfg by the original, in Patella.ini by the x64 client. The option names
-// in the comments are the keys that the Tibia.cfg loader uses, which give the names of the globals.
-//
-// Names are ours unless a comment says they come from the binary.
+// Preferences.h: the options, stored in Tibia.cfg by the original and in Patella.ini by this client (Preferences.cpp).
+// The option names in the comments are the keys that the Tibia.cfg loader uses, which give the names of the members.
 //
 // The data is TPreferences', which TClient owns (Client.h); the free functions of the original's names are the bridge
 // that the callers use until they hold the object (bridge::Preferences(), defined in Client.cpp).

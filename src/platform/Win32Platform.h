@@ -1,11 +1,7 @@
-// Win32Platform.h: the Win32 implementations of the platform's interfaces (platform/Platform.h). Not part of the
-// original source.
-//
-// The code behind each is what the client called itself before, call for call: timeGetTime, time and Sleep (the
-// clock). The file system is the portable TDataFileSystem (platform/FileSystem.h); the network is NetworkSocket(),
-// below. Also the input (GetCursorPos, SetTimer, KillTimer: MainFrm.cpp's and Player.cpp's) and the desktop's windows
-// (MessageBoxA, EnumWindows: Player.cpp's). The SDL3 window's clipboard and desktop are SDL3's
-// (platform/SdlPlatform.h), and these the golden runner's; the display's modes are SDL3's alone.
+// Win32Platform.h: the Win32 implementations of the platform's interfaces (platform/Platform.h): the clock, and what
+// the SDL3 window's input and desktop take from Win32 (the cursor's position on the screen, the other top-level
+// windows). The rest of the Windows client's platform is portable: TDataFileSystem (platform/FileSystem.h),
+// NetworkSocket() and the SDL3 window's input, clipboard and desktop (platform/Process.h, platform/SdlPlatform.h).
 
 #pragma once
 

@@ -1,5 +1,4 @@
-// PortableSocket.cpp: TPortableSocket, the platform's network over Winsock or POSIX sockets (PortableSocket.h). Not
-// part of the original source.
+// PortableSocket.cpp: TPortableSocket, the platform's network over Winsock or POSIX sockets (PortableSocket.h).
 
 #include "platform/PortableSocket.h"
 

@@ -1,26 +1,18 @@
 // msvc.h: the Microsoft C runtime's and compiler's own spellings that the client uses, behind portable
-// names. Not part of the original source.
+// names.
 //
 // Each name keeps the semantics of the Microsoft function it stands for, not those of the similar standard or
 // POSIX function: MsvcSnprintf is _snprintf (no NUL when the text fills the buffer, -1 when it does not fit),
 // not snprintf. On Windows (MSVC, and mingw-w64, whose CRT is Microsoft's) each name is the Microsoft
-// function itself (a macro: below, "On Windows"), so the images do not change; elsewhere (Linux) a
-// function with the same semantics from the C and POSIX libraries. The pure ones (formatting, comparison,
-// copy) are in compat/msvc_portable.h, which this header includes only off Windows and
-// tests/unit/core_msvc_test.cpp on every platform, so that the test holds them against the Microsoft
-// functions on Windows and against the same expected values everywhere.
+// function itself (a macro: below, "On Windows"); elsewhere (Linux) a function with the same semantics from
+// the C and POSIX libraries, in compat/msvc_portable.h, which this header includes only off Windows.
 //
 // Not here, the Windows platform's own spellings, which stay where they are: the Windows API with its
 // calling conventions (WINAPI, CALLBACK, APIENTRY on callbacks and imports), the Windows SDK's and the
-// CRT's configuration macros (_CRT_SECURE_NO_WARNINGS, _WINSOCK_DEPRECATED_NO_WARNINGS, WIN32_LEAN_AND_MEAN),
-// the CRT's file functions behind types/File.h's TFile (fopen as _fsopen, _fileno, the test mode's UTF-16 names
-// with _wfopen_s) and sysinc.cpp's #pragma comment(lib, "winmm.lib") (Windows-only code: timeGetTime, the
-// clipboard).
+// CRT's configuration macros (_CRT_SECURE_NO_WARNINGS, _WINSOCK_DEPRECATED_NO_WARNINGS, WIN32_LEAN_AND_MEAN)
+// and the CRT's file functions behind types/File.h's TFile (fopen as _fsopen, _fileno, the UTF-16 names).
 //
-// The descriptor function of <io.h> (_eof) is in compat/msvc_io.h, which only the files that use
-// them include, where they included <io.h> before: <io.h> included through common.h makes MSVC x64 emit the
-// <charconv> digit table std::_Digit_pairs<char> first among an object's constants, which moves it in the x64
-// images (measured).
+// The descriptor function of <io.h> (_eof) is in compat/msvc_io.h, which only the files that use it include.
 
 #pragma once
 

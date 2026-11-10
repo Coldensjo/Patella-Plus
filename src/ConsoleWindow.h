@@ -1,4 +1,4 @@
-// ConsoleWindow.h: the console below the map (c:\mud\tibiaplayer\ConsoleWindow.h).
+// ConsoleWindow.h: the console below the map.
 //
 // TConsoleWindow is MainWindow.cpp's Console: a tab bar (TTabBar) with one tab
 // (TTab) per open channel, the view of the current channel (TConsole: a
@@ -7,16 +7,6 @@
 // bytes) that fit its width, with a selection. Tabs that do not fit into the bar
 // are moved into two hidden windows of the bar (LeftTabs, RightTabs), whose arrow
 // buttons scroll them back in.
-//
-// Names from the binary: TLineFormat's LineText and its constructor's
-// parameters (_TextLine, _LineText, _LineLength, _OriginalOffset, _Indent),
-// GetFirstLineNumber, GetLastLineNumber, _CurrentLineNumber, InvisibleLines
-// (an error message), GetTextBuffer, IsDefault, GetCaption, CurrentConsole,
-// CurrentTab, DefaultTab, NewTab, Input, TextBuffer, _Caption, _TextBuffer,
-// _Active, Tab, Container ("failed to get composite"), Search, Question,
-// Addressee, ChannelID, TalkMode, MessageSeparator and the catch-block
-// parameters (Surface, x, y, Width, Height, Code, Event, Key, LineNumber,
-// Active, RecvMode, SendMode). The class names and the other names are ours.
 
 #pragma once
 

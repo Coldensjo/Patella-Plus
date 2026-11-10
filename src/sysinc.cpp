@@ -1,10 +1,5 @@
-// sysinc.cpp: reconstructed from Tibia.exe 7.72.
-//
-// System helpers: the millisecond clock, file checks, the PROGRAM_ERROR
-// texts, the clipboard with its buffer, and half of the encoded window title
-// and class name. The functions without line evidence come first, in binary
-// order; they use only this file's data. The asserted functions follow in
-// line order.
+// sysinc.cpp: system helpers: the millisecond clock, file checks, the PROGRAM_ERROR texts, the clipboard with its
+// buffer, and half of the encoded window title and class name.
 
 #include "sysinc.h"
 #include "BuildConfig.h"

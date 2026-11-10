@@ -1,5 +1,4 @@
-// CursorImage.h: a monochrome cursor resource as the bitmaps of a monochrome SDL cursor. Not part of the original
-// source. Portable: no platform header.
+// CursorImage.h: a monochrome cursor resource as the bitmaps of a monochrome SDL cursor. Portable: no platform header.
 //
 // The client's own cursors (resources 0x84 and 0x89, the crosshair and the magnifier: cursor_132.cur, cursor_137.cur of
 // the extracted resources) are 32x32 monochrome cursors. An RT_CURSOR resource is the hot spot (two 16-bit numbers)

@@ -1,5 +1,4 @@
-// WindowSystemSdl.cpp: the Vulkan engine's window system on the SDL3 window (WindowSystem.h). Not part of the original
-// source.
+// WindowSystemSdl.cpp: the Vulkan engine's window system on the SDL3 window (WindowSystem.h).
 //
 // The main window is SdlFrame.cpp's SDL_Window, which the client knows by its native handle (TWindowHandle, the HWND
 // on Windows: TGUI's, TNetwork's and the surface's window); the window system finds the SDL_Window of a handle among

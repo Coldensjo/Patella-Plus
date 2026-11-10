@@ -1,7 +1,7 @@
-// Win32Platform.cpp: the Win32 implementations of the platform's interfaces (platform/Win32Platform.h). Not part of
-// the original source: each function is the call the client made itself before (sysinc.cpp's timeGetTime, the wall
-// clock's time, the frame timer's Sleep; MainFrm.cpp's and Player.cpp's GetCursorPos, SetTimer, KillTimer, MessageBoxA
-// and EnumWindows), with the same arguments.
+// Win32Platform.cpp: the Win32 implementations of the platform's interfaces (platform/Win32Platform.h), the Windows
+// side of the SDL3 window's input (TSdlLoopInput) and the Windows client's Platform(). Each function of the Win32
+// classes is the call the original made itself (timeGetTime, time, Sleep, GetCursorPos, SetTimer, KillTimer,
+// MessageBoxA, EnumWindows), with the same arguments.
 
 #include "platform/Win32Platform.h"
 

@@ -1,9 +1,9 @@
-// Skins.cpp: rectangles of the GUI graphics (file name inferred), and SkinProperties, the window graphics' positions,
-// sizes, colours and fonts (GUI.cpp's global, which InitSkinProperties fills).
+// Skins.h: the skins, rectangles of the GUI graphics (their table and the names of their numbers), and SkinProperties,
+// the window graphics' positions, sizes, colours and fonts, which GUI.cpp's InitSkinProperties fills.
 //
-// TSkins: Skins.cpp's data and SkinProperties, a part of TGraphics (graphics.h), declared here and defined in
-// Skins.cpp, as TSession is Status.cpp's inside TCommunication. Portable (patella_core): the bridge accessor and the
-// original's free functions are the client's (graphics.cpp), since patella_core has no TClient.
+// TSkins holds both: a part of TGraphics (graphics.h), declared here and defined in Skins.cpp, as TSession is
+// Status.cpp's inside TCommunication. Portable (patella_core): the bridge accessor and the free functions are the
+// client's (graphics.cpp), since patella_core has no TClient.
 
 #pragma once
 

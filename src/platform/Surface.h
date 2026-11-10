@@ -1,21 +1,12 @@
 // Surface.h: TSurface, the platform's drawing surface. Portable: no platform header.
 //
-// TSurface is the original's base class of the graphics engines (Surface.cpp): the client draws
-// through it (graphics.cpp, the window files, Control.cpp) and the engine implements it. It moved here from
-// src/Surface.h with its slots, their order and their default bodies (still Surface.cpp's code, at its addresses),
-// so that the engine is a platform implementation behind it:
-//
-// 	TSurfaceVulkan   the Vulkan engine (vulkan/SurfaceVulkan.h): Patella.exe's and the test build's; its surfaces are
-// 	                 SDL_Vulkan_CreateSurface's (vulkan/WindowSystem.h)
-// 	the golden tests' recording surfaces (tests/golden: testsurface.h, commworld.cpp's)
+// TSurface is the original's base class of the graphics engines: the client draws through it (graphics.cpp, the
+// window files, Control.cpp) and the engine implements it. The engine is the Vulkan one, TSurfaceVulkan
+// (vulkan/SurfaceVulkan.h); the bodies of the functions that are not pure are in Surface.cpp.
 //
 // No Win32 type in it: the window is a TWindowHandle (platform/Window.h), ClipRect's rectangles a TEdgeRect (RECT's
 // four edges). What the engine shares with the client (the cache surfaces' size, the main window) is a TSurfaceShared
-// that the surface's creator passes to its constructor (TGraphicsEngine, src/Surface.h), instead of the client's
-// accessor (bridge::GraphicsEngine()).
-//
-// The names from the binary: hWindow, ViewMode, the surface and mode constants (SurfaceDX.cpp's and surfaceDX9.cpp's
-// assertions), TestEngine, InitSurfaces and ExitSurfaces (the original ChangeEngine's error messages); the rest are ours.
+// that the surface's creator passes to its constructor (TGraphicsEngine, src/Surface.h).
 
 #pragma once
 

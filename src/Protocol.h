@@ -1,5 +1,4 @@
 // Protocol.h: the numbers of the Tibia 7.72 protocol, named, so that a change of the protocol is made in one place.
-// Not part of the original source.
 //
 // A packet starts with one byte, its type. The two servers and the two directions each have their own numbers, so
 // one value can have several names here:

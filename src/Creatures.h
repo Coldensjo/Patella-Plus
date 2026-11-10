@@ -1,15 +1,6 @@
 // Creatures.h: the creatures known to the client, the player's own data
 // (statistics, skills, attack/follow targets, the steps of the current walk)
 // and the VIP list ("buddies").
-//
-// Names from the binary: GetCreature, GetPlayerID and GetPlayerPartyFlag
-// (assertion texts in ContextMenus.cpp and ConsoleWindow.cpp), CreatureID
-// (catch blocks of the TCreature members), NumberOfPlayerSteps,
-// CurrentPlayerStep, NumberOfBuddies, BUDDIES, SKILLS, Opponent, and the
-// parameter names in the assertions and catch blocks (Step, NewCreatureID,
-// AvailablePhases, Flag, Progress, SkillNumber, Value, Number, Position,
-// CharacterID, Name, Description, Method, NewDirection, i, j). The rest is
-// ours.
 
 #pragma once
 

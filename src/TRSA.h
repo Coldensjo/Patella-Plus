@@ -1,6 +1,4 @@
-// TRSA: RSA encryption with a public key, used for the login packet. The
-// original file name is unknown; "TRSA" fits the alphabetical link order
-// (after TMyException, before TXTEA). Errors are thrown as const char*.
+// TRSA.h: RSA encryption with a public key, used for the login packet. Errors are thrown as const char*.
 
 #pragma once
 

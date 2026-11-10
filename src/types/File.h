@@ -1,4 +1,4 @@
-// File.h: TFile, the client's open files (the C library's FILE *) with an owner. Not part of the original source.
+// File.h: TFile, the client's open files (the C library's FILE *) with an owner.
 //
 // TFile holds a FILE *, its only member. It closes its file when it is destroyed, it
 // moves but does not copy, and it compares with nullptr (and NULL) as the pointer did, so the conditions the
@@ -19,11 +19,11 @@
 //	  stream whose write function adds the '\r' and writes to the descriptor (POSIX has no text mode). The FILE
 //	  itself translates, so every write (Write, Print) and every flush point is the same as on Windows.
 //	  Reading in text mode is refused (false, errno EINVAL): the client reads only binary files.
-// Open is fopen with the original's sharing on Windows (_fsopen with _SH_DENYNO, which is what fopen calls);
-// the UTF-16 name overload of the Windows-only test mode is _wfopen_s, as its callers had (not shared).
-// The name is the client's text, Windows-1252 (types/Cp1252.h): on Windows it is opened by its
-// UTF-16 name (_wfsopen, the same sharing), so it no longer depends on the system's ANSI code page (where that is
-// 1252 the file is the same); elsewhere by its UTF-8 name. An ASCII name is the same file everywhere.
+// Open is fopen with the original's sharing on Windows (_fsopen with _SH_DENYNO, which is what fopen calls); the
+// wchar_t name overload is _wfopen_s (not shared). The name is the client's text, Windows-1252 (types/Cp1252.h): on
+// Windows it is opened by its UTF-16 name (_wfsopen, the same sharing), so it does not depend on the system's ANSI
+// code page (where that is 1252 the file is the same); elsewhere by its UTF-8 name. An ASCII name is the same file
+// everywhere.
 
 #pragma once
 

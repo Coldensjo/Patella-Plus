@@ -1,12 +1,4 @@
-// Inventory.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The body slots, open containers and trade offers. The functions without line evidence
-// come where the binary has them: four at the start and InitInventory before
-// ResetInventory. The others are in line order; the compiler placed
-// InsertContainerObject last.
-//
-// Most functions assert before doing anything and have no try block; the original's catch wrappers (common.h) around
-// the calls to other functions of this file are gone.
+// Inventory.cpp: the player's body slots, the open containers and the trade offers, as the server last sent them.
 
 #include "Inventory.h"
 #include "Objects.h"

@@ -1,6 +1,6 @@
-// WindowIconLinux.cpp: the Linux client's window icon through SDL3. Not part of the original source. On X11 SDL writes
-// the window's _NET_WM_ICON property; on Wayland it needs the compositor's xdg_toplevel_icon_v1 protocol and fails
-// without it, which is logged and changes nothing else.
+// WindowIconLinux.cpp: the Linux client's window icon through SDL3. On X11 SDL writes the window's _NET_WM_ICON
+// property; on Wayland it needs the compositor's xdg_toplevel_icon_v1 protocol and fails without it, which is logged
+// and changes nothing else.
 
 #include "platform/WindowIcon.h"
 

@@ -1,15 +1,12 @@
 // Script.h: reading script files (Tibia.cfg), reading and writing binary files.
 //
 // The class, member and token names follow CipSoft's game server, whose
-// TReadScriptFile has the same tokenizer (the binary names its state variable
-// "State", as the server does). The client's version reads a single file (no
-// #include) and has a smaller string buffer. The names are not in the client
-// binary.
+// TReadScriptFile has the same tokenizer. The client's version reads a single
+// file (no #include) and has a smaller string buffer.
 //
 // The constructors, destructors and close() functions are defined here. The
 // FILE * members are TFiles (types/File.h): fopen, fclose and the reads and
-// writes with an owner, the same bytes. Each class's TryOpen returns open's
-// failures.
+// writes with an owner. Each class's TryOpen returns open's failures.
 
 #pragma once
 

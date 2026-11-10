@@ -12,9 +12,8 @@
 //   without a constructor keeps the memory's bytes, one with a constructor runs it). std::vector's own allocator
 //   value-initialises (zeros an int), so the storage has its own allocator, TArrayNewAllocator.
 //
-// The members are the original's, in its order and with its names (the Container test compares min ... init, with their
-// padding, by the original's offsets; the storage, the original's T *entry, is the last member). The members are
-// initialised with braces: <windows.h>'s min and max macros take a parenthesis after the name.
+// The members are the original's, in its order and with its names; the storage, the original's T *entry, is the last
+// member. The members are initialised with braces: <windows.h>'s min and max macros take a parenthesis after the name.
 
 #pragma once
 

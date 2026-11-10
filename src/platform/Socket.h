@@ -1,19 +1,13 @@
-// Socket.h: ISocket, the platform's network. Not part of the original source. Portable: no platform header.
+// Socket.h: ISocket, the platform's network. Portable: no platform header.
 //
 // TNetwork (Network.cpp) has one connection at a time, to the login server or the game server, and resolves the
-// login servers' names. What it asked of WinSock and of MFC's CAsyncSocket it asks of the process's ISocket
-// (platform/Platform.h), call for call: the same calls, in the same order, with the same arguments, so the golden
-// Network test's fakes of WinSock and CAsyncSocket see what they saw.
+// login servers' names. What the original asked of WinSock and of MFC's CAsyncSocket it asks of the process's ISocket
+// (platform/Platform.h), call for call: the same calls, in the same order, with the same arguments. The implementation
+// is TPortableSocket (platform/PortableSocket.h): Winsock or POSIX sockets, non-blocking, polled from the loop, the
+// name lookup on a std::jthread.
 //
-//	TPortableSocket   Winsock or POSIX sockets, non-blocking, polled from the loop, the name lookup on a std::jthread
-//	                  (platform/PortableSocket.h): Patella.exe's, and the test build's live runs'
-//	TPipeSocketWin32  the test build's server replay inside the process (PipeSocketWin32.h)
-//	TMfcSocket        MFC's CAsyncSocket and WinSock, the original's calls (tests/golden/network/MfcSocket.h): the
-//	                  golden runner's, whose Network test fakes those calls
-//
-// A connection is a TSocket, which each executable defines once (PortableSocket.h's in Patella.exe and the test build,
-// a CAsyncSocket in the golden runner); TNetwork holds it as the original held its CAsyncSocket, and the golden Network
-// test reaches its events through it. Its events go to the ISocketEvents it was made for (TNetwork).
+// A connection is a TSocket (PortableSocket.h); TNetwork holds it as the original held its CAsyncSocket. Its events go
+// to the ISocketEvents it was made for (TNetwork).
 
 #pragma once
 

@@ -1,12 +1,5 @@
-// Skins.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The file name is inferred. These two functions sit between Script.cpp and
-// Status.cpp and have no assertions; the linker placed objects in
-// alphabetical order, and the table is the one GUI.cpp asserts on as
-// "Skins[skin].width>0" and "In(skin,0,LASTSKIN-1)". It has its own init and
-// exit calls (the client's start-up function in Control.cpp calls InitSkins
-// separately from InitStatus; the shut-down function calls ExitSkins right
-// after ExitNetwork), and InitStatus and ExitStatus never touch its data.
+// Skins.cpp: the table of the skins, the rectangles of the GUI graphics in
+// Tibia.pic; see Skins.h.
 
 // common.h first, where Skins.h included it before: Skins.cpp uses nothing of it, but in the client's builds it
 // brings MFC, whose per-object statics and initialisers Skins.obj has in the image (without it Skins.obj loses

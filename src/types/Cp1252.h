@@ -1,8 +1,8 @@
-// Cp1252.h: the client's 8-bit text and Unicode. Not part of the original source.
+// Cp1252.h: the client's 8-bit text and Unicode.
 //
-// The client keeps the original's 8-bit text inside: the 7.72 protocol, Tibia.dat, Tibia.cfg and Patella.ini are in
-// Windows-1252 (Latin-1 with the printable characters of 0x80-0x9f), and so is every string of the client. Where its
-// text meets the platform, the text is converted: UTF-8 for Linux and the developer log, UTF-16 for Windows' wide
+// The client keeps the original's 8-bit text inside: the 7.72 protocol, Tibia.dat and Tibia.cfg are in Windows-1252
+// (Latin-1 with the printable characters of 0x80-0x9f), and so is every string of the client. Where its text meets
+// the platform, the text is converted: UTF-8 for Linux, Patella.ini and the developer log, UTF-16 for Windows' wide
 // functions.
 //
 //	std::string Name = patella::text::Utf8ToCp1252(Utf8);      // the platform's text into the client
@@ -17,8 +17,8 @@
 //	  of UTF-8, as Unicode's chapter 3 counts them, or a lone surrogate). The C0 controls and NUL convert as
 //	  themselves; nothing is dropped.
 //
-// Header only and without a platform header: patella_core's code, types/File.h (tests_unit) and the platform layer
-// use the same functions.
+// Header only and without a platform header: the client's code, types/File.h and the platform layer use the same
+// functions.
 
 #pragma once
 

@@ -1,21 +1,11 @@
-// Input.h: IInput, the platform's input outside the window's messages. Not part of the original source. Portable: no
-// platform header.
+// Input.h: IInput, the platform's input outside the window's events. Portable: no platform header.
 //
-// The keys, the buttons and the wheel come to the client as its window's messages (MainFrm.cpp's handlers) or, on the
-// SDL3 window, as SDL's events (SdlFrame.cpp). What it reads or starts besides goes through the process's IInput
-// (platform/Platform.h): the mouse position, polled (Player.cpp InitInstance and OnIdle, MainFrm.cpp OnSetCursor and
-// OnCaptureChanged); the main frame's 100 ms timer (MainFrm.cpp OnCreate, OnDestroy), whose ticks are input to the
-// client (ActionNumber's); the idle step before the client reads them (CPlayerApp::OnIdle); and whether a loss of the
-// mouse capture is the client's input (MainFrm.cpp OnCaptureChanged); and, on the SDL3 window, whether the desktop's
-// keyboard and mouse events are the client's input (the test build drops them with a script, as its message filter
-// drops the messages).
-//
-//	TWin32Input   GetCursorPos, SetTimer, KillTimer (platform/Win32Platform.h); the idle step does nothing and every
-//	              capture change and desktop event is input: Patella.exe's and the golden runner's (TSdlLoopInput, the
-//	              SDL3 window's: the loop's timer, GetCursorPos)
-//	TTestInput    the test mode's (TestModeWin32.cpp): with a script the virtual cursor, the driver's ticks
-//	              instead of the timer, the driver's step at each idle call, and the capture changes and the desktop's
-//	              events dropped; without one the window path's (the control channel's probe at the idle step)
+// The keys, the buttons and the wheel come to the client as SDL's events (SdlFrame.cpp). What it reads or starts
+// besides goes through the process's IInput (platform/Platform.h): the mouse position, polled (Player.cpp InitInstance
+// and OnIdle, SdlFrame.cpp); the main frame's 100 ms timer (SdlFrame.cpp), whose ticks are input to the client
+// (ActionNumber's); the idle step before the client reads them (CPlayerApp::OnIdle); whether a loss of the mouse
+// capture is the client's input; and whether the desktop's keyboard and mouse events are. The client's IInput is
+// TSdlLoopInput (platform/Process.h), for which every capture change and desktop event is input.
 
 #pragma once
 

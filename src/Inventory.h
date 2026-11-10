@@ -1,9 +1,5 @@
 // Inventory.h: the player's body slots, the open containers and the trade
 // offers, as the server last sent them.
-//
-// Names from the binary (assertions): BODY_POSITIONS, OPEN_CONTAINERS,
-// OBJECTS_PER_OFFER, Containers, IsOpen, Count, OwnOffer, CounterOffer, Pos,
-// Position, Container, Name, i. The rest are ours.
 
 #pragma once
 

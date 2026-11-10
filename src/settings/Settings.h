@@ -1,9 +1,9 @@
 // Settings.h: Patella.ini, the fork's settings file.
 //
-// It is the x64 client's only settings file: the options the original kept in Tibia.cfg
-// (settings/PreferenceKeys.h) and everything new the fork lets the user set, in the working directory. An
-// existing Tibia.cfg is imported once (Preferences.cpp InitPreferences) and never written again. The format
-// is plain `key=value`, one per line:
+// It is the client's only settings file: the options the original kept in Tibia.cfg
+// (settings/PreferenceKeys.h) and everything new the fork lets the user set. An existing Tibia.cfg is
+// imported once (Preferences.cpp InitPreferences) and never written again. The format is plain
+// `key=value`, one per line:
 //
 //	# a comment (so is a line starting with ';')
 //	Device=gpu
@@ -11,8 +11,7 @@
 // Keys are compared without regard to ASCII case; spaces and tabs around keys and values are dropped;
 // the first line with a key counts. Every other line (comments, blank lines, unknown keys, lines without
 // '=') is kept as it is when the file is written again, and so are the file's line ends (CRLF or LF, as
-// its first line has them). A parser of our own (no dependency); no platform header, so it is part
-// of patella_core and tested on every preset (tests/unit/core_settings_test.cpp).
+// its first line has them). A parser of our own (no dependency); no platform header.
 //
 // Keys today: Device (auto, gpu, gpuN, cpu), LogLevel and LogFile (log/LogSettings.h), the options of Tibia.cfg
 // (settings/PreferenceKeys.h), DataFolder (ChooseLocations below), ServerAddress, ServerPort and RsaModulus

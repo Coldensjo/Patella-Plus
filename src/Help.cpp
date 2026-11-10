@@ -1,10 +1,6 @@
-// Help.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The help system: the help bubble of the help mode (the area and handle of
-// the window under the magnifying glass, and its text), and the event helps
-// ("hints") shown at certain places and NPCs. The functions without line
-// evidence come first, in binary order, then the asserted functions in line
-// order, then GetCurrentHelpText.
+// Help.cpp: the help system: the help bubble of the help mode (the area and
+// handle of the window under the magnifying glass, and its text), and the
+// event helps ("hints") shown at certain places and NPCs.
 
 #include "Help.h"
 #include "BuildConfig.h"

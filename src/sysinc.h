@@ -1,8 +1,4 @@
 // sysinc.h: system helpers (time, files, the clipboard, error texts).
-//
-// Names from the binary: GetMilliseconds and RemoveFile were named before
-// from their use; textdata and help come from the assertions. The rest are
-// ours.
 
 #pragma once
 

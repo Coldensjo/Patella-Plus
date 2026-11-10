@@ -1,11 +1,6 @@
-// Status.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The functions without line evidence (all of them small accessors) come
-// first, in binary order; the rest follow the assertion and catch line
-// numbers, which are also their binary order.
-//
-// Of all functions here only CheckClipboardText had a try block (its catch wrapper, gone); the others have assertions
-// only.
+// Status.cpp: the client's shared state: the session (the account, the character list, the connection state, the
+// rights) and the user interaction (the action, drag, trade and use state, the mouse, the message queue, the clipboard
+// link check).
 
 #include "Status.h"
 #include "Utils.h"

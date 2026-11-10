@@ -1,8 +1,7 @@
-// EntryWin32.cpp: the Windows client's entry point. Not part of the original source, where MFC's WinMain (AfxWinMain)
-// was the entry and called CPlayerApp's InitInstance and Run. Patella.exe and the test build compile it; the golden
-// tests, which have main, do not. What AfxWinMain did that the client relies on: the program's critical errors without
-// Windows' own boxes; the command line (m_lpCmdLine); InitInstance, and Run unless InitInstance returned FALSE (the
-// exit code is then CWinApp's ExitInstance's: 0 after a start refused with one of InitInstance's boxes).
+// EntryWin32.cpp: the Windows client's entry point. It does what MFC's WinMain (AfxWinMain) did for the original and
+// the client relies on: the program's critical errors without Windows' own boxes; the command line; InitInstance, and
+// Run unless InitInstance returned FALSE (the exit code is then 0, after a start refused with one of InitInstance's
+// boxes).
 
 #include "Player.h"
 #include "common.h"

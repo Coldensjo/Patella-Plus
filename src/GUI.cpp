@@ -1,13 +1,6 @@
-// GUI.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The window system's base classes (TComponent, TElement, TWindow), skin
-// drawing, the timers, the hotkey table and the skin properties. Functions
-// without line evidence come first, in binary order (the gap before the
-// first asserted function: the compiler-generated constructors of
-// SkinProperties and its blocks, Container.h code and the small functions
-// without exception frame), then the asserted ones in line order. The
-// TComponent functions that the binary has only as inline copies in earlier
-// objects (GetNext, GetParent, ...) are in GUI.h.
+// GUI.cpp: the window system's base classes (TComponent, TElement, TWindow),
+// skin drawing, the timers, the hotkey table and the skin properties' values;
+// see GUI.h.
 
 #include "GUI.h"
 #include "Skins.h"

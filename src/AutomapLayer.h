@@ -1,6 +1,5 @@
 // AutomapLayer.h: one layer of an automap block, 256 x 256 bytes of one kind (Map.h's TAutomapBlock: the colours and
-// the speeds), owned by the layer and indexed through a std::mdspan view. Not part of the original source: the
-// original's layers were uint8 Color[256][256] and Speed[256][256], indexed [x][y].
+// the speeds), owned by the layer and indexed through a std::mdspan view.
 //
 // The bytes are in the order of the automap file (<bx><by><bz>.map), which LoadAutomapBlock and SaveAutomapBlock read
 // and write in one piece: x the slowest index, y the fastest, the byte of x, y at x * 256 + y. The view is layout_right

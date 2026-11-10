@@ -1,10 +1,9 @@
-// vlong: arbitrary-precision unsigned arithmetic for RSA.
+// vlong.h: arbitrary-precision unsigned arithmetic for RSA.
 //
 // This is George Barwood's public-domain vlong library (1999), with CipSoft's
 // changes: a virtual destructor, conversions between vlong and big-endian byte
-// arrays or decimal text, and overloads taking an integer by reference. The file
-// name "vlong" matches the link order (right after Utils). Errors are thrown as
-// const char*.
+// arrays or decimal text, and overloads taking an integer by reference. Errors
+// are thrown as const char*.
 
 #pragma once
 

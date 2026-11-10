@@ -1,13 +1,9 @@
-// Control.cpp: the client's main control flow. Graphics device changes,
-// redrawing the screen, mouse and keyboard input, the timer, the event queue
-// that opens dialogs and starts connections, the network callbacks with the
-// packet dispatcher, and start-up and shutdown of all modules.
-// Function names are ours; parameter names come from the binary's catch
-// strings ("Force", "x", "y", "Key").
+// Control.h: the client's main control flow: graphics device changes, redrawing the screen, mouse and keyboard input,
+// the timer, the event queue that opens dialogs and starts connections, the network callbacks with the packet
+// dispatcher, and start-up and shutdown of all modules.
 //
-// The functions are TGUI's members (GUI.h), defined in Control.cpp; these free functions of the original's names
-// forward to them for the callers outside TGUI (MainFrm.cpp, Player.cpp, the test mode), InitControl's callbacks and
-// the golden tests, which call and fake them by name.
+// The functions are TGUI's members (GUI.h), defined in Control.cpp; these free functions of the same names forward to
+// them for the callers outside TGUI (SdlFrame.cpp, Player.cpp, the test mode) and for InitControl's callbacks.
 
 #pragma once
 

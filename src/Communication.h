@@ -1,5 +1,4 @@
-// Communication.cpp: Tibia 7.72 protocol senders and receive handlers.
-// Parameter names and assertion identifiers follow the binary; remaining names are inferred.
+// Communication.h: the senders of the client's packets and the handlers of the server's (Tibia 7.72's protocol).
 //
 // The data is TCommunication's, which TClient owns (Client.h); the free functions of the original's names are the
 // bridge that the callers use until they hold the object (bridge::Communication(), defined in Client.cpp).

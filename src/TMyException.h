@@ -1,15 +1,9 @@
-// TMyException: the client's exception type, the only game class with RTTI. The
-// original file name is unknown ("TMyException" fits the alphabetical link
-// order, which puts this file after Talk and before TRSA, TXTEA and Utils).
+// TMyException.h: the client's exception type, a message and the source location of the site that threw it.
 //
-// A message and the source location of the site that threw it. The original's
-// two constructors took the file, the line, the kind, two named values and a
-// reason (a text, or a caught TMyException whose message became the reason and
-// whose origin was kept); their formatting is ErrorText now, the message's
-// text, and the origin ("<file> <line>" of the site that first raised the
-// error) went with error.txt's report, its only reader. The sites build the
-// exception through common.h's TMYEXCEPTION and TERROR* and
-// compat/assertion.h's PATELLA_ASSERT*, which pass their own location.
+// The original's two constructors took the file, the line, the kind, two named values and a reason (a text, or a caught
+// TMyException whose message became the reason); their formatting is ErrorText's, the message's text. The sites build
+// the exception through common.h's TMYEXCEPTION and TERROR* and compat/assertion.h's PATELLA_ASSERT*, which pass their
+// own location.
 
 #pragma once
 

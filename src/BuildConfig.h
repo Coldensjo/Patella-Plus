@@ -1,16 +1,15 @@
-// BuildConfig.h: the values a build for another server fixes at compile time, and their checks. Not part of the
-// original source.
+// BuildConfig.h: the values a build for another server fixes at compile time, and their checks.
 //
 // The values are BuildConfigDefaults.h's, or those of a developer's own copy named by the CMake option PATELLA_BUILD_CONFIG
 // (cmake/BuildConfig.cmake). Every consumer includes this header, so a value cannot skip the checks below: a bad one fails
 // the compile with a message that says what is wrong. The checks are the safety part: SDL_OpenURL is ShellExecute's default
 // verb on Windows, so a link that is a program path or a file: address would be started by a button.
 //
-// These are the only copies of the values in the product (the test build's PATELLA_LOGIN_SERVER has its own default
-// port): the login servers and port (Network.cpp), the RSA modulus (Preferences.cpp GetRsaModulus), the test server
-// (Player.cpp), the links (Dialogs.cpp, MainWindow.cpp), Info's caption (Dialogs.cpp), the site named in texts
-// (Network.cpp, Help.cpp), the bug report address (sysinc.cpp). The values are plain text in the program: someone with
-// a hex editor can still change them, and only the server can enforce anything.
+// These are the only copies of the values in the product: the login servers and port (Network.cpp), the RSA modulus
+// (Preferences.cpp GetRsaModulus), the test server (Player.cpp), the links (Dialogs.cpp, MainWindow.cpp), Info's
+// caption (Dialogs.cpp), the site named in texts (Network.cpp, Help.cpp), the bug report address (sysinc.cpp). The
+// values are plain text in the program: someone with a hex editor can still change them, and only the server can
+// enforce anything.
 //
 // Portable and C++17: nothing but the standard library.
 

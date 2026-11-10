@@ -1,21 +1,16 @@
-// FileSystem.h: IFileSystem, the platform's files. Not part of the original source. Portable: the C library and
-// std::filesystem only.
+// FileSystem.h: IFileSystem, the platform's files. Portable: the C library and std::filesystem only.
 //
 // The client's files are opened by name, a name in the client's text (Windows-1252; types/File.h): the script and
 // binary files of Script.cpp (Tibia.dat, Tibia.spr, Tibia.pic, Tibia.cfg, the automap, the options), the saved
-// channels of ConsoleWindow.cpp, and Preferences.cpp's test whether Tibia.cfg is there. Each goes through the
-// process's IFileSystem (platform/Platform.h):
+// channels of ConsoleWindow.cpp, Preferences.cpp's test whether Tibia.cfg is there, Patella.ini (settings/Settings.h)
+// and the developer log's file (log/Log.h). Each goes through the process's IFileSystem (platform/Platform.h), which
+// is TDataFileSystem: the files of the data folder (Patella.ini of the settings folder), with the original names found
+// without regard to ASCII case where asked (Linux). Until the client's start-up sets its folders
+// (settings::ChooseLocations, Player.cpp InitInstance), and wherever the data folder is the working folder, it opens
+// the working folder's files as the original did (TFile::Open, std::filesystem).
 //
-//	TDataFileSystem    the files of the data folder (Patella.ini of the settings folder), with the original names
-//	                   found without regard to ASCII case where asked (Linux): Patella.exe's, the test build's and
-//	                   the golden runner's (platform/Win32Platform.h SystemFileSystem). Until the client's start-up
-//	                   sets its folders (settings::ChooseLocations, Player.cpp InitInstance), and wherever the data
-//	                   folder is the working folder, it opens the working folder's files as the original did
-//	                   (TFile::Open, std::filesystem).
-//
-// Both are portable, so the platform's file system is the same code on every platform; what is Windows' is TFile's
-// (its UTF-16 names, _wfsopen). Settings.cpp's Patella.ini and the developer log's LogFile are the fork's own files
-// and open themselves (std::fstream, TFile): not the original's, and part of patella_core.
+// It is portable, so the platform's file system is the same code on every system; what is Windows' is TFile's (its
+// UTF-16 names, _wfsopen).
 
 #pragma once
 

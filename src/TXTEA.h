@@ -1,5 +1,4 @@
-// TXTEA: the XTEA cipher used for the session. The original file name is
-// unknown; "TXTEA" fits the alphabetical link order (after TRSA, before Utils).
+// TXTEA.h: the XTEA cipher used for the session.
 
 #pragma once
 

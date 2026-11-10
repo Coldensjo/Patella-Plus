@@ -1,14 +1,8 @@
-// Surface.cpp: reconstructed from Tibia.exe 7.72.
+// Surface.cpp: the surface object of the graphics engine, the engine's start-up, the default bodies of the base class
+// TSurface, and the data the engines share (TGraphicsEngine, Surface.h).
 //
-// The first part of the Status/SurfaceDX gap: the surface object of the
-// graphics engine, the engine's start-up, the base class TSurface, and the
-// data the engines share. The file name is
-// inferred (see Surface.h). No function has line evidence, so they are in
-// binary order.
-
-// The Windows x64 client (PATELLA_VULKAN, cmake/WindowsX64.cmake) has one engine: the Vulkan engine
-// (src/vulkan/SurfaceVulkan.h), without SurfaceDX.cpp, SurfaceGL.cpp and surfaceDX9.cpp; GetSurface and
-// SurfaceInitInstance have their own versions for it below.
+// The client has one engine, the Vulkan engine (src/vulkan/SurfaceVulkan.h): GetSurface makes its surface, and
+// SurfaceInitInstance names its window and chooses its device.
 #include "Surface.h"
 #include "types/GraphicsTypes.h"
 #include "Preferences.h"

@@ -18,9 +18,9 @@
 // class has no background brush (Player.cpp InitInstance, as the original's); TPresentWindows subclasses it
 // from the first Open to Close or the main window's end.
 //
-// Windows: the x64 client and tests_vulkan; everything runs on the window's thread. Linux: SDL3 has no child
-// windows there, so the device's window is the main window itself, and these functions keep only that state
-// (a retired device has no window to outlive); the device test's window is a hidden SDL window of its own.
+// On Windows everything runs on the window's thread. On Linux SDL3 has no child windows, so the device's
+// window is the main window itself, and these functions keep only that state (a retired device has no
+// window to outlive); the device test's window is a hidden SDL window of its own.
 
 #pragma once
 

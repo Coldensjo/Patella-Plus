@@ -1,13 +1,5 @@
 // Objects.h: the object, outfit, effect and missile properties read from
 // Tibia.dat, and their accessors.
-//
-// Names from the binary: ObjectProperties, the Entry fields in the
-// assertions (Flags, Width, Height, Layers, PatternWidth, PatternHeight,
-// PatternDepth, Phases), the flags BANK, CUMULATIVE, LIQUIDCONTAINER,
-// LIQUIDPOOL, HANG, LIGHT, SHIFT, HEIGHT, AUTOMAP and LENSHELP, CREATURE
-// (MapWindow.cpp), and the parameter names Entry, Type, Number, Flag,
-// Direction, Obj, X, Y, Layer, PatternX/Y/Z, Phase and FileName. The rest is
-// ours.
 
 #pragma once
 

@@ -1,12 +1,5 @@
-// Surface.h: the graphics engine choice and its data (TGraphicsEngine, Surface.cpp's).
-//
-// The file name Surface.cpp is inferred: the code lies between Status.cpp and
-// SurfaceDX.cpp in the alphabetical link order and is the engine-independent
-// part of the surface classes (SurfaceDX.cpp, surfaceDX9.cpp, SurfaceGL.cpp
-// derive from TSurface). The name SurfaceExitInstance is the binary's; the rest
-// are ours. TSurface itself, the engines' base class, is the platform's
-// interface (platform/Surface.h, exported here); its default bodies are still
-// Surface.cpp's.
+// Surface.h: the graphics engine choice and its data (TGraphicsEngine, Surface.cpp's). TSurface, the engines' base
+// class, is the platform's interface (platform/Surface.h, exported here); its default bodies are Surface.cpp's.
 
 #pragma once
 

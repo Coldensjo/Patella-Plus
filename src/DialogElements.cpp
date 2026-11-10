@@ -1,15 +1,5 @@
-// DialogElements.cpp: the controls of the dialogs and windows
-// (c:\mud\tibiaplayer\DialogElements.cpp); see DialogElements.h.
-//
-// Order: the functions follow the source's line numbers. The binary moves
-// most constructors and a few members that call functions defined further
-// down (the labels' constructors, TFormattedText's constructor and Arrange,
-// the buttons' constructors, TCheckBox's constructor and SetEnabled, the edit
-// lines' first constructor, LeftButtonDown, KeyPress and SetFocusGroup,
-// TEditText's Arrange, KeyPress and SetText, the scroll bars' and the list
-// boxes' constructors and several list box members, TLink's constructor) to
-// the end of the object, Creatures.cpp's pattern. Functions without line
-// evidence go where the binary has them.
+// DialogElements.cpp: the controls of the dialogs and windows; see
+// DialogElements.h.
 
 #include "DialogElements.h"
 #include <cstdint>

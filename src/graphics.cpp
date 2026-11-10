@@ -1,16 +1,8 @@
-// graphics.cpp: reconstructed from Tibia.exe 7.72.
+// graphics.cpp: sprites (Tibia.spr), pictures (Tibia.pic), the fonts cut from pictures, the memory and video caches of
+// 32x32 tiles, and the functions that draw sprites, objects, outfits, pictures and text through the engine's surface
+// (Surface.h).
 //
-// Sprites (Tibia.spr), pictures (Tibia.pic), the fonts cut from pictures, the memory and video caches of
-// 32x32 tiles, and the functions that draw sprites, objects, outfits, pictures and text through the
-// engine's surface (Surface.h). Functions in line order. Those without line evidence stay where the
-// binary has them: the three of the DialogWindow/graphics gap first, the Find functions next to the
-// other cache functions, GetTextPosition after GetFittingTextLength. The compiler placed InitFont,
-// InitFonts and GetTextWidth out of line order, DrawObject and DrawOutfit at the end.
-//
-// The original's catch wrappers (common.h) are gone; the functions here have no handlers apart from the loaders' inner
-// handlers, which turn a file error into a PROGRAM_ERROR.
-//
-// Names: see graphics.h.
+// Only the loaders catch errors: they turn a file error into a PROGRAM_ERROR.
 
 #include "graphics.h"
 #include "Objects.h"

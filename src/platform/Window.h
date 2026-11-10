@@ -1,23 +1,11 @@
-// Window.h: IWindow, the platform's windows and display. Not part of the original source. Portable: no platform
-// header.
+// Window.h: IWindow, the platform's windows and display. Portable: no platform header.
 //
-// What the client asks of the desktop besides its own window's messages: the message boxes (Player.cpp FatalError,
-// the start's two), the other top-level windows (InitInstance's count of the Tibia clients, CountTibiaWindows) and
-// the display's modes (the Graphics Options dialog's list, vulkan/SurfaceVulkan.cpp GetFullscreenModes; the desktop's
+// What the client asks of the desktop besides its own window's events: the message boxes (Player.cpp FatalError, the
+// start's two), the other top-level windows (InitInstance's count of the Tibia clients, CountTibiaWindows) and the
+// display's modes (the Graphics Options dialog's list, vulkan/SurfaceVulkan.cpp GetFullscreenModes; the desktop's
 // own, CreateSurfaces' depth check; the fullscreen mode's change, CreateSurfaces and ExitDisplay). Each goes through
-// the process's IWindow (platform/Platform.h):
-//
-//	TWin32Window     MessageBoxA, EnumWindows with GetWindowTextA and GetClassNameA (platform/Win32Platform.h): the
-//	                 golden runner's, which asks no display modes
-//	TSdlWindow       SDL3's (platform/SdlPlatform.h): SDL_ShowSimpleMessageBox; the display's modes SDL3's on every
-//	                 system; the other windows Win32's EnumWindows on Windows (SDL3 has no such call): Patella.exe's
-//	                 on the SDL3 window
-//	TTestWindow      the test mode's (TestModeWin32.cpp): with a script a box is not shown (messages.txt); only the
-//	                 process's own windows are visited; with --test-display-modes the file's modes; the rest the
-//	                 window's (TSdlWindow, as Patella.exe's; the desktop's mode too: the machine's); with
-//	                 --test-headless headless
-//
-// The frame window itself is SdlFrame.cpp's SDL3 window.
+// the process's IWindow (platform/Platform.h), which is TSdlWindow (platform/SdlPlatform.h). The frame window itself
+// is SdlFrame.cpp's SDL3 window.
 
 #pragma once
 

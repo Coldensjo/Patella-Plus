@@ -8,13 +8,6 @@
 // map surface; the map surface is copied (or stretched) to the screen.
 // TMapFrame is the window MainWindow.cpp creates: it holds the map view, keeps
 // it at an aspect ratio of 15:11 and draws the border.
-//
-// Names from the binary: MAP_WIDTH and MAP_HEIGHT ("GetWidth()<=MAP_WIDTH*32"),
-// the creature fields PKFlag and PARTYFlag, Obj, SrcObj, TradeObject, Hint,
-// Brightness, Player, Talkbox, Creatures[i], EffectNumber and the parameter
-// names in the catch blocks (Width, Height, x, y, Event, Surface, posx, posy,
-// FieldX, FieldY, SpriteNumber). The class names and everything else are
-// ours.
 
 #pragma once
 

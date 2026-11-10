@@ -1,21 +1,9 @@
-// DialogElements.h: the controls of the dialogs and windows
-// (c:\mud\tibiaplayer\DialogElements.h; DialogElements.cpp is .\DialogElements.cpp).
+// DialogElements.h: the controls of the dialogs and windows.
 //
 // Separators, resizers, frames (TBorder), texts (TLabel, TFormattedText),
 // links, icons, buttons of every kind, check boxes, edit lines (single line,
 // password, multi-line) with their focus groups, scroll bars of both
 // directions, list boxes and the progress bar.
-//
-// Names from the binary: SkinProperties.Buttons.Texture and CheckBox.Item,
-// NumberOfSkins, GetMinimumWidth/GetMinimumHeight, GetWidth/GetHeight, Text,
-// Cursor, MaxLength, FocusGroup, MemberList, Member, Active, Next, FieldWidth,
-// Lines, RadioButtonGroup, ToResize, TokenType/TokenData, maximum/current, and
-// the parameters (_ToResize, _Window, _Text, ButtonText, _Destination,
-// _Outfit, _Direction, Mask, ColorData, _ButtonUp, _ButtonDown, _MaxLength,
-// _FocusGroup, Position, insertlength, start, length, _Min, _Max, _Value,
-// _ButtonRange, Number, Key, Code, Event, Surface, x, y, Width, Height).
-// TCheckBox is named after SkinProperties.CheckBox. The other class, member
-// and function names are ours.
 
 #pragma once
 

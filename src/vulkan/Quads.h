@@ -1,10 +1,10 @@
 // Quads.h: the Direct3D 9 quads of the Vulkan engine, as Vulkan vertices.
 //
-// surfaceDX9.cpp, the reference engine, draws every copy as a textured quad: integer corners on the
-// target, texture coordinates (x + 0.5) / width of its corners, one colour per corner. Direct3D 9 puts
-// pixel centres on integer coordinates, Vulkan (and the hardware under a Direct3D 9 driver) at + 0.5.
-// ConvertQuad gives the vertices that make Vulkan compute what Direct3D 9 computes at every pixel, in
-// two ways:
+// The original's Direct3D 9 engine (surfaceDX9.cpp), whose pixels this engine reproduces, draws every
+// copy as a textured quad: integer corners on the target, texture coordinates (x + 0.5) / width of its
+// corners, one colour per corner. Direct3D 9 puts pixel centres on integer coordinates, Vulkan (and the
+// hardware under a Direct3D 9 driver) at + 0.5. ConvertQuad gives the vertices that make Vulkan compute
+// what Direct3D 9 computes at every pixel, in two ways:
 //
 // - A one-colour quad that maps texels one to one (the texture's texel centres on the pixel centres:
 //   every unscaled blit) is a copy, marked Nearest: its corners stay on whole pixels (no pixel centre
@@ -15,7 +15,7 @@
 //   are. The hardware then covers, interpolates and filters as under Direct3D 9; its filter is the
 //   device's, so these pixels are as exact as the device's bilinear filter.
 //
-// Portable C++ without Vulkan: tests_render checks it on every preset.
+// Portable C++ without Vulkan.
 
 #pragma once
 

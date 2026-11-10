@@ -1,8 +1,6 @@
 // types/GraphicsTypes.h: the value types of the drawing interface (TRect, TRGBColor, TFont and the text
-// alignments), moved here from graphics.h so that Surface.cpp (TSurface's slots take them) and Skins.h
-// (SkinProperties holds them) need them without graphics.cpp's module: the {Surface, graphics} module cycle was
-// Surface.cpp's include of graphics.h for these types. Header only, portable (patella_core's header list).
-// graphics.h exports it, so the files that include graphics.h see them as before.
+// alignments). A header of their own so that Surface.cpp (TSurface's functions take them) and Skins.h (SkinProperties
+// holds them) need them without graphics.h. Header only, portable. graphics.h exports it.
 
 #pragma once
 

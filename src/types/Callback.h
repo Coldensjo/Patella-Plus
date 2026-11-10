@@ -1,5 +1,4 @@
-// types/Callback.h: TCallback, a receiver and an event number. GUI.h exports it, so the window files see it as
-// before. Its two functions are still GUI.cpp's.
+// types/Callback.h: TCallback, a receiver and an event number. GUI.h exports it; its two functions are GUI.cpp's.
 
 #pragma once
 

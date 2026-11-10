@@ -1,21 +1,17 @@
-// Control.cpp: reconstructed from Tibia.exe 7.72.
-//
-// Functions are in original source order, which comes from the assertion and
-// catch line numbers. The binary does not keep that order: CheckSurface,
-// Redraw, ProcessEvents, ReceivePackets and InitControl come after the
-// others. The functions here have no handlers apart from their own:
-// CheckSurface's (an error of the surface becomes PROGRAM_ERROR 12),
-// ChangeDevice's (each step's error with its message) and InitControl's (a
-// PROGRAM_ERROR shuts the modules down again).
+// Control.cpp: the client's main control flow; see Control.h.
 //
 // The functions are TGUI's members (GUI.h), the data they read TGUI's and,
 // through its constructor references, TNetwork's and TCommunication's; the
-// free functions of the original's names, at the end of the file, forward to
-// them. Their calls of each other are member calls; their calls into the
-// other files (GUI.cpp's hotkeys and timers and MainWindow.cpp's
-// ExitMainWindow included, with :: where a TGUI member of the same name would
-// hide them) stay those files' free functions, which the golden Control and
-// Communication tests fake (commworld.cpp's WorldFakes).
+// free functions of the same names, at the end of the file, forward to them.
+// Their calls of each other are member calls; their calls into the other
+// files (GUI.cpp's hotkeys and timers and MainWindow.cpp's ExitMainWindow
+// included, with :: where a TGUI member of the same name would hide them) are
+// those files' free functions.
+//
+// Errors pass through the functions here, but for three that catch them:
+// CheckSurface (an error of the surface becomes PROGRAM_ERROR 12),
+// ChangeDevice (each step's error with its message) and InitControl (a
+// PROGRAM_ERROR shuts the modules down again).
 //
 // The event queue (Status.cpp, AddMessage and FetchMessage) carries a type
 // and two parameters; ProcessEvents turns each event into a dialog, a context

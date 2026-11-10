@@ -1,7 +1,8 @@
-// Log.h: the developer log. Not part of the original source.
+// Log.h: the developer log.
 //
-// A small log of our own, no library: four levels, each line written to stderr (through TConsole: the unit tests
-// capture the lines there) and, when one is open, to a log file, as "[<level>] <message>\n" (a message may hold line breaks of its own). Nothing is sent anywhere.
+// A small log of our own, no library: four levels, each line written to stderr (through TConsole) and, when one is
+// open, to a log file, as "[<level>] <message>\n" (a message may hold line breaks of its own). Nothing is sent
+// anywhere.
 //
 //	patella::log::Error("Debug Assertion 7.72 {}", Message);   // std::format's language
 //	if (patella::log::Enabled(patella::log::TLevel::Debug)) ... // work done only for a debug line
@@ -10,24 +11,22 @@
 // (a setting that could not be used), info (the default level) and debug (the diagnostics the original's error.txt
 // held: the engine, the last packet types, the last packet's first bytes and the player's position). A line is
 // written when its level is the log's level or a more severe one. The level and the file come from Patella.ini
-// (log/LogSettings.h, the x64 client: LogLevel, LogFile); without them, or where nothing reads them (the tests),
-// the log is at info and writes to stderr only.
+// (log/LogSettings.h: LogLevel, LogFile); without them the log is at info and writes to stderr only.
 //
 // The text comes from std::format, as compat/print.h's and TFile::Print's do. Nothing here throws: a message that
-// cannot be formatted (std::bad_alloc) is dropped, and a failed
-// write is ignored (a GUI client's stderr is valid only when it is redirected). The file is opened for appending, in
-// binary ('\n' line ends on every platform); stderr's own mode does the rest (the Microsoft C runtime writes "\r\n").
-// Each line is flushed at once: the next thing the fatal path does may be the end of the process.
+// cannot be formatted (std::bad_alloc) is dropped, and a failed write is ignored (a GUI client's stderr is valid only
+// when it is redirected). The file is opened for appending, in binary ('\n' line ends on every platform); stderr's
+// own mode does the rest (the Microsoft C runtime writes "\r\n"). Each line is flushed at once: the next thing the
+// fatal path does may be the end of the process.
 //
 // The messages are the client's text, Windows-1252; the lines go out in UTF-8 (types/Cp1252.h), to stderr and to the
 // file alike, so that a terminal, an editor and the Linux console show them as they are. An ASCII message is written
 // unchanged. LogFile's name is the client's text too (TFile::Open).
 //
-// The fatal path's extras for Debug builds (Player.cpp FatalError), here so that every compiler tests them:
-// CurrentStacktrace (std::stacktrace's text where the standard library has it: MSVC's, and libstdc++'s with
-// libstdc++exp, GCC 16 and Clang 23 on Linux; nothing on mingw-w64's GCC 16 and on the oracle's C++17), and
-// BreakIfDebugged (a breakpoint when a debugger is attached: IsDebuggerPresent and DebugBreak on Windows, the
-// TracerPid of /proc/self/status and SIGTRAP on Linux; nothing elsewhere).
+// The fatal path's extras for Debug builds (Player.cpp FatalError): CurrentStacktrace (std::stacktrace's text where
+// the standard library has it: MSVC's, and libstdc++'s with libstdc++exp, GCC 16 and Clang 23 on Linux; nothing on
+// mingw-w64's GCC 16), and BreakIfDebugged (a breakpoint when a debugger is attached: IsDebuggerPresent and
+// DebugBreak on Windows, the TracerPid of /proc/self/status and SIGTRAP on Linux; nothing elsewhere).
 
 #pragma once
 

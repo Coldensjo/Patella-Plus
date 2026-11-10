@@ -1,6 +1,7 @@
-// Process.h: the platform services of the process that are not interfaces of platform/Platform.h, for both systems.
-// Not part of the original source. The Linux client's platform layer (LinuxPlatform.cpp, DataLocationLinux.cpp,
-// NetworkLinux.cpp) defines them too. Win32Platform.h includes this file.
+// Process.h: the platform services of the process that are not interfaces of platform/Platform.h, for both systems:
+// the SDL3 window's input, the data files' file system, the network's socket and, on Linux, the command line. Each
+// system's platform layer defines them (Win32Platform.cpp, DataLocationWin32.cpp, NetworkWin32.cpp; LinuxPlatform.cpp,
+// DataLocationLinux.cpp, NetworkLinux.cpp).
 
 #pragma once
 

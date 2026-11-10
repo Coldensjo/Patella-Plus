@@ -1,7 +1,4 @@
-// Utils.cpp: Latin-1 character and string helpers, outfit colours, and the
-// packet buffers. Member and parameter names come from the assertion strings
-// ("data", "size", "Position", "Size", "NewSize", "s", "s1", "Destination",
-// "Source", "Text", "Buffer", "Number"); function and class names are ours.
+// Utils.h: Latin-1 character and string helpers, the outfit colours, and the packet buffers.
 
 #pragma once
 

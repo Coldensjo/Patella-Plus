@@ -1,13 +1,6 @@
-// MainWindow.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The main game window (TMainWindow), the start window shown before the
-// game (TStartWindow) and the splitter above the console (TSplitter); see
-// MainWindow.h. The functions follow in line order; those without line
-// evidence go where the binary puts them (the destructor and ExitMainWindow
-// open the object, GetConsoleWindowHeight and TSplitter::Arrange sit between
-// their neighbours by line). The binary keeps a second run of functions after
-// the splitter (KeyPress, HandleEvent, ChangeMode, OpenTrade, CloseTrade,
-// the constructor and InitMainWindow); their lines put them in between.
+// MainWindow.cpp: the main game window (TMainWindow), the start window shown
+// before the game (TStartWindow) and the splitter above the console
+// (TSplitter); see MainWindow.h.
 //
 // In the game the window is laid out in two columns: the map frame, the
 // splitter and the console on the left, the side bar (SidePanel in a frame)
@@ -17,9 +10,6 @@
 // height. Leaving a mode (ChangeMode, the destructor) stores the open
 // sub-windows of both columns in the preferences; entering the game opens
 // them again.
-//
-// The functions here have no handlers apart from Draw's, which turns an error
-// of the start window into PROGRAM_ERROR 12.
 
 #include "MainWindow.h"
 #include "ContentWindows.h"

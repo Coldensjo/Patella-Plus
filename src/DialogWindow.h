@@ -13,13 +13,6 @@
 // body (the content, made by ContentWindows.cpp), a frame of eight skins, a
 // title, an icon, the buttons "up", "minimize" and "close" and optionally
 // two resizers (DialogElements.cpp).
-//
-// Names from the binary: TDialogWindow (MainWindow.cpp's
-// "DialogWindow!=NULL" and the file name), HasContentWindow (which gives the
-// class name TContentWindow and GetContentWindow), GetBody, Body, _Body,
-// _Identifier, IsMinimized, Search, Work, DeltaHeight, Strategy and the
-// parameter names in the catch blocks (Surface, Identifier, x, y, Width,
-// Height, Event). The other names are ours.
 
 #pragma once
 

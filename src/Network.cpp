@@ -1,10 +1,8 @@
-// Network.cpp: reconstructed from Tibia.exe 7.72.
+// Network.cpp: the login server list, connecting, and the packets' framing and XTEA encryption.
 //
-// Functions are in original source order, which comes from the assertion and
-// catch line numbers. The functions without line evidence come first, as in
-// the binary. The original's catch wrappers (common.h) are gone; the
-// functions here have no handlers apart from the encryption failures'
-// (SendCommand, PrepareNextPacket, SetSymmetricKey).
+// Three functions catch errors, the encryption's (SendCommand, PrepareNextPacket, SetSymmetricKey); any other exception
+// passes to the caller.
+//
 // Wire format, from SendCommand and PrepareNextPacket:
 //   unencrypted: [u16 length][payload]
 //   encrypted:   [u16 total][XTEA([u16 length][payload][random padding to 8])]

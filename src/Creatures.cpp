@@ -1,13 +1,4 @@
-// Creatures.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The creature table, the player's statistics and walk, the battle list and
-// the VIP list. Functions in line order. Where the binary order differs: the
-// compiler emits a function only after the bodies of the functions it calls,
-// so the ones that call a function defined further down (lines 278-592,
-// InitCreatures at line 1366 and SetPosition at line 108) come after
-// ResetCreatures (line 1414) in the binary. The functions without exception
-// frame have no line evidence; they come first in the binary, before the
-// line-142 function, and keep that place and order here.
+// Creatures.cpp: the creature table, the player's statistics and walk, the battle list and the VIP list.
 
 #include "Creatures.h"
 #include "types/GraphicsTypes.h" // TRGBColor

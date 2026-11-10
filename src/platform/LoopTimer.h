@@ -1,7 +1,6 @@
-// LoopTimer.h: TLoopTimer, the main frame's timer as a check of the event loop. Not part of the original source.
-// Portable: no platform header.
+// LoopTimer.h: TLoopTimer, the main frame's timer as a check of the event loop. Portable: no platform header.
 //
-// The MFC frame's 100 ms timer is Windows' SetTimer: a WM_TIMER message, made by the message queue only when it is
+// The original's 100 ms timer was Windows' SetTimer: a WM_TIMER message, made by the message queue only when it is
 // otherwise empty, and at most one at a time (ticks that come due while one waits are not queued: no backlog). The
 // SDL3 window's loop asks Due once per pass instead, with the platform's clock (IClock::Milliseconds, a 32-bit
 // millisecond count that wraps): true once Interval milliseconds have passed since the last tick (or the start), and

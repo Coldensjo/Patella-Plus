@@ -8,15 +8,6 @@
 // MemoryCacheSize of them (InitGraphics' MemoryCacheBytes / 3072), the video
 // cache VideoCacheSize slots on the cache surfaces (surfaces 6, 7, ...); both
 // are LRU lists with a hash table of HASH_TABLE_SIZE chains.
-//
-// Names from the binary (assertion and catch strings): FileName, PATH_MAX,
-// SpriteNumber, NumberOfSprites, MaskNumber, PictureNumber, NumberOfPictures,
-// TileX, TileY, Picture.TilesX, Picture.TilesY, Buffer, Position,
-// MemoryCacheSize, VideoCacheSize, Item.Type, EMPTY_ITEM, HashValue,
-// HASH_TABLE_SIZE, FontNumber, NumberOfFonts, FontName, CharsPerLine,
-// CharWidth, CharHeight, Surface, Width, Height, Text, Length, Alignment,
-// LEFT_ALIGN, CENTER_ALIGN, RIGHT_ALIGN, Format.Alignment, MemoryCacheBytes.
-// Everything else is ours.
 
 #pragma once
 

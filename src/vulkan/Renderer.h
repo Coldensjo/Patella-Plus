@@ -1,9 +1,9 @@
 // Renderer.h: the Vulkan 1.3 back end of the Vulkan engine.
 //
 // A small 2D compositor without any window system: images (the engine's surfaces), colour fills,
-// textured quads in Direct3D 9's pixel rules (Quads.h), uploads, the colour key pass,
-// and the presentation of an image in a swapchain when a surface is given. The engine
-// (SurfaceVulkan.cpp, Windows) maps TSurface's calls onto it; tests_vulkan drives it headless.
+// textured quads in Direct3D 9's pixel rules (Quads.h), uploads, the colour key pass, and the
+// presentation of an image in a swapchain when a surface is given. The engine (SurfaceVulkan.cpp) maps
+// TSurface's calls onto it.
 //
 // Libraries (cmake/Vulkan.cmake): Vulkan-Headers, volk (the loader's functions, no import library),
 // vk-bootstrap (instance, device and swapchain), VMA (memory). Vulkan 1.3 core only: dynamic

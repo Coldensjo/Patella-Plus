@@ -1,16 +1,16 @@
-// SdlFrame.cpp: the client's main window and event loop on SDL3 (SdlFrame.h). Not part of the original source.
+// SdlFrame.cpp: the client's main window and event loop on SDL3; see SdlFrame.h.
 //
-// Each function says which of MainFrm.cpp's (CMainFrame) or MFC's it stands for; the client calls are theirs, in their
-// order. What SDL3 does here (the window, its placement and size, the fullscreen switch, its activation, close and
-// display events, the loop): SDL_CreateWindow, SDL_SetWindowPosition/Size, SDL_SetWindowFullscreen, the window and
-// display events; the input's wheel, motion and IME text events, SDL_CaptureMouse, SDL's cursors and window coordinates
-// (platform/KeyInput.h has the client's rules). What stays Win32's, in the "Win32 until ..." parts below: the keys, the
-// characters and the buttons as window messages (SDL's events differ from them for posted messages and keys Windows
-// does not hold), the loss of the mouse capture (WM_CAPTURECHANGED: SDL has no event for it), the cursor's screen
-// position (GetCursorPos, TSdlLoopInput: it keeps the last position where SDL would report (0, 0)), and on Windows the
-// message pump itself (SDL's own is off: the loop dispatches the thread's messages as MFC's did, so the socket's
-// polling timer's and the test mode's messages are dispatched in the same order). The host lookup's reply is no message
-// (HostResolved, below).
+// Each function says which function of the original's MFC frame (MainFrm.cpp's CMainFrame) or of MFC it stands for; the
+// client calls are theirs, in their order. What SDL3 does here (the window, its placement and size, the fullscreen
+// switch, its activation, close and display events, the loop): SDL_CreateWindow, SDL_SetWindowPosition/Size,
+// SDL_SetWindowFullscreen, the window and display events; the input's wheel, motion and IME text events,
+// SDL_CaptureMouse, SDL's cursors and window coordinates (platform/KeyInput.h has the client's rules). What is Win32's
+// on Windows, in the parts under _WIN32: the keys, the characters and the buttons as window messages (SDL's events
+// differ from them for posted messages and keys Windows does not hold), the loss of the mouse capture
+// (WM_CAPTURECHANGED: SDL has no event for it), the cursor's screen position (GetCursorPos, TSdlLoopInput: it keeps the
+// last position where SDL would report (0, 0)), and the message pump itself (SDL's own is off: the loop dispatches the
+// thread's messages as MFC's did, so the socket's polling timer's and the test mode's messages are dispatched in the
+// same order). The host lookup's reply is no message (HostResolved, below).
 //
 // Events: the size, move and activation changes come through an event watch (SDL_AddEventWatch), which SDL calls as it
 // sends the event, inside the window procedure, so the client sees a size change within the call that made it, as

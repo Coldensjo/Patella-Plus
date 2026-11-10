@@ -1,15 +1,6 @@
-// Preferences.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The functions without line evidence come first, in binary order. The asserted functions follow in line order,
-// which is also their binary order. None of them has a try block.
-//
-// The Tibia.cfg loader and ExitPreferences end the file, in binary order.
-//
-// Patella.ini is the x64 client's only settings file. The original's loader is
-// ReadTibiaCfg, which imports an existing Tibia.cfg once; the client never
-// writes Tibia.cfg. InitPreferences, SavePreferences and ExitPreferences, the
-// names the client calls, read and write Patella.ini
-// (settings/PreferenceKeys.h) and come last.
+// Preferences.cpp: the options. Patella.ini is the client's only settings file: InitPreferences, SavePreferences and
+// ExitPreferences read and write it (settings/PreferenceKeys.h). ReadTibiaCfg, the original's loader, imports an
+// existing Tibia.cfg once; the client never writes Tibia.cfg.
 //
 // The data and the functions are TPreferences' (Preferences.h), which TClient owns; the free functions at the end, the
 // original's names, call them on bridge::Preferences(). Talk's lists (White, Ignore) are reached through TTalkLists, so

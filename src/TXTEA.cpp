@@ -1,6 +1,4 @@
-// TXTEA.cpp: reconstructed from Tibia.exe 7.72.
-// Standard XTEA with 32 cycles; the compiler unrolled the loop four cycles per
-// iteration. Blocks are two little-endian 32-bit words.
+// TXTEA.cpp: standard XTEA with 32 cycles. Blocks are two little-endian 32-bit words.
 
 #include "TXTEA.h"
 #include "common.h"

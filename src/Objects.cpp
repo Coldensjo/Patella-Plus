@@ -1,13 +1,5 @@
-// Objects.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The properties of objects, outfits, effects and missiles from Tibia.dat,
-// one array<TProperties> each, and their accessors. Functions in line order.
-// Where the binary order differs: the entry loader (line 939) sits right
-// after GetEntrySpriteNumber.
-//
-// The source has unreferenced functions the linker dropped: the line gaps
-// 70-91 and 281-303 fit an accessor of MaxLength at each level, and
-// lines 166-238 had room for more.
+// Objects.cpp: the properties of objects, outfits, effects and missiles from Tibia.dat, one array<TProperties> each,
+// and their accessors.
 
 #include "Objects.h"
 #include "Help.h" // HELP_NONE

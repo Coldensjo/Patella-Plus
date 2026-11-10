@@ -1,5 +1,4 @@
-// SdlClipboard.cpp: TSdlClipboard, the platform's clipboard over SDL3 (platform/SdlPlatform.h). Not part of the
-// original source: each function does with SDL3 what the client did with Win32's clipboard calls.
+// SdlClipboard.cpp: TSdlClipboard, the platform's clipboard over SDL3 (platform/SdlPlatform.h).
 
 #include "platform/SdlPlatform.h"
 

@@ -1,5 +1,4 @@
-// expected.h: C++23's std::expected for the recoverable failures, under the names the code uses. Not part of the
-// original source.
+// expected.h: C++23's std::expected for the recoverable failures, under the names the code uses.
 //
 // patella::TExpected<T, E> is std::expected<T, E> and patella::TUnexpected<E> std::unexpected<E>. The code spells
 // TUnexpected's argument type (no deduction guides) and tests has_value before it reads a value or an error.

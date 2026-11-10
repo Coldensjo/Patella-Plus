@@ -1,5 +1,5 @@
 // SlotTable.h: TSlotTable<T, N>, a table of at most N entries whose numbers stay theirs, an entry with Status 0 being
-// free. Not part of the original source. Its one user is Map.cpp's effect table (TSlotTable<TEffect, EFFECTS>).
+// free. Its one user is Map.cpp's effect table (TSlotTable<TEffect, EFFECTS>).
 //
 // The original's effect table is an array of EFFECTS entries; an entry's number is its index, which the map points and the
 // entries' links hold, and NewEffect takes the first entry with Status 0, or none (-1) when all are taken, which drops the

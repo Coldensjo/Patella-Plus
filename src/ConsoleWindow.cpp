@@ -1,6 +1,4 @@
-// ConsoleWindow.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The console below the map; see ConsoleWindow.h.
+// ConsoleWindow.cpp: the console below the map; see ConsoleWindow.h.
 //
 // The console's skin properties are SkinProperties.ConsoleWindow (the console),
 // Tab (the tabs) and EditLine.Font (the font of the default channel);

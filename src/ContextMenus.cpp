@@ -1,6 +1,4 @@
-// ContextMenus.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The help bubble and the context menus; see ContextMenus.h.
+// ContextMenus.cpp: the help bubble and the context menus; see ContextMenus.h.
 //
 // A menu is built by its constructor: AddEntry for every entry (Separator =
 // true starts a new group, AddSeparator draws the line), then Show, which

@@ -1,9 +1,8 @@
-// Shared definitions for the reconstructed Tibia 7.72 client.
+// common.h: what every file of the client shares: the platform's headers and types, the integer types, the range
+// helpers, the PROGRAM_ERROR codes and the error macros.
 //
-// The error macros reproduce the client's error messages as seen in the
-// binary. Their names are ours; the strings they produce (expression text,
-// "assertion failed", "exception occurred", "unknown exception occurred")
-// match the original's, the file and line are the site's own.
+// The error macros make the client's error messages. Their texts (the expression, "assertion failed", "exception
+// occurred", "unknown exception occurred") are the original's; the file and line are the site's own.
 
 #pragma once
 

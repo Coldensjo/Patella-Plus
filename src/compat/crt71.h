@@ -1,6 +1,5 @@
 // crt71.h: behaviour of MSVC 7.1's CRT (libcmt.lib, linked into Tibia.exe) that the CRT Patella.exe links
-// (the UCRT, or glibc) does differently and that reaches a file the client writes. Not part of the original
-// source.
+// (the UCRT, or glibc) does differently and that reaches a file the client writes.
 //
 // ctime/asctime: the client writes ctime's text into saved channels (ConsoleWindow.cpp SaveChannel). MSVC 7.1's
 // asctime writes every number with two digits, the day of the month too (tm_mday / 10 + '0', tm_mday % 10 + '0'):

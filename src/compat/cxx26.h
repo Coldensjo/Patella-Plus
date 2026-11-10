@@ -1,6 +1,5 @@
-// cxx26.h: the C++26 features Patella-Modern uses, each the real feature where the compiler and its
-// library have it and a C++23 stand-in elsewhere, selected by the feature's test macro. Not part of the
-// original source.
+// cxx26.h: the C++26 features the client uses, each the real feature where the compiler and its
+// library have it and a C++23 stand-in elsewhere, selected by the feature's test macro.
 //
 // The code reaches a C++26 feature only through this header. Today GCC 16 has both features below
 // (with -std=c++26, which cmake/Warnings.cmake gives GCC and Clang); MSVC 19.51 and Clang 23 (with
@@ -8,9 +7,8 @@
 // stand-in goes and the name stays as it is.
 //
 // PATELLA_CXX26_STANDIN, defined for a whole target (never for one file: the two paths are not
-// interchangeable inside one program), selects every stand-in also where the real feature exists;
-// tests/unit builds the unit tests once that way, so the stand-ins are checked against the real
-// features on the same compiler. After this header:
+// interchangeable inside one program), selects every stand-in also where the real feature exists.
+// After this header:
 //	PATELLA_HAS_CONTRACTS        1: CONTRACT_ASSERT is contract_assert; 0: the stand-in
 //	PATELLA_HAS_INPLACE_VECTOR   1: TStaticVector is std::inplace_vector; 0: the stand-in
 //

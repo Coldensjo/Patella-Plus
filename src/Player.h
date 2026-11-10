@@ -1,9 +1,6 @@
-// Player.h: the application class (c:\mud\tibiaplayer, so Player.cpp).
-//
-// The class name CPlayerApp is the original's, MFC's wizard naming for the
-// project "tibiaplayer"; the member names are ours. It derives from nothing:
-// the process's entry is WinMain (platform/EntryWin32.cpp), which does what
-// MFC's did and calls InitInstance and Run.
+// Player.h: the application class. CPlayerApp is the original's name, MFC's wizard naming for the project
+// "tibiaplayer". It derives from nothing: the process's entry (platform/EntryWin32.cpp, platform/EntryLinux.cpp) sets
+// CommandLine and calls InitInstance and Run.
 
 #pragma once
 

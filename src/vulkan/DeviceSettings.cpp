@@ -1,4 +1,4 @@
-// DeviceSettings.cpp: the x64 client's graphics device choice (DeviceSettings.h).
+// DeviceSettings.cpp: the client's graphics device choice (DeviceSettings.h).
 
 #include "vulkan/DeviceSettings.h"
 

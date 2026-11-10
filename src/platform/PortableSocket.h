@@ -1,9 +1,8 @@
-// PortableSocket.h: TPortableSocket, the platform's network over Winsock or POSIX sockets. Not part of the original
-// source. Portable: no platform header.
+// PortableSocket.h: TPortableSocket, the platform's network over Winsock or POSIX sockets. Portable: no platform
+// header.
 //
-// The ISocket of Patella.exe and of the test build's live runs, where MFC's CAsyncSocket and WSAAsyncGetHostByName
-// were (the golden runner keeps those calls: tests/golden/network/MfcSocket.h). One implementation for Windows
-// (Winsock 2) and POSIX (Linux), the same code but for the system calls' spellings:
+// The client's ISocket, where the original had MFC's CAsyncSocket and WSAAsyncGetHostByName. One implementation for
+// Windows (Winsock 2) and POSIX (Linux), the same code but for the system calls' spellings:
 //
 // - The connections are non-blocking sockets, IPv6 with IPv4 mapped where the system has IPv6, else IPv4. Nothing
 //   posts their events: Poll, the loop's turn (Player.cpp's OnIdle), asks each connection and calls its TSocket's
@@ -13,8 +12,8 @@
 //   A connection closed by an event's handler has no further event (MFC's handle map has it no more).
 // - The name lookup is getaddrinfo on a std::jthread (IPv4 and IPv6): the thread writes nothing of the client's; the
 //   loop's Poll takes its result, writes the address's text into the client's buffer and gives the request to the
-//   Resolved hook (the window's message: the frames' OnHostResolved). A cancelled lookup's thread runs to its end and
-//   is dropped at a later Poll.
+//   Resolved hook (the frame's OnHostResolved). A cancelled lookup's thread runs to its end and is dropped at a later
+//   Poll.
 // - The error codes are WinSock's numbers (platform/Socket.h's socket_error), on POSIX from errno and getaddrinfo's
 //   codes.
 //

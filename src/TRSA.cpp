@@ -1,4 +1,4 @@
-// TRSA.cpp: reconstructed from Tibia.exe 7.72.
+// TRSA.cpp: RSA encryption with a public key, for the login packet (TRSA.h).
 
 #include "TRSA.h"
 #include "common.h"

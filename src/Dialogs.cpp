@@ -1,12 +1,5 @@
-// Dialogs.cpp: the dialogs of the client (c:\mud\tibiaplayer\Dialogs.cpp);
-// see Dialogs.h.
-//
-// Order: the functions follow the source's line numbers: the creators, the
-// frame TDialog and the dialog bodies. The binary moves the creators, the
-// constructors that call functions defined further down (TDialog's, the
-// outfit's, the edit list's, the ignore list's, the hotkeys', the error
-// report's, the rule violation's) and the rule violation's HandleEvent to
-// the end of the object, Creatures.cpp's pattern.
+// Dialogs.cpp: the dialogs of the client; see Dialogs.h. The creators come
+// first, then the frame TDialog and the dialog bodies.
 
 #include "Dialogs.h"
 #include "vulkan/DeviceSettings.h"

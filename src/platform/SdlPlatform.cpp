@@ -1,7 +1,5 @@
-// SdlPlatform.cpp: the SDL3 implementations of the platform's desktop and, in SdlClipboard.cpp, clipboard
-// (platform/SdlPlatform.h). Not part of the original source: each function does with SDL3 what Win32Platform.cpp's
-// TWin32Window does with Win32's calls, for the SDL3 window's client (SdlFrame.cpp). The display's modes are SDL3's
-// on every system (TSdlWindow, below).
+// SdlPlatform.cpp: TSdlWindow, the platform's desktop over SDL3 (platform/SdlPlatform.h): the message box, the other
+// windows of the desktop and the display's modes. The clipboard is in SdlClipboard.cpp.
 
 #include "platform/SdlPlatform.h"
 

@@ -1,16 +1,15 @@
-// LogSettings.h: the developer log's settings in Patella.ini. Not part of the original source.
+// LogSettings.h: the developer log's settings in Patella.ini.
 //
-// Two keys of Patella.ini (settings/Settings.h), read once at the start (Player.cpp InitInstance, the x64 client):
+// Two keys of Patella.ini (settings/Settings.h), read once at the start (Player.cpp InitInstance):
 //
 //	LogLevel=debug          error, warn, info (the default) or debug, without regard to case (log/Log.h)
 //	LogFile=patella.log     a file the lines are appended to as well (created where it does not exist; the name in
 //	                        UTF-8: settings::ClientText); none without the key or with an empty value. A relative
-//	                        name is from the working directory, Tibia.cfg's and Patella.ini's.
+//	                        name is in the data folder.
 //
 // Nothing writes the keys: the user adds them. Without Patella.ini, or without the keys, the log stays at its defaults
 // (info, stderr only), so no new file appears. A value that cannot be used is reported at the warn level and the
-// default is kept. Part of patella_core (no platform header), tested by tests_core
-// (tests/unit/core_log_settings_test.cpp).
+// default is kept. No platform header.
 
 #pragma once
 

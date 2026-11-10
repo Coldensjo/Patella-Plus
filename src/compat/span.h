@@ -1,5 +1,5 @@
-// span.h: C++20's std::span for the parameters that took a pointer and a length (the packet buffers, TXTEA and TRSA),
-// under the names the code uses. Not part of the original source.
+// span.h: C++20's std::span for the parameters that are a buffer and its length (the packet buffers, TXTEA and TRSA),
+// under the names the code uses.
 //
 // patella::TSpan<T, Extent> is std::span<T, Extent>, and patella::DynamicExtent is std::dynamic_extent.
 //

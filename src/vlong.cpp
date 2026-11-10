@@ -1,7 +1,5 @@
-// vlong.cpp: reconstructed from Tibia.exe 7.72.
-// George Barwood's public-domain vlong (1999) with CipSoft's additions; see
-// vlong.h. Functions are in binary order. Barwood functions the client does not
-// use (gcd, the unsigned conversion) are absent from the binary and left out.
+// vlong.cpp: George Barwood's public-domain vlong (1999) with CipSoft's additions; see vlong.h. The Barwood functions
+// the client does not use (gcd, the unsigned conversion) are left out.
 
 #include "vlong.h"
 #include "common.h"

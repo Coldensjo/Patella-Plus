@@ -1,5 +1,4 @@
-// Dialogs.h: the dialogs of the client (c:\mud\tibiaplayer\Dialogs.h;
-// Dialogs.cpp is .\Dialogs.cpp).
+// Dialogs.h: the dialogs of the client.
 //
 // Every dialog is a TDialog (the frame: caption, separator, the OK, Cancel
 // and extra buttons, dragging) around a body window that builds the
@@ -7,14 +6,6 @@
 // body and the frame and return the frame as the new modal window
 // (Control.cpp's ProcessEvents); a body closes the dialog with
 // SetActionState(0), which makes ProcessEvents delete the modal window.
-//
-// Names from the binary: the members OkButton, CancelButton, ExtraButton
-// (assertions), FocusEdit (a local, assertion), DraggedObject (with
-// TObject's member Data), the parameters _Caption, _Dialog, timeout, Event,
-// Key, Surface, seconds, MaximumLength, _ObjectNumber, _NumberOfChannels,
-// _ChannelIDs, _CharacterID, CharacterID, DataSize, Timeout, Number, x, y,
-// Code, Text, MaxLength, Data, _Coordinate and the locals Position,
-// Creature, Number and AllocationNumber. The class, function and other member names are ours.
 
 #pragma once
 

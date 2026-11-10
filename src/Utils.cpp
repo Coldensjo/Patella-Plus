@@ -1,9 +1,4 @@
-// Utils.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The first functions have no assertions; they are assigned to this
-// file because they run straight up to its first assertion and are inlined
-// into its later functions. None of the functions has the original's catch
-// wrappers (common.h).
+// Utils.cpp: Latin-1 character and string helpers, the outfit colours, and the packet buffers (Utils.h).
 
 #include "Utils.h"
 #include "common.h"

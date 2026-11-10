@@ -1,4 +1,4 @@
-// SdlFrame.h: the client's main window and event loop on SDL3. Not part of the original source.
+// SdlFrame.h: the client's main window and event loop on SDL3.
 //
 // The client's main window: the SDL3 counterpart of the original's CMainFrame (the frame window: its creation,
 // placement, size, fullscreen switch, activation, closing and destruction) and of CWinApp::Run (the message loop, with
@@ -9,8 +9,7 @@
 // keys, the characters and the buttons stay the window's messages, because SDL's events differ from them. Either way
 // platform/KeyInput.h has the client's rules.
 //
-// No SDL header here: Player.cpp includes it, and the golden tests compile Player.cpp (their stubs stand in for these
-// functions, tests/golden/client_stubs.cpp).
+// No SDL header here: Player.cpp includes it.
 
 #pragma once
 

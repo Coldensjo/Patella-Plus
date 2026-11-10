@@ -1,5 +1,5 @@
-// Talk.cpp: reconstructed from Tibia.exe 7.72, in assertion/catch line order.
-// Header COMDATs are in Talk.h; Container.h supplies the filter-list vector.
+// Talk.cpp: the talk boxes over the map, the status message, the talk filters and ignore lists, and the console's text
+// buffers.
 #include "Talk.h"
 #include "Utils.h"
 #include "graphics.h"

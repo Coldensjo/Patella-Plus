@@ -1,14 +1,10 @@
-// Clipboard.h: IClipboard, the platform's clipboard. Not part of the original source. Portable: the standard library
-// only.
+// Clipboard.h: IClipboard, the platform's clipboard. Portable: the standard library only.
 //
 // sysinc.cpp's IsClipboardEmpty, GetClipboardText and SetClipboardText (the paste, CopyToClipboard,
 // CheckClipboardText, CopyTaintedClipboardText) ask the process's IClipboard (platform/Platform.h). The text is the
-// client's (Windows-1252) on both sides; the implementation converts it to and from the platform's:
-//
-//	TSdlClipboard     SDL3's clipboard text, UTF-8 ('?' for a character Windows-1252 does not have; SdlPlatform.h):
-//	                  the client's on every system
-//
-// sysinc.cpp keeps its buffer and the original's odd CR removal; only the clipboard's own calls are here.
+// client's (Windows-1252) on both sides; the implementation, TSdlClipboard (SdlPlatform.h), converts it to and from
+// SDL3's clipboard text, UTF-8, with '?' for a character Windows-1252 does not have. sysinc.cpp keeps its buffer and
+// the original's odd CR removal; only the clipboard's own calls are here.
 
 #pragma once
 

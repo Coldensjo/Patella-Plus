@@ -1,4 +1,4 @@
-// MapState.h: TMapState, the game state as five objects. Not part of the original source.
+// MapState.h: TMapState, the game state as five objects.
 //
 // TClient owns it (Client.h), after TNetwork and before TCommunication, whose packet handlers write it. Its five
 // objects are made in this order, each given the earlier ones it reads (references, never owners):

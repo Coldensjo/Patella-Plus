@@ -1,8 +1,6 @@
-// SdlPlatform.h: the SDL3 implementations of the platform's clipboard and desktop. Not part of the original source.
-//
-// The SDL3 window's (SdlFrame.cpp) Platform(): what the Win32 clipboard calls and TWin32Window (Win32Platform.h) do
-// with Win32's calls, done with SDL3's. The golden runner keeps Win32's. Each needs SDL's video subsystem, which
-// SdlFrame.cpp's Create starts before the client asks them anything (a message box needs none).
+// SdlPlatform.h: the SDL3 implementations of the platform's clipboard and desktop, the client's on every system. Each
+// needs SDL's video subsystem, which SdlFrame.cpp's Create starts before the client asks them anything (a message box
+// needs none).
 
 #pragma once
 

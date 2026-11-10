@@ -8,13 +8,6 @@
 // Coordinates: rx, ry, rz are map (relative) coordinates, x, y, z world
 // (absolute) ones. rz grows upwards; the player's floor is rz 7-z above
 // ground and rz 2 below it (GetMapLevel).
-//
-// Names from the binary: MAPSIZE_X/Y/Z, OBJECTS_PER_POINT, EFFECTS, the
-// variables Point, Effect, Effects, Block, Coordinate, EffectNumber,
-// EffectIteratorField, EffectIteratorCount and AmbienteActualBrightness, the
-// fields ObjectCount, EffectNumber, Status, Type, Next, Previous, bx, by, bz,
-// x, y, the parameter names in the assertions and catch blocks, and FindPath's
-// StartX ... ForceDiagonal (its error message). Everything else is ours.
 
 #pragma once
 

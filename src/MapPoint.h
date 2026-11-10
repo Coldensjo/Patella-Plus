@@ -1,6 +1,5 @@
 // MapPoint.h: a map point's stack of objects: TMapPoint and the operations on its stack that Map.cpp's InsertObject,
-// AddObject, AppendObject, DeleteObject, ClearField and the GetTop*Object functions make of it. Not part of the
-// original source; TMapPoint, ObjectCount and EffectNumber are the original's names.
+// AddObject, AppendObject, DeleteObject, ClearField and the GetTop*Object functions make of it.
 //
 // The original's point held ObjectCount and an array of OBJECTS_PER_POINT objects; here the objects are a
 // TStaticVector<TObject, OBJECTS_PER_POINT> (compat/cxx26.h: std::inplace_vector where the library has it), its size

@@ -1,9 +1,8 @@
 // NetworkWin32.cpp: the Windows client's network, TPortableSocket (platform/PortableSocket.h) with what the client's
-// window needs of it. Not part of the original source. Patella.exe and the test build compile it; the golden runner
-// has its own NetworkSocket() (tests/golden/network/MfcSocket.cpp).
+// window needs of it:
 //
-// - A finished lookup goes to the window as WSAAsyncGetHostByName's reply did: to SdlFrame.cpp's OnHostResolved
-//   (HostResolved: no window message).
+// - A finished lookup goes to SdlFrame.cpp's OnHostResolved (HostResolved: no window message), where
+//   WSAAsyncGetHostByName's reply went to the original's window.
 // - While the socket has a connection or a lookup, a timer (USER_TIMER_MINIMUM) of a message-only window polls it from
 //   every message loop that dispatches the thread's messages: the main loop's pump, and the modal loops the idle step
 //   does not run in (a message box's: FatalError's ShutdownConnection, whose close the original handled in the box's

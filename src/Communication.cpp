@@ -1,13 +1,9 @@
-// Communication.cpp: reconstructed from Tibia.exe 7.72. The
-// client-to-server packets (Send*) and the handlers of the server's packets
-// (Receive*), which ReceivePackets in Control.cpp dispatches. Functions are
-// in original source order from the assertion and catch line numbers.
+// Communication.cpp: the client-to-server packets (Send*) and the handlers of the server's packets (Receive*), which
+// ReceivePackets in Control.cpp dispatches.
 //
-// The original's catch wrappers (common.h) are gone; the functions here
-// have no handlers apart from their own: the encryption failures of
-// SendLogin and SendGameLogin (TRSA's const char *) and
-// ReceiveMoveCreature's cylinder loop (an error while listing the fields
-// goes into the message).
+// Three functions catch errors: SendLogin and SendGameLogin the encryption's failure (TRSA's const char *), and
+// ReceiveMoveCreature an error while listing the fields of its cylinder loop, which goes into the message. Any other
+// exception passes to the caller.
 
 #include "Communication.h"
 #include "Help.h"

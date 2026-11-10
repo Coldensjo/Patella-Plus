@@ -1,12 +1,5 @@
-// ContentWindows.cpp: the windows of the side bar and of the dialog column
-// (c:\mud\tibiaplayer\ContentWindows.cpp); see ContentWindows.h.
-//
-// Order: the functions follow the source's line numbers. The binary moves the
-// creators and most constructors behind the rest (each calls functions defined
-// further down, the pattern of Creatures.cpp): the creators come last, after
-// the constructors of the bodies and of TAutomapWindow, TInventoryView's
-// mouse handlers, TStatusWindow's and the container body's constructors.
-// Functions without line evidence go where the binary has them.
+// ContentWindows.cpp: the windows of the side bar and of the dialog column;
+// see ContentWindows.h.
 
 #include "ContentWindows.h"
 #include <cstdint>

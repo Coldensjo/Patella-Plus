@@ -1,5 +1,4 @@
-// ContentWindows.h: the windows of the side bar and of the dialog column
-// (c:\mud\tibiaplayer\ContentWindows.h).
+// ContentWindows.h: the windows of the side bar and of the dialog column.
 //
 // MainWindow.cpp fills two TDialogWindow columns (DialogWindow.h) with these
 // windows. The side panel holds the side-bar windows, TContentWindows with
@@ -14,14 +13,6 @@
 // list (9). The Create* functions build those windows with their buttons,
 // icon and title and size them before MainWindow.cpp hands them to
 // Rearrange(16).
-//
-// Names from the binary: _CheckObject, _RoseSkin, NumberOfSkins, islarge,
-// _Container, ScrollbarX, EventComponent, NumberOfLine, Lines, Value,
-// Progress, Position, SkinProperties.StatusWindow and PlayerStates (the class
-// names TStatusWindow and TPlayerStates), BuddylistWindow, RadioButtonGroup
-// (DialogElements.cpp's assertion) and the catch-block parameters (Surface, x,
-// y, Width, Height, Event, Direction, Code). The class, member and function
-// names are ours.
 
 #pragma once
 

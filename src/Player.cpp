@@ -1,18 +1,7 @@
-// Player.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The application: start-up (InitInstance), the message loop (Run), idle
-// processing, and the top-level error handling, which ends the client with
-// the critical error box. The original also wrote the error to error.txt and
-// read it back at the next start for the error report dialog; that report is
-// gone: the message goes to the developer log instead (log/Log.h; stderr, and
-// a log file when Patella.ini names one), with the report's diagnostics at
-// the debug level.
-//
-// Order: the functions without line evidence first, in binary order (message
-// map, constructor, FatalError), then the two text decoders, the window counter
-// for EnumWindows, the error handlers (binary order, before their first user;
-// the error.txt reader that followed them is gone), then InitInstance, Run and
-// OnIdle. The compiler placed OnIdle right after the decoders.
+// Player.cpp: the application: start-up (InitInstance), the message loop (Run), idle processing, and the top-level
+// error handling, which ends the client with the critical error box. The error's message goes to the developer log
+// (log/Log.h; stderr, and a log file when Patella.ini names one), with diagnostics at the debug level; the original
+// wrote a report to error.txt instead and showed it at the next start.
 
 #include "Player.h"
 #include "Control.h"

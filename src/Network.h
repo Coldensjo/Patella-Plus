@@ -1,6 +1,4 @@
-// Network.cpp: login server list, connecting, packet framing and XTEA.
-// Function names are ours; parameter names come from the binary's assertion
-// and catch strings.
+// Network.h: the login server list, connecting, and the packets' framing and XTEA encryption (Network.cpp).
 //
 // The data is TNetwork's, which TClient owns (Client.h); the free functions of the original's names are the bridge that
 // the callers use until they hold the object (bridge::Network(), defined in Client.cpp).

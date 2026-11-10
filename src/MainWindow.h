@@ -10,12 +10,6 @@
 // windows) above the dialog window that holds the containers and the skill,
 // battle, VIP and trade windows. The keys and hotkeys of the game window are
 // handled here (walking, turning and the Ctrl shortcuts).
-//
-// Names from the binary: MainWindow and ModalWindow (assertions in
-// Control.cpp), DialogWindow ("DialogWindow!=NULL"), GetBody, OldWindow,
-// TRADE_WINDOW, ACTIONSTATE_NONE and the parameter names in the catch blocks
-// (Width, Height, Surface, Key, Event, ConsoleHeight, dx, dy, Container,
-// Identifier, x, y). The class names and the other names are ours.
 
 #pragma once
 

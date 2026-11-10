@@ -1,5 +1,5 @@
 // mdspan.h: C++23's std::mdspan for the client's multi-dimensional storage (Container.h's matrix and matrix3d, the
-// automap's colour and speed layers), under the names the code uses. Not part of the original source.
+// automap's colour and speed layers), under the names the code uses.
 //
 //	- patella::TExtents<IndexType, Extents...> is std::extents (a static extent or patella::DynamicExtent each);
 //	- patella::TDynamicExtents<IndexType, Rank> is std::dextents;
