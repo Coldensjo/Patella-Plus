@@ -656,10 +656,10 @@ bool TConsole::MouseWheel(int x, int y, int Code)
 void TConsole::Arrange()
 {
 	const int WindowWidth = Width;
-	const int Top = Skins()[175].height;
-	const int RightEdge = Skins()[174].width;
-	const int LeftEdge = Skins()[173].width;
-	ScrollBar->SetSize(ScrollBar->Width, Height - Skins()[176].height - Top);
+	const int Top = Skins()[SKIN_CONSOLETEXT_EDGE_TOP].height;
+	const int RightEdge = Skins()[SKIN_CONSOLETEXT_EDGE_RIGHT].width;
+	const int LeftEdge = Skins()[SKIN_CONSOLETEXT_EDGE_LEFT].width;
+	ScrollBar->SetSize(ScrollBar->Width, Height - Skins()[SKIN_CONSOLETEXT_EDGE_BOTTOM].height - Top);
 	ScrollBar->SetPosition(WindowWidth - RightEdge - LeftEdge - ScrollBar->Width + LeftEdge, Top);
 	SetChildArea(TextWindow, SkinProperties().ConsoleWindow.TextWindow);
 	TWindow::Arrange();
@@ -683,18 +683,18 @@ void TConsole::Arrange()
 	ScrollBar->Range->SetRange(Minimum, Maximum, Value, Visible);
 	TextWindow->SetCurrentLineNumber(ScrollBar->Range->Value);
 
-	DrawingList[0] = TDrawing(169, 0, 0, 0, 0, 0, 0);
-	DrawingList[1] = TDrawing(175, Skins()[169].width, 0, Width - Skins()[170].width - Skins()[169].width,
-		Skins()[175].height, 0, 0);
-	DrawingList[2] = TDrawing(170, Width - Skins()[170].width, 0, 0, 0, 0, 0);
-	DrawingList[3] = TDrawing(173, 0, Skins()[169].height, Skins()[173].width,
-		Height - Skins()[171].height - Skins()[169].height, 0, 0);
-	DrawingList[4] = TDrawing(174, Width - Skins()[174].width, Skins()[170].height, Skins()[174].width,
-		Height - Skins()[172].height - Skins()[170].height, 0, 0);
-	DrawingList[5] = TDrawing(171, 0, Height - Skins()[171].height, 0, 0, 0, 0);
-	DrawingList[6] = TDrawing(176, Skins()[171].width, Height - Skins()[176].height,
-		Width - Skins()[172].width - Skins()[171].width, Skins()[176].height, 0, 0);
-	DrawingList[7] = TDrawing(172, Width - Skins()[172].width, Height - Skins()[172].height, 0, 0, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_CONSOLETEXT_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_CONSOLETEXT_EDGE_TOP, Skins()[SKIN_CONSOLETEXT_CORNER_TOPLEFT].width, 0, Width - Skins()[SKIN_CONSOLETEXT_CORNER_TOPRIGHT].width - Skins()[SKIN_CONSOLETEXT_CORNER_TOPLEFT].width,
+		Skins()[SKIN_CONSOLETEXT_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_CONSOLETEXT_CORNER_TOPRIGHT, Width - Skins()[SKIN_CONSOLETEXT_CORNER_TOPRIGHT].width, 0, 0, 0, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_CONSOLETEXT_EDGE_LEFT, 0, Skins()[SKIN_CONSOLETEXT_CORNER_TOPLEFT].height, Skins()[SKIN_CONSOLETEXT_EDGE_LEFT].width,
+		Height - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT].height - Skins()[SKIN_CONSOLETEXT_CORNER_TOPLEFT].height, 0, 0);
+	DrawingList[4] = TDrawing(SKIN_CONSOLETEXT_EDGE_RIGHT, Width - Skins()[SKIN_CONSOLETEXT_EDGE_RIGHT].width, Skins()[SKIN_CONSOLETEXT_CORNER_TOPRIGHT].height, Skins()[SKIN_CONSOLETEXT_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_CONSOLETEXT_CORNER_TOPRIGHT].height, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT, 0, Height - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT].height, 0, 0, 0, 0);
+	DrawingList[6] = TDrawing(SKIN_CONSOLETEXT_EDGE_BOTTOM, Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT].width, Height - Skins()[SKIN_CONSOLETEXT_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT].width, Skins()[SKIN_CONSOLETEXT_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[7] = TDrawing(SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT].width, Height - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT].height, 0, 0, 0, 0);
 }
 
 // --- TTab ------------------------------------------------------------------------------------
@@ -857,7 +857,7 @@ void TTab::Draw(int Surface, int x, int y)
 {
 	PATELLA_ASSERT_VALUES(x>=0, x);
 	PATELLA_ASSERT_VALUES(y>=0, y);
-	DrawSkin(Surface, x, y, Width, Height, 187 - (Active ? 1 : 0), 0, 0);
+	DrawSkin(Surface, x, y, Width, Height, SKIN_TAB_INACTIVE - (Active ? 1 : 0), 0, 0);
 	const TFont *Font;
 	if (Active)
 		Font = &SkinProperties().Tab.ActiveFont;
@@ -1214,19 +1214,19 @@ TConsoleWindow::TConsoleWindow()
 	InsertChild(TabBar);
 	CurrentConsole = new TConsole;
 	InsertChild(CurrentConsole);
-	VolumeButton = new TMultiStateButton(0, 0, TextAdjustVolume, 3, 197, 198, TCallback(this, EVENT_VOLUME_YELL), 201, 202,
-		TCallback(this, EVENT_VOLUME_WHISPER), 199, 200, TCallback(this, EVENT_VOLUME_SAY));
+	VolumeButton = new TMultiStateButton(0, 0, TextAdjustVolume, 3, SKIN_SAY_BUTTON_UP, SKIN_SAY_BUTTON_DOWN, TCallback(this, EVENT_VOLUME_YELL), SKIN_YELL_BUTTON_UP, SKIN_YELL_BUTTON_DOWN,
+		TCallback(this, EVENT_VOLUME_WHISPER), SKIN_WHISPER_BUTTON_UP, SKIN_WHISPER_BUTTON_DOWN, TCallback(this, EVENT_VOLUME_SAY));
 	InsertChild(VolumeButton);
-	CloseButton = new TSkinButton(0, 0, 188, 189, TCallback(this, EVENT_CLOSE_CHANNEL), TextCloseChannel, false);
-	ServerMessagesButton = new TToggleButton(0, 0, 190, 191, TCallback(this, EVENT_SERVER_MESSAGES), TextShowServerMessages,
+	CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_CHANNEL_BUTTON_UP, SKIN_CLOSE_CHANNEL_BUTTON_DOWN, TCallback(this, EVENT_CLOSE_CHANNEL), TextCloseChannel, false);
+	ServerMessagesButton = new TToggleButton(0, 0, SKIN_SERVER_MESSAGES_BUTTON_UP, SKIN_SERVER_MESSAGES_BUTTON_DOWN, TCallback(this, EVENT_SERVER_MESSAGES), TextShowServerMessages,
 		TextHideServerMessages, false);
-	IgnoreButton = new TSkinButton(0, 0, 192, 194, TCallback(this, EVENT_IGNORE_LIST), TextIgnorePlayers, false);
+	IgnoreButton = new TSkinButton(0, 0, SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN, TCallback(this, EVENT_IGNORE_LIST), TextIgnorePlayers, false);
 	InsertChild(IgnoreButton);
-	NewChannelButton = new TSkinButton(0, 0, 195, 196, TCallback(this, EVENT_REQUEST_CHANNELS), TextOpenNewChannel, false);
+	NewChannelButton = new TSkinButton(0, 0, SKIN_NEW_CHANNEL_BUTTON_UP, SKIN_NEW_CHANNEL_BUTTON_DOWN, TCallback(this, EVENT_REQUEST_CHANNELS), TextOpenNewChannel, false);
 	InsertChild(NewChannelButton);
-	MoveRightButton = new TSkinButton(0, 0, 203, 204, TCallback(TabBar, EVENT_TABS_MOVE_RIGHT), TextMoveChannelsRight, false);
+	MoveRightButton = new TSkinButton(0, 0, SKIN_TABS_RIGHT_BUTTON_UP, SKIN_TABS_RIGHT_BUTTON_DOWN, TCallback(TabBar, EVENT_TABS_MOVE_RIGHT), TextMoveChannelsRight, false);
 	InsertChild(MoveRightButton);
-	MoveLeftButton = new TSkinButton(0, 0, 205, 206, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
+	MoveLeftButton = new TSkinButton(0, 0, SKIN_TABS_LEFT_BUTTON_UP, SKIN_TABS_LEFT_BUTTON_DOWN, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
 	InsertChild(MoveLeftButton);
 	AddHotkey(0x449, TCallback(this, EVENT_IGNORE_LIST));
 	AddHotkey(0x44f, TCallback(this, EVENT_REQUEST_CHANNELS));
@@ -1332,7 +1332,7 @@ void TConsoleWindow::Draw(int Surface, int x, int y)
 		SetActive(TextBuffer->CanWrite());
 		Input->SetDisabled(!TextBuffer->CanWrite());
 	}
-	IgnoreButton->SetSkins(IsTalkThrottled() ? 193 : 192, 194);
+	IgnoreButton->SetSkins(IsTalkThrottled() ? SKIN_IGNORE_BUTTON_UP_THROTTLED : SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN);
 	const bool Changed = TabBar->Changed;
 	TabBar->Changed = false;
 	if (Changed)
@@ -1345,20 +1345,20 @@ void TConsoleWindow::Draw(int Surface, int x, int y)
 void TConsoleWindow::Arrange()
 {
 	TWindow::Arrange();
-	DrawingList[0] = TDrawing(177, 0, 0, 0, 0, 0, 0);
-	DrawingList[1] = TDrawing(183, Skins()[177].width, 0, Width - Skins()[178].width - Skins()[177].width,
-		Skins()[183].height, 0, 0);
-	DrawingList[2] = TDrawing(178, Width - Skins()[178].width, 0, 0, 0, 0, 0);
-	DrawingList[3] = TDrawing(181, 0, Skins()[177].height, Skins()[181].width,
-		Height - Skins()[179].height - Skins()[177].height, 0, 0);
-	DrawingList[4] = TDrawing(182, Width - Skins()[182].width, Skins()[178].height, Skins()[182].width,
-		Height - Skins()[180].height - Skins()[178].height, 0, 0);
-	DrawingList[5] = TDrawing(179, 0, Height - Skins()[179].height, 0, 0, 0, 0);
-	DrawingList[6] = TDrawing(184, Skins()[179].width, Height - Skins()[184].height,
-		Width - Skins()[180].width - Skins()[179].width, Skins()[184].height, 0, 0);
-	DrawingList[7] = TDrawing(180, Width - Skins()[180].width, Height - Skins()[180].height, 0, 0, 0, 0);
-	DrawingList[8] = TDrawing(185, Skins()[181].width, Skins()[183].height, Width - Skins()[182].width - Skins()[181].width,
-		Height - Skins()[184].height - Skins()[183].height, 0, OffsetY % Skins()[185].height);
+	DrawingList[0] = TDrawing(SKIN_CONSOLE_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_CONSOLE_EDGE_TOP, Skins()[SKIN_CONSOLE_CORNER_TOPLEFT].width, 0, Width - Skins()[SKIN_CONSOLE_CORNER_TOPRIGHT].width - Skins()[SKIN_CONSOLE_CORNER_TOPLEFT].width,
+		Skins()[SKIN_CONSOLE_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_CONSOLE_CORNER_TOPRIGHT, Width - Skins()[SKIN_CONSOLE_CORNER_TOPRIGHT].width, 0, 0, 0, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_CONSOLE_EDGE_LEFT, 0, Skins()[SKIN_CONSOLE_CORNER_TOPLEFT].height, Skins()[SKIN_CONSOLE_EDGE_LEFT].width,
+		Height - Skins()[SKIN_CONSOLE_CORNER_BOTTOMLEFT].height - Skins()[SKIN_CONSOLE_CORNER_TOPLEFT].height, 0, 0);
+	DrawingList[4] = TDrawing(SKIN_CONSOLE_EDGE_RIGHT, Width - Skins()[SKIN_CONSOLE_EDGE_RIGHT].width, Skins()[SKIN_CONSOLE_CORNER_TOPRIGHT].height, Skins()[SKIN_CONSOLE_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_CONSOLE_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_CONSOLE_CORNER_TOPRIGHT].height, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_CONSOLE_CORNER_BOTTOMLEFT, 0, Height - Skins()[SKIN_CONSOLE_CORNER_BOTTOMLEFT].height, 0, 0, 0, 0);
+	DrawingList[6] = TDrawing(SKIN_CONSOLE_EDGE_BOTTOM, Skins()[SKIN_CONSOLE_CORNER_BOTTOMLEFT].width, Height - Skins()[SKIN_CONSOLE_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_CONSOLE_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_CONSOLE_CORNER_BOTTOMLEFT].width, Skins()[SKIN_CONSOLE_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[7] = TDrawing(SKIN_CONSOLE_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_CONSOLE_CORNER_BOTTOMRIGHT].width, Height - Skins()[SKIN_CONSOLE_CORNER_BOTTOMRIGHT].height, 0, 0, 0, 0);
+	DrawingList[8] = TDrawing(SKIN_CONSOLE_BACKGROUND, Skins()[SKIN_CONSOLE_EDGE_LEFT].width, Skins()[SKIN_CONSOLE_EDGE_TOP].height, Width - Skins()[SKIN_CONSOLE_EDGE_RIGHT].width - Skins()[SKIN_CONSOLE_EDGE_LEFT].width,
+		Height - Skins()[SKIN_CONSOLE_EDGE_BOTTOM].height - Skins()[SKIN_CONSOLE_EDGE_TOP].height, 0, OffsetY % Skins()[SKIN_CONSOLE_BACKGROUND].height);
 }
 
 // 0x41e5e0, line 1659. A click clears both selections.

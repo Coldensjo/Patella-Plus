@@ -851,12 +851,12 @@ public:
 		Maximum = 100;
 	}
 	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	int getMinimumWidth() override { return Skins()[256].width + Skins()[258].width + Skins()[257].width; } // +0x3c, 0x452a90
-	int getMinimumHeight() override { return Skins()[256].height; }                                         // +0x40, 0x452ab0
-	void Arrange() override;                                                                                // +0x48, 0x464d00
-	void SetMaximum(int maximum);                                                                           // 0x464f40, lines 4271-4276
-	void SetCurrent(int current);                                                                           // 0x4651c0, line 4289
-	void SetComplete();                                                                                     // 0x465380, line 4301
+	int getMinimumWidth() override { return Skins()[SKIN_PROGRESS_LEFT].width + Skins()[SKIN_PROGRESS_RIGHT].width + Skins()[SKIN_PROGRESS_MIDDLE].width; } // +0x3c, 0x452a90
+	int getMinimumHeight() override { return Skins()[SKIN_PROGRESS_LEFT].height; }                                                                          // +0x40, 0x452ab0
+	void Arrange() override;                                                                                                                                // +0x48, 0x464d00
+	void SetMaximum(int maximum);                                                                                                                           // 0x464f40, lines 4271-4276
+	void SetCurrent(int current);                                                                                                                           // 0x4651c0, line 4289
+	void SetComplete();                                                                                                                                     // 0x465380, line 4301
 
 	int Maximum; // +0x24
 	int Current; // +0x28

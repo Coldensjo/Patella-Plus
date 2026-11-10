@@ -620,22 +620,22 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			// The party shield, then the skull (both blink when the skull is
 			// about to go); a shield of type 1 shows only while the player is
 			// in no party.
-			int Icon1 = 0, Icon2 = 0;
+			int Icon1 = SKIN_NONE, Icon2 = SKIN_NONE;
 			bool Blink = true;
 			if (Creature->PARTYFlag > PARTY_NONE) {
 				switch (Creature->PARTYFlag) {
 				case PARTY_INVITER:
 					if (!IsPlayerInParty())
-						Icon1 = 252;
+						Icon1 = SKIN_MAP_SHIELD_1;
 					break;
 				case PARTY_INVITEE:
-					Icon1 = 253;
+					Icon1 = SKIN_MAP_SHIELD_2;
 					break;
 				case PARTY_MEMBER:
-					Icon1 = 254;
+					Icon1 = SKIN_MAP_SHIELD_3;
 					break;
 				case PARTY_LEADER:
-					Icon1 = 255;
+					Icon1 = SKIN_MAP_SHIELD_4;
 					break;
 				default:
 					TERROR1B("unknown creature party flag", Creature->PARTYFlag, "[bug0001106]");
@@ -645,33 +645,33 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				int Skull;
 				switch (Creature->PKFlag) {
 				case PK_YELLOW:
-					Skull = 244;
+					Skull = SKIN_MAP_SKULL_1;
 					break;
 				case PK_GREEN:
-					Skull = 245;
+					Skull = SKIN_MAP_SKULL_2;
 					break;
 				case PK_WHITE:
-					Skull = 246;
+					Skull = SKIN_MAP_SKULL_3;
 					break;
 				case PK_RED:
-					Skull = 247;
+					Skull = SKIN_MAP_SKULL_4;
 					break;
 				default:
 					TERROR1("unknown creature PK flag", Creature->PKFlag);
 				}
 				Icon2 = Skull;
-				if (Icon1 == 0) {
+				if (Icon1 == SKIN_NONE) {
 					Icon1 = Skull;
-					Icon2 = 0;
+					Icon2 = SKIN_NONE;
 				}
 				if (Creature->SkullTime != 0) // a kept skull (issue #62: its 32 bits are negative from 2038 to 2106)
 					Blink = GetBlinkState();
 			}
-			if (Icon1 != 0) {
+			if (Icon1 != SKIN_NONE) {
 				const TSkin *Skin = &Skins()[Icon1];
 				int IconX = nx - Skin->width + 20;
 				int IconY = ny + 1;
-				if (Icon2 != 0) {
+				if (Icon2 != SKIN_NONE) {
 					Limit(IconX, 1, Width - Skin->width - 14);
 					Limit(IconY, 1, Height - Skin->height - 1);
 					DrawSkin(Surface, IconX + x, IconY + y, Skin->width, Skin->height, Icon1, 0, 0);
@@ -751,7 +751,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 
 	// The hint button while there is an event help to show.
 	if (GetShowNewHints() && GetEventHelp() != HINT_NONE && HintButton == nullptr) {
-		HintButton = new TBlinkingButton(0, 0, 61, 62, 63, 64, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
+		HintButton = new TBlinkingButton(0, 0, SKIN_HINT_BUTTON_UP1, SKIN_HINT_BUTTON_DOWN1, SKIN_HINT_BUTTON_UP2, SKIN_HINT_BUTTON_DOWN2, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
 		InsertChild(HintButton);
 		Arrange();
 		if (GetEventHelp() == HINT_FIRST_LOGIN)
@@ -1626,20 +1626,20 @@ int TMapFrame::getMinimumHeight()
 // over the rest, its pattern aligned to the frame.
 void TMapFrame::Arrange()
 {
-	DrawingList[0] = TDrawing(9, ViewX - Skins()[11].width, ViewY - Skins()[9].height,
-		Skins()[10].width + Skins()[11].width + ViewWidth, Skins()[9].height, 0, 0);
-	DrawingList[1] = TDrawing(11, ViewX - Skins()[11].width, ViewY, Skins()[11].width, Skins()[8].height + ViewHeight, 0, 0);
-	DrawingList[2] = TDrawing(10, ViewX + ViewWidth, ViewY, Skins()[10].width, Skins()[8].height + ViewHeight, 0, 0);
-	DrawingList[3] = TDrawing(8, ViewX, ViewY + ViewHeight, ViewWidth, Skins()[8].height, 0, 0);
-	const int Top = ViewY - Skins()[9].height;
-	const int Left = ViewX - Skins()[11].width;
-	const int Right = Skins()[10].width + ViewX + ViewWidth;
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, ViewX - Skins()[SKIN_FRAME_EDGE_LEFT].width, ViewY - Skins()[SKIN_FRAME_EDGE_TOP].height,
+		Skins()[SKIN_FRAME_EDGE_RIGHT].width + Skins()[SKIN_FRAME_EDGE_LEFT].width + ViewWidth, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_LEFT, ViewX - Skins()[SKIN_FRAME_EDGE_LEFT].width, ViewY, Skins()[SKIN_FRAME_EDGE_LEFT].width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height + ViewHeight, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_RIGHT, ViewX + ViewWidth, ViewY, Skins()[SKIN_FRAME_EDGE_RIGHT].width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height + ViewHeight, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, ViewX, ViewY + ViewHeight, ViewWidth, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
+	const int Top = ViewY - Skins()[SKIN_FRAME_EDGE_TOP].height;
+	const int Left = ViewX - Skins()[SKIN_FRAME_EDGE_LEFT].width;
+	const int Right = Skins()[SKIN_FRAME_EDGE_RIGHT].width + ViewX + ViewWidth;
 	const int RightWidth = Width - Right;
-	const int Bottom = Skins()[8].height + ViewY + ViewHeight;
-	DrawingList[4] = TDrawing(7, 0, 0, Width, Top, 0, 0);
-	DrawingList[5] = TDrawing(7, 0, Top, Left, Height - Top, 0, Top % Skins()[7].height);
-	DrawingList[6] = TDrawing(7, Right, Top, RightWidth, Height - Top, Right % Skins()[7].width, Top % Skins()[7].height);
-	DrawingList[7] = TDrawing(7, Left, Bottom, Width - RightWidth - Left, Height - Bottom, Left % Skins()[7].width,
-		Bottom % Skins()[7].height);
+	const int Bottom = Skins()[SKIN_FRAME_EDGE_BOTTOM].height + ViewY + ViewHeight;
+	DrawingList[4] = TDrawing(SKIN_BACKGROUND, 0, 0, Width, Top, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_BACKGROUND, 0, Top, Left, Height - Top, 0, Top % Skins()[SKIN_BACKGROUND].height);
+	DrawingList[6] = TDrawing(SKIN_BACKGROUND, Right, Top, RightWidth, Height - Top, Right % Skins()[SKIN_BACKGROUND].width, Top % Skins()[SKIN_BACKGROUND].height);
+	DrawingList[7] = TDrawing(SKIN_BACKGROUND, Left, Bottom, Width - RightWidth - Left, Height - Bottom, Left % Skins()[SKIN_BACKGROUND].width,
+		Bottom % Skins()[SKIN_BACKGROUND].height);
 }
 // NOLINTEND(cppcoreguidelines-owning-memory)

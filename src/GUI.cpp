@@ -192,7 +192,7 @@ void patella::TGUI::ExitHotkeys()
 // try block (it starts at state 35).
 void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int srcx, int srcy)
 {
-	if (skin == 0 || width == 0 || height == 0)
+	if (skin == SKIN_NONE || width == 0 || height == 0)
 		return;
 	PATELLA_ASSERT_VALUES(x>=0, x);
 	PATELLA_ASSERT_VALUES(y>=0, y);
@@ -243,7 +243,7 @@ void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int sr
 void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin, int ClipX, int ClipY,
 	int ClipWidth, int ClipHeight, int skinoffsetx, int skinoffsety)
 {
-	if (skin == 0 || width == 0 || height == 0)
+	if (skin == SKIN_NONE || width == 0 || height == 0)
 		return;
 	PATELLA_ASSERT_VALUES(In(skin,0,LASTSKIN-1), skin);
 	PATELLA_ASSERT_VALUES(width>0, width);
@@ -520,16 +520,16 @@ void InitSkinProperties()
 	SkinProperties().InventoryView.Slots[9].y = 88;
 	SkinProperties().InventoryView.Slots[9].width = 34;
 	SkinProperties().InventoryView.Slots[9].height = 34;
-	SkinProperties().InventoryView.EmptySlotSkins[0] = 88;
-	SkinProperties().InventoryView.EmptySlotSkins[1] = 89;
-	SkinProperties().InventoryView.EmptySlotSkins[2] = 90;
-	SkinProperties().InventoryView.EmptySlotSkins[3] = 91;
-	SkinProperties().InventoryView.EmptySlotSkins[4] = 93;
-	SkinProperties().InventoryView.EmptySlotSkins[5] = 92;
-	SkinProperties().InventoryView.EmptySlotSkins[6] = 94;
-	SkinProperties().InventoryView.EmptySlotSkins[7] = 95;
-	SkinProperties().InventoryView.EmptySlotSkins[8] = 96;
-	SkinProperties().InventoryView.EmptySlotSkins[9] = 97;
+	SkinProperties().InventoryView.EmptySlotSkins[0] = SKIN_EMPTY_SLOT_1;
+	SkinProperties().InventoryView.EmptySlotSkins[1] = SKIN_EMPTY_SLOT_2;
+	SkinProperties().InventoryView.EmptySlotSkins[2] = SKIN_EMPTY_SLOT_3;
+	SkinProperties().InventoryView.EmptySlotSkins[3] = SKIN_EMPTY_SLOT_4;
+	SkinProperties().InventoryView.EmptySlotSkins[4] = SKIN_EMPTY_SLOT_5;
+	SkinProperties().InventoryView.EmptySlotSkins[5] = SKIN_EMPTY_SLOT_6;
+	SkinProperties().InventoryView.EmptySlotSkins[6] = SKIN_EMPTY_SLOT_7;
+	SkinProperties().InventoryView.EmptySlotSkins[7] = SKIN_EMPTY_SLOT_8;
+	SkinProperties().InventoryView.EmptySlotSkins[8] = SKIN_EMPTY_SLOT_9;
+	SkinProperties().InventoryView.EmptySlotSkins[9] = SKIN_EMPTY_SLOT_10;
 	SkinProperties().InventoryView.Capacity.x = 74;
 	SkinProperties().InventoryView.Capacity.y = 124;
 	SkinProperties().InventoryView.Capacity.width = 34;
@@ -1795,7 +1795,7 @@ void TComponent::Draw(int Surface, int x, int y)
 {
 	int i = 0;
 	for (; i < DrawingListLength; i++) {
-		if (DrawingList[i].skin == 0)
+		if (DrawingList[i].skin == SKIN_NONE)
 			continue;
 		PATELLA_ASSERT_VALUES(DrawingList[i].skin<patella::bridge::Skins().NumberOfSkins, DrawingList[i].skin);
 		if (DrawingList[i].width == 0 && DrawingList[i].height == 0) {
@@ -1807,7 +1807,7 @@ void TComponent::Draw(int Surface, int x, int y)
 		if (DrawingList[i].x + x < 0 || DrawingList[i].y + y < 0) {
 			std::stringstream s;
 			const char *Name = " (CONSOLETEXT_CORNER_TOPRIGHT)";
-			if (DrawingList[i].skin != 170)
+			if (DrawingList[i].skin != SKIN_CONSOLETEXT_CORNER_TOPRIGHT)
 				Name = "";
 			s << "dialog origin outside main window " << "(surface: " << Surface << " x: " << x << " y: " << y
 			  << " DrawingListLength: " << DrawingListLength << " i: " << i << " DrawingList.Skin: "

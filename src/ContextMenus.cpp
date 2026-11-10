@@ -132,20 +132,20 @@ void THelpBubble::SetSize(int Width, int Height)
 // 0x43d9b0. The frame: corners 52-55, edges 56-59, the middle 60.
 void THelpBubble::Arrange()
 {
-	DrawingList[0] = TDrawing(52, 0, 0, 0, 0, 0, 0);
-	DrawingList[1] = TDrawing(58, Skins()[52].width, 0, Width - Skins()[53].width - Skins()[52].width, Skins()[58].height,
+	DrawingList[0] = TDrawing(SKIN_PANEL_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_PANEL_EDGE_TOP, Skins()[SKIN_PANEL_CORNER_TOPLEFT].width, 0, Width - Skins()[SKIN_PANEL_CORNER_TOPRIGHT].width - Skins()[SKIN_PANEL_CORNER_TOPLEFT].width, Skins()[SKIN_PANEL_EDGE_TOP].height,
 		0, 0);
-	DrawingList[2] = TDrawing(53, Width - Skins()[53].width, 0, 0, 0, 0, 0);
-	DrawingList[3] = TDrawing(56, 0, Skins()[52].height, Skins()[56].width, Height - Skins()[54].height - Skins()[52].height,
+	DrawingList[2] = TDrawing(SKIN_PANEL_CORNER_TOPRIGHT, Width - Skins()[SKIN_PANEL_CORNER_TOPRIGHT].width, 0, 0, 0, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_PANEL_EDGE_LEFT, 0, Skins()[SKIN_PANEL_CORNER_TOPLEFT].height, Skins()[SKIN_PANEL_EDGE_LEFT].width, Height - Skins()[SKIN_PANEL_CORNER_BOTTOMLEFT].height - Skins()[SKIN_PANEL_CORNER_TOPLEFT].height,
 		0, 0);
-	DrawingList[4] = TDrawing(57, Width - Skins()[57].width, Skins()[53].height, Skins()[57].width,
-		Height - Skins()[55].height - Skins()[53].height, 0, 0);
-	DrawingList[5] = TDrawing(54, 0, Height - Skins()[54].height, 0, 0, 0, 0);
-	DrawingList[6] = TDrawing(59, Skins()[54].width, Height - Skins()[59].height,
-		Width - Skins()[55].width - Skins()[54].width, Skins()[59].height, 0, 0);
-	DrawingList[7] = TDrawing(55, Width - Skins()[55].width, Height - Skins()[55].height, 0, 0, 0, 0);
-	DrawingList[8] = TDrawing(60, Skins()[56].width, Skins()[58].height, Width - Skins()[57].width - Skins()[56].width,
-		Height - Skins()[59].height - Skins()[58].height, 0, 0);
+	DrawingList[4] = TDrawing(SKIN_PANEL_EDGE_RIGHT, Width - Skins()[SKIN_PANEL_EDGE_RIGHT].width, Skins()[SKIN_PANEL_CORNER_TOPRIGHT].height, Skins()[SKIN_PANEL_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_PANEL_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_PANEL_CORNER_TOPRIGHT].height, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_PANEL_CORNER_BOTTOMLEFT, 0, Height - Skins()[SKIN_PANEL_CORNER_BOTTOMLEFT].height, 0, 0, 0, 0);
+	DrawingList[6] = TDrawing(SKIN_PANEL_EDGE_BOTTOM, Skins()[SKIN_PANEL_CORNER_BOTTOMLEFT].width, Height - Skins()[SKIN_PANEL_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_PANEL_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_PANEL_CORNER_BOTTOMLEFT].width, Skins()[SKIN_PANEL_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[7] = TDrawing(SKIN_PANEL_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_PANEL_CORNER_BOTTOMRIGHT].width, Height - Skins()[SKIN_PANEL_CORNER_BOTTOMRIGHT].height, 0, 0, 0, 0);
+	DrawingList[8] = TDrawing(SKIN_PANEL_BACKGROUND, Skins()[SKIN_PANEL_EDGE_LEFT].width, Skins()[SKIN_PANEL_EDGE_TOP].height, Width - Skins()[SKIN_PANEL_EDGE_RIGHT].width - Skins()[SKIN_PANEL_EDGE_LEFT].width,
+		Height - Skins()[SKIN_PANEL_EDGE_BOTTOM].height - Skins()[SKIN_PANEL_EDGE_TOP].height, 0, 0);
 }
 
 // 0x442110, lines 257-272. Tries eight places next to the help area (left
@@ -316,20 +316,20 @@ TContextMenu::TContextMenu()
 // 0x43ea00. The frame: corners 208-211, edges 212-215, the middle 207.
 void TContextMenu::Arrange()
 {
-	DrawingList[0] = TDrawing(208, 0, 0, 0, 0, 0, 0);
-	DrawingList[1] = TDrawing(214, Skins()[208].width, 0, Width - Skins()[209].width - Skins()[208].width,
-		Skins()[214].height, 0, 0);
-	DrawingList[2] = TDrawing(209, Width - Skins()[209].width, 0, 0, 0, 0, 0);
-	DrawingList[3] = TDrawing(212, 0, Skins()[208].height, Skins()[212].width,
-		Height - Skins()[210].height - Skins()[208].height, 0, 0);
-	DrawingList[4] = TDrawing(213, Width - Skins()[213].width, Skins()[209].height, Skins()[213].width,
-		Height - Skins()[211].height - Skins()[209].height, 0, 0);
-	DrawingList[5] = TDrawing(210, 0, Height - Skins()[210].height, 0, 0, 0, 0);
-	DrawingList[6] = TDrawing(215, Skins()[210].width, Height - Skins()[215].height,
-		Width - Skins()[211].width - Skins()[210].width, Skins()[215].height, 0, 0);
-	DrawingList[7] = TDrawing(211, Width - Skins()[211].width, Height - Skins()[211].height, 0, 0, 0, 0);
-	DrawingList[8] = TDrawing(207, Skins()[212].width, Skins()[214].height, Width - Skins()[213].width - Skins()[212].width,
-		Height - Skins()[215].height - Skins()[214].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_MENU_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_MENU_EDGE_TOP, Skins()[SKIN_MENU_CORNER_TOPLEFT].width, 0, Width - Skins()[SKIN_MENU_CORNER_TOPRIGHT].width - Skins()[SKIN_MENU_CORNER_TOPLEFT].width,
+		Skins()[SKIN_MENU_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_MENU_CORNER_TOPRIGHT, Width - Skins()[SKIN_MENU_CORNER_TOPRIGHT].width, 0, 0, 0, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_MENU_EDGE_LEFT, 0, Skins()[SKIN_MENU_CORNER_TOPLEFT].height, Skins()[SKIN_MENU_EDGE_LEFT].width,
+		Height - Skins()[SKIN_MENU_CORNER_BOTTOMLEFT].height - Skins()[SKIN_MENU_CORNER_TOPLEFT].height, 0, 0);
+	DrawingList[4] = TDrawing(SKIN_MENU_EDGE_RIGHT, Width - Skins()[SKIN_MENU_EDGE_RIGHT].width, Skins()[SKIN_MENU_CORNER_TOPRIGHT].height, Skins()[SKIN_MENU_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_MENU_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_MENU_CORNER_TOPRIGHT].height, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_MENU_CORNER_BOTTOMLEFT, 0, Height - Skins()[SKIN_MENU_CORNER_BOTTOMLEFT].height, 0, 0, 0, 0);
+	DrawingList[6] = TDrawing(SKIN_MENU_EDGE_BOTTOM, Skins()[SKIN_MENU_CORNER_BOTTOMLEFT].width, Height - Skins()[SKIN_MENU_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_MENU_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_MENU_CORNER_BOTTOMLEFT].width, Skins()[SKIN_MENU_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[7] = TDrawing(SKIN_MENU_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_MENU_CORNER_BOTTOMRIGHT].width, Height - Skins()[SKIN_MENU_CORNER_BOTTOMRIGHT].height, 0, 0, 0, 0);
+	DrawingList[8] = TDrawing(SKIN_MENU_BACKGROUND, Skins()[SKIN_MENU_EDGE_LEFT].width, Skins()[SKIN_MENU_EDGE_TOP].height, Width - Skins()[SKIN_MENU_EDGE_RIGHT].width - Skins()[SKIN_MENU_EDGE_LEFT].width,
+		Height - Skins()[SKIN_MENU_EDGE_BOTTOM].height - Skins()[SKIN_MENU_EDGE_TOP].height, 0, 0);
 }
 
 // 0x43ecf0, line 437. The entry under the mouse sends its event first.

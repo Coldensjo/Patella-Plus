@@ -886,7 +886,7 @@ void TSurfaceVulkan::StretchBlit(int ToSurface, TRect ToRect, int FromSurface, T
 		return;
 	}
 	if (Flag26)
-		DrawSkin(TEMP_SURFACE, 0, 0, FromRect.width + 1, FromRect.height + 1, 185, 0, 0);
+		DrawSkin(TEMP_SURFACE, 0, 0, FromRect.width + 1, FromRect.height + 1, SKIN_CONSOLE_BACKGROUND, 0, 0);
 	else
 		FillRectangle(TEMP_SURFACE, TRect(0, 0, FromRect.width + 1, FromRect.height + 1), Highlight);
 	Blit(TEMP_SURFACE, 0, 0, FromSurface, FromRect, ColorKey);

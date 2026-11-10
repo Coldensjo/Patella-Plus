@@ -178,7 +178,7 @@ TDialog *CreateInfoDialog(void (*OpenURL)(const char *URL))
 	Window->SetChildArea(Label, SkinProperties().InfoDialog.Label);
 	Window->SetChildArea(Separator, SkinProperties().InfoDialog.Separator);
 	Window->SetChildArea(Link, SkinProperties().InfoDialog.Link);
-	TBorder *Border = new TBorder(Window, 0, 9, 0, 11, 10, 0, 8, 0, SkinProperties().InfoDialog.Border);
+	TBorder *Border = new TBorder(Window, SKIN_NONE, SKIN_FRAME_EDGE_TOP, SKIN_NONE, SKIN_FRAME_EDGE_LEFT, SKIN_FRAME_EDGE_RIGHT, SKIN_NONE, SKIN_FRAME_EDGE_BOTTOM, SKIN_NONE, SkinProperties().InfoDialog.Border);
 	Border->FitToWindow();
 	TDialog *Dialog = new TDialog("Info", Border);
 	Dialog->SetOkButton("Ok", TCallback(Dialog, 1));
@@ -592,20 +592,20 @@ void TDialog::Arrange()
 		SetChildPosition(ExtraButton, SkinProperties().Dialog.Buttons[Button].x,
 			SkinProperties().Dialog.Buttons[Button].y);
 	}
-	DrawingList[0] = TDrawing(43, 0, 0, 0, 0, 0, 0);
-	DrawingList[1] = TDrawing(49, Skins()[43].width, 0, Width - Skins()[44].width - Skins()[43].width,
-		Skins()[49].height, 0, 0);
-	DrawingList[2] = TDrawing(44, Width - Skins()[44].width, 0, 0, 0, 0, 0);
-	DrawingList[3] = TDrawing(47, 0, Skins()[43].height, Skins()[47].width,
-		Height - Skins()[45].height - Skins()[43].height, 0, 0);
-	DrawingList[4] = TDrawing(48, Width - Skins()[48].width, Skins()[49].height, Skins()[48].width,
-		Height - Skins()[46].height - Skins()[44].height, 0, 0);
-	DrawingList[5] = TDrawing(45, 0, Height - Skins()[45].height, 0, 0, 0, 0);
-	DrawingList[6] = TDrawing(50, Skins()[45].height, Height - Skins()[50].height,
-		Width - Skins()[46].width - Skins()[45].width, Skins()[50].height, 0, 0);
-	DrawingList[7] = TDrawing(46, Width - Skins()[46].width, Height - Skins()[46].height, 0, 0, 0, 0);
-	DrawingList[8] = TDrawing(51, Skins()[47].width, Skins()[49].height, Width - Skins()[48].width - Skins()[47].width,
-		Height - Skins()[50].height - Skins()[49].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_DIALOG_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_DIALOG_EDGE_TOP, Skins()[SKIN_DIALOG_CORNER_TOPLEFT].width, 0, Width - Skins()[SKIN_DIALOG_CORNER_TOPRIGHT].width - Skins()[SKIN_DIALOG_CORNER_TOPLEFT].width,
+		Skins()[SKIN_DIALOG_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_DIALOG_CORNER_TOPRIGHT, Width - Skins()[SKIN_DIALOG_CORNER_TOPRIGHT].width, 0, 0, 0, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_DIALOG_EDGE_LEFT, 0, Skins()[SKIN_DIALOG_CORNER_TOPLEFT].height, Skins()[SKIN_DIALOG_EDGE_LEFT].width,
+		Height - Skins()[SKIN_DIALOG_CORNER_BOTTOMLEFT].height - Skins()[SKIN_DIALOG_CORNER_TOPLEFT].height, 0, 0);
+	DrawingList[4] = TDrawing(SKIN_DIALOG_EDGE_RIGHT, Width - Skins()[SKIN_DIALOG_EDGE_RIGHT].width, Skins()[SKIN_DIALOG_EDGE_TOP].height, Skins()[SKIN_DIALOG_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_DIALOG_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_DIALOG_CORNER_TOPRIGHT].height, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_DIALOG_CORNER_BOTTOMLEFT, 0, Height - Skins()[SKIN_DIALOG_CORNER_BOTTOMLEFT].height, 0, 0, 0, 0);
+	DrawingList[6] = TDrawing(SKIN_DIALOG_EDGE_BOTTOM, Skins()[SKIN_DIALOG_CORNER_BOTTOMLEFT].height, Height - Skins()[SKIN_DIALOG_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_DIALOG_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_DIALOG_CORNER_BOTTOMLEFT].width, Skins()[SKIN_DIALOG_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[7] = TDrawing(SKIN_DIALOG_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_DIALOG_CORNER_BOTTOMRIGHT].width, Height - Skins()[SKIN_DIALOG_CORNER_BOTTOMRIGHT].height, 0, 0, 0, 0);
+	DrawingList[8] = TDrawing(SKIN_DIALOG_BACKGROUND, Skins()[SKIN_DIALOG_EDGE_LEFT].width, Skins()[SKIN_DIALOG_EDGE_TOP].height, Width - Skins()[SKIN_DIALOG_EDGE_RIGHT].width - Skins()[SKIN_DIALOG_EDGE_LEFT].width,
+		Height - Skins()[SKIN_DIALOG_EDGE_BOTTOM].height - Skins()[SKIN_DIALOG_EDGE_TOP].height, 0, 0);
 }
 
 // 0x46d220, line 831
@@ -643,7 +643,7 @@ bool TDialog::MouseMove(int x, int y)
 // starts a drag.
 bool TDialog::LeftButtonDown(int x, int y, int Flags)
 {
-	if (!TWindow::LeftButtonDown(x, y, Flags) && In(x, 0, Width - 1) && In(y, 0, Skins()[49].height - 1)) {
+	if (!TWindow::LeftButtonDown(x, y, Flags) && In(x, 0, Width - 1) && In(y, 0, Skins()[SKIN_DIALOG_EDGE_TOP].height - 1)) {
 		Dragging = true;
 		DragX = x;
 		DragY = y;
@@ -1076,7 +1076,7 @@ TOutfitDialog::TOutfitDialog(const int *Data)
 	Colors[3] = Data[4];
 	TComponent::SetSize(SkinProperties().OutfitDialogWidth, SkinProperties().OutfitDialogHeight);
 	OutfitIcon = new TOutfitIcon(Outfit, DIRECTION_SOUTH, Colors.data(), &SkinProperties().OutfitDialogIconHighlight);
-	TBorder *Border = new TBorder(OutfitIcon, 0, 9, 0, 11, 10, 0, 8, 0, SkinProperties().OutfitDialogIconBorder);
+	TBorder *Border = new TBorder(OutfitIcon, SKIN_NONE, SKIN_FRAME_EDGE_TOP, SKIN_NONE, SKIN_FRAME_EDGE_LEFT, SKIN_FRAME_EDGE_RIGHT, SKIN_NONE, SKIN_FRAME_EDGE_BOTTOM, SKIN_NONE, SkinProperties().OutfitDialogIconBorder);
 	InsertChild(Border);
 	SetChildArea(Border, SkinProperties().OutfitDialogIcon);
 	TTextButton *NextButton = new TTextButton(0, 0, "Next", TCallback(this, EVENT_OUTFIT_NEXT), nullptr);
@@ -1108,7 +1108,7 @@ TOutfitDialog::TOutfitDialog(const int *Data)
 	}
 	ColorGroup.reset(new TRadioButtonGroup);
 	for (int i = 0; i < 133; i++) {
-		ColorButtons[i] = new TColorButton(0, 0, OutfitColor(i), 22, 23, TCallback(this, i + EVENT_OUTFIT_COLOR), nullptr);
+		ColorButtons[i] = new TColorButton(0, 0, OutfitColor(i), SKIN_COLOR_BUTTON_UP, SKIN_COLOR_BUTTON_DOWN, TCallback(this, i + EVENT_OUTFIT_COLOR), nullptr);
 		ColorButtons[i]->SetRadioButtonGroup(ColorGroup.get());
 		InsertChild(ColorButtons[i]);
 		SetChildPosition(ColorButtons[i], SkinProperties().OutfitDialogColorButtons.x, SkinProperties().OutfitDialogColorButtons.y);
@@ -1217,8 +1217,8 @@ TEditListDialog::TEditListDialog(int MaxLength, const char *Text, int _Type, uin
 // areas (TWindow::Arrange is not called).
 void TEditListDialog::Arrange()
 {
-	DrawingList[0] = TDrawing(217, SkinProperties().EditListDialogPicture.x, SkinProperties().EditListDialogPicture.y, Skins()[217].width,
-		Skins()[217].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_EDIT_LIST_PICTURE, SkinProperties().EditListDialogPicture.x, SkinProperties().EditListDialogPicture.y, Skins()[SKIN_EDIT_LIST_PICTURE].width,
+		Skins()[SKIN_EDIT_LIST_PICTURE].height, 0, 0);
 }
 
 // 0x471be0, line 1800
@@ -1248,10 +1248,10 @@ TIgnoreListDialog::TIgnoreListDialog()
 	InsertChild(IgnoreList);
 	SetChildArea(IgnoreList, SkinProperties().IgnoreListDialog.IgnoreList);
 	AddIgnoreButton = new TTextButton(SkinProperties().IgnoreListDialog.AddIgnoreButton.x, SkinProperties().IgnoreListDialog.AddIgnoreButton.y, "Add",
-		14, 15, TCallback(this, EVENT_IGNORE_ADD), nullptr);
+		SKIN_SMALL_BUTTON_UP, SKIN_SMALL_BUTTON_DOWN, TCallback(this, EVENT_IGNORE_ADD), nullptr);
 	InsertChild(AddIgnoreButton);
 	DeleteIgnoreButton = new TTextButton(SkinProperties().IgnoreListDialog.DeleteIgnoreButton.x, SkinProperties().IgnoreListDialog.DeleteIgnoreButton.y,
-		"Delete", 14, 15, TCallback(this, EVENT_IGNORE_DELETE), nullptr);
+		"Delete", SKIN_SMALL_BUTTON_UP, SKIN_SMALL_BUTTON_DOWN, TCallback(this, EVENT_IGNORE_DELETE), nullptr);
 	InsertChild(DeleteIgnoreButton);
 	IgnorePermanently = new TCheckBox("Ignore Permanently");
 	InsertChild(IgnorePermanently);
@@ -1317,10 +1317,10 @@ TIgnoreListDialog::TIgnoreListDialog()
 	InsertChild(WhiteList);
 	SetChildArea(WhiteList, SkinProperties().IgnoreListDialog.WhiteList);
 	AddWhiteButton = new TTextButton(SkinProperties().IgnoreListDialog.AddWhiteButton.x, SkinProperties().IgnoreListDialog.AddWhiteButton.y, "Add",
-		14, 15, TCallback(this, EVENT_WHITELIST_ADD), nullptr);
+		SKIN_SMALL_BUTTON_UP, SKIN_SMALL_BUTTON_DOWN, TCallback(this, EVENT_WHITELIST_ADD), nullptr);
 	InsertChild(AddWhiteButton);
 	DeleteWhiteButton = new TTextButton(SkinProperties().IgnoreListDialog.DeleteWhiteButton.x, SkinProperties().IgnoreListDialog.DeleteWhiteButton.y,
-		"Delete", 14, 15, TCallback(this, EVENT_WHITELIST_DELETE), nullptr);
+		"Delete", SKIN_SMALL_BUTTON_UP, SKIN_SMALL_BUTTON_DOWN, TCallback(this, EVENT_WHITELIST_DELETE), nullptr);
 	InsertChild(DeleteWhiteButton);
 	AllowPermanently = new TCheckBox("Allow Permanently");
 	InsertChild(AllowPermanently);
@@ -1816,10 +1816,10 @@ TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 	for (int i = 0; i < 11; i++) {
 		int Icon;
 		if (i == 0)
-			Icon = 0;
+			Icon = SKIN_NONE;
 		else
-			Icon = i + 217;
-		IconButtons[i] = new TIconButton(0, 0, Icon, 24, 25, NoCallback, nullptr);
+			Icon = i + SKIN_BUDDY_ICON_BASE;
+		IconButtons[i] = new TIconButton(0, 0, Icon, SKIN_ICON_BUTTON_UP, SKIN_ICON_BUTTON_DOWN, NoCallback, nullptr);
 		InsertChild(IconButtons[i]);
 		IconButtons[i]->SetRadioButtonGroup(IconGroup.get());
 		if (GetBuddyListIcon(Position) == i)
@@ -1871,37 +1871,37 @@ THelpDialog::THelpDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
 	TComponent::SetSize(SkinProperties().HelpDialog.Width, SkinProperties().HelpDialog.Height);
-	TTextButton *Button = new TTextButton(0, 0, "Client Help", 18, 19, TCallback(this, EVENT_HELP_MODE), nullptr);
+	TTextButton *Button = new TTextButton(0, 0, "Client Help", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_HELP_MODE), nullptr);
 	TLabel *Label = new TLabel(SkinProperties().Dialog.Data78, TextClientInfo);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().HelpDialog.ClientHelpButton.x, SkinProperties().HelpDialog.ClientHelpButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().HelpDialog.ClientHelpLabel.x, SkinProperties().HelpDialog.ClientHelpLabel.y);
-	Button = new TTextButton(0, 0, "Hints", 18, 19, TCallback(this, EVENT_HINTS), nullptr);
+	Button = new TTextButton(0, 0, "Hints", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_HINTS), nullptr);
 	Label = new TLabel(SkinProperties().Dialog.Data78, TextShowPreviousHints);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().HelpDialog.HintsButton.x, SkinProperties().HelpDialog.HintsButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().HelpDialog.HintsLabel.x, SkinProperties().HelpDialog.HintsLabel.y);
-	Button = new TTextButton(0, 0, "Tutor Help", 18, 19, TCallback(this, EVENT_TUTOR_HELP), nullptr);
+	Button = new TTextButton(0, 0, "Tutor Help", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_TUTOR_HELP), nullptr);
 	Label = new TLabel(SkinProperties().Dialog.Data78, TextAskTutor);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().HelpDialog.TutorHelpButton.x, SkinProperties().HelpDialog.TutorHelpButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().HelpDialog.TutorHelpLabel.x, SkinProperties().HelpDialog.TutorHelpLabel.y);
-	Button = new TTextButton(0, 0, "Rule Violation", 18, 19, TCallback(this, EVENT_REPORT), nullptr);
+	Button = new TTextButton(0, 0, "Rule Violation", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_REPORT), nullptr);
 	Label = new TLabel(SkinProperties().Dialog.Data78, TextReportRuleViolations);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().HelpDialog.RuleViolationButton.x, SkinProperties().HelpDialog.RuleViolationButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().HelpDialog.RuleViolationLabel.x, SkinProperties().HelpDialog.RuleViolationLabel.y);
-	Button = new TTextButton(0, 0, "Manual", 18, 19, TCallback(this, EVENT_MANUAL), nullptr);
+	Button = new TTextButton(0, 0, "Manual", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_MANUAL), nullptr);
 	Label = new TLabel(SkinProperties().Dialog.Data78, TextReadManual);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().HelpDialog.ManualButton.x, SkinProperties().HelpDialog.ManualButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().HelpDialog.ManualLabel.x, SkinProperties().HelpDialog.ManualLabel.y);
-	Button = new TTextButton(0, 0, "FAQ", 18, 19, TCallback(this, EVENT_FAQ), nullptr);
+	Button = new TTextButton(0, 0, "FAQ", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_FAQ), nullptr);
 	Label = new TLabel(SkinProperties().Dialog.Data78, TextReadFAQ);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().HelpDialog.FAQButton.x, SkinProperties().HelpDialog.FAQButton.y);
@@ -2211,7 +2211,7 @@ TEditMarkDialog::TEditMarkDialog(TCoordinate *_Coordinate, TMark *_Mark)
 	SetChildArea(Label, SkinProperties().EditMarkDialogTypeLabel);
 	TypeGroup.reset(new TRadioButtonGroup);
 	for (int i = 0; i < 14; i++) {
-		TypeButtons[i] = new TIconButton(0, 0, i + 74, 24, 25, NoCallback, nullptr);
+		TypeButtons[i] = new TIconButton(0, 0, i + SKIN_MARK_0, SKIN_ICON_BUTTON_UP, SKIN_ICON_BUTTON_DOWN, NoCallback, nullptr);
 		InsertChild(TypeButtons[i]);
 		TypeButtons[i]->SetRadioButtonGroup(TypeGroup.get());
 		if (Mark.Type == i)
@@ -2268,37 +2268,37 @@ void TEditMarkDialog::HandleEvent(int Event)
 TOptionsDialog::TOptionsDialog()
 {
 	TComponent::SetSize(SkinProperties().OptionsDialog.Width, SkinProperties().OptionsDialog.Height);
-	TTextButton *Button = new TTextButton(0, 0, "General", 18, 19, TCallback(this, EVENT_OPTIONS_GENERAL), nullptr);
+	TTextButton *Button = new TTextButton(0, 0, "General", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_OPTIONS_GENERAL), nullptr);
 	TLabel *Label = new TLabel(SkinProperties().Dialog.Data78, TextChangeGeneralOptions);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().OptionsDialog.GeneralButton.x, SkinProperties().OptionsDialog.GeneralButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().OptionsDialog.GeneralLabel.x, SkinProperties().OptionsDialog.GeneralLabel.y);
-	Button = new TTextButton(0, 0, "Graphics", 18, 19, TCallback(this, EVENT_OPTIONS_GRAPHICS), nullptr);
+	Button = new TTextButton(0, 0, "Graphics", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_OPTIONS_GRAPHICS), nullptr);
 	Label = new TLabel(SkinProperties().Dialog.Data78, TextChangeGraphicsOptions);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().OptionsDialog.GraphicsButton.x, SkinProperties().OptionsDialog.GraphicsButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().OptionsDialog.GraphicsLabel.x, SkinProperties().OptionsDialog.GraphicsLabel.y);
-	Button = new TTextButton(0, 0, "Console", 18, 19, TCallback(this, EVENT_OPTIONS_CONSOLE), nullptr);
+	Button = new TTextButton(0, 0, "Console", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_OPTIONS_CONSOLE), nullptr);
 	Label = new TLabel(SkinProperties().Dialog.Data78, TextCustomiseConsole);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().OptionsDialog.ConsoleButton.x, SkinProperties().OptionsDialog.ConsoleButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().OptionsDialog.ConsoleLabel.x, SkinProperties().OptionsDialog.ConsoleLabel.y);
-	Button = new TTextButton(0, 0, "Network", 18, 19, TCallback(this, EVENT_OPTIONS_NETWORK), nullptr);
+	Button = new TTextButton(0, 0, "Network", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_OPTIONS_NETWORK), nullptr);
 	Label = new TLabel(0, 0, SkinProperties().Dialog.Data78, TextChangeNetworkSettings);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().OptionsDialog.NetworkButton.x, SkinProperties().OptionsDialog.NetworkButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().OptionsDialog.NetworkLabel.x, SkinProperties().OptionsDialog.NetworkLabel.y);
-	Button = new TTextButton(0, 0, "Hotkeys", 18, 19, TCallback(this, EVENT_OPTIONS_HOTKEYS), nullptr);
+	Button = new TTextButton(0, 0, "Hotkeys", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_OPTIONS_HOTKEYS), nullptr);
 	Label = new TLabel(SkinProperties().Dialog.Data78, TextEditHotkeys);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().OptionsDialog.HotkeysButton.x, SkinProperties().OptionsDialog.HotkeysButton.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().OptionsDialog.HotkeysLabel.x, SkinProperties().OptionsDialog.HotkeysLabel.y);
-	Button = new TTextButton(0, 0, "Motd", 18, 19, TCallback(this, EVENT_OPTIONS_MOTD), nullptr);
+	Button = new TTextButton(0, 0, "Motd", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_OPTIONS_MOTD), nullptr);
 	Label = new TLabel(0, 0, SkinProperties().Dialog.Data78, TextShowMotD);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().OptionsDialog.MotdButton.x, SkinProperties().OptionsDialog.MotdButton.y);
@@ -2434,7 +2434,7 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 	Parent = _Parent;
 	Fullscreen = new TCheckBox("Fullscreen");
 	ResolutionList = new TListBox(NoCallback, NoCallback);
-	AdvancedButton = new TTextButton(0, 0, "Advanced", 18, 19, TCallback(this, EVENT_OPTIONS_ADVANCED), nullptr);
+	AdvancedButton = new TTextButton(0, 0, "Advanced", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_OPTIONS_ADVANCED), nullptr);
 	TLabel *ResolutionLabel = new TLabel(0, 0, SkinProperties().Dialog.Data78, TextAvailableResolutions);
 	TLabel *AdvancedLabel = new TLabel(0, 0, SkinProperties().Dialog.Data78, TextAdvancedSettings);
 	InsertChild(Fullscreen);
@@ -2543,13 +2543,13 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 		TextSelectDevice, true);
 	TLabel *Label = DeviceLabel;
 	DirectX5Button = new TTextButton(SkinProperties().AdvancedGraphicsDialog.DirectX5Button.x, SkinProperties().AdvancedGraphicsDialog.DirectX5Button.y,
-		"Automatic", 16, 17, TCallback(_Receiver, EVENT_DEVICE_AUTOMATIC), TextUseAutomaticDevice);
+		"Automatic", SKIN_MEDIUM_BUTTON_UP, SKIN_MEDIUM_BUTTON_DOWN, TCallback(_Receiver, EVENT_DEVICE_AUTOMATIC), TextUseAutomaticDevice);
 	DirectX5Button->SetRadioButtonGroup(EngineGroup.get());
 	DirectX9Button = new TTextButton(SkinProperties().AdvancedGraphicsDialog.DirectX9Button.x, SkinProperties().AdvancedGraphicsDialog.DirectX9Button.y,
-		"GPU", 16, 17, TCallback(_Receiver, EVENT_DEVICE_GPU), TextUseGpuDevice);
+		"GPU", SKIN_MEDIUM_BUTTON_UP, SKIN_MEDIUM_BUTTON_DOWN, TCallback(_Receiver, EVENT_DEVICE_GPU), TextUseGpuDevice);
 	DirectX9Button->SetRadioButtonGroup(EngineGroup.get());
 	OpenGLButton = new TTextButton(SkinProperties().AdvancedGraphicsDialog.OpenGLButton.x, SkinProperties().AdvancedGraphicsDialog.OpenGLButton.y,
-		"CPU", 16, 17, TCallback(_Receiver, EVENT_DEVICE_CPU), TextUseCpuDevice);
+		"CPU", SKIN_MEDIUM_BUTTON_UP, SKIN_MEDIUM_BUTTON_DOWN, TCallback(_Receiver, EVENT_DEVICE_CPU), TextUseCpuDevice);
 	OpenGLButton->SetRadioButtonGroup(EngineGroup.get());
 	InsertChild(Label);
 	InsertChild(DirectX5Button);

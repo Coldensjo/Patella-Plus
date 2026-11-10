@@ -60,11 +60,11 @@ void TSeparator::SetSize(int Width, int Height)
 void TSeparator::Arrange()
 {
 	if (!Horizontal) {
-		DrawingList[0] = TDrawing(11, 0, 0, Skins()[11].width, Height, 0, 0);
-		DrawingList[1] = TDrawing(10, Skins()[11].width, 0, Skins()[10].width, Height, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_LEFT, 0, 0, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_RIGHT, Skins()[SKIN_FRAME_EDGE_LEFT].width, 0, Skins()[SKIN_FRAME_EDGE_RIGHT].width, Height, 0, 0);
 	} else {
-		DrawingList[0] = TDrawing(9, 0, 0, Width, Skins()[9].height, 0, 0);
-		DrawingList[1] = TDrawing(8, 0, Skins()[9].height, Width, Skins()[8].height, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, 0, Skins()[SKIN_FRAME_EDGE_TOP].height, Width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
 	}
 }
 
@@ -97,9 +97,9 @@ void TResizer::SetSize(int Width, int Height)
 void TResizer::Arrange()
 {
 	if (!Invisible)
-		DrawingList[0] = TDrawing(42, 0, 0, Width, Height, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_RESIZER, 0, 0, Width, Height, 0, 0);
 	else
-		DrawingList[0] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 }
 
 // 0x453fe0, lines 113-122. The cursor is set before the assertion.
@@ -160,15 +160,15 @@ TBorder::TBorder(TComponent *_Window, int _Border)
 	Border = _Border;
 	Window = _Window;
 	TWindow::InsertChild(_Window);
-	Background = 0;
-	TopLeft = 26;
-	Top = 32;
-	TopRight = 27;
-	Left = 30;
-	Right = 31;
-	BottomLeft = 28;
-	Bottom = 33;
-	BottomRight = 29;
+	Background = SKIN_NONE;
+	TopLeft = SKIN_BORDER_CORNER_TOPLEFT;
+	Top = SKIN_BORDER_EDGE_TOP;
+	TopRight = SKIN_BORDER_CORNER_TOPRIGHT;
+	Left = SKIN_BORDER_EDGE_LEFT;
+	Right = SKIN_BORDER_EDGE_RIGHT;
+	BottomLeft = SKIN_BORDER_CORNER_BOTTOMLEFT;
+	Bottom = SKIN_BORDER_EDGE_BOTTOM;
+	BottomRight = SKIN_BORDER_CORNER_BOTTOMRIGHT;
 }
 
 // 0x454b10, lines 192-210
@@ -189,7 +189,7 @@ TBorder::TBorder(TComponent *_Window, int _TopLeft, int _Top, int _TopRight, int
 	Left = _Left;
 	BottomRight = _BottomRight;
 	BottomLeft = _BottomLeft;
-	Background = 0;
+	Background = SKIN_NONE;
 	Bottom = _Bottom;
 }
 
@@ -253,11 +253,11 @@ void TBorder::Arrange()
 		Width - Skins()[BottomRight].width - Skins()[BottomLeft].width, Skins()[Bottom].height, 0, 0);
 	DrawingList[7] = TDrawing(BottomRight, Width - Skins()[BottomRight].width, Height - Skins()[BottomRight].height, 0, 0,
 		0, 0);
-	if (Background != 0)
+	if (Background != SKIN_NONE)
 		DrawingList[8] = TDrawing(Background, Skins()[Left].width, Skins()[Top].height,
 			Width - Skins()[Right].width - Skins()[Left].width, Height - Skins()[Bottom].height - Skins()[Top].height, 0, 0);
 	else
-		DrawingList[8] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[8] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 }
 
 // --- TLabel -----------------------------------------------------------------------
@@ -609,7 +609,7 @@ void TFormattedText::Arrange()
 			Color = TRGBColor(TokenData / 36 * 51, TokenData / 6 % 6 * 51, TokenData % 6 * 51);
 			break;
 		case 15:
-			if (TokenData >= 0 && TokenData <= 262)
+			if (TokenData >= 0 && TokenData <= LASTSKIN)
 				Element = new TSkinIcon(TokenData);
 			break;
 		case 16:
@@ -673,7 +673,7 @@ TLink::TLink(const char *_Text, const char *ButtonText, const char *_Destination
 	OpenURL = _OpenURL;
 	Label = new TLabel(Font, _Text);
 	TWindow::InsertChild(Label);
-	Button = new TTextButton(0, 0, ButtonText, 18, 19, TCallback(this, 1), Destination.get());
+	Button = new TTextButton(0, 0, ButtonText, SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, 1), Destination.get());
 	TWindow::InsertChild(Button);
 }
 
@@ -774,7 +774,7 @@ void TObjectIcon::Draw(int Surface, int x, int y)
 	if (Framed) {
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
-		DrawSkin(Surface, x, y, ClipWidth, ClipHeight, 102, 0, 0);
+		DrawSkin(Surface, x, y, ClipWidth, ClipHeight, SKIN_SLOT_FRAME, 0, 0);
 		ClipX = x + SkinProperties().ObjectIconFrameWidth;
 		ClipY = y + SkinProperties().ObjectIconFrameWidth;
 		ClipWidth -= 2 * SkinProperties().ObjectIconFrameWidth;
@@ -957,7 +957,7 @@ TTextButton::TTextButton(int x, int y, const char *_Text, int _ButtonUp, int _Bu
 
 // 0x466ed0, lines 1390-1391. No try block.
 TTextButton::TTextButton(int x, int y, const char *_Text, TCallback _Callback, const char *_Tooltip)
-	: TSkinButton(x, y, 12, 13, _Callback, _Tooltip, false)
+	: TSkinButton(x, y, SKIN_BUTTON_UP, SKIN_BUTTON_DOWN, _Callback, _Tooltip, false)
 {
 	PATELLA_ASSERT(_Text!=nullptr);
 	PATELLA_ASSERT_VALUES(strlen(_Text)<50, strlen(_Text));
@@ -1131,9 +1131,9 @@ TCheckBox::TCheckBox(const char *_Text)
 void TCheckBox::Draw(int Surface, int x, int y)
 {
 	TWindow::Draw(Surface, x, y);
-	int Skin = 151 - (IsChecked() ? 1 : 0);
+	int Skin = SKIN_CHECKBOX_UNCHECKED - (IsChecked() ? 1 : 0);
 	if (!Enabled)
-		Skin = 151;
+		Skin = SKIN_CHECKBOX_UNCHECKED;
 	PATELLA_ASSERT_VALUES(x+SkinProperties().CheckBox.Item.x>=0, x);
 	PATELLA_ASSERT_VALUES(y+SkinProperties().CheckBox.Item.y>=0, y);
 	DrawSkin(Surface, x + SkinProperties().CheckBox.Item.x, y + SkinProperties().CheckBox.Item.y, Skins()[Skin].width,
@@ -1143,12 +1143,12 @@ void TCheckBox::Draw(int Surface, int x, int y)
 // 0x45a360. The catch wrapper's states without a try block.
 void TCheckBox::Arrange()
 {
-	DrawingList[0] = TDrawing(148, 0, 0, Width, Skins()[148].height, 0, 0);
-	DrawingList[1] = TDrawing(146, 0, Skins()[148].height, Skins()[146].width, Height - Skins()[148].height, 0, 0);
-	DrawingList[2] = TDrawing(147, Width - Skins()[147].width, Skins()[148].height, Skins()[147].width,
-		Height - Skins()[148].height, 0, 0);
-	DrawingList[3] = TDrawing(149, Skins()[146].width, Height - Skins()[149].height,
-		Width - Skins()[147].width - Skins()[146].width, Skins()[149].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_CHECKBOX_EDGE_TOP, 0, 0, Width, Skins()[SKIN_CHECKBOX_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_CHECKBOX_EDGE_LEFT, 0, Skins()[SKIN_CHECKBOX_EDGE_TOP].height, Skins()[SKIN_CHECKBOX_EDGE_LEFT].width, Height - Skins()[SKIN_CHECKBOX_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_CHECKBOX_EDGE_RIGHT, Width - Skins()[SKIN_CHECKBOX_EDGE_RIGHT].width, Skins()[SKIN_CHECKBOX_EDGE_TOP].height, Skins()[SKIN_CHECKBOX_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_CHECKBOX_EDGE_TOP].height, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_CHECKBOX_EDGE_BOTTOM, Skins()[SKIN_CHECKBOX_EDGE_LEFT].width, Height - Skins()[SKIN_CHECKBOX_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_CHECKBOX_EDGE_RIGHT].width - Skins()[SKIN_CHECKBOX_EDGE_LEFT].width, Skins()[SKIN_CHECKBOX_EDGE_BOTTOM].height, 0, 0);
 }
 
 // 0x4678d0, line 1768. Replaces the label by one in the enabled or disabled
@@ -1258,12 +1258,12 @@ void TEditLine::SetSize(int Width, int Height)
 // 0x45ade0. The catch wrapper's states without a try block. The frame of skins 8-11.
 void TEditLine::Arrange()
 {
-	DrawingList[0] = TDrawing(9, 0, 0, Width, Skins()[9].height, 0, 0);
-	DrawingList[1] = TDrawing(11, 0, Skins()[9].height, Skins()[11].width, Height - Skins()[9].height, 0, 0);
-	DrawingList[2] = TDrawing(10, Width - Skins()[10].width, Skins()[9].height, Skins()[10].width,
-		Height - Skins()[9].height, 0, 0);
-	DrawingList[3] = TDrawing(8, Skins()[11].width, Height - Skins()[8].height,
-		Width - Skins()[10].width - Skins()[11].width, Skins()[8].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_LEFT, 0, Skins()[SKIN_FRAME_EDGE_TOP].height, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height - Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_RIGHT, Width - Skins()[SKIN_FRAME_EDGE_RIGHT].width, Skins()[SKIN_FRAME_EDGE_TOP].height, Skins()[SKIN_FRAME_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height - Skins()[SKIN_FRAME_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_FRAME_EDGE_RIGHT].width - Skins()[SKIN_FRAME_EDGE_LEFT].width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
 }
 
 // 0x45af40, line 2014. A drag extends the selection.
@@ -1670,8 +1670,8 @@ void TEditText::Arrange()
 {
 	const int ScrollBarWidth = ScrollBar->Width;
 	SetChildArea(ScrollBar,
-		TRect(-(Skins()[10].width + ScrollBarWidth), Skins()[9].height, ScrollBarWidth,
-			Height - Skins()[11].width - Skins()[10].width));
+		TRect(-(Skins()[SKIN_FRAME_EDGE_RIGHT].width + ScrollBarWidth), Skins()[SKIN_FRAME_EDGE_TOP].height, ScrollBarWidth,
+			Height - Skins()[SKIN_FRAME_EDGE_LEFT].width - Skins()[SKIN_FRAME_EDGE_RIGHT].width));
 	FieldWidth = Width - 2 * SkinProperties().EditLineTextMargin - ScrollBar->Width;
 	FieldHeight = Height - 2 * SkinProperties().EditLineTextMargin;
 	VisibleLines = FieldHeight / GetFontLineHeight(Font.FontNumber);
@@ -2022,13 +2022,13 @@ void THorizontalScrollBarRange::SetSize(int Width, int Height)
 // on the x87 stack (double precision here).
 void THorizontalScrollBarRange::Arrange()
 {
-	DrawingList[0] = TDrawing(161, 0, 0, Width, Height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_HSCROLLBAR_TRACK, 0, 0, Width, Height, 0, 0);
 	if (!Enabled) {
-		DrawingList[1] = TDrawing(0, 0, 0, 0, 0, 0, 0);
-		DrawingList[2] = TDrawing(0, 0, 0, 0, 0, 0, 0);
-		DrawingList[3] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
+		DrawingList[2] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 	} else {
-		const int MinimumWidth = Skins()[164].width + Skins()[162].width;
+		const int MinimumWidth = Skins()[SKIN_HSCROLLBAR_SLIDER_RIGHT].width + Skins()[SKIN_HSCROLLBAR_SLIDER_LEFT].width;
 		const double Share = (double)Visible / (double)(Max - Min + Visible);
 		SliderWidth = Width;
 		if (Share < 1.0)
@@ -2038,10 +2038,10 @@ void THorizontalScrollBarRange::Arrange()
 		SliderPosition = (Value - Min) * (Width - SliderWidth) / (Max - Min);
 		if (SliderPosition + SliderWidth > Width)
 			SliderPosition = Width - SliderWidth;
-		DrawingList[1] = TDrawing(162, SliderPosition, 0, 0, 0, 0, 0);
-		DrawingList[2] = TDrawing(163, SliderPosition + Skins()[162].width, 0,
-			SliderWidth - Skins()[164].width - Skins()[162].width, Height, 0, 0);
-		DrawingList[3] = TDrawing(164, SliderPosition - Skins()[164].width + SliderWidth, 0, 0, 0, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_HSCROLLBAR_SLIDER_LEFT, SliderPosition, 0, 0, 0, 0, 0);
+		DrawingList[2] = TDrawing(SKIN_HSCROLLBAR_SLIDER_MIDDLE, SliderPosition + Skins()[SKIN_HSCROLLBAR_SLIDER_LEFT].width, 0,
+			SliderWidth - Skins()[SKIN_HSCROLLBAR_SLIDER_RIGHT].width - Skins()[SKIN_HSCROLLBAR_SLIDER_LEFT].width, Height, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_HSCROLLBAR_SLIDER_RIGHT, SliderPosition - Skins()[SKIN_HSCROLLBAR_SLIDER_RIGHT].width + SliderWidth, 0, 0, 0, 0, 0);
 	}
 }
 
@@ -2156,8 +2156,8 @@ THorizontalScrollBar::THorizontalScrollBar(int Min, int Max, int _Value, int _Vi
 	TCallback _Callback)
 {
 	PATELLA_ASSERT_VALUES(_ButtonRange>0, _ButtonRange);
-	LeftButton = new TSkinButton(0, 0, 165, 166, TCallback(this, EVENT_SCROLL_LEFT), nullptr, true);
-	RightButton = new TSkinButton(0, 0, 167, 168, TCallback(this, EVENT_SCROLL_RIGHT), nullptr, true);
+	LeftButton = new TSkinButton(0, 0, SKIN_SCROLL_LEFT_BUTTON_UP, SKIN_SCROLL_LEFT_BUTTON_DOWN, TCallback(this, EVENT_SCROLL_LEFT), nullptr, true);
+	RightButton = new TSkinButton(0, 0, SKIN_SCROLL_RIGHT_BUTTON_UP, SKIN_SCROLL_RIGHT_BUTTON_DOWN, TCallback(this, EVENT_SCROLL_RIGHT), nullptr, true);
 	TWindow::InsertChild(LeftButton);
 	TWindow::InsertChild(RightButton);
 	Range = new THorizontalScrollBarRange(Min, Max, _Value, _Visible, _Callback);
@@ -2262,13 +2262,13 @@ void TScrollBarRange::SetSize(int Width, int Height)
 // THorizontalScrollBarRange::Arrange (skins 153-156).
 void TScrollBarRange::Arrange()
 {
-	DrawingList[0] = TDrawing(153, 0, 0, Width, Height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_SCROLLBAR_TRACK, 0, 0, Width, Height, 0, 0);
 	if (!Enabled) {
-		DrawingList[1] = TDrawing(0, 0, 0, 0, 0, 0, 0);
-		DrawingList[2] = TDrawing(0, 0, 0, 0, 0, 0, 0);
-		DrawingList[3] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
+		DrawingList[2] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 	} else {
-		const int MinimumHeight = Skins()[156].height + Skins()[154].height;
+		const int MinimumHeight = Skins()[SKIN_SCROLLBAR_SLIDER_BOTTOM].height + Skins()[SKIN_SCROLLBAR_SLIDER_TOP].height;
 		const double Share = (double)Visible / (double)(Max - Min + Visible);
 		SliderHeight = Height;
 		if (Share < 1.0)
@@ -2278,10 +2278,10 @@ void TScrollBarRange::Arrange()
 		SliderPosition = (Value - Min) * (Height - SliderHeight) / (Max - Min);
 		if (SliderPosition + SliderHeight > Height)
 			SliderPosition = Height - SliderHeight;
-		DrawingList[1] = TDrawing(154, 0, SliderPosition, 0, 0, 0, 0);
-		DrawingList[2] = TDrawing(155, 0, SliderPosition + Skins()[154].height, Width,
-			SliderHeight - Skins()[156].height - Skins()[154].height, 0, 0);
-		DrawingList[3] = TDrawing(156, 0, SliderPosition - Skins()[156].height + SliderHeight, 0, 0, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_SCROLLBAR_SLIDER_TOP, 0, SliderPosition, 0, 0, 0, 0);
+		DrawingList[2] = TDrawing(SKIN_SCROLLBAR_SLIDER_MIDDLE, 0, SliderPosition + Skins()[SKIN_SCROLLBAR_SLIDER_TOP].height, Width,
+			SliderHeight - Skins()[SKIN_SCROLLBAR_SLIDER_BOTTOM].height - Skins()[SKIN_SCROLLBAR_SLIDER_TOP].height, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_SCROLLBAR_SLIDER_BOTTOM, 0, SliderPosition - Skins()[SKIN_SCROLLBAR_SLIDER_BOTTOM].height + SliderHeight, 0, 0, 0, 0);
 	}
 }
 
@@ -2387,8 +2387,8 @@ void TScrollBarRange::KeyPress(int Key)
 TScrollBar::TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, int _ButtonRange)
 {
 	PATELLA_ASSERT_VALUES(_ButtonRange>0, _ButtonRange);
-	UpButton = new TSkinButton(0, 0, 157, 158, TCallback(this, EVENT_SCROLL_UP), nullptr, true);
-	DownButton = new TSkinButton(0, 0, 159, 160, TCallback(this, EVENT_SCROLL_DOWN), nullptr, true);
+	UpButton = new TSkinButton(0, 0, SKIN_SCROLL_UP_BUTTON_UP, SKIN_SCROLL_UP_BUTTON_DOWN, TCallback(this, EVENT_SCROLL_UP), nullptr, true);
+	DownButton = new TSkinButton(0, 0, SKIN_SCROLL_DOWN_BUTTON_UP, SKIN_SCROLL_DOWN_BUTTON_DOWN, TCallback(this, EVENT_SCROLL_DOWN), nullptr, true);
 	TWindow::InsertChild(UpButton);
 	TWindow::InsertChild(DownButton);
 	Range = new TScrollBarRange(0, 0, Area.width, Area.height - DownButton->Height - UpButton->Height, Min, Max,
@@ -2498,20 +2498,20 @@ void TListBox::Arrange()
 {
 	TextWidth = Width - 2 * SkinProperties().ListBox.TextMargin - ScrollBar->Width;
 	SetChildArea(ScrollBar,
-		TRect(-(Skins()[10].width + ScrollBar->Width), Skins()[9].height, ScrollBar->Width,
-			Height - Skins()[11].width - Skins()[10].width));
+		TRect(-(Skins()[SKIN_FRAME_EDGE_RIGHT].width + ScrollBar->Width), Skins()[SKIN_FRAME_EDGE_TOP].height, ScrollBar->Width,
+			Height - Skins()[SKIN_FRAME_EDGE_LEFT].width - Skins()[SKIN_FRAME_EDGE_RIGHT].width));
 	VisibleLines = (Height - 2 * SkinProperties().ListBox.TextMargin)
 		/ GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 	if (VisibleLines < Lines)
 		ScrollBar->Range->SetRange(0, Lines - VisibleLines, ScrollBar->Range->Value, VisibleLines);
 	else
 		ScrollBar->Range->SetRange(0, 0, 0, 0);
-	DrawingList[0] = TDrawing(9, 0, 0, Width, Skins()[9].height, 0, 0);
-	DrawingList[1] = TDrawing(11, 0, Skins()[9].height, Skins()[11].width, Height - Skins()[9].height, 0, 0);
-	DrawingList[2] = TDrawing(10, Width - Skins()[10].width, Skins()[9].height, Skins()[10].width,
-		Height - Skins()[9].height, 0, 0);
-	DrawingList[3] = TDrawing(8, Skins()[11].width, Height - Skins()[8].height,
-		Width - Skins()[10].width - Skins()[11].width, Skins()[8].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_LEFT, 0, Skins()[SKIN_FRAME_EDGE_TOP].height, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height - Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_RIGHT, Width - Skins()[SKIN_FRAME_EDGE_RIGHT].width, Skins()[SKIN_FRAME_EDGE_TOP].height, Skins()[SKIN_FRAME_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height - Skins()[SKIN_FRAME_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_FRAME_EDGE_RIGHT].width - Skins()[SKIN_FRAME_EDGE_LEFT].width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
 }
 
 // 0x46a460, line 3696
@@ -2852,24 +2852,24 @@ void TFontListBox::StopEdit()
 // 259-261 the filled part (start, middle, end).
 void TProgressBar::Arrange()
 {
-	DrawingList[0] = TDrawing(256, 0, 0, Skins()[256].width, Height, 0, 0);
-	DrawingList[1] = TDrawing(257, Skins()[256].width, 0, Width - Skins()[258].width - Skins()[256].width, Height, 0, 0);
-	DrawingList[2] = TDrawing(258, Width - Skins()[258].width, 0, Skins()[258].width, Height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_PROGRESS_LEFT, 0, 0, Skins()[SKIN_PROGRESS_LEFT].width, Height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_PROGRESS_MIDDLE, Skins()[SKIN_PROGRESS_LEFT].width, 0, Width - Skins()[SKIN_PROGRESS_RIGHT].width - Skins()[SKIN_PROGRESS_LEFT].width, Height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_PROGRESS_RIGHT, Width - Skins()[SKIN_PROGRESS_RIGHT].width, 0, Skins()[SKIN_PROGRESS_RIGHT].width, Height, 0, 0);
 	int Filled = Current * Width / Maximum;
 	if (Filled < 1)
-		DrawingList[3] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 	else
-		DrawingList[3] = TDrawing(259, 0, 0, Filled, Height, 0, 0);
-	if (Filled > Width - Skins()[261].width) {
-		DrawingList[5] = TDrawing(261, Width - Skins()[261].width, 0, Skins()[261].width - Width + Filled, Height, 0, 0);
-		Filled = Width - Skins()[261].width;
+		DrawingList[3] = TDrawing(SKIN_PROGRESS_FILLED_LEFT, 0, 0, Filled, Height, 0, 0);
+	if (Filled > Width - Skins()[SKIN_PROGRESS_FILLED_RIGHT].width) {
+		DrawingList[5] = TDrawing(SKIN_PROGRESS_FILLED_RIGHT, Width - Skins()[SKIN_PROGRESS_FILLED_RIGHT].width, 0, Skins()[SKIN_PROGRESS_FILLED_RIGHT].width - Width + Filled, Height, 0, 0);
+		Filled = Width - Skins()[SKIN_PROGRESS_FILLED_RIGHT].width;
 	} else {
-		DrawingList[5] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[5] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 	}
-	if (Filled > Skins()[259].width)
-		DrawingList[4] = TDrawing(260, Skins()[259].width, 0, Filled - Skins()[259].width, Height, 0, 0);
+	if (Filled > Skins()[SKIN_PROGRESS_FILLED_LEFT].width)
+		DrawingList[4] = TDrawing(SKIN_PROGRESS_FILLED_MIDDLE, Skins()[SKIN_PROGRESS_FILLED_LEFT].width, 0, Filled - Skins()[SKIN_PROGRESS_FILLED_LEFT].width, Height, 0, 0);
 	else
-		DrawingList[4] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[4] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 }
 
 // 0x464f40, lines 4271-4276

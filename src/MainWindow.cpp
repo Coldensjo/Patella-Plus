@@ -672,22 +672,22 @@ TStartWindow::TStartWindow()
 {
 	TWindow *Panel = new TWindow;
 	Panel->SetSize(SkinProperties().StartWindow.PanelWidth, SkinProperties().StartWindow.PanelHeight);
-	TComponent *Button = new TTextButton(0, 0, "Enter Game", 0x12, 0x13, TCallback(this, EVENT_ENTER_GAME), nullptr);
+	TComponent *Button = new TTextButton(0, 0, "Enter Game", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_ENTER_GAME), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().StartWindow.EnterGameButton.x, SkinProperties().StartWindow.EnterGameButton.y);
-	Button = new TTextButton(0, 0, "Options", 0x12, 0x13, TCallback(this, EVENT_START_OPTIONS), nullptr);
+	Button = new TTextButton(0, 0, "Options", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_START_OPTIONS), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().StartWindow.OptionsButton.x, SkinProperties().StartWindow.OptionsButton.y);
-	Button = new TTextButton(0, 0, "Info", 0x12, 0x13, TCallback(this, EVENT_INFO), nullptr);
+	Button = new TTextButton(0, 0, "Info", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_INFO), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().StartWindow.InfoButton.x, SkinProperties().StartWindow.InfoButton.y);
-	Button = new TTextButton(0, 0, "Exit Game", 0x12, 0x13, TCallback(this, EVENT_EXIT_PROGRAM), nullptr);
+	Button = new TTextButton(0, 0, "Exit Game", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_EXIT_PROGRAM), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().StartWindow.ExitGameButton.x, SkinProperties().StartWindow.ExitGameButton.y);
-	Button = new TTextButton(0, 0, "Access Account", 0x12, 0x13, TCallback(this, EVENT_ACCOUNT_URL), nullptr);
+	Button = new TTextButton(0, 0, "Access Account", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_ACCOUNT_URL), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().StartWindow.AccessAccountButton.x, SkinProperties().StartWindow.AccessAccountButton.y);
-	Frame = new TBorder(Panel, 0x34, 0x3a, 0x35, 0x38, 0x39, 0x36, 0x3b, 0x37, 0x3c, SkinProperties().StartWindowBorder);
+	Frame = new TBorder(Panel, SKIN_PANEL_CORNER_TOPLEFT, SKIN_PANEL_EDGE_TOP, SKIN_PANEL_CORNER_TOPRIGHT, SKIN_PANEL_EDGE_LEFT, SKIN_PANEL_EDGE_RIGHT, SKIN_PANEL_CORNER_BOTTOMLEFT, SKIN_PANEL_EDGE_BOTTOM, SKIN_PANEL_CORNER_BOTTOMRIGHT, SKIN_PANEL_BACKGROUND, SkinProperties().StartWindowBorder);
 	InsertChild(Frame);
 	Frame->FitToWindow();
 }
@@ -744,16 +744,16 @@ TSplitter::TSplitter()
 	DrawingListLength = 3;
 	DrawingList.reset(new TDrawing[3]);
 	for (int i = 0; i < DrawingListLength; i++)
-		DrawingList[i].skin = 0;
+		DrawingList[i].skin = SKIN_NONE;
 }
 
 // 0x4ae430. Skins 8 (top), 7 (middle, stretched) and 9 (bottom). As in
 // GetConsoleWindowHeight the try block is gone.
 void TSplitter::Arrange()
 {
-	DrawingList[0] = TDrawing(8, 0, 0, Width, Skins()[8].height, 0, 0);
-	DrawingList[1] = TDrawing(7, 0, Skins()[8].height, Width, Height - Skins()[9].height - Skins()[8].height, 0, 0);
-	DrawingList[2] = TDrawing(9, 0, Height - Skins()[9].height, Width, Skins()[9].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_BACKGROUND, 0, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, Width, Height - Skins()[SKIN_FRAME_EDGE_TOP].height - Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, Height - Skins()[SKIN_FRAME_EDGE_TOP].height, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
 }
 
 // 0x4ae530, line 780. Mouse cursor 2 is the vertical size arrow. While

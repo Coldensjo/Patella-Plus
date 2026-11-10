@@ -25,6 +25,318 @@ struct TSkin {
 	int height; // +0xc
 };
 
+// The skin numbers: the index into Skins (InitSkins' table, Skins.cpp), the skin of a TDrawing and of DrawSkin, the
+// two skins of a TSkinButton. One name of the original is known, CONSOLETEXT_CORNER_TOPRIGHT, from the error text of
+// TComponent::Draw (GUI.cpp); the frames' names follow its pattern (CORNER_ and EDGE_ with the side, BACKGROUND for
+// the tiled middle). Every other name is taken from what the code that uses the skin draws with it: the pictures
+// themselves were not looked at. A button's two skins are _UP (released) and _DOWN (pressed).
+//
+// Without a name, because no code uses them by number or shows what they are: 3 (the picture of mouse cursor 3, which
+// nothing sets), 20, 21, 34-41 and 216. 152 has no entry in the table. The help texts (Help.cpp) keep their skin
+// numbers: they are arguments of std::format, which does not take an enumerator.
+//
+// Enumerators for the reason GUI.h gives at the modifier flags.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	// Nothing is drawn (DrawSkin, TComponent::Draw): an empty TDrawing, a TBorder without a corner or a background.
+	SKIN_NONE = 0,
+
+	// The mouse cursors: Control.cpp draws the skin of the mouse cursor's number (Status.cpp's GetMouseCursor).
+	SKIN_CURSOR_DEFAULT = 1,
+	SKIN_CURSOR_RESIZE = 2,   // over a TResizer and the main window's splitter
+	SKIN_CURSOR_USE_WITH = 4, // ACTIONSTATE_USE_WITH and ACTIONSTATE_TRADE_WITH
+	SKIN_CURSOR_DRAGGING = 5, // ACTIONSTATE_DRAGGING
+	SKIN_CURSOR_HELP = 6,     // ACTIONSTATE_HELP
+
+	SKIN_BACKGROUND = 7, // tiled: the map's frame, the side bar and its windows, the splitter
+
+	// The thin frame of the edit lines, the list boxes, the map and the automap; a TSeparator is the top above the
+	// bottom edge or the left beside the right one, the splitter the bottom above the top edge.
+	SKIN_FRAME_EDGE_BOTTOM = 8,
+	SKIN_FRAME_EDGE_TOP = 9,
+	SKIN_FRAME_EDGE_RIGHT = 10,
+	SKIN_FRAME_EDGE_LEFT = 11,
+
+	// The text buttons, by their widths in the table: 43 (TTextButton's own), 34, 58 and 86 pixels.
+	SKIN_BUTTON_UP = 12,
+	SKIN_BUTTON_DOWN = 13,
+	SKIN_SMALL_BUTTON_UP = 14,
+	SKIN_SMALL_BUTTON_DOWN = 15,
+	SKIN_MEDIUM_BUTTON_UP = 16,
+	SKIN_MEDIUM_BUTTON_DOWN = 17,
+	SKIN_LARGE_BUTTON_UP = 18,
+	SKIN_LARGE_BUTTON_DOWN = 19,
+	SKIN_COLOR_BUTTON_UP = 22, // TColorButton, the outfit dialog's colours
+	SKIN_COLOR_BUTTON_DOWN = 23,
+	SKIN_ICON_BUTTON_UP = 24, // TIconButton, under a buddy's icon or a mark
+	SKIN_ICON_BUTTON_DOWN = 25,
+
+	// TBorder's own frame: the side bar's, and of the free space below the side bar's windows (TDialogWindow).
+	SKIN_BORDER_CORNER_TOPLEFT = 26,
+	SKIN_BORDER_CORNER_TOPRIGHT = 27,
+	SKIN_BORDER_CORNER_BOTTOMLEFT = 28,
+	SKIN_BORDER_CORNER_BOTTOMRIGHT = 29,
+	SKIN_BORDER_EDGE_LEFT = 30,
+	SKIN_BORDER_EDGE_RIGHT = 31,
+	SKIN_BORDER_EDGE_TOP = 32,
+	SKIN_BORDER_EDGE_BOTTOM = 33,
+
+	SKIN_RESIZER = 42, // TResizer, when it is visible
+
+	// TDialog's frame; the top edge is the bar a dialog is dragged by.
+	SKIN_DIALOG_CORNER_TOPLEFT = 43,
+	SKIN_DIALOG_CORNER_TOPRIGHT = 44,
+	SKIN_DIALOG_CORNER_BOTTOMLEFT = 45,
+	SKIN_DIALOG_CORNER_BOTTOMRIGHT = 46,
+	SKIN_DIALOG_EDGE_LEFT = 47,
+	SKIN_DIALOG_EDGE_RIGHT = 48,
+	SKIN_DIALOG_EDGE_TOP = 49,
+	SKIN_DIALOG_EDGE_BOTTOM = 50,
+	SKIN_DIALOG_BACKGROUND = 51,
+
+	// The frame of the help bubble and of the start window's panel of buttons.
+	SKIN_PANEL_CORNER_TOPLEFT = 52,
+	SKIN_PANEL_CORNER_TOPRIGHT = 53,
+	SKIN_PANEL_CORNER_BOTTOMLEFT = 54,
+	SKIN_PANEL_CORNER_BOTTOMRIGHT = 55,
+	SKIN_PANEL_EDGE_LEFT = 56,
+	SKIN_PANEL_EDGE_RIGHT = 57,
+	SKIN_PANEL_EDGE_TOP = 58,
+	SKIN_PANEL_EDGE_BOTTOM = 59,
+	SKIN_PANEL_BACKGROUND = 60,
+
+	// The map window's hint button, a TBlinkingButton: its two pairs of skins.
+	SKIN_HINT_BUTTON_UP1 = 61,
+	SKIN_HINT_BUTTON_DOWN1 = 62,
+	SKIN_HINT_BUTTON_UP2 = 63,
+	SKIN_HINT_BUTTON_DOWN2 = 64,
+
+	// The automap window.
+	SKIN_COMPASS_ROSE = 65,
+	SKIN_ZOOM_IN_BUTTON_UP = 66,
+	SKIN_ZOOM_IN_BUTTON_DOWN = 67,
+	SKIN_ZOOM_OUT_BUTTON_UP = 68,
+	SKIN_ZOOM_OUT_BUTTON_DOWN = 69,
+	SKIN_HIGHER_FLOOR_BUTTON_UP = 70,
+	SKIN_HIGHER_FLOOR_BUTTON_DOWN = 71,
+	SKIN_LOWER_FLOOR_BUTTON_UP = 72,
+	SKIN_LOWER_FLOOR_BUTTON_DOWN = 73,
+	// The automap's marks: SKIN_MARK_0 plus the mark's type.
+	SKIN_MARK_0 = 74,
+	SKIN_MARK_1 = 75,
+	SKIN_MARK_2 = 76,
+	SKIN_MARK_3 = 77,
+	SKIN_MARK_4 = 78,
+	SKIN_MARK_5 = 79,
+	SKIN_MARK_6 = 80,
+	SKIN_MARK_7 = 81,
+	SKIN_MARK_8 = 82,
+	SKIN_MARK_9 = 83,
+	SKIN_MARK_10 = 84,
+	SKIN_MARK_11 = 85,
+	SKIN_MARK_12 = 86,
+	SKIN_MARK_13 = 87,
+
+	// The inventory. An empty body slot's picture, by the slot's number (SkinProperties' InventoryView.EmptySlotSkins).
+	SKIN_EMPTY_SLOT_1 = 88,
+	SKIN_EMPTY_SLOT_2 = 89,
+	SKIN_EMPTY_SLOT_3 = 90,
+	SKIN_EMPTY_SLOT_4 = 91,
+	SKIN_EMPTY_SLOT_6 = 92,
+	SKIN_EMPTY_SLOT_5 = 93,
+	SKIN_EMPTY_SLOT_7 = 94,
+	SKIN_EMPTY_SLOT_8 = 95,
+	SKIN_EMPTY_SLOT_9 = 96,
+	SKIN_EMPTY_SLOT_10 = 97,
+	SKIN_SOUL_CAPACITY_BACKGROUND = 98,  // behind each of the two numbers
+	SKIN_SMALL_INVENTORY_DROP_AREA = 99, // the small inventory's area for the body slots
+	SKIN_PLAYER_STATES_BACKGROUND = 100,
+	SKIN_PLAYER_STATES_EDGE_RIGHT = 101, // of the small inventory's row
+	SKIN_SLOT_FRAME = 102,               // around a body slot and a framed TObjectIcon
+
+	// The combat controls; the options and help buttons are the small inventory's.
+	SKIN_OFFENSIVE_BUTTON_UP = 103,
+	SKIN_OFFENSIVE_BUTTON_DOWN = 104,
+	SKIN_BALANCED_BUTTON_UP = 105,
+	SKIN_BALANCED_BUTTON_DOWN = 106,
+	SKIN_DEFENSIVE_BUTTON_UP = 107,
+	SKIN_DEFENSIVE_BUTTON_DOWN = 108,
+	SKIN_STAND_BUTTON_UP = 109,
+	SKIN_STAND_BUTTON_DOWN = 110,
+	SKIN_CHASE_BUTTON_UP = 111,
+	SKIN_CHASE_BUTTON_DOWN = 112,
+	SKIN_SECURE_BUTTON_UP = 113,
+	SKIN_SECURE_BUTTON_DOWN = 114,
+	SKIN_OPTIONS_BUTTON_UP = 115,
+	SKIN_OPTIONS_BUTTON_DOWN = 116,
+	SKIN_HELP_BUTTON_UP = 117,
+	SKIN_HELP_BUTTON_DOWN = 118,
+
+	// The status window: the picture beside each bar, the bar's background and the bar.
+	SKIN_HITPOINTS_ICON = 119,
+	SKIN_HITPOINTS_BAR_BACKGROUND = 120,
+	SKIN_HITPOINTS_BAR = 121,
+	SKIN_MANA_ICON = 122,
+	SKIN_MANA_BAR_BACKGROUND = 123,
+	SKIN_MANA_BAR = 124,
+
+	SKIN_CONTAINER_SLOT = 125, // a slot of a container and of a trade offer
+
+	// TSubWindow, a window of the side bar: its buttons, its frame and the icons of its title.
+	SKIN_HIGHER_CONTAINER_BUTTON_UP = 126,
+	SKIN_HIGHER_CONTAINER_BUTTON_DOWN = 127,
+	SKIN_SUBWINDOW_CORNER_TOPLEFT = 128,
+	SKIN_SUBWINDOW_CORNER_TOPRIGHT = 129,
+	SKIN_SUBWINDOW_CORNER_BOTTOMLEFT = 130,
+	SKIN_SUBWINDOW_CORNER_BOTTOMRIGHT = 131,
+	SKIN_SUBWINDOW_EDGE_TOP = 132,
+	SKIN_SUBWINDOW_EDGE_BOTTOM = 133,
+	SKIN_SUBWINDOW_EDGE_LEFT = 134,
+	SKIN_SUBWINDOW_EDGE_RIGHT = 135,
+	SKIN_CLOSE_BUTTON_UP = 136,
+	SKIN_CLOSE_BUTTON_DOWN = 137,
+	SKIN_MINIMISE_BUTTON_UP = 138, // also the inventory's
+	SKIN_MINIMISE_BUTTON_DOWN = 139,
+	SKIN_MAXIMISE_BUTTON_UP = 140, // of a minimised window and of the small inventory
+	SKIN_MAXIMISE_BUTTON_DOWN = 141,
+	SKIN_SKILLS_ICON = 142,
+	SKIN_VIP_ICON = 143,
+	SKIN_BATTLE_ICON = 144,
+	SKIN_TRADE_ICON = 145,
+
+	// TCheckBox: its frame and its box.
+	SKIN_CHECKBOX_EDGE_LEFT = 146,
+	SKIN_CHECKBOX_EDGE_RIGHT = 147,
+	SKIN_CHECKBOX_EDGE_TOP = 148,
+	SKIN_CHECKBOX_EDGE_BOTTOM = 149,
+	SKIN_CHECKBOX_CHECKED = 150,
+	SKIN_CHECKBOX_UNCHECKED = 151, // also a disabled one
+
+	// TScrollBar and THorizontalScrollBar: the track, the slider's three parts and the two buttons.
+	SKIN_SCROLLBAR_TRACK = 153,
+	SKIN_SCROLLBAR_SLIDER_TOP = 154,
+	SKIN_SCROLLBAR_SLIDER_MIDDLE = 155,
+	SKIN_SCROLLBAR_SLIDER_BOTTOM = 156,
+	SKIN_SCROLL_UP_BUTTON_UP = 157,
+	SKIN_SCROLL_UP_BUTTON_DOWN = 158,
+	SKIN_SCROLL_DOWN_BUTTON_UP = 159,
+	SKIN_SCROLL_DOWN_BUTTON_DOWN = 160,
+	SKIN_HSCROLLBAR_TRACK = 161,
+	SKIN_HSCROLLBAR_SLIDER_LEFT = 162,
+	SKIN_HSCROLLBAR_SLIDER_MIDDLE = 163,
+	SKIN_HSCROLLBAR_SLIDER_RIGHT = 164,
+	SKIN_SCROLL_LEFT_BUTTON_UP = 165,
+	SKIN_SCROLL_LEFT_BUTTON_DOWN = 166,
+	SKIN_SCROLL_RIGHT_BUTTON_UP = 167,
+	SKIN_SCROLL_RIGHT_BUTTON_DOWN = 168,
+
+	// The console. TConsole's frame, around a channel's text.
+	SKIN_CONSOLETEXT_CORNER_TOPLEFT = 169,
+	SKIN_CONSOLETEXT_CORNER_TOPRIGHT = 170, // the original's name
+	SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT = 171,
+	SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT = 172,
+	SKIN_CONSOLETEXT_EDGE_LEFT = 173,
+	SKIN_CONSOLETEXT_EDGE_RIGHT = 174,
+	SKIN_CONSOLETEXT_EDGE_TOP = 175,
+	SKIN_CONSOLETEXT_EDGE_BOTTOM = 176,
+	// TConsoleWindow's frame.
+	SKIN_CONSOLE_CORNER_TOPLEFT = 177,
+	SKIN_CONSOLE_CORNER_TOPRIGHT = 178,
+	SKIN_CONSOLE_CORNER_BOTTOMLEFT = 179,
+	SKIN_CONSOLE_CORNER_BOTTOMRIGHT = 180,
+	SKIN_CONSOLE_EDGE_LEFT = 181,
+	SKIN_CONSOLE_EDGE_RIGHT = 182,
+	SKIN_CONSOLE_EDGE_TOP = 183,
+	SKIN_CONSOLE_EDGE_BOTTOM = 184,
+	SKIN_CONSOLE_BACKGROUND = 185,
+	SKIN_TAB_ACTIVE = 186,
+	SKIN_TAB_INACTIVE = 187,
+	SKIN_CLOSE_CHANNEL_BUTTON_UP = 188,
+	SKIN_CLOSE_CHANNEL_BUTTON_DOWN = 189,
+	SKIN_SERVER_MESSAGES_BUTTON_UP = 190,
+	SKIN_SERVER_MESSAGES_BUTTON_DOWN = 191,
+	SKIN_IGNORE_BUTTON_UP = 192,
+	SKIN_IGNORE_BUTTON_UP_THROTTLED = 193, // while IsTalkThrottled
+	SKIN_IGNORE_BUTTON_DOWN = 194,
+	SKIN_NEW_CHANNEL_BUTTON_UP = 195,
+	SKIN_NEW_CHANNEL_BUTTON_DOWN = 196,
+	// The volume button's three states: the volume the player talks with while it shows.
+	SKIN_SAY_BUTTON_UP = 197,
+	SKIN_SAY_BUTTON_DOWN = 198,
+	SKIN_WHISPER_BUTTON_UP = 199,
+	SKIN_WHISPER_BUTTON_DOWN = 200,
+	SKIN_YELL_BUTTON_UP = 201,
+	SKIN_YELL_BUTTON_DOWN = 202,
+	SKIN_TABS_RIGHT_BUTTON_UP = 203, // "Move channels to the right"
+	SKIN_TABS_RIGHT_BUTTON_DOWN = 204,
+	SKIN_TABS_LEFT_BUTTON_UP = 205,
+	SKIN_TABS_LEFT_BUTTON_DOWN = 206,
+
+	// TContextMenu's frame.
+	SKIN_MENU_BACKGROUND = 207,
+	SKIN_MENU_CORNER_TOPLEFT = 208,
+	SKIN_MENU_CORNER_TOPRIGHT = 209,
+	SKIN_MENU_CORNER_BOTTOMLEFT = 210,
+	SKIN_MENU_CORNER_BOTTOMRIGHT = 211,
+	SKIN_MENU_EDGE_LEFT = 212,
+	SKIN_MENU_EDGE_RIGHT = 213,
+	SKIN_MENU_EDGE_TOP = 214,
+	SKIN_MENU_EDGE_BOTTOM = 215,
+
+	SKIN_EDIT_LIST_PICTURE = 217, // the picture in TEditListDialog
+	// A buddy's icon: SKIN_BUDDY_ICON_BASE plus the icon's number, 1-10 (icon 0 is no icon).
+	SKIN_BUDDY_ICON_BASE = 217,
+	SKIN_BUDDY_ICON_1 = 218,
+	SKIN_BUDDY_ICON_2 = 219,
+	SKIN_BUDDY_ICON_3 = 220,
+	SKIN_BUDDY_ICON_4 = 221,
+	SKIN_BUDDY_ICON_5 = 222,
+	SKIN_BUDDY_ICON_6 = 223,
+	SKIN_BUDDY_ICON_7 = 224,
+	SKIN_BUDDY_ICON_8 = 225,
+	SKIN_BUDDY_ICON_9 = 226,
+	SKIN_BUDDY_ICON_10 = 227,
+
+	// The player's states in the inventory (TPlayerStates::GetIcon). A skull's and a shield's number is the
+	// creature's PKFlag or PARTYFlag.
+	SKIN_STATE_POISONED = 228,
+	SKIN_STATE_BURNING = 229,
+	SKIN_STATE_ELECTRIFIED = 230,
+	SKIN_STATE_DRUNK = 231,
+	SKIN_STATE_MANA_SHIELD = 232,
+	SKIN_STATE_PARALYZED = 233,
+	SKIN_STATE_HASTED = 234,
+	SKIN_STATE_IN_FIGHT = 235,
+	SKIN_STATE_SKULL_1 = 236,
+	SKIN_STATE_SKULL_2 = 237,
+	SKIN_STATE_SKULL_3 = 238,
+	SKIN_STATE_SKULL_4 = 239,
+	// A creature's skull and party shield, in the battle window and above the creature on the map.
+	SKIN_BATTLE_SKULL_1 = 240,
+	SKIN_BATTLE_SKULL_2 = 241,
+	SKIN_BATTLE_SKULL_3 = 242,
+	SKIN_BATTLE_SKULL_4 = 243,
+	SKIN_MAP_SKULL_1 = 244,
+	SKIN_MAP_SKULL_2 = 245,
+	SKIN_MAP_SKULL_3 = 246,
+	SKIN_MAP_SKULL_4 = 247,
+	SKIN_BATTLE_SHIELD_1 = 248, // shown only while the player is in no party
+	SKIN_BATTLE_SHIELD_2 = 249,
+	SKIN_BATTLE_SHIELD_3 = 250,
+	SKIN_BATTLE_SHIELD_4 = 251,
+	SKIN_MAP_SHIELD_1 = 252, // shown only while the player is in no party
+	SKIN_MAP_SHIELD_2 = 253,
+	SKIN_MAP_SHIELD_3 = 254,
+	SKIN_MAP_SHIELD_4 = 255,
+
+	// TProgressBar: the empty bar's three parts and the filled bar's.
+	SKIN_PROGRESS_LEFT = 256,
+	SKIN_PROGRESS_MIDDLE = 257,
+	SKIN_PROGRESS_RIGHT = 258,
+	SKIN_PROGRESS_FILLED_LEFT = 259,
+	SKIN_PROGRESS_FILLED_MIDDLE = 260,
+	SKIN_PROGRESS_FILLED_RIGHT = 261,
+};
+
 // --- Skin properties (GUI.h's until issue #116) ---------------------------
 
 struct TGUIPoint {
