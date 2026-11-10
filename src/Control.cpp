@@ -1131,7 +1131,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		Preferences().Init(::Talk());
 		::Talk().Init();
 		Graphics().Init(0xa00000);
-		SkinData().InitSkins();
+		SkinData().Init();
 		InitSkinProperties();
 		::Network().Init([] { GUI().ConnectionEstablished(); }, [] { GUI().ReceivePackets(); },
 			[] { GUI().ConnectionClosed(); });
@@ -1156,7 +1156,7 @@ void patella::TGUI::ExitControl()
 	ExitHotkeys();
 	::Communication().Exit();
 	::Network().Exit();
-	SkinData().ExitSkins();
+	SkinData().Exit();
 	Graphics().Exit();
 	TSurface *const Current = GraphicsEngine().GetSurface();
 	if (Current != nullptr)

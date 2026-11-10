@@ -10,7 +10,7 @@
 #include <array>
 #include <memory>
 
-// Number of skin entries; the terminator of the table in InitSkins.
+// Number of skin entries; the terminator of the table in TSkins::Init.
 inline constexpr int LASTSKIN = 262;
 
 // One rectangle in the GUI picture.
@@ -21,7 +21,7 @@ struct TSkin {
 	int height;
 };
 
-// The skin numbers: the index into Skins (InitSkins' table, Skins.cpp), the skin of a TDrawing and of DrawSkin, the
+// The skin numbers: the index into Skins (TSkins::Init's table, Skins.cpp), the skin of a TDrawing and of DrawSkin, the
 // two skins of a TSkinButton. One name of the original is known, CONSOLETEXT_CORNER_TOPRIGHT, from the error text of
 // TComponent::Draw (GUI.cpp); the frames' names follow its pattern (CORNER_ and EDGE_ with the side, BACKGROUND for
 // the tiled middle). Every other name is taken from what the code that uses the skin draws with it: the pictures
@@ -904,8 +904,8 @@ public:
 	TSkins &operator=(TSkins &&) = delete;
 	~TSkins() = default;
 
-	void InitSkins();
-	void ExitSkins();
+	void Init();
+	void Exit();
 
 	// Skins.cpp's data, then GUI.cpp's.
 	int NumberOfSkins{};

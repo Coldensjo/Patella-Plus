@@ -235,7 +235,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 
 // --- Skin properties ------------------------------------------------------
 
-// Called by InitControl after InitSkins.
+// Called by InitControl after TSkins::Init.
 void InitSkinProperties()
 {
 	SkinProperties().CursorHotspot1.x = 0;

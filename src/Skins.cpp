@@ -14,7 +14,7 @@
 // Odd behaviour kept from the binary: the loop stops one entry before the
 // LASTSKIN terminator, and no entry has skin number 152, so Skins[152] stays
 // uninitialised.
-void patella::TSkins::InitSkins()
+void patella::TSkins::Init()
 {
 	const struct { // NOLINT(modernize-avoid-c-arrays): the binary's table of an unnamed type, sized by its entries
 		int skin;
@@ -284,7 +284,7 @@ void patella::TSkins::InitSkins()
 		{LASTSKIN, {0, 0, 0, 0}},
 	};
 	NumberOfSkins = LASTSKIN;
-	// Stored over a table it may still hold (InitSkins twice): the old one is dropped unfreed, as in the original.
+	// Stored over a table it may still hold (TSkins::Init twice): the old one is dropped unfreed, as in the original.
 	static_cast<void>(Skins.release()); // NOLINT(bugprone-unused-return-value): the leak is the original's
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): unique_ptr<T[]>::reset, a template, is not among its owners
 	Skins.reset(new TSkin[NumberOfSkins]);
@@ -292,7 +292,7 @@ void patella::TSkins::InitSkins()
 		Skins[SkinTable[i].skin] = SkinTable[i].Rect;
 }
 
-void patella::TSkins::ExitSkins()
+void patella::TSkins::Exit()
 {
 	Skins.reset();
 	Skins = nullptr;
