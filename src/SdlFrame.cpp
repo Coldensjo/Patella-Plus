@@ -764,8 +764,8 @@ void OnWheel(const SDL_MouseWheelEvent &Event)
 	const int Notches = Wheel.Notches(static_cast<int>(std::lround(Distance)));
 	for (int i = 0; i < std::abs(Notches); i++) {
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
-		const int MouseY = GetMouseY();
-		MouseWheel(GetMouseX(), MouseY, Notches > 0 ? 1 : 2);
+		const int MouseY = Interaction().GetMouseY();
+		MouseWheel(Interaction().GetMouseX(), MouseY, Notches > 0 ? 1 : 2);
 	}
 }
 
@@ -1211,7 +1211,7 @@ void UpdateMouseCursor()
 	SDL_Cursor *Cursor = nullptr;
 	if (GetWindowsMousepointer()) {
 		Cursor = DefaultCursor;
-		switch (GetMouseCursor()) {
+		switch (Interaction().GetMouseCursor()) {
 		case CURSOR_ARROW: Cursor = ArrowCursor; break;
 		case CURSOR_SIZENS: Cursor = SizeCursor; break;
 		case CURSOR_WAIT: Cursor = WaitCursor; break;

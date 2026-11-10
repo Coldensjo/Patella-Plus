@@ -113,7 +113,7 @@ void patella::TGUI::ExitMainWindow()
 	MainWindow.reset();
 	if (ModalWindow != nullptr) {
 		DeleteComponent(ModalWindow);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 	}
 	ModalWindow = nullptr;
 }
@@ -151,7 +151,7 @@ void TMainWindow::Draw(int Surface, int x, int y)
 void TMainWindow::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
-	SetWindowSize(Width, Height);
+	Interaction().SetWindowSize(Width, Height);
 	if (InGame) {
 		const int SplitterHeight = Splitter->Height;
 		int MaxMapHeight = MapFrame->GetMinimumHeight();
@@ -221,10 +221,10 @@ void TMainWindow::HandleEvent(int Event)
 	const patella::TGUI &GUI = ::GUI();
 	switch (Event) {
 	case EVENT_COPY_LINK:
-		CopyTaintedClipboardText();
+		Interaction().CopyTaintedClipboardText();
 		[[fallthrough]];
 	case EVENT_CANCEL:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_EXIT_PROGRAM:
 		GUI.ExitProgramCallback();
@@ -280,7 +280,7 @@ void TMainWindow::HandleEvent(int Event)
 			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
 		SetConnectionState(CONNECTION_OFFLINE);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_STOP:
 		PlayerState().ClearPlayerSteps();
@@ -307,7 +307,7 @@ void TMainWindow::HandleEvent(int Event)
 		}
 		break;
 	case EVENT_LOGOUT:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		SendLogout();
 		break;
 	case EVENT_LEAVE_QUESTION: {
@@ -327,7 +327,7 @@ void TMainWindow::HandleEvent(int Event)
 		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
 		break;
 	case EVENT_HELP_MODE:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_TUTOR_HELP:
@@ -733,7 +733,7 @@ void TSplitter::Arrange()
 bool TSplitter::MouseMove([[maybe_unused]] int x, int y)
 {
 	const patella::TGUI &GUI = ::GUI();
-	SetMouseCursor(CURSOR_SIZENS);
+	Interaction().SetMouseCursor(CURSOR_SIZENS);
 	if (Dragging) {
 		GUI.MainWindow->ResizeConsole(DragY - y + GUI.MainWindow->GetConsoleWindowHeight());
 		GUI.MainWindow->SetSize(GUI.MainWindow->Width, GUI.MainWindow->Height);
@@ -767,7 +767,7 @@ void patella::TGUI::InitMainWindow(int Width, int Height, void (*ExitProgram)(),
 	std::unique_ptr<TMainWindow> Made(new TMainWindow(Width, Height));
 	(void)MainWindow.release(); // NOLINT(bugprone-unused-return-value): the original stored over it (set only once)
 	MainWindow = std::move(Made);
-	PATELLA_ASSERT_VALUES(GetActionState()==ACTIONSTATE_NONE, GetActionState());
+	PATELLA_ASSERT_VALUES(Interaction.GetActionState()==ACTIONSTATE_NONE, Interaction.GetActionState());
 	ExitProgramCallback = ExitProgram;
 	ModalWindow = nullptr;
 	SetDisplayModeCallback = SetDisplayMode;

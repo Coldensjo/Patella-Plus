@@ -246,7 +246,7 @@ TDialog *CreateInfoDialog(void (*OpenURL)(const char *URL))
 TDialog *CreateMoveObjectsDialog()
 {
 	int Unused;
-	const TObject *Obj = GetDragObject(&Unused, &Unused, &Unused, &Unused);
+	const TObject *Obj = Interaction().GetDragObject(&Unused, &Unused, &Unused, &Unused);
 	if (*Obj != 0 && Obj->Data >= 1 && Obj->Data <= 100) {
 		TMoveObjectsDialog *Body = new TMoveObjectsDialog();
 		TDialog *Dialog = new TDialog("Move Objects", Body);
@@ -254,7 +254,7 @@ TDialog *CreateMoveObjectsDialog()
 		Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
 		return Dialog;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 	return nullptr;
 }
 
@@ -665,8 +665,8 @@ bool TDialog::MouseMove(int x, int y)
 		return TWindow::MouseMove(x, y);
 	int NewX = OffsetX - DragX + x;
 	int NewY = OffsetY - DragY + y;
-	Limit(&NewX, 0, GetWindowWidth() - Width);
-	Limit(&NewY, 0, GetWindowHeight() - Height);
+	Limit(&NewX, 0, Interaction().GetWindowWidth() - Width);
+	Limit(&NewY, 0, Interaction().GetWindowHeight() - Height);
 	SetPosition(NewX, NewY);
 	return true;
 }
@@ -694,7 +694,7 @@ bool TDialog::LeftButtonUp(int x, int y, int Flags)
 // every other.
 void TDialog::HandleEvent([[maybe_unused]] int Event)
 {
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TQuestionLabel, TLogoutLabel ----------------------------------------------
@@ -711,12 +711,12 @@ void TLogoutLabel::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN || Key == 'l' || Key == 'L') {
 		LogoutCallback.Send();
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
 	if (Key == 'e' || Key == 'E')
 		ExitCallback.Send();
 	if (Key == KEY_ESCAPE || Key == 'c' || Key == 'C')
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TWaitLabel ---------------------------------------------------------------------
@@ -734,15 +734,15 @@ void TWaitLabel::HandleEvent(int Event)
 		if (!Timer->IsExpired())
 			return;
 	} else if (Event == EVENT_ABORT && ClearOnAbort) {
-		ClearMessages();
+		Interaction().ClearMessages();
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 void TWaitLabel::Draw(int Surface, int x, int y)
 {
 	TLabel::Draw(Surface, x, y);
-	if (CloseOnMessage && PeekMessageType() != 0)
+	if (CloseOnMessage && Interaction().PeekMessageType() != 0)
 		HandleEvent(EVENT_ABORT);
 }
 
@@ -793,8 +793,8 @@ void TReconnectWindow::SetTime(int Time)
 void TReconnectWindow::Draw(int Surface, int x, int y)
 {
 	TWindow::Draw(Surface, x, y);
-	if (PeekMessageType() != 0)
-		SetActionState(ACTIONSTATE_NONE);
+	if (Interaction().PeekMessageType() != 0)
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // When the time is up it logs out of a running game (states 7 and 8) or
@@ -820,7 +820,7 @@ void TReconnectWindow::HandleEvent(int Event)
 			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
 			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -872,7 +872,7 @@ void TLoginDialog::HandleEvent(int Event)
 		AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
 		AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TCharacterListDialog ------------------------------------------------------
@@ -987,7 +987,7 @@ void TCharacterListDialog::HandleEvent(int Event)
 	} else if (Event == EVENT_TIMER && !Timer->IsExpired()) {
 		return;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 void TCharacterListDialog::SetTimeout(int seconds)
@@ -1002,8 +1002,8 @@ void TCharacterListDialog::SetTimeout(int seconds)
 TMoveObjectsDialog::TMoveObjectsDialog()
 {
 	LastDigit = 0;
-	DraggedObject = *GetDragObject(&SourceIndex, &SourceX, &SourceY, &SourceZ);
-	GetDragTarget(&DestinationX, &DestinationY, &DestinationZ);
+	DraggedObject = *Interaction().GetDragObject(&SourceIndex, &SourceX, &SourceY, &SourceZ);
+	Interaction().GetDragTarget(&DestinationX, &DestinationY, &DestinationZ);
 	PATELLA_ASSERT(DraggedObject!=0);
 	PATELLA_ASSERT_VALUES(In(DraggedObject.Data,1,100), DraggedObject.Data, DraggedObject);
 	TComponent::SetSize(SkinProperties().MoveObjectsDialogWidth, SkinProperties().MoveObjectsDialogHeight);
@@ -1067,7 +1067,7 @@ void TMoveObjectsDialog::HandleEvent(int Event)
 			SendMoveObject(SourceX, SourceY, SourceZ, DraggedObject.Type, SourceIndex, DestinationX, DestinationY,
 				DestinationZ, Count);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TOutfitDialog ------------------------------------------------------------------
@@ -1168,9 +1168,9 @@ void TOutfitDialog::HandleEvent(int Event)
 		OutfitIcon->Arrange();
 	} else if (Event == 1) {
 		SendOutfit(Outfit, Colors.data());
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	} else if (Event == EVENT_CANCEL) {
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -1206,7 +1206,7 @@ void TTextDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
 		SendEditText(ObjectNumber, EditText->Text.get());
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TEditListDialog ----------------------------------------------------------
@@ -1245,7 +1245,7 @@ void TEditListDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
 		SendEditHouseText(Type, Identifier, EditText->Text.get());
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TIgnoreListDialog --------------------------------------------------------
@@ -1537,7 +1537,7 @@ void TIgnoreListDialog::HandleEvent(int Event)
 			AllowPermanently->SetChecked(WhiteEntries(Selection).Permanent);
 		}
 	} else {
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -1607,7 +1607,7 @@ void TBugReportDialog::HandleEvent(int Event)
 		if (strlen(Text) != 0)
 			SendBugReport(Text);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TNewChannelDialog -----------------------------------------------------------
@@ -1684,7 +1684,7 @@ void TNewChannelDialog::HandleEvent(int Event)
 				SendJoinChannel(ChannelID);
 		}
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TPrivateChannelDialog -------------------------------------------------------
@@ -1724,7 +1724,7 @@ void TPrivateChannelDialog::HandleEvent(int Event)
 				SendExcludeFromPrivateChannel(Name);
 		}
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TReportDialog ----------------------------------------------------------------
@@ -1761,7 +1761,7 @@ void TReportDialog::HandleEvent(int Event)
 		TStringBuffer(Text, Size).Assign(TextEdit->Text.get());
 		AddMessage(MESSAGE_REPORT_RULE_VIOLATION, reinterpret_cast<std::intptr_t>(Text), 0);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TAddBuddyDialog ------------------------------------------------------------
@@ -1796,7 +1796,7 @@ void TAddBuddyDialog::HandleEvent(int Event)
 		if (strlen(Name) != 0)
 			SendAddBuddy(Name);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TEditBuddyDialog -----------------------------------------------------------
@@ -1860,7 +1860,7 @@ void TEditBuddyDialog::HandleEvent(int Event)
 		}
 		Creatures().EditBuddy(CharacterID, Icon, Description->Text.get(), Notify->IsChecked());
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- THelpDialog -------------------------------------------------------------------
@@ -1923,32 +1923,32 @@ void THelpDialog::HandleEvent(int Event)
 	switch (Event) {
 	case 1:
 	case EVENT_CANCEL:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_HELP_MODE:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_HINTS:
 		AddMessage(MESSAGE_HINTS_DIALOG, 0, 0);
 		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_TUTOR_HELP:
 		SendJoinChannel(7);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_REPORT:
 		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_MANUAL:
 		OpenURL(TextManualURL);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_FAQ:
 		OpenURL(TextFAQURL);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -2001,10 +2001,10 @@ void THintsDialog::HandleEvent(int Event)
 		const std::size_t Size = strlen(HelpText) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(HelpText);
-		AddMessageFirst(MESSAGE_HINTS_DIALOG, 0, 0);
-		AddMessageFirst(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(Help().GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
+		Interaction().AddMessageFirst(MESSAGE_HINTS_DIALOG, 0, 0);
+		Interaction().AddMessageFirst(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(Help().GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TRuleViolationDialog --------------------------------------------------------
@@ -2135,7 +2135,7 @@ void TRuleViolationDialog::HandleEvent(int Event)
 	default:
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // The actions the reason allows; the statement line is enabled for reasons
@@ -2250,7 +2250,7 @@ void TEditMarkDialog::HandleEvent(int Event)
 	} else if (Event != EVENT_CANCEL) {
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TOptionsDialog -----------------------------------------------------------------
@@ -2346,7 +2346,7 @@ void TOptionsDialog::HandleEvent(int Event)
 	default:
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TGeneralOptionsDialog ------------------------------------------------------
@@ -2399,10 +2399,10 @@ void TGeneralOptionsDialog::HandleEvent(int Event)
 		SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
 		SetTextualEffects(TextualEffects->IsChecked());
 		SetDragFullStacks(DragFullStacks->IsChecked());
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_CANCEL:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_HELP:
 		OpenURL(TextOptionsURL);
@@ -2499,13 +2499,13 @@ void TGraphicsOptionsDialog::HandleEvent(int Event)
 		if (Fullscreen->IsChecked())
 			GUI().Resize(0, 0); // Control.cpp's
 	} else if (Event == EVENT_OPTIONS_ADVANCED) {
-		AddMessageFirst(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
-		AddMessageFirst(MESSAGE_ADVANCED_GRAPHICS_DIALOG, reinterpret_cast<std::intptr_t>(Parent), 0);
+		Interaction().AddMessageFirst(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessageFirst(MESSAGE_ADVANCED_GRAPHICS_DIALOG, reinterpret_cast<std::intptr_t>(Parent), 0);
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextGraphicsOptionsURL);
 		return;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TAdvancedGraphicsDialog ------------------------------------------------------
@@ -2647,7 +2647,7 @@ void TAdvancedGraphicsDialog::HandleEvent(int Event)
 	} else if (Event == EVENT_CANCEL) {
 		GraphicsEngine().GetSurface()->SetFramerateLimit(GetConfineFramerate());
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TConsoleOptionsDialog --------------------------------------------------------
@@ -2692,7 +2692,7 @@ void TConsoleOptionsDialog::HandleEvent(int Event)
 		OpenURL(TextConsoleOptionsURL);
 		return;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TNetworkOptionsDialog ---------------------------------------------------------
@@ -2716,7 +2716,7 @@ void TNetworkOptionsDialog::HandleEvent(int Event)
 		OpenURL(TextNetworkOptionsURL);
 		return;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- THotkeyDialog -------------------------------------------------------------------
@@ -2811,12 +2811,12 @@ void THotkeyDialog::HandleEvent(int Event)
 			AutoSend[Selected] = AutoSendCheckBox->IsChecked();
 		for (int i = 0; i < HOTKEYS; i++)
 			SetHotkey(i, Texts[i], AutoSend[i]);
-		SetActionState(ACTIONSTATE_NONE);
-		if (PeekMessageType() != MESSAGE_OPTIONS_DIALOG)
+		Interaction().SetActionState(ACTIONSTATE_NONE);
+		if (Interaction().PeekMessageType() != MESSAGE_OPTIONS_DIALOG)
 			SavePreferences();
 		break;
 	case EVENT_CANCEL:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_LIST_SELECTED:
 		if (Selected != -1)

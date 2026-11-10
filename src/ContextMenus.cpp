@@ -177,7 +177,7 @@ void THelpBubble::Place(TWindow *Window)
 		Found = FitsIn(newX, newY, w, h, Window);
 	}
 	if (!Found) {
-		if (GetMouseX() < Window->Width / 2) {
+		if (Interaction().GetMouseX() < Window->Width / 2) {
 			newX = Window->Width - w - Margin;
 			newY = Margin;
 			PATELLA_ASSERT_VALUES(newX>=0, newX);
@@ -238,7 +238,7 @@ TContextMenuEntry::TContextMenuEntry(const char *_Text, const char *_Shortcut, T
 // the line); the shortcut is right-aligned.
 void TContextMenuEntry::Draw(int Surface, int x, int y)
 {
-	if (In(GetMouseX() - x, 0, Width - 1) && In(GetMouseY() - y, 0, Height - 1)) {
+	if (In(Interaction().GetMouseX() - x, 0, Width - 1) && In(Interaction().GetMouseY() - y, 0, Height - 1)) {
 		GraphicsEngine().GetSurface()->FillRectangle(Surface,
 			TRect(x, y, Width,
 				GetFontHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2),
@@ -302,13 +302,13 @@ void TContextMenu::Arrange()
 bool TContextMenu::LeftButtonUp(int x, int y, int Flags)
 {
 	TWindow::LeftButtonUp(x, y, Flags);
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 	return true;
 }
 
 bool TContextMenu::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 	return true;
 }
 
@@ -316,7 +316,7 @@ bool TContextMenu::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y,
 void TContextMenu::KeyPress(int Key)
 {
 	if (Key == KEY_ESCAPE)
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // Opens the menu at x, y, or left of and above it where it would reach the
@@ -381,9 +381,9 @@ void TContextMenu::AddSeparator()
 // reads the flags of the used object even when there is none (type 0).
 TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int ParentHeight)
 {
-	LookedObject = *GetTradeObject(&LookedObjectIndex, &LookedObjectX, &LookedObjectY, &LookedObjectZ);
-	UsedObject = *GetUseObject(&UsedObjectIndex, &UsedObjectX, &UsedObjectY, &UsedObjectZ);
-	CreatureID = GetTradeInfo();
+	LookedObject = *Interaction().GetTradeObject(&LookedObjectIndex, &LookedObjectX, &LookedObjectY, &LookedObjectZ);
+	UsedObject = *Interaction().GetUseObject(&UsedObjectIndex, &UsedObjectX, &UsedObjectY, &UsedObjectZ);
+	CreatureID = Interaction().GetTradeInfo();
 	PATELLA_ASSERT(LookedObject!=0);
 	const bool ClassicControl = GetClassicControl();
 	AddEntry(EVENT_MENU_LOOK, "Look", ClassicControl ? nullptr : "(Shift)");
@@ -568,7 +568,7 @@ void TObjectContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_COPY: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			CopyToClipboard(Creature->Name);
+			Interaction().CopyToClipboard(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_INVITE_PARTY: {
@@ -736,7 +736,7 @@ void TCreatureContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_COPY: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			CopyToClipboard(Creature->Name);
+			Interaction().CopyToClipboard(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_INVITE_PARTY: {
@@ -839,7 +839,7 @@ void TBuddyContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_COPY_NAME: {
 		const int Position = Creatures().GetBuddyPosition(CharacterID);
 		if (Position != -1)
-			CopyToClipboard(Creatures().GetBuddyListName(Position));
+			Interaction().CopyToClipboard(Creatures().GetBuddyListName(Position));
 		break;
 	}
 	case EVENT_MENU_REMOVE_VIP:
@@ -974,16 +974,16 @@ void TTextContextMenu::HandleEvent(int Event)
 		break;
 	case EVENT_MENU_COPY_NAME:
 		if (Speaker != nullptr)
-			CopyToClipboard(Speaker);
+			Interaction().CopyToClipboard(Speaker);
 		break;
 	case EVENT_MENU_COPY_MESSAGE:
 		if (Line != nullptr)
-			CopyToClipboard(Line->GetText());
+			Interaction().CopyToClipboard(Line->GetText());
 		break;
 	case EVENT_MENU_COPY: {
 		const char *Selection = TextWindow->GetSelectedText();
 		if (Selection != nullptr)
-			CopyToClipboard(Selection);
+			Interaction().CopyToClipboard(Selection);
 		break;
 	}
 	case EVENT_MENU_SELECT_ALL:
@@ -1051,10 +1051,10 @@ void TRequestContextMenu::HandleEvent(int Event)
 			SendCloseRuleViolation(Name);
 			break;
 		case EVENT_MENU_COPY_NAME:
-			CopyToClipboard(Name);
+			Interaction().CopyToClipboard(Name);
 			break;
 		case EVENT_MENU_COPY_MESSAGE:
-			CopyToClipboard(Line->GetText());
+			Interaction().CopyToClipboard(Line->GetText());
 			break;
 		case EVENT_MENU_RULE_VIOLATION:
 			if (Session().CheckAnyRight()) {

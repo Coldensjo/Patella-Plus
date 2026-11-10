@@ -737,7 +737,7 @@ void patella::TCommunication::ReceiveGameLogin()
 	Creatures.SetBeat(Beat);
 	const uint8 value = Network.GetByte();
 	Session.SetRight(40, value);
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 void patella::TCommunication::ReceiveGamemasterActions()

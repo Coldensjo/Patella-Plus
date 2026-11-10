@@ -371,7 +371,7 @@ void TAutomapWindow::MouseHover(int x, int y)
 		const int Length = (int)strlen(Mark.Text);
 		if (Length != 0) {
 			CopyString(GUI.AutomapMouseOverText.Chars, Mark.Text);
-			SetMouseOverText(GUI.AutomapMouseOverText);
+			Interaction().SetMouseOverText(GUI.AutomapMouseOverText);
 		}
 	}
 	patella::compat::PrintLine("{}", static_cast<const char *>(GUI.AutomapMouseOverText));
@@ -682,7 +682,7 @@ bool TCompassRose::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 
 void TCompassRose::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetMouseOverText(TextScrollAutomap);
+	Interaction().SetMouseOverText(TextScrollAutomap);
 }
 
 // --- TCapacityLabel, TSoulLabel ---------------------------------------------------
@@ -824,7 +824,7 @@ void TPlayerStates::MouseHover(int x, int y)
 			default:
 				TERROR1("unknown skin", skin);
 			}
-			SetMouseOverText(Text);
+			Interaction().SetMouseOverText(Text);
 		}
 	}
 }
@@ -955,9 +955,9 @@ TSmallInventoryWindow::TSmallInventoryWindow()
 void TSmallInventoryWindow::Draw(int Surface, int x, int y)
 {
 	TContentWindow::Draw(Surface, x, y);
-	if (In(GetMouseX() - SkinProperties().SmallInventoryDropArea.x - x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
-		&& In(GetMouseY() - SkinProperties().SmallInventoryDropArea.y - y, 0, SkinProperties().SmallInventoryDropArea.height - 1)
-		&& GetActionState() == ACTIONSTATE_DRAGGING)
+	if (In(Interaction().GetMouseX() - SkinProperties().SmallInventoryDropArea.x - x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
+		&& In(Interaction().GetMouseY() - SkinProperties().SmallInventoryDropArea.y - y, 0, SkinProperties().SmallInventoryDropArea.height - 1)
+		&& Interaction().GetActionState() == ACTIONSTATE_DRAGGING)
 		GraphicsEngine().GetSurface()->DrawFrame(Surface,
 			TRect(SkinProperties().SmallInventoryDropArea.x + x, SkinProperties().SmallInventoryDropArea.y + y,
 				SkinProperties().SmallInventoryDropArea.width, SkinProperties().SmallInventoryDropArea.height),
@@ -986,13 +986,13 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TContentWindow::LeftButtonUp(x, y, Flags);
 	if (In(x - SkinProperties().SmallInventoryDropArea.x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
-		&& In(y - SkinProperties().SmallInventoryDropArea.y, 0, SkinProperties().SmallInventoryDropArea.height - 1) && GetActionState() == ACTIONSTATE_DRAGGING) {
+		&& In(y - SkinProperties().SmallInventoryDropArea.y, 0, SkinProperties().SmallInventoryDropArea.height - 1) && Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 		int Index, SrcX, SrcY, SrcZ;
-		const TObject *Obj = GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
+		const TObject *Obj = Interaction().GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
 		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, 1);
 		} else if (AsksForCount(Flags)) {
-			SetDragTarget(POSITION_NOT_ON_MAP, 0, 0);
+			Interaction().SetDragTarget(POSITION_NOT_ON_MAP, 0, 0);
 			AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 		} else {
 			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, Obj->Data);
@@ -1064,7 +1064,7 @@ void TInventoryView::Draw(int Surface, int x, int y)
 			DrawObject(Surface, ObjX, ObjY, 32, Obj, TRGBColor(0, 0, 0), TRect(ObjX, ObjY, 32, 32),
 				SkinProperties().ObjectCountFont, false);
 		}
-		if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ObjX, ObjX + 31) && In(GetMouseY(), ObjY, ObjY + 31))
+		if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING && In(Interaction().GetMouseX(), ObjX, ObjX + 31) && In(Interaction().GetMouseY(), ObjY, ObjY + 31))
 			GraphicsEngine().GetSurface()->DrawFrame(Surface, TRect(ObjX - 1, ObjY - 1, 34, 34), 1,
 				TRGBColor(255, 255, 255));
 	}
@@ -1079,7 +1079,7 @@ bool TInventoryView::LeftButtonDown(int x, int y, int Flags)
 			return false;
 		const TObject *Obj = Inventory().GetBodyObject(Slot);
 		if (Obj->Type != 0)
-			SetDragObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
+			Interaction().SetDragObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 	}
 	return true;
 }
@@ -1094,27 +1094,27 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 		const int Slot = GetSlotAt(x, y);
 		if (Slot == 0)
 			return false;
-		if (GetActionState() == ACTIONSTATE_USE_WITH) {
+		if (Interaction().GetActionState() == ACTIONSTATE_USE_WITH) {
 			const TObject *Obj = Inventory().GetBodyObject(Slot);
 			if (Obj->Type != 0) {
 				int SrcIndex, SrcX, SrcY, SrcZ;
-				const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
+				const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 				PATELLA_ASSERT(SrcObj!=0);
 				PATELLA_ASSERT(SrcObj.Type!=CREATURE);
 				SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				return true;
 			}
-		} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
+		} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			SetStatusMessage("Select a player to trade with.", false);
 			return true;
-		} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
+		} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 			int DragIndex, DragX, DragY, DragZ;
-			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
+			const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != POSITION_NOT_ON_MAP || DragY != Slot) {
 				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Slot, 0, 1);
 				} else if (AsksForCount(Flags)) {
-					SetDragTarget(POSITION_NOT_ON_MAP, Slot, 0);
+					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Slot, 0);
 					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
@@ -1139,12 +1139,12 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 		const int Slot = GetSlotAt(x, y);
 		if (Slot == 0)
 			return false;
-		SetTradeObject(TObject(), 0, 0, 0, 0);
-		SetUseObject(TObject(), 0, 0, 0, 0);
-		SetTradeInfo(0);
+		Interaction().SetTradeObject(TObject(), 0, 0, 0, 0);
+		Interaction().SetUseObject(TObject(), 0, 0, 0, 0);
+		Interaction().SetTradeInfo(0);
 		const TObject *Obj = Inventory().GetBodyObject(Slot);
-		SetTradeObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
-		SetUseObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
+		Interaction().SetTradeObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
+		Interaction().SetUseObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 		if (Obj->Type != 0) {
 			if (GetClassicControl()) {
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
@@ -1459,8 +1459,9 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 							SkinProperties().ContainerSlotSizeAndObject.height + SlotY + y, 32, Inventory().GetContainerContent(Container, i),
 							TRGBColor(0, 0, 0), TRect(ScreenX, ScreenY, SlotWidth, ClipHeight), SkinProperties().ObjectCountFont,
 							false);
-					if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
-						&& In(GetMouseY(), ScreenY, ScreenY + ClipHeight - 1))
+					if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING
+						&& In(Interaction().GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
+						&& In(Interaction().GetMouseY(), ScreenY, ScreenY + ClipHeight - 1))
 						GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 							TRect(SkinProperties().ContainerFirstSlot.x + SlotX + x,
 								SlotY + SkinProperties().ContainerFirstSlot.y + y, 34, 34),
@@ -1525,7 +1526,8 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 		if (Position != -1) {
 			const TObject Obj = Inventory().GetContainerContent(Container, Position);
 			if (Obj.Type != 0)
-				SetDragObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+				Interaction().SetDragObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE,
+					Position);
 		}
 	}
 	return true;
@@ -1536,31 +1538,31 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
-		if (GetActionState() == ACTIONSTATE_USE_WITH) {
+		if (Interaction().GetActionState() == ACTIONSTATE_USE_WITH) {
 			const int Position = GetSlotAt(x, y, true);
 			if (Position != -1) {
 				const TObject Obj = Inventory().GetContainerContent(Container, Position);
 				if (Obj.Type != 0) {
 					int SrcIndex, SrcX, SrcY, SrcZ;
-					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
+					const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
 					PATELLA_ASSERT(SrcObj.Type!=CREATURE);
 					SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						Obj.Type, Position);
 				}
 			}
-		} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
+		} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			SetStatusMessage("Select a player to trade with.", false);
-		} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
+		} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 			const int Position = GetSlotAt(x, y, false);
 			int DragIndex, DragX, DragY, DragZ;
-			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
+			const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != POSITION_NOT_ON_MAP || DragY != Container + POSITION_CONTAINER_BASE || DragZ != Position) {
 				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						1);
 				} else if (AsksForCount(Flags)) {
-					SetDragTarget(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
@@ -1583,12 +1585,12 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 		const int Position = GetSlotAt(x, y, true);
 		if (Position == -1)
 			return true;
-		SetTradeObject(TObject(), 0, 0, 0, 0);
-		SetUseObject(TObject(), 0, 0, 0, 0);
-		SetTradeInfo(0);
+		Interaction().SetTradeObject(TObject(), 0, 0, 0, 0);
+		Interaction().SetUseObject(TObject(), 0, 0, 0, 0);
+		Interaction().SetTradeInfo(0);
 		const TObject Obj = Inventory().GetContainerContent(Container, Position);
-		SetTradeObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
-		SetUseObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+		Interaction().SetTradeObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+		Interaction().SetUseObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 		if (Obj.Type == 0)
 			return true;
 		if (GetClassicControl()) {
@@ -1844,7 +1846,7 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 				if (Top <= y && y <= ClipHeight + Top && SkinProperties().SkillsHorizontalMargin <= x
 					&& x <= SkinProperties().SkillsHorizontalMargin + TextWidth && Progress != -1) {
 					MsvcSnprintf(GUI.SkillMouseOverText, 256, TextPercentToGo, 100 - Progress);
-					SetMouseOverText(GUI.SkillMouseOverText);
+					Interaction().SetMouseOverText(GUI.SkillMouseOverText);
 				}
 			}
 			LineY += ItemHeight;
@@ -2065,10 +2067,10 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 			TRGBColor Color = SkinProperties().BattleWindow.NameFont.Color;
 			// GetOpponentAt's arguments in the original's order, right to left (MSVC; GCC and Clang may differ).
 			const auto OpponentAtMouse = [&] {
-				const int MouseY = GetMouseY();
-				return GetOpponentAt(GetMouseX() - x, MouseY - y);
+				const int MouseY = Interaction().GetMouseY();
+				return GetOpponentAt(Interaction().GetMouseX() - x, MouseY - y);
 			};
-			if (In(GetMouseY(), ClipY, ClipY + ClipHeight) && In(GetMouseX(), x, ClipWidth + x) && i == OpponentAtMouse()) {
+			if (In(Interaction().GetMouseY(), ClipY, ClipY + ClipHeight) && In(Interaction().GetMouseX(), x, ClipWidth + x) && i == OpponentAtMouse()) {
 				Creatures().SetHighlightID(Creature->CreatureID);
 				Color = SkinProperties().HighlightColor;
 				Framed = true;
@@ -2141,7 +2143,7 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 					break;
 				}
 				if (Skin != SKIN_NONE) {
-					if (Creature->SkullTime == 0 || !Creature->SkullKept(patella::platform::Platform().Clock.WallSeconds()) || GetBlinkState())
+					if (Creature->SkullTime == 0 || !Creature->SkullKept(patella::platform::Platform().Clock.WallSeconds()) || Interaction().GetBlinkState())
 						DrawSkinClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
 							SkinProperties().BattleWindow.Name.y + RowY + y, Skins()[Skin].width, Skins()[Skin].height, Skin, x,
 							ClipY, ClipWidth, ClipHeight, 0, 0);
@@ -2217,9 +2219,9 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 		if (Position != -1) {
 			const TCreature *Creature = Creatures().GetOpponent(Position);
 			if (Creature != nullptr) {
-				if (GetActionState() == ACTIONSTATE_USE_WITH) {
+				if (Interaction().GetActionState() == ACTIONSTATE_USE_WITH) {
 					int SrcIndex, SrcX, SrcY, SrcZ;
-					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
+					const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
 					PATELLA_ASSERT(SrcObj.Type!=CREATURE);
 					if (!Creatures().IsPlayer(Creature->CreatureID)) {
@@ -2227,16 +2229,16 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 						return true;
 					}
 					SetStatusMessage("You are not allowed to shoot directly on players.", false);
-				} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
+				} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
 					int TradeIndex, TradeX, TradeY, TradeZ;
-					const TObject &Obj = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
+					const TObject &Obj = *Interaction().GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 					PATELLA_ASSERT(Obj!=0);
 					if (Creatures().IsPlayer(Creature->CreatureID)) {
 						SendRequestTrade(TradeX, TradeY, TradeZ, Obj.Type, TradeIndex, Creature->CreatureID);
 						return true;
 					}
 					SetStatusMessage("Select a player to trade with.", false);
-				} else if (GetActionState() != ACTIONSTATE_DRAGGING) {
+				} else if (Interaction().GetActionState() != ACTIONSTATE_DRAGGING) {
 					if (Flags != 0)
 						RightButtonUp(x, y, Flags);
 					else
@@ -2283,7 +2285,7 @@ void TBattleWindowBody::MouseHover(int x, int y)
 				SkinProperties().BattleWindow.Name.width);
 			if (MaxLength < (int)strlen(Creature->Name)) {
 				MouseOverText.Assign(Creature->Name);
-				SetMouseOverText(MouseOverText);
+				Interaction().SetMouseOverText(MouseOverText);
 			}
 		}
 	}
@@ -2435,8 +2437,8 @@ void TTradeOffers::Arrange()
 // A click on an object of either offer inspects it.
 bool TTradeOffers::LeftButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::LeftButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
-		&& GetActionState() != ACTIONSTATE_TRADE_WITH) {
+	if (!TWindow::LeftButtonUp(x, y, Flags) && Interaction().GetActionState() != ACTIONSTATE_DRAGGING && Interaction().GetActionState() != ACTIONSTATE_USE_WITH
+		&& Interaction().GetActionState() != ACTIONSTATE_TRADE_WITH) {
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
@@ -2453,8 +2455,8 @@ bool TTradeOffers::LeftButtonDown(int x, int y, int Flags)
 
 bool TTradeOffers::RightButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::RightButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
-		&& GetActionState() != ACTIONSTATE_TRADE_WITH) {
+	if (!TWindow::RightButtonUp(x, y, Flags) && Interaction().GetActionState() != ACTIONSTATE_DRAGGING && Interaction().GetActionState() != ACTIONSTATE_USE_WITH
+		&& Interaction().GetActionState() != ACTIONSTATE_TRADE_WITH) {
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
@@ -2835,7 +2837,7 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 			MouseOverText.reset(new char[36]);
 			MouseOverText[0] = 0;
 			TStringBuffer(MouseOverText.get(), 36).Append(Name);
-			SetMouseOverText(MouseOverText.get());
+			Interaction().SetMouseOverText(MouseOverText.get());
 		}
 	}
 }

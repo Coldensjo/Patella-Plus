@@ -392,7 +392,7 @@ void CPlayerApp::OnIdle()
 		LastMousePosition.y = Point.y;
 		MouseMove(Point.x, Point.y);
 	}
-	const int Cursor = GetMouseCursor();
+	const int Cursor = Interaction().GetMouseCursor();
 	if (Cursor != LastMouseCursor) {
 		patella::sdlframe::UpdateMouseCursor(); // the SDL3 window's
 		LastMouseCursor = Cursor;

@@ -81,7 +81,7 @@ const char *TextRuleViolations = "Rule Violations"; // 145
 // follows the main window.
 void patella::TGUI::Resize(int Width, int Height)
 {
-	SetMouseCursor(CURSOR_ARROW);
+	Interaction.SetMouseCursor(CURSOR_ARROW);
 	if (GetViewMode() == 2) {
 		const TFullscreenMode *Mode = GetFullscreenMode();
 		Width = Mode->Width;
@@ -89,16 +89,16 @@ void patella::TGUI::Resize(int Width, int Height)
 	}
 	MainWindow->SetSize(Width, Height);
 	if (ModalWindow != nullptr) {
-		if (GetActionState() == ACTIONSTATE_CONTEXT_MENU) {
+		if (Interaction.GetActionState() == ACTIONSTATE_CONTEXT_MENU) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
-			SetActionState(ACTIONSTATE_NONE);
+			Interaction.SetActionState(ACTIONSTATE_NONE);
 			MainWindow->SetConsoleActive(true);
 		}
-		if (ModalWindow != nullptr && GetActionState() == ACTIONSTATE_DIALOG)
+		if (ModalWindow != nullptr && Interaction.GetActionState() == ACTIONSTATE_DIALOG)
 			ModalWindow->SetPosition(MainWindow->Width / 2 - ModalWindow->Width / 2,
 				MainWindow->Height / 2 - ModalWindow->Height / 2);
-		if (ModalWindow != nullptr && GetActionState() == ACTIONSTATE_HELP)
+		if (ModalWindow != nullptr && Interaction.GetActionState() == ACTIONSTATE_HELP)
 			(static_cast<THelpBubble *>(ModalWindow))->Place(MainWindow.get());
 	}
 }
@@ -165,15 +165,15 @@ void patella::TGUI::Redraw(bool Force)
 	MainWindow->Draw(1, 0, 0);
 	if (ModalWindow != nullptr)
 		ModalWindow->Draw(1, ModalWindow->OffsetX, ModalWindow->OffsetY);
-	UpdateBlinkState();
-	const char *Tooltip = GetMouseOverText();
+	Interaction.UpdateBlinkState();
+	const char *Tooltip = Interaction.GetMouseOverText();
 	if (Tooltip != nullptr) {
 		int x, y;
-		GetMouseOverTextPosition(&x, &y);
+		Interaction.GetMouseOverTextPosition(&x, &y);
 		const int Width = GetTextWidth(SkinProperties().TooltipFont.FontNumber, Tooltip) + SkinProperties().TooltipBorder * 2;
 		const int Height = GetTextHeight(SkinProperties().TooltipFont.FontNumber, Tooltip) + SkinProperties().TooltipBorder * 2;
 		y -= Height;
-		const int MaxX = GetWindowWidth() - Width - 1;
+		const int MaxX = Interaction.GetWindowWidth() - Width - 1;
 		if (MaxX >= 1) {
 			if (x < 1)
 				x = 1;
@@ -185,7 +185,7 @@ void patella::TGUI::Redraw(bool Force)
 			if (x > 1)
 				x = 1;
 		}
-		const int MaxY = GetWindowHeight() - Height - 1;
+		const int MaxY = Interaction.GetWindowHeight() - Height - 1;
 		if (MaxY >= 1) {
 			if (y < 1)
 				y = 1;
@@ -213,10 +213,10 @@ void patella::TGUI::Redraw(bool Force)
 		PrintText(1, 4, 4, FONT_BORDERED, Color, Text, 0);
 	}
 	if (!GetWindowsMousepointer()) {
-		const int Cursor = GetMouseCursor();
-		if (GetMouseX() >= 0 && GetMouseY() >= 0) {
-			int x = GetMouseX();
-			int y = GetMouseY();
+		const int Cursor = Interaction.GetMouseCursor();
+		if (Interaction.GetMouseX() >= 0 && Interaction.GetMouseY() >= 0) {
+			int x = Interaction.GetMouseX();
+			int y = Interaction.GetMouseY();
 			switch (Cursor) {
 			case CURSOR_ARROW:
 				x -= SkinProperties().CursorHotspot1.x;
@@ -253,11 +253,11 @@ void patella::TGUI::Redraw(bool Force)
 }
 
 // Game packet 0x0a, once the connection state is 8.
-void patella::TGUI::EnterGame() const
+void patella::TGUI::EnterGame()
 {
 	MainWindow->ChangeMode(true);
 	if (ModalWindow == nullptr) {
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		MainWindow->SetConsoleActive(true);
 	}
 	Map().ClearMap();
@@ -277,7 +277,7 @@ void patella::TGUI::LeaveGame()
 		ModalWindow = nullptr;
 		MainWindow->SetConsoleActive(true);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction.SetActionState(ACTIONSTATE_NONE);
 	SavePreferences();
 	if (!Network.Reconnect)
 		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
@@ -287,18 +287,18 @@ void patella::TGUI::LeaveGame()
 // text has changed.
 void patella::TGUI::MouseMove(int x, int y)
 {
-	SetMousePosition(x, y);
-	SetMouseCursor(CURSOR_ARROW);
-	switch (GetActionState()) {
+	Interaction.SetMousePosition(x, y);
+	Interaction.SetMouseCursor(CURSOR_ARROW);
+	switch (Interaction.GetActionState()) {
 	case ACTIONSTATE_LEFT_BUTTON_DOWN:
-		CheckDragStart(x, y);
+		Interaction.CheckDragStart(x, y);
 		[[fallthrough]];
 	default:
 		MainWindow->MouseMove(x, y);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
-		PATELLA_ASSERT_VALUES(ModalWindow!=nullptr, GetActionState());
+		PATELLA_ASSERT_VALUES(ModalWindow!=nullptr, Interaction.GetActionState());
 		ModalWindow->MouseMove(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY);
 		break;
 	case ACTIONSTATE_HELP: {
@@ -322,20 +322,20 @@ void patella::TGUI::MouseMove(int x, int y)
 	}
 	}
 	LastMouseMove = GetActionNumber();
-	SetMouseOverText(nullptr);
+	Interaction.SetMouseOverText(nullptr);
 }
 
 void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 {
-	switch (GetActionState()) {
+	switch (Interaction.GetActionState()) {
 	case ACTIONSTATE_NONE:
-		SetDragStart(x, y);
+		Interaction.SetDragStart(x, y);
 		MainWindow->LeftButtonDown(x, y, Flags);
-		SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
+		Interaction.SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		if (GetClassicControl())
-			SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
+			Interaction.SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
@@ -345,16 +345,16 @@ void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 	default:
 		break;
 	}
-	SetPendingAction(6, GetActionNumber());
+	Interaction.SetPendingAction(6, GetActionNumber());
 	LastMouseMove = 0;
-	SetMouseOverText(nullptr);
+	Interaction.SetMouseOverText(nullptr);
 }
 
 // Releasing the second of both buttons (state 4) sends a left button
 // release with Flags 0x200.
 void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 {
-	switch (GetActionState()) {
+	switch (Interaction.GetActionState()) {
 	case ACTIONSTATE_NONE:
 		if (MainWindow->GetCapture() != nullptr) {
 			MainWindow->LeftButtonUp(x, y, Flags);
@@ -362,24 +362,24 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 		}
 		break;
 	case ACTIONSTATE_BOTH_BUTTONS_DOWN:
-		SetActionState(ACTIONSTATE_LEFT_RELEASED);
+		Interaction.SetActionState(ACTIONSTATE_LEFT_RELEASED);
 		break;
 	case ACTIONSTATE_RIGHT_RELEASED:
 		MainWindow->LeftButtonUp(x, y, BOTH_BUTTONS_RELEASED);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_LEFT_BUTTON_DOWN:
 	case ACTIONSTATE_DRAGGING:
 	case ACTIONSTATE_USE_WITH:
 	case ACTIONSTATE_TRADE_WITH:
 		MainWindow->LeftButtonUp(x, y, Flags);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->LeftButtonUp(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == ACTIONSTATE_NONE || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
+		if (Interaction.GetActionState() == ACTIONSTATE_NONE || Interaction.GetActionState() == ACTIONSTATE_USE_WITH || Interaction.GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -388,33 +388,33 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 	case ACTIONSTATE_HELP:
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		break;
 	}
-	SetPendingAction(0, 0);
+	Interaction.SetPendingAction(0, 0);
 	LastMouseMove = 0;
-	SetMouseOverText(nullptr);
+	Interaction.SetMouseOverText(nullptr);
 }
 
 void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 {
-	switch (GetActionState()) {
+	switch (Interaction.GetActionState()) {
 	case ACTIONSTATE_NONE:
-		SetDragStart(x, y);
+		Interaction.SetDragStart(x, y);
 		MainWindow->LeftButtonDoubleClick(x, y, Flags);
-		SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
+		Interaction.SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		if (GetClassicControl())
-			SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
+			Interaction.SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->LeftButtonDoubleClick(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == ACTIONSTATE_NONE || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
+		if (Interaction.GetActionState() == ACTIONSTATE_NONE || Interaction.GetActionState() == ACTIONSTATE_USE_WITH || Interaction.GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -423,55 +423,55 @@ void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 	default:
 		break;
 	}
-	SetPendingAction(6, GetActionNumber());
+	Interaction.SetPendingAction(6, GetActionNumber());
 	LastMouseMove = 0;
-	SetMouseOverText(nullptr);
+	Interaction.SetMouseOverText(nullptr);
 }
 
 // Only changes the action state; the windows are not told (the position and
 // flags are not used).
 void patella::TGUI::RightButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
-	switch (GetActionState()) {
+	switch (Interaction.GetActionState()) {
 	case ACTIONSTATE_NONE:
-		SetActionState(ACTIONSTATE_RIGHT_BUTTON_DOWN);
+		Interaction.SetActionState(ACTIONSTATE_RIGHT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_LEFT_BUTTON_DOWN:
 		if (GetClassicControl())
-			SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
+			Interaction.SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
 		break;
 	default:
 		break;
 	}
 	LastMouseMove = 0;
-	SetMouseOverText(nullptr);
+	Interaction.SetMouseOverText(nullptr);
 }
 
 // Releasing the second of both buttons (state 5) sends a left button
 // release with Flags 0x200.
 void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 {
-	switch (GetActionState()) {
+	switch (Interaction.GetActionState()) {
 	case ACTIONSTATE_NONE:
 		if (MainWindow->GetCapture() != nullptr)
 			MainWindow->StopDragging();
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		MainWindow->RightButtonUp(x, y, Flags);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_BOTH_BUTTONS_DOWN:
-		SetActionState(ACTIONSTATE_RIGHT_RELEASED);
+		Interaction.SetActionState(ACTIONSTATE_RIGHT_RELEASED);
 		break;
 	case ACTIONSTATE_LEFT_RELEASED:
 		MainWindow->LeftButtonUp(x, y, BOTH_BUTTONS_RELEASED);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->RightButtonUp(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == ACTIONSTATE_NONE) {
+		if (Interaction.GetActionState() == ACTIONSTATE_NONE) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -480,23 +480,23 @@ void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 	case ACTIONSTATE_HELP:
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_USE_WITH:
 	case ACTIONSTATE_TRADE_WITH:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		break;
 	}
 	LastMouseMove = 0;
-	SetMouseOverText(nullptr);
+	Interaction.SetMouseOverText(nullptr);
 }
 
 // Direction 1 up, 2 down (SdlFrame.cpp's OnWheel).
 void patella::TGUI::MouseWheel(int x, int y, int Direction)
 {
-	switch (GetActionState()) {
+	switch (Interaction.GetActionState()) {
 	case ACTIONSTATE_HELP:
 		break;
 	case ACTIONSTATE_DIALOG:
@@ -509,7 +509,7 @@ void patella::TGUI::MouseWheel(int x, int y, int Direction)
 		break;
 	}
 	LastMouseMove = 0;
-	SetMouseOverText(nullptr);
+	Interaction.SetMouseOverText(nullptr);
 }
 
 // Key 0x907 switches the frame rate display.
@@ -519,11 +519,11 @@ void patella::TGUI::KeyPress(int Key)
 		ShowFPS = !ShowFPS;
 		return;
 	}
-	if (GetActionState() == ACTIONSTATE_HELP)
-		SetActionState(ACTIONSTATE_NONE);
+	if (Interaction.GetActionState() == ACTIONSTATE_HELP)
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 	if (ModalWindow != nullptr) {
 		ModalWindow->KeyPress(Key);
-		if (GetActionState() == ACTIONSTATE_NONE) {
+		if (Interaction.GetActionState() == ACTIONSTATE_NONE) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -532,7 +532,7 @@ void patella::TGUI::KeyPress(int Key)
 		MainWindow->KeyPress(Key);
 	}
 	LastMouseMove = 0;
-	SetMouseOverText(nullptr);
+	Interaction.SetMouseOverText(nullptr);
 }
 
 // False while a character is in the game; then the logout warning is posted (event 7) unless another window is open.
@@ -562,7 +562,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 // Callback for InitStatus.
 void patella::TGUI::LinkCopyWarning()
 {
-	SetActionState(ACTIONSTATE_NONE);
+	::Interaction().SetActionState(ACTIONSTATE_NONE);
 	AddMessage(MESSAGE_LINK_COPY_WARNING, reinterpret_cast<std::intptr_t>("Link Copy Warning"), 0);
 }
 
@@ -592,7 +592,7 @@ void patella::TGUI::ConnectionEstablished()
 	}
 	SetConnectionState(CONNECTION_OFFLINE);
 	Network.Disconnect(true);
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction.SetActionState(ACTIONSTATE_NONE);
 }
 
 // The receive handler for InitNetwork. The connection state chooses the
@@ -762,8 +762,8 @@ struct TMousePosition {
 };
 TMousePosition MousePosition()
 {
-	const int y = GetMouseY();
-	return {GetMouseX(), y};
+	const int y = Interaction().GetMouseY();
+	return {Interaction().GetMouseX(), y};
 }
 } // namespace
 
@@ -772,20 +772,20 @@ TMousePosition MousePosition()
 // (button event 6), it is told again every tick from the seventh tick on;
 // before that the function returns early and skips the connection timeout
 // check and the two calls after it.
-void patella::TGUI::TimerEvent() const
+void patella::TGUI::TimerEvent()
 {
-	IncrementActionNumber();
+	Interaction.IncrementActionNumber();
 	if (LastMouseMove != 0 && LastMouseMove == GetActionNumber() - 10) {
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
-		const int MouseY = GetMouseY();
-		const int MouseX = GetMouseX();
+		const int MouseY = Interaction.GetMouseY();
+		const int MouseX = Interaction.GetMouseX();
 		if (ModalWindow != nullptr)
 			ModalWindow->MouseHover(MouseX - ModalWindow->OffsetX, MouseY - ModalWindow->OffsetY);
 		else
 			MainWindow->MouseHover(MouseX, MouseY);
-		if (GetMouseOverText() != nullptr) {
-			const int TextY = GetMouseY();
-			SetMouseOverTextPosition(GetMouseX(), TextY);
+		if (Interaction.GetMouseOverText() != nullptr) {
+			const int TextY = Interaction.GetMouseY();
+			Interaction.SetMouseOverTextPosition(Interaction.GetMouseX(), TextY);
 		}
 	}
 	UpdateTalkboxes();
@@ -793,13 +793,13 @@ void patella::TGUI::TimerEvent() const
 	if (GetActionNumber() % 10 == 0)
 		Map().UpdateAmbientLight();
 	Map().ProcessEffects();
-	if (GetPendingActionNumber() != 0 && GetPendingActionState() == 6) {
-		if (GetActionNumber() - GetPendingActionNumber() < 7)
+	if (Interaction.GetPendingActionNumber() != 0 && Interaction.GetPendingActionState() == 6) {
+		if (GetActionNumber() - Interaction.GetPendingActionNumber() < 7)
 			return;
-		if (GetPendingActionState() == 6) {
+		if (Interaction.GetPendingActionState() == 6) {
 			// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
-			const int MouseY = GetMouseY();
-			const int MouseX = GetMouseX();
+			const int MouseY = Interaction.GetMouseY();
+			const int MouseX = Interaction.GetMouseX();
 			if (ModalWindow != nullptr)
 				ModalWindow->MouseWheel(MouseX - ModalWindow->OffsetX, MouseY - ModalWindow->OffsetY, 6);
 			else
@@ -821,16 +821,16 @@ void patella::TGUI::TimerEvent() const
 void patella::TGUI::ProcessEvents()
 {
 	int Type = 0;
-	if (ModalWindow != nullptr && GetActionState() == ACTIONSTATE_NONE) {
+	if (ModalWindow != nullptr && Interaction.GetActionState() == ACTIONSTATE_NONE) {
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 		MainWindow->SetConsoleActive(true);
 		Redraw(false);
 	}
-	while (MainWindow->GetCapture() == nullptr && ModalWindow == nullptr && PeekMessageType() != 0) {
+	while (MainWindow->GetCapture() == nullptr && ModalWindow == nullptr && Interaction.PeekMessageType() != 0) {
 		std::intptr_t Param1, Param2;
-		FetchMessage(&Type, &Param1, &Param2);
+		Interaction.FetchMessage(&Type, &Param1, &Param2);
 		switch (Type) {
 		case 0x01:
 			ModalWindow = CreateMessageDialog(reinterpret_cast<const char *>(Param1), reinterpret_cast<const char *>(Param2));
@@ -985,13 +985,13 @@ void patella::TGUI::ProcessEvents()
 			ModalWindow = CreateMessageDialog("Message of the Day", GetMessageOfTheDay());
 			break;
 		case MESSAGE_USE_WITH:
-			SetActionState(ACTIONSTATE_USE_WITH);
+			Interaction.SetActionState(ACTIONSTATE_USE_WITH);
 			break;
 		case MESSAGE_TRADE_WITH:
-			SetActionState(ACTIONSTATE_TRADE_WITH);
+			Interaction.SetActionState(ACTIONSTATE_TRADE_WITH);
 			break;
 		case MESSAGE_HELP_MODE:
-			SetActionState(ACTIONSTATE_HELP);
+			Interaction.SetActionState(ACTIONSTATE_HELP);
 			Help.SetHelpHandle(HELP_NONE);
 			break;
 		case MESSAGE_OPEN_PRIVATE_CONVERSATION:
@@ -1092,9 +1092,9 @@ void patella::TGUI::ProcessEvents()
 			if (Type < MESSAGE_FIRST_MENU) {
 				ModalWindow->SetPosition(MainWindow->Width / 2 - ModalWindow->Width / 2,
 					MainWindow->Height / 2 - ModalWindow->Height / 2);
-				SetActionState(ACTIONSTATE_DIALOG);
+				Interaction.SetActionState(ACTIONSTATE_DIALOG);
 			} else {
-				SetActionState(ACTIONSTATE_CONTEXT_MENU);
+				Interaction.SetActionState(ACTIONSTATE_CONTEXT_MENU);
 			}
 			MainWindow->SetConsoleActive(false);
 		}
@@ -1112,7 +1112,7 @@ void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgra
 	ExitCallback = ExitProgram;
 	DisplayModeCallback = SetDisplayMode;
 	URLCallback = OpenURL;
-	SetMouseCursor(CURSOR_ARROW);
+	Interaction.SetMouseCursor(CURSOR_ARROW);
 	memset(Communication.LastPacketTypes.data(), 0, sizeof(patella::TCommunication::LastPacketTypes));
 	Communication.LastPacketIndex = 0;
 	Network.Reconnect = false;
@@ -1128,7 +1128,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		Map().InitMap([](int CreatureID) { Creatures().HideCreature(CreatureID); });
 		Inventory().ResetInventory();
 		Creatures().InitCreatures();
-		InitStatus(Gamemaster, ::LinkCopyWarning);
+		::Interaction().InitStatus(Gamemaster, ::LinkCopyWarning);
 		::Help().InitHelp();
 		InitPreferences();
 		InitTalk();
@@ -1166,7 +1166,7 @@ void patella::TGUI::ExitControl()
 	ExitPreferences();
 	ExitTalk();
 	::Help().ExitHelp();
-	ExitStatus();
+	::Interaction().ExitStatus();
 	Creatures().ExitCreatures();
 	Inventory().ExitInventory();
 	Map().ExitMap();

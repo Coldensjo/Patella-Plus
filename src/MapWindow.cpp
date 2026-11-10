@@ -118,7 +118,7 @@ bool TMapWindow::LeftButtonDown(int x, int y, int Flags)
 		if (Obj.Type != 0) {
 			int ax = FieldX, ay = FieldY, az = FieldZ;
 			Map().MapToWorld(&ax, &ay, &az);
-			SetDragObject(Obj, Position, ax, ay, az);
+			Interaction().SetDragObject(Obj, Position, ax, ay, az);
 		}
 	}
 	return true;
@@ -135,12 +135,12 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		return true;
 	int FieldX, FieldY, FieldZ;
 	GetField(x, y, &FieldX, &FieldY, &FieldZ);
-	if (GetActionState() == ACTIONSTATE_USE_WITH) {
+	if (Interaction().GetActionState() == ACTIONSTATE_USE_WITH) {
 		int Position;
 		const TObject Obj = Map().GetTopMultiUseObject(FieldX, FieldY, FieldZ, Position);
 		if (Obj.Type != 0) {
 			int SrcIndex, SrcX, SrcY, SrcZ;
-			const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
+			const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 			PATELLA_ASSERT(SrcObj!=0);
 			PATELLA_ASSERT(SrcObj.Type!=CREATURE);
 			if (Obj.Type == CREATURE && !Creatures().IsPlayer(Obj.Data)) {
@@ -153,9 +153,9 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 				Position);
 			return true;
 		}
-	} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
+	} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
 		int TradeIndex, TradeX, TradeY, TradeZ;
-		const TObject &TradeObject = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
+		const TObject &TradeObject = *Interaction().GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 		PATELLA_ASSERT(TradeObject!=0);
 		const uint32 CreatureID = GetCreatureAt(x, y);
 		if (CreatureID != 0 && CreatureID != PlayerState().GetPlayerID() && Creatures().IsPlayer(CreatureID)) {
@@ -164,9 +164,9 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		}
 		SetStatusMessage(TextSelectPlayerToTrade, false);
 		return true;
-	} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
+	} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 		int DragIndex, DragX, DragY, DragZ;
-		const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
+		const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 		const int Type = DragObject->Type;
 		const int Count = DragObject->Data;
 		int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
@@ -179,7 +179,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 					SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, Count);
 					return true;
 				}
-				SetDragTarget(DestX, DestY, DestZ);
+				Interaction().SetDragTarget(DestX, DestY, DestZ);
 				AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 				return true;
 			}
@@ -221,39 +221,39 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		AddMessageTalkbox(TALK_INFO_MESSAGE, "You can't see anything.");
 		return true;
 	}
-	SetTradeObject(TObject(), 0, 0, 0, 0);
-	SetUseObject(TObject(), 0, 0, 0, 0);
-	SetTradeInfo(0);
+	Interaction().SetTradeObject(TObject(), 0, 0, 0, 0);
+	Interaction().SetUseObject(TObject(), 0, 0, 0, 0);
+	Interaction().SetTradeInfo(0);
 	int Position;
 	TObject Obj = Map().GetTopLookObject(FieldX, FieldY, FieldZ, Position);
 	if (Obj.Type != 0) {
 		int ax = FieldX, ay = FieldY, az = FieldZ;
 		Map().MapToWorld(&ax, &ay, &az);
-		SetTradeObject(Obj, Position, ax, ay, az);
+		Interaction().SetTradeObject(Obj, Position, ax, ay, az);
 	}
 	Obj = Map().GetTopUseObject(FieldX, FieldY, FieldZ, Position);
 	if (Obj.Type != 0) {
 		int ax = FieldX, ay = FieldY, az = FieldZ;
 		Map().MapToWorld(&ax, &ay, &az);
-		SetUseObject(Obj, Position, ax, ay, az);
+		Interaction().SetUseObject(Obj, Position, ax, ay, az);
 	}
 	const uint32 CreatureID = GetCreatureAt(x, y);
 	if (CreatureID != 0)
-		SetTradeInfo(CreatureID);
+		Interaction().SetTradeInfo(CreatureID);
 	int Index, ox, oy, oz;
 	if (GetClassicControl()) {
 		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
-			const TObject *LookObj = GetTradeObject(&Index, &ox, &oy, &oz);
+			const TObject *LookObj = Interaction().GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
 				SendLook(ox, oy, oz, LookObj->Type, Index);
 			return true;
 		}
-		if ((Flags & KEY_CONTROL) && GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
+		if ((Flags & KEY_CONTROL) && Interaction().GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
 			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			return true;
 		}
-		const uint32 Target = GetTradeInfo();
-		TObject &UseObj = *GetUseObject(&Index, &ox, &oy, &oz);
+		const uint32 Target = Interaction().GetTradeInfo();
+		TObject &UseObj = *Interaction().GetUseObject(&Index, &ox, &oy, &oz);
 		if (Target != 0 && Target != PlayerState().GetPlayerID() && UseObj.Type != 0
 			&& !GetObjectFlag(UseObj, FORCEUSE)) {
 			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
@@ -271,7 +271,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		return true;
 	} else {
 		if (Flags & KEY_ALT) {
-			const uint32 Target = GetTradeInfo();
+			const uint32 Target = Interaction().GetTradeInfo();
 			if (Target == 0 || Target == PlayerState().GetPlayerID())
 				return true;
 			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
@@ -279,13 +279,13 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			return true;
 		}
 		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
-			const TObject *LookObj = GetTradeObject(&Index, &ox, &oy, &oz);
+			const TObject *LookObj = Interaction().GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
 				SendLook(ox, oy, oz, LookObj->Type, Index);
 			return true;
 		}
 		if (Flags & KEY_CONTROL) {
-			TObject &UseObj = *GetUseObject(&Index, &ox, &oy, &oz);
+			TObject &UseObj = *Interaction().GetUseObject(&Index, &ox, &oy, &oz);
 			if (UseObj.Type == 0)
 				return true;
 			PATELLA_ASSERT(UseObj!=CREATURE);
@@ -296,7 +296,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			SendUseObject(ox, oy, oz, UseObj.Type, Index, Inventory().GetFreeContainer());
 			return true;
 		}
-		if (GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0)
+		if (Interaction().GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0)
 			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 		return true;
 	}
@@ -643,7 +643,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 					Icon2 = SKIN_NONE;
 				}
 				if (Creature->SkullTime != 0) // a kept skull
-					Blink = GetBlinkState();
+					Blink = Interaction().GetBlinkState();
 			}
 			if (Icon1 != SKIN_NONE) {
 				const TSkin *Skin = &Skins()[Icon1];

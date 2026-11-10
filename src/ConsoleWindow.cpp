@@ -278,7 +278,7 @@ void TTextWindow::HandleEvent(int Event)
 	case EVENT_COPY: {
 		const char *Text = GetSelectedText();
 		if (Text != nullptr)
-			CopyToClipboard(Text);
+			Interaction().CopyToClipboard(Text);
 		break;
 	}
 	case EVENT_CUT:
@@ -796,7 +796,7 @@ bool TTab::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe
 void TTab::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	if (Shortened)
-		SetMouseOverText(FullCaption.get());
+		Interaction().SetMouseOverText(FullCaption.get());
 }
 
 // New lines light the tab up (blinking when the number of lines changed);
@@ -1526,7 +1526,7 @@ void TConsoleWindow::SetActive(bool Active) const
 	if (!TextBuffer->CanWrite())
 		Active = false;
 	PATELLA_ASSERT(Input!=nullptr);
-	if (!Active && GetActionState() == ACTIONSTATE_CONTEXT_MENU)
+	if (!Active && Interaction().GetActionState() == ACTIONSTATE_CONTEXT_MENU)
 		return;
 	Input->SetActive(Active);
 }

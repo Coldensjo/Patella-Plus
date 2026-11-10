@@ -346,7 +346,7 @@ public:
 	void CheckSurface(bool Force);
 	static void ChangeDevice(vulkan::TDeviceButton Button);
 	void Redraw(bool Force);
-	void EnterGame() const;
+	void EnterGame();
 	void LeaveGame();
 	void MouseMove(int x, int y);
 	void LeftButtonDown(int x, int y, int Flags);
@@ -361,7 +361,7 @@ public:
 	void ConnectionEstablished();
 	void ReceivePackets();
 	void ConnectionClosed();
-	void TimerEvent() const;
+	void TimerEvent();
 	void ProcessEvents();
 	void InitWindow(platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL));
 	static void InitControl(bool Gamemaster);

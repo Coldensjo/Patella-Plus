@@ -77,7 +77,7 @@ void TResizer::Arrange()
 // The cursor is set before the assertion.
 bool TResizer::MouseMove(int x, int y)
 {
-	SetMouseCursor(CURSOR_SIZENS);
+	Interaction().SetMouseCursor(CURSOR_SIZENS);
 	PATELLA_ASSERT(ToResize!=nullptr);
 	if (Dragging) {
 		int NewWidth = ToResize->Width;
@@ -294,7 +294,7 @@ void TLabel::Draw(int Surface, int x, int y)
 void TLabel::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	if (Shortened)
-		SetMouseOverText(FullText.get());
+		Interaction().SetMouseOverText(FullText.get());
 }
 
 // Line breaks end the lines; Shorten cuts each line to the width.
@@ -1255,8 +1255,8 @@ bool TEditLine::LeftButtonDoubleClick(int x, int y, int Flags)
 // release (the binary calls TWindow::LeftButtonUp).
 bool TEditLine::RightButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::LeftButtonUp(x, y, Flags) && !IsDisabled() && GetActionState() != ACTIONSTATE_DIALOG
-		&& GetActionState() != ACTIONSTATE_CONTEXT_MENU)
+	if (!TWindow::LeftButtonUp(x, y, Flags) && !IsDisabled() && Interaction().GetActionState() != ACTIONSTATE_DIALOG
+		&& Interaction().GetActionState() != ACTIONSTATE_CONTEXT_MENU)
 		AddMessage(MESSAGE_EDIT_MENU, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }
@@ -1341,7 +1341,8 @@ void TEditLine::HandleEvent(int Event)
 		if (SelectionStart != -1 && SelectionLength != 0) {
 			const int End = SelectionLength < 0 ? SelectionStart : SelectionStart + SelectionLength;
 			const int Begin = SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart;
-			CheckClipboardText(patella::TSpan<const char>(Text.get() + Begin, static_cast<std::size_t>(End - Begin)));
+			Interaction().CheckClipboardText(patella::TSpan<const char>(Text.get() + Begin,
+				static_cast<std::size_t>(End - Begin)));
 		}
 		return;
 	case EVENT_CUT: {
@@ -1349,7 +1350,8 @@ void TEditLine::HandleEvent(int Event)
 			return;
 		int Begin = SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart;
 		int End = SelectionLength < 0 ? SelectionStart : SelectionStart + SelectionLength;
-		CheckClipboardText(patella::TSpan<const char>(Text.get() + Begin, static_cast<std::size_t>(End - Begin)));
+		Interaction().CheckClipboardText(patella::TSpan<const char>(Text.get() + Begin,
+			static_cast<std::size_t>(End - Begin)));
 		SetCursor(SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart);
 		Begin = SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart;
 		End = SelectionLength < 0 ? SelectionStart : SelectionStart + SelectionLength;
@@ -2429,7 +2431,7 @@ void TListBox::MouseHover(int x, int y)
 	if (Line != -1) {
 		const int Fitting = GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, LineText(Line), TextWidth);
 		if (LineText(Line) != nullptr && Fitting < (int)strlen(LineText(Line)))
-			SetMouseOverText(LineText(Line));
+			Interaction().SetMouseOverText(LineText(Line));
 	}
 }
 
@@ -2674,7 +2676,7 @@ void TFontListBox::MouseHover(int x, int y)
 	if (Line != -1) {
 		const int Fitting = GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, FontLines(Line).Text, TextWidth);
 		if (FontLines(Line).Text != nullptr && Fitting < (int)strlen(FontLines(Line).Text))
-			SetMouseOverText(FontLines(Line).Text);
+			Interaction().SetMouseOverText(FontLines(Line).Text);
 	}
 }
 
