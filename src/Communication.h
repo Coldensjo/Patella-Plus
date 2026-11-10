@@ -14,6 +14,7 @@
 // moves (measured on x64, issue #49).
 #include "Talk.h" // IWYU pragma: keep
 #include "Status.h"
+#include "Protocol.h" // the packet types of the Send functions and of ReceivePackets (Control.cpp), named
 #include <array>
 
 namespace patella {

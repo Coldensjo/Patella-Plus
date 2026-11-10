@@ -653,18 +653,18 @@ void patella::TGUI::ReceivePackets()
 			SetConnectionState(4);
 		if (GetConnectionState() == 4) {
 			switch (Type) {
-			case 0x0a: ReceiveLoginError(); break;
-			case 0x0b: ReceiveLoginMessage(); break;
-			case 0x14:
+			case LOGIN_RECEIVE_ERROR: ReceiveLoginError(); break;
+			case LOGIN_RECEIVE_MESSAGE: ReceiveLoginMessage(); break;
+			case LOGIN_RECEIVE_MESSAGE_OF_THE_DAY:
 				ReceiveMessageOfTheDay();
 				break;
 			// The patch packets (Tibia.exe: ReceivePatch, ReceiveWholeFile, ReceivePatchBlock, each followed by
 			// HandleEvents) end the login since Patella-Modern issue #75 (decision D9).
-			case 0x1e:
-			case 0x1f:
-			case 0x20: ReceiveUpdateRequest(); break;
-			case 0x28: ReceiveLoginServerOverloaded(); break;
-			case 0x64: ReceiveCharacterList(); break;
+			case LOGIN_RECEIVE_PATCH:
+			case LOGIN_RECEIVE_WHOLE_FILE:
+			case LOGIN_RECEIVE_PATCH_BLOCK: ReceiveUpdateRequest(); break;
+			case LOGIN_RECEIVE_SERVER_OVERLOADED: ReceiveLoginServerOverloaded(); break;
+			case LOGIN_RECEIVE_CHARACTER_LIST: ReceiveCharacterList(); break;
 			default:
 				TERROR1("unknown packet type during login", Type);
 			}
@@ -672,87 +672,87 @@ void patella::TGUI::ReceivePackets()
 			if (GetConnectionState() == 6)
 				SetConnectionState(7);
 			switch (Type) {
-			case 0x0a:
+			case GAME_RECEIVE_LOGIN:
 				SetConnectionState(8);
 				EnterGame();
 				ReceiveGameLogin();
 				AddEventHelp(HINT_FIRST_LOGIN);
 				SendFightModes();
 				break;
-			case 0x0b: ReceiveGamemasterActions(); break;
-			case 0x14: ReceiveGameError(); break;
-			case 0x15: ReceiveGameMessage(); break;
-			case 0x16: ReceiveLoginWait(); break;
-			case 0x1e: ReceivePing(); break;
-			case 0x64: ReceiveMap(); break;
-			case 0x65: ReceiveMapNorth(); break;
-			case 0x66: ReceiveMapEast(); break;
-			case 0x67: ReceiveMapSouth(); break;
-			case 0x68: ReceiveMapWest(); break;
-			case 0x69: ReceiveField(); break;
-			case 0x6a: ReceiveAddObject(); break;
-			case 0x6b: ReceiveChangeObject(); break;
-			case 0x6c: ReceiveDeleteObject(); break;
-			case 0x6d: ReceiveMoveCreature(); break;
-			case 0x6e: {
+			case GAME_RECEIVE_GAMEMASTER_ACTIONS: ReceiveGamemasterActions(); break;
+			case GAME_RECEIVE_ERROR: ReceiveGameError(); break;
+			case GAME_RECEIVE_MESSAGE: ReceiveGameMessage(); break;
+			case GAME_RECEIVE_LOGIN_WAIT: ReceiveLoginWait(); break;
+			case GAME_RECEIVE_PING: ReceivePing(); break;
+			case GAME_RECEIVE_MAP: ReceiveMap(); break;
+			case GAME_RECEIVE_MAP_NORTH: ReceiveMapNorth(); break;
+			case GAME_RECEIVE_MAP_EAST: ReceiveMapEast(); break;
+			case GAME_RECEIVE_MAP_SOUTH: ReceiveMapSouth(); break;
+			case GAME_RECEIVE_MAP_WEST: ReceiveMapWest(); break;
+			case GAME_RECEIVE_FIELD: ReceiveField(); break;
+			case GAME_RECEIVE_ADD_OBJECT: ReceiveAddObject(); break;
+			case GAME_RECEIVE_CHANGE_OBJECT: ReceiveChangeObject(); break;
+			case GAME_RECEIVE_DELETE_OBJECT: ReceiveDeleteObject(); break;
+			case GAME_RECEIVE_MOVE_CREATURE: ReceiveMoveCreature(); break;
+			case GAME_RECEIVE_OPEN_CONTAINER: {
 				int Container;
 				ReceiveOpenContainer(Container);
 				MainWindow->OpenContainer(Container);
 				break;
 			}
-			case 0x6f: {
+			case GAME_RECEIVE_CLOSE_CONTAINER: {
 				int Container;
 				ReceiveCloseContainer(Container);
 				MainWindow->CloseContainer(Container);
 				break;
 			}
-			case 0x70: ReceiveContainerAddObject(); break;
-			case 0x71: ReceiveContainerChangeObject(); break;
-			case 0x72: ReceiveContainerDeleteObject(); break;
-			case 0x78: ReceiveInventoryObject(); break;
-			case 0x79:
+			case GAME_RECEIVE_CONTAINER_ADD_OBJECT: ReceiveContainerAddObject(); break;
+			case GAME_RECEIVE_CONTAINER_CHANGE_OBJECT: ReceiveContainerChangeObject(); break;
+			case GAME_RECEIVE_CONTAINER_DELETE_OBJECT: ReceiveContainerDeleteObject(); break;
+			case GAME_RECEIVE_INVENTORY_OBJECT: ReceiveInventoryObject(); break;
+			case GAME_RECEIVE_DELETE_INVENTORY_OBJECT:
 				ReceiveDeleteInventoryObject();
 				break;
 				// clang-format off
-			case 0x7d: ReceiveOwnTrade(); MainWindow->OpenTrade(); break;
-			case 0x7e: ReceiveCounterTrade(); MainWindow->UpdateTrade(); break;
-			case 0x7f: ReceiveCloseTrade(); MainWindow->CloseTrade(); break;
+			case GAME_RECEIVE_OWN_TRADE: ReceiveOwnTrade(); MainWindow->OpenTrade(); break;
+			case GAME_RECEIVE_COUNTER_TRADE: ReceiveCounterTrade(); MainWindow->UpdateTrade(); break;
+			case GAME_RECEIVE_CLOSE_TRADE: ReceiveCloseTrade(); MainWindow->CloseTrade(); break;
 			// clang-format on
-			case 0x82: ReceiveWorldLight(); break;
-			case 0x83: ReceiveMagicEffect(); break;
-			case 0x84: ReceiveAnimatedText(); break;
-			case 0x85: ReceiveDistanceEffect(); break;
-			case 0x86: ReceiveCreatureMark(); break;
-			case 0x8c: ReceiveCreatureHealth(); break;
-			case 0x8d: ReceiveCreatureLight(); break;
-			case 0x8e: ReceiveCreatureOutfit(); break;
-			case 0x8f: ReceiveCreatureSpeed(); break;
-			case 0x90: ReceiveCreatureSkull(); break;
-			case 0x91: ReceiveCreatureShield(); break;
-			case 0x96: ReceiveEditText(); break;
-			case 0x97: ReceiveEditHouseText(); break;
-			case 0xa0: ReceivePlayerStats(); break;
-			case 0xa1: ReceivePlayerSkills(); break;
-			case 0xa2: ReceivePlayerIcons(); break;
-			case 0xa3: ReceiveCancelAttack(); break;
-			case 0xaa: ReceiveTalk(); break;
-			case 0xab: ReceiveChannelList(); break;
-			case 0xac: ReceiveOpenChannel(); break;
-			case 0xad: ReceiveOpenPrivateConversation(); break;
-			case 0xae: ReceiveRuleViolationChannel(); break;
-			case 0xaf: ReceiveRemoveRuleViolation(); break;
-			case 0xb0: ReceiveCancelRuleViolation(); break;
-			case 0xb1: ReceiveLockRuleViolation(); break;
-			case 0xb2: ReceiveOwnChannel(); break;
-			case 0xb3: ReceiveCloseChannel(); break;
-			case 0xb4: ReceiveTextMessage(); break;
-			case 0xb5: ReceiveCancelWalk(); break;
-			case 0xbe: ReceiveFloorUp(); break;
-			case 0xbf: ReceiveFloorDown(); break;
-			case 0xc8: ReceiveOutfit(); break;
-			case 0xd2: ReceiveBuddy(); break;
-			case 0xd3: ReceiveBuddyLogin(); break;
-			case 0xd4: ReceiveBuddyLogout(); break;
+			case GAME_RECEIVE_WORLD_LIGHT: ReceiveWorldLight(); break;
+			case GAME_RECEIVE_MAGIC_EFFECT: ReceiveMagicEffect(); break;
+			case GAME_RECEIVE_ANIMATED_TEXT: ReceiveAnimatedText(); break;
+			case GAME_RECEIVE_DISTANCE_EFFECT: ReceiveDistanceEffect(); break;
+			case GAME_RECEIVE_CREATURE_MARK: ReceiveCreatureMark(); break;
+			case GAME_RECEIVE_CREATURE_HEALTH: ReceiveCreatureHealth(); break;
+			case GAME_RECEIVE_CREATURE_LIGHT: ReceiveCreatureLight(); break;
+			case GAME_RECEIVE_CREATURE_OUTFIT: ReceiveCreatureOutfit(); break;
+			case GAME_RECEIVE_CREATURE_SPEED: ReceiveCreatureSpeed(); break;
+			case GAME_RECEIVE_CREATURE_SKULL: ReceiveCreatureSkull(); break;
+			case GAME_RECEIVE_CREATURE_SHIELD: ReceiveCreatureShield(); break;
+			case GAME_RECEIVE_EDIT_TEXT: ReceiveEditText(); break;
+			case GAME_RECEIVE_EDIT_HOUSE_TEXT: ReceiveEditHouseText(); break;
+			case GAME_RECEIVE_PLAYER_STATS: ReceivePlayerStats(); break;
+			case GAME_RECEIVE_PLAYER_SKILLS: ReceivePlayerSkills(); break;
+			case GAME_RECEIVE_PLAYER_ICONS: ReceivePlayerIcons(); break;
+			case GAME_RECEIVE_CANCEL_ATTACK: ReceiveCancelAttack(); break;
+			case GAME_RECEIVE_TALK: ReceiveTalk(); break;
+			case GAME_RECEIVE_CHANNEL_LIST: ReceiveChannelList(); break;
+			case GAME_RECEIVE_OPEN_CHANNEL: ReceiveOpenChannel(); break;
+			case GAME_RECEIVE_OPEN_PRIVATE_CONVERSATION: ReceiveOpenPrivateConversation(); break;
+			case GAME_RECEIVE_RULE_VIOLATION_CHANNEL: ReceiveRuleViolationChannel(); break;
+			case GAME_RECEIVE_REMOVE_RULE_VIOLATION: ReceiveRemoveRuleViolation(); break;
+			case GAME_RECEIVE_CANCEL_RULE_VIOLATION: ReceiveCancelRuleViolation(); break;
+			case GAME_RECEIVE_LOCK_RULE_VIOLATION: ReceiveLockRuleViolation(); break;
+			case GAME_RECEIVE_OWN_CHANNEL: ReceiveOwnChannel(); break;
+			case GAME_RECEIVE_CLOSE_CHANNEL: ReceiveCloseChannel(); break;
+			case GAME_RECEIVE_TEXT_MESSAGE: ReceiveTextMessage(); break;
+			case GAME_RECEIVE_CANCEL_WALK: ReceiveCancelWalk(); break;
+			case GAME_RECEIVE_FLOOR_UP: ReceiveFloorUp(); break;
+			case GAME_RECEIVE_FLOOR_DOWN: ReceiveFloorDown(); break;
+			case GAME_RECEIVE_OUTFIT: ReceiveOutfit(); break;
+			case GAME_RECEIVE_BUDDY: ReceiveBuddy(); break;
+			case GAME_RECEIVE_BUDDY_LOGIN: ReceiveBuddyLogin(); break;
+			case GAME_RECEIVE_BUDDY_LOGOUT: ReceiveBuddyLogout(); break;
 			default:
 				TERROR1("unknown packet type during game", Type);
 			}
