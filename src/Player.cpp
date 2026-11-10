@@ -92,7 +92,8 @@ void LogDiagnostics() noexcept
 	if (!patella::log::Enabled(patella::log::TLevel::Debug))
 		return;
 	try {
-		patella::log::Debug("Graphic engine: {}", GetCurrentEngine());
+		// The number the original's report gave: 2 (its DirectX 9) once the engine is set up, 0 before.
+		patella::log::Debug("Graphic engine: {}", patella::bridge::GraphicsEngine().Initialised ? 2 : 0);
 	} catch (...) { // NOLINT(bugprone-empty-catch): this part left out
 	}
 	try {

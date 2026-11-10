@@ -8,8 +8,7 @@
 // and with the filter DirectDraw 4 gave surfaceDX9.cpp (issue #20). Windows x64 client only
 // (cmake/Vulkan.cmake).
 //
-// The engine is the x64 client's only engine, curEngine 2 (DirectX 9 in the original and in the oracle;
-// Surface.cpp; notes/vulkan.md, "Choosing the engine"). Its device is the graphics device choice of
+// The engine is the x64 client's only engine (Surface.cpp; notes/vulkan.md, "Choosing the engine"). Its device is the graphics device choice of
 // DeviceSettings.h (issue #31): the advanced options' buttons, Patella.ini's Device, PATELLA_VULKAN. Its window system
 // (the client area, the screen, the surfaces) is SDL3's, vulkan/WindowSystem.h (issue #126).
 

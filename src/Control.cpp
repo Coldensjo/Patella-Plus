@@ -137,7 +137,7 @@ void patella::TGUI::ChangeEngine(int engine)
 	// choice is applied at once as the original's switch is: the surface is released and the new device
 	// tested on a new one (the next CheckSurface creates its surfaces); when the test fails, the old
 	// choice and Tibia.cfg's number stay, as the original keeps the old engine. Patella.ini gets the new
-	// choice. In fullscreen mode the dialog disables the buttons, as the original's. curEngine stays 2.
+	// choice. In fullscreen mode the dialog disables the buttons, as the original's.
 	const patella::vulkan::TDeviceChoice OldChoice = GetDeviceChoice();
 	const patella::vulkan::TDeviceChoice NewChoice = patella::vulkan::ChoiceAfterButton(OldChoice,
 		DeviceButtonOfEngine(engine), GetNumberOfGpus(), GetBestGpu());
@@ -1164,7 +1164,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 // Called from the main frame's destructor, and from InitControl after a failed
 // step. GetSurface creates a surface first if there is none, so one may be
 // created only to be deleted. Patella-Modern issue #90: the x64 GetSurface
-// makes one only once SurfaceInitInstance has set the engine (after
+// makes one only once SurfaceInitInstance has run (after
 // InitControl), so after a failed InitControl there is none and the surface
 // step is skipped. Tibia.exe's GetSurface made a DirectX 5 surface there whose
 // ExitSurfaces faulted on its uninitialised members (seen under cdb); its
