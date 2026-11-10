@@ -610,14 +610,14 @@ public:
 };
 
 // "Advanced Graphics Options": light, stretching, the mouse pointer, the
-// frame rate limit and the engine. The engine buttons send 800-802 to
-// Receiver (the main window).
+// frame rate limit and the graphics device. The device buttons send 800-802
+// to Receiver (the main window).
 class TAdvancedGraphicsDialog final : public TWindow {
 public:
 	TAdvancedGraphicsDialog(const TAdvancedGraphicsDialog &) = delete;
 	TAdvancedGraphicsDialog &operator=(const TAdvancedGraphicsDialog &) = delete;
 	TAdvancedGraphicsDialog(void (*_OpenURL)(const char *URL), TComponent *_Receiver);
-	~TAdvancedGraphicsDialog() override { EngineGroup.reset(); }
+	~TAdvancedGraphicsDialog() override { DeviceGroup.reset(); }
 	void Draw(int Surface, int x, int y) override;
 	void HandleEvent(int Event) override;
 
@@ -627,12 +627,12 @@ public:
 	TCheckBox *WindowsMousepointer;
 	THorizontalScrollBar *Framerate; // 10-201 (201 is no limit), event 30
 	void (*OpenURL)(const char *URL);
-	TTextButton *DirectX5Button;
-	TTextButton *DirectX9Button;
-	TTextButton *OpenGLButton;
-	std::unique_ptr<TRadioButtonGroup> EngineGroup; // issue #58
+	TTextButton *AutomaticButton;
+	TTextButton *GpuButton;
+	TTextButton *CpuButton;
+	std::unique_ptr<TRadioButtonGroup> DeviceGroup; // issue #58
 	// The x64 client (Patella-Modern issue #31, plan 6.3): the three buttons choose the graphics device
-	// ("Automatic", "GPU", "CPU" in the places of DirectX5Button, DirectX9Button, OpenGLButton), and the
+	// ("Automatic", "GPU", "CPU", in the places of the original's DirectX 5, DirectX 9 and OpenGL buttons), and the
 	// line above them names the device in use. Since issue #111 without PATELLA_VULKAN's guard (the oracle,
 	// whose layout kept the original's, left with #94), so patella_core compiles it too.
 	void ShowDevice();                 // the selected button and the device's name

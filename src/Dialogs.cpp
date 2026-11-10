@@ -2536,7 +2536,7 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 {
 	OpenURL = _OpenURL;
 	Receiver = _Receiver;
-	EngineGroup.reset(new TRadioButtonGroup);
+	DeviceGroup.reset(new TRadioButtonGroup);
 	LightEffects = new TCheckBox("Show Light Effects");
 	NoStretching = new TCheckBox("Don't stretch/shrink the Map");
 	WindowsMousepointer = new TCheckBox("Windows Mouse Pointer");
@@ -2551,19 +2551,19 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 		GetFontLineHeight(SkinProperties().Dialog.TextFont.FontNumber), SkinProperties().Dialog.TextFont,
 		TextSelectDevice, true);
 	TLabel *Label = DeviceLabel;
-	DirectX5Button = new TTextButton(SkinProperties().AdvancedGraphicsDialog.DirectX5Button.x, SkinProperties().AdvancedGraphicsDialog.DirectX5Button.y,
+	AutomaticButton = new TTextButton(SkinProperties().AdvancedGraphicsDialog.DirectX5Button.x, SkinProperties().AdvancedGraphicsDialog.DirectX5Button.y,
 		"Automatic", SKIN_MEDIUM_BUTTON_UP, SKIN_MEDIUM_BUTTON_DOWN, TCallback(_Receiver, EVENT_DEVICE_AUTOMATIC), TextUseAutomaticDevice);
-	DirectX5Button->SetRadioButtonGroup(EngineGroup.get());
-	DirectX9Button = new TTextButton(SkinProperties().AdvancedGraphicsDialog.DirectX9Button.x, SkinProperties().AdvancedGraphicsDialog.DirectX9Button.y,
+	AutomaticButton->SetRadioButtonGroup(DeviceGroup.get());
+	GpuButton = new TTextButton(SkinProperties().AdvancedGraphicsDialog.DirectX9Button.x, SkinProperties().AdvancedGraphicsDialog.DirectX9Button.y,
 		"GPU", SKIN_MEDIUM_BUTTON_UP, SKIN_MEDIUM_BUTTON_DOWN, TCallback(_Receiver, EVENT_DEVICE_GPU), TextUseGpuDevice);
-	DirectX9Button->SetRadioButtonGroup(EngineGroup.get());
-	OpenGLButton = new TTextButton(SkinProperties().AdvancedGraphicsDialog.OpenGLButton.x, SkinProperties().AdvancedGraphicsDialog.OpenGLButton.y,
+	GpuButton->SetRadioButtonGroup(DeviceGroup.get());
+	CpuButton = new TTextButton(SkinProperties().AdvancedGraphicsDialog.OpenGLButton.x, SkinProperties().AdvancedGraphicsDialog.OpenGLButton.y,
 		"CPU", SKIN_MEDIUM_BUTTON_UP, SKIN_MEDIUM_BUTTON_DOWN, TCallback(_Receiver, EVENT_DEVICE_CPU), TextUseCpuDevice);
-	OpenGLButton->SetRadioButtonGroup(EngineGroup.get());
+	CpuButton->SetRadioButtonGroup(DeviceGroup.get());
 	InsertChild(Label);
-	InsertChild(DirectX5Button);
-	InsertChild(DirectX9Button);
-	InsertChild(OpenGLButton);
+	InsertChild(AutomaticButton);
+	InsertChild(GpuButton);
+	InsertChild(CpuButton);
 	InsertChild(LightEffects);
 	InsertChild(NoStretching);
 	InsertChild(WindowsMousepointer);
@@ -2583,15 +2583,15 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 		FramerateLimit = 201;
 	Framerate->Range->SetValue(FramerateLimit);
 	if (GetViewMode() == 2) {
-		DirectX5Button->SetEnabled(false);
-		DirectX9Button->SetEnabled(false);
-		OpenGLButton->SetEnabled(false);
+		AutomaticButton->SetEnabled(false);
+		GpuButton->SetEnabled(false);
+		CpuButton->SetEnabled(false);
 	} else {
 		// GPU without a GPU, CPU without the CPU driver next to the executable (vulkan/DeviceSettings.h).
 		if (GetNumberOfGpus() == 0)
-			DirectX9Button->SetEnabled(false);
+			GpuButton->SetEnabled(false);
 		if (GetCpuDriverManifest().empty())
-			OpenGLButton->SetEnabled(false);
+			CpuButton->SetEnabled(false);
 	}
 	ShowDevice();
 	Arrange();
@@ -2603,13 +2603,13 @@ void TAdvancedGraphicsDialog::ShowDevice()
 {
 	switch (patella::vulkan::ButtonOf(GetDeviceChoice())) {
 	case patella::vulkan::TDeviceButton::Automatic:
-		EngineGroup->Selected = DirectX5Button;
+		DeviceGroup->Selected = AutomaticButton;
 		break;
 	case patella::vulkan::TDeviceButton::Gpu:
-		EngineGroup->Selected = DirectX9Button;
+		DeviceGroup->Selected = GpuButton;
 		break;
 	case patella::vulkan::TDeviceButton::Cpu:
-		EngineGroup->Selected = OpenGLButton;
+		DeviceGroup->Selected = CpuButton;
 		break;
 	}
 	const char *Name = GetDeviceName();
