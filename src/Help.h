@@ -15,9 +15,12 @@ inline constexpr int EVENTHELPS = 14; // "In(Number,1,EVENTHELPS)", "In(Hint,1,E
 // HELP_* are the Handle of SetHelpHandle, GetHelpHandle and GetHelpText: what the help bubble of the help mode
 // explains. 10-23 are parts of the screen, which the windows' HelpMouseMove set. 1000-1002 are things on the map,
 // which TMapWindow::HelpMouseMove sets. 1100-1112 are the lens help of an object type, read from Tibia.dat (LENSHELP,
-// Objects.h), so only GetHelpText's case labels have them. InitHelp's handle 1 has no text and stays a number.
+// Objects.h), so only GetHelpText's case labels have them; a type without one has HELP_NONE (Objects.cpp).
 enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	HELP_NONE = 0, // no bubble: an element that explains nothing, a field with nothing to explain
+	// InitHelp's, until the first SetHelpHandle. Nothing sets it and it has no text, so that first call is always a
+	// change, also when it sets HELP_NONE.
+	HELP_UNSET = 1,
 	HELP_AUTOMAP = 10,
 	HELP_STATUS_BARS = 11,
 	HELP_INVENTORY = 12,

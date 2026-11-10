@@ -10,6 +10,7 @@
 // lines 166-238 had room for more.
 
 #include "Objects.h"
+#include "Help.h" // HELP_NONE
 #include "Script.h"
 #include "Container.h"
 #include "common.h"
@@ -478,7 +479,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 	Entry->ShiftY = 0;
 	Entry->Elevation = 0;
 	Entry->AutomapColor = 0;
-	Entry->LensHelp = 0;
+	Entry->LensHelp = HELP_NONE;
 	while (true) {
 		const int Flag = File->readByte();
 		if (Flag == 0xff)

@@ -66,7 +66,7 @@ bool patella::THelp::TakeHelpHandleChanged()
 
 void patella::THelp::InitHelp()
 {
-	HelpHandle = 1;
+	HelpHandle = HELP_UNSET;
 	HelpHandleChanged = false;
 	EventHelps.clear();
 }
