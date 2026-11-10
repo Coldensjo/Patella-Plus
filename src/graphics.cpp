@@ -24,7 +24,7 @@
 // The data is TGraphics' (graphics.h).
 
 // The six tables are std::unique_ptrs. Their elements have no destructors that act (a picture's Offsets stays raw:
-// ExitGraphics frees them first), so a table still set when FatalError calls exit(1) is only memory freed during static
+// Exit frees them first), so a table still set when FatalError calls exit(1) is only memory freed during static
 // destruction. Where the original stored a new table over one it may still have held (InitMemoryCache, InitFonts,
 // LoadSprites, LoadPictures, InitVideoCache), release() drops the old one unfreed first: the leak is the original's.
 
@@ -46,7 +46,7 @@ int patella::TGraphics::GetFontLineHeight(int FontNumber) const
 }
 
 // Called by ExitControl.
-void patella::TGraphics::ExitGraphics()
+void patella::TGraphics::Exit()
 {
 	VideoCache.reset();
 	VideoCache = nullptr;
@@ -160,7 +160,7 @@ void patella::TGraphics::LoadPictures(const char *FileName)
 		NumberOfPictures = File.readWord();
 		static_cast<void>(Pictures.release()); // NOLINT(bugprone-unused-return-value): a table still held leaks, as in the original
 		Pictures.reset(new TPicture[NumberOfPictures]);
-		// A deliberate difference from the original: every picture's offsets start empty, so ExitGraphics, after a file
+		// A deliberate difference from the original: every picture's offsets start empty, so Exit, after a file
 		// that ends before the last picture, deletes only the tables allocated here. The original left the later
 		// pictures' Offsets indeterminate.
 		for (int i = 0; i < NumberOfPictures; i++)
@@ -1157,7 +1157,7 @@ void patella::TGraphics::ResetVideoCache()
 
 // Called by InitControl with 10 MB. The video cache comes later
 // (InitVideoCache), when the surfaces exist.
-void patella::TGraphics::InitGraphics(int MemoryCacheBytes)
+void patella::TGraphics::Init(int MemoryCacheBytes)
 {
 	LoadSprites("Tibia.spr");
 	LoadPictures("Tibia.pic");

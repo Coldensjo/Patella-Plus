@@ -5,7 +5,7 @@
 //
 // A sprite is 32x32 pixels; a picture is TilesX x TilesY tiles of 32x32.
 // Decoded tiles are 32*32 RGB triples (3072 bytes). The memory cache holds
-// MemoryCacheSize of them (InitGraphics' MemoryCacheBytes / 3072), the video
+// MemoryCacheSize of them (TGraphics::Init's MemoryCacheBytes / 3072), the video
 // cache VideoCacheSize slots on the cache surfaces (surfaces 6, 7, ...); both
 // are LRU lists with a hash table of HASH_TABLE_SIZE chains.
 
@@ -129,10 +129,10 @@ public:
 	~TGraphics() = default;
 
 	// Start-up and shut-down.
-	void InitGraphics(int MemoryCacheBytes);
+	void Init(int MemoryCacheBytes);
 	void InitVideoCache();
 	void ResetVideoCache();
-	void ExitGraphics();
+	void Exit();
 
 	// The files and the fonts.
 	void LoadSprites(const char *FileName);
