@@ -212,8 +212,8 @@ void patella::TCommunication::PrepareMovement()
 {
 	if (GetAutoChaseOff()) {
 		if (Creatures.GetAttackID() != 0) {
-			if (GetChaseMode() != 0) {
-				SetChaseMode(0);
+			if (GetChaseMode() != CHASE_STAND) {
+				SetChaseMode(CHASE_STAND);
 				SendFightModes();
 			}
 		}

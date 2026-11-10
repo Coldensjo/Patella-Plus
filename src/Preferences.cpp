@@ -496,8 +496,8 @@ void TPreferences::SetDefaultPreferences(TTalkLists &Lists)
 	ClassicControl = false;
 	AutoChaseOff = true;
 	DragFullStacks = false;
-	AttackMode = 2;
-	ChaseMode = 0;
+	AttackMode = ATTACK_BALANCED;
+	ChaseMode = CHASE_STAND;
 	SecureMode = true;
 	Buddies.clear();
 	KnownHints.clear();
@@ -860,7 +860,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 			if (strcmp(Identifier, "chasemode") == 0) {
 				ChaseMode = Script.readNumber();
 				if (ChaseMode == 2)
-					ChaseMode = 0;
+					ChaseMode = CHASE_STAND;
 			}
 			if (strcmp(Identifier, "securemode") == 0)
 				SecureMode = Script.readNumber() == 1;

@@ -1241,23 +1241,23 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 			TextOpenHelpMenu));
 	}
 	switch (GetAttackMode()) {
-	case 1:
+	case ATTACK_OFFENSIVE:
 		AttackModes->Selected = Offensive;
 		break;
-	case 2:
+	case ATTACK_BALANCED:
 		AttackModes->Selected = Balanced;
 		break;
-	case 3:
+	case ATTACK_DEFENSIVE:
 		AttackModes->Selected = Defensive;
 		break;
 	default:
 		break;
 	}
 	switch (GetChaseMode()) {
-	case 0:
+	case CHASE_STAND:
 		ChaseModes->Selected = StandButton;
 		break;
-	case 1:
+	case CHASE_ON:
 		ChaseModes->Selected = ChaseButton;
 		break;
 	default:
@@ -1272,11 +1272,11 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 void TCombatControls::Draw(int Surface, int x, int y)
 {
 	switch (GetChaseMode()) {
-	case 0:
+	case CHASE_STAND:
 		if (ChaseModes->Selected != StandButton)
 			ChaseModes->Selected = StandButton;
 		break;
-	case 1:
+	case CHASE_ON:
 		if (ChaseModes->Selected != ChaseButton)
 			ChaseModes->Selected = ChaseButton;
 		break;
@@ -1306,19 +1306,19 @@ void TCombatControls::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_ATTACK_DEFENSIVE:
-		SetAttackMode(3);
+		SetAttackMode(ATTACK_DEFENSIVE);
 		break;
 	case EVENT_ATTACK_BALANCED:
-		SetAttackMode(2);
+		SetAttackMode(ATTACK_BALANCED);
 		break;
 	case EVENT_ATTACK_OFFENSIVE:
-		SetAttackMode(1);
+		SetAttackMode(ATTACK_OFFENSIVE);
 		break;
 	case EVENT_CHASE_STAND:
-		SetChaseMode(0);
+		SetChaseMode(CHASE_STAND);
 		break;
 	case EVENT_CHASE_ON:
-		SetChaseMode(1);
+		SetChaseMode(CHASE_ON);
 		break;
 	case EVENT_SECURE_MODE:
 		SetSecureMode(!SecureButton->State);
