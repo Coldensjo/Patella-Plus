@@ -983,11 +983,6 @@ void InitSkinProperties()
 	SkinProperties().Dialog.TextFont.Color.G = 192;
 	SkinProperties().Dialog.TextFont.Color.B = 192;
 	SkinProperties().Dialog.TextFont.Alignment = 0;
-	SkinProperties().Dialog.Data78.FontNumber = FONT_SMOOTH;
-	SkinProperties().Dialog.Data78.Color.R = 192;
-	SkinProperties().Dialog.Data78.Color.G = 192;
-	SkinProperties().Dialog.Data78.Color.B = 192;
-	SkinProperties().Dialog.Data78.Alignment = 0;
 	SkinProperties().LoginDialogWidth = 200;
 	SkinProperties().LoginDialogHeight = 86;
 	SkinProperties().LoginDialogAccountLabel.x = 0;

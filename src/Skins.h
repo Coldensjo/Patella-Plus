@@ -548,8 +548,7 @@ struct TTabProperties {
 	TFont BlinkingFont; // an unread tab while it blinks
 };
 
-// The frame of a dialog (TDialog, Dialogs.cpp). TextFont and Data78 are the fonts of the dialogs'
-// texts and labels; they hold the same values and the code does not show how they differ.
+// The frame of a dialog (TDialog, Dialogs.cpp), and the font of the texts and labels in the dialogs.
 struct TDialogProperties {
 	int MinimumWidth;
 	int MinimumHeight;
@@ -559,7 +558,6 @@ struct TDialogProperties {
 	TRect Separator;
 	TRect Body; // FitToChild takes it by value
 	TFont TextFont;
-	TFont Data78;
 };
 
 // The ignore list dialog (TIgnoreListDialog,
