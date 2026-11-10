@@ -97,8 +97,8 @@ TMapWindow::TMapWindow()
 {
 	HintButton = nullptr;
 	MaxLevel = 0;
-	AddHotkey(0x44e, TCallback(this, 600));
-	AddHotkey(0x457, TCallback(this, 601));
+	AddHotkey(0x44e, TCallback(this, EVENT_CREATURE_INFO));
+	AddHotkey(0x457, TCallback(this, EVENT_REMOVE_TALKBOX));
 	for (int i = 0; i < 16; i++) {
 		for (int j = 0; j < 12; j++) {
 			Cache[i][j].x = i << 5;
@@ -200,7 +200,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 					return true;
 				}
 				SetDragTarget(DestX, DestY, DestZ);
-				AddMessage(13, 0, 0);
+				AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 				return true;
 			}
 			SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, 1);
@@ -270,7 +270,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			return true;
 		}
 		if ((Flags & KEY_CONTROL) && GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
-			AddMessage(0x34, 0, 0);
+			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			return true;
 		}
 		const uint32 Target = GetTradeInfo();
@@ -284,7 +284,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			return true;
 		PATELLA_ASSERT(UseObj!=CREATURE);
 		if (GetObjectFlag(UseObj, MULTIUSE)) {
-			AddMessage(0x2c, 0, 0);
+			AddMessage(MESSAGE_USE_WITH, 0, 0);
 			return true;
 		}
 		SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
@@ -310,14 +310,14 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 				return true;
 			PATELLA_ASSERT(UseObj!=CREATURE);
 			if (GetObjectFlag(UseObj, MULTIUSE)) {
-				AddMessage(0x2c, 0, 0);
+				AddMessage(MESSAGE_USE_WITH, 0, 0);
 				return true;
 			}
 			SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
 			return true;
 		}
 		if (GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0)
-			AddMessage(0x34, 0, 0);
+			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 		return true;
 	}
 }
@@ -329,11 +329,11 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMapWindow::HandleEvent(int Event)
 {
-	if (Event == 600)
+	if (Event == EVENT_CREATURE_INFO)
 		SetCreatureInfo((GetCreatureInfo() + 1) % 3);
-	if (Event == 601)
+	if (Event == EVENT_REMOVE_TALKBOX)
 		RemoveOldestTalkbox();
-	if (Event == 27) {
+	if (Event == EVENT_MAP_HINT) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;
 		const int Hint = PopEventHelp();
@@ -341,7 +341,7 @@ void TMapWindow::HandleEvent(int Event)
 		const std::size_t Size = strlen(GetEventHelpText(Hint)) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(GetEventHelpText(Hint));
-		AddMessage(2, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
+		AddMessage(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
 	}
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
@@ -751,11 +751,11 @@ void TMapWindow::Draw(int Surface, int x, int y)
 
 	// The hint button while there is an event help to show.
 	if (GetShowNewHints() && GetEventHelp() != 0 && HintButton == nullptr) {
-		HintButton = new TBlinkingButton(0, 0, 61, 62, 63, 64, TCallback(this, 27), TextReceiveHint);
+		HintButton = new TBlinkingButton(0, 0, 61, 62, 63, 64, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
 		InsertChild(HintButton);
 		Arrange();
 		if (GetEventHelp() == 1)
-			HandleEvent(27);
+			HandleEvent(EVENT_MAP_HINT);
 	} else if (!GetShowNewHints() && HintButton != nullptr) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;

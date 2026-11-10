@@ -19,8 +19,8 @@
 // The console's skin properties are SkinProperties.Style9E8 (the console),
 // StyleAA4 (the tabs) and Style944.Data24 (the font of the default channel);
 // the frames are skins 169-176 (TConsole) and 177-185 (TConsoleWindow). Events
-// are written in decimal (201-213, 403), as in ContextMenus.cpp; AddMessage's
-// numbers in hex, as in Control.cpp.
+// (201-213, 403) and AddMessage's numbers are named in Events.h; the comments
+// give events in decimal, as in ContextMenus.cpp, and messages in hex.
 //
 // The try blocks and catch lines the comments name are the original's (its
 // catch wrappers, common.h); since issue #78 the functions here have none.
@@ -271,14 +271,14 @@ bool TTextWindow::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 		return true;
 	int Message;
 	if (!TextBuffer->IsRuleViolationChannel()) {
-		Message = 0x37;
+		Message = MESSAGE_TEXT_MENU;
 	} else {
 		TTalkLine *TextLine = GetTalkLine(Line);
 		if (TextLine == nullptr)
 			return true;
 		if (strlen(TextLine->Addressee) == 0)
 			return true;
-		Message = 0x39;
+		Message = MESSAGE_REQUEST_MENU;
 	}
 	AddMessage(Message, Line, 0);
 	return true;
@@ -290,17 +290,17 @@ bool TTextWindow::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 void TTextWindow::HandleEvent(int Event)
 {
 	switch (Event) {
-	case 16: {
+	case EVENT_COPY: {
 		const char *Text = GetSelectedText();
 		if (Text != nullptr)
 			CopyToClipboard(Text);
 		break;
 	}
-	case 17:
-	case 18:
-	case 19:
+	case EVENT_CUT:
+	case EVENT_PASTE:
+	case EVENT_DELETE:
 		break;
-	case 20:
+	case EVENT_SELECT_ALL:
 		SelectAll();
 		break;
 	default:
@@ -824,7 +824,7 @@ bool TTab::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe
 {
 	static_cast<TTabBar *>(GetParent())->SetCurrentTab(this);
 	Callback.Send();
-	AddMessage(0x38, 0, 0);
+	AddMessage(MESSAGE_CHANNEL_MENU, 0, 0);
 	return true;
 }
 
@@ -1026,7 +1026,7 @@ bool TTabBar::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 // 26 do the same until no tab is hidden on that side.
 void TTabBar::HandleEvent(int Event)
 {
-	if (Event == 6) {
+	if (Event == EVENT_TABS_MOVE_LEFT) {
 		if (RightTabs->GetFirstChild() == nullptr)
 			return;
 		TComponent *Tab = GetFirstChild();
@@ -1035,19 +1035,19 @@ void TTabBar::HandleEvent(int Event)
 		TWindow::RemoveChild(Tab);
 		LeftTabs->AppendChild(Tab);
 		Changed = true;
-	} else if (Event == 5) {
+	} else if (Event == EVENT_TABS_MOVE_RIGHT) {
 		TComponent *Tab = LeftTabs->GetLastChild();
 		if (Tab == nullptr)
 			return;
 		LeftTabs->RemoveChild(Tab);
 		InsertChild(Tab);
 		Changed = true;
-	} else if (Event == 25) {
+	} else if (Event == EVENT_TABS_MOVE_ALL_RIGHT) {
 		while (LeftTabs->GetFirstChild() != nullptr)
-			HandleEvent(5);
-	} else if (Event == 26) {
+			HandleEvent(EVENT_TABS_MOVE_RIGHT);
+	} else if (Event == EVENT_TABS_MOVE_ALL_LEFT) {
 		while (RightTabs->GetFirstChild() != nullptr)
-			HandleEvent(6);
+			HandleEvent(EVENT_TABS_MOVE_LEFT);
 	}
 	Rearrange(nullptr);
 }
@@ -1214,26 +1214,26 @@ TConsoleWindow::TConsoleWindow()
 	InsertChild(TabBar);
 	CurrentConsole = new TConsole;
 	InsertChild(CurrentConsole);
-	VolumeButton = new TMultiStateButton(0, 0, TextAdjustVolume, 3, 197, 198, TCallback(this, 208), 201, 202,
-		TCallback(this, 207), 199, 200, TCallback(this, 206));
+	VolumeButton = new TMultiStateButton(0, 0, TextAdjustVolume, 3, 197, 198, TCallback(this, EVENT_VOLUME_YELL), 201, 202,
+		TCallback(this, EVENT_VOLUME_WHISPER), 199, 200, TCallback(this, EVENT_VOLUME_SAY));
 	InsertChild(VolumeButton);
-	CloseButton = new TSkinButton(0, 0, 188, 189, TCallback(this, 202), TextCloseChannel, false);
-	ServerMessagesButton = new TToggleButton(0, 0, 190, 191, TCallback(this, 203), TextShowServerMessages,
+	CloseButton = new TSkinButton(0, 0, 188, 189, TCallback(this, EVENT_CLOSE_CHANNEL), TextCloseChannel, false);
+	ServerMessagesButton = new TToggleButton(0, 0, 190, 191, TCallback(this, EVENT_SERVER_MESSAGES), TextShowServerMessages,
 		TextHideServerMessages, false);
-	IgnoreButton = new TSkinButton(0, 0, 192, 194, TCallback(this, 204), TextIgnorePlayers, false);
+	IgnoreButton = new TSkinButton(0, 0, 192, 194, TCallback(this, EVENT_IGNORE_LIST), TextIgnorePlayers, false);
 	InsertChild(IgnoreButton);
-	NewChannelButton = new TSkinButton(0, 0, 195, 196, TCallback(this, 205), TextOpenNewChannel, false);
+	NewChannelButton = new TSkinButton(0, 0, 195, 196, TCallback(this, EVENT_REQUEST_CHANNELS), TextOpenNewChannel, false);
 	InsertChild(NewChannelButton);
-	MoveRightButton = new TSkinButton(0, 0, 203, 204, TCallback(TabBar, 5), TextMoveChannelsRight, false);
+	MoveRightButton = new TSkinButton(0, 0, 203, 204, TCallback(TabBar, EVENT_TABS_MOVE_RIGHT), TextMoveChannelsRight, false);
 	InsertChild(MoveRightButton);
-	MoveLeftButton = new TSkinButton(0, 0, 205, 206, TCallback(TabBar, 6), TextMoveChannelsLeft, false);
+	MoveLeftButton = new TSkinButton(0, 0, 205, 206, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
 	InsertChild(MoveLeftButton);
-	AddHotkey(0x449, TCallback(this, 204));
-	AddHotkey(0x44f, TCallback(this, 205));
-	AddHotkey(0x445, TCallback(this, 202));
-	AddHotkey(0x44d, TCallback(this, 210));
-	AddHotkey(0x44b, TCallback(this, 403));
-	AddHotkey(0x444, TCallback(this, 211));
+	AddHotkey(0x449, TCallback(this, EVENT_IGNORE_LIST));
+	AddHotkey(0x44f, TCallback(this, EVENT_REQUEST_CHANNELS));
+	AddHotkey(0x445, TCallback(this, EVENT_CLOSE_CHANNEL));
+	AddHotkey(0x44d, TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
+	AddHotkey(0x44b, TCallback(this, EVENT_OPTIONS_HOTKEYS));
+	AddHotkey(0x444, TCallback(this, EVENT_DEFAULT_CHANNEL));
 	SwitchTime = GetActionNumber() + 50;
 	int *Channels;
 	const int Count = GetOpenChannels(&Channels);
@@ -1394,9 +1394,9 @@ bool TConsoleWindow::HelpMouseMove(int x, int y)
 void TConsoleWindow::KeyPress(int Key)
 {
 	if (Key == 9)
-		HandleEvent(212);
+		HandleEvent(EVENT_NEXT_CHANNEL);
 	if (Key == 0x209)
-		HandleEvent(213);
+		HandleEvent(EVENT_PREVIOUS_CHANNEL);
 	TComponent *Selection;
 	if (CurrentConsole->TextWindow->HasSelection())
 		Selection = CurrentConsole->TextWindow;
@@ -1412,21 +1412,21 @@ void TConsoleWindow::KeyPress(int Key)
 		TComponent *Target = Input;
 		if (strlen(Input->Text.get()) == 0)
 			Target = CurrentConsole->TextWindow;
-		Target->HandleEvent(20);
+		Target->HandleEvent(EVENT_SELECT_ALL);
 		return;
 	}
 	if (Selection != nullptr) {
 		bool Done = false;
 		if (Key == 0x510 || Key == 0x463) {
-			Selection->HandleEvent(16);
+			Selection->HandleEvent(EVENT_COPY);
 			Done = true;
 		}
 		if (Key == 0x311 || Key == 0x478) {
-			Selection->HandleEvent(17);
+			Selection->HandleEvent(EVENT_CUT);
 			Done = true;
 		}
 		if (Key == 0x511) {
-			Selection->HandleEvent(19);
+			Selection->HandleEvent(EVENT_DELETE);
 			return;
 		}
 		if (Done)
@@ -1503,10 +1503,10 @@ void TConsoleWindow::KeyPress(int Key)
 void TConsoleWindow::HandleEvent(int Event)
 {
 	switch (Event) {
-	case 202:
+	case EVENT_CLOSE_CHANNEL:
 		CloseChannel();
 		[[fallthrough]];
-	case 201:
+	case EVENT_SHOW_CHANNEL:
 		CurrentConsole->TextWindow->SetTextBuffer(TabBar->CurrentTab->TextBuffer);
 		CurrentConsole->ScrollToEnd = true;
 		CurrentConsole->Arrange();
@@ -1514,59 +1514,59 @@ void TConsoleWindow::HandleEvent(int Event)
 		SetSize(Width, Height);
 		CurrentConsole->Arrange();
 		break;
-	case 210:
+	case EVENT_TOGGLE_SERVER_MESSAGES:
 		ServerMessagesButton->State = !ServerMessagesButton->State;
 		[[fallthrough]];
-	case 203:
+	case EVENT_SERVER_MESSAGES:
 		CurrentConsole->getTextBuffer()->ShowMessages = ServerMessagesButton->State;
 		break;
-	case 204:
-		AddMessage(0x15, 0, 0);
+	case EVENT_IGNORE_LIST:
+		AddMessage(MESSAGE_IGNORE_LIST_DIALOG, 0, 0);
 		break;
-	case 205:
+	case EVENT_REQUEST_CHANNELS:
 		SendRequestChannels();
 		break;
-	case 206:
+	case EVENT_VOLUME_SAY:
 		TalkMode = 1;
 		break;
-	case 207:
+	case EVENT_VOLUME_WHISPER:
 		TalkMode = 2;
 		break;
-	case 208:
+	case EVENT_VOLUME_YELL:
 		TalkMode = 3;
 		break;
-	case 211:
+	case EVENT_DEFAULT_CHANNEL:
 		TabBar->SetCurrentTab(DefaultTab);
-		HandleEvent(201);
+		HandleEvent(EVENT_SHOW_CHANNEL);
 		break;
-	case 212: {
+	case EVENT_NEXT_CHANNEL: {
 		TTab *Tab = TabBar->CurrentTab;
 		if (Tab->GetNext() == nullptr)
-			TabBar->HandleEvent(6);
+			TabBar->HandleEvent(EVENT_TABS_MOVE_LEFT);
 		TComponent *NewTab = Tab->GetNext();
 		if (NewTab == nullptr) {
-			TabBar->HandleEvent(25);
+			TabBar->HandleEvent(EVENT_TABS_MOVE_ALL_RIGHT);
 			NewTab = TabBar->GetFirstChild();
 		}
 		TabBar->SetCurrentTab(static_cast<TTab *>(NewTab));
-		HandleEvent(201);
+		HandleEvent(EVENT_SHOW_CHANNEL);
 		break;
 	}
-	case 213: {
+	case EVENT_PREVIOUS_CHANNEL: {
 		TTab *Tab = TabBar->CurrentTab;
 		if (Tab->GetPrevious() == nullptr)
-			TabBar->HandleEvent(5);
+			TabBar->HandleEvent(EVENT_TABS_MOVE_RIGHT);
 		TComponent *NewTab = Tab->GetPrevious();
 		if (NewTab == nullptr) {
-			TabBar->HandleEvent(26);
+			TabBar->HandleEvent(EVENT_TABS_MOVE_ALL_LEFT);
 			NewTab = TabBar->GetLastChild();
 		}
 		TabBar->SetCurrentTab(static_cast<TTab *>(NewTab));
-		HandleEvent(201);
+		HandleEvent(EVENT_SHOW_CHANNEL);
 		break;
 	}
-	case 403:
-		AddMessage(0x26, 0, 0);
+	case EVENT_OPTIONS_HOTKEYS:
+		AddMessage(MESSAGE_HOTKEY_DIALOG, 0, 0);
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -1635,10 +1635,10 @@ void TConsoleWindow::UpdateButtons()
 // 0x422e70, line 1953. MainWindow.cpp opens the default channel ("Default").
 void TConsoleWindow::OpenDefaultChannel(TTalkBuffer *TextBuffer, const char *Caption)
 {
-	DefaultTab = new TTab(Caption, TextBuffer, TCallback(this, 201));
+	DefaultTab = new TTab(Caption, TextBuffer, TCallback(this, EVENT_SHOW_CHANNEL));
 	TabBar->InsertChild(DefaultTab);
 	TabBar->SetCurrentTab(DefaultTab);
-	HandleEvent(201);
+	HandleEvent(EVENT_SHOW_CHANNEL);
 }
 
 // 0x425070, lines 1965-1969. Creates the buffer of a channel (or takes the
@@ -1665,7 +1665,7 @@ void TConsoleWindow::AddChannel(TTalkBuffer *TextBuffer, const char *Caption)
 	PATELLA_ASSERT(TextBuffer!=nullptr);
 	TTab *NewTab = TabBar->FindTab(TextBuffer);
 	if (NewTab == nullptr) {
-		NewTab = new TTab(Caption, TextBuffer, TCallback(this, 201));
+		NewTab = new TTab(Caption, TextBuffer, TCallback(this, EVENT_SHOW_CHANNEL));
 		TabBar->AppendChild(NewTab);
 		if (TextBuffer->GetChannelID() == 7) {
 			AddTextBufferLine(TextBuffer, 0, TextHelpChannelWelcome, TALK_ADMIN_MESSAGE, nullptr, 0);
@@ -1677,7 +1677,7 @@ void TConsoleWindow::AddChannel(TTalkBuffer *TextBuffer, const char *Caption)
 	TextBuffer->SetWriteEnabled(true);
 	if (GetActionNumber() >= SwitchTime) {
 		TabBar->SetCurrentTab(NewTab);
-		HandleEvent(201);
+		HandleEvent(EVENT_SHOW_CHANNEL);
 	} else if (CurrentTab != nullptr) {
 		NewTab->SetActive(false);
 	}
@@ -1702,7 +1702,7 @@ void TConsoleWindow::CloseChannel()
 		}
 		TabBar->SetCurrentTab(static_cast<TTab *>(NewTab));
 		DeleteComponent(CurrentTab);
-		HandleEvent(201);
+		HandleEvent(EVENT_SHOW_CHANNEL);
 	}
 }
 
@@ -1746,7 +1746,7 @@ void TConsoleWindow::SetServerMessages(bool Show)
 	PATELLA_ASSERT(CurrentConsole->getTextBuffer()!=nullptr);
 	PATELLA_ASSERT(CurrentConsole->getTextBuffer()->isDefault()==false);
 	ServerMessagesButton->State = Show;
-	HandleEvent(203);
+	HandleEvent(EVENT_SERVER_MESSAGES);
 }
 
 // 0x41f7f0, line 2085. No try block.
@@ -1934,7 +1934,7 @@ void TConsoleWindow::ParseInput(char **Text, char **Addressee, int *TalkMode, ch
 		*Addressee = nullptr;
 		*TalkMode = 0;
 		*Separator = 0;
-		AddMessage(0xc, reinterpret_cast<std::intptr_t>("Account Data Warning"), 0);
+		AddMessage(MESSAGE_ACCOUNT_DATA_WARNING, reinterpret_cast<std::intptr_t>("Account Data Warning"), 0);
 		return;
 	}
 	while (IsSpace(Line[i]))

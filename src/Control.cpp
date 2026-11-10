@@ -314,7 +314,7 @@ void patella::TGUI::LeaveGame()
 	SetActionState(0);
 	SavePreferences();
 	if (!Network.Reconnect)
-		AddMessage(10, 300, 0);
+		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 }
 
 // 0x4469b0, lines 461-483. In help mode (action state 9) the help bubble is
@@ -588,7 +588,7 @@ bool patella::TGUI::CloseRequest() const
 													  "Click on \"Exit\" if you want to exit the program without logging out your character.");
 			Data[2] = 0;
 			Data[3] = 0;
-			AddMessage(7, reinterpret_cast<std::intptr_t>(Data), 0);
+			AddMessage(MESSAGE_LOGOUT_DIALOG, reinterpret_cast<std::intptr_t>(Data), 0);
 		}
 		return false;
 	}
@@ -606,7 +606,7 @@ void patella::TGUI::HandleEvents()
 void patella::TGUI::LinkCopyWarning()
 {
 	SetActionState(0);
-	AddMessage(11, reinterpret_cast<std::intptr_t>("Link Copy Warning"), 0);
+	AddMessage(MESSAGE_LINK_COPY_WARNING, reinterpret_cast<std::intptr_t>("Link Copy Warning"), 0);
 }
 
 // 0x448430, lines 1174-1182. The connect handler for InitNetwork: sends the
@@ -776,7 +776,7 @@ void patella::TGUI::ConnectionClosed()
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ERROR_DISCONNECTED, 2);
 		AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
-		AddMessage(10, 300, 0);
+		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 	} else if (GetConnectionState() == 3) {
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ERROR_DISCONNECTED, 1);
@@ -787,12 +787,12 @@ void patella::TGUI::ConnectionClosed()
 		Network.Reconnect = false;
 		if (InGame) {
 			if (GetMilliseconds() < Network.ReconnectTimeout) {
-				AddMessage(0x3e, 0, 0);
-				AddMessage(4, 0, 0);
+				AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
+				AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
 			}
 		} else {
-			AddMessage(0x3d, 0, 0);
-			AddMessage(3, 0, 0);
+			AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
+			AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 		}
 	}
 }
@@ -880,52 +880,52 @@ void patella::TGUI::ProcessEvents()
 			ModalWindow = CreateMessageDialog(reinterpret_cast<const char *>(Param1), reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
-		case 0x02:
+		case MESSAGE_FORMATTED_DIALOG:
 			ModalWindow = CreateFormattedMessageDialog(reinterpret_cast<const char *>(Param1), reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
-		case 0x03:
+		case MESSAGE_CONNECTING_LOGIN_DIALOG:
 			ModalWindow = CreateConnectingDialog("Connecting", TextCharacterListLoading, MainWindow.get());
 			break;
-		case 0x04:
+		case MESSAGE_CONNECTING_GAME_DIALOG:
 			ModalWindow = CreateConnectingDialog("Connecting", TextConnectingGameWorld, MainWindow.get());
 			break;
-		case 0x05:
+		case MESSAGE_RECONNECT_DIALOG:
 			ModalWindow = CreateReconnectDialog("Please wait", reinterpret_cast<const char *>(Param1), (int)Param2);
 			delete[] reinterpret_cast<char *>(Param1);
 			break;
-		case 0x06: {
+		case MESSAGE_QUESTION_DIALOG: {
 			const std::intptr_t *Data = reinterpret_cast<std::intptr_t *>(Param1);
 			ModalWindow = CreateQuestionDialog(reinterpret_cast<const char *>(Data[0]), reinterpret_cast<const char *>(Data[1]), reinterpret_cast<TWindow *>(Data[2]),
-				(int)Data[3], 2);
+				(int)Data[3], EVENT_CANCEL);
 			delete[] Data;
 			break;
 		}
-		case 0x07: {
+		case MESSAGE_LOGOUT_DIALOG: {
 			const std::intptr_t *Data = reinterpret_cast<std::intptr_t *>(Param1);
 			ModalWindow = CreateLogoutDialog(reinterpret_cast<const char *>(Data[0]), reinterpret_cast<const char *>(Data[1]), MainWindow.get());
 			delete[] Data;
 			break;
 		}
-		case 0x08:
+		case MESSAGE_LOGIN_DIALOG:
 			ModalWindow = CreateLoginDialog(URLCallback);
 			break;
-		case 0x09:
+		case MESSAGE_WAIT_DIALOG:
 			ModalWindow = CreateWaitDialog("Please wait", TextWaitForCharacterList, (int)Param1);
 			break;
-		case 0x0a:
+		case MESSAGE_CHARACTER_LIST_DIALOG:
 			ModalWindow = CreateCharacterListDialog((int)Param1);
 			break;
-		case 0x0b:
-			ModalWindow = CreateQuestionDialog(reinterpret_cast<const char *>(Param1), TextLinkCopyWarning, MainWindow.get(), 0x21, 2);
+		case MESSAGE_LINK_COPY_WARNING:
+			ModalWindow = CreateQuestionDialog(reinterpret_cast<const char *>(Param1), TextLinkCopyWarning, MainWindow.get(), EVENT_COPY_LINK, EVENT_CANCEL);
 			break;
-		case 0x0c:
+		case MESSAGE_ACCOUNT_DATA_WARNING:
 			ModalWindow = CreateMessageDialog(reinterpret_cast<const char *>(Param1), TextNeverGiveAccount);
 			break;
-		case 0x0d:
+		case MESSAGE_MOVE_OBJECTS_DIALOG:
 			ModalWindow = CreateMoveObjectsDialog();
 			break;
-		case 0x0e: {
+		case MESSAGE_TEXT_DIALOG: {
 			const std::intptr_t *Texts = reinterpret_cast<std::intptr_t *>(Param2);
 			ModalWindow = CreateTextDialog(reinterpret_cast<int *>(Param1), reinterpret_cast<const char *>(Texts[0]), reinterpret_cast<const char *>(Texts[1]));
 			delete[] reinterpret_cast<char *>(Param1);
@@ -934,20 +934,20 @@ void patella::TGUI::ProcessEvents()
 			delete[] Texts;
 			break;
 		}
-		case 0x0f:
+		case MESSAGE_EDIT_LIST_DIALOG:
 			ModalWindow = CreateEditListDialog(reinterpret_cast<int *>(Param1), reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param1);
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
-		case 0x10:
+		case MESSAGE_OUTFIT_DIALOG:
 			Communication.OutfitRequested = false;
 			ModalWindow = CreateOutfitDialog(reinterpret_cast<int *>(Param1));
 			delete[] reinterpret_cast<char *>(Param1);
 			break;
-		case 0x11:
+		case MESSAGE_BUG_REPORT_DIALOG:
 			ModalWindow = CreateBugReportDialog();
 			break;
-		case 0x12: {
+		case MESSAGE_NEW_CHANNEL_DIALOG: {
 			// ReceiveChannelList's int[]: the count, then the channel IDs (Patella-Modern issue #30).
 			int *Data = reinterpret_cast<int *>(Param1);
 			ModalWindow = CreateNewChannelDialog(Data[0], &Data[1], reinterpret_cast<const char (*)[30]>(Param2)); // NOLINT(modernize-avoid-c-arrays): CreateNewChannelDialog's parameter (Dialogs.h)
@@ -956,178 +956,178 @@ void patella::TGUI::ProcessEvents()
 				delete[] reinterpret_cast<char *>(Param2);
 			break;
 		}
-		case 0x13:
+		case MESSAGE_INVITE_DIALOG:
 			ModalWindow = CreateInviteDialog();
 			break;
-		case 0x14:
+		case MESSAGE_EXCLUDE_DIALOG:
 			ModalWindow = CreateExcludeDialog();
 			break;
-		case 0x15:
+		case MESSAGE_IGNORE_LIST_DIALOG:
 			ModalWindow = CreateIgnoreListDialog();
 			break;
-		case 0x16:
+		case MESSAGE_REPORT_DIALOG:
 			ModalWindow = CreateReportDialog();
 			break;
-		case 0x17:
+		case MESSAGE_ADD_BUDDY_DIALOG:
 			ModalWindow = CreateAddBuddyDialog();
 			break;
-		case 0x18:
+		case MESSAGE_EDIT_BUDDY_DIALOG:
 			ModalWindow = CreateEditBuddyDialog((int)Param1);
 			break;
-		case 0x19:
+		case MESSAGE_TEMPORARY_IGNORE:
 			AddTemporaryIgnore(reinterpret_cast<const char *>(Param1));
 			delete[] reinterpret_cast<char *>(Param1);
 			break;
-		case 0x1a:
+		case MESSAGE_TEMPORARY_UNIGNORE:
 			RemoveTemporaryIgnore(reinterpret_cast<const char *>(Param1));
 			delete[] reinterpret_cast<char *>(Param1);
 			break;
-		case 0x1b:
+		case MESSAGE_INFO_DIALOG:
 			ModalWindow = CreateInfoDialog(URLCallback);
 			break;
-		case 0x1c:
+		case MESSAGE_RULE_VIOLATION_DIALOG:
 			ModalWindow = CreateRuleViolationDialog(reinterpret_cast<const char *>(Param1), reinterpret_cast<TTalkLine *>(Param2));
 			if (Param1 != 0)
 				delete[] reinterpret_cast<char *>(Param1);
 			if (Param2 != 0)
 				delete[] reinterpret_cast<char *>(Param2);
 			break;
-		case 0x1d:
+		case MESSAGE_SET_MARK_DIALOG:
 			ModalWindow = CreateEditMarkDialog(reinterpret_cast<TCoordinate *>(Param1), nullptr);
 			break;
-		case 0x1e:
+		case MESSAGE_EDIT_MARK_DIALOG:
 			ModalWindow = CreateEditMarkDialog(reinterpret_cast<TCoordinate *>(Param1), reinterpret_cast<TMark *>(Param2));
 			break;
-		case 0x1f:
+		case MESSAGE_HELP_DIALOG:
 			ModalWindow = CreateHelpDialog(URLCallback);
 			break;
-		case 0x20:
+		case MESSAGE_HINTS_DIALOG:
 			ModalWindow = CreateHintsDialog();
 			break;
-		case 0x21:
+		case MESSAGE_OPTIONS_DIALOG:
 			ModalWindow = CreateOptionsDialog();
 			break;
-		case 0x22:
+		case MESSAGE_NETWORK_OPTIONS_DIALOG:
 			ModalWindow = CreateNetworkOptionsDialog(URLCallback);
 			break;
-		case 0x23:
+		case MESSAGE_GRAPHICS_OPTIONS_DIALOG:
 			ModalWindow = CreateGraphicsOptionsDialog(URLCallback, DisplayModeCallback, MainWindow.get());
 			break;
-		case 0x24:
+		case MESSAGE_ADVANCED_GRAPHICS_DIALOG:
 			ModalWindow = CreateAdvancedGraphicsDialog(URLCallback, reinterpret_cast<TComponent *>(Param1));
 			break;
-		case 0x25:
+		case MESSAGE_CONSOLE_OPTIONS_DIALOG:
 			ModalWindow = CreateConsoleOptionsDialog(URLCallback);
 			break;
-		case 0x26:
+		case MESSAGE_HOTKEY_DIALOG:
 			ModalWindow = CreateHotkeyDialog(URLCallback);
 			break;
-		case 0x27:
+		case MESSAGE_GENERAL_OPTIONS_DIALOG:
 			ModalWindow = CreateGeneralOptionsDialog(URLCallback);
 			break;
-		case 0x28:
+		case MESSAGE_MESSAGE_OF_THE_DAY:
 			ModalWindow = CreateMessageDialog("Message of the Day", GetMotD());
 			break;
 		// 0x29, the update dialog (ReceivePatch and ReceiveWholeFile posted it), is gone since issue #75.
-		case 0x2c:
+		case MESSAGE_USE_WITH:
 			SetActionState(ACTIONSTATE_USE_WITH);
 			break;
-		case 0x2d:
+		case MESSAGE_TRADE_WITH:
 			SetActionState(ACTIONSTATE_TRADE_WITH);
 			break;
-		case 0x2e:
+		case MESSAGE_HELP_MODE:
 			SetActionState(ACTIONSTATE_HELP);
 			SetHelpHandle(0);
 			break;
-		case 0x2f:
+		case MESSAGE_OPEN_PRIVATE_CONVERSATION:
 			MainWindow->Console->OpenChannel(4, 4, reinterpret_cast<const char *>(Param2), -1, reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
-		case 0x30:
+		case MESSAGE_OPEN_CHANNEL:
 			MainWindow->Console->OpenChannel(5, 5, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
-		case 0x31:
+		case MESSAGE_OPEN_OWN_CHANNEL:
 			MainWindow->Console->OpenChannel(5, 5, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2))->SetSelected(true);
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
-		case 0x32:
+		case MESSAGE_RULE_VIOLATION_CHANNEL:
 			MainWindow->Console->AddChannel(reinterpret_cast<TTalkBuffer *>(Param1), TextRuleViolations);
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
-		case 0x33:
+		case MESSAGE_REPORT_RULE_VIOLATION:
 			MainWindow->Console->ReportRuleViolation(reinterpret_cast<const char *>(Param1));
 			delete[] reinterpret_cast<char *>(Param1);
 			break;
-		case 0x34: {
+		case MESSAGE_OBJECT_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TObjectContextMenu(Mouse.x, Mouse.y, MainWindow->Width,
 				MainWindow->Height);
 			break;
 		}
-		case 0x35: {
+		case MESSAGE_CREATURE_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TCreatureContextMenu((uint32)Param1, Mouse.x, Mouse.y,
 				MainWindow->Width, MainWindow->Height);
 			break;
 		}
-		case 0x36: {
+		case MESSAGE_BUDDY_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TBuddyContextMenu((uint32)Param1, Mouse.x, Mouse.y,
 				MainWindow->Width, MainWindow->Height);
 			break;
 		}
-		case 0x37: {
+		case MESSAGE_TEXT_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TTextContextMenu(MainWindow->Console->CurrentConsole->TextWindow, (int)Param1,
 				Mouse.x, Mouse.y, MainWindow->Width, MainWindow->Height);
 			break;
 		}
-		case 0x38: {
+		case MESSAGE_CHANNEL_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TChannelContextMenu(MainWindow->Console, Mouse.x, Mouse.y,
 				MainWindow->Width, MainWindow->Height);
 			break;
 		}
-		case 0x39: {
+		case MESSAGE_REQUEST_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TRequestContextMenu(MainWindow->Console, (int)Param1, Mouse.x,
 				Mouse.y, MainWindow->Width, MainWindow->Height);
 			break;
 		}
-		case 0x3a: {
+		case MESSAGE_EDIT_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TEditContextMenu(reinterpret_cast<TEditLine *>(Param1), Mouse.x, Mouse.y,
 				MainWindow->Width, MainWindow->Height);
 			break;
 		}
-		case 0x3b: {
+		case MESSAGE_MARK_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TMarkContextMenu(reinterpret_cast<TMarkMenuData *>(Param1), Mouse.x, Mouse.y,
 				MainWindow->Width, MainWindow->Height);
 			break;
 		}
-		case 0x3c: {
+		case MESSAGE_SKILL_MENU: {
 			const TMousePosition Mouse = MousePosition();
 			ModalWindow = new TSkillContextMenu(reinterpret_cast<TSkillsWindowBody *>(Param1), Mouse.x, Mouse.y,
 				MainWindow->Width, MainWindow->Height);
 			break;
 		}
-		case 0x3d:
+		case MESSAGE_CONNECT_LOGIN_SERVER:
 			Redraw(false);
 			ConnectToLoginServer();
 			break;
-		case 0x3e:
+		case MESSAGE_CONNECT_GAME_SERVER:
 			Redraw(false);
 			ConnectToGameServer();
 			break;
-		case 0x3f:
+		case MESSAGE_RECONNECT:
 			if (GetConnectionState() != 0) {
 				Network.Reconnect = true;
 				Network.ReconnectTimeout = GetMilliseconds() + 5000;
 			} else {
-				AddMessage(0x3d, 0, 0);
-				AddMessage(3, 0, 0);
+				AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
+				AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 			}
 			break;
 		// 0x40 (wait until the login connection is closed), 0x41-0x44 (InstallPatch: Tibia.dat, .spr, .pic,
@@ -1138,7 +1138,7 @@ void patella::TGUI::ProcessEvents()
 			TERROR1("unknown message type", Type);
 		}
 		if (ModalWindow != nullptr) {
-			if (Type < 0x34) {
+			if (Type < MESSAGE_FIRST_MENU) {
 				ModalWindow->SetPosition(MainWindow->Width / 2 - ModalWindow->Width / 2,
 					MainWindow->Height / 2 - ModalWindow->Height / 2);
 				SetActionState(ACTIONSTATE_DIALOG);

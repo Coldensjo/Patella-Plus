@@ -103,9 +103,9 @@ TDialog *CreateConnectingDialog(const char *Caption, const char *Text, TComponen
 {
 	TWaitLabel *Label = new TWaitLabel(Text, true, false);
 	TDialog *Dialog = new TDialog(Caption, Label);
-	Dialog->SetOkButton("Abort", TCallback(Receiver, 29));
-	Dialog->SetCancelButton(nullptr, TCallback(Receiver, 29));
-	Dialog->CancelCallback = TCallback(Receiver, 29);
+	Dialog->SetOkButton("Abort", TCallback(Receiver, EVENT_ABORT));
+	Dialog->SetCancelButton(nullptr, TCallback(Receiver, EVENT_ABORT));
+	Dialog->CancelCallback = TCallback(Receiver, EVENT_ABORT);
 	return Dialog;
 }
 
@@ -115,11 +115,11 @@ TDialog *CreateWaitDialog(const char *Caption, const char *Text, int Timeout)
 {
 	TWaitLabel *Label = new TWaitLabel(Text, false, true);
 	TDialog *Dialog = new TDialog(Caption, Label);
-	Dialog->SetOkButton("Abort", TCallback(Label, 29));
-	Dialog->SetCancelButton(nullptr, TCallback(Label, 29));
-	Dialog->CancelCallback = TCallback(Label, 29);
+	Dialog->SetOkButton("Abort", TCallback(Label, EVENT_ABORT));
+	Dialog->SetCancelButton(nullptr, TCallback(Label, EVENT_ABORT));
+	Dialog->CancelCallback = TCallback(Label, EVENT_ABORT);
 	if (Timeout > 0)
-		Label->SetTimer(Timeout, TCallback(Label, 31));
+		Label->SetTimer(Timeout, TCallback(Label, EVENT_TIMER));
 	return Dialog;
 }
 
@@ -128,9 +128,9 @@ TDialog *CreateReconnectDialog(const char *Caption, const char *Text, int timeou
 {
 	TReconnectWindow *Window = new TReconnectWindow(Text, timeout);
 	TDialog *Dialog = new TDialog(Caption, Window);
-	Dialog->SetOkButton("Abort", TCallback(Window, 29));
-	Dialog->SetCancelButton(nullptr, TCallback(Window, 29));
-	Dialog->CancelCallback = TCallback(Window, 29);
+	Dialog->SetOkButton("Abort", TCallback(Window, EVENT_ABORT));
+	Dialog->SetCancelButton(nullptr, TCallback(Window, EVENT_ABORT));
+	Dialog->CancelCallback = TCallback(Window, EVENT_ABORT);
 	return Dialog;
 }
 
@@ -150,12 +150,12 @@ TDialog *CreateQuestionDialog(const char *Caption, const char *Text, TComponent 
 // receiver.
 TDialog *CreateLogoutDialog(const char *Caption, const char *Text, TComponent *Receiver)
 {
-	TLogoutLabel *Label = new TLogoutLabel(SkinProperties().StyleB08.Data64, Text, TCallback(Receiver, 506),
-		TCallback(Receiver, 7));
+	TLogoutLabel *Label = new TLogoutLabel(SkinProperties().StyleB08.Data64, Text, TCallback(Receiver, EVENT_LOGOUT),
+		TCallback(Receiver, EVENT_EXIT_PROGRAM));
 	TDialog *Dialog = new TDialog(Caption, Label);
-	Dialog->SetOkButton("Logout", TCallback(Receiver, 506));
-	Dialog->SetCancelButton("Cancel", TCallback(Receiver, 2));
-	Dialog->SetExtraButton("Exit", TCallback(Receiver, 7));
+	Dialog->SetOkButton("Logout", TCallback(Receiver, EVENT_LOGOUT));
+	Dialog->SetCancelButton("Cancel", TCallback(Receiver, EVENT_CANCEL));
+	Dialog->SetExtraButton("Exit", TCallback(Receiver, EVENT_EXIT_PROGRAM));
 	return Dialog;
 }
 
@@ -196,7 +196,7 @@ TDialog *CreateMoveObjectsDialog()
 		TMoveObjectsDialog *Body = new TMoveObjectsDialog();
 		TDialog *Dialog = new TDialog("Move Objects", Body);
 		Dialog->SetOkButton("Ok", TCallback(Body, 1));
-		Dialog->SetCancelButton("Cancel", TCallback(Body, 2));
+		Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
 		return Dialog;
 	}
 	SetActionState(0);
@@ -209,7 +209,7 @@ TDialog *CreateLoginDialog(void (*OpenURL)(const char *URL))
 	TLoginDialog *Body = new TLoginDialog(OpenURL);
 	TDialog *Dialog = new TDialog("Enter Game", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetCancelButton("Cancel", TCallback(Body, 2));
+	Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
 	return Dialog;
 }
 
@@ -260,8 +260,8 @@ TDialog *CreateTextDialog(const int *ObjectData, const char *Author, const char 
 		Obj.Type = Type;
 		Body = new TTextDialog(MaximumLength, Text, ObjectNumber, Obj, Description);
 		Dialog = new TDialog("Show Text", Body);
-		Dialog->SetOkButton("Ok", TCallback(Body, 2));
-		Dialog->SetCancelButton(nullptr, TCallback(Body, 2));
+		Dialog->SetOkButton("Ok", TCallback(Body, EVENT_CANCEL));
+		Dialog->SetCancelButton(nullptr, TCallback(Body, EVENT_CANCEL));
 	}
 	Dialog->OkCallback = NoCallback;
 	return Dialog;
@@ -328,9 +328,9 @@ TDialog *CreateIgnoreListDialog()
 {
 	TIgnoreListDialog *Body = new TIgnoreListDialog();
 	TDialog *Dialog = new TDialog("Edit Ignore List and White List", Body);
-	Dialog->SetOkButton("Ok", TCallback(Body, 602));
+	Dialog->SetOkButton("Ok", TCallback(Body, EVENT_IGNORE_LIST_OK));
 	Dialog->OkCallback = NoCallback;
-	Dialog->SetCancelButton("Cancel", TCallback(Body, 2));
+	Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
 	return Dialog;
 }
 
@@ -386,7 +386,7 @@ TDialog *CreateHintsDialog()
 	THintsDialog *Body = new THintsDialog();
 	TDialog *Dialog = new TDialog("Hints for Tibia", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetCancelButton("Cancel", TCallback(Dialog, 2));
+	Dialog->SetCancelButton("Cancel", TCallback(Dialog, EVENT_CANCEL));
 	return Dialog;
 }
 
@@ -396,7 +396,7 @@ TDialog *CreateRuleViolationDialog(const char *Name, TTalkLine *Statement)
 	TRuleViolationDialog *Body = new TRuleViolationDialog(Name, Statement);
 	TDialog *Dialog = new TDialog("Rule Violation", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetCancelButton("Cancel", TCallback(Body, 2));
+	Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
 	return Dialog;
 }
 
@@ -406,7 +406,7 @@ TDialog *CreateEditMarkDialog(TCoordinate *Coordinate, TMark *Mark)
 	TEditMarkDialog *Body = new TEditMarkDialog(Coordinate, Mark);
 	TDialog *Dialog = new TDialog("Edit Mark", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetCancelButton("Cancel", TCallback(Body, 2));
+	Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
 	return Dialog;
 }
 
@@ -427,7 +427,7 @@ TDialog *CreateGeneralOptionsDialog(void (*OpenURL)(const char *URL))
 	TGeneralOptionsDialog *Body = new TGeneralOptionsDialog(OpenURL);
 	TDialog *Dialog = new TDialog("General Options", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetExtraButton("Help", TCallback(Body, 701));
+	Dialog->SetExtraButton("Help", TCallback(Body, EVENT_HELP));
 	return Dialog;
 }
 
@@ -438,7 +438,7 @@ TDialog *CreateGraphicsOptionsDialog(void (*OpenURL)(const char *URL), void (*Se
 	TGraphicsOptionsDialog *Body = new TGraphicsOptionsDialog(OpenURL, SetDisplayMode, Parent);
 	TDialog *Dialog = new TDialog("Graphics Options", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetExtraButton("Help", TCallback(Body, 701));
+	Dialog->SetExtraButton("Help", TCallback(Body, EVENT_HELP));
 	return Dialog;
 }
 
@@ -448,8 +448,8 @@ TDialog *CreateAdvancedGraphicsDialog(void (*OpenURL)(const char *URL), TCompone
 	TAdvancedGraphicsDialog *Body = new TAdvancedGraphicsDialog(OpenURL, Receiver);
 	TDialog *Dialog = new TDialog("Advanced Graphics Options", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetCancelButton("Cancel", TCallback(Body, 2));
-	Dialog->SetExtraButton("Help", TCallback(Body, 701));
+	Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
+	Dialog->SetExtraButton("Help", TCallback(Body, EVENT_HELP));
 	return Dialog;
 }
 
@@ -459,7 +459,7 @@ TDialog *CreateConsoleOptionsDialog(void (*OpenURL)(const char *URL))
 	TConsoleOptionsDialog *Body = new TConsoleOptionsDialog(OpenURL);
 	TDialog *Dialog = new TDialog("Console Options", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetExtraButton("Help", TCallback(Body, 701));
+	Dialog->SetExtraButton("Help", TCallback(Body, EVENT_HELP));
 	return Dialog;
 }
 
@@ -469,7 +469,7 @@ TDialog *CreateNetworkOptionsDialog(void (*OpenURL)(const char *URL))
 	TNetworkOptionsDialog *Body = new TNetworkOptionsDialog(OpenURL);
 	TDialog *Dialog = new TDialog("Network Options", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
-	Dialog->SetExtraButton("Help", TCallback(Body, 701));
+	Dialog->SetExtraButton("Help", TCallback(Body, EVENT_HELP));
 	return Dialog;
 }
 
@@ -510,7 +510,7 @@ TDialog::TDialog(const char *_Caption, TComponent *_Dialog)
 	InsertChild(Separator);
 	FitToChild(Dialog, SkinProperties().StyleB08.Data54, true);
 	SetOkButton("Ok", TCallback(this, 1));
-	SetCancelButton("Cancel", TCallback(this, 2));
+	SetCancelButton("Cancel", TCallback(this, EVENT_CANCEL));
 }
 
 // 0x46c3e0, lines 687-700
@@ -540,13 +540,13 @@ void TDialog::SetCancelButton(const char *Text, TCallback Callback)
 		PATELLA_ASSERT(CancelButton!=nullptr);
 		DeleteChild(CancelButton);
 		CancelButton = nullptr;
-		CancelCallback = TCallback(this, 2);
+		CancelCallback = TCallback(this, EVENT_CANCEL);
 	} else {
 		if (CancelButton != nullptr)
 			DeleteChild(CancelButton);
 		CancelButton = new TTextButton(0, 0, Text, Callback, nullptr);
 		if (Callback.Event == NoCallback.Event && Callback.Receiver == NoCallback.Receiver)
-			Callback = TCallback(this, 2);
+			Callback = TCallback(this, EVENT_CANCEL);
 		CancelCallback = Callback;
 		InsertChild(CancelButton);
 	}
@@ -703,10 +703,10 @@ void TWaitLabel::SetTimer(int Time, TCallback Callback)
 // 0x46e0e0, line 1000. The timer's ticks wait until it runs out.
 void TWaitLabel::HandleEvent(int Event)
 {
-	if (Event == 31) {
+	if (Event == EVENT_TIMER) {
 		if (!Timer->IsExpired())
 			return;
-	} else if (Event == 29 && ClearOnAbort) {
+	} else if (Event == EVENT_ABORT && ClearOnAbort) {
 		ClearMessages();
 	}
 	SetActionState(0);
@@ -717,7 +717,7 @@ void TWaitLabel::Draw(int Surface, int x, int y)
 {
 	TLabel::Draw(Surface, x, y);
 	if (CloseOnMessage && PeekMessageType() != 0)
-		HandleEvent(29);
+		HandleEvent(EVENT_ABORT);
 }
 
 // --- TReconnectWindow ----------------------------------------------------------
@@ -728,7 +728,7 @@ void TWaitLabel::Draw(int Surface, int x, int y)
 TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 {
 	Timeout = timeout * 10;
-	Timer.reset(new TTimer(Timeout, TCallback(this, 31)));
+	Timer.reset(new TTimer(Timeout, TCallback(this, EVENT_TIMER)));
 	SetTime(Timeout + 10);
 	TLabel *TextLabel = new TLabel(SkinProperties().StyleB08.Data64, Text);
 	ProgressBar = new TProgressBar();
@@ -768,23 +768,23 @@ void TReconnectWindow::Draw(int Surface, int x, int y)
 // up and shows the character list again.
 void TReconnectWindow::HandleEvent(int Event)
 {
-	if (Event == 31) {
+	if (Event == EVENT_TIMER) {
 		if (!Timer->IsExpired()) {
 			const int Time = Timer->GetTime();
 			ProgressBar->SetCurrent(Timeout - Time);
 			SetTime(Time + 10);
 			TimeLabel->SetText(Text, false);
 		} else if (GetConnectionState() == 8 || GetConnectionState() == 7) {
-			AddMessage(0x3f, 0, 0);
+			AddMessage(MESSAGE_RECONNECT, 0, 0);
 			SendLogout();
 		} else {
-			AddMessage(0x3e, 0, 0);
-			AddMessage(4, 0, 0);
+			AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
+			AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
 		}
 	} else {
-		if (Event == 29) {
-			AddMessage(9, 20, 0);
-			AddMessage(10, 300, 0);
+		if (Event == EVENT_ABORT) {
+			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
+			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
 		SetActionState(0);
 	}
@@ -824,7 +824,7 @@ void TLoginDialog::KeyPress(int Key)
 	if (Key == 13) {
 		HandleEvent(1);
 	} else if (Key == 27) {
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	} else {
 		TEditLine *FocusEdit = FocusGroup->Active;
 		PATELLA_ASSERT(FocusEdit!=nullptr);
@@ -837,8 +837,8 @@ void TLoginDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
 		SetAccount(atoi(Account->Text.get()), Password->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
-		AddMessage(0x3d, 0, 0);
-		AddMessage(3, 0, 0);
+		AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
+		AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 	}
 	SetActionState(0);
 }
@@ -930,7 +930,7 @@ void TCharacterListDialog::KeyPress(int Key)
 	if (Key == 13) {
 		HandleEvent(1);
 	} else if (Key == 27) {
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	} else {
 		Timer.reset();
 		Timer = nullptr;
@@ -948,14 +948,14 @@ void TCharacterListDialog::HandleEvent(int Event)
 		if (Selection >= 0) {
 			SetActiveCharacter(Selection);
 			if (GetConnectionState() == 8 || GetConnectionState() == 7) {
-				AddMessage(0x3f, 0, 0);
+				AddMessage(MESSAGE_RECONNECT, 0, 0);
 				SendLogout();
 			} else {
-				AddMessage(0x3e, 0, 0);
-				AddMessage(4, 0, 0);
+				AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
+				AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
 			}
 		}
-	} else if (Event == 31 && !Timer->IsExpired()) {
+	} else if (Event == EVENT_TIMER && !Timer->IsExpired()) {
 		return;
 	}
 	SetActionState(0);
@@ -965,7 +965,7 @@ void TCharacterListDialog::HandleEvent(int Event)
 void TCharacterListDialog::SetTimeout(int seconds)
 {
 	Timer.reset();
-	Timer.reset(new TTimer(seconds, TCallback(this, 31)));
+	Timer.reset(new TTimer(seconds, TCallback(this, EVENT_TIMER)));
 	Seconds = seconds;
 }
 
@@ -1012,7 +1012,7 @@ void TMoveObjectsDialog::KeyPress(int Key)
 	if (Key == 13) {
 		HandleEvent(1);
 	} else if (Key == 27) {
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	} else if (Key >= '0' && Key <= '9') {
 		ScrollBar->Range->SetValue(LastDigit * 10 + Key - '0');
 		LastDigit = Key - '0';
@@ -1079,7 +1079,7 @@ TOutfitDialog::TOutfitDialog(const int *Data)
 	TBorder *Border = new TBorder(OutfitIcon, 0, 9, 0, 11, 10, 0, 8, 0, SkinProperties().DataC70);
 	InsertChild(Border);
 	SetChildArea(Border, SkinProperties().DataC60);
-	TTextButton *NextButton = new TTextButton(0, 0, "Next", TCallback(this, 6), nullptr);
+	TTextButton *NextButton = new TTextButton(0, 0, "Next", TCallback(this, EVENT_OUTFIT_NEXT), nullptr);
 	InsertChild(NextButton);
 	SetChildPosition(NextButton, SkinProperties().DataC80.x, SkinProperties().DataC80.y);
 	PartGroup.reset(new TRadioButtonGroup);
@@ -1101,14 +1101,14 @@ TOutfitDialog::TOutfitDialog(const int *Data)
 		default:
 			break;
 		}
-		PartButtons[i] = new TTextButton(70, i * 25, PartName, TCallback(this, i + 1000), nullptr);
+		PartButtons[i] = new TTextButton(70, i * 25, PartName, TCallback(this, i + EVENT_OUTFIT_PART), nullptr);
 		InsertChild(PartButtons[i]);
 		SetChildPosition(PartButtons[i], SkinProperties().DataC88[i].x, SkinProperties().DataC88[i].y);
 		PartButtons[i]->SetRadioButtonGroup(PartGroup.get());
 	}
 	ColorGroup.reset(new TRadioButtonGroup);
 	for (int i = 0; i < 133; i++) {
-		ColorButtons[i] = new TColorButton(0, 0, OutfitColor(i), 22, 23, TCallback(this, i + 2000), nullptr);
+		ColorButtons[i] = new TColorButton(0, 0, OutfitColor(i), 22, 23, TCallback(this, i + EVENT_OUTFIT_COLOR), nullptr);
 		ColorButtons[i]->SetRadioButtonGroup(ColorGroup.get());
 		InsertChild(ColorButtons[i]);
 		SetChildPosition(ColorButtons[i], SkinProperties().DataCA8.x, SkinProperties().DataCA8.y);
@@ -1119,7 +1119,7 @@ TOutfitDialog::TOutfitDialog(const int *Data)
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().DataCB8.x, SkinProperties().DataCB8.y);
 	PartGroup->Selected = PartButtons[0];
-	HandleEvent(1000);
+	HandleEvent(EVENT_OUTFIT_PART);
 }
 
 // 0x471250, line 1586. A part button selects the colour button of its
@@ -1127,17 +1127,17 @@ TOutfitDialog::TOutfitDialog(const int *Data)
 // (into the members after them) when a part has a higher colour (kept).
 void TOutfitDialog::HandleEvent(int Event)
 {
-	if (Event >= 1000 && Event <= 1003) {
-		Part = Event - 1000;
+	if (Event >= EVENT_OUTFIT_PART && Event <= EVENT_OUTFIT_PART_LAST) {
+		Part = Event - EVENT_OUTFIT_PART;
 		for (int i = 0; i < 216; i++) {
 			if (Colors[Part] == i)
 				ColorGroup->Selected = ColorButtons[i];
 		}
-	} else if (Event >= 2000 && Event <= 2215) {
-		Colors[Part] = Event - 2000;
+	} else if (Event >= EVENT_OUTFIT_COLOR && Event <= EVENT_OUTFIT_COLOR_LAST) {
+		Colors[Part] = Event - EVENT_OUTFIT_COLOR;
 		OutfitIcon->SetColor(Part + 1, Colors[Part]);
 		OutfitIcon->Arrange();
-	} else if (Event == 6) {
+	} else if (Event == EVENT_OUTFIT_NEXT) {
 		Outfit++;
 		if (Outfit > LastOutfit)
 			Outfit = FirstOutfit;
@@ -1146,7 +1146,7 @@ void TOutfitDialog::HandleEvent(int Event)
 	} else if (Event == 1) {
 		SendOutfit(Outfit, Colors.data());
 		SetActionState(0);
-	} else if (Event == 2) {
+	} else if (Event == EVENT_CANCEL) {
 		SetActionState(0);
 	}
 }
@@ -1243,15 +1243,15 @@ TIgnoreListDialog::TIgnoreListDialog()
 	TLabel *Label = new TLabel(SkinProperties().StyleB08.Data78, TextCharactersToIgnore);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().StyleD3C.Data18);
-	IgnoreList = new TFontListBox(TCallback(this, 11), NoCallback);
+	IgnoreList = new TFontListBox(TCallback(this, EVENT_LIST_SELECTED), NoCallback);
 	IgnoreList->SetEditable(true);
 	InsertChild(IgnoreList);
 	SetChildArea(IgnoreList, SkinProperties().StyleD3C.Data28);
 	AddIgnoreButton = new TTextButton(SkinProperties().StyleD3C.Data38.x, SkinProperties().StyleD3C.Data38.y, "Add",
-		14, 15, TCallback(this, 709), nullptr);
+		14, 15, TCallback(this, EVENT_IGNORE_ADD), nullptr);
 	InsertChild(AddIgnoreButton);
 	DeleteIgnoreButton = new TTextButton(SkinProperties().StyleD3C.Data40.x, SkinProperties().StyleD3C.Data40.y,
-		"Delete", 14, 15, TCallback(this, 710), nullptr);
+		"Delete", 14, 15, TCallback(this, EVENT_IGNORE_DELETE), nullptr);
 	InsertChild(DeleteIgnoreButton);
 	IgnorePermanently = new TCheckBox("Ignore Permanently");
 	InsertChild(IgnorePermanently);
@@ -1312,15 +1312,15 @@ TIgnoreListDialog::TIgnoreListDialog()
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextCharactersToAllow);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().StyleD3C.DataA4);
-	WhiteList = new TFontListBox(TCallback(this, 11), NoCallback);
+	WhiteList = new TFontListBox(TCallback(this, EVENT_LIST_SELECTED), NoCallback);
 	WhiteList->SetEditable(true);
 	InsertChild(WhiteList);
 	SetChildArea(WhiteList, SkinProperties().StyleD3C.DataB4);
 	AddWhiteButton = new TTextButton(SkinProperties().StyleD3C.DataC4.x, SkinProperties().StyleD3C.DataC4.y, "Add",
-		14, 15, TCallback(this, 712), nullptr);
+		14, 15, TCallback(this, EVENT_WHITELIST_ADD), nullptr);
 	InsertChild(AddWhiteButton);
 	DeleteWhiteButton = new TTextButton(SkinProperties().StyleD3C.DataCC.x, SkinProperties().StyleD3C.DataCC.y,
-		"Delete", 14, 15, TCallback(this, 713), nullptr);
+		"Delete", 14, 15, TCallback(this, EVENT_WHITELIST_DELETE), nullptr);
 	InsertChild(DeleteWhiteButton);
 	AllowPermanently = new TCheckBox("Allow Permanently");
 	InsertChild(AllowPermanently);
@@ -1372,7 +1372,7 @@ TIgnoreListDialog::TIgnoreListDialog()
 	if (Text != nullptr)
 		delete[] Text;
 	Arrange();
-	HandleEvent(11);
+	HandleEvent(EVENT_LIST_SELECTED);
 }
 
 // 0x471d90, line 1987
@@ -1392,7 +1392,7 @@ void TIgnoreListDialog::Arrange()
 // each entry once more without using it (kept).
 void TIgnoreListDialog::HandleEvent(int Event)
 {
-	if (Event == 602) {
+	if (Event == EVENT_IGNORE_LIST_OK) {
 		IgnoreList->StopEdit();
 		ClearIgnoreList();
 		for (int i = 0; i < IgnoreList->GetNumberOfLines(); i++) {
@@ -1421,7 +1421,7 @@ void TIgnoreListDialog::HandleEvent(int Event)
 		SetIgnoreEnabled(WhiteListCheckBox->IsChecked());
 		SetBuddyIgnore(AllowBuddies->IsChecked());
 	}
-	if (Event == 709) {
+	if (Event == EVENT_IGNORE_ADD) {
 		WhiteList->StopEdit();
 		IgnoreList->StopEdit();
 		const int Selection = IgnoreList->GetSelection();
@@ -1439,7 +1439,7 @@ void TIgnoreListDialog::HandleEvent(int Event)
 		IgnoreList->SetSelection(IgnoreList->GetNumberOfLines() - 1);
 		IgnorePermanently->SetChecked(false);
 		IgnoreList->StartEdit();
-	} else if (Event == 712) {
+	} else if (Event == EVENT_WHITELIST_ADD) {
 		IgnoreList->StopEdit();
 		WhiteList->StopEdit();
 		const int Selection = WhiteList->GetSelection();
@@ -1457,7 +1457,7 @@ void TIgnoreListDialog::HandleEvent(int Event)
 		WhiteList->SetSelection(WhiteList->GetNumberOfLines() - 1);
 		AllowPermanently->SetChecked(false);
 		WhiteList->StartEdit();
-	} else if (Event == 710) {
+	} else if (Event == EVENT_IGNORE_DELETE) {
 		IgnoreList->StopEdit();
 		const int Selection = IgnoreList->GetSelection();
 		if (Selection > -1) {
@@ -1482,7 +1482,7 @@ void TIgnoreListDialog::HandleEvent(int Event)
 			}
 		}
 		IgnoreList->SetSelection(-1);
-	} else if (Event == 713) {
+	} else if (Event == EVENT_WHITELIST_DELETE) {
 		WhiteList->StopEdit();
 		const int Selection = WhiteList->GetSelection();
 		if (Selection > -1) {
@@ -1507,7 +1507,7 @@ void TIgnoreListDialog::HandleEvent(int Event)
 			}
 		}
 		WhiteList->SetSelection(-1);
-	} else if (Event == 11) {
+	} else if (Event == EVENT_LIST_SELECTED) {
 		int Selection = IgnoreList->GetSelection();
 		if (Selection != -1) {
 			IgnoreEntries(Selection);
@@ -1603,7 +1603,7 @@ TNewChannelDialog::TNewChannelDialog(int _NumberOfChannels, const int *_ChannelI
 	PATELLA_ASSERT(_ChannelIDs!=nullptr);
 	PATELLA_ASSERT_VALUES(_NumberOfChannels>0, _NumberOfChannels);
 	TComponent::SetSize(SkinProperties().DataECC, SkinProperties().DataED0);
-	ListBox = new TListBox(NoCallback, TCallback(this, 301));
+	ListBox = new TListBox(NoCallback, TCallback(this, EVENT_NEW_CHANNEL_JOIN));
 	TLabel *Label = new TLabel(SkinProperties().StyleB08.Data78, TextSelectChannel);
 	InsertChild(ListBox);
 	InsertChild(Label);
@@ -1632,11 +1632,11 @@ void TNewChannelDialog::KeyPress(int Key)
 {
 	if (Key == 13) {
 		if (strlen(NameEdit->Text.get()) != 0)
-			HandleEvent(302);
+			HandleEvent(EVENT_NEW_CHANNEL_CLOSE);
 		else
-			HandleEvent(301);
+			HandleEvent(EVENT_NEW_CHANNEL_JOIN);
 	} else if (Key == 27) {
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	} else {
 		NameEdit->KeyPress(Key);
 	}
@@ -1657,10 +1657,10 @@ void TNewChannelDialog::HandleEvent(int Event)
 			else
 				SendOpenPrivateConversation(Name);
 		} else {
-			Event = 301;
+			Event = EVENT_NEW_CHANNEL_JOIN;
 		}
 	}
-	if (Event == 301) {
+	if (Event == EVENT_NEW_CHANNEL_JOIN) {
 		const int Selection = ListBox->GetSelection();
 		if (Selection != -1) {
 			const int ChannelID = ChannelIDs[Selection];
@@ -1696,7 +1696,7 @@ void TPrivateChannelDialog::KeyPress(int Key)
 	if (Key == 13)
 		HandleEvent(1);
 	else if (Key == 27)
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	else
 		NameEdit->KeyPress(Key);
 }
@@ -1738,7 +1738,7 @@ void TReportDialog::KeyPress(int Key)
 	if (Key == 13)
 		HandleEvent(1);
 	else if (Key == 27)
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	else
 		TextEdit->KeyPress(Key);
 }
@@ -1751,7 +1751,7 @@ void TReportDialog::HandleEvent(int Event)
 		const std::size_t Size = strlen(TextEdit->Text.get()) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(TextEdit->Text.get());
-		AddMessage(0x33, reinterpret_cast<std::intptr_t>(Text), 0);
+		AddMessage(MESSAGE_REPORT_RULE_VIOLATION, reinterpret_cast<std::intptr_t>(Text), 0);
 	}
 	SetActionState(0);
 }
@@ -1778,7 +1778,7 @@ void TAddBuddyDialog::KeyPress(int Key)
 	if (Key == 13)
 		HandleEvent(1);
 	else if (Key == 27)
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	else
 		NameEdit->KeyPress(Key);
 }
@@ -1871,37 +1871,37 @@ THelpDialog::THelpDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
 	TComponent::SetSize(SkinProperties().Style1084.Data00, SkinProperties().Style1084.Data04);
-	TTextButton *Button = new TTextButton(0, 0, "Client Help", 18, 19, TCallback(this, 702), nullptr);
+	TTextButton *Button = new TTextButton(0, 0, "Client Help", 18, 19, TCallback(this, EVENT_HELP_MODE), nullptr);
 	TLabel *Label = new TLabel(SkinProperties().StyleB08.Data78, TextClientInfo);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1084.Data08.x, SkinProperties().Style1084.Data08.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1084.Data38.x, SkinProperties().Style1084.Data38.y);
-	Button = new TTextButton(0, 0, "Hints", 18, 19, TCallback(this, 703), nullptr);
+	Button = new TTextButton(0, 0, "Hints", 18, 19, TCallback(this, EVENT_HINTS), nullptr);
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextShowPreviousHints);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1084.Data10.x, SkinProperties().Style1084.Data10.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1084.Data40.x, SkinProperties().Style1084.Data40.y);
-	Button = new TTextButton(0, 0, "Tutor Help", 18, 19, TCallback(this, 704), nullptr);
+	Button = new TTextButton(0, 0, "Tutor Help", 18, 19, TCallback(this, EVENT_TUTOR_HELP), nullptr);
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextAskTutor);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1084.Data18.x, SkinProperties().Style1084.Data18.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1084.Data48.x, SkinProperties().Style1084.Data48.y);
-	Button = new TTextButton(0, 0, "Rule Violation", 18, 19, TCallback(this, 705), nullptr);
+	Button = new TTextButton(0, 0, "Rule Violation", 18, 19, TCallback(this, EVENT_REPORT), nullptr);
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextReportRuleViolations);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1084.Data20.x, SkinProperties().Style1084.Data20.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1084.Data50.x, SkinProperties().Style1084.Data50.y);
-	Button = new TTextButton(0, 0, "Manual", 18, 19, TCallback(this, 706), nullptr);
+	Button = new TTextButton(0, 0, "Manual", 18, 19, TCallback(this, EVENT_MANUAL), nullptr);
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextReadManual);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1084.Data28.x, SkinProperties().Style1084.Data28.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1084.Data58.x, SkinProperties().Style1084.Data58.y);
-	Button = new TTextButton(0, 0, "FAQ", 18, 19, TCallback(this, 707), nullptr);
+	Button = new TTextButton(0, 0, "FAQ", 18, 19, TCallback(this, EVENT_FAQ), nullptr);
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextReadFAQ);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1084.Data30.x, SkinProperties().Style1084.Data30.y);
@@ -1915,7 +1915,7 @@ void THelpDialog::KeyPress(int Key)
 	if (Key == 13)
 		HandleEvent(1);
 	else if (Key == 27)
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 }
 
 // 0x476930, lines 2914-2918. Client Help (702) closes first and then asks
@@ -1925,31 +1925,31 @@ void THelpDialog::HandleEvent(int Event)
 {
 	switch (Event) {
 	case 1:
-	case 2:
+	case EVENT_CANCEL:
 		SetActionState(0);
 		break;
-	case 702:
+	case EVENT_HELP_MODE:
 		SetActionState(0);
-		AddMessage(0x2e, 0, 0);
+		AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
-	case 703:
-		AddMessage(0x20, 0, 0);
-		AddMessage(0x1f, 0, 0);
+	case EVENT_HINTS:
+		AddMessage(MESSAGE_HINTS_DIALOG, 0, 0);
+		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
 		SetActionState(0);
 		break;
-	case 704:
+	case EVENT_TUTOR_HELP:
 		SendJoinChannel(7);
 		SetActionState(0);
 		break;
-	case 705:
-		AddMessage(0x16, 0, 0);
+	case EVENT_REPORT:
+		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
 		SetActionState(0);
 		break;
-	case 706:
+	case EVENT_MANUAL:
 		OpenURL(TextManualURL);
 		SetActionState(0);
 		break;
-	case 707:
+	case EVENT_FAQ:
 		OpenURL(TextFAQURL);
 		SetActionState(0);
 		break;
@@ -1982,7 +1982,7 @@ void THintsDialog::KeyPress(int Key)
 	if (Key == 13)
 		HandleEvent(1);
 	else if (Key == 27)
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	else
 		ListBox->KeyPress(Key);
 }
@@ -2005,8 +2005,8 @@ void THintsDialog::HandleEvent(int Event)
 		const std::size_t Size = strlen(HelpText) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(HelpText);
-		AddMessageFirst(0x20, 0, 0);
-		AddMessageFirst(2, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
+		AddMessageFirst(MESSAGE_HINTS_DIALOG, 0, 0);
+		AddMessageFirst(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
 	}
 	SetActionState(0);
 }
@@ -2036,7 +2036,7 @@ TRuleViolationDialog::TRuleViolationDialog(const char *Name, TTalkLine *Statemen
 	Label = new TLabel(SkinProperties().StyleB08.Data64, "Reason");
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().Style1114.Data28);
-	ReasonList = new TListBox(TCallback(this, 21), NoCallback);
+	ReasonList = new TListBox(TCallback(this, EVENT_REASON_SELECTED), NoCallback);
 	InsertChild(ReasonList);
 	SetChildArea(ReasonList, SkinProperties().Style1114.Data38);
 	Label = new TLabel(SkinProperties().StyleB08.Data64, "Action");
@@ -2085,7 +2085,7 @@ void TRuleViolationDialog::KeyPress(int Key)
 	if (Key == 13) {
 		HandleEvent(1);
 	} else if (Key == 27) {
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	} else if (FocusGroup->Active != nullptr) {
 		FocusGroup->Active->KeyPress(Key);
 	}
@@ -2132,9 +2132,9 @@ void TRuleViolationDialog::HandleEvent(int Event)
 		}
 		break;
 	}
-	case 2:
+	case EVENT_CANCEL:
 		break;
-	case 21:
+	case EVENT_REASON_SELECTED:
 		UpdateActions();
 		return;
 	default:
@@ -2231,7 +2231,7 @@ void TEditMarkDialog::KeyPress(int Key)
 	if (Key == 13)
 		HandleEvent(1);
 	else if (Key == 27)
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 	else
 		TextEdit->KeyPress(Key);
 }
@@ -2255,7 +2255,7 @@ void TEditMarkDialog::HandleEvent(int Event)
 			Coordinate.y = Mark.y;
 		}
 		AddAutomapMark(Coordinate, Mark.Text, Type);
-	} else if (Event != 2) {
+	} else if (Event != EVENT_CANCEL) {
 		TERROR1("unknown event", Event);
 	}
 	SetActionState(0);
@@ -2268,37 +2268,37 @@ void TEditMarkDialog::HandleEvent(int Event)
 TOptionsDialog::TOptionsDialog()
 {
 	TComponent::SetSize(SkinProperties().Style1274.Data00, SkinProperties().Style1274.Data04);
-	TTextButton *Button = new TTextButton(0, 0, "General", 18, 19, TCallback(this, 404), nullptr);
+	TTextButton *Button = new TTextButton(0, 0, "General", 18, 19, TCallback(this, EVENT_OPTIONS_GENERAL), nullptr);
 	TLabel *Label = new TLabel(SkinProperties().StyleB08.Data78, TextChangeGeneralOptions);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1274.Data08.x, SkinProperties().Style1274.Data08.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1274.Data38.x, SkinProperties().Style1274.Data38.y);
-	Button = new TTextButton(0, 0, "Graphics", 18, 19, TCallback(this, 401), nullptr);
+	Button = new TTextButton(0, 0, "Graphics", 18, 19, TCallback(this, EVENT_OPTIONS_GRAPHICS), nullptr);
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextChangeGraphicsOptions);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1274.Data10.x, SkinProperties().Style1274.Data10.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1274.Data40.x, SkinProperties().Style1274.Data40.y);
-	Button = new TTextButton(0, 0, "Console", 18, 19, TCallback(this, 402), nullptr);
+	Button = new TTextButton(0, 0, "Console", 18, 19, TCallback(this, EVENT_OPTIONS_CONSOLE), nullptr);
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextCustomiseConsole);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1274.Data18.x, SkinProperties().Style1274.Data18.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1274.Data48.x, SkinProperties().Style1274.Data48.y);
-	Button = new TTextButton(0, 0, "Network", 18, 19, TCallback(this, 400), nullptr);
+	Button = new TTextButton(0, 0, "Network", 18, 19, TCallback(this, EVENT_OPTIONS_NETWORK), nullptr);
 	Label = new TLabel(0, 0, SkinProperties().StyleB08.Data78, TextChangeNetworkSettings);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1274.Data20.x, SkinProperties().Style1274.Data20.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1274.Data50.x, SkinProperties().Style1274.Data50.y);
-	Button = new TTextButton(0, 0, "Hotkeys", 18, 19, TCallback(this, 403), nullptr);
+	Button = new TTextButton(0, 0, "Hotkeys", 18, 19, TCallback(this, EVENT_OPTIONS_HOTKEYS), nullptr);
 	Label = new TLabel(SkinProperties().StyleB08.Data78, TextEditHotkeys);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1274.Data28.x, SkinProperties().Style1274.Data28.y);
 	InsertChild(Label);
 	SetChildPosition(Label, SkinProperties().Style1274.Data58.x, SkinProperties().Style1274.Data58.y);
-	Button = new TTextButton(0, 0, "Motd", 18, 19, TCallback(this, 406), nullptr);
+	Button = new TTextButton(0, 0, "Motd", 18, 19, TCallback(this, EVENT_OPTIONS_MOTD), nullptr);
 	Label = new TLabel(0, 0, SkinProperties().StyleB08.Data78, TextShowMotD);
 	InsertChild(Button);
 	SetChildPosition(Button, SkinProperties().Style1274.Data30.x, SkinProperties().Style1274.Data30.y);
@@ -2316,7 +2316,7 @@ void TOptionsDialog::KeyPress(int Key)
 	if (Key == 13)
 		HandleEvent(1);
 	else if (Key == 27)
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 }
 
 // 0x479010, lines 3422-3426. Closing saves the options; each button opens
@@ -2325,32 +2325,32 @@ void TOptionsDialog::HandleEvent(int Event)
 {
 	switch (Event) {
 	case 1:
-	case 2:
+	case EVENT_CANCEL:
 		SavePreferences();
 		break;
-	case 400:
-		AddMessage(0x22, 0, 0);
-		AddMessage(0x21, 0, 0);
+	case EVENT_OPTIONS_NETWORK:
+		AddMessage(MESSAGE_NETWORK_OPTIONS_DIALOG, 0, 0);
+		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
-	case 401:
-		AddMessage(0x23, 0, 0);
-		AddMessage(0x21, 0, 0);
+	case EVENT_OPTIONS_GRAPHICS:
+		AddMessage(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
+		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
-	case 402:
-		AddMessage(0x25, 0, 0);
-		AddMessage(0x21, 0, 0);
+	case EVENT_OPTIONS_CONSOLE:
+		AddMessage(MESSAGE_CONSOLE_OPTIONS_DIALOG, 0, 0);
+		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
-	case 403:
-		AddMessage(0x26, 0, 0);
-		AddMessage(0x21, 0, 0);
+	case EVENT_OPTIONS_HOTKEYS:
+		AddMessage(MESSAGE_HOTKEY_DIALOG, 0, 0);
+		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
-	case 404:
-		AddMessage(0x27, 0, 0);
-		AddMessage(0x21, 0, 0);
+	case EVENT_OPTIONS_GENERAL:
+		AddMessage(MESSAGE_GENERAL_OPTIONS_DIALOG, 0, 0);
+		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
-	case 406:
-		AddMessage(0x28, 0, 0);
-		AddMessage(0x21, 0, 0);
+	case EVENT_OPTIONS_MOTD:
+		AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
+		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -2411,10 +2411,10 @@ void TGeneralOptionsDialog::HandleEvent(int Event)
 		SetDragFullStacks(DragFullStacks->IsChecked());
 		SetActionState(0);
 		break;
-	case 2:
+	case EVENT_CANCEL:
 		SetActionState(0);
 		break;
-	case 701:
+	case EVENT_HELP:
 		OpenURL(TextOptionsURL);
 		break;
 	default:
@@ -2434,7 +2434,7 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 	Parent = _Parent;
 	Fullscreen = new TCheckBox("Fullscreen");
 	ResolutionList = new TListBox(NoCallback, NoCallback);
-	AdvancedButton = new TTextButton(0, 0, "Advanced", 18, 19, TCallback(this, 407), nullptr);
+	AdvancedButton = new TTextButton(0, 0, "Advanced", 18, 19, TCallback(this, EVENT_OPTIONS_ADVANCED), nullptr);
 	TLabel *ResolutionLabel = new TLabel(0, 0, SkinProperties().StyleB08.Data78, TextAvailableResolutions);
 	TLabel *AdvancedLabel = new TLabel(0, 0, SkinProperties().StyleB08.Data78, TextAdvancedSettings);
 	InsertChild(Fullscreen);
@@ -2478,7 +2478,7 @@ void TGraphicsOptionsDialog::KeyPress(int Key)
 		HandleEvent(1);
 		break;
 	case 27:
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 		break;
 	case 0x10c:
 		ResolutionList->KeyPress(0x10c);
@@ -2508,10 +2508,10 @@ void TGraphicsOptionsDialog::HandleEvent(int Event)
 			SetDisplayMode(Fullscreen->IsChecked() + 1);
 		if (patella::bridge::GraphicsEngine().curEngine == 2 && Fullscreen->IsChecked())
 			patella::bridge::GUI().Resize(0, 0); // Control.cpp's (issues #107, #118)
-	} else if (Event == 407) {
-		AddMessageFirst(0x23, 0, 0);
-		AddMessageFirst(0x24, reinterpret_cast<std::intptr_t>(Parent), 0);
-	} else if (Event == 701) {
+	} else if (Event == EVENT_OPTIONS_ADVANCED) {
+		AddMessageFirst(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
+		AddMessageFirst(MESSAGE_ADVANCED_GRAPHICS_DIALOG, reinterpret_cast<std::intptr_t>(Parent), 0);
+	} else if (Event == EVENT_HELP) {
 		OpenURL(TextGraphicsOptionsURL);
 		return;
 	}
@@ -2531,7 +2531,7 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	LightEffects = new TCheckBox("Show Light Effects");
 	NoStretching = new TCheckBox("Don't stretch/shrink the Map");
 	WindowsMousepointer = new TCheckBox("Windows Mouse Pointer");
-	Framerate = new THorizontalScrollBar(10, 201, 10, 11, 1, TCallback(this, 30));
+	Framerate = new THorizontalScrollBar(10, 201, 10, 11, 1, TCallback(this, EVENT_FRAMERATE));
 	// The x64 client (issue #31): the graphics device choice in the engine buttons' places, with the
 	// original's events (MainWindow.cpp: 800, 801, 802; Control.cpp ChangeEngine). The buttons are 58
 	// pixels wide (skin 16), which "CPU (compatibility)" does not fit: its help text says it. The line
@@ -2543,13 +2543,13 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 		TextSelectDevice, true);
 	TLabel *Label = DeviceLabel;
 	DirectX5Button = new TTextButton(SkinProperties().Style1394.Data10.x, SkinProperties().Style1394.Data10.y,
-		"Automatic", 16, 17, TCallback(_Receiver, 800), TextUseAutomaticDevice);
+		"Automatic", 16, 17, TCallback(_Receiver, EVENT_DEVICE_AUTOMATIC), TextUseAutomaticDevice);
 	DirectX5Button->SetRadioButtonGroup(EngineGroup.get());
 	DirectX9Button = new TTextButton(SkinProperties().Style1394.Data18.x, SkinProperties().Style1394.Data18.y,
-		"GPU", 16, 17, TCallback(_Receiver, 801), TextUseGpuDevice);
+		"GPU", 16, 17, TCallback(_Receiver, EVENT_DEVICE_GPU), TextUseGpuDevice);
 	DirectX9Button->SetRadioButtonGroup(EngineGroup.get());
 	OpenGLButton = new TTextButton(SkinProperties().Style1394.Data20.x, SkinProperties().Style1394.Data20.y,
-		"CPU", 16, 17, TCallback(_Receiver, 802), TextUseCpuDevice);
+		"CPU", 16, 17, TCallback(_Receiver, EVENT_DEVICE_CPU), TextUseCpuDevice);
 	OpenGLButton->SetRadioButtonGroup(EngineGroup.get());
 	InsertChild(Label);
 	InsertChild(DirectX5Button);
@@ -2674,14 +2674,14 @@ void TAdvancedGraphicsDialog::HandleEvent(int Event)
 		SetConfineFramerate(Framerate->Range->Value);
 		GetSurface()->SetFramerateLimit(GetConfineFramerate());
 		if (Rearrange)
-			Receiver->HandleEvent(9);
-	} else if (Event == 701) {
+			Receiver->HandleEvent(EVENT_REARRANGE);
+	} else if (Event == EVENT_HELP) {
 		OpenURL(TextAdvancedGraphicsURL);
 		return;
-	} else if (Event == 30) {
+	} else if (Event == EVENT_FRAMERATE) {
 		GetSurface()->SetFramerateLimit(Framerate->Range->Value);
 		return;
-	} else if (Event == 2) {
+	} else if (Event == EVENT_CANCEL) {
 		GetSurface()->SetFramerateLimit(GetConfineFramerate());
 	}
 	SetActionState(0);
@@ -2727,7 +2727,7 @@ void TConsoleOptionsDialog::HandleEvent(int Event)
 		SetTimeStamps(TimeStamps->IsChecked());
 		SetPrivateMessages(PrivateMessages->IsChecked());
 		SetConsoleChanged();
-	} else if (Event == 701) {
+	} else if (Event == EVENT_HELP) {
 		OpenURL(TextConsoleOptionsURL);
 		return;
 	}
@@ -2753,7 +2753,7 @@ void TNetworkOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
 		SetTestServerLogin(TestServerLogin->IsChecked());
-	} else if (Event == 701) {
+	} else if (Event == EVENT_HELP) {
 		OpenURL(TextNetworkOptionsURL);
 		return;
 	}
@@ -2774,7 +2774,7 @@ THotkeyDialog::THotkeyDialog(void (*_OpenURL)(const char *URL))
 	Label = new TLabel(0, 0, SkinProperties().StyleB08.Data78, TextEditHotkeyText);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().Data14B4);
-	ListBox = new TFontListBox(TCallback(this, 11), NoCallback);
+	ListBox = new TFontListBox(TCallback(this, EVENT_LIST_SELECTED), NoCallback);
 	InsertChild(ListBox);
 	SetChildArea(ListBox, SkinProperties().Data1484);
 	for (int i = 0; i < HOTKEYS; i++) {
@@ -2819,7 +2819,7 @@ void THotkeyDialog::KeyPress(int Key)
 		HandleEvent(1);
 		break;
 	case 27:
-		HandleEvent(2);
+		HandleEvent(EVENT_CANCEL);
 		break;
 	case 0x10c:
 		ListBox->KeyPress(0x10c);
@@ -2855,13 +2855,13 @@ void THotkeyDialog::HandleEvent(int Event)
 		for (int i = 0; i < HOTKEYS; i++)
 			SetHotkey(i, Texts[i], AutoSend[i]);
 		SetActionState(0);
-		if (PeekMessageType() != 0x21)
+		if (PeekMessageType() != MESSAGE_OPTIONS_DIALOG)
 			SavePreferences();
 		break;
-	case 2:
+	case EVENT_CANCEL:
 		SetActionState(0);
 		break;
-	case 11:
+	case EVENT_LIST_SELECTED:
 		if (Selected != -1)
 			AutoSend[Selected] = AutoSendCheckBox->IsChecked();
 		Selected = ListBox->GetSelection();

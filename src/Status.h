@@ -32,6 +32,7 @@ inline constexpr int RIGHT_ANY = 50;
 // "In(Type,MESSAGE_NONE,MESSAGE_STARTPATCHER)". Other values seen: 1 shows
 // a message box (Param1 title, Param2 text, which the queue owns), 10 with
 // Param1 300 follows a failed game server connection.
+// The other numbers' names: Events.h.
 inline constexpr int MESSAGE_NONE = 0;
 inline constexpr int MESSAGE_STARTPATCHER = 72;
 
@@ -368,3 +369,7 @@ void CheckClipboardText(patella::TSpan<const char> Characters); // the copied ch
 void CopyToClipboard(const char *text);
 void CopyTaintedClipboardText();
 void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
+
+// Events.h, the message and event numbers, comes last on purpose: included at the top of this file, its enumerators
+// moved data in the executable (measured; the Release build is compared byte for byte).
+#include "Events.h"
