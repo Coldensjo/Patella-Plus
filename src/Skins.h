@@ -32,8 +32,8 @@ struct TSkin {
 // themselves were not looked at. A button's two skins are _UP (released) and _DOWN (pressed).
 //
 // Without a name, because no code uses them by number or shows what they are: 3 (the picture of mouse cursor 3, which
-// nothing sets), 20, 21, 34-41 and 216. 152 has no entry in the table. The help texts (Help.cpp) keep their skin
-// numbers: they are arguments of std::format, which does not take an enumerator.
+// nothing sets), 20, 21, 34-41 and 216. 152 has no entry in the table. The help texts (Help.cpp) write theirs as
+// int{SKIN_...}: they are arguments of std::format, which does not take an enumerator.
 //
 // Enumerators for the reason GUI.h gives at the modifier flags.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
