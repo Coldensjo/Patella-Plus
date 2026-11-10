@@ -155,6 +155,8 @@ public:
 	void SetAutoChaseOff(bool Value);
 	[[nodiscard]] bool GetClassicControl() const;
 	[[nodiscard]] bool GetAutoChaseOff() const;
+	void SetDragFullStacks(bool Value);
+	[[nodiscard]] bool GetDragFullStacks() const;
 	void SetAttackMode(int Value);
 	void SetChaseMode(int Value);
 	void SetSecureMode(bool Value);
@@ -209,6 +211,7 @@ private:
 	int AttackMode{};      // 0x719e8c
 	bool AutoChaseOff{};   // 0x719e90
 	bool ClassicControl{}; // 0x719e91
+	bool DragFullStacks{}; // Patella-Plus, not in the original
 	// 0x719e94 NumberOfOpenChannels: OpenChannels.size().
 	bool PrivateMessages{};                // 0x719e98
 	bool TimeStamps{};                     // 0x719e99
@@ -318,6 +321,8 @@ void SetClassicControl(bool Value);
 void SetAutoChaseOff(bool Value);
 bool GetClassicControl();
 bool GetAutoChaseOff();
+void SetDragFullStacks(bool Value);
+bool GetDragFullStacks();
 void SetAttackMode(int Value);
 void SetChaseMode(int Value);
 void SetSecureMode(bool Value);

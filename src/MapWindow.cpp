@@ -193,7 +193,9 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		RelativeToAbsolute(&DestX, &DestY, &DestZ);
 		if (DragX != DestX || DragY != DestY || DragZ != DestZ) {
 			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & 0x200) == 0) {
-				if (Flags & 0x400) {
+				// Patella-Plus, the option Drag Full Stacks: with it a pile moves whole without Ctrl and asks for the
+				// count with it, as on a slot (AsksForCount in ContentWindows.cpp).
+				if (((Flags & 0x400) != 0) != GetDragFullStacks()) {
 					SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, Count);
 					return true;
 				}

@@ -359,6 +359,18 @@ bool TPreferences::GetAutoChaseOff() const
 	return AutoChaseOff;
 }
 
+// Patella-Plus, not in the original.
+void TPreferences::SetDragFullStacks(bool Value)
+{
+	DragFullStacks = Value;
+}
+
+// Patella-Plus, not in the original.
+bool TPreferences::GetDragFullStacks() const
+{
+	return DragFullStacks;
+}
+
 // 0x4db660
 void TPreferences::SetAttackMode(int Value)
 {
@@ -466,6 +478,7 @@ void TPreferences::SetDefaultPreferences(TTalkLists &Lists)
 	OpenChannels.clear();
 	ClassicControl = false;
 	AutoChaseOff = true;
+	DragFullStacks = false;
 	AttackMode = 2;
 	ChaseMode = 0;
 	SecureMode = true;
@@ -1186,6 +1199,7 @@ patella::settings::TPreferenceValues TPreferences::GetPreferenceValues(TTalkList
 	Values.OpenChannels = OpenChannels;
 	Values.ClassicControl = ClassicControl;
 	Values.AutoChaseOff = AutoChaseOff;
+	Values.DragFullStacks = DragFullStacks;
 	Values.AttackMode = AttackMode;
 	Values.ChaseMode = ChaseMode;
 	Values.SecureMode = SecureMode;
@@ -1279,6 +1293,7 @@ void TPreferences::SetPreferenceValues(const patella::settings::TPreferenceValue
 	OpenChannels.insert(OpenChannels.end(), Values.OpenChannels.begin(), Values.OpenChannels.end());
 	ClassicControl = Values.ClassicControl;
 	AutoChaseOff = Values.AutoChaseOff;
+	DragFullStacks = Values.DragFullStacks;
 	AttackMode = Values.AttackMode;
 	ChaseMode = Values.ChaseMode;
 	SecureMode = Values.SecureMode;
@@ -1600,6 +1615,16 @@ bool GetClassicControl()
 bool GetAutoChaseOff()
 {
 	return patella::bridge::Preferences().GetAutoChaseOff();
+}
+
+void SetDragFullStacks(bool Value)
+{
+	patella::bridge::Preferences().SetDragFullStacks(Value);
+}
+
+bool GetDragFullStacks()
+{
+	return patella::bridge::Preferences().GetDragFullStacks();
 }
 
 void SetAttackMode(int Value)

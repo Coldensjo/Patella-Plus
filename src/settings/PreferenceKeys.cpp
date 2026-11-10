@@ -410,6 +410,7 @@ void WritePreferences(TSettingsFile &File, const TPreferenceValues &Values)
 	Put(File, "OpenChannel", Numbers(Values.OpenChannels));
 	Put(File, "ClassicControl", YesNo(Values.ClassicControl));
 	Put(File, "AutoChaseOff", YesNo(Values.AutoChaseOff));
+	Put(File, "DragFullStacks", YesNo(Values.DragFullStacks));
 	Put(File, "AttackMode", Number(Values.AttackMode));
 	Put(File, "ChaseMode", Number(Values.ChaseMode));
 	Put(File, "SecureMode", YesNo(Values.SecureMode));
@@ -508,6 +509,7 @@ std::vector<std::string> ReadPreferences(const TSettingsFile &File, TPreferenceV
 	Read.NumberList("OpenChannel", Values.OpenChannels);
 	Read.Flag("ClassicControl", Values.ClassicControl);
 	Read.Flag("AutoChaseOff", Values.AutoChaseOff);
+	Read.Flag("DragFullStacks", Values.DragFullStacks);
 	Read.Number("AttackMode", Values.AttackMode);
 	Read.Number("ChaseMode", Values.ChaseMode);
 	if (Values.ChaseMode == 2)

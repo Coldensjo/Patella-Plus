@@ -19,6 +19,7 @@
 //	OpenDialogs=1,4                       the numbers, in their order (empty: none)
 //	OpenChannel=5,7                       the same
 //	ClassicControl, AutoChaseOff, SecureMode
+//	DragFullStacks                        Patella-Plus, not in Tibia.cfg
 //	Buddy<n>=CharacterID,Icon,"description",notify   n 1, 2, ...
 //	White="name","name"                   the permanent entries of the buddy (white) list
 //	Ignore="name"                         the permanent entries of the ignore list
@@ -116,6 +117,7 @@ struct TPreferenceValues {
 	std::vector<int> OpenChannels;
 	bool ClassicControl = false;
 	bool AutoChaseOff = true;
+	bool DragFullStacks = false;
 	int AttackMode = 2;
 	int ChaseMode = 0;
 	bool SecureMode = true;
