@@ -734,7 +734,7 @@ void patella::TCommunication::ReceiveLoginError()
 	const char *Text = Network.GetString();
 	AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
 	Network.Disconnect(false);
-	Session.SetConnectionState(0);
+	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
 
 // 0x40a670, lines 1006-1006
@@ -771,7 +771,7 @@ void patella::TCommunication::ReceiveUpdateRequest()
 	Text[TextUpdateRefused.size()] = 0;
 	AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
 	Network.Disconnect(false);
-	Session.SetConnectionState(0);
+	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
 
 // 0x40b8b0, lines 1162-1162
@@ -804,7 +804,7 @@ void patella::TCommunication::ReceiveLoginServerOverloaded()
 {
 	Network.SetConnectionTimeout(0);
 	Network.Disconnect(false);
-	Session.SetConnectionState(0);
+	Session.SetConnectionState(CONNECTION_OFFLINE);
 	Network.SetServerError(ERROR_LOGINSERVER_OVERLOADED);
 	Network.ConnectToLoginServer();
 }
@@ -839,7 +839,7 @@ void patella::TCommunication::ReceiveGameError()
 	const char *Text = Network.GetString();
 	AddMessage(1, reinterpret_cast<std::intptr_t>("Sorry"), reinterpret_cast<std::intptr_t>(Text));
 	Network.Disconnect(false);
-	Session.SetConnectionState(0);
+	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
 
 // 0x40c360, lines 1258-1258

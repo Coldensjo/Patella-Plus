@@ -202,7 +202,7 @@ void TMainWindow::SetSize(int Width, int Height)
 // arrow key turns, every other key goes to the console.
 void TMainWindow::KeyPress(int Key)
 {
-	if (GetConnectionState() != 8)
+	if (GetConnectionState() != CONNECTION_IN_GAME)
 		return;
 	switch (Key) {
 	case 0x10c: Walk(0, -1, false); break;
@@ -290,11 +290,11 @@ void TMainWindow::HandleEvent(int Event)
 	}
 	case EVENT_ABORT:
 		Disconnect(false);
-		if (GetConnectionState() == 5 || GetConnectionState() == 6) {
+		if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER || GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
 			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
 			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
-		SetConnectionState(0);
+		SetConnectionState(CONNECTION_OFFLINE);
 		SetActionState(0);
 		break;
 	case EVENT_STOP:
@@ -317,7 +317,7 @@ void TMainWindow::HandleEvent(int Event)
 	case EVENT_BUG_REPORT:
 		if (!CheckRight(40, -1)) {
 			SetStatusMessage(TextNoBugReportRight, false);
-		} else if (GetConnectionState() == 8 && GUI.ModalWindow == nullptr) {
+		} else if (GetConnectionState() == CONNECTION_IN_GAME && GUI.ModalWindow == nullptr) {
 			AddMessage(MESSAGE_BUG_REPORT_DIALOG, 0, 0);
 		}
 		break;
@@ -712,7 +712,7 @@ void TStartWindow::SetSize(int Width, int Height)
 void TStartWindow::HandleEvent(int Event)
 {
 	const patella::TGUI &GUI = patella::bridge::GUI();
-	if (GetConnectionState() != 0)
+	if (GetConnectionState() != CONNECTION_OFFLINE)
 		return;
 	switch (Event) {
 	case EVENT_ENTER_GAME:

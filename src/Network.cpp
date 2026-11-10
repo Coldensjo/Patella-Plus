@@ -407,7 +407,7 @@ void patella::TNetwork::CheckConnectionTimeout()
 		TimeoutCounter = 0;
 		SetServerError(platform::socket_error::TimedOut);
 		Disconnect(false);
-		Session.SetConnectionState(0);
+		Session.SetConnectionState(CONNECTION_OFFLINE);
 		ConnectToLoginServer();
 	}
 }
@@ -516,7 +516,7 @@ bool patella::TNetwork::ResolveHostname(const char *Hostname)
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), Sockets.LastError(), 1);
 		Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
-		Session.SetConnectionState(0);
+		Session.SetConnectionState(CONNECTION_OFFLINE);
 		return false;
 	}
 	TimeoutCounter = 0;
@@ -541,7 +541,7 @@ int patella::TNetwork::CreateSocket()
 		const int Error = Sockets.LastError();
 		Sockets.Delete(Socket);
 		Socket = nullptr;
-		Session.SetConnectionState(0);
+		Session.SetConnectionState(CONNECTION_OFFLINE);
 		return Error;
 	}
 	return 0;
@@ -556,7 +556,7 @@ int patella::TNetwork::ConnectSocket(const char *IPAddress, int Port, bool SetTi
 			const int Error = Sockets.LastError();
 			Sockets.Delete(Socket);
 			Socket = nullptr;
-			Session.SetConnectionState(0);
+			Session.SetConnectionState(CONNECTION_OFFLINE);
 			return Error;
 		}
 	}
@@ -584,7 +584,7 @@ void patella::TNetwork::SetSymmetricKey(const uint8 *Key)
 // 0x4ce300, line 727
 void patella::TNetwork::Disconnect(bool force)
 {
-	if (force || Session.GetConnectionState() == 1) {
+	if (force || Session.GetConnectionState() == CONNECTION_RESOLVING_LOGIN_SERVER) {
 		Sockets.CancelResolve(HostnameRequest);
 		HostnameRequest = nullptr;
 	}
@@ -622,10 +622,10 @@ void patella::TNetwork::ConnectToLoginServer()
 			Servers[i].Available = true;
 		TestServer.Available = true;
 	} else if (!Server->Resolved) {
-		Session.SetConnectionState(1);
+		Session.SetConnectionState(CONNECTION_RESOLVING_LOGIN_SERVER);
 		ResolveHostname(Server->Address);
 	} else {
-		Session.SetConnectionState(2);
+		Session.SetConnectionState(CONNECTION_CONNECTING_LOGIN_SERVER);
 		int Error = CreateSocket();
 		if (Error == 0) {
 			Error = ConnectSocket(Server->Address, Server->Port, true);
@@ -643,7 +643,7 @@ void patella::TNetwork::ConnectToLoginServer()
 // 0x4cf390, line 802
 void patella::TNetwork::ConnectToGameServer()
 {
-	Session.SetConnectionState(5);
+	Session.SetConnectionState(CONNECTION_CONNECTING_GAME_SERVER);
 	const int Character = Session.GetActiveCharacter();
 	const char *IPAddress = Session.GetCharacterIPAddress(Character);
 	Session.GetCharacterPort(Character); // result unused in the binary
@@ -677,11 +677,11 @@ void patella::TNetwork::OnConnect(int ErrorCode)
 		TestServer.Available = true;
 		return;
 	}
-	if (Session.GetConnectionState() == 2) {
+	if (Session.GetConnectionState() == CONNECTION_CONNECTING_LOGIN_SERVER) {
 		// A login server refused: try the next one.
 		TimeoutLimit = 0;
 		TimeoutCounter = 0;
-		Session.SetConnectionState(0);
+		Session.SetConnectionState(CONNECTION_OFFLINE);
 		SetServerError(ErrorCode);
 		ConnectToLoginServer();
 		return;
@@ -692,7 +692,7 @@ void patella::TNetwork::OnConnect(int ErrorCode)
 	Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
 	Session.AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 	Disconnect(false);
-	Session.SetConnectionState(0);
+	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
 
 // 0x4ce530, line 885. vtable +0x1c. Appends received bytes and calls the

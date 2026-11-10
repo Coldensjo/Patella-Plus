@@ -832,9 +832,9 @@ void OnCaptureChanged()
 void OnHostResolved(int Error)
 {
 	if (Error == 0) {
-		if (GetConnectionState() != 1) {
+		if (GetConnectionState() != CONNECTION_RESOLVING_LOGIN_SERVER) {
 			SetConnectionTimeout(0);
-			SetConnectionState(0);
+			SetConnectionState(CONNECTION_OFFLINE);
 			Disconnect(true);
 			// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue, freed with its message
 			char *Text = new char[1024];
@@ -844,10 +844,10 @@ void OnHostResolved(int Error)
 		}
 		SetConnectionTimeout(0);
 		SetServerIPAddress(GetResolvedIPAddress());
-		SetConnectionState(2);
+		SetConnectionState(CONNECTION_CONNECTING_LOGIN_SERVER);
 	} else {
 		SetConnectionTimeout(0);
-		SetConnectionState(0);
+		SetConnectionState(CONNECTION_OFFLINE);
 		SetServerError(Error);
 	}
 	ConnectToLoginServer();

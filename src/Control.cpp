@@ -579,7 +579,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 bool patella::TGUI::CloseRequest() const
 {
-	if (GetConnectionState() == 8) {
+	if (GetConnectionState() == CONNECTION_IN_GAME) {
 		if (ModalWindow == nullptr) {
 			std::intptr_t *Data = new std::intptr_t[4];
 			Data[0] = reinterpret_cast<std::intptr_t>("Warning");
@@ -613,16 +613,16 @@ void patella::TGUI::LinkCopyWarning()
 // login packet to the login server (state 2) or the game server (state 5).
 void patella::TGUI::ConnectionEstablished()
 {
-	if (GetConnectionState() == 2) {
-		SetConnectionState(3);
+	if (GetConnectionState() == CONNECTION_CONNECTING_LOGIN_SERVER) {
+		SetConnectionState(CONNECTION_LOGIN_SENT);
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
 		const char *Password = GetAccountPassword();
 		SendLogin(GetAccountNumber(), Password);
 		return;
 	}
-	if (GetConnectionState() == 5) {
+	if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER) {
 		const int OldConnectionState = GetConnectionState();
-		SetConnectionState(6);
+		SetConnectionState(CONNECTION_GAME_LOGIN_SENT);
 		Communication.OutfitRequested = false;
 		// The original's order: In's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
 		const int AccountCharacters = GetAccountCharacters();
@@ -633,7 +633,7 @@ void patella::TGUI::ConnectionEstablished()
 		SendGameLogin(GetAccountNumber(), Name, Password);
 		return;
 	}
-	SetConnectionState(0);
+	SetConnectionState(CONNECTION_OFFLINE);
 	Disconnect(true);
 	SetActionState(0);
 }
@@ -649,9 +649,9 @@ void patella::TGUI::ReceivePackets()
 		Communication.LastPacketIndex++;
 		if (Communication.LastPacketIndex >= 10)
 			Communication.LastPacketIndex -= 10;
-		if (GetConnectionState() == 3)
-			SetConnectionState(4);
-		if (GetConnectionState() == 4) {
+		if (GetConnectionState() == CONNECTION_LOGIN_SENT)
+			SetConnectionState(CONNECTION_LOGIN_ANSWERED);
+		if (GetConnectionState() == CONNECTION_LOGIN_ANSWERED) {
 			switch (Type) {
 			case LOGIN_RECEIVE_ERROR: ReceiveLoginError(); break;
 			case LOGIN_RECEIVE_MESSAGE: ReceiveLoginMessage(); break;
@@ -669,11 +669,11 @@ void patella::TGUI::ReceivePackets()
 				TERROR1("unknown packet type during login", Type);
 			}
 		} else {
-			if (GetConnectionState() == 6)
-				SetConnectionState(7);
+			if (GetConnectionState() == CONNECTION_GAME_LOGIN_SENT)
+				SetConnectionState(CONNECTION_GAME_LOGIN_ANSWERED);
 			switch (Type) {
 			case GAME_RECEIVE_LOGIN:
-				SetConnectionState(8);
+				SetConnectionState(CONNECTION_IN_GAME);
 				EnterGame();
 				ReceiveGameLogin();
 				AddEventHelp(HINT_FIRST_LOGIN);
@@ -769,20 +769,20 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void patella::TGUI::ConnectionClosed()
 {
-	const bool InGame = GetConnectionState() == 8;
-	if (GetConnectionState() == 8) {
+	const bool InGame = GetConnectionState() == CONNECTION_IN_GAME;
+	if (GetConnectionState() == CONNECTION_IN_GAME) {
 		LeaveGame();
-	} else if (GetConnectionState() == 6) {
+	} else if (GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ERROR_DISCONNECTED, 2);
 		AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
 		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
-	} else if (GetConnectionState() == 3) {
+	} else if (GetConnectionState() == CONNECTION_LOGIN_SENT) {
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ERROR_DISCONNECTED, 1);
 		AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
 	}
-	SetConnectionState(0);
+	SetConnectionState(CONNECTION_OFFLINE);
 	if (Network.Reconnect) {
 		Network.Reconnect = false;
 		if (InGame) {
@@ -1122,7 +1122,7 @@ void patella::TGUI::ProcessEvents()
 			ConnectToGameServer();
 			break;
 		case MESSAGE_RECONNECT:
-			if (GetConnectionState() != 0) {
+			if (GetConnectionState() != CONNECTION_OFFLINE) {
 				Network.Reconnect = true;
 				Network.ReconnectTimeout = GetMilliseconds() + 5000;
 			} else {
@@ -1148,7 +1148,7 @@ void patella::TGUI::ProcessEvents()
 			MainWindow->SetConsoleActive(false);
 		}
 	}
-	if (GetConnectionState() == 8 && MoveCreatures())
+	if (GetConnectionState() == CONNECTION_IN_GAME && MoveCreatures())
 		SendWalk();
 	Redraw(false);
 }

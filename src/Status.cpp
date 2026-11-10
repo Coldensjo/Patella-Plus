@@ -270,7 +270,7 @@ int patella::TInteraction::GetTradeInfo() const
 
 // 0x4e71e0. 0 offline, 1 resolving the login server name, 2 connecting to a
 // login server, 4 talking to the login server, 5 connecting to the game
-// server; the game uses higher values (see ReceivePackets in Control.cpp).
+// server; the game uses higher values. All are named in Events.h (CONNECTION_*).
 void patella::TSession::SetConnectionState(int State)
 {
 	ConnectionState = State;
@@ -720,7 +720,7 @@ void patella::TSession::InitSession(bool Value)
 {
 	Gamemaster = Value;
 	ClearRights();
-	ConnectionState = 0;
+	ConnectionState = CONNECTION_OFFLINE;
 	AccountNumber = 0;
 	AccountPassword[0] = 0;
 	AccountCharacters = 0;

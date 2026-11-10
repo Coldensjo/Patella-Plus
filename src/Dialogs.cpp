@@ -774,7 +774,7 @@ void TReconnectWindow::HandleEvent(int Event)
 			ProgressBar->SetCurrent(Timeout - Time);
 			SetTime(Time + 10);
 			TimeLabel->SetText(Text, false);
-		} else if (GetConnectionState() == 8 || GetConnectionState() == 7) {
+		} else if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
 			AddMessage(MESSAGE_RECONNECT, 0, 0);
 			SendLogout();
 		} else {
@@ -864,7 +864,7 @@ TCharacterListDialog::TCharacterListDialog()
 		Line.Format("{} ({})", GetCharacterName(i), GetCharacterWorld(i));
 		ListBox->AddLine(Line);
 	}
-	if (GetConnectionState() == 8 && GetActiveCharacter() < Characters)
+	if (GetConnectionState() == CONNECTION_IN_GAME && GetActiveCharacter() < Characters)
 		ListBox->SetSelection(GetActiveCharacter());
 	else
 		ListBox->SetSelection(0);
@@ -947,7 +947,7 @@ void TCharacterListDialog::HandleEvent(int Event)
 		const int Selection = ListBox->GetSelection();
 		if (Selection >= 0) {
 			SetActiveCharacter(Selection);
-			if (GetConnectionState() == 8 || GetConnectionState() == 7) {
+			if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
 				AddMessage(MESSAGE_RECONNECT, 0, 0);
 				SendLogout();
 			} else {
