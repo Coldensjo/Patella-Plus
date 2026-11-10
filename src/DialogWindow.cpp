@@ -100,7 +100,7 @@ TSubWindow::~TSubWindow()
 void TSubWindow::OnClose()
 {
 	try {
-		if (Identifier == 6 || Identifier == 7 || Identifier == 9)
+		if (Identifier == SKILLS_WINDOW || Identifier == BATTLE_WINDOW || Identifier == BUDDYLIST_WINDOW)
 			SetContentWindowSize(Identifier, Body->Height);
 		if (UpButton != nullptr && !IsChild(UpButton))
 			UpButton->Close();

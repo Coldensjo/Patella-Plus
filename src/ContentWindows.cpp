@@ -75,7 +75,7 @@ static_assert(sizeof(patella::bridge::GUI().AutomapMouseOverText) == 100 && size
 // slots and the large combat controls.
 TContentWindow *CreateInventoryWindow(TWindow *Receiver)
 {
-	TContentWindow *Window = new TContentWindow(1, true);
+	TContentWindow *Window = new TContentWindow(INVENTORY_WINDOW, true);
 	Window->SetSize(SkinProperties().Data184, SkinProperties().Data274);
 	TInventoryView *View = new TInventoryView(Receiver);
 	Window->InsertChild(View);
@@ -138,7 +138,7 @@ TSubWindow *CreateContainerWindow(int Container)
 TSubWindow *CreateSkillsWindow()
 {
 	TSkillsWindowBody *Body = new TSkillsWindowBody;
-	TSubWindow *Window = new TSubWindow(6, Body, true, false);
+	TSubWindow *Window = new TSubWindow(SKILLS_WINDOW, Body, true, false);
 	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
 	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "Skills");
@@ -156,7 +156,7 @@ TSubWindow *CreateSkillsWindow()
 TSubWindow *CreateBattleWindow()
 {
 	TBattleWindowBody *Body = new TBattleWindowBody;
-	TSubWindow *Window = new TSubWindow(7, Body, true, false);
+	TSubWindow *Window = new TSubWindow(BATTLE_WINDOW, Body, true, false);
 	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
 	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "Battle");
@@ -194,7 +194,7 @@ TSubWindow *CreateTradeWindow()
 TSubWindow *CreateBuddylistWindow()
 {
 	TBuddylistWindowBody *Body = new TBuddylistWindowBody;
-	TSubWindow *Window = new TSubWindow(9, Body, true, false);
+	TSubWindow *Window = new TSubWindow(BUDDYLIST_WINDOW, Body, true, false);
 	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
 	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "VIP");
@@ -213,7 +213,7 @@ TSubWindow *CreateBuddylistWindow()
 // 0x426480, lines 292-309. The assertion comes before the try block (after
 // the base class).
 TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
-	: TContentWindow(5, true)
+	: TContentWindow(BUTTONS_WINDOW, true)
 {
 	PATELLA_ASSERT(_CheckObject!=nullptr);
 	CheckObject = _CheckObject;
@@ -235,9 +235,9 @@ TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
 // 0x4268c0, line 322. A button shows as pressed while its window is open.
 void TButtonsWindow::Draw(int Surface, int x, int y)
 {
-	SkillsButton->State = CheckObject->hasContentWindow(6);
-	BattleButton->State = CheckObject->hasContentWindow(7);
-	BuddyButton->State = CheckObject->hasContentWindow(9);
+	SkillsButton->State = CheckObject->hasContentWindow(SKILLS_WINDOW);
+	BattleButton->State = CheckObject->hasContentWindow(BATTLE_WINDOW);
+	BuddyButton->State = CheckObject->hasContentWindow(BUDDYLIST_WINDOW);
 	TContentWindow::Draw(Surface, x, y);
 }
 
@@ -256,7 +256,7 @@ bool TButtonsWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int 
 // Alt+Home/End zoom, Alt+PageUp/PageDown change the floor, Alt+cursor
 // scrolls.
 TAutomapWindow::TAutomapWindow()
-	: TContentWindow(3, true)
+	: TContentWindow(AUTOMAP_WINDOW, true)
 {
 	DrawingListLength = 4;
 	DrawingList.reset(new TDrawing[4]);
@@ -939,7 +939,7 @@ int TPlayerStates::GetIcon(int Position)
 
 // 0x429eb0, line 1083. The try block starts after the base class.
 TSmallInventoryWindow::TSmallInventoryWindow()
-	: TContentWindow(2, true)
+	: TContentWindow(SMALL_INVENTORY_WINDOW, true)
 {
 	DrawingListLength = 1;
 	DrawingList.reset(new TDrawing[1]);
@@ -1333,7 +1333,7 @@ void TCombatControls::HandleEvent(int Event)
 
 // 0x438310, line 1522. The try block starts after the base class.
 TStatusWindow::TStatusWindow()
-	: TContentWindow(4, true)
+	: TContentWindow(STATUS_WINDOW, true)
 {
 	DrawingListLength = 4;
 	DrawingList.reset(new TDrawing[4]);
@@ -1917,7 +1917,7 @@ int TSkillsWindowBody::getMinimumHeight()
 // or the full height, at least the minimum.
 int TSkillsWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(6);
+	int Height = GetContentWindowSize(SKILLS_WINDOW);
 	if (Height == 0)
 		Height = GetMaximumHeight();
 	if (Height < getMinimumHeight())
@@ -2347,7 +2347,7 @@ int TBattleWindowBody::getMinimumHeight()
 // 0x430890, line 2644. The stored height ("ContentWindow" 7) or the content.
 int TBattleWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(7);
+	int Height = GetContentWindowSize(BATTLE_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
 	if (Height < getMinimumHeight())
@@ -2929,7 +2929,7 @@ int TBuddylistWindowBody::getMinimumHeight()
 // 0x435d50, line 3363. The stored height ("ContentWindow" 9) or the content.
 int TBuddylistWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(9);
+	int Height = GetContentWindowSize(BUDDYLIST_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
 	if (Height < getMinimumHeight())

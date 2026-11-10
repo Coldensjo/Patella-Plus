@@ -251,25 +251,25 @@ void TMainWindow::HandleEvent(int Event)
 		SetSize(Width, Height);
 		break;
 	case EVENT_TOGGLE_SKILLS:
-		if (DialogWindow->GetContentWindow(6) != nullptr)
-			CloseContentWindow(6);
+		if (DialogWindow->GetContentWindow(SKILLS_WINDOW) != nullptr)
+			CloseContentWindow(SKILLS_WINDOW);
 		else
-			OpenContentWindow(6);
+			OpenContentWindow(SKILLS_WINDOW);
 		break;
 	case EVENT_TOGGLE_BATTLE:
-		if (DialogWindow->GetContentWindow(7) != nullptr)
-			CloseContentWindow(7);
+		if (DialogWindow->GetContentWindow(BATTLE_WINDOW) != nullptr)
+			CloseContentWindow(BATTLE_WINDOW);
 		else
-			OpenContentWindow(7);
+			OpenContentWindow(BATTLE_WINDOW);
 		break;
 	case EVENT_TOGGLE_VIP:
-		if (DialogWindow->GetContentWindow(9) != nullptr)
-			CloseContentWindow(9);
+		if (DialogWindow->GetContentWindow(BUDDYLIST_WINDOW) != nullptr)
+			CloseContentWindow(BUDDYLIST_WINDOW);
 		else
-			OpenContentWindow(9);
+			OpenContentWindow(BUDDYLIST_WINDOW);
 		break;
 	case EVENT_MINIMISE_INVENTORY: {
-		TContentWindow *OldWindow = SidePanel->GetContentWindow(1);
+		TContentWindow *OldWindow = SidePanel->GetContentWindow(INVENTORY_WINDOW);
 		PATELLA_ASSERT(OldWindow!=nullptr);
 		SidePanel->InsertChildAfter(OldWindow, CreateSmallInventoryWindow(this));
 		SidePanel->DeleteChild(OldWindow);
@@ -279,7 +279,7 @@ void TMainWindow::HandleEvent(int Event)
 		break;
 	}
 	case EVENT_MAXIMISE_INVENTORY: {
-		TContentWindow *OldWindow = SidePanel->GetContentWindow(2);
+		TContentWindow *OldWindow = SidePanel->GetContentWindow(SMALL_INVENTORY_WINDOW);
 		PATELLA_ASSERT(OldWindow!=nullptr);
 		SidePanel->InsertChildAfter(OldWindow, CreateInventoryWindow(this));
 		SidePanel->DeleteChild(OldWindow);
@@ -410,23 +410,23 @@ void TMainWindow::ChangeMode(bool InGame)
 		bool HaveButtons = false;
 		for (int i = Count - 1; i >= 0; i--) {
 			switch (Dialogs[i]) {
-			case 1:
+			case INVENTORY_WINDOW:
 				SidePanel->InsertChild(CreateInventoryWindow(this));
 				HaveInventory = true;
 				break;
-			case 2:
+			case SMALL_INVENTORY_WINDOW:
 				SidePanel->InsertChild(CreateSmallInventoryWindow(this));
 				HaveInventory = true;
 				break;
-			case 3:
+			case AUTOMAP_WINDOW:
 				SidePanel->InsertChild(new TAutomapWindow);
 				HaveAutomap = true;
 				break;
-			case 4:
+			case STATUS_WINDOW:
 				SidePanel->InsertChild(new TStatusWindow);
 				HaveStatus = true;
 				break;
-			case 5:
+			case BUTTONS_WINDOW:
 				SidePanel->InsertChild(new TButtonsWindow(DialogWindow, this));
 				HaveButtons = true;
 				break;
@@ -476,7 +476,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		DialogWindow->SetPosition(MapWidth, SideBar->Height);
 		for (int i = 0; i < Count; i++) {
 			const int Identifier = Dialogs[i];
-			if (Identifier >= 6 && (Identifier <= 7 || Identifier == 9))
+			if (Identifier >= SKILLS_WINDOW && (Identifier <= BATTLE_WINDOW || Identifier == BUDDYLIST_WINDOW))
 				OpenContentWindow(Identifier);
 		}
 		if (Count > 0) {
@@ -629,16 +629,16 @@ void TMainWindow::OpenContentWindow(int Identifier) const
 	if (DialogWindow->GetContentWindow(Identifier) == nullptr) {
 		TWindow *Window;
 		switch (Identifier) {
-		case 6:
+		case SKILLS_WINDOW:
 			Window = CreateSkillsWindow();
 			break;
-		case 7:
+		case BATTLE_WINDOW:
 			Window = CreateBattleWindow();
 			break;
 		case TRADE_WINDOW:
 			Window = CreateTradeWindow();
 			break;
-		case 9:
+		case BUDDYLIST_WINDOW:
 			Window = CreateBuddylistWindow();
 			break;
 		default:
