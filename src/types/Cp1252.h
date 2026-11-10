@@ -200,12 +200,6 @@ inline std::string Utf8ToCp1252(std::string_view Text, char Missing = Replacemen
 	return Out;
 }
 
-// The client's text as UTF-16 (Windows' wide functions: Cp1252ToWide).
-inline std::u16string Cp1252ToUtf16(std::string_view Text)
-{
-	return detail::ToUtf16<char16_t>(Text);
-}
-
 // UTF-16 as the client's text: Missing for each character the code page does not have and for each lone surrogate.
 inline std::string Utf16ToCp1252(std::u16string_view Text, char Missing = Replacement)
 {
