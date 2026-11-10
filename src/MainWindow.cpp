@@ -62,8 +62,8 @@ TMainWindow::TMainWindow(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
 	ChangeMode(false);
-	AddHotkey(KEY_CONTROL | 'F', TCallback(this, EVENT_TOGGLE_FULLSCREEN));
-	AddHotkey(KEY_ALT | KEY_RETURN, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	GUI().AddHotkey(KEY_CONTROL | 'F', TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	GUI().AddHotkey(KEY_ALT | KEY_RETURN, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
 }
 
 // Its work is the close's (OnClose).
@@ -116,13 +116,6 @@ void patella::TGUI::ExitMainWindow()
 		Interaction.SetActionState(ACTIONSTATE_NONE);
 	}
 	ModalWindow = nullptr;
-}
-
-// The free function of the original's name: Control.cpp's ExitControl and the golden MainWindow test call it, the
-// golden Control and Communication tests fake it (commworld.cpp).
-void ExitMainWindow()
-{
-	GUI().ExitMainWindow();
 }
 
 // Out of the game an error while drawing the start window becomes
@@ -473,33 +466,33 @@ void TMainWindow::ChangeMode(bool InGame)
 		// Ctrl+Z reports a bug, Ctrl+R a rule violation, Ctrl+Y opens the
 		// gamemaster dialog, Ctrl+H the hints, Ctrl+T the channel 7 and
 		// Escape cancels the attack and the walk.
-		AddHotkey(KEY_CONTROL | 'L', TCallback(this, EVENT_LOGOUT));
-		AddHotkey(KEY_CONTROL | 'Q', TCallback(this, EVENT_LOGOUT));
-		AddHotkey(KEY_CONTROL | 'G', TCallback(this, EVENT_CHARACTER_LIST));
-		AddHotkey(KEY_CONTROL | 'S', TCallback(this, EVENT_TOGGLE_SKILLS));
-		AddHotkey(KEY_CONTROL | 'B', TCallback(this, EVENT_TOGGLE_BATTLE));
-		AddHotkey(KEY_CONTROL | 'P', TCallback(this, EVENT_TOGGLE_VIP));
-		AddHotkey(KEY_CONTROL | 'Z', TCallback(this, EVENT_BUG_REPORT));
-		AddHotkey(KEY_CONTROL | 'R', TCallback(this, EVENT_REPORT));
-		AddHotkey(KEY_CONTROL | 'Y', TCallback(this, EVENT_RULE_VIOLATION));
-		AddHotkey(KEY_CONTROL | 'H', TCallback(this, EVENT_HELP_MODE));
-		AddHotkey(KEY_CONTROL | 'T', TCallback(this, EVENT_TUTOR_HELP));
-		AddHotkey(KEY_ESCAPE, TCallback(this, EVENT_STOP));
+		GUI().AddHotkey(KEY_CONTROL | 'L', TCallback(this, EVENT_LOGOUT));
+		GUI().AddHotkey(KEY_CONTROL | 'Q', TCallback(this, EVENT_LOGOUT));
+		GUI().AddHotkey(KEY_CONTROL | 'G', TCallback(this, EVENT_CHARACTER_LIST));
+		GUI().AddHotkey(KEY_CONTROL | 'S', TCallback(this, EVENT_TOGGLE_SKILLS));
+		GUI().AddHotkey(KEY_CONTROL | 'B', TCallback(this, EVENT_TOGGLE_BATTLE));
+		GUI().AddHotkey(KEY_CONTROL | 'P', TCallback(this, EVENT_TOGGLE_VIP));
+		GUI().AddHotkey(KEY_CONTROL | 'Z', TCallback(this, EVENT_BUG_REPORT));
+		GUI().AddHotkey(KEY_CONTROL | 'R', TCallback(this, EVENT_REPORT));
+		GUI().AddHotkey(KEY_CONTROL | 'Y', TCallback(this, EVENT_RULE_VIOLATION));
+		GUI().AddHotkey(KEY_CONTROL | 'H', TCallback(this, EVENT_HELP_MODE));
+		GUI().AddHotkey(KEY_CONTROL | 'T', TCallback(this, EVENT_TUTOR_HELP));
+		GUI().AddHotkey(KEY_ESCAPE, TCallback(this, EVENT_STOP));
 	} else {
 		StartWindow = new TStartWindow;
 		InsertChild(StartWindow);
-		RemoveHotkey(KEY_CONTROL | 'L');
-		RemoveHotkey(KEY_CONTROL | 'Q');
-		RemoveHotkey(KEY_CONTROL | 'G');
-		RemoveHotkey(KEY_CONTROL | 'S');
-		RemoveHotkey(KEY_CONTROL | 'B');
-		RemoveHotkey(KEY_CONTROL | 'P');
-		RemoveHotkey(KEY_CONTROL | 'Z');
-		RemoveHotkey(KEY_CONTROL | 'R');
-		RemoveHotkey(KEY_CONTROL | 'Y');
-		RemoveHotkey(KEY_CONTROL | 'H');
-		RemoveHotkey(KEY_CONTROL | 'T');
-		RemoveHotkey(KEY_ESCAPE);
+		GUI().RemoveHotkey(KEY_CONTROL | 'L');
+		GUI().RemoveHotkey(KEY_CONTROL | 'Q');
+		GUI().RemoveHotkey(KEY_CONTROL | 'G');
+		GUI().RemoveHotkey(KEY_CONTROL | 'S');
+		GUI().RemoveHotkey(KEY_CONTROL | 'B');
+		GUI().RemoveHotkey(KEY_CONTROL | 'P');
+		GUI().RemoveHotkey(KEY_CONTROL | 'Z');
+		GUI().RemoveHotkey(KEY_CONTROL | 'R');
+		GUI().RemoveHotkey(KEY_CONTROL | 'Y');
+		GUI().RemoveHotkey(KEY_CONTROL | 'H');
+		GUI().RemoveHotkey(KEY_CONTROL | 'T');
+		GUI().RemoveHotkey(KEY_ESCAPE);
 	}
 	SetSize(Width, Height);
 	SetConsoleActive(GUI().ModalWindow == nullptr);
@@ -772,12 +765,5 @@ void patella::TGUI::InitMainWindow(int Width, int Height, void (*ExitProgram)(),
 	ModalWindow = nullptr;
 	SetDisplayModeCallback = SetDisplayMode;
 	OpenURLCallback = OpenURL;
-}
-
-// The free function of the original's name: src/SdlFrame.cpp and the golden MainWindow test call it.
-void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
-	void (*OpenURL)(const char *URL))
-{
-	GUI().InitMainWindow(Width, Height, ExitProgram, SetDisplayMode, OpenURL);
 }
 // NOLINTEND(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)

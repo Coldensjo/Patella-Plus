@@ -1178,12 +1178,12 @@ TConsoleWindow::TConsoleWindow()
 	InsertChild(MoveRightButton);
 	MoveLeftButton = new TSkinButton(0, 0, SKIN_TABS_LEFT_BUTTON_UP, SKIN_TABS_LEFT_BUTTON_DOWN, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
 	InsertChild(MoveLeftButton);
-	AddHotkey(KEY_CONTROL | 'I', TCallback(this, EVENT_IGNORE_LIST));
-	AddHotkey(KEY_CONTROL | 'O', TCallback(this, EVENT_REQUEST_CHANNELS));
-	AddHotkey(KEY_CONTROL | 'E', TCallback(this, EVENT_CLOSE_CHANNEL));
-	AddHotkey(KEY_CONTROL | 'M', TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
-	AddHotkey(KEY_CONTROL | 'K', TCallback(this, EVENT_OPTIONS_HOTKEYS));
-	AddHotkey(KEY_CONTROL | 'D', TCallback(this, EVENT_DEFAULT_CHANNEL));
+	GUI().AddHotkey(KEY_CONTROL | 'I', TCallback(this, EVENT_IGNORE_LIST));
+	GUI().AddHotkey(KEY_CONTROL | 'O', TCallback(this, EVENT_REQUEST_CHANNELS));
+	GUI().AddHotkey(KEY_CONTROL | 'E', TCallback(this, EVENT_CLOSE_CHANNEL));
+	GUI().AddHotkey(KEY_CONTROL | 'M', TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
+	GUI().AddHotkey(KEY_CONTROL | 'K', TCallback(this, EVENT_OPTIONS_HOTKEYS));
+	GUI().AddHotkey(KEY_CONTROL | 'D', TCallback(this, EVENT_DEFAULT_CHANNEL));
 	SwitchTime = GetActionNumber() + 50;
 	int *Channels;
 	const int Count = GetOpenChannels(&Channels);
@@ -1230,12 +1230,12 @@ void TConsoleWindow::OnClose()
 			MoveRightButton->Close();
 		if (!IsChild(MoveLeftButton) && MoveLeftButton != nullptr)
 			MoveLeftButton->Close();
-		RemoveHotkey(KEY_CONTROL | 'I');
-		RemoveHotkey(KEY_CONTROL | 'O');
-		RemoveHotkey(KEY_CONTROL | 'E');
-		RemoveHotkey(KEY_CONTROL | 'M');
-		RemoveHotkey(KEY_CONTROL | 'K');
-		RemoveHotkey(KEY_CONTROL | 'D');
+		GUI().RemoveHotkey(KEY_CONTROL | 'I');
+		GUI().RemoveHotkey(KEY_CONTROL | 'O');
+		GUI().RemoveHotkey(KEY_CONTROL | 'E');
+		GUI().RemoveHotkey(KEY_CONTROL | 'M');
+		GUI().RemoveHotkey(KEY_CONTROL | 'K');
+		GUI().RemoveHotkey(KEY_CONTROL | 'D');
 	} catch (...) {
 		CloseWhileUnwinding([this] { TWindow::OnClose(); });
 		throw;

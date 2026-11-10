@@ -92,7 +92,3 @@ public:
 
 // ModalWindow and MainWindow are TGUI's members (GUI.h):
 // GUI().ModalWindow and .MainWindow.
-
-void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
-	void (*OpenURL)(const char *URL));
-void ExitMainWindow();

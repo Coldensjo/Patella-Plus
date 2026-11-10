@@ -315,14 +315,14 @@ TAutomapWindow::TAutomapWindow()
 	SetChildPosition(CompassRose, SkinProperties().AutomapCentreButtonAndCompassRose.width, SkinProperties().AutomapCentreButtonAndCompassRose.height);
 	CompassRose->SetSize(Skins()[SKIN_COMPASS_ROSE].width, Skins()[SKIN_COMPASS_ROSE].height);
 	Arrange();
-	AddHotkey(KEY_ALT | KEY_HOME, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
-	AddHotkey(KEY_ALT | KEY_END, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
-	AddHotkey(KEY_ALT | KEY_PAGE_UP, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
-	AddHotkey(KEY_ALT | KEY_PAGE_DOWN, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
-	AddHotkey(KEY_ALT | KEY_UP, TCallback(this, EVENT_AUTOMAP_NORTH));
-	AddHotkey(KEY_ALT | KEY_LEFT, TCallback(this, EVENT_AUTOMAP_WEST));
-	AddHotkey(KEY_ALT | KEY_RIGHT, TCallback(this, EVENT_AUTOMAP_EAST));
-	AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
+	GUI().AddHotkey(KEY_ALT | KEY_HOME, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
+	GUI().AddHotkey(KEY_ALT | KEY_END, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
+	GUI().AddHotkey(KEY_ALT | KEY_PAGE_UP, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
+	GUI().AddHotkey(KEY_ALT | KEY_PAGE_DOWN, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
+	GUI().AddHotkey(KEY_ALT | KEY_UP, TCallback(this, EVENT_AUTOMAP_NORTH));
+	GUI().AddHotkey(KEY_ALT | KEY_LEFT, TCallback(this, EVENT_AUTOMAP_WEST));
+	GUI().AddHotkey(KEY_ALT | KEY_RIGHT, TCallback(this, EVENT_AUTOMAP_EAST));
+	GUI().AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
 }
 
 // Its work is the close's (OnClose).
@@ -337,14 +337,14 @@ void TAutomapWindow::OnClose()
 {
 	try {
 		SetAutomapZoom(Zoom);
-		RemoveHotkey(KEY_ALT | KEY_HOME);
-		RemoveHotkey(KEY_ALT | KEY_END);
-		RemoveHotkey(KEY_ALT | KEY_PAGE_UP);
-		RemoveHotkey(KEY_ALT | KEY_PAGE_DOWN);
-		RemoveHotkey(KEY_ALT | KEY_UP);
-		RemoveHotkey(KEY_ALT | KEY_LEFT);
-		RemoveHotkey(KEY_ALT | KEY_RIGHT);
-		RemoveHotkey(KEY_ALT | KEY_DOWN);
+		GUI().RemoveHotkey(KEY_ALT | KEY_HOME);
+		GUI().RemoveHotkey(KEY_ALT | KEY_END);
+		GUI().RemoveHotkey(KEY_ALT | KEY_PAGE_UP);
+		GUI().RemoveHotkey(KEY_ALT | KEY_PAGE_DOWN);
+		GUI().RemoveHotkey(KEY_ALT | KEY_UP);
+		GUI().RemoveHotkey(KEY_ALT | KEY_LEFT);
+		GUI().RemoveHotkey(KEY_ALT | KEY_RIGHT);
+		GUI().RemoveHotkey(KEY_ALT | KEY_DOWN);
 	} catch (...) {
 		CloseWhileUnwinding([this] { TContentWindow::OnClose(); });
 		throw;

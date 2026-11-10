@@ -20,7 +20,7 @@
 
 #include "SdlFrame.h"
 
-#include "Control.h"
+#include "GUI.h"
 #include "MainWindow.h"
 #include "Network.h"
 #include "Preferences.h"
@@ -271,7 +271,7 @@ void OnSize(int cx, int cy)
 {
 	if ((SDL_GetWindowFlags(Window) & SDL_WINDOW_MINIMIZED) != 0)
 		return;
-	Resize(cx < 550 ? 550 : cx, cy < 450 ? 450 : cy);
+	GUI().Resize(cx < 550 ? 550 : cx, cy < 450 ? 450 : cy);
 }
 
 // CMainFrame::OnActivateApp: forgets the held modifiers and leaves fullscreen mode (after the message).
@@ -356,7 +356,7 @@ bool SDLCALL WatchEvent([[maybe_unused]] void *UserData, SDL_Event *Event)
 // CMainFrame::OnClose: Control.cpp may refuse (the logout warning in the game).
 void OnClose()
 {
-	if (!Closing && !CloseRequest())
+	if (!Closing && !GUI().CloseRequest())
 		return;
 	DestroyWanted = true;
 }
@@ -480,7 +480,7 @@ void OnChar(unsigned int Char)
 {
 	const int Code = Keys.Character(Char);
 	if (Code >= 0)
-		KeyPress(Code);
+		GUI().KeyPress(Code);
 }
 
 // Whether a key down makes its control character here (platform::KeyCharacter): where SDL's text input is the only
@@ -503,7 +503,7 @@ void KeyDown(const platform::TKeyEvent &Key)
 		return;
 	}
 	if (Action.Kind == platform::TKeyAction::TKind::Press)
-		KeyPress(Action.Code);
+		GUI().KeyPress(Action.Code);
 	if (KeysMakeCharacters) {
 		const int Char = platform::KeyCharacter(Key);
 		if (Char >= 0)
@@ -664,14 +664,14 @@ void ButtonDown(const POINT &Point, bool Left, bool Double)
 {
 	if (Left) {
 		if (Double)
-			LeftButtonDoubleClick(Point.x, Point.y, Keys.Flags());
+			GUI().LeftButtonDoubleClick(Point.x, Point.y, Keys.Flags());
 		else
-			LeftButtonDown(Point.x, Point.y, Keys.Flags());
+			GUI().LeftButtonDown(Point.x, Point.y, Keys.Flags());
 		LeftButtonPressed = true;
 		if (!RightButtonPressed)
 			TakeCapture();
 	} else {
-		RightButtonDown(Point.x, Point.y, Keys.Flags());
+		GUI().RightButtonDown(Point.x, Point.y, Keys.Flags());
 		RightButtonPressed = true;
 		if (!LeftButtonPressed)
 			TakeCapture();
@@ -682,13 +682,13 @@ void ButtonUp(const POINT &Point, bool Left)
 {
 	if (Left) {
 		if (LeftButtonPressed) {
-			LeftButtonUp(Point.x, Point.y, Keys.Flags());
+			GUI().LeftButtonUp(Point.x, Point.y, Keys.Flags());
 			LeftButtonPressed = false;
 			if (!RightButtonPressed)
 				FreeCapture();
 		}
 	} else if (RightButtonPressed) {
-		RightButtonUp(Point.x, Point.y, Keys.Flags());
+		GUI().RightButtonUp(Point.x, Point.y, Keys.Flags());
 		RightButtonPressed = false;
 		if (!LeftButtonPressed)
 			FreeCapture();
@@ -765,7 +765,7 @@ void OnWheel(const SDL_MouseWheelEvent &Event)
 	for (int i = 0; i < std::abs(Notches); i++) {
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 		const int MouseY = Interaction().GetMouseY();
-		MouseWheel(Interaction().GetMouseX(), MouseY, Notches > 0 ? 1 : 2);
+		GUI().MouseWheel(Interaction().GetMouseX(), MouseY, Notches > 0 ? 1 : 2);
 	}
 }
 
@@ -812,11 +812,11 @@ void OnCaptureChanged()
 		Point = POINT{x, y};
 	}
 	if (LeftButtonPressed) {
-		LeftButtonUp(Point.x, Point.y, Keys.Flags());
+		GUI().LeftButtonUp(Point.x, Point.y, Keys.Flags());
 		LeftButtonPressed = false;
 	}
 	if (RightButtonPressed) {
-		RightButtonUp(Point.x, Point.y, Keys.Flags());
+		GUI().RightButtonUp(Point.x, Point.y, Keys.Flags());
 		RightButtonPressed = false;
 	}
 	FreeCapture();
@@ -888,7 +888,7 @@ LRESULT CALLBACK InputProc(HWND Hwnd, UINT Message, WPARAM WParam, LPARAM LParam
 		// CMainFrame::OnTimer: the test mode's ticks (with a script the driver dispatches WM_TIMER 1); the loop's own
 		// timer does not use WM_TIMER.
 		::DefWindowProcA(Hwnd, Message, WParam, LParam);
-		TimerEvent();
+		GUI().TimerEvent();
 		return 0;
 	case WM_NCHITTEST:
 		if (GetViewMode() == 2)
@@ -952,7 +952,7 @@ void DestroyFrame()
 	Window = nullptr;
 	WindowHandle = nullptr;
 	Destroyed = true;
-	ExitControl();
+	GUI().ExitControl();
 }
 
 } // namespace
@@ -1015,7 +1015,7 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 	DefaultCursor = LoadClientCursor(0x84);
 	HandCursor = LoadClientCursor(0x89);
 	SetWindowedMode(-1, -1, 0, 0, false);
-	InitControl(Gamemaster);
+	GUI().InitControl(Gamemaster);
 	SetViewMode(1);
 
 	// Create (CFrameWnd::Create with WS_OVERLAPPEDWINDOW: SDL's resizable window), hidden, as the MFC frame is until
@@ -1062,8 +1062,8 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 	int ClientWidth = 0;
 	int ClientHeight = 0;
 	SDL_GetWindowSize(Window, &ClientWidth, &ClientHeight);
-	InitMainWindow(ClientWidth, ClientHeight, ExitProgram, SetDisplayMode, OpenURL);
-	InitWindow(WindowHandle, ExitProgram, SetDisplayMode, OpenURL);
+	GUI().InitMainWindow(ClientWidth, ClientHeight, ExitProgram, SetDisplayMode, OpenURL);
+	GUI().InitWindow(WindowHandle, ExitProgram, SetDisplayMode, OpenURL);
 	Created = true;
 	int x, y, Width, Height;
 	bool Maximized;
@@ -1139,7 +1139,7 @@ int Run(void (*Idle)())
 			break;
 		// The main timer in the loop: WM_TIMER came when the queue was otherwise empty.
 		if (platform::SdlLoopInput().TimerDue(platform::Platform().Clock.Milliseconds()))
-			TimerEvent();
+			GUI().TimerEvent();
 		Idle();
 	}
 	SDL_Quit();
@@ -1177,13 +1177,13 @@ void SetDisplayMode(int ViewMode)
 	SetViewMode(ViewMode);
 	if (ViewMode == 2) {
 		SetFrameStyle(WS_EX_APPWINDOW | WS_EX_CLIENTEDGE, 0);
-		Redraw(false);
+		GUI().Redraw(false);
 		SDL_SetWindowFullscreen(Window, true);
 		SDL_SyncWindow(Window);
-		Resize(0, 0);
+		GUI().Resize(0, 0);
 	} else {
 		SetFrameStyle(0, WS_EX_APPWINDOW | WS_EX_CLIENTEDGE);
-		Redraw(false);
+		GUI().Redraw(false);
 		// The display back in the desktop's mode first, by the one path that makes sure of it (not SDL's own when the
 		// window leaves fullscreen); the Vulkan engine's ExitDisplay finds nothing left to do.
 		platform::SdlSetFullscreenMode(WindowHandle, nullptr);

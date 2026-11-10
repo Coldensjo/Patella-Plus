@@ -82,8 +82,8 @@ TMapWindow::TMapWindow()
 {
 	HintButton = nullptr;
 	MaxLevel = 0;
-	AddHotkey(KEY_CONTROL | 'N', TCallback(this, EVENT_CREATURE_INFO));
-	AddHotkey(KEY_CONTROL | 'W', TCallback(this, EVENT_REMOVE_TALKBOX));
+	GUI().AddHotkey(KEY_CONTROL | 'N', TCallback(this, EVENT_CREATURE_INFO));
+	GUI().AddHotkey(KEY_CONTROL | 'W', TCallback(this, EVENT_REMOVE_TALKBOX));
 	for (int i = 0; i < 16; i++) {
 		for (int j = 0; j < 12; j++) {
 			Cache[i][j].x = i << 5;

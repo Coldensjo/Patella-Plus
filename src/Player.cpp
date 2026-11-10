@@ -4,7 +4,6 @@
 // wrote a report to error.txt instead and showed it at the next start.
 
 #include "Player.h"
-#include "Control.h"
 #include "Creatures.h"
 #include "GUI.h"
 #include "graphics.h"
@@ -83,7 +82,7 @@ void LogDiagnostics() noexcept
 	} catch (...) { // NOLINT(bugprone-empty-catch): this part left out
 	}
 	try {
-		patella::log::Debug("Last packet types:{}", ByteList(GetLastPacketTypes()));
+		patella::log::Debug("Last packet types:{}", ByteList(GUI().GetLastPacketTypes()));
 	} catch (...) { // NOLINT(bugprone-empty-catch): this part left out
 	}
 	try {
@@ -271,7 +270,7 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 			return FALSE;
 		}
 	}
-	Redraw(false);
+	GUI().Redraw(false);
 	int x, y, Width, Height;
 	bool Maximized;
 	GetWindowedMode(&x, &y, &Width, &Height, &Maximized);
@@ -279,7 +278,7 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastMousePosition); // GetCursorPos
 	if (GetViewMode() == 1)
 		SdlScreenToClient(LastMousePosition); // the SDL window's coordinates
-	MouseMove(LastMousePosition.x, LastMousePosition.y);
+	GUI().MouseMove(LastMousePosition.x, LastMousePosition.y);
 	return TRUE;
 }
 
@@ -390,12 +389,12 @@ void CPlayerApp::OnIdle()
 	if (LastMousePosition.x != Point.x || LastMousePosition.y != Point.y) {
 		LastMousePosition.x = Point.x;
 		LastMousePosition.y = Point.y;
-		MouseMove(Point.x, Point.y);
+		GUI().MouseMove(Point.x, Point.y);
 	}
 	const int Cursor = Interaction().GetMouseCursor();
 	if (Cursor != LastMouseCursor) {
 		patella::sdlframe::UpdateMouseCursor(); // the SDL3 window's
 		LastMouseCursor = Cursor;
 	}
-	ProcessEvents();
+	GUI().ProcessEvents();
 }

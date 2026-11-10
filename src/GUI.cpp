@@ -1566,14 +1566,14 @@ TTimer::TTimer(int Time, TCallback Callback)
 	if (Remaining == 0) {
 		Active = false;
 	} else {
-		AddTimer(this);
+		GUI().AddTimer(this);
 		Active = true;
 	}
 }
 
 TTimer::~TTimer()
 {
-	RemoveTimer(this);
+	GUI().RemoveTimer(this);
 	Active = false;
 }
 
@@ -1588,7 +1588,7 @@ void TTimer::Update(int elapsed)
 		}
 		Callback.Send();
 		if (Remaining == 0) {
-			RemoveTimer(this);
+			GUI().RemoveTimer(this);
 			Active = false;
 		}
 	}
@@ -2190,45 +2190,4 @@ bool patella::TGUI::CheckHotkey(int Key)
 	return true;
 }
 
-// The functions of the original: each calls its member on the one TClient's TGUI.
-
-void AddTimer(TTimer *Timer)
-{
-	GUI().AddTimer(Timer);
-}
-
-void RemoveTimer(TTimer *Timer)
-{
-	GUI().RemoveTimer(Timer);
-}
-
-void UpdateTimers()
-{
-	GUI().UpdateTimers();
-}
-
-void InitHotkeys()
-{
-	GUI().InitHotkeys();
-}
-
-void ExitHotkeys()
-{
-	patella::TGUI::ExitHotkeys();
-}
-
-void AddHotkey(int Key, TCallback Callback)
-{
-	GUI().AddHotkey(Key, Callback);
-}
-
-void RemoveHotkey(int Key)
-{
-	GUI().RemoveHotkey(Key);
-}
-
-bool CheckHotkey(int Key)
-{
-	return GUI().CheckHotkey(Key);
-}
 // NOLINTEND(cppcoreguidelines-owning-memory)

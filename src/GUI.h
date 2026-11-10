@@ -280,18 +280,6 @@ public:
 	TCallback Callback;
 };
 
-void AddTimer(TTimer *Timer);
-void RemoveTimer(TTimer *Timer);
-void UpdateTimers();
-
-// --- Hotkeys --------------------------------------------------------------
-
-void InitHotkeys();
-void ExitHotkeys();
-void AddHotkey(int Key, TCallback Callback);
-void RemoveHotkey(int Key);
-bool CheckHotkey(int Key);
-
 // --- Skin properties ------------------------------------------------------
 
 // SkinProperties and its types are Skins.h's (TGraphics' TSkins); InitSkinProperties, which fills it, is GUI.cpp's.
@@ -339,9 +327,7 @@ public:
 	void RemoveHotkey(int Key);
 	bool CheckHotkey(int Key);
 
-	// Control.cpp's (Control.h has the free functions of the same names, which forward here). Their calls into the
-	// other files (GUI.cpp's and MainWindow.cpp's included) are those files' free functions; their calls of each other
-	// are member calls.
+	// Control.cpp's.
 	void Resize(int Width, int Height);
 	void CheckSurface(bool Force);
 	static void ChangeDevice(vulkan::TDeviceButton Button);
@@ -366,9 +352,11 @@ public:
 	void InitWindow(platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL));
 	static void InitControl(bool Gamemaster);
 	static void ExitControl();
+	// The last ten packet types received, the newest first (0 for none), for the developer log's diagnostics
+	// (Player.cpp's HandleException).
 	[[nodiscard]] std::array<uint8, 10> GetLastPacketTypes() const;
 
-	// MainWindow.cpp's (MainWindow.h has the free functions).
+	// MainWindow.cpp's.
 	void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
 		void (*OpenURL)(const char *URL));
 	void ExitMainWindow();

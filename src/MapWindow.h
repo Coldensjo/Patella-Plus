@@ -127,8 +127,8 @@ protected:
 	void OnClose() override
 	{
 		try {
-			RemoveHotkey(KEY_CONTROL | 'N');
-			RemoveHotkey(KEY_CONTROL | 'W');
+			GUI().RemoveHotkey(KEY_CONTROL | 'N');
+			GUI().RemoveHotkey(KEY_CONTROL | 'W');
 		} catch (...) {
 			CloseWhileUnwinding([this] { TWindow::OnClose(); });
 			throw;

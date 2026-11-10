@@ -1,12 +1,9 @@
-// Control.cpp: the client's main control flow; see Control.h.
+// Control.cpp: the client's main control flow: graphics device changes, redrawing the screen, mouse and keyboard input,
+// the timer, the event queue that opens dialogs and starts connections, the network callbacks with the packet
+// dispatcher, and start-up and shutdown of all modules.
 //
 // The functions are TGUI's members (GUI.h), the data they read TGUI's and,
-// through its constructor references, TNetwork's and TCommunication's; the
-// free functions of the same names, at the end of the file, forward to them.
-// Their calls of each other are member calls; their calls into the other
-// files (GUI.cpp's hotkeys and timers and MainWindow.cpp's ExitMainWindow
-// included, with :: where a TGUI member of the same name would hide them) are
-// those files' free functions.
+// through its constructor references, TNetwork's and TCommunication's.
 //
 // Errors pass through the functions here, but for three that catch them:
 // CheckSurface (an error of the surface becomes PROGRAM_ERROR 12),
@@ -18,7 +15,6 @@
 // menu or an action. Parameters that are strings or arrays belong to the
 // event and are deleted here.
 
-#include "Control.h"
 #include "ConsoleWindow.h"
 #include "ContextMenus.h"
 #include "Dialogs.h"
@@ -528,7 +524,7 @@ void patella::TGUI::KeyPress(int Key)
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
 		}
-	} else if (!::CheckHotkey(Key)) {
+	} else if (!CheckHotkey(Key)) {
 		MainWindow->KeyPress(Key);
 	}
 	LastMouseMove = 0;
@@ -807,7 +803,7 @@ void patella::TGUI::TimerEvent()
 		}
 	}
 	Network.CheckConnectionTimeout();
-	::UpdateTimers();
+	UpdateTimers();
 	Creatures().UpdateSkulls();
 }
 
@@ -1128,16 +1124,17 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		Map().InitMap([](int CreatureID) { Creatures().HideCreature(CreatureID); });
 		Inventory().ResetInventory();
 		Creatures().InitCreatures();
-		::Interaction().InitStatus(Gamemaster, ::LinkCopyWarning);
+		::Interaction().InitStatus(Gamemaster, LinkCopyWarning);
 		::Help().InitHelp();
 		InitPreferences();
 		::Talk().InitTalk();
 		Graphics().InitGraphics(0xa00000);
 		SkinData().InitSkins();
 		InitSkinProperties();
-		::Network().InitNetwork(::ConnectionEstablished, ::ReceivePackets, ::ConnectionClosed);
+		::Network().InitNetwork([] { GUI().ConnectionEstablished(); }, [] { GUI().ReceivePackets(); },
+			[] { GUI().ConnectionClosed(); });
 		InitCommunication();
-		::InitHotkeys();
+		GUI().InitHotkeys();
 	} catch (const TProgramError &Error) {
 		try {
 			ExitControl();
@@ -1153,8 +1150,8 @@ void patella::TGUI::InitControl(bool Gamemaster)
 // surface step is skipped.
 void patella::TGUI::ExitControl()
 {
-	::ExitMainWindow();
-	::ExitHotkeys();
+	GUI().ExitMainWindow();
+	ExitHotkeys();
 	ExitCommunication();
 	::Network().ExitNetwork();
 	SkinData().ExitSkins();
@@ -1183,114 +1180,4 @@ std::array<uint8, 10> patella::TGUI::GetLastPacketTypes() const
 	return Types;
 }
 
-// --- The free functions of the original's names -------------------------------------
-
-// Each forwards to its TGUI member (above): MainFrm.cpp, Player.cpp, Communication.cpp and the test mode call them,
-// InitControl passes four of them as callbacks (InitStatus's, InitNetwork's), and the golden tests call and fake them
-// by name.
-
-void Resize(int Width, int Height)
-{
-	GUI().Resize(Width, Height);
-}
-
-void Redraw(bool Force)
-{
-	GUI().Redraw(Force);
-}
-
-void MouseMove(int x, int y)
-{
-	GUI().MouseMove(x, y);
-}
-
-void LeftButtonDown(int x, int y, int Flags)
-{
-	GUI().LeftButtonDown(x, y, Flags);
-}
-
-void LeftButtonUp(int x, int y, int Flags)
-{
-	GUI().LeftButtonUp(x, y, Flags);
-}
-
-void LeftButtonDoubleClick(int x, int y, int Flags)
-{
-	GUI().LeftButtonDoubleClick(x, y, Flags);
-}
-
-void RightButtonDown(int x, int y, int Flags)
-{
-	GUI().RightButtonDown(x, y, Flags);
-}
-
-void RightButtonUp(int x, int y, int Flags)
-{
-	GUI().RightButtonUp(x, y, Flags);
-}
-
-void MouseWheel(int x, int y, int Direction)
-{
-	GUI().MouseWheel(x, y, Direction);
-}
-
-void KeyPress(int Key)
-{
-	GUI().KeyPress(Key);
-}
-
-bool CloseRequest()
-{
-	return GUI().CloseRequest();
-}
-
-void LinkCopyWarning()
-{
-	patella::TGUI::LinkCopyWarning();
-}
-
-void ConnectionEstablished()
-{
-	GUI().ConnectionEstablished();
-}
-
-void ReceivePackets()
-{
-	GUI().ReceivePackets();
-}
-
-void ConnectionClosed()
-{
-	GUI().ConnectionClosed();
-}
-
-void TimerEvent()
-{
-	GUI().TimerEvent();
-}
-
-void ProcessEvents()
-{
-	GUI().ProcessEvents();
-}
-
-void InitWindow(patella::platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL))
-{
-	GUI().InitWindow(Window, ExitProgram, SetDisplayMode, OpenURL);
-}
-
-void InitControl(bool Gamemaster)
-{
-	patella::TGUI::InitControl(Gamemaster);
-}
-
-void ExitControl()
-{
-	patella::TGUI::ExitControl();
-}
-
-std::array<uint8, 10> GetLastPacketTypes()
-{
-	return GUI().GetLastPacketTypes();
-}
 // NOLINTEND(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
