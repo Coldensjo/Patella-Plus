@@ -56,8 +56,6 @@ public:
 	void BlitClipped(int ToSurface, int x, int y, int FromSurface, TRect FromRect, TRGBColor ColorKey,
 		TRect Clip) override;
 	void StretchBlitRect(int ToSurface, TRect Destination, int FromSurface, TRect Source) override;
-	void StretchBlitUnclipped(int ToSurface, TRect ToRect, int FromSurface, TRect FromRect, TRGBColor ColorKey,
-		TRGBColor Highlight) override;
 	void StretchBlit(int ToSurface, TRect ToRect, int FromSurface, TRect FromRect, TRGBColor ColorKey,
 		TRGBColor Highlight, TRect Clip) override;
 	void ShadeRectangles(int Surface, int Count, TRect *Rects, TRGBColor *Colors) override;
@@ -76,11 +74,9 @@ public:
 	int GetFullscreenModes(TFullscreenMode **Modes) override;
 	int GetCacheSurfaces() override;
 	void GetSurfaceRect(int Surface, TRect *Rect) override;
-	void SetSurfaceRect(int Surface, int x, int y, int Width, int Height) override;
 	bool SurfaceRecreated(int Surface) override;
 	bool IsUnavailable() override;
 	bool CanShadeRectangles() override;
-	int GetSurfaceMemory(int Surface) override;
 	void SetFramerateLimit(int Limit) override;
 	double GetFPS() override;
 	void InitSurfaces() override;
@@ -112,7 +108,6 @@ private:
 	bool Ready;                                            // CreateSurfaces has finished (SurfaceRecreated)
 	std::array<TEdgeRect, NUMBER_OF_SURFACES_VULKAN> Rect; // the surfaces' rectangles, as surfaceDX9.cpp's
 	TEdgeRect WindowRect;                                  // the client area (from 0, 0 since issue #126: only its size)
-	TEdgeRect SurfaceArea;                                 // SetSurfaceRect
 	bool Initialized;                                      // between InitSurfaces and ExitSurfaces (surfaceDX9.cpp: DirectDraw exists)
 	std::unique_ptr<patella::vulkan::TRenderer> Renderer;  // surfaceDX9.cpp's Direct3D and Device
 	std::array<int, NUMBER_OF_SURFACES_VULKAN> Image;      // the renderer's images (SCREEN_SURFACE: the canvas)

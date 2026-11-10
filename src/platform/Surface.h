@@ -10,9 +10,8 @@
 // 	                 SDL_Vulkan_CreateSurface's since M8's #126 (vulkan/WindowSystem.h)
 // 	the golden tests' recording surfaces (tests/golden: testsurface.h, commworld.cpp's)
 //
-// No Win32 type in it: the window is a TWindowHandle (platform/Window.h), ClipRect's rectangles and ScreenRect a
-// TEdgeRect (RECT's four edges), SurfaceGL.cpp's device context a pointer. What the engine shares with the client
-// (Surface.cpp's data: the blit statistics, the screen, the cache surfaces' size, the main window, the available
+// No Win32 type in it: the window is a TWindowHandle (platform/Window.h), ClipRect's rectangles a TEdgeRect (RECT's
+// four edges). What the engine shares with the client (the cache surfaces' size, the main window, the available
 // engines) is a TSurfaceShared that the surface's creator passes to its constructor (TGraphicsEngine, src/Surface.h),
 // instead of the client's accessor (bridge::GraphicsEngine(), until issue #138).
 //
@@ -41,9 +40,8 @@ static_assert(std::is_same_v<std::underlying_type_t<decltype(WINDOWED_MODE)>, in
 // The surfaces of an engine, by index (the int Surface/ToSurface/FromSurface
 // arguments of the drawing slots). SPRITE_SURFACE is the first of the video
 // cache surfaces (graphics.cpp's Item.Surface + 6). The names are from the
-// assertions of SurfaceDX.cpp and surfaceDX9.cpp ("Surface9[SPRITE_SURFACE]");
-// NUMBER_OF_SURFACES is SurfaceDX.cpp's count (surfaceDX9.cpp has its own
-// NUMBER_OF_SURFACES_DX9). Unscoped int constants, as the view modes'.
+// assertions of SurfaceDX.cpp and surfaceDX9.cpp ("Surface9[SPRITE_SURFACE]").
+// Unscoped int constants, as the view modes'.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	PRIMARY_SURFACE = 0,
 	SCREEN_SURFACE = 1,
@@ -52,7 +50,6 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	CACHE_SURFACE = 4,
 	AUTOMAP_SURFACE = 5,
 	SPRITE_SURFACE = 6,
-	NUMBER_OF_SURFACES = 22,
 };
 static_assert(sizeof(decltype(PRIMARY_SURFACE)) == 4);
 static_assert(std::is_same_v<std::underlying_type_t<decltype(PRIMARY_SURFACE)>, int>);
@@ -60,7 +57,7 @@ static_assert(std::is_same_v<std::underlying_type_t<decltype(PRIMARY_SURFACE)>, 
 namespace patella::platform {
 
 // A rectangle by its edges, in pixels: Win32's RECT (left, top inside; right, bottom outside), the same members in
-// the same order, for ClipRect and ScreenRect (TRect is a position and a size).
+// the same order, for ClipRect (TRect is a position and a size).
 struct TEdgeRect {
 	int left = 0;
 	int top = 0;
@@ -69,12 +66,9 @@ struct TEdgeRect {
 };
 
 // The data the engines share with the client: Surface.cpp's (TGraphicsEngine's since issue #116, which derives from
-// this since issue #138). The engine writes the statistics, the screen's size, the surfaces counted, the
-// initialisation step and the cache surfaces' size; the client reads them (the frame rate line, the dumps, the golden
-// tests). The main window and the available engines are Surface.cpp's file-local values: TGraphicsEngine sets them
-// (SurfaceInitInstance), TSurface reads them (TestEngine, GetAvailableEngines). The ints in the original's .data and
-// .bss order; the pointer first and the byte last, so the object has no padding but its end and TGraphicsEngine keeps
-// its size (80 bytes on x64).
+// this since issue #138). The engine sets the cache surfaces' size. The main window and the available engines are
+// Surface.cpp's file-local values: TGraphicsEngine sets them (SurfaceInitInstance), TSurface reads them (TestEngine,
+// GetAvailableEngines).
 class TSurfaceShared {
 public:
 	TSurfaceShared(const TSurfaceShared &) = delete;
@@ -91,21 +85,8 @@ protected:
 	TWindowHandle SurfaceWindow{}; // the main window, from SurfaceInitInstance
 
 public:
-	// .data
 	int CacheSurfaceWidth = 256; // the size of a video cache surface (256 at start)
 	int CacheSurfaceHeight = 256;
-	// .bss. The statistics count the blits of a frame (the engines').
-	int InitStep{}; // the step reached in Direct3D's initialisation; 0 done
-	int BlitCount{};
-	int BlitPixels{};
-	int Data71D0D8{};  // cleared by surfaceDX9.cpp and SurfaceGL.cpp
-	int ScreenWidth{}; // of the last frame
-	int ScreenHeight{};
-	int ScreenDepth{};
-	int LastBlitCount{}; // BlitCount of the last frame
-	int LastBlitPixels{};
-	int NumberOfSurfaces{}; // the surfaces created (SurfaceDX.cpp's SurfaceMemory entries)
-	int Data71D0F4{};       // SurfaceGL.cpp's
 
 protected:
 	std::uint8_t AvailableEngines{}; // bit 0 OpenGL works, bit 1 DirectX 9 passed TestEngine
@@ -128,8 +109,6 @@ public:
 	TSurface(TSurface &&) = delete;
 	TSurface &operator=(TSurface &&) = delete;
 	virtual ~TSurface();                                                                         // +0x00
-	virtual void SelectSurface(int Surface);                                                     // +0x04, empty; SurfaceGL.cpp's drawing target
-	virtual void SetTextureFilter(int Filter);                                                   // +0x08, empty; SurfaceGL.cpp's GL_LINEAR/GL_NEAREST
 	virtual void SetPixel(int Surface, int x, int y, TRGBColor Color) = 0;                       // +0x0c, ContentWindows.cpp's automap cross
 	virtual void FillRectangleClipped(int Surface, TRect Rect, TRGBColor Color, TRect Clip) = 0; // +0x10, ContentWindows.cpp's bars
 	virtual void FillRectangle(int Surface, TRect Rect, TRGBColor Color) = 0;                    // +0x14
@@ -155,9 +134,6 @@ public:
 		TRGBColor ColorKey, TRect Clip) = 0; // +0x3c
 	virtual void StretchBlitRect(int ToSurface, TRect Destination, int FromSurface,
 		TRect Source) = 0; // +0x40
-	// +0x44: StretchBlit without the clipping rectangle.
-	virtual void StretchBlitUnclipped(int ToSurface, TRect ToRect, int FromSurface, TRect FromRect,
-		TRGBColor ColorKey, TRGBColor Highlight) = 0;
 	virtual void StretchBlit(int ToSurface, TRect ToRect, int FromSurface, TRect FromRect,
 		TRGBColor ColorKey, TRGBColor Highlight, TRect Clip) = 0; // +0x48
 	// +0x4c: shades Count rectangles with the colours of their four corners
@@ -170,27 +146,23 @@ public:
 	virtual bool ClipRect(TRect Clip, patella::platform::TEdgeRect *Destination, patella::platform::TEdgeRect *Source) = 0;
 	virtual void ResetFrameTimer() = 0;                                    // +0x5c
 	virtual void WaitForNextFrame() = 0;                                   // +0x60, the frame limiter and the FPS count
-	virtual void AttachWindow();                                           // +0x64, empty; the window handle changed
 	virtual void UpdateWindowRect() = 0;                                   // +0x68
 	virtual void InitDisplay(int VMode, TFullscreenMode *GMode) = 0;       // +0x6c
 	virtual void ExitDisplay() = 0;                                        // +0x70
 	virtual void CreateSurfaces() = 0;                                     // +0x74
 	virtual void ResetDisplay(int VMode, TFullscreenMode *GMode) = 0;      // +0x78
 	virtual void RestoreSurfaces(int ViewMode, TFullscreenMode *Mode) = 0; // +0x7c
-	virtual void AddDirtyRect(TRect Rect);                                 // +0x80, empty; SurfaceGL.cpp's area drawn into the selected surface
 	virtual void FinishFrame() = 0;                                        // +0x84
 	// +0x88: Window is the main window (TGUI's WindowHandle), read during the call.
 	virtual bool Init(patella::platform::TWindowHandle *Window, int ViewMode, TFullscreenMode *Resolution, bool Force) = 0;
-	virtual int GetFullscreenModes(TFullscreenMode **Modes) = 0;                   // +0x8c, a new[] list; the number of modes
-	virtual int GetCacheSurfaces() = 0;                                            // +0x90, the number of video cache surfaces
-	virtual void GetSurfaceRect(int Surface, TRect *Rect) = 0;                     // +0x94
-	virtual void SetSurfaceRect(int Surface, int x, int y, int Width, int Height); // +0x98, empty here (surfaceDX9.cpp sets Rect[Surface])
+	virtual int GetFullscreenModes(TFullscreenMode **Modes) = 0; // +0x8c, a new[] list; the number of modes
+	virtual int GetCacheSurfaces() = 0;                          // +0x90, the number of video cache surfaces
+	virtual void GetSurfaceRect(int Surface, TRect *Rect) = 0;   // +0x94
 	// +0x9c: the surfaces were created again since the last Init (their
 	// contents are gone); MapWindow.cpp forgets its tile cache then.
 	virtual bool SurfaceRecreated(int Surface) = 0;
 	virtual bool IsUnavailable() = 0;                  // +0xa0
 	virtual bool CanShadeRectangles() = 0;             // +0xa4, MapWindow.cpp draws the light with +0x4c only when true
-	virtual int GetSurfaceMemory(int Index) = 0;       // +0xa8, 1 video memory, 2 system memory
 	virtual void SetFramerateLimit(int Framerate) = 0; // +0xac
 	virtual double GetFPS() = 0;                       // +0xb0
 	virtual void InitSurfaces() = 0;                   // +0xb4
@@ -204,27 +176,20 @@ public:
 	// surfaceDX9.cpp's copies). The doubles align the class to 8 bytes, so
 	// +0x04 is padding after the vtable pointer.
 	patella::platform::TWindowHandle hWindow; // +0x08, the main window (TestEngine, SurfaceInitInstance)
-	void *DeviceContext;                      // +0x0c, SurfaceGL.cpp's device context of the window (an HDC)
 	int ViewMode;                             // +0x10, 0 none, WINDOWED_MODE, FULLSCREEN_MODE
 	int Width;                                // +0x14, the fullscreen mode
 	int Height;                               // +0x18
 	int Depth;                                // +0x1c
-	int Data20;                               // +0x20
 	bool Unavailable;                         // +0x24, no exclusive mode (another application has it)
 	bool CanStretch;                          // +0x25, the hardware stretches blits
 	bool Flag26;                              // +0x26, cleared by the constructor
-	std::uint8_t Data27;                      // +0x27
-	patella::platform::TEdgeRect ScreenRect;  // +0x28, SurfaceGL.cpp's client area in screen coordinates
 	int NumberOfModes;                        // +0x38, cleared by the constructor; GetFullscreenModes' count
-	int Data3C;                               // +0x3c, cleared by the constructor
 	int CacheSurfaces;                        // +0x40, cleared by the constructor
-	int Data44;                               // +0x44
 	double StartTime;                         // +0x48, timeGetTime at ResetFrameTimer
 	double NextFrame;                         // +0x50, the time the next frame is due
 	double FrameTime;                         // +0x58, 1000 / Framerate
 	double FPS;                               // +0x60, frames per second, counted each second
 	int Framerate;                            // +0x68, the frame limit; 0xffff is none
-	int Data6C;                               // +0x6c
 
 protected:
 	// The engine's shared data (issue #138: the client's bridge::GraphicsEngine() until then). After the original's

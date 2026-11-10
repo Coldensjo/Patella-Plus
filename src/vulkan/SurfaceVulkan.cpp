@@ -55,7 +55,6 @@ namespace {
 int CurrentTargetNumber = -1;
 std::array<uint32, NUMBER_OF_SURFACES_VULKAN> SurfaceKeys; // surfaceDX9.cpp ColorKey; 0 when the surface has none
 std::vector<TQuad> Vertices;                               // the queued quads (6 vertices each)
-std::array<int, NUMBER_OF_SURFACES_VULKAN> SurfaceCreated;
 int CurrentTexture;
 uint32 FrameCount;
 double LastFPSTime;
@@ -205,15 +204,9 @@ void TSurfaceVulkan::SetRenderTarget(int Surface)
 	CurrentTarget = Image[Surface];
 }
 
-int TSurfaceVulkan::GetSurfaceMemory(int Surface)
-{
-	return SurfaceCreated[Surface];
-}
-
 // The device goes before its window is retired (PresentWindow.h).
 TSurfaceVulkan::~TSurfaceVulkan()
 {
-	Shared.NumberOfSurfaces = 0;
 	Renderer.reset();
 	PresentWindows.Retire();
 }
@@ -320,8 +313,6 @@ void TSurfaceVulkan::FillRectangle(int Surface, TRect Area, TRGBColor Color)
 		SetRenderTarget(Surface);
 		FlushVertices();
 		ColorFill(CurrentTarget, &R, Xrgb(Color.R, Color.G, Color.B));
-		Shared.BlitCount++;
-		Shared.BlitPixels += Area.height * Area.width;
 	}
 }
 
@@ -330,14 +321,11 @@ void TSurfaceVulkan::FillRectangleClipped(int Surface, TRect Area, TRGBColor Col
 {
 	patella::platform::TEdgeRect R = {Area.x, Area.y, Area.x + Area.width, Area.y + Area.height};
 	if (R.top != R.bottom && R.left != R.right) {
-		const int Pixels = Area.height * Area.width;
 		patella::platform::TEdgeRect Unused = R;
 		if (ClipRect(Clip, &R, &Unused)) {
 			SetRenderTarget(Surface);
 			FlushVertices();
 			ColorFill(CurrentTarget, &R, Xrgb(Color.R, Color.G, Color.B));
-			Shared.BlitCount++;
-			Shared.BlitPixels += Pixels;
 		}
 	}
 }
@@ -349,8 +337,6 @@ void TSurfaceVulkan::DrawHorizontalLine(int Surface, int x, int y, int Length, T
 		SetRenderTarget(Surface);
 		FlushVertices();
 		ColorFill(CurrentTarget, &R, Xrgb(Color.R, Color.G, Color.B));
-		Shared.BlitCount++;
-		Shared.BlitPixels += Length;
 	}
 }
 
@@ -361,8 +347,6 @@ void TSurfaceVulkan::DrawVerticalLine(int Surface, int x, int y, int Length, TRG
 		SetRenderTarget(Surface);
 		FlushVertices();
 		ColorFill(CurrentTarget, &R, Xrgb(Color.R, Color.G, Color.B));
-		Shared.BlitCount++;
-		Shared.BlitPixels += Length;
 	}
 }
 
@@ -443,13 +427,6 @@ void TSurfaceVulkan::FinishFrame()
 {
 	if (ViewMode != 0) {
 		WaitForNextFrame();
-		Shared.ScreenWidth = Rect[SCREEN_SURFACE].right;
-		Shared.ScreenHeight = Rect[SCREEN_SURFACE].bottom;
-		Shared.LastBlitPixels = Shared.BlitPixels;
-		Shared.LastBlitCount = Shared.BlitCount;
-		Shared.Data71D0D8 = 0;
-		Shared.BlitCount = 0;
-		Shared.BlitPixels = 0;
 		FlushVertices();
 		if (Renderer != nullptr && Image[SCREEN_SURFACE] >= 0) {
 			const int x = Rect[SCREEN_SURFACE].left;
@@ -467,8 +444,6 @@ void TSurfaceVulkan::FinishFrame()
 				Fail();
 			}
 		}
-		Shared.BlitCount++;
-		Shared.BlitPixels += (WindowRect.bottom - WindowRect.top) * (WindowRect.right - WindowRect.left);
 	}
 }
 
@@ -483,14 +458,8 @@ void TSurfaceVulkan::ExitDisplay()
 	Shade.clear();
 	Renderer.reset();
 	PresentWindows.Retire();
-	for (int i = 0; i < NUMBER_OF_SURFACES_VULKAN; i++) {
-		// surfaceDX9.cpp clears SurfaceCreated[i] where Surface9[i] exists, which SCREEN_SURFACE's never does.
-		if (Image[i] >= 0) {
-			Image[i] = -1;
-			if (i != SCREEN_SURFACE)
-				SurfaceCreated[i] = 0;
-		}
-	}
+	for (int i = 0; i < NUMBER_OF_SURFACES_VULKAN; i++)
+		Image[i] = -1;
 	ScreenTexture = -1;
 	WhiteTexture = -1;
 	DeviceTarget = -1;
@@ -601,21 +570,6 @@ int TSurfaceVulkan::GetFullscreenModes(TFullscreenMode **Modes)
 	return NumberOfModes;
 }
 
-// SetSurfaceRect: SurfaceArea.left is set only for surface 0, its other members always.
-void TSurfaceVulkan::SetSurfaceRect(int Surface, int x, int y, int PartWidth, int PartHeight)
-{
-	if (Surface != 0) {
-		Rect[Surface].left = x;
-		Rect[Surface].top = y;
-		Rect[Surface].right = x + PartWidth;
-		Rect[Surface].bottom = y + PartHeight;
-	} else
-		SurfaceArea.left = x;
-	SurfaceArea.top = y;
-	SurfaceArea.right = x + PartWidth;
-	SurfaceArea.bottom = y + PartHeight;
-}
-
 bool TSurfaceVulkan::SurfaceRecreated(int)
 {
 	return Ready;
@@ -637,7 +591,6 @@ TSurfaceVulkan::TSurfaceVulkan(patella::platform::TSurfaceShared &Shared) : TSur
 	Ready = false;
 	Rect.fill(patella::platform::TEdgeRect{});
 	WindowRect = patella::platform::TEdgeRect{};
-	SurfaceArea = patella::platform::TEdgeRect{};
 	Initialized = false;
 	for (int i = 0; i < NUMBER_OF_SURFACES_VULKAN; i++)
 		Image[i] = -1;
@@ -660,25 +613,6 @@ void TSurfaceVulkan::AddQuad(int Left, int Top, int Right, int Bottom, double Le
 		FlushVertices();
 }
 
-// StretchBlitUnclipped: an unscaled one is a Blit; the colours are not used for a scaled one.
-void TSurfaceVulkan::StretchBlitUnclipped(int ToSurface, TRect ToRect, int FromSurface, TRect FromRect,
-	TRGBColor ColorKey, TRGBColor)
-{
-	if (ToRect.width == FromRect.width && ToRect.height == FromRect.height) {
-		Blit(ToSurface, ToRect.x, ToRect.y, FromSurface, FromRect, ColorKey);
-		return;
-	}
-	const int Right = ToRect.x + ToRect.width;
-	const int Bottom = ToRect.y + ToRect.height;
-	const int FromRight = FromRect.x + FromRect.width;
-	const int FromBottom = FromRect.y + FromRect.height;
-	SetRenderTarget(ToSurface);
-	SetTexture(FromSurface);
-	AddQuad(ToRect.x, ToRect.y, Right, Bottom, (FromRect.x + 0.5) / Rect[FromSurface].right,
-		(FromRight + 0.5) / Rect[FromSurface].right, (FromRect.y + 0.5) / Rect[FromSurface].bottom,
-		(FromBottom + 0.5) / Rect[FromSurface].bottom, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
-}
-
 void TSurfaceVulkan::StretchBlitRect(int ToSurface, TRect Destination, int FromSurface, TRect Source)
 {
 	SetRenderTarget(ToSurface);
@@ -687,8 +621,6 @@ void TSurfaceVulkan::StretchBlitRect(int ToSurface, TRect Destination, int FromS
 		(Source.x + 0.5) / Rect[FromSurface].right, (Source.x + Source.width + 0.5) / Rect[FromSurface].right,
 		(Source.y + 0.5) / Rect[FromSurface].bottom, (Source.y + Source.height + 0.5) / Rect[FromSurface].bottom,
 		0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
-	Shared.BlitCount++;
-	Shared.BlitPixels += Destination.height * Destination.width;
 }
 
 // BlitRectClipped: ScreenTexture (SCREEN_SURFACE) is always mapped as a whole.
@@ -713,8 +645,6 @@ void TSurfaceVulkan::BlitRectClipped(int ToSurface, int x, int y, int FromSurfac
 		}
 		AddQuad(To.left, To.top, To.right, To.bottom, Left_u, Right_u, Top_v, Bottom_v, 0xffffffff, 0xffffffff,
 			0xffffffff, 0xffffffff);
-		Shared.BlitCount++;
-		Shared.BlitPixels += FromRect.height * FromRect.width;
 	}
 }
 
@@ -734,7 +664,6 @@ void TSurfaceVulkan::InitSurfaces()
 	CurrentTarget = -1;
 	for (int i = 0; i < NUMBER_OF_SURFACES_VULKAN; i++) {
 		Image[i] = -1;
-		SurfaceCreated[i] = 0;
 		SurfaceKeys[i] = 0;
 	}
 	Rect[TEMP_SURFACE] = SizeRect(640, 480);
@@ -887,12 +816,10 @@ void TSurfaceVulkan::InitDisplay(int VMode, TFullscreenMode *GMode)
 	ViewMode = VMode;
 }
 
-// CreateSurfaces: the device for ViewMode and every surface, in surfaceDX9.cpp's order (SurfaceCreated
-// and NumberOfSurfaces count them the same way). PROGRAM_ERRORs: 8 below 16 bits per pixel on the
+// CreateSurfaces: the device for ViewMode and every surface, in surfaceDX9.cpp's order. PROGRAM_ERRORs: 8 below 16 bits per pixel on the
 // desktop, 12 without a Vulkan device.
 void TSurfaceVulkan::CreateSurfaces()
 {
-	Shared.NumberOfSurfaces = 0;
 	// surfaceDX9.cpp: DirectDraw's GetDisplayMode, the desktop's depth (0 before InitSurfaces). Since issue #138 the
 	// platform's IWindow::DesktopMode (platform/Window.h; SDL3's SDL_GetCurrentDisplayMode since issue #152).
 	patella::platform::TDisplayMode Desktop;
@@ -911,10 +838,8 @@ void TSurfaceVulkan::CreateSurfaces()
 		Mode.Depth = Depth;
 		// Issue #145: headless, the display's mode stays the desktop's (the change counts as made).
 		if (!patella::platform::Platform().Window.Headless()) {
-			if (!patella::platform::Platform().Window.SetFullscreenMode(hWindow, &Mode)) {
-				Shared.InitStep = 1;
+			if (!patella::platform::Platform().Window.SetFullscreenMode(hWindow, &Mode))
 				throw TProgramError{PROGRAM_ERROR::SURFACE};
-			}
 			DisplayModeSet = true;
 		}
 	}
@@ -946,30 +871,22 @@ void TSurfaceVulkan::CreateSurfaces()
 		Renderer->Fill(WhiteTexture, 0, 0, 1, 1, 0xffffffffu);
 
 		Image[PRIMARY_SURFACE] = Renderer->CreateImage(Rect[TEMP_SURFACE].right, Rect[TEMP_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		Renderer->Fill(Image[PRIMARY_SURFACE], 0, 0, Rect[TEMP_SURFACE].right, Rect[TEMP_SURFACE].bottom, 0xffff0000u);
 
 		ScreenTexture = Renderer->CreateImage(106, 106);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 
 		Image[TEMP_SURFACE] = Renderer->CreateImage(Rect[TEMP_SURFACE].right, Rect[TEMP_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		Image[STRETCH_SURFACE] = Renderer->CreateImage(Rect[STRETCH_SURFACE].right, Rect[STRETCH_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		Image[CACHE_SURFACE] = Renderer->CreateImage(Rect[CACHE_SURFACE].right, Rect[CACHE_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		Image[AUTOMAP_SURFACE] = Renderer->CreateImage(Rect[AUTOMAP_SURFACE].right, Rect[AUTOMAP_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		for (int i = 0; i < 16; i++) {
 			const int Surface = SPRITE_SURFACE + i;
 			Image[Surface] = Renderer->CreateImage(Rect[Surface].right, Rect[Surface].bottom);
-			SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 			CacheSurfaces++;
 		}
 	} catch (const TVulkanError &) {
 		Renderer.reset();
 		PresentWindows.Retire();
-		Shared.InitStep = 1;
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
 	// A new device draws into the back buffer and has no texture; the numbers above stay as they were

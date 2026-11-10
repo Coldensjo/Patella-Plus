@@ -54,7 +54,6 @@ bool TSurface::TestEngine()
 TSurface::TSurface(patella::platform::TSurfaceShared &Shared) : Shared(Shared)
 {
 	NumberOfModes = 0;
-	Data3C = 0;
 	CacheSurfaces = 0;
 	Flag26 = false;
 }
@@ -71,29 +70,6 @@ TSurface::~TSurface() = default;
 uint8 TSurface::GetAvailableEngines() // NOLINT(readability-make-member-function-const): the golden corpus's table takes it as a pointer to this non-const member
 {
 	return Shared.AvailableEngines;
-}
-
-void TSurface::SetSurfaceRect([[maybe_unused]] int Surface, [[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Width, [[maybe_unused]] int Height)
-{
-}
-
-// SelectSurface and SetTextureFilter share this copy (identical code).
-// Only SurfaceGL.cpp overrides them.
-void TSurface::SelectSurface([[maybe_unused]] int Surface)
-{
-}
-
-void TSurface::SetTextureFilter([[maybe_unused]] int Filter)
-{
-}
-
-// Only SurfaceGL.cpp overrides it.
-void TSurface::AddDirtyRect([[maybe_unused]] TRect Rect)
-{
-}
-
-void TSurface::AttachWindow()
-{
 }
 
 // The x64 client (issue #20): the Vulkan engine is the only engine, so curEngine is 2 whatever Tibia.cfg
