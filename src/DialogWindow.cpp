@@ -53,7 +53,7 @@ TCallback NoCallback(nullptr, 0);
 // 0x4854b0. A column is as wide as the side bar.
 int TDialogWindow::getMinimumWidth()
 {
-	return SkinProperties().Data184;
+	return SkinProperties().SideBarWidth;
 }
 
 // 0x4854c0. Also inlined into TSubWindow's constructor.
@@ -100,7 +100,7 @@ TSubWindow::~TSubWindow()
 void TSubWindow::OnClose()
 {
 	try {
-		if (Identifier == 6 || Identifier == 7 || Identifier == 9)
+		if (Identifier == SKILLS_WINDOW || Identifier == BATTLE_WINDOW || Identifier == BUDDYLIST_WINDOW)
 			SetContentWindowSize(Identifier, Body->Height);
 		if (UpButton != nullptr && !IsChild(UpButton))
 			UpButton->Close();
@@ -128,7 +128,7 @@ void TSubWindow::OnClose()
 // 0x485670. ContentWindows.cpp adds the body's height to get the window's.
 int TSubWindow::GetFrameHeight()
 {
-	return Skins()[133].height + Skins()[132].height;
+	return Skins()[SKIN_SUBWINDOW_EDGE_BOTTOM].height + Skins()[SKIN_SUBWINDOW_EDGE_TOP].height;
 }
 
 // 0x485690. A minimized window is its frame only.
@@ -187,14 +187,14 @@ int TDialogWindow::getMinimumHeight()
 }
 
 // 0x485b10, line 109. The dragged child's place is a rectangle of
-// SkinProperties.Data188; the child itself is drawn last, over the others.
+// SkinProperties.DraggedWindowPlaceColor; the child itself is drawn last, over the others.
 void TDialogWindow::Draw(int Surface, int x, int y)
 {
 	int Position = 0;
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext()) {
 		if (Child == Dragged) {
 			GetSurface()->FillRectangle(Surface, TRect(x, Position + y, Width, Dragged->Height),
-				SkinProperties().Data188);
+				SkinProperties().DraggedWindowPlaceColor);
 		} else {
 			Child->Draw(Surface, Child->OffsetX + x, Child->OffsetY + y);
 		}
@@ -218,41 +218,41 @@ void TDialogWindow::Arrange()
 		DrawingList[i] = TDrawing();
 	if (Free != 0) {
 		const int Top = Height - Free;
-		int h = Free < Skins()[26].height ? Free : Skins()[26].height;
+		int h = Free < Skins()[SKIN_BORDER_CORNER_TOPLEFT].height ? Free : Skins()[SKIN_BORDER_CORNER_TOPLEFT].height;
 		if (h > 0)
-			DrawingList[0] = TDrawing(26, 0, Top, Skins()[26].width, h, 0, 0);
-		h = Free < Skins()[32].height ? Free : Skins()[32].height;
+			DrawingList[0] = TDrawing(SKIN_BORDER_CORNER_TOPLEFT, 0, Top, Skins()[SKIN_BORDER_CORNER_TOPLEFT].width, h, 0, 0);
+		h = Free < Skins()[SKIN_BORDER_EDGE_TOP].height ? Free : Skins()[SKIN_BORDER_EDGE_TOP].height;
 		if (h > 0)
-			DrawingList[1] = TDrawing(32, Skins()[26].width, Top, Width - Skins()[27].width - Skins()[26].width, h, 0, 0);
-		h = Free < Skins()[27].height ? Free : Skins()[27].height;
+			DrawingList[1] = TDrawing(SKIN_BORDER_EDGE_TOP, Skins()[SKIN_BORDER_CORNER_TOPLEFT].width, Top, Width - Skins()[SKIN_BORDER_CORNER_TOPRIGHT].width - Skins()[SKIN_BORDER_CORNER_TOPLEFT].width, h, 0, 0);
+		h = Free < Skins()[SKIN_BORDER_CORNER_TOPRIGHT].height ? Free : Skins()[SKIN_BORDER_CORNER_TOPRIGHT].height;
 		if (h > 0)
-			DrawingList[2] = TDrawing(27, Width - Skins()[27].width, Top, Skins()[27].width, h, 0, 0);
-		h = Free - Skins()[26].height;
-		if (h >= Skins()[28].height)
-			h = Skins()[28].height;
+			DrawingList[2] = TDrawing(SKIN_BORDER_CORNER_TOPRIGHT, Width - Skins()[SKIN_BORDER_CORNER_TOPRIGHT].width, Top, Skins()[SKIN_BORDER_CORNER_TOPRIGHT].width, h, 0, 0);
+		h = Free - Skins()[SKIN_BORDER_CORNER_TOPLEFT].height;
+		if (h >= Skins()[SKIN_BORDER_CORNER_BOTTOMLEFT].height)
+			h = Skins()[SKIN_BORDER_CORNER_BOTTOMLEFT].height;
 		if (h > 0)
-			DrawingList[3] = TDrawing(28, 0, Height - h, Skins()[26].width, h, 0, 0);
-		h = Free - Skins()[32].height;
-		if (h >= Skins()[33].height)
-			h = Skins()[33].height;
+			DrawingList[3] = TDrawing(SKIN_BORDER_CORNER_BOTTOMLEFT, 0, Height - h, Skins()[SKIN_BORDER_CORNER_TOPLEFT].width, h, 0, 0);
+		h = Free - Skins()[SKIN_BORDER_EDGE_TOP].height;
+		if (h >= Skins()[SKIN_BORDER_EDGE_BOTTOM].height)
+			h = Skins()[SKIN_BORDER_EDGE_BOTTOM].height;
 		if (h > 0)
-			DrawingList[4] = TDrawing(33, Skins()[28].width, Height - h, Width - Skins()[29].width - Skins()[28].width, h,
+			DrawingList[4] = TDrawing(SKIN_BORDER_EDGE_BOTTOM, Skins()[SKIN_BORDER_CORNER_BOTTOMLEFT].width, Height - h, Width - Skins()[SKIN_BORDER_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_BORDER_CORNER_BOTTOMLEFT].width, h,
 				0, 0);
-		h = Free - Skins()[27].height;
-		if (h >= Skins()[29].height)
-			h = Skins()[29].height;
+		h = Free - Skins()[SKIN_BORDER_CORNER_TOPRIGHT].height;
+		if (h >= Skins()[SKIN_BORDER_CORNER_BOTTOMRIGHT].height)
+			h = Skins()[SKIN_BORDER_CORNER_BOTTOMRIGHT].height;
 		if (h > 0)
-			DrawingList[5] = TDrawing(29, Width - Skins()[29].width, Height - h, Skins()[29].width, h, 0, 0);
-		h = Free - Skins()[28].height - Skins()[26].height;
+			DrawingList[5] = TDrawing(SKIN_BORDER_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_BORDER_CORNER_BOTTOMRIGHT].width, Height - h, Skins()[SKIN_BORDER_CORNER_BOTTOMRIGHT].width, h, 0, 0);
+		h = Free - Skins()[SKIN_BORDER_CORNER_BOTTOMLEFT].height - Skins()[SKIN_BORDER_CORNER_TOPLEFT].height;
 		if (h > 0)
-			DrawingList[6] = TDrawing(30, 0, Skins()[26].height + Top, Skins()[30].width, h, 0, 0);
-		h = Free - Skins()[33].height - Skins()[32].height;
+			DrawingList[6] = TDrawing(SKIN_BORDER_EDGE_LEFT, 0, Skins()[SKIN_BORDER_CORNER_TOPLEFT].height + Top, Skins()[SKIN_BORDER_EDGE_LEFT].width, h, 0, 0);
+		h = Free - Skins()[SKIN_BORDER_EDGE_BOTTOM].height - Skins()[SKIN_BORDER_EDGE_TOP].height;
 		if (h > 0)
-			DrawingList[7] = TDrawing(7, Skins()[30].width, Skins()[32].height + Top,
-				Width - Skins()[31].width - Skins()[30].width, h, 0, Top % Skins()[7].height);
-		h = Free - Skins()[29].height - Skins()[27].height;
+			DrawingList[7] = TDrawing(SKIN_BACKGROUND, Skins()[SKIN_BORDER_EDGE_LEFT].width, Skins()[SKIN_BORDER_EDGE_TOP].height + Top,
+				Width - Skins()[SKIN_BORDER_EDGE_RIGHT].width - Skins()[SKIN_BORDER_EDGE_LEFT].width, h, 0, Top % Skins()[SKIN_BACKGROUND].height);
+		h = Free - Skins()[SKIN_BORDER_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_BORDER_CORNER_TOPRIGHT].height;
 		if (h > 0)
-			DrawingList[8] = TDrawing(31, Width - Skins()[31].width, Skins()[27].height + Top, Skins()[135].width, h, 0, 0);
+			DrawingList[8] = TDrawing(SKIN_BORDER_EDGE_RIGHT, Width - Skins()[SKIN_BORDER_EDGE_RIGHT].width, Skins()[SKIN_BORDER_CORNER_TOPRIGHT].height + Top, Skins()[SKIN_SUBWINDOW_EDGE_RIGHT].width, h, 0, 0);
 	}
 }
 
@@ -523,7 +523,7 @@ void TContentWindow::Draw(int Surface, int x, int y)
 	if (Background) {
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
-		DrawSkin(Surface, x, y, Width, Height, 7, 0, BackgroundY);
+		DrawSkin(Surface, x, y, Width, Height, SKIN_BACKGROUND, 0, BackgroundY);
 	}
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
 	TComponent::Draw(Surface, x, y);
@@ -535,7 +535,7 @@ void TContentWindow::Draw(int Surface, int x, int y)
 void TContentWindow::Arrange()
 {
 	TWindow::Arrange();
-	BackgroundY = OffsetY % Skins()[7].height;
+	BackgroundY = OffsetY % Skins()[SKIN_BACKGROUND].height;
 }
 
 // 0x487740, line 714. The catch blocks name no parameter.
@@ -621,7 +621,7 @@ TSubWindow::TSubWindow(int _Identifier, TSubWindowBody *_Body, bool _Resizable, 
 }
 
 // 0x4881f0, line 861. Not lower than the minimum height; a minimized window
-// keeps its frame height (Style194.Data4C). The column is told whether the
+// keeps its frame height (SubWindow.MinimizedHeight). The column is told whether the
 // window grew (2), shrank (4) or kept its height (32), then fits its
 // children into its height (8).
 void TSubWindow::SetSize(int Width, int Height)
@@ -629,7 +629,7 @@ void TSubWindow::SetSize(int Width, int Height)
 	TDialogWindow *Column = static_cast<TDialogWindow *>(GetParent());
 	int Change = 0;
 	if (IsMinimized) {
-		TWindow::SetSize(Width, SkinProperties().Style194.Data4C);
+		TWindow::SetSize(Width, SkinProperties().SubWindow.MinimizedHeight);
 	} else {
 		if (Height > this->Height)
 			Change = 1;
@@ -638,12 +638,12 @@ void TSubWindow::SetSize(int Width, int Height)
 		if (Height < getMinimumHeight())
 			Height = getMinimumHeight();
 		TWindow::SetSize(Width, Height);
-		SetChildArea(Body, SkinProperties().Style194.Data50);
-		FitToChild(Body, SkinProperties().Style194.Data50, false);
+		SetChildArea(Body, SkinProperties().SubWindow.Body);
+		FitToChild(Body, SkinProperties().SubWindow.Body, false);
 		if (Resizer1 != nullptr)
-			SetChildArea(Resizer1, SkinProperties().Style194.Data60);
+			SetChildArea(Resizer1, SkinProperties().SubWindow.Resizer1);
 		if (Resizer2 != nullptr)
-			SetChildArea(Resizer2, SkinProperties().Style194.Data70);
+			SetChildArea(Resizer2, SkinProperties().SubWindow.Resizer2);
 	}
 	Arrange();
 	if (Column != nullptr) {
@@ -676,18 +676,18 @@ void TSubWindow::Arrange()
 		PATELLA_ASSERT(Body!=nullptr);
 		UpdateContainerUpButton(Body);
 	}
-	DrawingList[0] = TDrawing(128, 0, 0, 0, 0, 0, 0);
-	DrawingList[1] = TDrawing(132, Skins()[128].width, 0, Width - Skins()[129].width - Skins()[128].width,
-		Skins()[132].height, 0, 0);
-	DrawingList[2] = TDrawing(129, Width - Skins()[129].width, 0, 0, 0, 0, 0);
-	DrawingList[3] = TDrawing(134, 0, Skins()[128].height, Skins()[134].width, Height - Skins()[130].height - Skins()[128].height,
+	DrawingList[0] = TDrawing(SKIN_SUBWINDOW_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_SUBWINDOW_EDGE_TOP, Skins()[SKIN_SUBWINDOW_CORNER_TOPLEFT].width, 0, Width - Skins()[SKIN_SUBWINDOW_CORNER_TOPRIGHT].width - Skins()[SKIN_SUBWINDOW_CORNER_TOPLEFT].width,
+		Skins()[SKIN_SUBWINDOW_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_SUBWINDOW_CORNER_TOPRIGHT, Width - Skins()[SKIN_SUBWINDOW_CORNER_TOPRIGHT].width, 0, 0, 0, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_SUBWINDOW_EDGE_LEFT, 0, Skins()[SKIN_SUBWINDOW_CORNER_TOPLEFT].height, Skins()[SKIN_SUBWINDOW_EDGE_LEFT].width, Height - Skins()[SKIN_SUBWINDOW_CORNER_BOTTOMLEFT].height - Skins()[SKIN_SUBWINDOW_CORNER_TOPLEFT].height,
 		0, 0);
-	DrawingList[4] = TDrawing(135, Width - Skins()[135].width, Skins()[132].height, Skins()[135].width,
-		Height - Skins()[131].height - Skins()[129].height, 0, 0);
-	DrawingList[5] = TDrawing(130, 0, Height - Skins()[130].height, 0, 0, 0, 0);
-	DrawingList[6] = TDrawing(133, Skins()[130].width, Height - Skins()[133].height, Width - Skins()[131].width - Skins()[130].width,
-		Skins()[133].height, 0, 0);
-	DrawingList[7] = TDrawing(131, Width - Skins()[131].width, Height - Skins()[131].height, 0, 0, 0, 0);
+	DrawingList[4] = TDrawing(SKIN_SUBWINDOW_EDGE_RIGHT, Width - Skins()[SKIN_SUBWINDOW_EDGE_RIGHT].width, Skins()[SKIN_SUBWINDOW_EDGE_TOP].height, Skins()[SKIN_SUBWINDOW_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_SUBWINDOW_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_SUBWINDOW_CORNER_TOPRIGHT].height, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_SUBWINDOW_CORNER_BOTTOMLEFT, 0, Height - Skins()[SKIN_SUBWINDOW_CORNER_BOTTOMLEFT].height, 0, 0, 0, 0);
+	DrawingList[6] = TDrawing(SKIN_SUBWINDOW_EDGE_BOTTOM, Skins()[SKIN_SUBWINDOW_CORNER_BOTTOMLEFT].width, Height - Skins()[SKIN_SUBWINDOW_EDGE_BOTTOM].height, Width - Skins()[SKIN_SUBWINDOW_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_SUBWINDOW_CORNER_BOTTOMLEFT].width,
+		Skins()[SKIN_SUBWINDOW_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[7] = TDrawing(SKIN_SUBWINDOW_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_SUBWINDOW_CORNER_BOTTOMRIGHT].width, Height - Skins()[SKIN_SUBWINDOW_CORNER_BOTTOMRIGHT].height, 0, 0, 0, 0);
 }
 
 // 0x4889c0, line 950. The resizers get the press first, even where they
@@ -757,8 +757,8 @@ void TSubWindow::Minimize()
 	if (Body != nullptr)
 		RemoveChild(Body);
 	if (MinimizeButton != nullptr)
-		MinimizeButton->SetSkins(140, 141);
-	SetSize(Width, SkinProperties().Style194.Data4C);
+		MinimizeButton->SetSkins(SKIN_MAXIMISE_BUTTON_UP, SKIN_MAXIMISE_BUTTON_DOWN);
+	SetSize(Width, SkinProperties().SubWindow.MinimizedHeight);
 }
 
 // 0x489500, lines 1027-1037. The assertion comes before the try block.
@@ -774,7 +774,7 @@ void TSubWindow::Maximize()
 	if (Resizer2 != nullptr)
 		AppendChild(Resizer2);
 	if (MinimizeButton != nullptr)
-		MinimizeButton->SetSkins(138, 139);
+		MinimizeButton->SetSkins(SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN);
 	SetSize(Width, RestoreHeight);
 }
 
@@ -804,7 +804,7 @@ void TSubWindow::SetUpButton(TComponent *Button)
 	}
 	UpButton = Button;
 	InsertChild(Button);
-	SetChildPosition(UpButton, SkinProperties().Style194.Data20.x, SkinProperties().Style194.Data20.y);
+	SetChildPosition(UpButton, SkinProperties().SubWindow.UpButton.x, SkinProperties().SubWindow.UpButton.y);
 }
 
 // 0x489cf0, line 1088
@@ -818,7 +818,7 @@ void TSubWindow::SetCloseButton(TComponent *Button)
 	}
 	CloseButton = Button;
 	InsertChild(Button);
-	SetChildPosition(CloseButton, SkinProperties().Style194.Data10.x, SkinProperties().Style194.Data10.y);
+	SetChildPosition(CloseButton, SkinProperties().SubWindow.CloseButton.x, SkinProperties().SubWindow.CloseButton.y);
 }
 
 // 0x489ed0, line 1101
@@ -832,7 +832,7 @@ void TSubWindow::SetMinimizeButton(TSkinButton *Button)
 	}
 	MinimizeButton = Button;
 	InsertChild(Button);
-	SetChildPosition(MinimizeButton, SkinProperties().Style194.Data18.x, SkinProperties().Style194.Data18.y);
+	SetChildPosition(MinimizeButton, SkinProperties().SubWindow.MinimizeButton.x, SkinProperties().SubWindow.MinimizeButton.y);
 }
 
 // 0x48a0b0, line 1114
@@ -846,7 +846,7 @@ void TSubWindow::SetIcon(TComponent *_Icon)
 	}
 	Icon = _Icon;
 	InsertChild(_Icon);
-	SetChildArea(Icon, SkinProperties().Style194.Data00);
+	SetChildArea(Icon, SkinProperties().SubWindow.Icon);
 }
 
 // 0x48a2a0, line 1127
@@ -860,6 +860,6 @@ void TSubWindow::SetTitle(TComponent *_Title)
 	}
 	Title = _Title;
 	InsertChild(_Title);
-	SetChildArea(Title, SkinProperties().Style194.Data28);
+	SetChildArea(Title, SkinProperties().SubWindow.Title);
 }
 // NOLINTEND(cppcoreguidelines-owning-memory)

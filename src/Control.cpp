@@ -94,7 +94,7 @@ TCallback NoCallback(nullptr, 0);
 // help bubble (9) follows the main window.
 void patella::TGUI::Resize(int Width, int Height)
 {
-	SetMouseCursor(1);
+	SetMouseCursor(CURSOR_ARROW);
 	if (GetViewMode() == 2) {
 		const TFullscreenMode *Mode = GetFullscreenMode();
 		Width = Mode->Width;
@@ -105,7 +105,7 @@ void patella::TGUI::Resize(int Width, int Height)
 		if (GetActionState() == ACTIONSTATE_CONTEXT_MENU) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
-			SetActionState(0);
+			SetActionState(ACTIONSTATE_NONE);
 			MainWindow->SetConsoleActive(true);
 		}
 		if (ModalWindow != nullptr && GetActionState() == ACTIONSTATE_DIALOG)
@@ -128,7 +128,7 @@ void patella::TGUI::CheckSurface(bool Force)
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
 	if (!Success)
-		ChangeEngine(0);
+		ChangeEngine(ENGINE_DIRECTX5);
 	if (GetSurface()->SurfaceRecreated(1))
 		ResetVideoCache();
 }
@@ -224,13 +224,13 @@ void patella::TGUI::Redraw(bool Force)
 	if (ShowFPS) {
 		TFixedString<4> Engine; // _snprintf(Engine, 4, "DX5") until issue #64: three characters and the NUL
 		switch (patella::bridge::GraphicsEngine().curEngine) {
-		case 0:
+		case ENGINE_DIRECTX5:
 			Engine.Assign("DX5");
 			break;
-		case 1:
+		case ENGINE_OPENGL:
 			Engine.Assign("OGL");
 			break;
-		case 2:
+		case ENGINE_DIRECTX9:
 			Engine.Assign("DX9");
 			break;
 		default:
@@ -243,7 +243,7 @@ void patella::TGUI::Redraw(bool Force)
 		// than 10 digits fills the 20 characters (no NUL), which the type would cut (issue #64).
 		MsvcSnprintf(Text, 20, "%s %.02f fps", Engine.Chars, FPS);
 		const TRGBColor Color = {200, 200, 200};
-		PrintText(1, 4, 4, 2, Color, Text, 0);
+		PrintText(1, 4, 4, FONT_BORDERED, Color, Text, 0);
 	}
 	if (!GetWindowsMousepointer()) {
 		const int Cursor = GetMouseCursor();
@@ -251,27 +251,27 @@ void patella::TGUI::Redraw(bool Force)
 			int x = GetMouseX();
 			int y = GetMouseY();
 			switch (Cursor) {
-			case 1:
+			case CURSOR_ARROW:
 				x -= SkinProperties().CursorHotspot1.x;
 				y -= SkinProperties().CursorHotspot1.y;
 				break;
-			case 2:
+			case CURSOR_SIZENS:
 				x -= SkinProperties().CursorHotspot2.x;
 				y -= SkinProperties().CursorHotspot2.y;
 				break;
-			case 3:
+			case CURSOR_WAIT:
 				x -= SkinProperties().CursorHotspot3.x;
 				y -= SkinProperties().CursorHotspot3.y;
 				break;
-			case 4:
+			case CURSOR_CROSSHAIR:
 				x -= SkinProperties().CursorHotspot4.x;
 				y -= SkinProperties().CursorHotspot4.y;
 				break;
-			case 5:
+			case CURSOR_DRAG:
 				x -= SkinProperties().CursorHotspot5.x;
 				y -= SkinProperties().CursorHotspot5.y;
 				break;
-			case 6:
+			case CURSOR_MAGNIFIER:
 				x -= SkinProperties().CursorHotspot6.x;
 				y -= SkinProperties().CursorHotspot6.y;
 				break;
@@ -291,7 +291,7 @@ PATELLA_NOINLINE void patella::TGUI::EnterGame() const
 {
 	MainWindow->ChangeMode(true);
 	if (ModalWindow == nullptr) {
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		MainWindow->SetConsoleActive(true);
 	}
 	ClearMap();
@@ -311,7 +311,7 @@ void patella::TGUI::LeaveGame()
 		ModalWindow = nullptr;
 		MainWindow->SetConsoleActive(true);
 	}
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 	SavePreferences();
 	if (!Network.Reconnect)
 		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
@@ -322,9 +322,9 @@ void patella::TGUI::LeaveGame()
 void patella::TGUI::MouseMove(int x, int y)
 {
 	SetMousePosition(x, y);
-	SetMouseCursor(1);
+	SetMouseCursor(CURSOR_ARROW);
 	switch (GetActionState()) {
-	case 1:
+	case ACTIONSTATE_LEFT_BUTTON_DOWN:
 		CheckDragStart(x, y);
 		[[fallthrough]];
 	default:
@@ -346,7 +346,7 @@ void patella::TGUI::MouseMove(int x, int y)
 		if (GetHelpHandleChanged()) {
 			DeleteComponent(Bubble);
 			Bubble = nullptr;
-			if (GetHelpHandle() != 0)
+			if (GetHelpHandle() != HELP_NONE)
 				Bubble = new THelpBubble(GetCurrentHelpText());
 		}
 		if (Bubble != nullptr)
@@ -363,10 +363,10 @@ void patella::TGUI::MouseMove(int x, int y)
 void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		SetDragStart(x, y);
 		MainWindow->LeftButtonDown(x, y, Flags);
-		SetActionState(1);
+		SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		if (GetClassicControl())
@@ -390,7 +390,7 @@ void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		if (MainWindow->GetCapture() != nullptr) {
 			MainWindow->LeftButtonUp(x, y, Flags);
 			MainWindow->StopDragging();
@@ -401,20 +401,20 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 		break;
 	case ACTIONSTATE_RIGHT_RELEASED:
 		MainWindow->LeftButtonUp(x, y, BOTH_BUTTONS_RELEASED);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
-	case 1:
+	case ACTIONSTATE_LEFT_BUTTON_DOWN:
 	case ACTIONSTATE_DRAGGING:
 	case ACTIONSTATE_USE_WITH:
 	case ACTIONSTATE_TRADE_WITH:
 		MainWindow->LeftButtonUp(x, y, Flags);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->LeftButtonUp(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == 0 || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
+		if (GetActionState() == ACTIONSTATE_NONE || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -423,7 +423,7 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 	case ACTIONSTATE_HELP:
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		break;
@@ -437,10 +437,10 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		SetDragStart(x, y);
 		MainWindow->LeftButtonDoubleClick(x, y, Flags);
-		SetActionState(1);
+		SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		if (GetClassicControl())
@@ -450,7 +450,7 @@ void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->LeftButtonDoubleClick(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == 0 || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
+		if (GetActionState() == ACTIONSTATE_NONE || GetActionState() == ACTIONSTATE_USE_WITH || GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -469,10 +469,10 @@ void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 void patella::TGUI::RightButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		SetActionState(ACTIONSTATE_RIGHT_BUTTON_DOWN);
 		break;
-	case 1:
+	case ACTIONSTATE_LEFT_BUTTON_DOWN:
 		if (GetClassicControl())
 			SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
 		break;
@@ -488,26 +488,26 @@ void patella::TGUI::RightButtonDown([[maybe_unused]] int x, [[maybe_unused]] int
 void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
-	case 0:
+	case ACTIONSTATE_NONE:
 		if (MainWindow->GetCapture() != nullptr)
 			MainWindow->StopDragging();
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
 		MainWindow->RightButtonUp(x, y, Flags);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_BOTH_BUTTONS_DOWN:
 		SetActionState(ACTIONSTATE_RIGHT_RELEASED);
 		break;
 	case ACTIONSTATE_LEFT_RELEASED:
 		MainWindow->LeftButtonUp(x, y, BOTH_BUTTONS_RELEASED);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_DIALOG:
 	case ACTIONSTATE_CONTEXT_MENU:
 		PATELLA_ASSERT(ModalWindow!=nullptr);
 		ModalWindow->RightButtonUp(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY, Flags);
-		if (GetActionState() == 0) {
+		if (GetActionState() == ACTIONSTATE_NONE) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -516,11 +516,11 @@ void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 	case ACTIONSTATE_HELP:
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case ACTIONSTATE_USE_WITH:
 	case ACTIONSTATE_TRADE_WITH:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		break;
@@ -551,15 +551,15 @@ void patella::TGUI::MouseWheel(int x, int y, int Direction)
 // 0x447e60, line 1086. Key 0x907 switches the frame rate display.
 void patella::TGUI::KeyPress(int Key)
 {
-	if (Key == 0x907) {
+	if (Key == (KEY_ALT | KEY_F8)) {
 		ShowFPS = !ShowFPS;
 		return;
 	}
 	if (GetActionState() == ACTIONSTATE_HELP)
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	if (ModalWindow != nullptr) {
 		ModalWindow->KeyPress(Key);
-		if (GetActionState() == 0) {
+		if (GetActionState() == ACTIONSTATE_NONE) {
 			DeleteComponent(ModalWindow);
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
@@ -579,7 +579,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 bool patella::TGUI::CloseRequest() const
 {
-	if (GetConnectionState() == 8) {
+	if (GetConnectionState() == CONNECTION_IN_GAME) {
 		if (ModalWindow == nullptr) {
 			std::intptr_t *Data = new std::intptr_t[4];
 			Data[0] = reinterpret_cast<std::intptr_t>("Warning");
@@ -605,7 +605,7 @@ void patella::TGUI::HandleEvents()
 // 0x448290, line 1155. Callback for InitStatus.
 void patella::TGUI::LinkCopyWarning()
 {
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 	AddMessage(MESSAGE_LINK_COPY_WARNING, reinterpret_cast<std::intptr_t>("Link Copy Warning"), 0);
 }
 
@@ -613,16 +613,16 @@ void patella::TGUI::LinkCopyWarning()
 // login packet to the login server (state 2) or the game server (state 5).
 void patella::TGUI::ConnectionEstablished()
 {
-	if (GetConnectionState() == 2) {
-		SetConnectionState(3);
+	if (GetConnectionState() == CONNECTION_CONNECTING_LOGIN_SERVER) {
+		SetConnectionState(CONNECTION_LOGIN_SENT);
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
 		const char *Password = GetAccountPassword();
 		SendLogin(GetAccountNumber(), Password);
 		return;
 	}
-	if (GetConnectionState() == 5) {
+	if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER) {
 		const int OldConnectionState = GetConnectionState();
-		SetConnectionState(6);
+		SetConnectionState(CONNECTION_GAME_LOGIN_SENT);
 		Communication.OutfitRequested = false;
 		// The original's order: In's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
 		const int AccountCharacters = GetAccountCharacters();
@@ -633,9 +633,9 @@ void patella::TGUI::ConnectionEstablished()
 		SendGameLogin(GetAccountNumber(), Name, Password);
 		return;
 	}
-	SetConnectionState(0);
+	SetConnectionState(CONNECTION_OFFLINE);
 	Disconnect(true);
-	SetActionState(0);
+	SetActionState(ACTIONSTATE_NONE);
 }
 
 // 0x44a900, lines 1208-1280. The receive handler for InitNetwork. The
@@ -649,110 +649,110 @@ void patella::TGUI::ReceivePackets()
 		Communication.LastPacketIndex++;
 		if (Communication.LastPacketIndex >= 10)
 			Communication.LastPacketIndex -= 10;
-		if (GetConnectionState() == 3)
-			SetConnectionState(4);
-		if (GetConnectionState() == 4) {
+		if (GetConnectionState() == CONNECTION_LOGIN_SENT)
+			SetConnectionState(CONNECTION_LOGIN_ANSWERED);
+		if (GetConnectionState() == CONNECTION_LOGIN_ANSWERED) {
 			switch (Type) {
-			case 0x0a: ReceiveLoginError(); break;
-			case 0x0b: ReceiveLoginMessage(); break;
-			case 0x14:
+			case LOGIN_RECEIVE_ERROR: ReceiveLoginError(); break;
+			case LOGIN_RECEIVE_MESSAGE: ReceiveLoginMessage(); break;
+			case LOGIN_RECEIVE_MESSAGE_OF_THE_DAY:
 				ReceiveMessageOfTheDay();
 				break;
 			// The patch packets (Tibia.exe: ReceivePatch, ReceiveWholeFile, ReceivePatchBlock, each followed by
 			// HandleEvents) end the login since Patella-Modern issue #75 (decision D9).
-			case 0x1e:
-			case 0x1f:
-			case 0x20: ReceiveUpdateRequest(); break;
-			case 0x28: ReceiveLoginServerOverloaded(); break;
-			case 0x64: ReceiveCharacterList(); break;
+			case LOGIN_RECEIVE_PATCH:
+			case LOGIN_RECEIVE_WHOLE_FILE:
+			case LOGIN_RECEIVE_PATCH_BLOCK: ReceiveUpdateRequest(); break;
+			case LOGIN_RECEIVE_SERVER_OVERLOADED: ReceiveLoginServerOverloaded(); break;
+			case LOGIN_RECEIVE_CHARACTER_LIST: ReceiveCharacterList(); break;
 			default:
 				TERROR1("unknown packet type during login", Type);
 			}
 		} else {
-			if (GetConnectionState() == 6)
-				SetConnectionState(7);
+			if (GetConnectionState() == CONNECTION_GAME_LOGIN_SENT)
+				SetConnectionState(CONNECTION_GAME_LOGIN_ANSWERED);
 			switch (Type) {
-			case 0x0a:
-				SetConnectionState(8);
+			case GAME_RECEIVE_LOGIN:
+				SetConnectionState(CONNECTION_IN_GAME);
 				EnterGame();
 				ReceiveGameLogin();
-				AddEventHelp(1);
+				AddEventHelp(HINT_FIRST_LOGIN);
 				SendFightModes();
 				break;
-			case 0x0b: ReceiveGamemasterActions(); break;
-			case 0x14: ReceiveGameError(); break;
-			case 0x15: ReceiveGameMessage(); break;
-			case 0x16: ReceiveLoginWait(); break;
-			case 0x1e: ReceivePing(); break;
-			case 0x64: ReceiveMap(); break;
-			case 0x65: ReceiveMapNorth(); break;
-			case 0x66: ReceiveMapEast(); break;
-			case 0x67: ReceiveMapSouth(); break;
-			case 0x68: ReceiveMapWest(); break;
-			case 0x69: ReceiveField(); break;
-			case 0x6a: ReceiveAddObject(); break;
-			case 0x6b: ReceiveChangeObject(); break;
-			case 0x6c: ReceiveDeleteObject(); break;
-			case 0x6d: ReceiveMoveCreature(); break;
-			case 0x6e: {
+			case GAME_RECEIVE_GAMEMASTER_ACTIONS: ReceiveGamemasterActions(); break;
+			case GAME_RECEIVE_ERROR: ReceiveGameError(); break;
+			case GAME_RECEIVE_MESSAGE: ReceiveGameMessage(); break;
+			case GAME_RECEIVE_LOGIN_WAIT: ReceiveLoginWait(); break;
+			case GAME_RECEIVE_PING: ReceivePing(); break;
+			case GAME_RECEIVE_MAP: ReceiveMap(); break;
+			case GAME_RECEIVE_MAP_NORTH: ReceiveMapNorth(); break;
+			case GAME_RECEIVE_MAP_EAST: ReceiveMapEast(); break;
+			case GAME_RECEIVE_MAP_SOUTH: ReceiveMapSouth(); break;
+			case GAME_RECEIVE_MAP_WEST: ReceiveMapWest(); break;
+			case GAME_RECEIVE_FIELD: ReceiveField(); break;
+			case GAME_RECEIVE_ADD_OBJECT: ReceiveAddObject(); break;
+			case GAME_RECEIVE_CHANGE_OBJECT: ReceiveChangeObject(); break;
+			case GAME_RECEIVE_DELETE_OBJECT: ReceiveDeleteObject(); break;
+			case GAME_RECEIVE_MOVE_CREATURE: ReceiveMoveCreature(); break;
+			case GAME_RECEIVE_OPEN_CONTAINER: {
 				int Container;
 				ReceiveOpenContainer(Container);
 				MainWindow->OpenContainer(Container);
 				break;
 			}
-			case 0x6f: {
+			case GAME_RECEIVE_CLOSE_CONTAINER: {
 				int Container;
 				ReceiveCloseContainer(Container);
 				MainWindow->CloseContainer(Container);
 				break;
 			}
-			case 0x70: ReceiveContainerAddObject(); break;
-			case 0x71: ReceiveContainerChangeObject(); break;
-			case 0x72: ReceiveContainerDeleteObject(); break;
-			case 0x78: ReceiveInventoryObject(); break;
-			case 0x79:
+			case GAME_RECEIVE_CONTAINER_ADD_OBJECT: ReceiveContainerAddObject(); break;
+			case GAME_RECEIVE_CONTAINER_CHANGE_OBJECT: ReceiveContainerChangeObject(); break;
+			case GAME_RECEIVE_CONTAINER_DELETE_OBJECT: ReceiveContainerDeleteObject(); break;
+			case GAME_RECEIVE_INVENTORY_OBJECT: ReceiveInventoryObject(); break;
+			case GAME_RECEIVE_DELETE_INVENTORY_OBJECT:
 				ReceiveDeleteInventoryObject();
 				break;
 				// clang-format off
-			case 0x7d: ReceiveOwnTrade(); MainWindow->OpenTrade(); break;
-			case 0x7e: ReceiveCounterTrade(); MainWindow->UpdateTrade(); break;
-			case 0x7f: ReceiveCloseTrade(); MainWindow->CloseTrade(); break;
+			case GAME_RECEIVE_OWN_TRADE: ReceiveOwnTrade(); MainWindow->OpenTrade(); break;
+			case GAME_RECEIVE_COUNTER_TRADE: ReceiveCounterTrade(); MainWindow->UpdateTrade(); break;
+			case GAME_RECEIVE_CLOSE_TRADE: ReceiveCloseTrade(); MainWindow->CloseTrade(); break;
 			// clang-format on
-			case 0x82: ReceiveWorldLight(); break;
-			case 0x83: ReceiveMagicEffect(); break;
-			case 0x84: ReceiveAnimatedText(); break;
-			case 0x85: ReceiveDistanceEffect(); break;
-			case 0x86: ReceiveCreatureMark(); break;
-			case 0x8c: ReceiveCreatureHealth(); break;
-			case 0x8d: ReceiveCreatureLight(); break;
-			case 0x8e: ReceiveCreatureOutfit(); break;
-			case 0x8f: ReceiveCreatureSpeed(); break;
-			case 0x90: ReceiveCreatureSkull(); break;
-			case 0x91: ReceiveCreatureShield(); break;
-			case 0x96: ReceiveEditText(); break;
-			case 0x97: ReceiveEditHouseText(); break;
-			case 0xa0: ReceivePlayerStats(); break;
-			case 0xa1: ReceivePlayerSkills(); break;
-			case 0xa2: ReceivePlayerIcons(); break;
-			case 0xa3: ReceiveCancelAttack(); break;
-			case 0xaa: ReceiveTalk(); break;
-			case 0xab: ReceiveChannelList(); break;
-			case 0xac: ReceiveOpenChannel(); break;
-			case 0xad: ReceiveOpenPrivateConversation(); break;
-			case 0xae: ReceiveRuleViolationChannel(); break;
-			case 0xaf: ReceiveRemoveRuleViolation(); break;
-			case 0xb0: ReceiveCancelRuleViolation(); break;
-			case 0xb1: ReceiveLockRuleViolation(); break;
-			case 0xb2: ReceiveOwnChannel(); break;
-			case 0xb3: ReceiveCloseChannel(); break;
-			case 0xb4: ReceiveTextMessage(); break;
-			case 0xb5: ReceiveCancelWalk(); break;
-			case 0xbe: ReceiveFloorUp(); break;
-			case 0xbf: ReceiveFloorDown(); break;
-			case 0xc8: ReceiveOutfit(); break;
-			case 0xd2: ReceiveBuddy(); break;
-			case 0xd3: ReceiveBuddyLogin(); break;
-			case 0xd4: ReceiveBuddyLogout(); break;
+			case GAME_RECEIVE_WORLD_LIGHT: ReceiveWorldLight(); break;
+			case GAME_RECEIVE_MAGIC_EFFECT: ReceiveMagicEffect(); break;
+			case GAME_RECEIVE_ANIMATED_TEXT: ReceiveAnimatedText(); break;
+			case GAME_RECEIVE_DISTANCE_EFFECT: ReceiveDistanceEffect(); break;
+			case GAME_RECEIVE_CREATURE_MARK: ReceiveCreatureMark(); break;
+			case GAME_RECEIVE_CREATURE_HEALTH: ReceiveCreatureHealth(); break;
+			case GAME_RECEIVE_CREATURE_LIGHT: ReceiveCreatureLight(); break;
+			case GAME_RECEIVE_CREATURE_OUTFIT: ReceiveCreatureOutfit(); break;
+			case GAME_RECEIVE_CREATURE_SPEED: ReceiveCreatureSpeed(); break;
+			case GAME_RECEIVE_CREATURE_SKULL: ReceiveCreatureSkull(); break;
+			case GAME_RECEIVE_CREATURE_SHIELD: ReceiveCreatureShield(); break;
+			case GAME_RECEIVE_EDIT_TEXT: ReceiveEditText(); break;
+			case GAME_RECEIVE_EDIT_HOUSE_TEXT: ReceiveEditHouseText(); break;
+			case GAME_RECEIVE_PLAYER_STATS: ReceivePlayerStats(); break;
+			case GAME_RECEIVE_PLAYER_SKILLS: ReceivePlayerSkills(); break;
+			case GAME_RECEIVE_PLAYER_ICONS: ReceivePlayerIcons(); break;
+			case GAME_RECEIVE_CANCEL_ATTACK: ReceiveCancelAttack(); break;
+			case GAME_RECEIVE_TALK: ReceiveTalk(); break;
+			case GAME_RECEIVE_CHANNEL_LIST: ReceiveChannelList(); break;
+			case GAME_RECEIVE_OPEN_CHANNEL: ReceiveOpenChannel(); break;
+			case GAME_RECEIVE_OPEN_PRIVATE_CONVERSATION: ReceiveOpenPrivateConversation(); break;
+			case GAME_RECEIVE_RULE_VIOLATION_CHANNEL: ReceiveRuleViolationChannel(); break;
+			case GAME_RECEIVE_REMOVE_RULE_VIOLATION: ReceiveRemoveRuleViolation(); break;
+			case GAME_RECEIVE_CANCEL_RULE_VIOLATION: ReceiveCancelRuleViolation(); break;
+			case GAME_RECEIVE_LOCK_RULE_VIOLATION: ReceiveLockRuleViolation(); break;
+			case GAME_RECEIVE_OWN_CHANNEL: ReceiveOwnChannel(); break;
+			case GAME_RECEIVE_CLOSE_CHANNEL: ReceiveCloseChannel(); break;
+			case GAME_RECEIVE_TEXT_MESSAGE: ReceiveTextMessage(); break;
+			case GAME_RECEIVE_CANCEL_WALK: ReceiveCancelWalk(); break;
+			case GAME_RECEIVE_FLOOR_UP: ReceiveFloorUp(); break;
+			case GAME_RECEIVE_FLOOR_DOWN: ReceiveFloorDown(); break;
+			case GAME_RECEIVE_OUTFIT: ReceiveOutfit(); break;
+			case GAME_RECEIVE_BUDDY: ReceiveBuddy(); break;
+			case GAME_RECEIVE_BUDDY_LOGIN: ReceiveBuddyLogin(); break;
+			case GAME_RECEIVE_BUDDY_LOGOUT: ReceiveBuddyLogout(); break;
 			default:
 				TERROR1("unknown packet type during game", Type);
 			}
@@ -769,20 +769,20 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void patella::TGUI::ConnectionClosed()
 {
-	const bool InGame = GetConnectionState() == 8;
-	if (GetConnectionState() == 8) {
+	const bool InGame = GetConnectionState() == CONNECTION_IN_GAME;
+	if (GetConnectionState() == CONNECTION_IN_GAME) {
 		LeaveGame();
-	} else if (GetConnectionState() == 6) {
+	} else if (GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ERROR_DISCONNECTED, 2);
 		AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
 		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
-	} else if (GetConnectionState() == 3) {
+	} else if (GetConnectionState() == CONNECTION_LOGIN_SENT) {
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ERROR_DISCONNECTED, 1);
 		AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
 	}
-	SetConnectionState(0);
+	SetConnectionState(CONNECTION_OFFLINE);
 	if (Network.Reconnect) {
 		Network.Reconnect = false;
 		if (InGame) {
@@ -865,10 +865,10 @@ void patella::TGUI::TimerEvent() const
 void patella::TGUI::ProcessEvents()
 {
 	int Type = 0;
-	if (ModalWindow != nullptr && GetActionState() == 0) {
+	if (ModalWindow != nullptr && GetActionState() == ACTIONSTATE_NONE) {
 		DeleteComponent(ModalWindow);
 		ModalWindow = nullptr;
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		MainWindow->SetConsoleActive(true);
 		Redraw(false);
 	}
@@ -1037,18 +1037,18 @@ void patella::TGUI::ProcessEvents()
 			break;
 		case MESSAGE_HELP_MODE:
 			SetActionState(ACTIONSTATE_HELP);
-			SetHelpHandle(0);
+			SetHelpHandle(HELP_NONE);
 			break;
 		case MESSAGE_OPEN_PRIVATE_CONVERSATION:
-			MainWindow->Console->OpenChannel(4, 4, reinterpret_cast<const char *>(Param2), -1, reinterpret_cast<const char *>(Param2));
+			MainWindow->Console->OpenChannel(TALK_PRIVATE_MESSAGE, TALK_PRIVATE_MESSAGE, reinterpret_cast<const char *>(Param2), -1, reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
 		case MESSAGE_OPEN_CHANNEL:
-			MainWindow->Console->OpenChannel(5, 5, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2));
+			MainWindow->Console->OpenChannel(TALK_CHANNEL_CALL, TALK_CHANNEL_CALL, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
 		case MESSAGE_OPEN_OWN_CHANNEL:
-			MainWindow->Console->OpenChannel(5, 5, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2))->SetSelected(true);
+			MainWindow->Console->OpenChannel(TALK_CHANNEL_CALL, TALK_CHANNEL_CALL, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2))->SetSelected(true);
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
 		case MESSAGE_RULE_VIOLATION_CHANNEL:
@@ -1122,7 +1122,7 @@ void patella::TGUI::ProcessEvents()
 			ConnectToGameServer();
 			break;
 		case MESSAGE_RECONNECT:
-			if (GetConnectionState() != 0) {
+			if (GetConnectionState() != CONNECTION_OFFLINE) {
 				Network.Reconnect = true;
 				Network.ReconnectTimeout = GetMilliseconds() + 5000;
 			} else {
@@ -1148,7 +1148,7 @@ void patella::TGUI::ProcessEvents()
 			MainWindow->SetConsoleActive(false);
 		}
 	}
-	if (GetConnectionState() == 8 && MoveCreatures())
+	if (GetConnectionState() == CONNECTION_IN_GAME && MoveCreatures())
 		SendWalk();
 	Redraw(false);
 }
@@ -1162,7 +1162,7 @@ void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgra
 	ExitCallback = ExitProgram;
 	DisplayModeCallback = SetDisplayMode;
 	URLCallback = OpenURL;
-	SetMouseCursor(1);
+	SetMouseCursor(CURSOR_ARROW);
 	memset(Communication.LastPacketTypes.data(), 0, sizeof(patella::TCommunication::LastPacketTypes));
 	Communication.LastPacketIndex = 0;
 	Network.Reconnect = false;

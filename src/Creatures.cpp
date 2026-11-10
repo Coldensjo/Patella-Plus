@@ -116,7 +116,7 @@ bool TCreature::IsMarked() const
 // away four seconds later.
 void TCreature::SetSkull(int Skull, bool Delay)
 {
-	if (Delay && this->PKFlag != 0 && Skull == 0) {
+	if (Delay && this->PKFlag != PK_NONE && Skull == PK_NONE) {
 		SkullTime = StoreTime32(patella::platform::Platform().Clock.WallSeconds());
 		return;
 	}
@@ -443,13 +443,13 @@ int TCreature::GetDrawDirection() const
 void TCreature::StartMovement(int dx, int dy, int Waypoints)
 {
 	if (dx > 0)
-		Direction = 1;
+		Direction = DIRECTION_EAST;
 	else if (dx < 0)
-		Direction = 3;
+		Direction = DIRECTION_WEST;
 	else if (dy < 0)
-		Direction = 0;
+		Direction = DIRECTION_NORTH;
 	else if (dy > 0)
-		Direction = 2;
+		Direction = DIRECTION_SOUTH;
 	patella::TPlayerState &Player = patella::bridge::PlayerState();
 	if (Waypoints != 0 && CreatureID == Player.PlayerID) {
 		const bool Predicted = Player.PlayerStepDX == dx && Player.PlayerStepDY == dy;
@@ -536,14 +536,14 @@ void patella::TPlayerState::DoPlayerStep()
 	int dy = 0;
 	switch (PlayerSteps[CurrentPlayerStep]) {
 		// clang-format off
-	case 1: dx = 1; dy = 0; break;
-	case 2: dx = 1; dy = -1; break;
-	case 3: dx = 0; dy = -1; break;
-	case 4: dx = -1; dy = -1; break;
-	case 5: dx = -1; dy = 0; break;
-	case 6: dx = -1; dy = 1; break;
-	case 7: dx = 0; dy = 1; break;
-	case 8: dx = 1; dy = 1; break;
+	case STEP_EAST: dx = 1; dy = 0; break;
+	case STEP_NORTHEAST: dx = 1; dy = -1; break;
+	case STEP_NORTH: dx = 0; dy = -1; break;
+	case STEP_NORTHWEST: dx = -1; dy = -1; break;
+	case STEP_WEST: dx = -1; dy = 0; break;
+	case STEP_SOUTHWEST: dx = -1; dy = 1; break;
+	case STEP_SOUTH: dx = 0; dy = 1; break;
+	case STEP_SOUTHEAST: dx = 1; dy = 1; break;
 	default: break; // no step: dx and dy stay 0, as without it (bugprone-switch-missing-default-case, issue #110)
 		// clang-format on
 	}
@@ -559,13 +559,13 @@ void patella::TPlayerState::DoPlayerStep()
 	PlayerStepDX = dx;
 	PlayerStepDY = dy;
 	if (dx > 0)
-		PlayerStepDirection = 1;
+		PlayerStepDirection = DIRECTION_EAST;
 	else if (dx < 0)
-		PlayerStepDirection = 3;
+		PlayerStepDirection = DIRECTION_WEST;
 	else if (dy < 0)
-		PlayerStepDirection = 0;
+		PlayerStepDirection = DIRECTION_NORTH;
 	else if (dy > 0)
-		PlayerStepDirection = 2;
+		PlayerStepDirection = DIRECTION_SOUTH;
 }
 
 // 0x4510f0, line 347. Computes the path to the destination and starts its
@@ -710,8 +710,8 @@ TCreature *patella::TCreatures::AddCreature(uint32 RemoveID, uint32 NewCreatureI
 	TCreature *Creature = &Creatures[Index];
 	if (Creature->CreatureID == 0)
 		Creature->NextOpponent = NOT_AN_OPPONENT;
-	Creature->PKFlag = 0;
-	Creature->PARTYFlag = 0;
+	Creature->PKFlag = PK_NONE;
+	Creature->PARTYFlag = PARTY_NONE;
 	Creature->SkullTime = 0;
 	Creature->CreatureID = NewCreatureID;
 	return Creature;
@@ -737,7 +737,7 @@ void patella::TCreatures::UpdateSkulls()
 		TCreature *Creature = &Creatures[i];
 		if (Creature->SkullTime != 0 && !Creature->SkullKept(Now)) {
 			Creature->SkullTime = 0;
-			Creature->PKFlag = 0;
+			Creature->PKFlag = PK_NONE;
 		}
 	}
 }
@@ -815,8 +815,8 @@ void patella::TCreatures::CheckMonsterHint(TCreature *Creature)
 // it reads.
 void patella::TCreatures::NotifySkull(int Flag)
 {
-	if (Flag != 0)
-		GUI.AddEventHelp(13);
+	if (Flag != PK_NONE)
+		GUI.AddEventHelp(HINT_PLAYER_KILLING);
 }
 
 // --- Experience and skills -------------------------------------------------
@@ -827,13 +827,13 @@ void patella::TPlayerState::SetPlayerExperience(int Experience, int Level, int P
 {
 	PATELLA_ASSERT_VALUES(In(Progress,-1,100), Progress);
 	if (PlayerLevel != 0 && PlayerExperience == 0 && Experience > 0)
-		GUI.AddEventHelp(7);
+		GUI.AddEventHelp(HINT_FIRST_EXPERIENCE_POINTS);
 	if (PlayerLevel != 0 && PlayerLevel < 2 && Level >= 2)
-		GUI.AddEventHelp(8);
+		GUI.AddEventHelp(HINT_LEVEL_2);
 	if (PlayerLevel != 0 && PlayerLevel < 8 && Level >= 8)
-		GUI.AddEventHelp(10);
+		GUI.AddEventHelp(HINT_LEVEL_8);
 	if (PlayerLevel != 0 && PlayerLevel < 20 && Level >= 20)
-		GUI.AddEventHelp(14);
+		GUI.AddEventHelp(HINT_LEVEL_20);
 	PlayerExperience = Experience;
 	PlayerLevel = Level;
 	PlayerLevelProgress = Progress;
@@ -844,7 +844,7 @@ void patella::TPlayerState::SetPlayerSkill(int SkillNumber, int Value, int Progr
 {
 	PATELLA_ASSERT_VALUES(In(Progress,0,100), Progress);
 	if (PlayerSkillValue[SkillNumber] != 0 && PlayerSkillValue[SkillNumber] < Value)
-		GUI.AddEventHelp(9);
+		GUI.AddEventHelp(HINT_FIRST_SKILL_ADVANCE);
 	PlayerSkillProgress[SkillNumber] = Progress;
 	PlayerSkillValue[SkillNumber] = Value;
 }
@@ -882,7 +882,7 @@ const char *patella::TPlayerState::GetSkillName(int SkillNumber)
 // 0x44d6d0. No check for a missing player creature.
 bool patella::TPlayerState::HasPlayerSkull() const
 {
-	return Creatures.GetCreature(GetPlayerID())->PKFlag != 0;
+	return Creatures.GetCreature(GetPlayerID())->PKFlag != PK_NONE;
 }
 
 // 0x44d6f0. Party flag 1, 3 or 4; ContextMenus.cpp offers "Leave Party"
@@ -890,7 +890,7 @@ bool patella::TPlayerState::HasPlayerSkull() const
 bool patella::TPlayerState::IsPlayerInParty() const
 {
 	const int Shield = Creatures.GetCreature(GetPlayerID())->PARTYFlag;
-	return Shield == 4 || Shield == 3 || Shield == 1;
+	return Shield == PARTY_LEADER || Shield == PARTY_MEMBER || Shield == PARTY_INVITER;
 }
 
 // 0x44d720

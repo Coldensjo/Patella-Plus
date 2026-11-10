@@ -11,7 +11,7 @@
 //
 // In the game the window is laid out in two columns: the map frame, the
 // splitter and the console on the left, the side bar (SidePanel in a frame)
-// and the dialog window on the right, SkinProperties.Data184 wide. The
+// and the dialog window on the right, SkinProperties.SideBarWidth wide. The
 // heights of the map and the console follow the console height of the
 // preferences and the minimum sizes; the splitter changes the console's
 // height. Leaving a mode (ChangeMode, the destructor) stores the open
@@ -74,8 +74,8 @@ TMainWindow::TMainWindow(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
 	ChangeMode(false);
-	AddHotkey(0x446, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
-	AddHotkey(0x80d, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	AddHotkey(KEY_CONTROL | 'F', TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	AddHotkey(KEY_ALT | KEY_RETURN, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
 }
 
 // 0x4ac010. Its work is the close since issue #108.
@@ -126,7 +126,7 @@ void patella::TGUI::ExitMainWindow()
 	MainWindow.reset();
 	if (ModalWindow != nullptr) {
 		DeleteComponent(ModalWindow);
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 	}
 	ModalWindow = nullptr;
 }
@@ -177,18 +177,18 @@ void TMainWindow::SetSize(int Width, int Height)
 			MapHeight = MinMapHeight;
 		if (MapHeight > MaxMapHeight)
 			MapHeight = MaxMapHeight;
-		const int MapWidth = Width - SkinProperties().Data184;
+		const int MapWidth = Width - SkinProperties().SideBarWidth;
 		MapFrame->SetPosition(0, 0);
 		MapFrame->SetSize(MapWidth, MapHeight);
 		MapHeight = MapFrame->Height;
-		Splitter->SetSize(MapWidth, SkinProperties().Data138);
+		Splitter->SetSize(MapWidth, SkinProperties().SplitterHeight);
 		Splitter->SetPosition(0, MapHeight);
 		Splitter->Arrange();
-		Console->SetSize(MapWidth, Height - SkinProperties().Data138 - MapHeight);
+		Console->SetSize(MapWidth, Height - SkinProperties().SplitterHeight - MapHeight);
 		Console->SetPosition(0, Splitter->Height + MapHeight);
 		Console->Arrange();
 		SideBar->SetPosition(MapWidth, 0);
-		DialogWindow->SetSize(SkinProperties().Data184, Height - SideBar->Height);
+		DialogWindow->SetSize(SkinProperties().SideBarWidth, Height - SideBar->Height);
 		DialogWindow->SetPosition(MapWidth, SideBar->Height);
 	} else {
 		StartWindow->SetSize(Width, Height);
@@ -202,21 +202,21 @@ void TMainWindow::SetSize(int Width, int Height)
 // arrow key turns, every other key goes to the console.
 void TMainWindow::KeyPress(int Key)
 {
-	if (GetConnectionState() != 8)
+	if (GetConnectionState() != CONNECTION_IN_GAME)
 		return;
 	switch (Key) {
-	case 0x10c: Walk(0, -1, false); break;
-	case 0x10d: Walk(-1, 0, false); break;
-	case 0x10e: Walk(1, 0, false); break;
-	case 0x10f: Walk(0, 1, false); break;
-	case 0x116: Walk(-1, 1, true); break;
-	case 0x117: Walk(1, 1, true); break;
-	case 0x118: Walk(-1, -1, true); break;
-	case 0x119: Walk(1, -1, true); break;
-	case 0x50c: SendTurnNorth(); break;
-	case 0x50d: SendTurnWest(); break;
-	case 0x50e: SendTurnEast(); break;
-	case 0x50f: SendTurnSouth(); break;
+	case KEY_UP: Walk(0, -1, false); break;
+	case KEY_LEFT: Walk(-1, 0, false); break;
+	case KEY_RIGHT: Walk(1, 0, false); break;
+	case KEY_DOWN: Walk(0, 1, false); break;
+	case KEY_PAD_END: Walk(-1, 1, true); break;
+	case KEY_PAD_PAGE_DOWN: Walk(1, 1, true); break;
+	case KEY_PAD_HOME: Walk(-1, -1, true); break;
+	case KEY_PAD_PAGE_UP: Walk(1, -1, true); break;
+	case KEY_CONTROL | KEY_UP: SendTurnNorth(); break;
+	case KEY_CONTROL | KEY_LEFT: SendTurnWest(); break;
+	case KEY_CONTROL | KEY_RIGHT: SendTurnEast(); break;
+	case KEY_CONTROL | KEY_DOWN: SendTurnSouth(); break;
 	default:
 		Console->KeyPress(Key);
 		break;
@@ -239,7 +239,7 @@ void TMainWindow::HandleEvent(int Event)
 		CopyTaintedClipboardText();
 		[[fallthrough]];
 	case EVENT_CANCEL:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_EXIT_PROGRAM:
 		GUI.ExitProgramCallback();
@@ -251,51 +251,51 @@ void TMainWindow::HandleEvent(int Event)
 		SetSize(Width, Height);
 		break;
 	case EVENT_TOGGLE_SKILLS:
-		if (DialogWindow->GetContentWindow(6) != nullptr)
-			CloseContentWindow(6);
+		if (DialogWindow->GetContentWindow(SKILLS_WINDOW) != nullptr)
+			CloseContentWindow(SKILLS_WINDOW);
 		else
-			OpenContentWindow(6);
+			OpenContentWindow(SKILLS_WINDOW);
 		break;
 	case EVENT_TOGGLE_BATTLE:
-		if (DialogWindow->GetContentWindow(7) != nullptr)
-			CloseContentWindow(7);
+		if (DialogWindow->GetContentWindow(BATTLE_WINDOW) != nullptr)
+			CloseContentWindow(BATTLE_WINDOW);
 		else
-			OpenContentWindow(7);
+			OpenContentWindow(BATTLE_WINDOW);
 		break;
 	case EVENT_TOGGLE_VIP:
-		if (DialogWindow->GetContentWindow(9) != nullptr)
-			CloseContentWindow(9);
+		if (DialogWindow->GetContentWindow(BUDDYLIST_WINDOW) != nullptr)
+			CloseContentWindow(BUDDYLIST_WINDOW);
 		else
-			OpenContentWindow(9);
+			OpenContentWindow(BUDDYLIST_WINDOW);
 		break;
 	case EVENT_MINIMISE_INVENTORY: {
-		TContentWindow *OldWindow = SidePanel->GetContentWindow(1);
+		TContentWindow *OldWindow = SidePanel->GetContentWindow(INVENTORY_WINDOW);
 		PATELLA_ASSERT(OldWindow!=nullptr);
 		SidePanel->InsertChildAfter(OldWindow, CreateSmallInventoryWindow(this));
 		SidePanel->DeleteChild(OldWindow);
 		SidePanel->Rearrange(32, nullptr);
-		SideBar->SetSize(SkinProperties().Data184, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
+		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
 		SetSize(Width, Height);
 		break;
 	}
 	case EVENT_MAXIMISE_INVENTORY: {
-		TContentWindow *OldWindow = SidePanel->GetContentWindow(2);
+		TContentWindow *OldWindow = SidePanel->GetContentWindow(SMALL_INVENTORY_WINDOW);
 		PATELLA_ASSERT(OldWindow!=nullptr);
 		SidePanel->InsertChildAfter(OldWindow, CreateInventoryWindow(this));
 		SidePanel->DeleteChild(OldWindow);
 		SidePanel->Rearrange(32, nullptr);
-		SideBar->SetSize(SkinProperties().Data184, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
+		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
 		SetSize(Width, Height);
 		break;
 	}
 	case EVENT_ABORT:
 		Disconnect(false);
-		if (GetConnectionState() == 5 || GetConnectionState() == 6) {
+		if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER || GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
 			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
 			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
-		SetConnectionState(0);
-		SetActionState(0);
+		SetConnectionState(CONNECTION_OFFLINE);
+		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_STOP:
 		ClearPlayerSteps();
@@ -317,12 +317,12 @@ void TMainWindow::HandleEvent(int Event)
 	case EVENT_BUG_REPORT:
 		if (!CheckRight(40, -1)) {
 			SetStatusMessage(TextNoBugReportRight, false);
-		} else if (GetConnectionState() == 8 && GUI.ModalWindow == nullptr) {
+		} else if (GetConnectionState() == CONNECTION_IN_GAME && GUI.ModalWindow == nullptr) {
 			AddMessage(MESSAGE_BUG_REPORT_DIALOG, 0, 0);
 		}
 		break;
 	case EVENT_LOGOUT:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		SendLogout();
 		break;
 	case EVENT_LEAVE_QUESTION: {
@@ -342,7 +342,7 @@ void TMainWindow::HandleEvent(int Event)
 		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
 		break;
 	case EVENT_HELP_MODE:
-		SetActionState(0);
+		SetActionState(ACTIONSTATE_NONE);
 		AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_TUTOR_HELP:
@@ -356,13 +356,13 @@ void TMainWindow::HandleEvent(int Event)
 			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 		break;
 	case EVENT_DEVICE_AUTOMATIC:
-		patella::TGUI::ChangeEngine(0); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeEngine(ENGINE_DIRECTX5); // Control.cpp's (issue #118)
 		break;
 	case EVENT_DEVICE_GPU:
-		patella::TGUI::ChangeEngine(2); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeEngine(ENGINE_DIRECTX9); // Control.cpp's (issue #118)
 		break;
 	case EVENT_DEVICE_CPU:
-		patella::TGUI::ChangeEngine(1); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeEngine(ENGINE_OPENGL); // Control.cpp's (issue #118)
 		break;
 	default:
 		break;
@@ -410,23 +410,23 @@ void TMainWindow::ChangeMode(bool InGame)
 		bool HaveButtons = false;
 		for (int i = Count - 1; i >= 0; i--) {
 			switch (Dialogs[i]) {
-			case 1:
+			case INVENTORY_WINDOW:
 				SidePanel->InsertChild(CreateInventoryWindow(this));
 				HaveInventory = true;
 				break;
-			case 2:
+			case SMALL_INVENTORY_WINDOW:
 				SidePanel->InsertChild(CreateSmallInventoryWindow(this));
 				HaveInventory = true;
 				break;
-			case 3:
+			case AUTOMAP_WINDOW:
 				SidePanel->InsertChild(new TAutomapWindow);
 				HaveAutomap = true;
 				break;
-			case 4:
+			case STATUS_WINDOW:
 				SidePanel->InsertChild(new TStatusWindow);
 				HaveStatus = true;
 				break;
-			case 5:
+			case BUTTONS_WINDOW:
 				SidePanel->InsertChild(new TButtonsWindow(DialogWindow, this));
 				HaveButtons = true;
 				break;
@@ -454,29 +454,29 @@ void TMainWindow::ChangeMode(bool InGame)
 		const int StoredHeight = GetConsoleHeight();
 		if (StoredHeight > ConsoleHeight)
 			ConsoleHeight = StoredHeight;
-		int MapWidth = Width - SkinProperties().Data184;
-		int MapHeight = Height - ConsoleHeight - SkinProperties().Data138;
+		int MapWidth = Width - SkinProperties().SideBarWidth;
+		int MapHeight = Height - ConsoleHeight - SkinProperties().SplitterHeight;
 		if (MapHeight < MapFrame->getMinimumHeight()) {
 			ConsoleHeight = Console->getMinimumHeight();
-			MapWidth = Width - SkinProperties().Data184;
-			MapHeight = Height - ConsoleHeight - SkinProperties().Data138;
+			MapWidth = Width - SkinProperties().SideBarWidth;
+			MapHeight = Height - ConsoleHeight - SkinProperties().SplitterHeight;
 		}
 		MapFrame->SetPosition(0, 0);
 		MapFrame->SetSize(MapWidth, MapHeight);
-		Splitter->SetSize(MapWidth, SkinProperties().Data138);
+		Splitter->SetSize(MapWidth, SkinProperties().SplitterHeight);
 		Splitter->SetPosition(0, MapHeight);
 		Splitter->Arrange();
 		Console->SetSize(MapWidth, ConsoleHeight);
-		Console->SetPosition(0, MapHeight + SkinProperties().Data138);
+		Console->SetPosition(0, MapHeight + SkinProperties().SplitterHeight);
 		Console->OpenDefaultChannel(patella::bridge::Talk().DefaultTextBuffer, "Default");
 		Console->Arrange();
 		SideBar->SetPosition(MapWidth, 0);
-		SideBar->SetSize(SkinProperties().Data184, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
-		DialogWindow->SetSize(SkinProperties().Data184, Height - SideBar->Height);
+		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
+		DialogWindow->SetSize(SkinProperties().SideBarWidth, Height - SideBar->Height);
 		DialogWindow->SetPosition(MapWidth, SideBar->Height);
 		for (int i = 0; i < Count; i++) {
 			const int Identifier = Dialogs[i];
-			if (Identifier >= 6 && (Identifier <= 7 || Identifier == 9))
+			if (Identifier >= SKILLS_WINDOW && (Identifier <= BATTLE_WINDOW || Identifier == BUDDYLIST_WINDOW))
 				OpenContentWindow(Identifier);
 		}
 		if (Count > 0) {
@@ -488,33 +488,33 @@ void TMainWindow::ChangeMode(bool InGame)
 		// Ctrl+Z reports a bug, Ctrl+R a rule violation, Ctrl+Y opens the
 		// gamemaster dialog, Ctrl+H the hints, Ctrl+T the channel 7 and
 		// Escape cancels the attack and the walk.
-		AddHotkey(0x44c, TCallback(this, EVENT_LOGOUT));
-		AddHotkey(0x451, TCallback(this, EVENT_LOGOUT));
-		AddHotkey(0x447, TCallback(this, EVENT_CHARACTER_LIST));
-		AddHotkey(0x453, TCallback(this, EVENT_TOGGLE_SKILLS));
-		AddHotkey(0x442, TCallback(this, EVENT_TOGGLE_BATTLE));
-		AddHotkey(0x450, TCallback(this, EVENT_TOGGLE_VIP));
-		AddHotkey(0x45a, TCallback(this, EVENT_BUG_REPORT));
-		AddHotkey(0x452, TCallback(this, EVENT_REPORT));
-		AddHotkey(0x459, TCallback(this, EVENT_RULE_VIOLATION));
-		AddHotkey(0x448, TCallback(this, EVENT_HELP_MODE));
-		AddHotkey(0x454, TCallback(this, EVENT_TUTOR_HELP));
-		AddHotkey(0x1b, TCallback(this, EVENT_STOP));
+		AddHotkey(KEY_CONTROL | 'L', TCallback(this, EVENT_LOGOUT));
+		AddHotkey(KEY_CONTROL | 'Q', TCallback(this, EVENT_LOGOUT));
+		AddHotkey(KEY_CONTROL | 'G', TCallback(this, EVENT_CHARACTER_LIST));
+		AddHotkey(KEY_CONTROL | 'S', TCallback(this, EVENT_TOGGLE_SKILLS));
+		AddHotkey(KEY_CONTROL | 'B', TCallback(this, EVENT_TOGGLE_BATTLE));
+		AddHotkey(KEY_CONTROL | 'P', TCallback(this, EVENT_TOGGLE_VIP));
+		AddHotkey(KEY_CONTROL | 'Z', TCallback(this, EVENT_BUG_REPORT));
+		AddHotkey(KEY_CONTROL | 'R', TCallback(this, EVENT_REPORT));
+		AddHotkey(KEY_CONTROL | 'Y', TCallback(this, EVENT_RULE_VIOLATION));
+		AddHotkey(KEY_CONTROL | 'H', TCallback(this, EVENT_HELP_MODE));
+		AddHotkey(KEY_CONTROL | 'T', TCallback(this, EVENT_TUTOR_HELP));
+		AddHotkey(KEY_ESCAPE, TCallback(this, EVENT_STOP));
 	} else {
 		StartWindow = new TStartWindow;
 		InsertChild(StartWindow);
-		RemoveHotkey(0x44c);
-		RemoveHotkey(0x451);
-		RemoveHotkey(0x447);
-		RemoveHotkey(0x453);
-		RemoveHotkey(0x442);
-		RemoveHotkey(0x450);
-		RemoveHotkey(0x45a);
-		RemoveHotkey(0x452);
-		RemoveHotkey(0x459);
-		RemoveHotkey(0x448);
-		RemoveHotkey(0x454);
-		RemoveHotkey(0x1b);
+		RemoveHotkey(KEY_CONTROL | 'L');
+		RemoveHotkey(KEY_CONTROL | 'Q');
+		RemoveHotkey(KEY_CONTROL | 'G');
+		RemoveHotkey(KEY_CONTROL | 'S');
+		RemoveHotkey(KEY_CONTROL | 'B');
+		RemoveHotkey(KEY_CONTROL | 'P');
+		RemoveHotkey(KEY_CONTROL | 'Z');
+		RemoveHotkey(KEY_CONTROL | 'R');
+		RemoveHotkey(KEY_CONTROL | 'Y');
+		RemoveHotkey(KEY_CONTROL | 'H');
+		RemoveHotkey(KEY_CONTROL | 'T');
+		RemoveHotkey(KEY_ESCAPE);
 	}
 	SetSize(Width, Height);
 	SetConsoleActive(patella::bridge::GUI().ModalWindow == nullptr);
@@ -578,8 +578,8 @@ void TMainWindow::OpenContainer(int Container) const
 	TContainerWindowBody *Body = static_cast<TContainerWindowBody *>(Window->Body);
 	Body->Update();
 	if (Body->IsMinimized()) {
-		Window->SetTitle(new TLabel(SkinProperties().Style194.Data38, GetContainerName(Container)));
-		Window->SetIcon(new TObjectIcon(GetContainerObject(Container), &SkinProperties().Style194.Data80, false));
+		Window->SetTitle(new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container)));
+		Window->SetIcon(new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false));
 		if (GetContainerHasParent(Container))
 			Window->ShowUpButton();
 		else
@@ -629,16 +629,16 @@ void TMainWindow::OpenContentWindow(int Identifier) const
 	if (DialogWindow->GetContentWindow(Identifier) == nullptr) {
 		TWindow *Window;
 		switch (Identifier) {
-		case 6:
+		case SKILLS_WINDOW:
 			Window = CreateSkillsWindow();
 			break;
-		case 7:
+		case BATTLE_WINDOW:
 			Window = CreateBattleWindow();
 			break;
 		case TRADE_WINDOW:
 			Window = CreateTradeWindow();
 			break;
-		case 9:
+		case BUDDYLIST_WINDOW:
 			Window = CreateBuddylistWindow();
 			break;
 		default:
@@ -671,23 +671,23 @@ void TMainWindow::SetConsoleActive(bool Active) const
 TStartWindow::TStartWindow()
 {
 	TWindow *Panel = new TWindow;
-	Panel->SetSize(SkinProperties().Style0D8.Data00, SkinProperties().Style0D8.Data04);
-	TComponent *Button = new TTextButton(0, 0, "Enter Game", 0x12, 0x13, TCallback(this, EVENT_ENTER_GAME), nullptr);
+	Panel->SetSize(SkinProperties().StartWindow.PanelWidth, SkinProperties().StartWindow.PanelHeight);
+	TComponent *Button = new TTextButton(0, 0, "Enter Game", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_ENTER_GAME), nullptr);
 	Panel->InsertChild(Button);
-	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data10.x, SkinProperties().Style0D8.Data10.y);
-	Button = new TTextButton(0, 0, "Options", 0x12, 0x13, TCallback(this, EVENT_START_OPTIONS), nullptr);
+	Panel->SetChildPosition(Button, SkinProperties().StartWindow.EnterGameButton.x, SkinProperties().StartWindow.EnterGameButton.y);
+	Button = new TTextButton(0, 0, "Options", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_START_OPTIONS), nullptr);
 	Panel->InsertChild(Button);
-	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data18.x, SkinProperties().Style0D8.Data18.y);
-	Button = new TTextButton(0, 0, "Info", 0x12, 0x13, TCallback(this, EVENT_INFO), nullptr);
+	Panel->SetChildPosition(Button, SkinProperties().StartWindow.OptionsButton.x, SkinProperties().StartWindow.OptionsButton.y);
+	Button = new TTextButton(0, 0, "Info", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_INFO), nullptr);
 	Panel->InsertChild(Button);
-	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data20.x, SkinProperties().Style0D8.Data20.y);
-	Button = new TTextButton(0, 0, "Exit Game", 0x12, 0x13, TCallback(this, EVENT_EXIT_PROGRAM), nullptr);
+	Panel->SetChildPosition(Button, SkinProperties().StartWindow.InfoButton.x, SkinProperties().StartWindow.InfoButton.y);
+	Button = new TTextButton(0, 0, "Exit Game", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_EXIT_PROGRAM), nullptr);
 	Panel->InsertChild(Button);
-	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data28.x, SkinProperties().Style0D8.Data28.y);
-	Button = new TTextButton(0, 0, "Access Account", 0x12, 0x13, TCallback(this, EVENT_ACCOUNT_URL), nullptr);
+	Panel->SetChildPosition(Button, SkinProperties().StartWindow.ExitGameButton.x, SkinProperties().StartWindow.ExitGameButton.y);
+	Button = new TTextButton(0, 0, "Access Account", SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, EVENT_ACCOUNT_URL), nullptr);
 	Panel->InsertChild(Button);
-	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data30.x, SkinProperties().Style0D8.Data30.y);
-	Frame = new TBorder(Panel, 0x34, 0x3a, 0x35, 0x38, 0x39, 0x36, 0x3b, 0x37, 0x3c, SkinProperties().Data134);
+	Panel->SetChildPosition(Button, SkinProperties().StartWindow.AccessAccountButton.x, SkinProperties().StartWindow.AccessAccountButton.y);
+	Frame = new TBorder(Panel, SKIN_PANEL_CORNER_TOPLEFT, SKIN_PANEL_EDGE_TOP, SKIN_PANEL_CORNER_TOPRIGHT, SKIN_PANEL_EDGE_LEFT, SKIN_PANEL_EDGE_RIGHT, SKIN_PANEL_CORNER_BOTTOMLEFT, SKIN_PANEL_EDGE_BOTTOM, SKIN_PANEL_CORNER_BOTTOMRIGHT, SKIN_PANEL_BACKGROUND, SkinProperties().StartWindowBorder);
 	InsertChild(Frame);
 	Frame->FitToWindow();
 }
@@ -705,14 +705,14 @@ void TStartWindow::Draw(int Surface, int x, int y)
 void TStartWindow::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
-	SetChildPosition(Frame, SkinProperties().Style0D8.Data08.x, SkinProperties().Style0D8.Data08.y);
+	SetChildPosition(Frame, SkinProperties().StartWindow.FramePosition.x, SkinProperties().StartWindow.FramePosition.y);
 }
 
 // 0x4ae030, line 731. The buttons work only while there is no connection.
 void TStartWindow::HandleEvent(int Event)
 {
 	const patella::TGUI &GUI = patella::bridge::GUI();
-	if (GetConnectionState() != 0)
+	if (GetConnectionState() != CONNECTION_OFFLINE)
 		return;
 	switch (Event) {
 	case EVENT_ENTER_GAME:
@@ -744,16 +744,16 @@ TSplitter::TSplitter()
 	DrawingListLength = 3;
 	DrawingList.reset(new TDrawing[3]);
 	for (int i = 0; i < DrawingListLength; i++)
-		DrawingList[i].skin = 0;
+		DrawingList[i].skin = SKIN_NONE;
 }
 
 // 0x4ae430. Skins 8 (top), 7 (middle, stretched) and 9 (bottom). As in
 // GetConsoleWindowHeight the try block is gone.
 void TSplitter::Arrange()
 {
-	DrawingList[0] = TDrawing(8, 0, 0, Width, Skins()[8].height, 0, 0);
-	DrawingList[1] = TDrawing(7, 0, Skins()[8].height, Width, Height - Skins()[9].height - Skins()[8].height, 0, 0);
-	DrawingList[2] = TDrawing(9, 0, Height - Skins()[9].height, Width, Skins()[9].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_BACKGROUND, 0, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, Width, Height - Skins()[SKIN_FRAME_EDGE_TOP].height - Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, Height - Skins()[SKIN_FRAME_EDGE_TOP].height, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
 }
 
 // 0x4ae530, line 780. Mouse cursor 2 is the vertical size arrow. While
@@ -762,7 +762,7 @@ void TSplitter::Arrange()
 bool TSplitter::MouseMove([[maybe_unused]] int x, int y)
 {
 	const patella::TGUI &GUI = patella::bridge::GUI();
-	SetMouseCursor(2);
+	SetMouseCursor(CURSOR_SIZENS);
 	if (Dragging) {
 		GUI.MainWindow->ResizeConsole(DragY - y + GUI.MainWindow->GetConsoleWindowHeight());
 		GUI.MainWindow->SetSize(GUI.MainWindow->Width, GUI.MainWindow->Height);

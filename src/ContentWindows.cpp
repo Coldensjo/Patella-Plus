@@ -75,14 +75,14 @@ static_assert(sizeof(patella::bridge::GUI().AutomapMouseOverText) == 100 && size
 // slots and the large combat controls.
 TContentWindow *CreateInventoryWindow(TWindow *Receiver)
 {
-	TContentWindow *Window = new TContentWindow(1, true);
-	Window->SetSize(SkinProperties().Data184, SkinProperties().Data274);
+	TContentWindow *Window = new TContentWindow(INVENTORY_WINDOW, true);
+	Window->SetSize(SkinProperties().SideBarWidth, SkinProperties().InventoryWindowHeight);
 	TInventoryView *View = new TInventoryView(Receiver);
 	Window->InsertChild(View);
-	Window->SetChildPosition(View, SkinProperties().Data278.width, SkinProperties().Data278.height);
+	Window->SetChildPosition(View, SkinProperties().InventoryControlsAndView.width, SkinProperties().InventoryControlsAndView.height);
 	TCombatControls *Controls = new TCombatControls(Receiver, true);
 	Window->InsertChild(Controls);
-	Window->SetChildPosition(Controls, SkinProperties().Data278.x, SkinProperties().Data278.y);
+	Window->SetChildPosition(Controls, SkinProperties().InventoryControlsAndView.x, SkinProperties().InventoryControlsAndView.y);
 	Window->Arrange();
 	return Window;
 }
@@ -92,22 +92,22 @@ TContentWindow *CreateInventoryWindow(TWindow *Receiver)
 TContentWindow *CreateSmallInventoryWindow(TWindow *Receiver)
 {
 	TSmallInventoryWindow *Window = new TSmallInventoryWindow;
-	Window->SetSize(SkinProperties().Data184, SkinProperties().Data54C);
+	Window->SetSize(SkinProperties().SideBarWidth, SkinProperties().SmallInventoryWindowHeight);
 	TCombatControls *Controls = new TCombatControls(Receiver, false);
 	Window->InsertChild(Controls);
-	Window->SetChildPosition(Controls, SkinProperties().Data550.x, SkinProperties().Data550.y);
-	TSkinButton *Maximise = new TSkinButton(0, 0, 140, 141, TCallback(Receiver, EVENT_MAXIMISE_INVENTORY), TextMaximiseInventory, false);
+	Window->SetChildPosition(Controls, SkinProperties().SmallInventoryControlsAndMaximise.x, SkinProperties().SmallInventoryControlsAndMaximise.y);
+	TSkinButton *Maximise = new TSkinButton(0, 0, SKIN_MAXIMISE_BUTTON_UP, SKIN_MAXIMISE_BUTTON_DOWN, TCallback(Receiver, EVENT_MAXIMISE_INVENTORY), TextMaximiseInventory, false);
 	Window->InsertChild(Maximise);
-	Window->SetChildPosition(Maximise, SkinProperties().Data550.width, SkinProperties().Data550.height);
+	Window->SetChildPosition(Maximise, SkinProperties().SmallInventoryControlsAndMaximise.width, SkinProperties().SmallInventoryControlsAndMaximise.height);
 	TCapacityLabel *Capacity = new TCapacityLabel;
 	Window->InsertChild(Capacity);
-	Window->SetChildArea(Capacity, SkinProperties().Data560);
+	Window->SetChildArea(Capacity, SkinProperties().SmallInventoryCapacity);
 	TSoulLabel *Soul = new TSoulLabel;
 	Window->InsertChild(Soul);
-	Window->SetChildArea(Soul, SkinProperties().Data570);
+	Window->SetChildArea(Soul, SkinProperties().SmallInventorySoul);
 	TPlayerStates *States = new TPlayerStates(false);
 	Window->InsertChild(States);
-	Window->SetChildArea(States, SkinProperties().Data580);
+	Window->SetChildArea(States, SkinProperties().SmallInventoryStates);
 	return Window;
 }
 
@@ -119,12 +119,12 @@ TSubWindow *CreateContainerWindow(int Container)
 {
 	TContainerWindowBody *Body = new TContainerWindowBody(Container);
 	TSubWindow *Window = new TSubWindow(Container + CONTAINER_WINDOW, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
-	TSkinButton *UpButton = new TSkinButton(0, 0, 126, 127, TCallback(Body, EVENT_CONTAINER_UP), TextShowHigherContainer, false);
-	TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().Style194.Data80, false);
-	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, GetContainerName(Container));
-	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
+	TSkinButton *CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_BUTTON_UP, SKIN_CLOSE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
+	TSkinButton *UpButton = new TSkinButton(0, 0, SKIN_HIGHER_CONTAINER_BUTTON_UP, SKIN_HIGHER_CONTAINER_BUTTON_DOWN, TCallback(Body, EVENT_CONTAINER_UP), TextShowHigherContainer, false);
+	TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
+	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container));
+	Window->SetSize(SkinProperties().SideBarWidth, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
 	Window->SetCloseButton(CloseButton);
 	Window->SetMinimizeButton(MinimizeButton);
 	Window->SetUpButton(UpButton);
@@ -138,12 +138,12 @@ TSubWindow *CreateContainerWindow(int Container)
 TSubWindow *CreateSkillsWindow()
 {
 	TSkillsWindowBody *Body = new TSkillsWindowBody;
-	TSubWindow *Window = new TSubWindow(6, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
-	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "Skills");
-	TSkinIcon *Icon = new TSkinIcon(142);
-	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
+	TSubWindow *Window = new TSubWindow(SKILLS_WINDOW, Body, true, false);
+	TSkinButton *CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_BUTTON_UP, SKIN_CLOSE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
+	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, "Skills");
+	TSkinIcon *Icon = new TSkinIcon(SKIN_SKILLS_ICON);
+	Window->SetSize(SkinProperties().SideBarWidth, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
 	Window->SetCloseButton(CloseButton);
 	Window->SetMinimizeButton(MinimizeButton);
 	Window->SetIcon(Icon);
@@ -156,12 +156,12 @@ TSubWindow *CreateSkillsWindow()
 TSubWindow *CreateBattleWindow()
 {
 	TBattleWindowBody *Body = new TBattleWindowBody;
-	TSubWindow *Window = new TSubWindow(7, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
-	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "Battle");
-	TSkinIcon *Icon = new TSkinIcon(144);
-	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
+	TSubWindow *Window = new TSubWindow(BATTLE_WINDOW, Body, true, false);
+	TSkinButton *CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_BUTTON_UP, SKIN_CLOSE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
+	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, "Battle");
+	TSkinIcon *Icon = new TSkinIcon(SKIN_BATTLE_ICON);
+	Window->SetSize(SkinProperties().SideBarWidth, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
 	Window->SetCloseButton(CloseButton);
 	Window->SetMinimizeButton(MinimizeButton);
 	Window->SetIcon(Icon);
@@ -175,11 +175,11 @@ TSubWindow *CreateTradeWindow()
 {
 	TTradeWindowBody *Body = new TTradeWindowBody;
 	TSubWindow *Window = new TSubWindow(TRADE_WINDOW, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
-	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "Trade");
-	TSkinIcon *Icon = new TSkinIcon(145);
-	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
+	TSkinButton *CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_BUTTON_UP, SKIN_CLOSE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
+	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, "Trade");
+	TSkinIcon *Icon = new TSkinIcon(SKIN_TRADE_ICON);
+	Window->SetSize(SkinProperties().SideBarWidth, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
 	Window->SetCloseButton(CloseButton);
 	Window->SetMinimizeButton(MinimizeButton);
 	Window->SetIcon(Icon);
@@ -194,12 +194,12 @@ TSubWindow *CreateTradeWindow()
 TSubWindow *CreateBuddylistWindow()
 {
 	TBuddylistWindowBody *Body = new TBuddylistWindowBody;
-	TSubWindow *Window = new TSubWindow(9, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
-	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "VIP");
-	TSkinIcon *Icon = new TSkinIcon(143);
-	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
+	TSubWindow *Window = new TSubWindow(BUDDYLIST_WINDOW, Body, true, false);
+	TSkinButton *CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_BUTTON_UP, SKIN_CLOSE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
+	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, "VIP");
+	TSkinIcon *Icon = new TSkinIcon(SKIN_VIP_ICON);
+	Window->SetSize(SkinProperties().SideBarWidth, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
 	Window->SetCloseButton(CloseButton);
 	Window->SetMinimizeButton(MinimizeButton);
 	Window->SetIcon(Icon);
@@ -213,21 +213,21 @@ TSubWindow *CreateBuddylistWindow()
 // 0x426480, lines 292-309. The assertion comes before the try block (after
 // the base class).
 TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
-	: TContentWindow(5, true)
+	: TContentWindow(BUTTONS_WINDOW, true)
 {
 	PATELLA_ASSERT(_CheckObject!=nullptr);
 	CheckObject = _CheckObject;
-	SetSize(SkinProperties().Data184, SkinProperties().Data608);
-	SkillsButton = new TTextToggleButton(SkinProperties().Data60C.x, SkinProperties().Data60C.y, "Skills", 14, 15,
+	SetSize(SkinProperties().SideBarWidth, SkinProperties().ButtonsWindowHeight);
+	SkillsButton = new TTextToggleButton(SkinProperties().ButtonsWindowSkillsAndBattle.x, SkinProperties().ButtonsWindowSkillsAndBattle.y, "Skills", SKIN_SMALL_BUTTON_UP, SKIN_SMALL_BUTTON_DOWN,
 		TCallback(Receiver, EVENT_TOGGLE_SKILLS), TextOpenSkillsWindow, TextCloseSkillsWindow, false);
 	InsertChild(SkillsButton);
-	BattleButton = new TTextToggleButton(SkinProperties().Data60C.width, SkinProperties().Data60C.height, "Battle", 14,
-		15, TCallback(Receiver, EVENT_TOGGLE_BATTLE), TextOpenBattleWindow, TextCloseBattleWindow, false);
+	BattleButton = new TTextToggleButton(SkinProperties().ButtonsWindowSkillsAndBattle.width, SkinProperties().ButtonsWindowSkillsAndBattle.height, "Battle", SKIN_SMALL_BUTTON_UP,
+		SKIN_SMALL_BUTTON_DOWN, TCallback(Receiver, EVENT_TOGGLE_BATTLE), TextOpenBattleWindow, TextCloseBattleWindow, false);
 	InsertChild(BattleButton);
-	BuddyButton = new TTextToggleButton(SkinProperties().Data61C.x, SkinProperties().Data61C.y, "VIP", 14, 15,
+	BuddyButton = new TTextToggleButton(SkinProperties().ButtonsWindowBuddyAndLogout.x, SkinProperties().ButtonsWindowBuddyAndLogout.y, "VIP", SKIN_SMALL_BUTTON_UP, SKIN_SMALL_BUTTON_DOWN,
 		TCallback(Receiver, EVENT_TOGGLE_VIP), TextOpenVIPWindow, TextCloseVIPWindow, false);
 	InsertChild(BuddyButton);
-	LogoutButton = new TTextButton(SkinProperties().Data61C.width, SkinProperties().Data61C.height, "Logout",
+	LogoutButton = new TTextButton(SkinProperties().ButtonsWindowBuddyAndLogout.width, SkinProperties().ButtonsWindowBuddyAndLogout.height, "Logout",
 		TCallback(Receiver, EVENT_LEAVE_QUESTION), TextLeaveGame);
 	InsertChild(LogoutButton);
 }
@@ -235,16 +235,16 @@ TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
 // 0x4268c0, line 322. A button shows as pressed while its window is open.
 void TButtonsWindow::Draw(int Surface, int x, int y)
 {
-	SkillsButton->State = CheckObject->hasContentWindow(6);
-	BattleButton->State = CheckObject->hasContentWindow(7);
-	BuddyButton->State = CheckObject->hasContentWindow(9);
+	SkillsButton->State = CheckObject->hasContentWindow(SKILLS_WINDOW);
+	BattleButton->State = CheckObject->hasContentWindow(BATTLE_WINDOW);
+	BuddyButton->State = CheckObject->hasContentWindow(BUDDYLIST_WINDOW);
 	TContentWindow::Draw(Surface, x, y);
 }
 
 // 0x426aa0, line 334
 bool TButtonsWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(16);
+	SetHelpHandle(HELP_CONTROL_BUTTONS);
 	SetHelpSize(Width, Height);
 	return true;
 }
@@ -256,28 +256,28 @@ bool TButtonsWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int 
 // Alt+Home/End zoom, Alt+PageUp/PageDown change the floor, Alt+cursor
 // scrolls.
 TAutomapWindow::TAutomapWindow()
-	: TContentWindow(3, true)
+	: TContentWindow(AUTOMAP_WINDOW, true)
 {
 	DrawingListLength = 4;
 	DrawingList.reset(new TDrawing[4]);
-	SetSize(SkinProperties().Data184, SkinProperties().Data220);
+	SetSize(SkinProperties().SideBarWidth, SkinProperties().AutomapWindowHeight);
 	Changed = true;
 	Centred = true;
 	Zoom = GetAutomapZoom();
 	if (Zoom != 1 && Zoom != 2 && Zoom != 4 && Zoom != 8)
 		Zoom = 2;
 	View = new TAutomapView;
-	CentreButton = new TTextButton(SkinProperties().Data264.x, SkinProperties().Data264.y, "Centre", TCallback(this, EVENT_AUTOMAP_CENTRE),
+	CentreButton = new TTextButton(SkinProperties().AutomapCentreButtonAndCompassRose.x, SkinProperties().AutomapCentreButtonAndCompassRose.y, "Centre", TCallback(this, EVENT_AUTOMAP_CENTRE),
 		TextCentreAroundPlayer);
-	FloorUpButton = new TSkinButton(SkinProperties().Data254.x, SkinProperties().Data254.y, 70, 71, TCallback(this, EVENT_AUTOMAP_FLOOR_UP),
+	FloorUpButton = new TSkinButton(SkinProperties().AutomapFloorButtons.x, SkinProperties().AutomapFloorButtons.y, SKIN_HIGHER_FLOOR_BUTTON_UP, SKIN_HIGHER_FLOOR_BUTTON_DOWN, TCallback(this, EVENT_AUTOMAP_FLOOR_UP),
 		TextShowHigherFloor, false);
-	FloorDownButton = new TSkinButton(SkinProperties().Data254.width, SkinProperties().Data254.height, 72, 73,
+	FloorDownButton = new TSkinButton(SkinProperties().AutomapFloorButtons.width, SkinProperties().AutomapFloorButtons.height, SKIN_LOWER_FLOOR_BUTTON_UP, SKIN_LOWER_FLOOR_BUTTON_DOWN,
 		TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN), TextShowLowerFloor, false);
-	ZoomInButton = new TSkinButton(SkinProperties().Data244.x, SkinProperties().Data244.y, 66, 67, TCallback(this, EVENT_AUTOMAP_ZOOM_IN),
+	ZoomInButton = new TSkinButton(SkinProperties().AutomapZoomButtons.x, SkinProperties().AutomapZoomButtons.y, SKIN_ZOOM_IN_BUTTON_UP, SKIN_ZOOM_IN_BUTTON_DOWN, TCallback(this, EVENT_AUTOMAP_ZOOM_IN),
 		TextZoomIn, false);
-	ZoomOutButton = new TSkinButton(SkinProperties().Data244.width, SkinProperties().Data244.height, 68, 69,
+	ZoomOutButton = new TSkinButton(SkinProperties().AutomapZoomButtons.width, SkinProperties().AutomapZoomButtons.height, SKIN_ZOOM_OUT_BUTTON_UP, SKIN_ZOOM_OUT_BUTTON_DOWN,
 		TCallback(this, EVENT_AUTOMAP_ZOOM_OUT), TextZoomOut, false);
-	CompassRose = new TCompassRose(65);
+	CompassRose = new TCompassRose(SKIN_COMPASS_ROSE);
 	InsertChild(View);
 	InsertChild(CentreButton);
 	InsertChild(FloorUpButton);
@@ -285,18 +285,18 @@ TAutomapWindow::TAutomapWindow()
 	InsertChild(ZoomInButton);
 	InsertChild(ZoomOutButton);
 	InsertChild(CompassRose);
-	SetChildArea(View, SkinProperties().Data234);
-	SetChildPosition(CompassRose, SkinProperties().Data264.width, SkinProperties().Data264.height);
-	CompassRose->SetSize(Skins()[65].width, Skins()[65].height);
+	SetChildArea(View, SkinProperties().AutomapView);
+	SetChildPosition(CompassRose, SkinProperties().AutomapCentreButtonAndCompassRose.width, SkinProperties().AutomapCentreButtonAndCompassRose.height);
+	CompassRose->SetSize(Skins()[SKIN_COMPASS_ROSE].width, Skins()[SKIN_COMPASS_ROSE].height);
 	Arrange();
-	AddHotkey(0x912, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
-	AddHotkey(0x913, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
-	AddHotkey(0x914, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
-	AddHotkey(0x915, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
-	AddHotkey(0x90c, TCallback(this, EVENT_AUTOMAP_NORTH));
-	AddHotkey(0x90d, TCallback(this, EVENT_AUTOMAP_WEST));
-	AddHotkey(0x90e, TCallback(this, EVENT_AUTOMAP_EAST));
-	AddHotkey(0x90f, TCallback(this, EVENT_AUTOMAP_SOUTH));
+	AddHotkey(KEY_ALT | KEY_HOME, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
+	AddHotkey(KEY_ALT | KEY_END, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
+	AddHotkey(KEY_ALT | KEY_PAGE_UP, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
+	AddHotkey(KEY_ALT | KEY_PAGE_DOWN, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
+	AddHotkey(KEY_ALT | KEY_UP, TCallback(this, EVENT_AUTOMAP_NORTH));
+	AddHotkey(KEY_ALT | KEY_LEFT, TCallback(this, EVENT_AUTOMAP_WEST));
+	AddHotkey(KEY_ALT | KEY_RIGHT, TCallback(this, EVENT_AUTOMAP_EAST));
+	AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
 }
 
 // 0x426c40, line 406 (deleting destructor 0x436e80). Its work is the close
@@ -312,14 +312,14 @@ void TAutomapWindow::OnClose()
 {
 	try {
 		SetAutomapZoom(Zoom);
-		RemoveHotkey(0x912);
-		RemoveHotkey(0x913);
-		RemoveHotkey(0x914);
-		RemoveHotkey(0x915);
-		RemoveHotkey(0x90c);
-		RemoveHotkey(0x90d);
-		RemoveHotkey(0x90e);
-		RemoveHotkey(0x90f);
+		RemoveHotkey(KEY_ALT | KEY_HOME);
+		RemoveHotkey(KEY_ALT | KEY_END);
+		RemoveHotkey(KEY_ALT | KEY_PAGE_UP);
+		RemoveHotkey(KEY_ALT | KEY_PAGE_DOWN);
+		RemoveHotkey(KEY_ALT | KEY_UP);
+		RemoveHotkey(KEY_ALT | KEY_LEFT);
+		RemoveHotkey(KEY_ALT | KEY_RIGHT);
+		RemoveHotkey(KEY_ALT | KEY_DOWN);
 	} catch (...) {
 		CloseWhileUnwinding([this] { TContentWindow::OnClose(); });
 		throw;
@@ -330,7 +330,7 @@ void TAutomapWindow::OnClose()
 // 0x426e40, line 418
 bool TAutomapWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(10);
+	SetHelpHandle(HELP_AUTOMAP);
 	SetHelpSize(Width, Height);
 	return true;
 }
@@ -354,19 +354,19 @@ void TAutomapWindow::MouseHover(int x, int y)
 }
 
 // 0x427200, line 465. The frame around the view: skins 9 (top), 11 (left),
-// 10 (right) and 8 (bottom) along the edges of Data224.
+// 10 (right) and 8 (bottom) along the edges of AutomapFrame.
 void TAutomapWindow::Arrange()
 {
 	TContentWindow::Arrange();
 	Changed = true;
-	DrawingList[0] = TDrawing(9, SkinProperties().Data224.x, SkinProperties().Data224.y, SkinProperties().Data224.width,
-		Skins()[9].height, 0, 0);
-	DrawingList[1] = TDrawing(11, SkinProperties().Data224.x, SkinProperties().Data224.y, Skins()[11].width,
-		SkinProperties().Data224.height, 0, 0);
-	DrawingList[2] = TDrawing(10, SkinProperties().Data224.x - 1 + SkinProperties().Data224.width,
-		SkinProperties().Data224.y, Skins()[10].width, SkinProperties().Data224.height, 0, 0);
-	DrawingList[3] = TDrawing(8, SkinProperties().Data224.x, SkinProperties().Data224.height - 1 + SkinProperties().Data224.y,
-		SkinProperties().Data224.width, Skins()[8].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, SkinProperties().AutomapFrame.x, SkinProperties().AutomapFrame.y, SkinProperties().AutomapFrame.width,
+		Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_LEFT, SkinProperties().AutomapFrame.x, SkinProperties().AutomapFrame.y, Skins()[SKIN_FRAME_EDGE_LEFT].width,
+		SkinProperties().AutomapFrame.height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_RIGHT, SkinProperties().AutomapFrame.x - 1 + SkinProperties().AutomapFrame.width,
+		SkinProperties().AutomapFrame.y, Skins()[SKIN_FRAME_EDGE_RIGHT].width, SkinProperties().AutomapFrame.height, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, SkinProperties().AutomapFrame.x, SkinProperties().AutomapFrame.height - 1 + SkinProperties().AutomapFrame.y,
+		SkinProperties().AutomapFrame.width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
 }
 
 // 0x436ea0, line 523. The jump table 0x43716c (byte table 0x437194, Event-3)
@@ -551,7 +551,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 						const int MarkX = (Mark.x - Left) * Window->Zoom / 2;
 						const int MarkY = (Mark.y - Top) * Window->Zoom / 2;
 						if (MarkX >= 0 && MarkY >= 0 && MarkX < 106 && MarkY < 106)
-							DrawSkinClipped(5, MarkX - 5, MarkY - 5, 11, 11, Mark.Type + 74, 0, 0, 106, 106, 0, 0);
+							DrawSkinClipped(5, MarkX - 5, MarkY - 5, 11, 11, Mark.Type + SKIN_MARK_0, 0, 0, 106, 106, 0, 0);
 					}
 				}
 			}
@@ -675,22 +675,22 @@ void TCompassRose::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 void TCapacityLabel::Draw(int Surface, int x, int y)
 {
 	TFixedString<20> Text;
-	PrintFormattedText(Surface, SkinProperties().Style3E0.Data00.x + x, SkinProperties().Style3E0.Data00.y + y,
-		SkinProperties().Style3E0.Data10, "Cap:");
+	PrintFormattedText(Surface, SkinProperties().CapacityLabel.Caption.x + x, SkinProperties().CapacityLabel.Caption.y + y,
+		SkinProperties().CapacityLabel.CaptionFont, "Cap:");
 	Text.Format("{}", GetPlayerCapacity());
-	PrintFormattedText(Surface, SkinProperties().Style3E0.Data24.x + x, SkinProperties().Style3E0.Data24.y + y,
-		SkinProperties().Style3E0.Data34, Text);
+	PrintFormattedText(Surface, SkinProperties().CapacityLabel.Value.x + x, SkinProperties().CapacityLabel.Value.y + y,
+		SkinProperties().CapacityLabel.ValueFont, Text);
 }
 
 // 0x429090, line 875
 void TSoulLabel::Draw(int Surface, int x, int y)
 {
 	TFixedString<20> Text;
-	PrintFormattedText(Surface, SkinProperties().Style428.Data00.x + x, SkinProperties().Style428.Data00.y + y,
-		SkinProperties().Style428.Data10, "Soul:");
+	PrintFormattedText(Surface, SkinProperties().SoulLabel.Caption.x + x, SkinProperties().SoulLabel.Caption.y + y,
+		SkinProperties().SoulLabel.CaptionFont, "Soul:");
 	Text.Format("{}", GetPlayerSoul());
-	PrintFormattedText(Surface, SkinProperties().Style428.Data24.x + x, SkinProperties().Style428.Data24.y + y,
-		SkinProperties().Style428.Data34, Text);
+	PrintFormattedText(Surface, SkinProperties().SoulLabel.Value.x + x, SkinProperties().SoulLabel.Value.y + y,
+		SkinProperties().SoulLabel.ValueFont, Text);
 }
 
 // --- TPlayerStates ----------------------------------------------------------------
@@ -704,38 +704,38 @@ TPlayerStates::TPlayerStates(bool islarge)
 		MaxIcons = 9;
 		DrawingListLength = 2;
 		DrawingList.reset(new TDrawing[2]);
-		DrawingList[0] = TDrawing(100, 0, 0, SkinProperties().Data580.width, SkinProperties().Data580.height, 0, 0);
-		DrawingList[1] = TDrawing(101, SkinProperties().Data580.width - 1, 0, Skins()[101].width, Skins()[101].height, 0,
+		DrawingList[0] = TDrawing(SKIN_PLAYER_STATES_BACKGROUND, 0, 0, SkinProperties().SmallInventoryStates.width, SkinProperties().SmallInventoryStates.height, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_PLAYER_STATES_EDGE_RIGHT, SkinProperties().SmallInventoryStates.width - 1, 0, Skins()[SKIN_PLAYER_STATES_EDGE_RIGHT].width, Skins()[SKIN_PLAYER_STATES_EDGE_RIGHT].height, 0,
 			0);
 	} else {
 		MaxIcons = 10;
 		DrawingListLength = 1;
 		DrawingList.reset(new TDrawing[1]);
-		DrawingList[0] = TDrawing(100, 0, 0, SkinProperties().Style288.Data148.width,
-			SkinProperties().Style288.Data148.height, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_PLAYER_STATES_BACKGROUND, 0, 0, SkinProperties().InventoryView.States.width,
+			SkinProperties().InventoryView.States.height, 0, 0);
 	}
 }
 
-// 0x437210, lines 920-925. The icons side by side, PlayerStates.Data24
+// 0x437210, lines 920-925. The icons side by side, PlayerStates.IconDistance
 // pixels apart.
 void TPlayerStates::Draw(int Surface, int x, int y)
 {
 	TComponent::Draw(Surface, x, y);
 	const int Icons = GetNumberOfIcons();
 	for (int i = 0; i < Icons; i++) {
-		int destx = SkinProperties().PlayerStates.Data24 * i;
+		int destx = SkinProperties().PlayerStates.IconDistance * i;
 		int desty;
 		if (IsLarge) {
-			destx += SkinProperties().PlayerStates.Data00.x;
-			desty = SkinProperties().PlayerStates.Data00.y;
+			destx += SkinProperties().PlayerStates.LargeRow.x;
+			desty = SkinProperties().PlayerStates.LargeRow.y;
 		} else {
-			destx += SkinProperties().PlayerStates.Data10.x;
-			desty = SkinProperties().PlayerStates.Data10.y;
+			destx += SkinProperties().PlayerStates.SmallRow.x;
+			desty = SkinProperties().PlayerStates.SmallRow.y;
 		}
 		const int Skin = GetIcon(i);
 		PATELLA_ASSERT_VALUES(x+destx>=0, x+destx);
 		PATELLA_ASSERT_VALUES(y+desty>=0, y+desty);
-		if (Skin != 0)
+		if (Skin != SKIN_NONE)
 			DrawSkin(Surface, x + destx, y + desty, Skins()[Skin].width, Skins()[Skin].height, Skin, 0, 0);
 	}
 }
@@ -771,43 +771,43 @@ void TPlayerStates::MouseHover(int x, int y)
 	const int Position = GetIconAt(x, y);
 	if (Position != -1) {
 		const int skin = GetIcon(Position);
-		if (skin != 0) {
+		if (skin != SKIN_NONE) {
 			const char *Text;
 			switch (skin) {
-			case 228:
+			case SKIN_STATE_POISONED:
 				Text = TextPoisoned;
 				break;
-			case 229:
+			case SKIN_STATE_BURNING:
 				Text = TextOnFire;
 				break;
-			case 230:
+			case SKIN_STATE_ELECTRIFIED:
 				Text = TextStruckByEnergy;
 				break;
-			case 231:
+			case SKIN_STATE_DRUNK:
 				Text = TextDrunk;
 				break;
-			case 232:
+			case SKIN_STATE_MANA_SHIELD:
 				Text = TextMagicShield;
 				break;
-			case 233:
+			case SKIN_STATE_PARALYZED:
 				Text = TextParalysed;
 				break;
-			case 234:
+			case SKIN_STATE_HASTED:
 				Text = TextHasted;
 				break;
-			case 235:
+			case SKIN_STATE_IN_FIGHT:
 				Text = TextNoLogoutInFight;
 				break;
-			case 236:
+			case SKIN_STATE_SKULL_1:
 				Text = TextMayBeAttacked;
 				break;
-			case 237:
+			case SKIN_STATE_SKULL_2:
 				Text = TextPartyMember;
 				break;
-			case 238:
+			case SKIN_STATE_SKULL_3:
 				Text = TextAttackedUnmarked;
 				break;
-			case 239:
+			case SKIN_STATE_SKULL_4:
 				Text = TextKilledTooMany;
 				break;
 			default:
@@ -824,15 +824,15 @@ int TPlayerStates::GetIconAt(int x, int y) const
 {
 	const int Icons = GetNumberOfIcons();
 	for (int i = 0; i < Icons; i++) {
-		int IconX = SkinProperties().PlayerStates.Data10.x;
-		int IconY = SkinProperties().PlayerStates.Data10.y;
+		int IconX = SkinProperties().PlayerStates.SmallRow.x;
+		int IconY = SkinProperties().PlayerStates.SmallRow.y;
 		if (IsLarge) {
-			IconX = SkinProperties().PlayerStates.Data00.x;
-			IconY = SkinProperties().PlayerStates.Data00.y;
+			IconX = SkinProperties().PlayerStates.LargeRow.x;
+			IconY = SkinProperties().PlayerStates.LargeRow.y;
 		}
-		IconX = SkinProperties().PlayerStates.Data24 * i + IconX;
-		if (IconX <= x && x <= IconX + SkinProperties().PlayerStates.Data24 && IconY <= y
-			&& y <= IconY + SkinProperties().PlayerStates.Data24)
+		IconX = SkinProperties().PlayerStates.IconDistance * i + IconX;
+		if (IconX <= x && x <= IconX + SkinProperties().PlayerStates.IconDistance && IconY <= y
+			&& y <= IconY + SkinProperties().PlayerStates.IconDistance)
 			return i;
 	}
 	return -1;
@@ -850,52 +850,52 @@ int TPlayerStates::GetIcon(int Position)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,SkinProperties().PlayerStates.NumberOfIcons-1), Position,
 		SkinProperties().PlayerStates.NumberOfIcons);
-	int Skin = 0;
+	int Skin = SKIN_NONE;
 	int Found = 0;
 	for (int i = 0; i <= 9 && Found <= Position; i++) {
-		Skin = 0;
+		Skin = SKIN_NONE;
 		switch (i) {
 		case 0:
 			if (IsPlayerPoisoned()) {
 				Found++;
-				Skin = 228;
+				Skin = SKIN_STATE_POISONED;
 			}
 			break;
 		case 1:
 			if (IsPlayerBurning()) {
 				Found++;
-				Skin = 229;
+				Skin = SKIN_STATE_BURNING;
 			}
 			break;
 		case 2:
 			if (IsPlayerManaShielded()) {
 				Found++;
-				Skin = 232;
+				Skin = SKIN_STATE_MANA_SHIELD;
 			}
 			break;
 		case 3:
 			if (IsPlayerParalyzed()) {
 				Found++;
-				Skin = 233;
+				Skin = SKIN_STATE_PARALYZED;
 			}
 			break;
 		case 4:
 			switch (GetCreature(GetPlayerID())->PKFlag) {
-			case 1:
+			case PK_YELLOW:
 				Found++;
-				Skin = 236;
+				Skin = SKIN_STATE_SKULL_1;
 				break;
-			case 2:
+			case PK_GREEN:
 				Found++;
-				Skin = 237;
+				Skin = SKIN_STATE_SKULL_2;
 				break;
-			case 3:
+			case PK_WHITE:
 				Found++;
-				Skin = 238;
+				Skin = SKIN_STATE_SKULL_3;
 				break;
-			case 4:
+			case PK_RED:
 				Found++;
-				Skin = 239;
+				Skin = SKIN_STATE_SKULL_4;
 				break;
 			default:
 				break;
@@ -904,29 +904,29 @@ int TPlayerStates::GetIcon(int Position)
 		case 5:
 			if (IsPlayerInFight()) {
 				Found++;
-				Skin = 235;
+				Skin = SKIN_STATE_IN_FIGHT;
 			}
 			break;
 		case 6:
 			if (IsPlayerDrunk()) {
 				Found++;
-				Skin = 231;
+				Skin = SKIN_STATE_DRUNK;
 			}
 			break;
 		case 7:
 			if (IsPlayerElectrified()) {
 				Found++;
-				Skin = 230;
+				Skin = SKIN_STATE_ELECTRIFIED;
 			}
 			break;
 		case 8:
 			if (IsPlayerHasted()) {
 				Found++;
-				Skin = 234;
+				Skin = SKIN_STATE_HASTED;
 			}
 			break;
 		case 9:
-			Skin = 0;
+			Skin = SKIN_NONE;
 			break;
 		default: // never reached (i is 0-9): the original's TERROR1, see above
 			break;
@@ -939,12 +939,12 @@ int TPlayerStates::GetIcon(int Position)
 
 // 0x429eb0, line 1083. The try block starts after the base class.
 TSmallInventoryWindow::TSmallInventoryWindow()
-	: TContentWindow(2, true)
+	: TContentWindow(SMALL_INVENTORY_WINDOW, true)
 {
 	DrawingListLength = 1;
 	DrawingList.reset(new TDrawing[1]);
-	DrawingList[0] = TDrawing(99, SkinProperties().Data590.x, SkinProperties().Data590.y, SkinProperties().Data590.width,
-		SkinProperties().Data590.height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_SMALL_INVENTORY_DROP_AREA, SkinProperties().SmallInventoryDropArea.x, SkinProperties().SmallInventoryDropArea.y, SkinProperties().SmallInventoryDropArea.width,
+		SkinProperties().SmallInventoryDropArea.height, 0, 0);
 }
 
 // 0x42a0c0, line 1099. A white frame around the drop area while an object
@@ -952,12 +952,12 @@ TSmallInventoryWindow::TSmallInventoryWindow()
 void TSmallInventoryWindow::Draw(int Surface, int x, int y)
 {
 	TContentWindow::Draw(Surface, x, y);
-	if (In(GetMouseX() - SkinProperties().Data590.x - x, 0, SkinProperties().Data590.width - 1)
-		&& In(GetMouseY() - SkinProperties().Data590.y - y, 0, SkinProperties().Data590.height - 1)
+	if (In(GetMouseX() - SkinProperties().SmallInventoryDropArea.x - x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
+		&& In(GetMouseY() - SkinProperties().SmallInventoryDropArea.y - y, 0, SkinProperties().SmallInventoryDropArea.height - 1)
 		&& GetActionState() == ACTIONSTATE_DRAGGING)
 		GetSurface()->DrawFrame(Surface,
-			TRect(SkinProperties().Data590.x + x, SkinProperties().Data590.y + y,
-				SkinProperties().Data590.width, SkinProperties().Data590.height),
+			TRect(SkinProperties().SmallInventoryDropArea.x + x, SkinProperties().SmallInventoryDropArea.y + y,
+				SkinProperties().SmallInventoryDropArea.width, SkinProperties().SmallInventoryDropArea.height),
 			1, TRGBColor(255, 255, 255));
 }
 
@@ -982,8 +982,8 @@ bool AsksForCount(int Flags)
 bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TContentWindow::LeftButtonUp(x, y, Flags);
-	if (In(x - SkinProperties().Data590.x, 0, SkinProperties().Data590.width - 1)
-		&& In(y - SkinProperties().Data590.y, 0, SkinProperties().Data590.height - 1) && GetActionState() == ACTIONSTATE_DRAGGING) {
+	if (In(x - SkinProperties().SmallInventoryDropArea.x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
+		&& In(y - SkinProperties().SmallInventoryDropArea.y, 0, SkinProperties().SmallInventoryDropArea.height - 1) && GetActionState() == ACTIONSTATE_DRAGGING) {
 		int Index, SrcX, SrcY, SrcZ;
 		const TObject *Obj = GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
 		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
@@ -1002,7 +1002,7 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 bool TSmallInventoryWindow::HelpMouseMove(int x, int y)
 {
 	if (!TWindow::HelpMouseMove(x, y)) {
-		SetHelpHandle(13);
+		SetHelpHandle(HELP_MINIMISED_INVENTORY);
 		SetHelpSize(Width, Height);
 	}
 	return true;
@@ -1014,54 +1014,54 @@ bool TSmallInventoryWindow::HelpMouseMove(int x, int y)
 // "minimise" button is event 23 of the main window.
 TInventoryView::TInventoryView(TWindow *Receiver)
 {
-	SetSize(SkinProperties().Style288.Data00, SkinProperties().Style288.Data04);
-	TSkinButton *Minimise = new TSkinButton(0, 0, 138, 139, TCallback(Receiver, EVENT_MINIMISE_INVENTORY), TextMinimiseInventory, false);
+	SetSize(SkinProperties().InventoryView.Width, SkinProperties().InventoryView.Height);
+	TSkinButton *Minimise = new TSkinButton(0, 0, SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN, TCallback(Receiver, EVENT_MINIMISE_INVENTORY), TextMinimiseInventory, false);
 	InsertChild(Minimise);
-	SetChildPosition(Minimise, SkinProperties().Style288.Data08.x, SkinProperties().Style288.Data08.y);
+	SetChildPosition(Minimise, SkinProperties().InventoryView.MinimiseButton.x, SkinProperties().InventoryView.MinimiseButton.y);
 	TCapacityLabel *Capacity = new TCapacityLabel;
 	InsertChild(Capacity);
-	SetChildArea(Capacity, SkinProperties().Style288.Data128);
+	SetChildArea(Capacity, SkinProperties().InventoryView.Capacity);
 	TSoulLabel *Soul = new TSoulLabel;
 	InsertChild(Soul);
-	SetChildArea(Soul, SkinProperties().Style288.Data138);
+	SetChildArea(Soul, SkinProperties().InventoryView.Soul);
 	TPlayerStates *States = new TPlayerStates(true);
 	InsertChild(States);
-	SetChildArea(States, SkinProperties().Style288.Data148);
+	SetChildArea(States, SkinProperties().InventoryView.States);
 	Arrange();
 }
 
 // 0x42aa90, lines 1181-1209. The backgrounds of capacity and soul (skin 98),
 // the children, then the ten slots: a frame (skin 102), the object or the
-// slot's empty picture (skins Style288.Data100), and a white frame while an
+// slot's empty picture (skins InventoryView.EmptySlotSkins), and a white frame while an
 // object is dragged over a slot.
 void TInventoryView::Draw(int Surface, int x, int y)
 {
-	int destx = SkinProperties().Style288.Data128.x + x;
-	int desty = SkinProperties().Style288.Data128.y + y;
+	int destx = SkinProperties().InventoryView.Capacity.x + x;
+	int desty = SkinProperties().InventoryView.Capacity.y + y;
 	PATELLA_ASSERT_VALUES(destx>=0, destx);
 	PATELLA_ASSERT_VALUES(desty>=0, desty);
-	DrawSkin(Surface, destx, desty, SkinProperties().Style288.Data128.width, SkinProperties().Style288.Data128.height, 98,
+	DrawSkin(Surface, destx, desty, SkinProperties().InventoryView.Capacity.width, SkinProperties().InventoryView.Capacity.height, SKIN_SOUL_CAPACITY_BACKGROUND,
 		0, 0);
-	destx = SkinProperties().Style288.Data138.x + x;
-	desty = y + SkinProperties().Style288.Data138.y;
+	destx = SkinProperties().InventoryView.Soul.x + x;
+	desty = y + SkinProperties().InventoryView.Soul.y;
 	PATELLA_ASSERT_VALUES(destx>=0, destx);
 	PATELLA_ASSERT_VALUES(desty>=0, desty);
-	DrawSkin(Surface, destx, desty, SkinProperties().Style288.Data138.width, SkinProperties().Style288.Data138.height, 98,
+	DrawSkin(Surface, destx, desty, SkinProperties().InventoryView.Soul.width, SkinProperties().InventoryView.Soul.height, SKIN_SOUL_CAPACITY_BACKGROUND,
 		0, 0);
 	TWindow::Draw(Surface, x, y);
 	for (int i = 0; i < 10; i++) {
 		const TObject Obj = *GetBodyObject(i + 1);
-		DrawPicturePart(Surface, SkinProperties().Style288.Data60[i].x + x, SkinProperties().Style288.Data60[i].y + y, 4,
-			Skins()[102].x, Skins()[102].y, Skins()[102].width, Skins()[102].height);
-		const int ObjX = SkinProperties().Style288.Data10[i].x + x;
-		const int ObjY = SkinProperties().Style288.Data10[i].y + y;
+		DrawPicturePart(Surface, SkinProperties().InventoryView.Slots[i].x + x, SkinProperties().InventoryView.Slots[i].y + y, 4,
+			Skins()[SKIN_SLOT_FRAME].x, Skins()[SKIN_SLOT_FRAME].y, Skins()[SKIN_SLOT_FRAME].width, Skins()[SKIN_SLOT_FRAME].height);
+		const int ObjX = SkinProperties().InventoryView.Objects[i].x + x;
+		const int ObjY = SkinProperties().InventoryView.Objects[i].y + y;
 		if (Obj.Type == 0) {
-			const int Empty = SkinProperties().Style288.Data100[i];
+			const int Empty = SkinProperties().InventoryView.EmptySlotSkins[i];
 			DrawPicturePart(Surface, ObjX, ObjY, 4, Skins()[Empty].x, Skins()[Empty].y, Skins()[Empty].width,
 				Skins()[Empty].height);
 		} else {
 			DrawObject(Surface, ObjX, ObjY, 32, Obj, TRGBColor(0, 0, 0), TRect(ObjX, ObjY, 32, 32),
-				SkinProperties().Data498, false);
+				SkinProperties().ObjectCountFont, false);
 		}
 		if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ObjX, ObjX + 31) && In(GetMouseY(), ObjY, ObjY + 31))
 			GetSurface()->DrawFrame(Surface, TRect(ObjX - 1, ObjY - 1, 34, 34), 1, TRGBColor(255, 255, 255));
@@ -1171,7 +1171,7 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 // 0x42b1b0, lines 1339-1344
 bool TInventoryView::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(12);
+	SetHelpHandle(HELP_INVENTORY);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1179,12 +1179,12 @@ bool TInventoryView::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int 
 	return true;
 }
 
-// 0x42b450. The body slot (1-10) whose area (Style288.Data60) holds x, y;
+// 0x42b450. The body slot (1-10) whose area (InventoryView.Slots) holds x, y;
 // 0 for none. The try block was dropped (nothing in it can throw).
 int TInventoryView::GetSlotAt(int x, int y)
 {
 	for (int i = 0; i < 10; i++) {
-		const TRect &Area = SkinProperties().Style288.Data60[i];
+		const TRect &Area = SkinProperties().InventoryView.Slots[i];
 		if (x - Area.x >= 0 && x - Area.x <= Area.width && y - Area.y >= 0 && y - Area.y <= Area.height)
 			return i + 1;
 	}
@@ -1194,45 +1194,45 @@ int TInventoryView::GetSlotAt(int x, int y)
 // --- TCombatControls --------------------------------------------------------------
 
 // 0x42b4d0, line 1425. The try block starts after the base class. The
-// layout (Style4AC for the large controls, Style4FC for the small ones) is
+// layout (LargeCombatControls for the large controls, SmallCombatControls for the small ones) is
 // copied first. The radio groups have no selection until the modes are read
 // at the end (none for an unknown mode).
 TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 {
 	IsLarge = Large;
-	const TCombatControlsProperties Layout = Large ? SkinProperties().Style4AC : SkinProperties().Style4FC;
+	const TCombatControlsProperties Layout = Large ? SkinProperties().LargeCombatControls : SkinProperties().SmallCombatControls;
 	AttackModes.reset(new TRadioButtonGroup);
 	ChaseModes.reset(new TRadioButtonGroup);
 	SetSize(Layout.Width, Layout.Height);
-	TSkinButton *Offensive = new TSkinButton(Layout.Buttons[0].x, Layout.Buttons[0].y, 103, 104, TCallback(this, EVENT_ATTACK_OFFENSIVE),
+	TSkinButton *Offensive = new TSkinButton(Layout.Buttons[0].x, Layout.Buttons[0].y, SKIN_OFFENSIVE_BUTTON_UP, SKIN_OFFENSIVE_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_OFFENSIVE),
 		TextOffensiveFighting, false);
 	Offensive->SetRadioButtonGroup(AttackModes.get());
 	InsertChild(Offensive);
-	TSkinButton *Balanced = new TSkinButton(Layout.Buttons[1].x, Layout.Buttons[1].y, 105, 106, TCallback(this, EVENT_ATTACK_BALANCED),
+	TSkinButton *Balanced = new TSkinButton(Layout.Buttons[1].x, Layout.Buttons[1].y, SKIN_BALANCED_BUTTON_UP, SKIN_BALANCED_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_BALANCED),
 		TextBalancedFighting, false);
 	Balanced->SetRadioButtonGroup(AttackModes.get());
 	InsertChild(Balanced);
-	TSkinButton *Defensive = new TSkinButton(Layout.Buttons[2].x, Layout.Buttons[2].y, 107, 108, TCallback(this, EVENT_ATTACK_DEFENSIVE),
+	TSkinButton *Defensive = new TSkinButton(Layout.Buttons[2].x, Layout.Buttons[2].y, SKIN_DEFENSIVE_BUTTON_UP, SKIN_DEFENSIVE_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_DEFENSIVE),
 		TextDefensiveFighting, false);
 	Defensive->SetRadioButtonGroup(AttackModes.get());
 	InsertChild(Defensive);
-	StandButton = new TSkinButton(Layout.Buttons[3].x, Layout.Buttons[3].y, 109, 110, TCallback(this, EVENT_CHASE_STAND),
+	StandButton = new TSkinButton(Layout.Buttons[3].x, Layout.Buttons[3].y, SKIN_STAND_BUTTON_UP, SKIN_STAND_BUTTON_DOWN, TCallback(this, EVENT_CHASE_STAND),
 		TextStandWhileFighting, false);
 	StandButton->SetRadioButtonGroup(ChaseModes.get());
 	InsertChild(StandButton);
-	ChaseButton = new TSkinButton(Layout.Buttons[4].x, Layout.Buttons[4].y, 111, 112, TCallback(this, EVENT_CHASE_ON),
+	ChaseButton = new TSkinButton(Layout.Buttons[4].x, Layout.Buttons[4].y, SKIN_CHASE_BUTTON_UP, SKIN_CHASE_BUTTON_DOWN, TCallback(this, EVENT_CHASE_ON),
 		TextChaseOpponent, false);
 	ChaseButton->SetRadioButtonGroup(ChaseModes.get());
 	InsertChild(ChaseButton);
-	SecureButton = new TToggleButton(Layout.Buttons[5].x, Layout.Buttons[5].y, 113, 114, TCallback(this, EVENT_SECURE_MODE),
+	SecureButton = new TToggleButton(Layout.Buttons[5].x, Layout.Buttons[5].y, SKIN_SECURE_BUTTON_UP, SKIN_SECURE_BUTTON_DOWN, TCallback(this, EVENT_SECURE_MODE),
 		TextCannotAttackUnmarked, TextCanAttackAny, false);
 	InsertChild(SecureButton);
 	InsertChild(new TTextButton(Layout.Buttons[6].x, Layout.Buttons[6].y, "Stop", TCallback(Receiver, EVENT_STOP),
 		TextStopCurrentAction));
 	if (!IsLarge) {
-		InsertChild(new TSkinButton(Layout.Buttons[7].x, Layout.Buttons[7].y, 115, 116, TCallback(Receiver, EVENT_OPTIONS),
+		InsertChild(new TSkinButton(Layout.Buttons[7].x, Layout.Buttons[7].y, SKIN_OPTIONS_BUTTON_UP, SKIN_OPTIONS_BUTTON_DOWN, TCallback(Receiver, EVENT_OPTIONS),
 			TextOpenOptions, false));
-		InsertChild(new TSkinButton(Layout.Buttons[8].x, Layout.Buttons[8].y, 117, 118, TCallback(Receiver, EVENT_HELP),
+		InsertChild(new TSkinButton(Layout.Buttons[8].x, Layout.Buttons[8].y, SKIN_HELP_BUTTON_UP, SKIN_HELP_BUTTON_DOWN, TCallback(Receiver, EVENT_HELP),
 			TextOpenHelpMenu, false));
 	} else {
 		InsertChild(new TTextButton(Layout.Buttons[7].x, Layout.Buttons[7].y, "Options", TCallback(Receiver, EVENT_OPTIONS),
@@ -1241,23 +1241,23 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 			TextOpenHelpMenu));
 	}
 	switch (GetAttackMode()) {
-	case 1:
+	case ATTACK_OFFENSIVE:
 		AttackModes->Selected = Offensive;
 		break;
-	case 2:
+	case ATTACK_BALANCED:
 		AttackModes->Selected = Balanced;
 		break;
-	case 3:
+	case ATTACK_DEFENSIVE:
 		AttackModes->Selected = Defensive;
 		break;
 	default:
 		break;
 	}
 	switch (GetChaseMode()) {
-	case 0:
+	case CHASE_STAND:
 		ChaseModes->Selected = StandButton;
 		break;
-	case 1:
+	case CHASE_ON:
 		ChaseModes->Selected = ChaseButton;
 		break;
 	default:
@@ -1272,11 +1272,11 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 void TCombatControls::Draw(int Surface, int x, int y)
 {
 	switch (GetChaseMode()) {
-	case 0:
+	case CHASE_STAND:
 		if (ChaseModes->Selected != StandButton)
 			ChaseModes->Selected = StandButton;
 		break;
-	case 1:
+	case CHASE_ON:
 		if (ChaseModes->Selected != ChaseButton)
 			ChaseModes->Selected = ChaseButton;
 		break;
@@ -1290,9 +1290,9 @@ void TCombatControls::Draw(int Surface, int x, int y)
 bool TCombatControls::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	if (!IsLarge)
-		SetHelpHandle(15);
+		SetHelpHandle(HELP_COMBAT_CONTROLS_SMALL);
 	else
-		SetHelpHandle(14);
+		SetHelpHandle(HELP_COMBAT_CONTROLS_LARGE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1306,19 +1306,19 @@ void TCombatControls::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_ATTACK_DEFENSIVE:
-		SetAttackMode(3);
+		SetAttackMode(ATTACK_DEFENSIVE);
 		break;
 	case EVENT_ATTACK_BALANCED:
-		SetAttackMode(2);
+		SetAttackMode(ATTACK_BALANCED);
 		break;
 	case EVENT_ATTACK_OFFENSIVE:
-		SetAttackMode(1);
+		SetAttackMode(ATTACK_OFFENSIVE);
 		break;
 	case EVENT_CHASE_STAND:
-		SetChaseMode(0);
+		SetChaseMode(CHASE_STAND);
 		break;
 	case EVENT_CHASE_ON:
-		SetChaseMode(1);
+		SetChaseMode(CHASE_ON);
 		break;
 	case EVENT_SECURE_MODE:
 		SetSecureMode(!SecureButton->State);
@@ -1333,13 +1333,13 @@ void TCombatControls::HandleEvent(int Event)
 
 // 0x438310, line 1522. The try block starts after the base class.
 TStatusWindow::TStatusWindow()
-	: TContentWindow(4, true)
+	: TContentWindow(STATUS_WINDOW, true)
 {
 	DrawingListLength = 4;
 	DrawingList.reset(new TDrawing[4]);
 	Data44 = 100;
 	Data48 = 100;
-	SetSize(SkinProperties().Data184, SkinProperties().StatusWindow.Data00);
+	SetSize(SkinProperties().SideBarWidth, SkinProperties().StatusWindow.Height);
 	Arrange();
 }
 
@@ -1354,31 +1354,31 @@ void TStatusWindow::Draw(int Surface, int x, int y)
 	const int MaxMana = GetPlayerMaxMana();
 	TFixedString<16> Text;
 	Text.Format("{}", Health);
-	PrintFormattedText(Surface, SkinProperties().StatusWindow.Data34.x + x, SkinProperties().StatusWindow.Data34.y + y,
-		SkinProperties().StatusWindow.Data54, Text);
+	PrintFormattedText(Surface, SkinProperties().StatusWindow.HitpointsValue.x + x, SkinProperties().StatusWindow.HitpointsValue.y + y,
+		SkinProperties().StatusWindow.ValueFont, Text);
 	Text.Format("{}", Mana);
-	PrintFormattedText(Surface, SkinProperties().StatusWindow.Data44.x + x, SkinProperties().StatusWindow.Data44.y + y,
-		SkinProperties().StatusWindow.Data54, Text);
+	PrintFormattedText(Surface, SkinProperties().StatusWindow.ManaValue.x + x, SkinProperties().StatusWindow.ManaValue.y + y,
+		SkinProperties().StatusWindow.ValueFont, Text);
 	int BarWidth = SkinProperties().StatusWindow.HitpointsBar.width;
 	if (Health < MaxHealth)
 		BarWidth = SkinProperties().StatusWindow.HitpointsBar.width * Health / MaxHealth;
 	PATELLA_ASSERT_VALUES(x+SkinProperties().StatusWindow.HitpointsBar.x>=0, x);
 	PATELLA_ASSERT_VALUES(y+SkinProperties().StatusWindow.HitpointsBar.y>=0, y);
 	DrawSkin(Surface, SkinProperties().StatusWindow.HitpointsBar.x + x, y + SkinProperties().StatusWindow.HitpointsBar.y,
-		BarWidth, Skins()[121].height, 121, 0, 0);
+		BarWidth, Skins()[SKIN_HITPOINTS_BAR].height, SKIN_HITPOINTS_BAR, 0, 0);
 	BarWidth = SkinProperties().StatusWindow.ManaBar.width;
 	if (Mana < MaxMana)
 		BarWidth = SkinProperties().StatusWindow.ManaBar.width * Mana / MaxMana;
 	PATELLA_ASSERT_VALUES(x+SkinProperties().StatusWindow.ManaBar.x>=0, x);
 	PATELLA_ASSERT_VALUES(y+SkinProperties().StatusWindow.ManaBar.y>=0, y);
 	DrawSkin(Surface, SkinProperties().StatusWindow.ManaBar.x + x, SkinProperties().StatusWindow.ManaBar.y + y, BarWidth,
-		Skins()[124].height, 124, 0, 0);
+		Skins()[SKIN_MANA_BAR].height, SKIN_MANA_BAR, 0, 0);
 }
 
 // 0x42c830, line 1571
 bool TStatusWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(11);
+	SetHelpHandle(HELP_STATUS_BARS);
 	SetHelpSize(Width, Height);
 	return true;
 }
@@ -1388,13 +1388,13 @@ bool TStatusWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y
 void TStatusWindow::Arrange()
 {
 	TContentWindow::Arrange();
-	DrawingList[0] = TDrawing(119, SkinProperties().StatusWindow.Data04.x, SkinProperties().StatusWindow.Data04.y,
-		Skins()[119].width, Skins()[119].height, 0, 0);
-	DrawingList[1] = TDrawing(122, SkinProperties().StatusWindow.Data04.width, SkinProperties().StatusWindow.Data04.height,
-		Skins()[122].width, Skins()[122].height, 0, 0);
-	DrawingList[2] = TDrawing(120, SkinProperties().StatusWindow.HitpointsBar.x, SkinProperties().StatusWindow.HitpointsBar.y,
+	DrawingList[0] = TDrawing(SKIN_HITPOINTS_ICON, SkinProperties().StatusWindow.Pictures.x, SkinProperties().StatusWindow.Pictures.y,
+		Skins()[SKIN_HITPOINTS_ICON].width, Skins()[SKIN_HITPOINTS_ICON].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_MANA_ICON, SkinProperties().StatusWindow.Pictures.width, SkinProperties().StatusWindow.Pictures.height,
+		Skins()[SKIN_MANA_ICON].width, Skins()[SKIN_MANA_ICON].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_HITPOINTS_BAR_BACKGROUND, SkinProperties().StatusWindow.HitpointsBar.x, SkinProperties().StatusWindow.HitpointsBar.y,
 		SkinProperties().StatusWindow.HitpointsBar.width, SkinProperties().StatusWindow.HitpointsBar.height, 0, 0);
-	DrawingList[3] = TDrawing(123, SkinProperties().StatusWindow.ManaBar.x, SkinProperties().StatusWindow.ManaBar.y,
+	DrawingList[3] = TDrawing(SKIN_MANA_BAR_BACKGROUND, SkinProperties().StatusWindow.ManaBar.x, SkinProperties().StatusWindow.ManaBar.y,
 		SkinProperties().StatusWindow.ManaBar.width, SkinProperties().StatusWindow.ManaBar.height, 0, 0);
 }
 
@@ -1404,7 +1404,7 @@ void TStatusWindow::Arrange()
 TContainerWindowBody::TContainerWindowBody(int _Container)
 {
 	Container = _Container;
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data870, SkinProperties().Data874), 0, 0, 0, 0, 10);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0, 10);
 	InsertChild(ScrollBar);
 	HasParent = false;
 	Arrange();
@@ -1446,13 +1446,13 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 		const int Bottom = Height - 1;
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
-		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, 7, 0, ScrollY % Skins()[7].height);
+		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 		if (IsContainerOpen(Container)) {
 			for (int i = 0; i < Capacity; i++) {
-				const int SlotX = i % SkinProperties().Data62C * SkinProperties().Data648;
-				const int SlotY = i / SkinProperties().Data62C * SkinProperties().Data64C - ScrollY;
-				int Top = SlotY + SkinProperties().Data630.y;
-				int ClipHeight = SkinProperties().Data638.y;
+				const int SlotX = i % SkinProperties().ContainerSlotsPerRow * SkinProperties().ContainerColumnWidth;
+				const int SlotY = i / SkinProperties().ContainerSlotsPerRow * SkinProperties().ContainerRowHeight - ScrollY;
+				int Top = SlotY + SkinProperties().ContainerFirstSlot.y;
+				int ClipHeight = SkinProperties().ContainerSlotSizeAndObject.y;
 				if (Top + ClipHeight > 0 && Top <= Bottom) {
 					if (Top < 0) {
 						ClipHeight = Top + ClipHeight;
@@ -1460,20 +1460,20 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 					}
 					if (ClipHeight + Top > Bottom)
 						ClipHeight = Bottom - Top + 1;
-					const int ScreenX = SkinProperties().Data630.x + SlotX + x;
+					const int ScreenX = SkinProperties().ContainerFirstSlot.x + SlotX + x;
 					const int ScreenY = Top + y;
-					const int SlotWidth = SkinProperties().Data638.x;
-					DrawPicturePart(Surface, ScreenX, ScreenY, 4, Skins()[125].x, Skins()[125].y, SlotWidth, ClipHeight);
+					const int SlotWidth = SkinProperties().ContainerSlotSizeAndObject.x;
+					DrawPicturePart(Surface, ScreenX, ScreenY, 4, Skins()[SKIN_CONTAINER_SLOT].x, Skins()[SKIN_CONTAINER_SLOT].y, SlotWidth, ClipHeight);
 					if (i < ObjectCount)
-						DrawObject(Surface, SkinProperties().Data638.width + SlotX + x,
-							SkinProperties().Data638.height + SlotY + y, 32, GetContainerContent(Container, i),
-							TRGBColor(0, 0, 0), TRect(ScreenX, ScreenY, SlotWidth, ClipHeight), SkinProperties().Data498,
+						DrawObject(Surface, SkinProperties().ContainerSlotSizeAndObject.width + SlotX + x,
+							SkinProperties().ContainerSlotSizeAndObject.height + SlotY + y, 32, GetContainerContent(Container, i),
+							TRGBColor(0, 0, 0), TRect(ScreenX, ScreenY, SlotWidth, ClipHeight), SkinProperties().ObjectCountFont,
 							false);
 					if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
 						&& In(GetMouseY(), ScreenY, ScreenY + ClipHeight - 1))
 						GetSurface()->DrawFrameClipped(Surface,
-							TRect(SkinProperties().Data630.x + SlotX + x,
-								SlotY + SkinProperties().Data630.y + y, 34, 34),
+							TRect(SkinProperties().ContainerFirstSlot.x + SlotX + x,
+								SlotY + SkinProperties().ContainerFirstSlot.y + y, 34, 34),
 							1, TRGBColor(255, 255, 255),
 							TRect(ScreenX, ScreenY, SlotWidth, ClipHeight));
 				}
@@ -1500,7 +1500,7 @@ void TContainerWindowBody::SetSize(int Width, int Height)
 // 0x42d6f0, line 1693
 int TContainerWindowBody::getMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().Data650);
+	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().ContainerMinimumHeight);
 }
 
 // 0x42d890, line 1712
@@ -1521,8 +1521,8 @@ void TContainerWindowBody::Arrange()
 	ScrollBar->Range->SetRange(0, ContentHeight - Height, ScrollBar->Range->Value, Height);
 	TSubWindow *Window = static_cast<TSubWindow *>(GetParent());
 	if (Window != nullptr) {
-		TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().Style194.Data80, false);
-		TLabel *Title = new TLabel(SkinProperties().Style194.Data38, GetContainerName(Container));
+		TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
+		TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container));
 		Window->SetIcon(Icon);
 		Window->SetTitle(Title);
 	}
@@ -1637,7 +1637,7 @@ bool TContainerWindowBody::MouseWheel(int x, int y, int Code)
 // 0x42de80, lines 1885-1890
 bool TContainerWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(20);
+	SetHelpHandle(HELP_OPEN_CONTAINERS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1670,12 +1670,12 @@ int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 {
 	// x and y become positions in the slot grid in their own stack slots
 	// (0x42e302, 0x42e30c): the original's catch wrapper printed them (issue #34).
-	x -= SkinProperties().Data630.x;
-	y += ScrollBar->Range->Value - SkinProperties().Data630.y;
-	const int Column = x / SkinProperties().Data648;
-	if (Column < SkinProperties().Data62C && x % SkinProperties().Data648 <= SkinProperties().Data638.x
-		&& y % SkinProperties().Data64C <= SkinProperties().Data638.y) {
-		const int Position = SkinProperties().Data62C * (y / SkinProperties().Data64C) + Column;
+	x -= SkinProperties().ContainerFirstSlot.x;
+	y += ScrollBar->Range->Value - SkinProperties().ContainerFirstSlot.y;
+	const int Column = x / SkinProperties().ContainerColumnWidth;
+	if (Column < SkinProperties().ContainerSlotsPerRow && x % SkinProperties().ContainerColumnWidth <= SkinProperties().ContainerSlotSizeAndObject.x
+		&& y % SkinProperties().ContainerRowHeight <= SkinProperties().ContainerSlotSizeAndObject.y) {
+		const int Position = SkinProperties().ContainerSlotsPerRow * (y / SkinProperties().ContainerRowHeight) + Column;
 		if (Occupied && GetContainerObjectCount(Container) <= Position)
 			return -1;
 		return Position;
@@ -1706,8 +1706,8 @@ void TContainerWindowBody::UpdateUpButton()
 TSkillsWindowBody::TSkillsWindowBody()
 {
 	ContextMenu = nullptr;
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data870, SkinProperties().Data874), 0, 0, 0, 0,
-		GetFontLineHeight(SkinProperties().Data654.FontNumber) / 2);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0,
+		GetFontLineHeight(SkinProperties().SkillsFont.FontNumber) / 2);
 	InsertChild(ScrollBar);
 	Lines = 15;
 	Arrange();
@@ -1741,7 +1741,7 @@ void UpdateContainerUpButton(TSubWindowBody *Body)
 
 // 0x4394d0, lines 2003-2063. One line per skill: the name on the left, the
 // value on the right; a bar of the progress below it when the skill's bar
-// is on (Data670 for the first seven lines, then Data67C); line 8 is a
+// is on (SkillsFirstBarsColor for the first seven lines, then SkillsOtherBarsColor); line 8 is a
 // separator. Odd, kept: a line with a bar is 10 pixels taller here, but 9
 // in MouseHover and GetContentHeight.
 void TSkillsWindowBody::Draw(int Surface, int x, int y)
@@ -1751,14 +1751,14 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 		const int Bottom = Height - 1;
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
-		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, 7, 0, ScrollY % Skins()[7].height);
+		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 		if (!Minimized)
 			TWindow::Draw(Surface, x, y);
-		const int LineHeight = GetFontLineHeight(SkinProperties().Data654.FontNumber);
+		const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 		int LineY = -ScrollY;
-		const int TextWidth = Width - SkinProperties().Data668 * 2 - ScrollBar->Width;
+		const int TextWidth = Width - SkinProperties().SkillsHorizontalMargin * 2 - ScrollBar->Width;
 		int Progress = -1;
-		const int Margin = SkinProperties().Data668;
+		const int Margin = SkinProperties().SkillsHorizontalMargin;
 		for (int i = 0; i < Lines; i++) {
 			TFixedString<100> Text;
 			int Value;
@@ -1766,7 +1766,7 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 			int ItemHeight = LineHeight;
 			if (Progress != -1)
 				ItemHeight = LineHeight + 10;
-			int Top = LineY + SkinProperties().Data66C;
+			int Top = LineY + SkinProperties().SkillsVerticalMargin;
 			int ClipHeight = ItemHeight;
 			if (Top + ItemHeight > 0) {
 				if (Top > Bottom)
@@ -1777,21 +1777,21 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 				}
 				if (ClipHeight + Top > Bottom)
 					ClipHeight = Bottom - Top + 1;
-				const int ClipX = SkinProperties().Data668 + x;
+				const int ClipX = SkinProperties().SkillsHorizontalMargin + x;
 				const int ClipY = Top + y;
-				const int LineMiddle = GetFontHeight(SkinProperties().Data654.FontNumber) / 2 + SkinProperties().Data66C - 1 + LineY;
+				const int LineMiddle = GetFontHeight(SkinProperties().SkillsFont.FontNumber) / 2 + SkinProperties().SkillsVerticalMargin - 1 + LineY;
 				if (!HasValue) {
 					if (LineMiddle >= 0 && LineMiddle <= Bottom)
 						GetSurface()->DrawHorizontalLine(Surface, ClipX, LineMiddle + y, TextWidth,
-							SkinProperties().Data654.Color);
+							SkinProperties().SkillsFont.Color);
 				} else {
 					TFixedString<20> Number;
 					FormatNumber(Value, Number.Chars);
-					PrintTextClipped(Surface, SkinProperties().Data668 + x, SkinProperties().Data66C + LineY + y,
-						SkinProperties().Data654.FontNumber, SkinProperties().Data654.Color, Text, 0,
+					PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + x, SkinProperties().SkillsVerticalMargin + LineY + y,
+						SkinProperties().SkillsFont.FontNumber, SkinProperties().SkillsFont.Color, Text, 0,
 						TRect(ClipX, ClipY, TextWidth, ClipHeight));
-					PrintTextClipped(Surface, SkinProperties().Data668 + TextWidth - 1 + x, SkinProperties().Data66C + LineY + y,
-						SkinProperties().Data654.FontNumber, SkinProperties().Data654.Color, Number, 2,
+					PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + TextWidth - 1 + x, SkinProperties().SkillsVerticalMargin + LineY + y,
+						SkinProperties().SkillsFont.FontNumber, SkinProperties().SkillsFont.Color, Number, 2,
 						TRect(ClipX, ClipY, TextWidth, ClipHeight));
 					if (Progress != -1) {
 						const int BarHeight = 5;
@@ -1802,8 +1802,8 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 						GetSurface()->FillRectangleClipped(Surface,
 							TRect(Margin + x + 1, LineHeight + 8 + LineY + y + 1,
 								(TextWidth - 2) * Progress / 100, BarHeight - 2),
-							i < 7 ? SkinProperties().Data670
-								  : SkinProperties().Data67C,
+							i < 7 ? SkinProperties().SkillsFirstBarsColor
+								  : SkinProperties().SkillsOtherBarsColor,
 							TRect(ClipX, ClipY, TextWidth, ClipHeight));
 					}
 				}
@@ -1824,7 +1824,7 @@ bool TSkillsWindowBody::MouseWheel(int x, int y, int Code)
 // 0x42e8d0, lines 2086-2091
 bool TSkillsWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(17);
+	SetHelpHandle(HELP_SKILLS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1839,8 +1839,8 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 	if (!IsMinimized()) {
 		const int ScrollY = ScrollBar->Range->Value;
 		const int Bottom = Height - 1;
-		const int LineHeight = GetFontLineHeight(SkinProperties().Data654.FontNumber);
-		const int TextWidth = Width - SkinProperties().Data668 * 2 - ScrollBar->Width;
+		const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+		const int TextWidth = Width - SkinProperties().SkillsHorizontalMargin * 2 - ScrollBar->Width;
 		int LineY = -ScrollY;
 		int Progress = -1;
 		for (int i = 0; i < Lines;) {
@@ -1851,19 +1851,19 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 			int ItemHeight = LineHeight;
 			if (Progress != -1)
 				ItemHeight = LineHeight + 9;
-			int Top = SkinProperties().Data66C + LineY;
+			int Top = SkinProperties().SkillsVerticalMargin + LineY;
 			if (Top + ItemHeight > 0) {
 				if (Top > Bottom)
 					return;
 				int ClipHeight = ItemHeight;
 				if (Top < 0) {
 					Top = 0;
-					ClipHeight = SkinProperties().Data66C + LineY + ItemHeight;
+					ClipHeight = SkinProperties().SkillsVerticalMargin + LineY + ItemHeight;
 				}
 				if (ClipHeight + Top > Bottom)
 					ClipHeight = Bottom - Top + 1;
-				if (Top <= y && y <= ClipHeight + Top && SkinProperties().Data668 <= x
-					&& x <= SkinProperties().Data668 + TextWidth && Progress != -1) {
+				if (Top <= y && y <= ClipHeight + Top && SkinProperties().SkillsHorizontalMargin <= x
+					&& x <= SkinProperties().SkillsHorizontalMargin + TextWidth && Progress != -1) {
 					MsvcSnprintf(GUI.SkillMouseOverText, 256, TextPercentToGo, 100 - Progress);
 					SetMouseOverText(GUI.SkillMouseOverText);
 				}
@@ -1894,12 +1894,12 @@ void TSkillsWindowBody::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x42efd0, line 2173. The visible part leaves the margin (Data66C) at the
+// 0x42efd0, line 2173. The visible part leaves the margin (SkillsVerticalMargin) at the
 // top and the bottom.
 void TSkillsWindowBody::Arrange()
 {
 	int ContentHeight = GetContentHeight();
-	const int Visible = Height - SkinProperties().Data66C * 2;
+	const int Visible = Height - SkinProperties().SkillsVerticalMargin * 2;
 	if (ContentHeight <= Visible)
 		ContentHeight = Visible;
 	ScrollBar->Range->SetRange(0, ContentHeight - Visible, ScrollBar->Range->Value, Visible);
@@ -1909,7 +1909,7 @@ void TSkillsWindowBody::Arrange()
 int TSkillsWindowBody::getMinimumHeight()
 {
 	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
-	const int LineHeight = GetFontLineHeight(SkinProperties().Data654.FontNumber);
+	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 	return (std::max)(ScrollBar->getMinimumHeight(), LineHeight);
 }
 
@@ -1917,7 +1917,7 @@ int TSkillsWindowBody::getMinimumHeight()
 // or the full height, at least the minimum.
 int TSkillsWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(6);
+	int Height = GetContentWindowSize(SKILLS_WINDOW);
 	if (Height == 0)
 		Height = GetMaximumHeight();
 	if (Height < getMinimumHeight())
@@ -1928,13 +1928,13 @@ int TSkillsWindowBody::GetInitialHeight()
 // 0x42f500, line 2206
 int TSkillsWindowBody::GetMaximumHeight()
 {
-	return GetContentHeight() + SkinProperties().Data66C * 2;
+	return GetContentHeight() + SkinProperties().SkillsVerticalMargin * 2;
 }
 
 // 0x439ef0, line 2225
 int TSkillsWindowBody::GetContentHeight()
 {
-	const int LineHeight = GetFontLineHeight(SkinProperties().Data654.FontNumber);
+	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 	int Result = 0;
 	for (int i = 0; i < Lines;) {
 		i++;
@@ -2027,8 +2027,8 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 // scroll bar moves by a third of a row.
 TBattleWindowBody::TBattleWindowBody()
 {
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data870, SkinProperties().Data874), 0, 0, 0, 0,
-		SkinProperties().Style688.Data00 / 3);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0,
+		SkinProperties().BattleWindow.RowHeight / 3);
 	InsertChild(ScrollBar);
 	MouseOverText[0] = 0;
 	NumberOfOpponents = -1;
@@ -2069,27 +2069,27 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 		const int Bottom = Height - 1;
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
-		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, 7, 0, ScrollY % Skins()[7].height);
+		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 		const int ClipWidth = Width - ScrollBar->Width;
 		for (int i = 0; i < Opponents; i++) {
 			TCreature *Creature = GetOpponent(i);
-			const int RowY = SkinProperties().Style688.Data00 * i - ScrollY;
+			const int RowY = SkinProperties().BattleWindow.RowHeight * i - ScrollY;
 			int Offset = 0;
-			if (SkinProperties().Style688.Data00 + RowY <= 0)
+			if (SkinProperties().BattleWindow.RowHeight + RowY <= 0)
 				continue;
 			if (RowY > Bottom)
 				return;
 			int ClipY = RowY;
-			int ClipHeight = SkinProperties().Style688.Data00;
+			int ClipHeight = SkinProperties().BattleWindow.RowHeight;
 			if (RowY < 0) {
 				ClipY = 0;
-				ClipHeight = SkinProperties().Style688.Data00 + RowY;
+				ClipHeight = SkinProperties().BattleWindow.RowHeight + RowY;
 			}
 			if (ClipHeight + ClipY > Bottom)
 				ClipHeight = Bottom - ClipY + 1;
 			ClipY += y;
 			bool Framed = false;
-			TRGBColor Color = SkinProperties().Style688.Data54.Color;
+			TRGBColor Color = SkinProperties().BattleWindow.NameFont.Color;
 			// GetOpponentAt's arguments in the original's order, right to left (MSVC; GCC and Clang may differ, issue
 			// #91).
 			const auto OpponentAtMouse = [&] {
@@ -2116,69 +2116,69 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 			}
 			if (Framed)
 				GetSurface()->DrawFrameClipped(Surface,
-					TRect(SkinProperties().Style688.Data38.x + x,
-						SkinProperties().Style688.Data38.y + RowY + y, SkinProperties().Style688.Data38.width,
-						SkinProperties().Style688.Data38.height),
+					TRect(SkinProperties().BattleWindow.Frame.x + x,
+						SkinProperties().BattleWindow.Frame.y + RowY + y, SkinProperties().BattleWindow.Frame.width,
+						SkinProperties().BattleWindow.Frame.height),
 					1, Color, TRect(x, ClipY, ClipWidth, ClipHeight));
 			GetSurface()->Flag26 = true;
-			DrawOutfit(Surface, SkinProperties().Style688.Data04.x + x, SkinProperties().Style688.Data04.y + RowY + y,
-				SkinProperties().Style688.Data04.width, Creature->OutfitType, Creature->Colors,
-				SkinProperties().Style688.Data68, TRect(x, ClipY, ClipWidth, ClipHeight), SkinProperties().Data498);
+			DrawOutfit(Surface, SkinProperties().BattleWindow.Outfit.x + x, SkinProperties().BattleWindow.Outfit.y + RowY + y,
+				SkinProperties().BattleWindow.Outfit.width, Creature->OutfitType, Creature->Colors,
+				SkinProperties().BattleWindow.OutfitHighlight, TRect(x, ClipY, ClipWidth, ClipHeight), SkinProperties().ObjectCountFont);
 			GetSurface()->Flag26 = false;
-			if (Creature->PARTYFlag > 0) {
-				int Skin = 0; // none: no shield in the party (flag 1) or an unknown flag
+			if (Creature->PARTYFlag > PARTY_NONE) {
+				int Skin = SKIN_NONE; // none: no shield in the party (flag 1) or an unknown flag
 				switch (Creature->PARTYFlag) {
-				case 1:
+				case PARTY_INVITER:
 					if (!IsPlayerInParty())
-						Skin = 248;
+						Skin = SKIN_BATTLE_SHIELD_1;
 					break;
-				case 2:
-					Skin = 249;
+				case PARTY_INVITEE:
+					Skin = SKIN_BATTLE_SHIELD_2;
 					break;
-				case 3:
-					Skin = 250;
+				case PARTY_MEMBER:
+					Skin = SKIN_BATTLE_SHIELD_3;
 					break;
-				case 4:
-					Skin = 251;
+				case PARTY_LEADER:
+					Skin = SKIN_BATTLE_SHIELD_4;
 					break;
 				default:
 					break;
 				}
-				if (Skin != 0) {
-					DrawSkinClipped(Surface, SkinProperties().Style688.Data14.x + x, SkinProperties().Style688.Data14.y + RowY + y,
+				if (Skin != SKIN_NONE) {
+					DrawSkinClipped(Surface, SkinProperties().BattleWindow.Name.x + x, SkinProperties().BattleWindow.Name.y + RowY + y,
 						Skins()[Skin].width, Skins()[Skin].height, Skin, x, ClipY, ClipWidth, ClipHeight, 0, 0);
-					Offset = SkinProperties().Style688.Data24;
+					Offset = SkinProperties().BattleWindow.FlagOffset;
 				}
 			}
-			if (Creature->PKFlag > 0) {
-				int Skin = 0; // none: an unknown flag
+			if (Creature->PKFlag > PK_NONE) {
+				int Skin = SKIN_NONE; // none: an unknown flag
 				switch (Creature->PKFlag) {
-				case 1:
-					Skin = 240;
+				case PK_YELLOW:
+					Skin = SKIN_BATTLE_SKULL_1;
 					break;
-				case 2:
-					Skin = 241;
+				case PK_GREEN:
+					Skin = SKIN_BATTLE_SKULL_2;
 					break;
-				case 3:
-					Skin = 242;
+				case PK_WHITE:
+					Skin = SKIN_BATTLE_SKULL_3;
 					break;
-				case 4:
-					Skin = 243;
+				case PK_RED:
+					Skin = SKIN_BATTLE_SKULL_4;
 					break;
 				default:
 					break;
 				}
-				if (Skin != 0) {
+				if (Skin != SKIN_NONE) {
 					if (Creature->SkullTime == 0 || !Creature->SkullKept(patella::platform::Platform().Clock.WallSeconds()) || GetBlinkState())
-						DrawSkinClipped(Surface, SkinProperties().Style688.Data14.x + Offset + x,
-							SkinProperties().Style688.Data14.y + RowY + y, Skins()[Skin].width, Skins()[Skin].height, Skin, x,
+						DrawSkinClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
+							SkinProperties().BattleWindow.Name.y + RowY + y, Skins()[Skin].width, Skins()[Skin].height, Skin, x,
 							ClipY, ClipWidth, ClipHeight, 0, 0);
-					Offset += SkinProperties().Style688.Data24;
+					Offset += SkinProperties().BattleWindow.FlagOffset;
 				}
 			}
 			const char *Name = Creature->Name;
-			const int MaxLength = GetFittingTextLength(SkinProperties().Style688.Data54.FontNumber, Name,
-				SkinProperties().Style688.Data14.width);
+			const int MaxLength = GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Name,
+				SkinProperties().BattleWindow.Name.width);
 			TFixedString<32> Shortened;
 			if (MaxLength < (int)strlen(Name)) {
 				Shortened.Assign(Name);
@@ -2186,24 +2186,24 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				Name = Shortened;
 			}
 			if (Framed)
-				PrintTextClipped(Surface, SkinProperties().Style688.Data14.x + Offset + x,
-					SkinProperties().Style688.Data14.y + RowY + y, SkinProperties().Style688.Data54.FontNumber, Color, Name,
-					SkinProperties().Style688.Data54.Alignment, TRect(x, ClipY, ClipWidth, ClipHeight));
+				PrintTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
+					SkinProperties().BattleWindow.Name.y + RowY + y, SkinProperties().BattleWindow.NameFont.FontNumber, Color, Name,
+					SkinProperties().BattleWindow.NameFont.Alignment, TRect(x, ClipY, ClipWidth, ClipHeight));
 			else
-				PrintFormattedTextClipped(Surface, SkinProperties().Style688.Data14.x + Offset + x,
-					SkinProperties().Style688.Data14.y + RowY + y, SkinProperties().Style688.Data54, Name,
+				PrintFormattedTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
+					SkinProperties().BattleWindow.Name.y + RowY + y, SkinProperties().BattleWindow.NameFont, Name,
 					TRect(x, ClipY, ClipWidth, ClipHeight));
 			GetSurface()->DrawFrameClipped(Surface,
-				TRect(SkinProperties().Style688.Data28.x + x,
-					SkinProperties().Style688.Data28.y + RowY + y, SkinProperties().Style688.Data28.width,
-					SkinProperties().Style688.Data28.height),
-				1, SkinProperties().Style688.Data48,
+				TRect(SkinProperties().BattleWindow.HealthBar.x + x,
+					SkinProperties().BattleWindow.HealthBar.y + RowY + y, SkinProperties().BattleWindow.HealthBar.width,
+					SkinProperties().BattleWindow.HealthBar.height),
+				1, SkinProperties().BattleWindow.HealthBarFrameColor,
 				TRect(x, ClipY, ClipWidth, ClipHeight));
 			GetSurface()->FillRectangleClipped(Surface,
-				TRect(SkinProperties().Style688.Data28.x + x + 1,
-					SkinProperties().Style688.Data28.y + RowY + y + 1,
-					Creature->Health * (SkinProperties().Style688.Data28.width - 2) / 100,
-					SkinProperties().Style688.Data28.height - 2),
+				TRect(SkinProperties().BattleWindow.HealthBar.x + x + 1,
+					SkinProperties().BattleWindow.HealthBar.y + RowY + y + 1,
+					Creature->Health * (SkinProperties().BattleWindow.HealthBar.width - 2) / 100,
+					SkinProperties().BattleWindow.HealthBar.height - 2),
 				Creature->GetHealthColor(),
 				TRect(x, ClipY, ClipWidth, ClipHeight));
 		}
@@ -2309,8 +2309,8 @@ void TBattleWindowBody::MouseHover(int x, int y)
 	if (Position != -1) {
 		TCreature *Creature = GetOpponent(Position);
 		if (Creature != nullptr) {
-			const int MaxLength = GetFittingTextLength(SkinProperties().Style688.Data54.FontNumber, Creature->Name,
-				SkinProperties().Style688.Data14.width);
+			const int MaxLength = GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Creature->Name,
+				SkinProperties().BattleWindow.Name.width);
 			if (MaxLength < (int)strlen(Creature->Name)) {
 				MouseOverText.Assign(Creature->Name);
 				SetMouseOverText(MouseOverText);
@@ -2330,7 +2330,7 @@ bool TBattleWindowBody::MouseWheel(int x, int y, int Code)
 // 0x430450, lines 2616-2621
 bool TBattleWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(18);
+	SetHelpHandle(HELP_BATTLE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -2341,13 +2341,13 @@ bool TBattleWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] i
 // 0x4306f0, line 2631. At least one row.
 int TBattleWindowBody::getMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().Style688.Data00);
+	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BattleWindow.RowHeight);
 }
 
 // 0x430890, line 2644. The stored height ("ContentWindow" 7) or the content.
 int TBattleWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(7);
+	int Height = GetContentWindowSize(BATTLE_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
 	if (Height < getMinimumHeight())
@@ -2358,14 +2358,14 @@ int TBattleWindowBody::GetInitialHeight()
 // 0x430a50, line 2654
 int TBattleWindowBody::GetContentHeight()
 {
-	return GetNumberOfOpponents() * SkinProperties().Style688.Data00 + 1;
+	return GetNumberOfOpponents() * SkinProperties().BattleWindow.RowHeight + 1;
 }
 
 // 0x430be0, line 2668. The row under x, y; -1 for none.
 int TBattleWindowBody::GetOpponentAt(int x, int y)
 {
 	y += ScrollBar->Range->Value;
-	const int Position = y / SkinProperties().Style688.Data00;
+	const int Position = y / SkinProperties().BattleWindow.RowHeight;
 	if (y >= 0 && x >= 0 && x <= Width - ScrollBar->Width && Position < GetNumberOfOpponents())
 		return Position;
 	return -1;
@@ -2376,14 +2376,14 @@ int TBattleWindowBody::GetOpponentAt(int x, int y)
 // 0x430dc0, line 2687. The try block starts after the base class.
 TTradeOffers::TTradeOffers()
 {
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data870, SkinProperties().Data874), 0, 0, 0, 0, 10);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0, 10);
 	InsertChild(ScrollBar);
 	Separator = new TSeparator(false);
 	InsertChild(Separator);
 }
 
-// 0x430fd0, lines 2698-2730. Both offers side by side (Style6FC.Data68 the
-// own, Data78 the partner's) in rows of DataA4 slots (skin 125), scrolled
+// 0x430fd0, lines 2698-2730. Both offers side by side (TradeWindow.OwnOffer the
+// own, CounterOffer the partner's) in rows of SlotsPerRow slots (skin 125), scrolled
 // together.
 void TTradeOffers::Draw(int Surface, int x, int y)
 {
@@ -2391,26 +2391,26 @@ void TTradeOffers::Draw(int Surface, int x, int y)
 	const int Bottom = Height - 1;
 	PATELLA_ASSERT_VALUES(x>=0, x);
 	PATELLA_ASSERT_VALUES(y>=0, y);
-	DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, 7, 0, ScrollY % Skins()[7].height);
+	DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 	TWindow::Draw(Surface, x, y);
 	const int ClipHeight = Height;
 	const int ClipWidth = Width;
 	for (int Side = 0; Side < 2; Side++) {
-		const TRect &Area = Side == 0 ? SkinProperties().Style6FC.Data68 : SkinProperties().Style6FC.Data78;
+		const TRect &Area = Side == 0 ? SkinProperties().TradeWindow.OwnOffer : SkinProperties().TradeWindow.CounterOffer;
 		const int AreaX = Area.x;
 		const int AreaY = Area.y;
 		const int AreaWidth = Area.width;
 		const int AreaHeight = Area.height;
-		// Data88: the object's offset in a slot, x/y for the own offer,
+		// ObjectOffsets: the object's offset in a slot, x/y for the own offer,
 		// Width/Height for the partner's.
-		const int *ObjectOffset = Side == 0 ? &SkinProperties().Style6FC.Data88.x : &SkinProperties().Style6FC.Data88.width;
+		const int *ObjectOffset = Side == 0 ? &SkinProperties().TradeWindow.ObjectOffsets.x : &SkinProperties().TradeWindow.ObjectOffsets.width;
 		const int OffsetX = ObjectOffset[0];
 		const int OffsetY = ObjectOffset[1];
 		const int Count = Side == 0 ? GetOwnOfferCount() : GetCounterOfferCount();
 		for (int i = 0; i < Count; i++) {
 			const TObject Obj = Side == 0 ? GetOwnOfferObject(i) : GetCounterOfferObject(i);
-			const int SlotX = i % SkinProperties().Style6FC.DataA4 * SkinProperties().Style6FC.DataA0;
-			const int RowY = i / SkinProperties().Style6FC.DataA4 * SkinProperties().Style6FC.Data9C - ScrollY;
+			const int SlotX = i % SkinProperties().TradeWindow.SlotsPerRow * SkinProperties().TradeWindow.ColumnWidth;
+			const int RowY = i / SkinProperties().TradeWindow.SlotsPerRow * SkinProperties().TradeWindow.RowHeight - ScrollY;
 			if (AreaHeight + AreaY + RowY > 0 && AreaY + RowY <= Bottom) {
 				const int DestX = SlotX + AreaX;
 				int DestY = AreaY + RowY;
@@ -2423,9 +2423,9 @@ void TTradeOffers::Draw(int Surface, int x, int y)
 					SlotHeight = Bottom - DestY + 1;
 				PATELLA_ASSERT_VALUES(x+DestX>=0, x+DestX);
 				PATELLA_ASSERT_VALUES(y+DestY>=0, y+DestY);
-				DrawSkin(Surface, x + DestX, y + DestY, AreaWidth, SlotHeight, 125, 0, 0);
-				DrawObject(Surface, OffsetX + SlotX + x, OffsetY + RowY + y, SkinProperties().Style6FC.Data98, Obj,
-					TRGBColor(0, 0, 0), TRect(x, y, ClipWidth, ClipHeight), SkinProperties().Data498, false);
+				DrawSkin(Surface, x + DestX, y + DestY, AreaWidth, SlotHeight, SKIN_CONTAINER_SLOT, 0, 0);
+				DrawObject(Surface, OffsetX + SlotX + x, OffsetY + RowY + y, SkinProperties().TradeWindow.ObjectSize, Obj,
+					TRGBColor(0, 0, 0), TRect(x, y, ClipWidth, ClipHeight), SkinProperties().ObjectCountFont, false);
 			}
 		}
 	}
@@ -2438,7 +2438,7 @@ void TTradeOffers::SetSize(int Width, int Height)
 	TWindow::SetSize(Width, Height);
 	ScrollBar->SetPosition(Width - ScrollBarWidth, 0);
 	ScrollBar->SetSize(ScrollBar->Width, Height);
-	SetChildArea(Separator, SkinProperties().Style6FC.DataA8);
+	SetChildArea(Separator, SkinProperties().TradeWindow.OffersSeparator);
 	Arrange();
 }
 
@@ -2449,15 +2449,15 @@ int TTradeOffers::getMinimumHeight()
 }
 
 // 0x431b40, line 2769. The rows of the longer offer. Odd, kept: the top
-// margin added is Data68.x, the left edge of the own offer.
+// margin added is OwnOffer.x, the left edge of the own offer.
 int TTradeOffers::GetContentHeight()
 {
 	const int CounterCount = GetCounterOfferCount();
 	const int OwnCount = GetOwnOfferCount();
 	const int Count = (std::max)(OwnCount, CounterCount);
-	const int Result = SkinProperties().Style6FC.Data9C
-			* (Count / SkinProperties().Style6FC.DataA4 + (Count % SkinProperties().Style6FC.DataA4 > 0))
-		+ 1 + SkinProperties().Style6FC.Data68.x;
+	const int Result = SkinProperties().TradeWindow.RowHeight
+			* (Count / SkinProperties().TradeWindow.SlotsPerRow + (Count % SkinProperties().TradeWindow.SlotsPerRow > 0))
+		+ 1 + SkinProperties().TradeWindow.OwnOffer.x;
 	return (std::max)(getMinimumHeight(), Result);
 }
 
@@ -2518,17 +2518,17 @@ void TTradeOffers::GetOfferAt(int x, int y, int *Side, int *Position) const
 	*Position = -1;
 	*Side = -1;
 	for (int i = 0; i <= 1; i++) {
-		const TRect &Area = i == 0 ? SkinProperties().Style6FC.Data68 : SkinProperties().Style6FC.Data78;
+		const TRect &Area = i == 0 ? SkinProperties().TradeWindow.OwnOffer : SkinProperties().TradeWindow.CounterOffer;
 		const int AreaWidth = Area.width;
 		const int AreaX = Area.x;
 		const int AreaY = Area.y;
 		const int AreaHeight = Area.height;
 		const int Count = i == 0 ? GetOwnOfferCount() : GetCounterOfferCount();
 		const int RelativeY = ScrollBar->Range->Value - AreaY + y;
-		const int Column = (x - AreaX) / SkinProperties().Style6FC.DataA0;
-		if (Column < SkinProperties().Style6FC.DataA4 && (x - AreaX) % SkinProperties().Style6FC.DataA0 <= AreaWidth
-			&& RelativeY % SkinProperties().Style6FC.Data9C <= AreaHeight) {
-			const int Found = RelativeY / SkinProperties().Style6FC.Data9C * SkinProperties().Style6FC.DataA4 + Column;
+		const int Column = (x - AreaX) / SkinProperties().TradeWindow.ColumnWidth;
+		if (Column < SkinProperties().TradeWindow.SlotsPerRow && (x - AreaX) % SkinProperties().TradeWindow.ColumnWidth <= AreaWidth
+			&& RelativeY % SkinProperties().TradeWindow.RowHeight <= AreaHeight) {
+			const int Found = RelativeY / SkinProperties().TradeWindow.RowHeight * SkinProperties().TradeWindow.SlotsPerRow + Column;
 			if (Found < Count) {
 				*Position = Found;
 				*Side = i;
@@ -2546,13 +2546,13 @@ TTradeNames::TTradeNames()
 	Separator = new TSeparator(true);
 	InsertChild(Separator);
 	const char *Name = GetOwnOfferCount() < 1 ? "" : GetOwnOfferName();
-	OwnName = new TLabel(SkinProperties().Style6FC.Data14.x, SkinProperties().Style6FC.Data14.y,
-		SkinProperties().Style6FC.Data14.width, SkinProperties().Style6FC.Data14.height, SkinProperties().Style6FC.Data44, Name,
+	OwnName = new TLabel(SkinProperties().TradeWindow.OwnName.x, SkinProperties().TradeWindow.OwnName.y,
+		SkinProperties().TradeWindow.OwnName.width, SkinProperties().TradeWindow.OwnName.height, SkinProperties().TradeWindow.NameFont, Name,
 		true);
 	InsertChild(OwnName);
 	Name = GetCounterOfferCount() < 1 ? "" : GetCounterOfferName();
-	CounterName = new TLabel(SkinProperties().Style6FC.Data24.x, SkinProperties().Style6FC.Data24.y,
-		SkinProperties().Style6FC.Data24.width, SkinProperties().Style6FC.Data24.height, SkinProperties().Style6FC.Data44, Name,
+	CounterName = new TLabel(SkinProperties().TradeWindow.CounterName.x, SkinProperties().TradeWindow.CounterName.y,
+		SkinProperties().TradeWindow.CounterName.width, SkinProperties().TradeWindow.CounterName.height, SkinProperties().TradeWindow.NameFont, Name,
 		true);
 	InsertChild(CounterName);
 }
@@ -2562,7 +2562,7 @@ void TTradeNames::Draw(int Surface, int x, int y)
 {
 	PATELLA_ASSERT_VALUES(x>=0, x);
 	PATELLA_ASSERT_VALUES(y>=0, y);
-	DrawSkin(Surface, x, y, Width, Height, 7, 0, 0);
+	DrawSkin(Surface, x, y, Width, Height, SKIN_BACKGROUND, 0, 0);
 	TWindow::Draw(Surface, x, y);
 }
 
@@ -2570,9 +2570,9 @@ void TTradeNames::Draw(int Surface, int x, int y)
 void TTradeNames::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
-	SetChildArea(OwnName, SkinProperties().Style6FC.Data14);
-	SetChildArea(CounterName, SkinProperties().Style6FC.Data24);
-	SetChildArea(Separator, SkinProperties().Style6FC.Data34);
+	SetChildArea(OwnName, SkinProperties().TradeWindow.OwnName);
+	SetChildArea(CounterName, SkinProperties().TradeWindow.CounterName);
+	SetChildArea(Separator, SkinProperties().TradeWindow.NamesSeparator);
 }
 
 // 0x432d40, line 2930. The names once the offers came.
@@ -2595,7 +2595,7 @@ TTradeButtons::TTradeButtons()
 	CancelButton = nullptr;
 	WaitLabel = nullptr;
 	AcceptButton = nullptr;
-	WaitLabel = new TLabel(SkinProperties().Style6FC.DataF8, TextWaitForCounterOffer);
+	WaitLabel = new TLabel(SkinProperties().TradeWindow.WaitFont, TextWaitForCounterOffer);
 	InsertChild(WaitLabel);
 	Separator = new TSeparator(true);
 	InsertChild(Separator);
@@ -2606,7 +2606,7 @@ void TTradeButtons::Draw(int Surface, int x, int y)
 {
 	PATELLA_ASSERT_VALUES(x>=0, x);
 	PATELLA_ASSERT_VALUES(y>=0, y);
-	DrawSkin(Surface, x, y, Width, Height, 7, 0, 0);
+	DrawSkin(Surface, x, y, Width, Height, SKIN_BACKGROUND, 0, 0);
 	TWindow::Draw(Surface, x, y);
 }
 
@@ -2614,13 +2614,13 @@ void TTradeButtons::Draw(int Surface, int x, int y)
 void TTradeButtons::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
-	SetChildArea(Separator, SkinProperties().Style6FC.DataE8);
+	SetChildArea(Separator, SkinProperties().TradeWindow.ButtonsSeparator);
 	if (CancelButton != nullptr)
-		SetChildPosition(CancelButton, SkinProperties().Style6FC.DataC8.width, SkinProperties().Style6FC.DataC8.height);
+		SetChildPosition(CancelButton, SkinProperties().TradeWindow.AcceptAndCancelButtons.width, SkinProperties().TradeWindow.AcceptAndCancelButtons.height);
 	if (WaitLabel != nullptr)
-		SetChildArea(WaitLabel, SkinProperties().Style6FC.DataD8);
+		SetChildArea(WaitLabel, SkinProperties().TradeWindow.WaitLabel);
 	if (AcceptButton != nullptr)
-		SetChildPosition(AcceptButton, SkinProperties().Style6FC.DataC8.x, SkinProperties().Style6FC.DataC8.y);
+		SetChildPosition(AcceptButton, SkinProperties().TradeWindow.AcceptAndCancelButtons.x, SkinProperties().TradeWindow.AcceptAndCancelButtons.y);
 }
 
 // 0x433720, line 2988. "Cancel" before the partner offered, "Reject"
@@ -2658,7 +2658,7 @@ void TTradeButtons::Wait()
 {
 	DeleteChild(AcceptButton);
 	AcceptButton = nullptr;
-	WaitLabel = new TLabel(SkinProperties().Style6FC.DataF8, TextWaitForPartner);
+	WaitLabel = new TLabel(SkinProperties().TradeWindow.WaitFont, TextWaitForPartner);
 	InsertChild(WaitLabel);
 	SetSize(Width, Height);
 	Arrange();
@@ -2720,16 +2720,16 @@ void TTradeWindowBody::SetSize(int Width, int Height)
 	Minimum = getMinimumHeight();
 	Limit(&Height, Lower, (std::max)(Maximum, Minimum));
 	TWindow::SetSize(Width, Height);
-	SetChildArea(Buttons, SkinProperties().Style6FC.DataB8);
-	SetChildArea(Offers, SkinProperties().Style6FC.Data58);
-	SetChildArea(Names, SkinProperties().Style6FC.Data04);
+	SetChildArea(Buttons, SkinProperties().TradeWindow.Buttons);
+	SetChildArea(Offers, SkinProperties().TradeWindow.Offers);
+	SetChildArea(Names, SkinProperties().TradeWindow.Names);
 	Arrange();
 }
 
 // 0x4342b0, lines 3076-3081
 bool TTradeWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(21);
+	SetHelpHandle(HELP_TRADE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -2740,7 +2740,7 @@ bool TTradeWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] in
 // 0x434550, line 3092
 int TTradeWindowBody::getMinimumHeight()
 {
-	return (std::max)(Offers->getMinimumHeight(), SkinProperties().Style6FC.Data00);
+	return (std::max)(Offers->getMinimumHeight(), SkinProperties().TradeWindow.MinimumHeight);
 }
 
 // 0x4346f0, line 3102
@@ -2777,8 +2777,8 @@ void TTradeWindowBody::HandleEvent(int Event)
 // scroll bar moves by half a row.
 TBuddylistWindowBody::TBuddylistWindowBody()
 {
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data870, SkinProperties().Data874), 0, 0, 0, 0,
-		SkinProperties().BuddylistWindow.Data04 / 2);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0,
+		SkinProperties().BuddylistWindow.RowHeight / 2);
 	InsertChild(ScrollBar);
 	MouseOverText = nullptr;
 	NumberOfBuddies = -1;
@@ -2799,15 +2799,15 @@ void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 		const int Bottom = Height - 1;
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
-		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, 7, 0, ScrollY % Skins()[7].height);
+		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 		if (!Minimized)
 			TWindow::Draw(Surface, x, y);
 		const int ClipHeight = Height;
 		const int ClipWidth = Width - ScrollBar->Width;
 		for (int i = 0; i < GetNumberOfBuddies(); i++) {
 			const int ItemX = 0;
-			const int ItemY = SkinProperties().BuddylistWindow.Data04 * i - ScrollY;
-			if (SkinProperties().BuddylistWindow.Data04 + ItemY <= 0)
+			const int ItemY = SkinProperties().BuddylistWindow.RowHeight * i - ScrollY;
+			if (SkinProperties().BuddylistWindow.RowHeight + ItemY <= 0)
 				continue;
 			if (ItemY > Bottom)
 				return;
@@ -2817,24 +2817,24 @@ void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 				PATELLA_ASSERT_VALUES(y+ItemY+SkinProperties().BuddylistWindow.Logo.y>=0, y);
 				DrawSkinClipped(Surface, SkinProperties().BuddylistWindow.Logo.x + x,
 					SkinProperties().BuddylistWindow.Logo.y + ItemY + y, SkinProperties().BuddylistWindow.Logo.width,
-					SkinProperties().BuddylistWindow.Logo.height, Icon + 217, x, y, ClipWidth, ClipHeight, 0, 0);
+					SkinProperties().BuddylistWindow.Logo.height, Icon + SKIN_BUDDY_ICON_BASE, x, y, ClipWidth, ClipHeight, 0, 0);
 			}
-			TRGBColor Color = GetBuddyListOnline(i) ? SkinProperties().BuddylistWindow.Data3C
-													: SkinProperties().BuddylistWindow.Data48;
+			TRGBColor Color = GetBuddyListOnline(i) ? SkinProperties().BuddylistWindow.OnlineColor
+													: SkinProperties().BuddylistWindow.OfflineColor;
 			if (GetBuddyListNew(i))
-				Color = SkinProperties().BuddylistWindow.Data54;
+				Color = SkinProperties().BuddylistWindow.NewColor;
 			const char *Name = GetBuddyListName(i);
-			const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.Data28.FontNumber, Name,
-				SkinProperties().BuddylistWindow.Data18.width);
+			const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,
+				SkinProperties().BuddylistWindow.Name.width);
 			TFixedString<40> Shortened;
 			if (MaxLength < (int)strlen(Name)) {
 				Shortened.Assign(Name);
 				ShortenString(Shortened, MaxLength);
 				Name = Shortened;
 			}
-			PrintTextClipped(Surface, SkinProperties().BuddylistWindow.Data18.x + x,
-				SkinProperties().BuddylistWindow.Data18.y + ItemY + y, SkinProperties().BuddylistWindow.Data28.FontNumber,
-				Color, Name, SkinProperties().BuddylistWindow.Data28.Alignment, TRect(x, y, ClipWidth, ClipHeight));
+			PrintTextClipped(Surface, SkinProperties().BuddylistWindow.Name.x + x,
+				SkinProperties().BuddylistWindow.Name.y + ItemY + y, SkinProperties().BuddylistWindow.NameFont.FontNumber,
+				Color, Name, SkinProperties().BuddylistWindow.NameFont.Alignment, TRect(x, y, ClipWidth, ClipHeight));
 		}
 	}
 }
@@ -2886,8 +2886,8 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 	const int Position = GetBuddyAt(x, y);
 	if (Position != -1) {
 		const char *Name = GetBuddyListName(Position);
-		const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.Data28.FontNumber, Name,
-			SkinProperties().BuddylistWindow.Data18.width);
+		const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,
+			SkinProperties().BuddylistWindow.Name.width);
 		if (MaxLength < (int)strlen(Name)) {
 			if (MouseOverText != nullptr)
 				MouseOverText.reset();
@@ -2903,7 +2903,7 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 // 0x435760, lines 3322-3327
 bool TBuddylistWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(19);
+	SetHelpHandle(HELP_VIP);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -2923,13 +2923,13 @@ void TBuddylistWindowBody::Arrange()
 // 0x435bb0, line 3350. At least one row.
 int TBuddylistWindowBody::getMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BuddylistWindow.Data04);
+	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BuddylistWindow.RowHeight);
 }
 
 // 0x435d50, line 3363. The stored height ("ContentWindow" 9) or the content.
 int TBuddylistWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(9);
+	int Height = GetContentWindowSize(BUDDYLIST_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
 	if (Height < getMinimumHeight())
@@ -2940,7 +2940,7 @@ int TBuddylistWindowBody::GetInitialHeight()
 // 0x435f20, line 3374
 int TBuddylistWindowBody::GetContentHeight()
 {
-	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.Data04 + SkinProperties().Data868;
+	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().Data868;
 }
 
 // 0x4360c0, line 3389. The row under x, y; -1 for none. Odd, kept: y is
@@ -2951,7 +2951,7 @@ int TBuddylistWindowBody::GetBuddyAt(int x, int y)
 {
 	if (!IsMinimized()) {
 		y += ScrollBar->Range->Value;
-		const int Position = y / SkinProperties().BuddylistWindow.Data04;
+		const int Position = y / SkinProperties().BuddylistWindow.RowHeight;
 		if (x >= 0 && x <= Width - ScrollBar->Width && Position < GetNumberOfBuddies())
 			return Position;
 	}

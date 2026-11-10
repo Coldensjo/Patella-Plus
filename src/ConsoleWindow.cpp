@@ -16,8 +16,8 @@
 // with ReportRuleViolation's catch blocks at 0x42591f; ContentWindows.obj
 // follows (file-ranges.tsv).
 //
-// The console's skin properties are SkinProperties.Style9E8 (the console),
-// StyleAA4 (the tabs) and Style944.Data24 (the font of the default channel);
+// The console's skin properties are SkinProperties.ConsoleWindow (the console),
+// Tab (the tabs) and EditLine.Font (the font of the default channel);
 // the frames are skins 169-176 (TConsole) and 177-185 (TConsoleWindow). Events
 // (201-213, 403) and AddMessage's numbers are named in Events.h; the comments
 // give events in decimal, as in ContextMenus.cpp, and messages in hex.
@@ -162,7 +162,7 @@ void TTextWindow::Draw(int Surface, int x, int y)
 				SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText, Format->LineLength);
 			}
 			GetSurface()->FillRectangle(Surface, TRect(SelectionX, LineY, SelectionWidth, SelectionHeight),
-				SkinProperties().Style9E8.Data9C);
+				SkinProperties().ConsoleWindow.SelectionColor);
 		}
 		PrintTextPart(Surface, LineX, LineY, Format->FontNumber, Format->Color, Format->LineText,
 			Format->LineLength, 0);
@@ -331,7 +331,7 @@ void TTextWindow::FormatLines()
 			TRGBColor Color;
 			GetTalkColor(&Color, TextLine->Mode);
 			int NextIndent = 10;
-			if (TextLine->Mode > 17 && TextLine->Mode < 23)
+			if (TextLine->Mode > TALK_ANIMAL_LOUD && TextLine->Mode < 23)
 				NextIndent = 0;
 			const char *Text = TextLine->GetText();
 			int Indent = 0;
@@ -340,7 +340,7 @@ void TTextWindow::FormatLines()
 			int Start = 0;
 			while (!Last) {
 				int Blank = -1;
-				const int End = GetFittingTextLength(4, Text + Start, TextWidth - Indent) + Start;
+				const int End = GetFittingTextLength(FONT_SMOOTH, Text + Start, TextWidth - Indent) + Start;
 				int i;
 				for (i = Start; i < End; i++) {
 					const char c = Text[i];
@@ -363,7 +363,7 @@ void TTextWindow::FormatLines()
 					i = Blank + 1;
 				}
 				if (Length > 0)
-					Lines(Count++) = TLineFormat(TextLine, Text + Start, Length, Start, Indent, 4, Color, LineEnd);
+					Lines(Count++) = TLineFormat(TextLine, Text + Start, Length, Start, Indent, FONT_SMOOTH, Color, LineEnd);
 				Indent = NextIndent;
 				Start = i;
 			}
@@ -621,7 +621,7 @@ TConsole::TConsole()
 	DrawingListLength = 8;
 	DrawingList.reset(new TDrawing[8]);
 	TextWindow = new TTextWindow;
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data878, SkinProperties().Data874), 0, 0, 0, 0, 1);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0, 1);
 	InsertChild(ScrollBar);
 	InsertChild(TextWindow);
 }
@@ -656,12 +656,12 @@ bool TConsole::MouseWheel(int x, int y, int Code)
 void TConsole::Arrange()
 {
 	const int WindowWidth = Width;
-	const int Top = Skins()[175].height;
-	const int RightEdge = Skins()[174].width;
-	const int LeftEdge = Skins()[173].width;
-	ScrollBar->SetSize(ScrollBar->Width, Height - Skins()[176].height - Top);
+	const int Top = Skins()[SKIN_CONSOLETEXT_EDGE_TOP].height;
+	const int RightEdge = Skins()[SKIN_CONSOLETEXT_EDGE_RIGHT].width;
+	const int LeftEdge = Skins()[SKIN_CONSOLETEXT_EDGE_LEFT].width;
+	ScrollBar->SetSize(ScrollBar->Width, Height - Skins()[SKIN_CONSOLETEXT_EDGE_BOTTOM].height - Top);
 	ScrollBar->SetPosition(WindowWidth - RightEdge - LeftEdge - ScrollBar->Width + LeftEdge, Top);
-	SetChildArea(TextWindow, SkinProperties().Style9E8.Data8C);
+	SetChildArea(TextWindow, SkinProperties().ConsoleWindow.TextWindow);
 	TWindow::Arrange();
 	const int Visible = TextWindow->getLastLineNumber() - TextWindow->getFirstLineNumber() - TextWindow->InvisibleLines;
 	const int Minimum = TextWindow->getFirstLineNumber() + Visible;
@@ -683,18 +683,18 @@ void TConsole::Arrange()
 	ScrollBar->Range->SetRange(Minimum, Maximum, Value, Visible);
 	TextWindow->SetCurrentLineNumber(ScrollBar->Range->Value);
 
-	DrawingList[0] = TDrawing(169, 0, 0, 0, 0, 0, 0);
-	DrawingList[1] = TDrawing(175, Skins()[169].width, 0, Width - Skins()[170].width - Skins()[169].width,
-		Skins()[175].height, 0, 0);
-	DrawingList[2] = TDrawing(170, Width - Skins()[170].width, 0, 0, 0, 0, 0);
-	DrawingList[3] = TDrawing(173, 0, Skins()[169].height, Skins()[173].width,
-		Height - Skins()[171].height - Skins()[169].height, 0, 0);
-	DrawingList[4] = TDrawing(174, Width - Skins()[174].width, Skins()[170].height, Skins()[174].width,
-		Height - Skins()[172].height - Skins()[170].height, 0, 0);
-	DrawingList[5] = TDrawing(171, 0, Height - Skins()[171].height, 0, 0, 0, 0);
-	DrawingList[6] = TDrawing(176, Skins()[171].width, Height - Skins()[176].height,
-		Width - Skins()[172].width - Skins()[171].width, Skins()[176].height, 0, 0);
-	DrawingList[7] = TDrawing(172, Width - Skins()[172].width, Height - Skins()[172].height, 0, 0, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_CONSOLETEXT_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_CONSOLETEXT_EDGE_TOP, Skins()[SKIN_CONSOLETEXT_CORNER_TOPLEFT].width, 0, Width - Skins()[SKIN_CONSOLETEXT_CORNER_TOPRIGHT].width - Skins()[SKIN_CONSOLETEXT_CORNER_TOPLEFT].width,
+		Skins()[SKIN_CONSOLETEXT_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_CONSOLETEXT_CORNER_TOPRIGHT, Width - Skins()[SKIN_CONSOLETEXT_CORNER_TOPRIGHT].width, 0, 0, 0, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_CONSOLETEXT_EDGE_LEFT, 0, Skins()[SKIN_CONSOLETEXT_CORNER_TOPLEFT].height, Skins()[SKIN_CONSOLETEXT_EDGE_LEFT].width,
+		Height - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT].height - Skins()[SKIN_CONSOLETEXT_CORNER_TOPLEFT].height, 0, 0);
+	DrawingList[4] = TDrawing(SKIN_CONSOLETEXT_EDGE_RIGHT, Width - Skins()[SKIN_CONSOLETEXT_EDGE_RIGHT].width, Skins()[SKIN_CONSOLETEXT_CORNER_TOPRIGHT].height, Skins()[SKIN_CONSOLETEXT_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_CONSOLETEXT_CORNER_TOPRIGHT].height, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT, 0, Height - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT].height, 0, 0, 0, 0);
+	DrawingList[6] = TDrawing(SKIN_CONSOLETEXT_EDGE_BOTTOM, Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT].width, Height - Skins()[SKIN_CONSOLETEXT_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMLEFT].width, Skins()[SKIN_CONSOLETEXT_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[7] = TDrawing(SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT].width, Height - Skins()[SKIN_CONSOLETEXT_CORNER_BOTTOMRIGHT].height, 0, 0, 0, 0);
 }
 
 // --- TTab ------------------------------------------------------------------------------------
@@ -721,11 +721,11 @@ TTab::TTab(const char *_Caption, TTalkBuffer *_TextBuffer, TCallback _Callback)
 	TStringBuffer(FullCaption.get(), Size).Assign(Caption.get());
 	Callback = _Callback;
 	Shortened = false;
-	const int Length = GetFittingTextLength(SkinProperties().StyleAA4.Data14.FontNumber, Caption.get(),
-		SkinProperties().StyleAA4.Data00 - SkinProperties().StyleAA4.Data10 * 2);
+	const int Length = GetFittingTextLength(SkinProperties().Tab.ActiveFont.FontNumber, Caption.get(),
+		SkinProperties().Tab.Width - SkinProperties().Tab.CaptionMargin * 2);
 	if (ShortenString(Caption.get(), Length))
 		Shortened = true;
-	SetSize(SkinProperties().StyleAA4.Data00, SkinProperties().StyleAA4.Data04);
+	SetSize(SkinProperties().Tab.Width, SkinProperties().Tab.Height);
 }
 
 // 0x41acd0, lines 849-866: the destructor frees the captions; the rest of its
@@ -857,17 +857,17 @@ void TTab::Draw(int Surface, int x, int y)
 {
 	PATELLA_ASSERT_VALUES(x>=0, x);
 	PATELLA_ASSERT_VALUES(y>=0, y);
-	DrawSkin(Surface, x, y, Width, Height, 187 - (Active ? 1 : 0), 0, 0);
+	DrawSkin(Surface, x, y, Width, Height, SKIN_TAB_INACTIVE - (Active ? 1 : 0), 0, 0);
 	const TFont *Font;
 	if (Active)
-		Font = &SkinProperties().StyleAA4.Data14;
+		Font = &SkinProperties().Tab.ActiveFont;
 	else if (Unread && BlinkEnd == 0)
-		Font = &SkinProperties().StyleAA4.Data3C;
+		Font = &SkinProperties().Tab.UnreadFont;
 	else if (Unread && BlinkEnd != 0)
-		Font = &SkinProperties().StyleAA4.Data50;
+		Font = &SkinProperties().Tab.BlinkingFont;
 	else
-		Font = &SkinProperties().StyleAA4.Data28;
-	PrintFormattedText(Surface, SkinProperties().StyleAA4.Data08.x + x, SkinProperties().StyleAA4.Data08.y + y, *Font,
+		Font = &SkinProperties().Tab.InactiveFont;
+	PrintFormattedText(Surface, SkinProperties().Tab.Caption.x + x, SkinProperties().Tab.Caption.y + y, *Font,
 		Caption.get());
 	if (BlinkEnd != 0 && BlinkEnd < GetActionNumber())
 		BlinkEnd = 0;
@@ -1013,7 +1013,7 @@ TWindow *TTabBar::GetContainer(TComponent *Child)
 // whole parent.
 bool TTabBar::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(23);
+	SetHelpHandle(HELP_CONSOLE_CHANNELS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1204,7 +1204,7 @@ TConsoleWindow::TConsoleWindow()
 {
 	DrawingListLength = 9;
 	DrawingList.reset(new TDrawing[9]);
-	TalkMode = 1;
+	TalkMode = TALK_SAY;
 	DefaultTab = nullptr;
 	HistoryPosition = -1;
 	History.reset(new TTalkBuffer(0));
@@ -1214,26 +1214,26 @@ TConsoleWindow::TConsoleWindow()
 	InsertChild(TabBar);
 	CurrentConsole = new TConsole;
 	InsertChild(CurrentConsole);
-	VolumeButton = new TMultiStateButton(0, 0, TextAdjustVolume, 3, 197, 198, TCallback(this, EVENT_VOLUME_YELL), 201, 202,
-		TCallback(this, EVENT_VOLUME_WHISPER), 199, 200, TCallback(this, EVENT_VOLUME_SAY));
+	VolumeButton = new TMultiStateButton(0, 0, TextAdjustVolume, 3, SKIN_SAY_BUTTON_UP, SKIN_SAY_BUTTON_DOWN, TCallback(this, EVENT_VOLUME_YELL), SKIN_YELL_BUTTON_UP, SKIN_YELL_BUTTON_DOWN,
+		TCallback(this, EVENT_VOLUME_WHISPER), SKIN_WHISPER_BUTTON_UP, SKIN_WHISPER_BUTTON_DOWN, TCallback(this, EVENT_VOLUME_SAY));
 	InsertChild(VolumeButton);
-	CloseButton = new TSkinButton(0, 0, 188, 189, TCallback(this, EVENT_CLOSE_CHANNEL), TextCloseChannel, false);
-	ServerMessagesButton = new TToggleButton(0, 0, 190, 191, TCallback(this, EVENT_SERVER_MESSAGES), TextShowServerMessages,
+	CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_CHANNEL_BUTTON_UP, SKIN_CLOSE_CHANNEL_BUTTON_DOWN, TCallback(this, EVENT_CLOSE_CHANNEL), TextCloseChannel, false);
+	ServerMessagesButton = new TToggleButton(0, 0, SKIN_SERVER_MESSAGES_BUTTON_UP, SKIN_SERVER_MESSAGES_BUTTON_DOWN, TCallback(this, EVENT_SERVER_MESSAGES), TextShowServerMessages,
 		TextHideServerMessages, false);
-	IgnoreButton = new TSkinButton(0, 0, 192, 194, TCallback(this, EVENT_IGNORE_LIST), TextIgnorePlayers, false);
+	IgnoreButton = new TSkinButton(0, 0, SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN, TCallback(this, EVENT_IGNORE_LIST), TextIgnorePlayers, false);
 	InsertChild(IgnoreButton);
-	NewChannelButton = new TSkinButton(0, 0, 195, 196, TCallback(this, EVENT_REQUEST_CHANNELS), TextOpenNewChannel, false);
+	NewChannelButton = new TSkinButton(0, 0, SKIN_NEW_CHANNEL_BUTTON_UP, SKIN_NEW_CHANNEL_BUTTON_DOWN, TCallback(this, EVENT_REQUEST_CHANNELS), TextOpenNewChannel, false);
 	InsertChild(NewChannelButton);
-	MoveRightButton = new TSkinButton(0, 0, 203, 204, TCallback(TabBar, EVENT_TABS_MOVE_RIGHT), TextMoveChannelsRight, false);
+	MoveRightButton = new TSkinButton(0, 0, SKIN_TABS_RIGHT_BUTTON_UP, SKIN_TABS_RIGHT_BUTTON_DOWN, TCallback(TabBar, EVENT_TABS_MOVE_RIGHT), TextMoveChannelsRight, false);
 	InsertChild(MoveRightButton);
-	MoveLeftButton = new TSkinButton(0, 0, 205, 206, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
+	MoveLeftButton = new TSkinButton(0, 0, SKIN_TABS_LEFT_BUTTON_UP, SKIN_TABS_LEFT_BUTTON_DOWN, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
 	InsertChild(MoveLeftButton);
-	AddHotkey(0x449, TCallback(this, EVENT_IGNORE_LIST));
-	AddHotkey(0x44f, TCallback(this, EVENT_REQUEST_CHANNELS));
-	AddHotkey(0x445, TCallback(this, EVENT_CLOSE_CHANNEL));
-	AddHotkey(0x44d, TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
-	AddHotkey(0x44b, TCallback(this, EVENT_OPTIONS_HOTKEYS));
-	AddHotkey(0x444, TCallback(this, EVENT_DEFAULT_CHANNEL));
+	AddHotkey(KEY_CONTROL | 'I', TCallback(this, EVENT_IGNORE_LIST));
+	AddHotkey(KEY_CONTROL | 'O', TCallback(this, EVENT_REQUEST_CHANNELS));
+	AddHotkey(KEY_CONTROL | 'E', TCallback(this, EVENT_CLOSE_CHANNEL));
+	AddHotkey(KEY_CONTROL | 'M', TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
+	AddHotkey(KEY_CONTROL | 'K', TCallback(this, EVENT_OPTIONS_HOTKEYS));
+	AddHotkey(KEY_CONTROL | 'D', TCallback(this, EVENT_DEFAULT_CHANNEL));
 	SwitchTime = GetActionNumber() + 50;
 	int *Channels;
 	const int Count = GetOpenChannels(&Channels);
@@ -1283,12 +1283,12 @@ void TConsoleWindow::OnClose()
 			MoveRightButton->Close();
 		if (!IsChild(MoveLeftButton) && MoveLeftButton != nullptr)
 			MoveLeftButton->Close();
-		RemoveHotkey(0x449);
-		RemoveHotkey(0x44f);
-		RemoveHotkey(0x445);
-		RemoveHotkey(0x44d);
-		RemoveHotkey(0x44b);
-		RemoveHotkey(0x444);
+		RemoveHotkey(KEY_CONTROL | 'I');
+		RemoveHotkey(KEY_CONTROL | 'O');
+		RemoveHotkey(KEY_CONTROL | 'E');
+		RemoveHotkey(KEY_CONTROL | 'M');
+		RemoveHotkey(KEY_CONTROL | 'K');
+		RemoveHotkey(KEY_CONTROL | 'D');
 	} catch (...) {
 		CloseWhileUnwinding([this] { TWindow::OnClose(); });
 		throw;
@@ -1300,21 +1300,21 @@ void TConsoleWindow::OnClose()
 void TConsoleWindow::SetSize(int Width, int Height)
 {
 	TComponent::SetSize(Width, Height);
-	SetChildArea(TabBar, SkinProperties().Style9E8.Data04);
-	SetChildArea(Input, SkinProperties().Style9E8.Data24);
-	SetChildArea(CurrentConsole, SkinProperties().Style9E8.Data44);
+	SetChildArea(TabBar, SkinProperties().ConsoleWindow.TabBar);
+	SetChildArea(Input, SkinProperties().ConsoleWindow.Input);
+	SetChildArea(CurrentConsole, SkinProperties().ConsoleWindow.CurrentConsole);
 	if (IsChild(VolumeButton))
-		SetChildPosition(VolumeButton, SkinProperties().Style9E8.Data64.x, SkinProperties().Style9E8.Data64.y);
-	SetChildPosition(IgnoreButton, SkinProperties().Style9E8.Data7C.x, SkinProperties().Style9E8.Data7C.y);
-	SetChildPosition(NewChannelButton, SkinProperties().Style9E8.Data84.x, SkinProperties().Style9E8.Data84.y);
+		SetChildPosition(VolumeButton, SkinProperties().ConsoleWindow.VolumeButton.x, SkinProperties().ConsoleWindow.VolumeButton.y);
+	SetChildPosition(IgnoreButton, SkinProperties().ConsoleWindow.IgnoreButton.x, SkinProperties().ConsoleWindow.IgnoreButton.y);
+	SetChildPosition(NewChannelButton, SkinProperties().ConsoleWindow.NewChannelButton.x, SkinProperties().ConsoleWindow.NewChannelButton.y);
 	if (IsChild(CloseButton))
-		SetChildPosition(CloseButton, SkinProperties().Style9E8.Data6C.x, SkinProperties().Style9E8.Data6C.y);
+		SetChildPosition(CloseButton, SkinProperties().ConsoleWindow.CloseButton.x, SkinProperties().ConsoleWindow.CloseButton.y);
 	if (IsChild(ServerMessagesButton))
-		SetChildPosition(ServerMessagesButton, SkinProperties().Style9E8.Data74.x, SkinProperties().Style9E8.Data74.y);
+		SetChildPosition(ServerMessagesButton, SkinProperties().ConsoleWindow.ServerMessagesButton.x, SkinProperties().ConsoleWindow.ServerMessagesButton.y);
 	if (MoveRightButton != nullptr && IsChild(MoveRightButton))
-		SetChildPosition(MoveRightButton, SkinProperties().Style9E8.Data54.x, SkinProperties().Style9E8.Data54.y);
+		SetChildPosition(MoveRightButton, SkinProperties().ConsoleWindow.MoveRightButton.x, SkinProperties().ConsoleWindow.MoveRightButton.y);
 	if (MoveLeftButton != nullptr && IsChild(MoveLeftButton))
-		SetChildPosition(MoveLeftButton, SkinProperties().Style9E8.Data5C.x, SkinProperties().Style9E8.Data5C.y);
+		SetChildPosition(MoveLeftButton, SkinProperties().ConsoleWindow.MoveLeftButton.x, SkinProperties().ConsoleWindow.MoveLeftButton.y);
 	Arrange();
 }
 
@@ -1332,7 +1332,7 @@ void TConsoleWindow::Draw(int Surface, int x, int y)
 		SetActive(TextBuffer->CanWrite());
 		Input->SetDisabled(!TextBuffer->CanWrite());
 	}
-	IgnoreButton->SetSkins(IsTalkThrottled() ? 193 : 192, 194);
+	IgnoreButton->SetSkins(IsTalkThrottled() ? SKIN_IGNORE_BUTTON_UP_THROTTLED : SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN);
 	const bool Changed = TabBar->Changed;
 	TabBar->Changed = false;
 	if (Changed)
@@ -1345,20 +1345,20 @@ void TConsoleWindow::Draw(int Surface, int x, int y)
 void TConsoleWindow::Arrange()
 {
 	TWindow::Arrange();
-	DrawingList[0] = TDrawing(177, 0, 0, 0, 0, 0, 0);
-	DrawingList[1] = TDrawing(183, Skins()[177].width, 0, Width - Skins()[178].width - Skins()[177].width,
-		Skins()[183].height, 0, 0);
-	DrawingList[2] = TDrawing(178, Width - Skins()[178].width, 0, 0, 0, 0, 0);
-	DrawingList[3] = TDrawing(181, 0, Skins()[177].height, Skins()[181].width,
-		Height - Skins()[179].height - Skins()[177].height, 0, 0);
-	DrawingList[4] = TDrawing(182, Width - Skins()[182].width, Skins()[178].height, Skins()[182].width,
-		Height - Skins()[180].height - Skins()[178].height, 0, 0);
-	DrawingList[5] = TDrawing(179, 0, Height - Skins()[179].height, 0, 0, 0, 0);
-	DrawingList[6] = TDrawing(184, Skins()[179].width, Height - Skins()[184].height,
-		Width - Skins()[180].width - Skins()[179].width, Skins()[184].height, 0, 0);
-	DrawingList[7] = TDrawing(180, Width - Skins()[180].width, Height - Skins()[180].height, 0, 0, 0, 0);
-	DrawingList[8] = TDrawing(185, Skins()[181].width, Skins()[183].height, Width - Skins()[182].width - Skins()[181].width,
-		Height - Skins()[184].height - Skins()[183].height, 0, OffsetY % Skins()[185].height);
+	DrawingList[0] = TDrawing(SKIN_CONSOLE_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_CONSOLE_EDGE_TOP, Skins()[SKIN_CONSOLE_CORNER_TOPLEFT].width, 0, Width - Skins()[SKIN_CONSOLE_CORNER_TOPRIGHT].width - Skins()[SKIN_CONSOLE_CORNER_TOPLEFT].width,
+		Skins()[SKIN_CONSOLE_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_CONSOLE_CORNER_TOPRIGHT, Width - Skins()[SKIN_CONSOLE_CORNER_TOPRIGHT].width, 0, 0, 0, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_CONSOLE_EDGE_LEFT, 0, Skins()[SKIN_CONSOLE_CORNER_TOPLEFT].height, Skins()[SKIN_CONSOLE_EDGE_LEFT].width,
+		Height - Skins()[SKIN_CONSOLE_CORNER_BOTTOMLEFT].height - Skins()[SKIN_CONSOLE_CORNER_TOPLEFT].height, 0, 0);
+	DrawingList[4] = TDrawing(SKIN_CONSOLE_EDGE_RIGHT, Width - Skins()[SKIN_CONSOLE_EDGE_RIGHT].width, Skins()[SKIN_CONSOLE_CORNER_TOPRIGHT].height, Skins()[SKIN_CONSOLE_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_CONSOLE_CORNER_BOTTOMRIGHT].height - Skins()[SKIN_CONSOLE_CORNER_TOPRIGHT].height, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_CONSOLE_CORNER_BOTTOMLEFT, 0, Height - Skins()[SKIN_CONSOLE_CORNER_BOTTOMLEFT].height, 0, 0, 0, 0);
+	DrawingList[6] = TDrawing(SKIN_CONSOLE_EDGE_BOTTOM, Skins()[SKIN_CONSOLE_CORNER_BOTTOMLEFT].width, Height - Skins()[SKIN_CONSOLE_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_CONSOLE_CORNER_BOTTOMRIGHT].width - Skins()[SKIN_CONSOLE_CORNER_BOTTOMLEFT].width, Skins()[SKIN_CONSOLE_EDGE_BOTTOM].height, 0, 0);
+	DrawingList[7] = TDrawing(SKIN_CONSOLE_CORNER_BOTTOMRIGHT, Width - Skins()[SKIN_CONSOLE_CORNER_BOTTOMRIGHT].width, Height - Skins()[SKIN_CONSOLE_CORNER_BOTTOMRIGHT].height, 0, 0, 0, 0);
+	DrawingList[8] = TDrawing(SKIN_CONSOLE_BACKGROUND, Skins()[SKIN_CONSOLE_EDGE_LEFT].width, Skins()[SKIN_CONSOLE_EDGE_TOP].height, Width - Skins()[SKIN_CONSOLE_EDGE_RIGHT].width - Skins()[SKIN_CONSOLE_EDGE_LEFT].width,
+		Height - Skins()[SKIN_CONSOLE_EDGE_BOTTOM].height - Skins()[SKIN_CONSOLE_EDGE_TOP].height, 0, OffsetY % Skins()[SKIN_CONSOLE_BACKGROUND].height);
 }
 
 // 0x41e5e0, line 1659. A click clears both selections.
@@ -1378,7 +1378,7 @@ bool TConsoleWindow::LeftButtonDown(int x, int y, int Flags)
 bool TConsoleWindow::HelpMouseMove(int x, int y)
 {
 	if (!TWindow::HelpMouseMove(x, y)) {
-		SetHelpHandle(22);
+		SetHelpHandle(HELP_CONSOLE);
 		SetHelpSize(Width, Height);
 	}
 	return true;
@@ -1393,16 +1393,16 @@ bool TConsoleWindow::HelpMouseMove(int x, int y)
 // through the sent lines (one step below the last stores the edit line).
 void TConsoleWindow::KeyPress(int Key)
 {
-	if (Key == 9)
+	if (Key == KEY_TAB)
 		HandleEvent(EVENT_NEXT_CHANNEL);
-	if (Key == 0x209)
+	if (Key == (KEY_SHIFT | KEY_TAB))
 		HandleEvent(EVENT_PREVIOUS_CHANNEL);
 	TComponent *Selection;
 	if (CurrentConsole->TextWindow->HasSelection())
 		Selection = CurrentConsole->TextWindow;
 	else
 		Selection = Input->HasSelection() ? Input : nullptr;
-	if (Key == 0x461) {
+	if (Key == (KEY_CONTROL | 'a')) {
 		TTextWindow *TextWindow = CurrentConsole->TextWindow;
 		TextWindow->SelectionStartLine = -1;
 		TextWindow->SelectionStartOffset = -1;
@@ -1417,15 +1417,15 @@ void TConsoleWindow::KeyPress(int Key)
 	}
 	if (Selection != nullptr) {
 		bool Done = false;
-		if (Key == 0x510 || Key == 0x463) {
+		if (Key == (KEY_CONTROL | KEY_INSERT) || Key == (KEY_CONTROL | 'c')) {
 			Selection->HandleEvent(EVENT_COPY);
 			Done = true;
 		}
-		if (Key == 0x311 || Key == 0x478) {
+		if (Key == (KEY_SHIFT | KEY_DELETE) || Key == (KEY_CONTROL | 'x')) {
 			Selection->HandleEvent(EVENT_CUT);
 			Done = true;
 		}
-		if (Key == 0x511) {
+		if (Key == (KEY_CONTROL | KEY_DELETE)) {
 			Selection->HandleEvent(EVENT_DELETE);
 			return;
 		}
@@ -1437,30 +1437,30 @@ void TConsoleWindow::KeyPress(int Key)
 	if (!TextBuffer->CanWrite())
 		return;
 	Input->KeyPress(Key);
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		SendInput();
 	int Number;
-	switch (Key & 0x1ff) {
-	case 0x100: Number = 0; break;
-	case 0x101: Number = 1; break;
-	case 0x102: Number = 2; break;
-	case 0x103: Number = 3; break;
-	case 0x104: Number = 4; break;
-	case 0x105: Number = 5; break;
-	case 0x106: Number = 6; break;
-	case 0x107: Number = 7; break;
-	case 0x108: Number = 8; break;
-	case 0x109: Number = 9; break;
-	case 0x10a: Number = 10; break;
-	case 0x10b: Number = 11; break;
+	switch (Key & KEY_CODE_MASK) {
+	case KEY_F1: Number = 0; break;
+	case KEY_F2: Number = 1; break;
+	case KEY_F3: Number = 2; break;
+	case KEY_F4: Number = 3; break;
+	case KEY_F5: Number = 4; break;
+	case KEY_F6: Number = 5; break;
+	case KEY_F7: Number = 6; break;
+	case KEY_F8: Number = 7; break;
+	case KEY_F9: Number = 8; break;
+	case KEY_F10: Number = 9; break;
+	case KEY_F11: Number = 10; break;
+	case KEY_F12: Number = 11; break;
 	default: {
 		bool Moved = false;
-		const int Code = Key % 0x200;
-		if (Code == 0x10f && HistoryPosition > -2) {
+		const int Code = Key % (KEY_CODE_MASK + 1);
+		if (Code == KEY_DOWN && HistoryPosition > -2) {
 			HistoryPosition--;
 			Moved = true;
 		}
-		if (Code == 0x10c && HistoryPosition < History->lines - 1)
+		if (Code == KEY_UP && HistoryPosition < History->lines - 1)
 			HistoryPosition++;
 		else if (!Moved)
 			return;
@@ -1527,13 +1527,13 @@ void TConsoleWindow::HandleEvent(int Event)
 		SendRequestChannels();
 		break;
 	case EVENT_VOLUME_SAY:
-		TalkMode = 1;
+		TalkMode = TALK_SAY;
 		break;
 	case EVENT_VOLUME_WHISPER:
-		TalkMode = 2;
+		TalkMode = TALK_WHISPER;
 		break;
 	case EVENT_VOLUME_YELL:
-		TalkMode = 3;
+		TalkMode = TALK_YELL;
 		break;
 	case EVENT_DEFAULT_CHANNEL:
 		TabBar->SetCurrentTab(DefaultTab);
@@ -1606,26 +1606,26 @@ void TConsoleWindow::UpdateButtons()
 		RemoveChild(MoveRightButton);
 	if (!IsChild(MoveRightButton) && TabBar->LeftTabs->GetFirstChild() != nullptr) {
 		InsertChild(MoveRightButton);
-		SetChildPosition(MoveRightButton, SkinProperties().Style9E8.Data54.x, SkinProperties().Style9E8.Data54.y);
+		SetChildPosition(MoveRightButton, SkinProperties().ConsoleWindow.MoveRightButton.x, SkinProperties().ConsoleWindow.MoveRightButton.y);
 	}
 	if (IsChild(MoveLeftButton) && TabBar->RightTabs->GetFirstChild() == nullptr)
 		RemoveChild(MoveLeftButton);
 	if (!IsChild(MoveLeftButton) && TabBar->RightTabs->GetFirstChild() != nullptr) {
 		InsertChild(MoveLeftButton);
-		SetChildPosition(MoveLeftButton, SkinProperties().Style9E8.Data5C.x, SkinProperties().Style9E8.Data5C.y);
+		SetChildPosition(MoveLeftButton, SkinProperties().ConsoleWindow.MoveLeftButton.x, SkinProperties().ConsoleWindow.MoveLeftButton.y);
 	}
 	if (!TextBuffer->isDefault()) {
 		InsertChild(CloseButton);
-		SetChildPosition(CloseButton, SkinProperties().Style9E8.Data6C.x, SkinProperties().Style9E8.Data6C.y);
+		SetChildPosition(CloseButton, SkinProperties().ConsoleWindow.CloseButton.x, SkinProperties().ConsoleWindow.CloseButton.y);
 		InsertChild(ServerMessagesButton);
-		SetChildPosition(ServerMessagesButton, SkinProperties().Style9E8.Data74.x, SkinProperties().Style9E8.Data74.y);
+		SetChildPosition(ServerMessagesButton, SkinProperties().ConsoleWindow.ServerMessagesButton.x, SkinProperties().ConsoleWindow.ServerMessagesButton.y);
 		ServerMessagesButton->State = TextBuffer->ShowMessages;
 	}
-	TFont Font = SkinProperties().Style9E8.DataA8;
+	TFont Font = SkinProperties().ConsoleWindow.InputFont;
 	if (TextBuffer->AcceptMessages()) {
 		InsertChild(VolumeButton);
-		SetChildPosition(VolumeButton, SkinProperties().Style9E8.Data64.x, SkinProperties().Style9E8.Data64.y);
-		Font = SkinProperties().Style944.Data24;
+		SetChildPosition(VolumeButton, SkinProperties().ConsoleWindow.VolumeButton.x, SkinProperties().ConsoleWindow.VolumeButton.y);
+		Font = SkinProperties().EditLine.Font;
 	}
 	Input->SetFont(Font);
 	Input->SetDisabled(!TextBuffer->CanWrite());
@@ -1779,7 +1779,7 @@ void TConsoleWindow::SendInput()
 		TalkMode = this->TalkMode;
 		Addressee = nullptr;
 		VolumeButton->Reset();
-		this->TalkMode = 1;
+		this->TalkMode = TALK_SAY;
 	}
 	if (strlen(Input->Text.get()) != 0)
 		AddToHistory();

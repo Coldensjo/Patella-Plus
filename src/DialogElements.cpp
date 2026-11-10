@@ -60,11 +60,11 @@ void TSeparator::SetSize(int Width, int Height)
 void TSeparator::Arrange()
 {
 	if (!Horizontal) {
-		DrawingList[0] = TDrawing(11, 0, 0, Skins()[11].width, Height, 0, 0);
-		DrawingList[1] = TDrawing(10, Skins()[11].width, 0, Skins()[10].width, Height, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_LEFT, 0, 0, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_RIGHT, Skins()[SKIN_FRAME_EDGE_LEFT].width, 0, Skins()[SKIN_FRAME_EDGE_RIGHT].width, Height, 0, 0);
 	} else {
-		DrawingList[0] = TDrawing(9, 0, 0, Width, Skins()[9].height, 0, 0);
-		DrawingList[1] = TDrawing(8, 0, Skins()[9].height, Width, Skins()[8].height, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, 0, Skins()[SKIN_FRAME_EDGE_TOP].height, Width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
 	}
 }
 
@@ -97,15 +97,15 @@ void TResizer::SetSize(int Width, int Height)
 void TResizer::Arrange()
 {
 	if (!Invisible)
-		DrawingList[0] = TDrawing(42, 0, 0, Width, Height, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_RESIZER, 0, 0, Width, Height, 0, 0);
 	else
-		DrawingList[0] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[0] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 }
 
 // 0x453fe0, lines 113-122. The cursor is set before the assertion.
 bool TResizer::MouseMove(int x, int y)
 {
-	SetMouseCursor(2);
+	SetMouseCursor(CURSOR_SIZENS);
 	PATELLA_ASSERT(ToResize!=nullptr);
 	if (Dragging) {
 		int NewWidth = ToResize->Width;
@@ -160,15 +160,15 @@ TBorder::TBorder(TComponent *_Window, int _Border)
 	Border = _Border;
 	Window = _Window;
 	TWindow::InsertChild(_Window);
-	Background = 0;
-	TopLeft = 26;
-	Top = 32;
-	TopRight = 27;
-	Left = 30;
-	Right = 31;
-	BottomLeft = 28;
-	Bottom = 33;
-	BottomRight = 29;
+	Background = SKIN_NONE;
+	TopLeft = SKIN_BORDER_CORNER_TOPLEFT;
+	Top = SKIN_BORDER_EDGE_TOP;
+	TopRight = SKIN_BORDER_CORNER_TOPRIGHT;
+	Left = SKIN_BORDER_EDGE_LEFT;
+	Right = SKIN_BORDER_EDGE_RIGHT;
+	BottomLeft = SKIN_BORDER_CORNER_BOTTOMLEFT;
+	Bottom = SKIN_BORDER_EDGE_BOTTOM;
+	BottomRight = SKIN_BORDER_CORNER_BOTTOMRIGHT;
 }
 
 // 0x454b10, lines 192-210
@@ -189,7 +189,7 @@ TBorder::TBorder(TComponent *_Window, int _TopLeft, int _Top, int _TopRight, int
 	Left = _Left;
 	BottomRight = _BottomRight;
 	BottomLeft = _BottomLeft;
-	Background = 0;
+	Background = SKIN_NONE;
 	Bottom = _Bottom;
 }
 
@@ -253,11 +253,11 @@ void TBorder::Arrange()
 		Width - Skins()[BottomRight].width - Skins()[BottomLeft].width, Skins()[Bottom].height, 0, 0);
 	DrawingList[7] = TDrawing(BottomRight, Width - Skins()[BottomRight].width, Height - Skins()[BottomRight].height, 0, 0,
 		0, 0);
-	if (Background != 0)
+	if (Background != SKIN_NONE)
 		DrawingList[8] = TDrawing(Background, Skins()[Left].width, Skins()[Top].height,
 			Width - Skins()[Right].width - Skins()[Left].width, Height - Skins()[Bottom].height - Skins()[Top].height, 0, 0);
 	else
-		DrawingList[8] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[8] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 }
 
 // --- TLabel -----------------------------------------------------------------------
@@ -516,7 +516,7 @@ void TFormattedText::Arrange()
 	while (FirstChild != nullptr)
 		DeleteChild(FirstChild);
 	TRGBColor Color(224, 224, 224);
-	int FontNumber = 2;
+	int FontNumber = FONT_BORDERED;
 	int Indent = 0;
 	int X = 0;
 	int Y = 0;
@@ -609,7 +609,7 @@ void TFormattedText::Arrange()
 			Color = TRGBColor(TokenData / 36 * 51, TokenData / 6 % 6 * 51, TokenData % 6 * 51);
 			break;
 		case 15:
-			if (TokenData >= 0 && TokenData <= 262)
+			if (TokenData >= 0 && TokenData <= LASTSKIN)
 				Element = new TSkinIcon(TokenData);
 			break;
 		case 16:
@@ -673,7 +673,7 @@ TLink::TLink(const char *_Text, const char *ButtonText, const char *_Destination
 	OpenURL = _OpenURL;
 	Label = new TLabel(Font, _Text);
 	TWindow::InsertChild(Label);
-	Button = new TTextButton(0, 0, ButtonText, 18, 19, TCallback(this, 1), Destination.get());
+	Button = new TTextButton(0, 0, ButtonText, SKIN_LARGE_BUTTON_UP, SKIN_LARGE_BUTTON_DOWN, TCallback(this, 1), Destination.get());
 	TWindow::InsertChild(Button);
 }
 
@@ -725,7 +725,7 @@ void TOutfitIcon::Draw(int Surface, int x, int y)
 {
 	const int Size = Width;
 	PATELLA_ASSERT_VALUES(getWidth()==getHeight(), getWidth()-getHeight());
-	DrawOutfit(Surface, x, y, Size, Outfit, Colors, Highlight, TRect(x, y, Size, Height), SkinProperties().Data498);
+	DrawOutfit(Surface, x, y, Size, Outfit, Colors, Highlight, TRect(x, y, Size, Height), SkinProperties().ObjectCountFont);
 }
 
 // 0x457440, line 934. No try block.
@@ -774,15 +774,15 @@ void TObjectIcon::Draw(int Surface, int x, int y)
 	if (Framed) {
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
-		DrawSkin(Surface, x, y, ClipWidth, ClipHeight, 102, 0, 0);
-		ClipX = x + SkinProperties().Data940;
-		ClipY = y + SkinProperties().Data940;
-		ClipWidth -= 2 * SkinProperties().Data940;
-		ClipHeight -= 2 * SkinProperties().Data940;
+		DrawSkin(Surface, x, y, ClipWidth, ClipHeight, SKIN_SLOT_FRAME, 0, 0);
+		ClipX = x + SkinProperties().ObjectIconFrameWidth;
+		ClipY = y + SkinProperties().ObjectIconFrameWidth;
+		ClipWidth -= 2 * SkinProperties().ObjectIconFrameWidth;
+		ClipHeight -= 2 * SkinProperties().ObjectIconFrameWidth;
 	}
 	PATELLA_ASSERT_VALUES(getWidth()==getHeight(), getWidth()-getHeight());
 	DrawObject(Surface, x, y, Width, Obj, Highlight, TRect(ClipX, ClipY, ClipWidth, ClipHeight),
-		SkinProperties().Data498, false);
+		SkinProperties().ObjectCountFont, false);
 }
 
 // --- TSkinButton ------------------------------------------------------------------
@@ -924,7 +924,7 @@ TBlinkingButton::TBlinkingButton(int x, int y, int _ButtonUp1, int _ButtonDown1,
 	ButtonDown1 = _ButtonDown1;
 	ButtonUp2 = _ButtonUp2;
 	ButtonDown2 = _ButtonDown2;
-	NextChange = GetMilliseconds() + SkinProperties().Data8C0;
+	NextChange = GetMilliseconds() + SkinProperties().BlinkingButtonInterval;
 	Phase = 2;
 }
 
@@ -932,7 +932,7 @@ TBlinkingButton::TBlinkingButton(int x, int y, int _ButtonUp1, int _ButtonDown1,
 void TBlinkingButton::Draw(int Surface, int x, int y)
 {
 	if (GetMilliseconds() > NextChange) {
-		NextChange = GetMilliseconds() + SkinProperties().Data8C0;
+		NextChange = GetMilliseconds() + SkinProperties().BlinkingButtonInterval;
 		if (Phase == 1) {
 			ButtonUp = ButtonUp1;
 			ButtonDown = ButtonDown1;
@@ -957,22 +957,22 @@ TTextButton::TTextButton(int x, int y, const char *_Text, int _ButtonUp, int _Bu
 
 // 0x466ed0, lines 1390-1391. No try block.
 TTextButton::TTextButton(int x, int y, const char *_Text, TCallback _Callback, const char *_Tooltip)
-	: TSkinButton(x, y, 12, 13, _Callback, _Tooltip, false)
+	: TSkinButton(x, y, SKIN_BUTTON_UP, SKIN_BUTTON_DOWN, _Callback, _Tooltip, false)
 {
 	PATELLA_ASSERT(_Text!=nullptr);
 	PATELLA_ASSERT_VALUES(strlen(_Text)<50, strlen(_Text));
 	Text.Assign(_Text);
 }
 
-// 0x4596d0, line 1410. The text moves by Buttons.Data28 while pressed.
+// 0x4596d0, line 1410. The text moves by Buttons.PressedOffset while pressed.
 void TTextButton::Draw(int Surface, int x, int y)
 {
 	TSkinButton::Draw(Surface, x, y);
-	const int Offset = IsPressed() ? SkinProperties().Buttons.Data28 : 0;
+	const int Offset = IsPressed() ? SkinProperties().Buttons.PressedOffset : 0;
 	int TextX, TextY;
-	GetTextPosition(&TextX, &TextY, x, y, Width, Height, &SkinProperties().Buttons.Data00);
+	GetTextPosition(&TextX, &TextY, x, y, Width, Height, &SkinProperties().Buttons.Font);
 	PrintFormattedText(Surface, TextX + Offset, TextY + Offset,
-		Enabled ? SkinProperties().Buttons.Data00 : SkinProperties().Buttons.Data14, Text);
+		Enabled ? SkinProperties().Buttons.Font : SkinProperties().Buttons.DisabledFont, Text);
 }
 
 // 0x4671e0. No try block. The base gets the button's own Tooltip, which is not set yet: the original's read of the
@@ -1121,19 +1121,19 @@ TCheckBox::TCheckBox(const char *_Text)
 	DrawingList.reset(new TDrawing[4]);
 	Checked = false;
 	Enabled = true;
-	Label = new TLabel(SkinProperties().CheckBox.Data18, _Text);
+	Label = new TLabel(SkinProperties().CheckBox.Font, _Text);
 	TWindow::InsertChild(Label);
-	TWindow::FitToChild(Label, SkinProperties().CheckBox.Data08, true);
-	TWindow::SetChildArea(Label, SkinProperties().CheckBox.Data08);
+	TWindow::FitToChild(Label, SkinProperties().CheckBox.Label, true);
+	TWindow::SetChildArea(Label, SkinProperties().CheckBox.Label);
 }
 
 // 0x459f90, lines 1711-1716. Skin 150 checked, 151 unchecked or disabled.
 void TCheckBox::Draw(int Surface, int x, int y)
 {
 	TWindow::Draw(Surface, x, y);
-	int Skin = 151 - (IsChecked() ? 1 : 0);
+	int Skin = SKIN_CHECKBOX_UNCHECKED - (IsChecked() ? 1 : 0);
 	if (!Enabled)
-		Skin = 151;
+		Skin = SKIN_CHECKBOX_UNCHECKED;
 	PATELLA_ASSERT_VALUES(x+SkinProperties().CheckBox.Item.x>=0, x);
 	PATELLA_ASSERT_VALUES(y+SkinProperties().CheckBox.Item.y>=0, y);
 	DrawSkin(Surface, x + SkinProperties().CheckBox.Item.x, y + SkinProperties().CheckBox.Item.y, Skins()[Skin].width,
@@ -1143,12 +1143,12 @@ void TCheckBox::Draw(int Surface, int x, int y)
 // 0x45a360. The catch wrapper's states without a try block.
 void TCheckBox::Arrange()
 {
-	DrawingList[0] = TDrawing(148, 0, 0, Width, Skins()[148].height, 0, 0);
-	DrawingList[1] = TDrawing(146, 0, Skins()[148].height, Skins()[146].width, Height - Skins()[148].height, 0, 0);
-	DrawingList[2] = TDrawing(147, Width - Skins()[147].width, Skins()[148].height, Skins()[147].width,
-		Height - Skins()[148].height, 0, 0);
-	DrawingList[3] = TDrawing(149, Skins()[146].width, Height - Skins()[149].height,
-		Width - Skins()[147].width - Skins()[146].width, Skins()[149].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_CHECKBOX_EDGE_TOP, 0, 0, Width, Skins()[SKIN_CHECKBOX_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_CHECKBOX_EDGE_LEFT, 0, Skins()[SKIN_CHECKBOX_EDGE_TOP].height, Skins()[SKIN_CHECKBOX_EDGE_LEFT].width, Height - Skins()[SKIN_CHECKBOX_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_CHECKBOX_EDGE_RIGHT, Width - Skins()[SKIN_CHECKBOX_EDGE_RIGHT].width, Skins()[SKIN_CHECKBOX_EDGE_TOP].height, Skins()[SKIN_CHECKBOX_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_CHECKBOX_EDGE_TOP].height, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_CHECKBOX_EDGE_BOTTOM, Skins()[SKIN_CHECKBOX_EDGE_LEFT].width, Height - Skins()[SKIN_CHECKBOX_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_CHECKBOX_EDGE_RIGHT].width - Skins()[SKIN_CHECKBOX_EDGE_LEFT].width, Skins()[SKIN_CHECKBOX_EDGE_BOTTOM].height, 0, 0);
 }
 
 // 0x4678d0, line 1768. Replaces the label by one in the enabled or disabled
@@ -1156,7 +1156,7 @@ void TCheckBox::Arrange()
 void TCheckBox::SetEnabled(bool _Enabled)
 {
 	Enabled = _Enabled;
-	const TFont Font = _Enabled ? SkinProperties().CheckBox.Data18 : SkinProperties().CheckBox.Data2C;
+	const TFont Font = _Enabled ? SkinProperties().CheckBox.Font : SkinProperties().CheckBox.DisabledFont;
 	TLabel *NewLabel = new TLabel(Label->OffsetX, Label->OffsetY, Label->Width, Label->Height, Font, Label->Text.get(),
 		false);
 	DeleteChild(Label);
@@ -1182,7 +1182,7 @@ TEditLine::TEditLine(TRect Area, int _MaxLength, bool _ReadOnly)
 	SingleLine = true;
 	Disabled = false;
 	FocusGroup = nullptr;
-	Font = _ReadOnly ? SkinProperties().Style944.Data38 : SkinProperties().Style944.Data24;
+	Font = _ReadOnly ? SkinProperties().EditLine.ReadOnlyFont : SkinProperties().EditLine.Font;
 	MaxLength = _MaxLength;
 	DrawingListLength = 4;
 	DrawingList.reset(new TDrawing[4]);
@@ -1207,7 +1207,7 @@ TEditLine::TEditLine(int _MaxLength, bool _ReadOnly)
 	SingleLine = true;
 	Disabled = false;
 	FocusGroup = nullptr;
-	Font = _ReadOnly ? SkinProperties().Style944.Data38 : SkinProperties().Style944.Data24;
+	Font = _ReadOnly ? SkinProperties().EditLine.ReadOnlyFont : SkinProperties().EditLine.Font;
 	MaxLength = _MaxLength;
 	DrawingListLength = 4;
 	DrawingList.reset(new TDrawing[4]);
@@ -1218,17 +1218,17 @@ TEditLine::TEditLine(int _MaxLength, bool _ReadOnly)
 void TEditLine::Draw(int Surface, int x, int y)
 {
 	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height),
-		IsDisabled() ? SkinProperties().Style944.Data0C : SkinProperties().Style944.Data00);
+		IsDisabled() ? SkinProperties().EditLine.DisabledBackground : SkinProperties().EditLine.Background);
 	TWindow::Draw(Surface, x, y);
 	if (!IsDisabled()) {
 		if (Cursor < FirstVisible)
 			FirstVisible = Cursor;
 		while (Cursor > FirstVisible
-				+ GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, Width - 2 * SkinProperties().Data99C))
+				+ GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, Width - 2 * SkinProperties().EditLineTextMargin))
 			FirstVisible++;
-		const int TextX = x + SkinProperties().Data99C;
-		const int TextY = y + SkinProperties().Data99C;
-		const int Visible = GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, Width - 2 * SkinProperties().Data99C);
+		const int TextX = x + SkinProperties().EditLineTextMargin;
+		const int TextY = y + SkinProperties().EditLineTextMargin;
+		const int Visible = GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, Width - 2 * SkinProperties().EditLineTextMargin);
 		if (SelectionStart != -1 && SelectionLength != 0) {
 			const int Low = SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart;
 			const int High = SelectionLength < 0 ? SelectionStart : SelectionStart + SelectionLength;
@@ -1239,12 +1239,12 @@ void TEditLine::Draw(int Surface, int x, int y)
 			GetSurface()->FillRectangle(Surface,
 				TRect(TextX + Offset, TextY, SelectionWidth,
 					GetFontHeight(Font.FontNumber)),
-				SkinProperties().Style944.Data4C);
+				SkinProperties().EditLine.SelectionColor);
 		}
 		PrintFormattedTextPart(Surface, TextX, TextY, Font, Text.get() + FirstVisible, Visible);
 		if (Active && GetActionNumber() / 5 % 2 == 0)
 			GetSurface()->DrawVerticalLine(Surface,
-				TextX + GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible, Cursor - FirstVisible), TextY, GetFontHeight(Font.FontNumber), SkinProperties().Style944.Data18);
+				TextX + GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible, Cursor - FirstVisible), TextY, GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
 	}
 }
 
@@ -1258,12 +1258,12 @@ void TEditLine::SetSize(int Width, int Height)
 // 0x45ade0. The catch wrapper's states without a try block. The frame of skins 8-11.
 void TEditLine::Arrange()
 {
-	DrawingList[0] = TDrawing(9, 0, 0, Width, Skins()[9].height, 0, 0);
-	DrawingList[1] = TDrawing(11, 0, Skins()[9].height, Skins()[11].width, Height - Skins()[9].height, 0, 0);
-	DrawingList[2] = TDrawing(10, Width - Skins()[10].width, Skins()[9].height, Skins()[10].width,
-		Height - Skins()[9].height, 0, 0);
-	DrawingList[3] = TDrawing(8, Skins()[11].width, Height - Skins()[8].height,
-		Width - Skins()[10].width - Skins()[11].width, Skins()[8].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_LEFT, 0, Skins()[SKIN_FRAME_EDGE_TOP].height, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height - Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_RIGHT, Width - Skins()[SKIN_FRAME_EDGE_RIGHT].width, Skins()[SKIN_FRAME_EDGE_TOP].height, Skins()[SKIN_FRAME_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height - Skins()[SKIN_FRAME_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_FRAME_EDGE_RIGHT].width - Skins()[SKIN_FRAME_EDGE_LEFT].width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
 }
 
 // 0x45af40, line 2014. A drag extends the selection.
@@ -1347,41 +1347,41 @@ bool TEditLine::RightButtonUp(int x, int y, int Flags)
 void TEditLine::KeyPress(int Key)
 {
 	if (FocusGroup != nullptr) {
-		if (Key == 9)
+		if (Key == KEY_TAB)
 			FocusGroup->Next();
-		if (Key == 0x209)
+		if (Key == (KEY_SHIFT | KEY_TAB))
 			FocusGroup->Previous();
 	}
 	if (!IsDisabled()) {
-		const int Code = Key & 0x1ff;
-		if (Code == 0x10d && Cursor > 0) {
+		const int Code = Key & KEY_CODE_MASK;
+		if (Code == KEY_LEFT && Cursor > 0) {
 			SetCursor(Cursor - 1);
 			SelectionLength = 0;
 		}
-		if (Code == 0x10e && Cursor < (int)strlen(Text.get())) {
+		if (Code == KEY_RIGHT && Cursor < (int)strlen(Text.get())) {
 			SetCursor(Cursor + 1);
 			SelectionLength = 0;
 		}
-		if (Code == 0x112) {
+		if (Code == KEY_HOME) {
 			SetCursor(0);
 			SelectionLength = 0;
 		}
-		if (Code == 0x113) {
+		if (Code == KEY_END) {
 			SetCursor((int)strlen(Text.get()));
 			SelectionLength = 0;
 		}
 		if (!ReadOnly) {
-			if (Key == 0x310 || Key == 0x476)
+			if (Key == (KEY_SHIFT | KEY_INSERT) || Key == (KEY_CONTROL | 'v'))
 				HandleEvent(EVENT_PASTE);
-			if (Key == 0x510 || Key == 0x463)
+			if (Key == (KEY_CONTROL | KEY_INSERT) || Key == (KEY_CONTROL | 'c'))
 				HandleEvent(EVENT_COPY);
-			if (Key == 0x311 || Key == 0x478)
+			if (Key == (KEY_SHIFT | KEY_DELETE) || Key == (KEY_CONTROL | 'x'))
 				HandleEvent(EVENT_CUT);
-			if (Key == 0x511)
+			if (Key == (KEY_CONTROL | KEY_DELETE))
 				HandleEvent(EVENT_DELETE);
-			if (Key == 0x461)
+			if (Key == (KEY_CONTROL | 'a'))
 				HandleEvent(EVENT_SELECT_ALL);
-			if (Code == 8) {
+			if (Code == KEY_BACKSPACE) {
 				if (SelectionStart == -1 || SelectionLength == 0) {
 					if (Cursor > 0) {
 						SetCursor(Cursor - 1);
@@ -1392,7 +1392,7 @@ void TEditLine::KeyPress(int Key)
 					HandleEvent(EVENT_DELETE);
 				}
 			}
-			if (Key == 0x111 && Cursor <= (int)strlen(Text.get())) {
+			if (Key == KEY_DELETE && Cursor <= (int)strlen(Text.get())) {
 				if (SelectionStart == -1 || SelectionLength == 0)
 					DeleteChar(Cursor);
 				else
@@ -1402,7 +1402,7 @@ void TEditLine::KeyPress(int Key)
 			// (0x4682b2-0x4682b8): the original's catch wrapper then prints the code.
 			if ((Key & KEY_CONTROL) == 0 || (Key & KEY_ALT) != 0) {
 				Key = Code;
-				if (Key > 0x1f && Key < 0x100 && (int)strlen(Text.get()) < MaxLength) {
+				if (Key > 0x1f && Key < KEY_F1 && (int)strlen(Text.get()) < MaxLength) {
 					if (HasSelection())
 						HandleEvent(EVENT_DELETE);
 					InsertChar(Cursor, (char)Key);
@@ -1611,7 +1611,7 @@ void TPasswordEditLine::HandleEvent(int Event)
 // 0x46b570, line 2466
 TEditText::TEditText(int MaxLength, bool _ReadOnly) : TEditLine(MaxLength, _ReadOnly), LineStart(0, 9, 10, 0)
 {
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data878, SkinProperties().Data874), 0, 0, 0, 0, 1);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0, 1);
 	TWindow::InsertChild(ScrollBar);
 	Lines = 0;
 	SingleLine = false;
@@ -1621,13 +1621,13 @@ TEditText::TEditText(int MaxLength, bool _ReadOnly) : TEditLine(MaxLength, _Read
 // the selection; the cursor shows in its line (or after the end).
 void TEditText::Draw(int Surface, int x, int y)
 {
-	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().Style944.Data00);
+	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().EditLine.Background);
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
 	TWindow::Draw(Surface, x, y);
 	if (!IsDisabled()) {
 		const int LineHeight = GetFontLineHeight(Font.FontNumber);
-		const int TextX = x + SkinProperties().Data99C;
-		const int TextY = y + SkinProperties().Data99C;
+		const int TextX = x + SkinProperties().EditLineTextMargin;
+		const int TextY = y + SkinProperties().EditLineTextMargin;
 		const int First = ScrollBar->Range->Value;
 		for (int i = 0; i < VisibleLines; i++) {
 			const int Line = i + First;
@@ -1649,7 +1649,7 @@ void TEditText::Draw(int Surface, int x, int y)
 					GetSurface()->FillRectangle(Surface,
 						TRect(TextX + Offset, i * LineHeight + TextY, SelectionWidth,
 							SelectionHeight),
-						SkinProperties().Style944.Data4C);
+						SkinProperties().EditLine.SelectionColor);
 				}
 			}
 			const int LineY = i * LineHeight + TextY;
@@ -1658,7 +1658,7 @@ void TEditText::Draw(int Surface, int x, int y)
 				if ((Cursor >= Start && Cursor <= End - 1)
 					|| (Line == Lines - 1 && Cursor == (int)strlen(Text.get())))
 					GetSurface()->DrawVerticalLine(Surface,
-						TextX + GetTextPartWidth(Font.FontNumber, Text.get() + Start, Cursor - Start), LineY, GetFontHeight(Font.FontNumber), SkinProperties().Style944.Data18);
+						TextX + GetTextPartWidth(Font.FontNumber, Text.get() + Start, Cursor - Start), LineY, GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
 			}
 		}
 	}
@@ -1670,10 +1670,10 @@ void TEditText::Arrange()
 {
 	const int ScrollBarWidth = ScrollBar->Width;
 	SetChildArea(ScrollBar,
-		TRect(-(Skins()[10].width + ScrollBarWidth), Skins()[9].height, ScrollBarWidth,
-			Height - Skins()[11].width - Skins()[10].width));
-	FieldWidth = Width - 2 * SkinProperties().Data99C - ScrollBar->Width;
-	FieldHeight = Height - 2 * SkinProperties().Data99C;
+		TRect(-(Skins()[SKIN_FRAME_EDGE_RIGHT].width + ScrollBarWidth), Skins()[SKIN_FRAME_EDGE_TOP].height, ScrollBarWidth,
+			Height - Skins()[SKIN_FRAME_EDGE_LEFT].width - Skins()[SKIN_FRAME_EDGE_RIGHT].width));
+	FieldWidth = Width - 2 * SkinProperties().EditLineTextMargin - ScrollBar->Width;
+	FieldHeight = Height - 2 * SkinProperties().EditLineTextMargin;
 	VisibleLines = FieldHeight / GetFontLineHeight(Font.FontNumber);
 	FormatText();
 	if (Lines < VisibleLines)
@@ -1701,21 +1701,21 @@ void TEditText::KeyPress(int Key)
 {
 	if (ReadOnly) {
 		int Value = ScrollBar->Range->Value;
-		if (Key == 0x510 || Key == 0x463)
+		if (Key == (KEY_CONTROL | KEY_INSERT) || Key == (KEY_CONTROL | 'c'))
 			HandleEvent(EVENT_COPY);
-		if (Key == 0x461)
+		if (Key == (KEY_CONTROL | 'a'))
 			HandleEvent(EVENT_SELECT_ALL);
-		switch (Key & 0x1ff) {
-		case 0x10c:
+		switch (Key & KEY_CODE_MASK) {
+		case KEY_UP:
 			Value--;
 			break;
-		case 0x10f:
+		case KEY_DOWN:
 			Value++;
 			break;
-		case 0x114:
+		case KEY_PAGE_UP:
 			Value -= VisibleLines;
 			break;
-		case 0x115:
+		case KEY_PAGE_DOWN:
 			Value += VisibleLines;
 			break;
 		default:
@@ -1728,15 +1728,15 @@ void TEditText::KeyPress(int Key)
 		ScrollBar->Range->SetValue(Value);
 		return;
 	}
-	if (Key == 0x0d && (int)strlen(Text.get()) < MaxLength) {
+	if (Key == KEY_RETURN && (int)strlen(Text.get()) < MaxLength) {
 		if (SelectionStart != -1 && SelectionLength != 0)
 			HandleEvent(EVENT_DELETE);
 		InsertChar(Cursor, '\n');
 		SetCursor(Cursor + 1);
 	}
-	const int Code = Key & 0x1ff;
-	if ((Code != 0x112 && Code != 0x113 && Code != 0x10c && Code != 0x10f && Code != 0x114 && Code != 0x115)
-		|| (Key & 0xe00) != 0) {
+	const int Code = Key & KEY_CODE_MASK;
+	if ((Code != KEY_HOME && Code != KEY_END && Code != KEY_UP && Code != KEY_DOWN && Code != KEY_PAGE_UP && Code != KEY_PAGE_DOWN)
+		|| (Key & (KEY_SHIFT | KEY_CONTROL | KEY_ALT)) != 0) {
 		TEditLine::KeyPress(Key);
 	} else {
 		int Line = 0;
@@ -1745,7 +1745,7 @@ void TEditText::KeyPress(int Key)
 		SelectionLength = 0;
 		int PixelX, Next, MaxPosition, Fitting, Start;
 		switch (Code) {
-		case 0x10c:
+		case KEY_UP:
 			if (Line == 0)
 				break;
 			PixelX = GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line), Cursor - LineStart(Line));
@@ -1756,7 +1756,7 @@ void TEditText::KeyPress(int Key)
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
-		case 0x10f:
+		case KEY_DOWN:
 			if (Line == Lines - 1)
 				break;
 			PixelX = GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line), Cursor - LineStart(Line));
@@ -1767,10 +1767,10 @@ void TEditText::KeyPress(int Key)
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
-		case 0x112:
+		case KEY_HOME:
 			Cursor = LineStart(Line);
 			break;
-		case 0x113:
+		case KEY_END:
 			if (Line == Lines - 1) {
 				Cursor = (int)strlen(Text.get());
 			} else {
@@ -1778,7 +1778,7 @@ void TEditText::KeyPress(int Key)
 				Cursor = LineStart(Line) <= Next - 1 ? Next - 1 : LineStart(Line);
 			}
 			break;
-		case 0x114:
+		case KEY_PAGE_UP:
 			Line -= VisibleLines;
 			if (Line < 0) {
 				Line = 0;
@@ -1792,7 +1792,7 @@ void TEditText::KeyPress(int Key)
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
-		case 0x115:
+		case KEY_PAGE_DOWN:
 			Line += VisibleLines;
 			if (Line >= Lines) {
 				Line = Lines - 1;
@@ -1846,12 +1846,12 @@ void TEditText::SetActive(bool _Active)
 // start; right of or below it: the end of the last visible line.
 int TEditText::GetPosition(int x, int y)
 {
-	x -= SkinProperties().Data99C;
-	y -= SkinProperties().Data99C;
+	x -= SkinProperties().EditLineTextMargin;
+	y -= SkinProperties().EditLineTextMargin;
 	int Line;
 	if (x < 0 || y < 0) {
 		Line = ScrollBar->Range->Value;
-	} else if (x <= Width - 2 * SkinProperties().Data99C && y <= Height - 2 * SkinProperties().Data99C) {
+	} else if (x <= Width - 2 * SkinProperties().EditLineTextMargin && y <= Height - 2 * SkinProperties().EditLineTextMargin) {
 		Line = ScrollBar->Range->Value + y / GetFontLineHeight(Font.FontNumber);
 		if (Line > Lines)
 			Line = Lines;
@@ -2022,13 +2022,13 @@ void THorizontalScrollBarRange::SetSize(int Width, int Height)
 // on the x87 stack (double precision here).
 void THorizontalScrollBarRange::Arrange()
 {
-	DrawingList[0] = TDrawing(161, 0, 0, Width, Height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_HSCROLLBAR_TRACK, 0, 0, Width, Height, 0, 0);
 	if (!Enabled) {
-		DrawingList[1] = TDrawing(0, 0, 0, 0, 0, 0, 0);
-		DrawingList[2] = TDrawing(0, 0, 0, 0, 0, 0, 0);
-		DrawingList[3] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
+		DrawingList[2] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 	} else {
-		const int MinimumWidth = Skins()[164].width + Skins()[162].width;
+		const int MinimumWidth = Skins()[SKIN_HSCROLLBAR_SLIDER_RIGHT].width + Skins()[SKIN_HSCROLLBAR_SLIDER_LEFT].width;
 		const double Share = (double)Visible / (double)(Max - Min + Visible);
 		SliderWidth = Width;
 		if (Share < 1.0)
@@ -2038,10 +2038,10 @@ void THorizontalScrollBarRange::Arrange()
 		SliderPosition = (Value - Min) * (Width - SliderWidth) / (Max - Min);
 		if (SliderPosition + SliderWidth > Width)
 			SliderPosition = Width - SliderWidth;
-		DrawingList[1] = TDrawing(162, SliderPosition, 0, 0, 0, 0, 0);
-		DrawingList[2] = TDrawing(163, SliderPosition + Skins()[162].width, 0,
-			SliderWidth - Skins()[164].width - Skins()[162].width, Height, 0, 0);
-		DrawingList[3] = TDrawing(164, SliderPosition - Skins()[164].width + SliderWidth, 0, 0, 0, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_HSCROLLBAR_SLIDER_LEFT, SliderPosition, 0, 0, 0, 0, 0);
+		DrawingList[2] = TDrawing(SKIN_HSCROLLBAR_SLIDER_MIDDLE, SliderPosition + Skins()[SKIN_HSCROLLBAR_SLIDER_LEFT].width, 0,
+			SliderWidth - Skins()[SKIN_HSCROLLBAR_SLIDER_RIGHT].width - Skins()[SKIN_HSCROLLBAR_SLIDER_LEFT].width, Height, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_HSCROLLBAR_SLIDER_RIGHT, SliderPosition - Skins()[SKIN_HSCROLLBAR_SLIDER_RIGHT].width + SliderWidth, 0, 0, 0, 0, 0);
 	}
 }
 
@@ -2137,9 +2137,9 @@ bool THorizontalScrollBarRange::MouseWheel(int x, int y, int Code)
 void THorizontalScrollBarRange::KeyPress(int Key)
 {
 	if (Enabled) {
-		if (Key == 0x10d)
+		if (Key == KEY_LEFT)
 			Value -= ButtonRange;
-		else if (Key == 0x10e)
+		else if (Key == KEY_RIGHT)
 			Value += ButtonRange;
 		Callback.Send();
 		Limit(&Value, Min, Max);
@@ -2156,8 +2156,8 @@ THorizontalScrollBar::THorizontalScrollBar(int Min, int Max, int _Value, int _Vi
 	TCallback _Callback)
 {
 	PATELLA_ASSERT_VALUES(_ButtonRange>0, _ButtonRange);
-	LeftButton = new TSkinButton(0, 0, 165, 166, TCallback(this, EVENT_SCROLL_LEFT), nullptr, true);
-	RightButton = new TSkinButton(0, 0, 167, 168, TCallback(this, EVENT_SCROLL_RIGHT), nullptr, true);
+	LeftButton = new TSkinButton(0, 0, SKIN_SCROLL_LEFT_BUTTON_UP, SKIN_SCROLL_LEFT_BUTTON_DOWN, TCallback(this, EVENT_SCROLL_LEFT), nullptr, true);
+	RightButton = new TSkinButton(0, 0, SKIN_SCROLL_RIGHT_BUTTON_UP, SKIN_SCROLL_RIGHT_BUTTON_DOWN, TCallback(this, EVENT_SCROLL_RIGHT), nullptr, true);
 	TWindow::InsertChild(LeftButton);
 	TWindow::InsertChild(RightButton);
 	Range = new THorizontalScrollBarRange(Min, Max, _Value, _Visible, _Callback);
@@ -2170,7 +2170,7 @@ THorizontalScrollBar::THorizontalScrollBar(int Min, int Max, int _Value, int _Vi
 // blocks report the changed values).
 void THorizontalScrollBar::SetSize(int Width, int Height)
 {
-	Height = SkinProperties().Data880;
+	Height = SkinProperties().HorizontalScrollBarHeight;
 	Width -= RightButton->Width + LeftButton->Width;
 	if (Width < Range->getMinimumWidth())
 		Width = Range->getMinimumWidth();
@@ -2262,13 +2262,13 @@ void TScrollBarRange::SetSize(int Width, int Height)
 // THorizontalScrollBarRange::Arrange (skins 153-156).
 void TScrollBarRange::Arrange()
 {
-	DrawingList[0] = TDrawing(153, 0, 0, Width, Height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_SCROLLBAR_TRACK, 0, 0, Width, Height, 0, 0);
 	if (!Enabled) {
-		DrawingList[1] = TDrawing(0, 0, 0, 0, 0, 0, 0);
-		DrawingList[2] = TDrawing(0, 0, 0, 0, 0, 0, 0);
-		DrawingList[3] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
+		DrawingList[2] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 	} else {
-		const int MinimumHeight = Skins()[156].height + Skins()[154].height;
+		const int MinimumHeight = Skins()[SKIN_SCROLLBAR_SLIDER_BOTTOM].height + Skins()[SKIN_SCROLLBAR_SLIDER_TOP].height;
 		const double Share = (double)Visible / (double)(Max - Min + Visible);
 		SliderHeight = Height;
 		if (Share < 1.0)
@@ -2278,10 +2278,10 @@ void TScrollBarRange::Arrange()
 		SliderPosition = (Value - Min) * (Height - SliderHeight) / (Max - Min);
 		if (SliderPosition + SliderHeight > Height)
 			SliderPosition = Height - SliderHeight;
-		DrawingList[1] = TDrawing(154, 0, SliderPosition, 0, 0, 0, 0);
-		DrawingList[2] = TDrawing(155, 0, SliderPosition + Skins()[154].height, Width,
-			SliderHeight - Skins()[156].height - Skins()[154].height, 0, 0);
-		DrawingList[3] = TDrawing(156, 0, SliderPosition - Skins()[156].height + SliderHeight, 0, 0, 0, 0);
+		DrawingList[1] = TDrawing(SKIN_SCROLLBAR_SLIDER_TOP, 0, SliderPosition, 0, 0, 0, 0);
+		DrawingList[2] = TDrawing(SKIN_SCROLLBAR_SLIDER_MIDDLE, 0, SliderPosition + Skins()[SKIN_SCROLLBAR_SLIDER_TOP].height, Width,
+			SliderHeight - Skins()[SKIN_SCROLLBAR_SLIDER_BOTTOM].height - Skins()[SKIN_SCROLLBAR_SLIDER_TOP].height, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_SCROLLBAR_SLIDER_BOTTOM, 0, SliderPosition - Skins()[SKIN_SCROLLBAR_SLIDER_BOTTOM].height + SliderHeight, 0, 0, 0, 0);
 	}
 }
 
@@ -2371,9 +2371,9 @@ bool TScrollBarRange::MouseWheel(int x, int y, int Code)
 void TScrollBarRange::KeyPress(int Key)
 {
 	if (Enabled) {
-		if (Key == 0x10c)
+		if (Key == KEY_UP)
 			Value -= ButtonRange;
-		else if (Key == 0x10f)
+		else if (Key == KEY_DOWN)
 			Value += ButtonRange;
 		Limit(&Value, Min, Max);
 		Arrange();
@@ -2387,8 +2387,8 @@ void TScrollBarRange::KeyPress(int Key)
 TScrollBar::TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, int _ButtonRange)
 {
 	PATELLA_ASSERT_VALUES(_ButtonRange>0, _ButtonRange);
-	UpButton = new TSkinButton(0, 0, 157, 158, TCallback(this, EVENT_SCROLL_UP), nullptr, true);
-	DownButton = new TSkinButton(0, 0, 159, 160, TCallback(this, EVENT_SCROLL_DOWN), nullptr, true);
+	UpButton = new TSkinButton(0, 0, SKIN_SCROLL_UP_BUTTON_UP, SKIN_SCROLL_UP_BUTTON_DOWN, TCallback(this, EVENT_SCROLL_UP), nullptr, true);
+	DownButton = new TSkinButton(0, 0, SKIN_SCROLL_DOWN_BUTTON_UP, SKIN_SCROLL_DOWN_BUTTON_DOWN, TCallback(this, EVENT_SCROLL_DOWN), nullptr, true);
 	TWindow::InsertChild(UpButton);
 	TWindow::InsertChild(DownButton);
 	Range = new TScrollBarRange(0, 0, Area.width, Area.height - DownButton->Height - UpButton->Height, Min, Max,
@@ -2403,7 +2403,7 @@ TScrollBar::TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, i
 // 0x461770, line 3509. The parameters are changed in place.
 void TScrollBar::SetSize(int Width, int Height)
 {
-	Width = SkinProperties().Data878;
+	Width = SkinProperties().ScrollBarWidth;
 	Height -= DownButton->Height + UpButton->Height;
 	if (Height < Range->getMinimumHeight())
 		Height = Range->getMinimumHeight();
@@ -2438,7 +2438,7 @@ void TScrollBar::HandleEvent(int Event)
 TListBox::TListBox(TCallback _SelectCallback, TCallback _ActionCallback)
 	: LineText(0, 9, 10, nullptr), SelectCallback(nullptr, 0), ActionCallback(nullptr, 0)
 {
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data878, SkinProperties().Data874), 0, 0, 0, 0, 1);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0, 1);
 	TWindow::InsertChild(ScrollBar);
 	Lines = 0;
 	TextWidth = 0;
@@ -2460,26 +2460,26 @@ void TListBox::Draw(int Surface, int x, int y)
 	const int First = ScrollBar->Range->Value;
 	if (Editing && First != EditScroll)
 		StopEdit();
-	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().Style9A0.Data00);
+	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().ListBox.Background);
 	TWindow::Draw(Surface, x, y);
-	x += SkinProperties().Style9A0.Data20;
-	y += SkinProperties().Style9A0.Data20;
-	const int LineHeight = GetFontLineHeight(SkinProperties().Style9A0.Data0C.FontNumber);
+	x += SkinProperties().ListBox.TextMargin;
+	y += SkinProperties().ListBox.TextMargin;
+	const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 	for (int i = 0; i < VisibleLines && i < Lines; i++) {
 		const int Line = i + First;
-		const int Fitting = GetFittingTextLength(SkinProperties().Style9A0.Data0C.FontNumber, LineText(Line), TextWidth);
+		const int Fitting = GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, LineText(Line), TextWidth);
 		if (Line == Selected) {
 			if (!Editing) {
-				const int Margin = SkinProperties().Data9E4;
+				const int Margin = SkinProperties().ListBoxSelectionMargin;
 				GetSurface()->FillRectangle(Surface,
 					TRect(x - Margin, i * LineHeight - Margin + y, TextWidth + 2 * Margin,
-						GetFontHeight(SkinProperties().Style9A0.Data0C.FontNumber) + 2 * Margin),
-					SkinProperties().Style9A0.Data24);
-				PrintFormattedTextPart(Surface, x, i * LineHeight + y, SkinProperties().Style9A0.Data30, LineText(Line),
+						GetFontHeight(SkinProperties().ListBox.Font.FontNumber) + 2 * Margin),
+					SkinProperties().ListBox.SelectedBackground);
+				PrintFormattedTextPart(Surface, x, i * LineHeight + y, SkinProperties().ListBox.SelectedFont, LineText(Line),
 					Fitting);
 			}
 		} else {
-			PrintFormattedTextPart(Surface, x, i * LineHeight + y, SkinProperties().Style9A0.Data0C, LineText(Line),
+			PrintFormattedTextPart(Surface, x, i * LineHeight + y, SkinProperties().ListBox.Font, LineText(Line),
 				Fitting);
 		}
 	}
@@ -2496,22 +2496,22 @@ void TListBox::SetSize(int Width, int Height)
 // TEditText::Arrange.
 void TListBox::Arrange()
 {
-	TextWidth = Width - 2 * SkinProperties().Style9A0.Data20 - ScrollBar->Width;
+	TextWidth = Width - 2 * SkinProperties().ListBox.TextMargin - ScrollBar->Width;
 	SetChildArea(ScrollBar,
-		TRect(-(Skins()[10].width + ScrollBar->Width), Skins()[9].height, ScrollBar->Width,
-			Height - Skins()[11].width - Skins()[10].width));
-	VisibleLines = (Height - 2 * SkinProperties().Style9A0.Data20)
-		/ GetFontLineHeight(SkinProperties().Style9A0.Data0C.FontNumber);
+		TRect(-(Skins()[SKIN_FRAME_EDGE_RIGHT].width + ScrollBar->Width), Skins()[SKIN_FRAME_EDGE_TOP].height, ScrollBar->Width,
+			Height - Skins()[SKIN_FRAME_EDGE_LEFT].width - Skins()[SKIN_FRAME_EDGE_RIGHT].width));
+	VisibleLines = (Height - 2 * SkinProperties().ListBox.TextMargin)
+		/ GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 	if (VisibleLines < Lines)
 		ScrollBar->Range->SetRange(0, Lines - VisibleLines, ScrollBar->Range->Value, VisibleLines);
 	else
 		ScrollBar->Range->SetRange(0, 0, 0, 0);
-	DrawingList[0] = TDrawing(9, 0, 0, Width, Skins()[9].height, 0, 0);
-	DrawingList[1] = TDrawing(11, 0, Skins()[9].height, Skins()[11].width, Height - Skins()[9].height, 0, 0);
-	DrawingList[2] = TDrawing(10, Width - Skins()[10].width, Skins()[9].height, Skins()[10].width,
-		Height - Skins()[9].height, 0, 0);
-	DrawingList[3] = TDrawing(8, Skins()[11].width, Height - Skins()[8].height,
-		Width - Skins()[10].width - Skins()[11].width, Skins()[8].height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_LEFT, 0, Skins()[SKIN_FRAME_EDGE_TOP].height, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height - Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_RIGHT, Width - Skins()[SKIN_FRAME_EDGE_RIGHT].width, Skins()[SKIN_FRAME_EDGE_TOP].height, Skins()[SKIN_FRAME_EDGE_RIGHT].width,
+		Height - Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, Skins()[SKIN_FRAME_EDGE_LEFT].width, Height - Skins()[SKIN_FRAME_EDGE_BOTTOM].height,
+		Width - Skins()[SKIN_FRAME_EDGE_RIGHT].width - Skins()[SKIN_FRAME_EDGE_LEFT].width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
 }
 
 // 0x46a460, line 3696
@@ -2549,7 +2549,7 @@ void TListBox::MouseHover(int x, int y)
 {
 	const int Line = GetLineAt(x, y);
 	if (Line != -1) {
-		const int Fitting = GetFittingTextLength(SkinProperties().Style9A0.Data0C.FontNumber, LineText(Line), TextWidth);
+		const int Fitting = GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, LineText(Line), TextWidth);
 		if (LineText(Line) != nullptr && Fitting < (int)strlen(LineText(Line)))
 			SetMouseOverText(LineText(Line));
 	}
@@ -2568,12 +2568,12 @@ bool TListBox::MouseWheel(int x, int y, int Code)
 // the edit and the other keys go to the edit line.
 void TListBox::KeyPress(int _Key)
 {
-	const int Code = _Key & 0x1ff;
-	if (Code == 0x10c) {
+	const int Code = _Key & KEY_CODE_MASK;
+	if (Code == KEY_UP) {
 		if (Editing)
 			StopEdit();
 		Selected = Selected - 1;
-	} else if (Code == 0x10f) {
+	} else if (Code == KEY_DOWN) {
 		if (Editing)
 			StopEdit();
 		Selected = Selected + 1;
@@ -2587,7 +2587,7 @@ void TListBox::KeyPress(int _Key)
 				}
 			}
 		}
-	} else if (Code == 0x0d) {
+	} else if (Code == KEY_RETURN) {
 		StopEdit();
 	} else {
 		EditLine->KeyPress(_Key);
@@ -2667,11 +2667,11 @@ void TListBox::Clear()
 // 0x462e70, line 3938. The visible line at y (-1 for none).
 int TListBox::GetLineAt([[maybe_unused]] int x, int y) const
 {
-	const int LineHeight = GetFontLineHeight(SkinProperties().Style9A0.Data0C.FontNumber);
-	const int Offset = (LineHeight - GetFontHeight(SkinProperties().Style9A0.Data0C.FontNumber)) / 2;
-	if (y >= SkinProperties().Style9A0.Data20 - Offset) {
+	const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
+	const int Offset = (LineHeight - GetFontHeight(SkinProperties().ListBox.Font.FontNumber)) / 2;
+	if (y >= SkinProperties().ListBox.TextMargin - Offset) {
 		const int First = ScrollBar->Range->Value;
-		const int Line = (Offset - SkinProperties().Style9A0.Data20 + y) / LineHeight + First;
+		const int Line = (Offset - SkinProperties().ListBox.TextMargin + y) / LineHeight + First;
 		if (Line < Lines && Line < VisibleLines + First)
 			return Line;
 	}
@@ -2682,7 +2682,7 @@ int TListBox::GetLineAt([[maybe_unused]] int x, int y) const
 void TListBox::StartEdit()
 {
 	if (!Editing) {
-		const int LineHeight = GetFontLineHeight(SkinProperties().Style9A0.Data0C.FontNumber);
+		const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 		const int ScrollBarWidth = ScrollBar->Width;
 		const int ListWidth = Width;
 		Editing = true;
@@ -2720,22 +2720,22 @@ void TFontListBox::Draw(int Surface, int x, int y)
 	const int First = ScrollBar->Range->Value;
 	if (Editing && First != EditScroll)
 		StopEdit();
-	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().Style9A0.Data00);
+	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().ListBox.Background);
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
 	TWindow::Draw(Surface, x, y);
-	x += SkinProperties().Style9A0.Data20;
-	y += SkinProperties().Style9A0.Data20;
-	const int LineHeight = GetFontLineHeight(SkinProperties().Style9A0.Data0C.FontNumber);
+	x += SkinProperties().ListBox.TextMargin;
+	y += SkinProperties().ListBox.TextMargin;
+	const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 	for (int i = 0; i < VisibleLines && i < Lines; i++) {
 		const int Line = i + First;
 		const int Fitting = GetFittingTextLength(FontLines(Line).Font.FontNumber, FontLines(Line).Text, TextWidth);
 		if (Line == Selected) {
 			if (!Editing) {
-				const int Margin = SkinProperties().Data9E4;
+				const int Margin = SkinProperties().ListBoxSelectionMargin;
 				GetSurface()->FillRectangle(Surface,
 					TRect(x - Margin, i * LineHeight - Margin + y, TextWidth + 2 * Margin,
 						GetFontHeight(FontLines(Line).Font.FontNumber) + 2 * Margin),
-					SkinProperties().Style9A0.Data24);
+					SkinProperties().ListBox.SelectedBackground);
 				PrintFormattedTextPart(Surface, x, i * LineHeight + y, FontLines(Line).Font, FontLines(Line).Text,
 					Fitting);
 			}
@@ -2806,7 +2806,7 @@ void TFontListBox::MouseHover(int x, int y)
 {
 	const int Line = GetLineAt(x, y);
 	if (Line != -1) {
-		const int Fitting = GetFittingTextLength(SkinProperties().Style9A0.Data0C.FontNumber, FontLines(Line).Text, TextWidth);
+		const int Fitting = GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, FontLines(Line).Text, TextWidth);
 		if (FontLines(Line).Text != nullptr && Fitting < (int)strlen(FontLines(Line).Text))
 			SetMouseOverText(FontLines(Line).Text);
 	}
@@ -2816,7 +2816,7 @@ void TFontListBox::MouseHover(int x, int y)
 void TFontListBox::StartEdit()
 {
 	if (!Editing) {
-		const int LineHeight = GetFontLineHeight(SkinProperties().Style9A0.Data0C.FontNumber);
+		const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 		const int EditWidth = Width - ScrollBar->Width;
 		TFont Font;
 		const char *Edited = GetLine(Selected, &Font);
@@ -2852,24 +2852,24 @@ void TFontListBox::StopEdit()
 // 259-261 the filled part (start, middle, end).
 void TProgressBar::Arrange()
 {
-	DrawingList[0] = TDrawing(256, 0, 0, Skins()[256].width, Height, 0, 0);
-	DrawingList[1] = TDrawing(257, Skins()[256].width, 0, Width - Skins()[258].width - Skins()[256].width, Height, 0, 0);
-	DrawingList[2] = TDrawing(258, Width - Skins()[258].width, 0, Skins()[258].width, Height, 0, 0);
+	DrawingList[0] = TDrawing(SKIN_PROGRESS_LEFT, 0, 0, Skins()[SKIN_PROGRESS_LEFT].width, Height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_PROGRESS_MIDDLE, Skins()[SKIN_PROGRESS_LEFT].width, 0, Width - Skins()[SKIN_PROGRESS_RIGHT].width - Skins()[SKIN_PROGRESS_LEFT].width, Height, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_PROGRESS_RIGHT, Width - Skins()[SKIN_PROGRESS_RIGHT].width, 0, Skins()[SKIN_PROGRESS_RIGHT].width, Height, 0, 0);
 	int Filled = Current * Width / Maximum;
 	if (Filled < 1)
-		DrawingList[3] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[3] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 	else
-		DrawingList[3] = TDrawing(259, 0, 0, Filled, Height, 0, 0);
-	if (Filled > Width - Skins()[261].width) {
-		DrawingList[5] = TDrawing(261, Width - Skins()[261].width, 0, Skins()[261].width - Width + Filled, Height, 0, 0);
-		Filled = Width - Skins()[261].width;
+		DrawingList[3] = TDrawing(SKIN_PROGRESS_FILLED_LEFT, 0, 0, Filled, Height, 0, 0);
+	if (Filled > Width - Skins()[SKIN_PROGRESS_FILLED_RIGHT].width) {
+		DrawingList[5] = TDrawing(SKIN_PROGRESS_FILLED_RIGHT, Width - Skins()[SKIN_PROGRESS_FILLED_RIGHT].width, 0, Skins()[SKIN_PROGRESS_FILLED_RIGHT].width - Width + Filled, Height, 0, 0);
+		Filled = Width - Skins()[SKIN_PROGRESS_FILLED_RIGHT].width;
 	} else {
-		DrawingList[5] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[5] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 	}
-	if (Filled > Skins()[259].width)
-		DrawingList[4] = TDrawing(260, Skins()[259].width, 0, Filled - Skins()[259].width, Height, 0, 0);
+	if (Filled > Skins()[SKIN_PROGRESS_FILLED_LEFT].width)
+		DrawingList[4] = TDrawing(SKIN_PROGRESS_FILLED_MIDDLE, Skins()[SKIN_PROGRESS_FILLED_LEFT].width, 0, Filled - Skins()[SKIN_PROGRESS_FILLED_LEFT].width, Height, 0, 0);
 	else
-		DrawingList[4] = TDrawing(0, 0, 0, 0, 0, 0, 0);
+		DrawingList[4] = TDrawing(SKIN_NONE, 0, 0, 0, 0, 0, 0);
 }
 
 // 0x464f40, lines 4271-4276

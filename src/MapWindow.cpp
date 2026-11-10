@@ -97,8 +97,8 @@ TMapWindow::TMapWindow()
 {
 	HintButton = nullptr;
 	MaxLevel = 0;
-	AddHotkey(0x44e, TCallback(this, EVENT_CREATURE_INFO));
-	AddHotkey(0x457, TCallback(this, EVENT_REMOVE_TALKBOX));
+	AddHotkey(KEY_CONTROL | 'N', TCallback(this, EVENT_CREATURE_INFO));
+	AddHotkey(KEY_CONTROL | 'W', TCallback(this, EVENT_REMOVE_TALKBOX));
 	for (int i = 0; i < 16; i++) {
 		for (int j = 0; j < 12; j++) {
 			Cache[i][j].x = i << 5;
@@ -116,12 +116,12 @@ void TMapWindow::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x4bfde0, line 164. The area is the TRect SkinProperties.Data140, copied
+// 0x4bfde0, line 164. The area is the TRect SkinProperties.MapHintButton, copied
 // as one 16-byte block (sub esp,0x10 and four stores).
 void TMapWindow::Arrange()
 {
 	if (HintButton != nullptr)
-		SetChildArea(HintButton, SkinProperties().Data140);
+		SetChildArea(HintButton, SkinProperties().MapHintButton);
 }
 
 // 0x4c24d0, line 196. Starts dragging the top movable object of the field.
@@ -357,16 +357,16 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		return false;
 	int Position = 0;
 	TObject Obj = GetTopLookObject(FieldX, FieldY, FieldZ, Position);
-	int Handle = 0;
+	int Handle = HELP_NONE;
 	if (Obj.Type == CREATURE && Obj.Data == (int)GetPlayerID())
-		Handle = 1001;
+		Handle = HELP_YOUR_CHARACTER;
 	else if (Obj.Type == CREATURE)
-		Handle = 1000;
+		Handle = HELP_CREATURES;
 	else if (GetObjectFlag(Obj, LENSHELP))
 		Handle = GetObjectLensHelp(Obj.Type);
 	else if (GetObjectFlag(Obj, CONTAINER))
-		Handle = 1002;
-	if (Handle == 0)
+		Handle = HELP_CONTAINERS;
+	if (Handle == HELP_NONE)
 		return false;
 	const TCreature *Player = GetCreature(GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
@@ -599,16 +599,16 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			int BarY = ny - 4;
 			if (CreatureInfo == 2) {
 				int BarX = nx - 14;
-				const int TextWidth = GetTextWidth(2, Creature->Name);
+				const int TextWidth = GetTextWidth(FONT_BORDERED, Creature->Name);
 				Limit(BarX, 1, Width - 28);
-				Limit(BarY, GetFontHeight(2) + 1, Height - GetFontHeight(2) - 5);
+				Limit(BarY, GetFontHeight(FONT_BORDERED) + 1, Height - GetFontHeight(FONT_BORDERED) - 5);
 				int TextX = BarX - TextWidth / 2 + 14;
-				const int TextY = BarY - GetFontHeight(2);
+				const int TextY = BarY - GetFontHeight(FONT_BORDERED);
 				Limit(TextX, 1, Width - TextWidth - 1);
 				GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4), TRGBColor(0, 0, 0));
 				GetSurface()->FillRectangle(Surface, TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
 					NameColor);
-				PrintText(Surface, TextX + x, TextY + y, 2, NameColor, Creature->Name, 0);
+				PrintText(Surface, TextX + x, TextY + y, FONT_BORDERED, NameColor, Creature->Name, 0);
 			} else {
 				int BarX = nx - 14;
 				Limit(BarX, 1, Width - 28);
@@ -620,58 +620,58 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			// The party shield, then the skull (both blink when the skull is
 			// about to go); a shield of type 1 shows only while the player is
 			// in no party.
-			int Icon1 = 0, Icon2 = 0;
+			int Icon1 = SKIN_NONE, Icon2 = SKIN_NONE;
 			bool Blink = true;
-			if (Creature->PARTYFlag > 0) {
+			if (Creature->PARTYFlag > PARTY_NONE) {
 				switch (Creature->PARTYFlag) {
-				case 1:
+				case PARTY_INVITER:
 					if (!IsPlayerInParty())
-						Icon1 = 252;
+						Icon1 = SKIN_MAP_SHIELD_1;
 					break;
-				case 2:
-					Icon1 = 253;
+				case PARTY_INVITEE:
+					Icon1 = SKIN_MAP_SHIELD_2;
 					break;
-				case 3:
-					Icon1 = 254;
+				case PARTY_MEMBER:
+					Icon1 = SKIN_MAP_SHIELD_3;
 					break;
-				case 4:
-					Icon1 = 255;
+				case PARTY_LEADER:
+					Icon1 = SKIN_MAP_SHIELD_4;
 					break;
 				default:
 					TERROR1B("unknown creature party flag", Creature->PARTYFlag, "[bug0001106]");
 				}
 			}
-			if (Creature->PKFlag > 0) {
+			if (Creature->PKFlag > PK_NONE) {
 				int Skull;
 				switch (Creature->PKFlag) {
-				case 1:
-					Skull = 244;
+				case PK_YELLOW:
+					Skull = SKIN_MAP_SKULL_1;
 					break;
-				case 2:
-					Skull = 245;
+				case PK_GREEN:
+					Skull = SKIN_MAP_SKULL_2;
 					break;
-				case 3:
-					Skull = 246;
+				case PK_WHITE:
+					Skull = SKIN_MAP_SKULL_3;
 					break;
-				case 4:
-					Skull = 247;
+				case PK_RED:
+					Skull = SKIN_MAP_SKULL_4;
 					break;
 				default:
 					TERROR1("unknown creature PK flag", Creature->PKFlag);
 				}
 				Icon2 = Skull;
-				if (Icon1 == 0) {
+				if (Icon1 == SKIN_NONE) {
 					Icon1 = Skull;
-					Icon2 = 0;
+					Icon2 = SKIN_NONE;
 				}
 				if (Creature->SkullTime != 0) // a kept skull (issue #62: its 32 bits are negative from 2038 to 2106)
 					Blink = GetBlinkState();
 			}
-			if (Icon1 != 0) {
+			if (Icon1 != SKIN_NONE) {
 				const TSkin *Skin = &Skins()[Icon1];
 				int IconX = nx - Skin->width + 20;
 				int IconY = ny + 1;
-				if (Icon2 != 0) {
+				if (Icon2 != SKIN_NONE) {
 					Limit(IconX, 1, Width - Skin->width - 14);
 					Limit(IconY, 1, Height - Skin->height - 1);
 					DrawSkin(Surface, IconX + x, IconY + y, Skin->width, Skin->height, Icon1, 0, 0);
@@ -704,13 +704,13 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		TRGBColor Color;
 		GetTalkboxColor(&Color, Talkbox);
 		for (int Line = 0; Line < Lines; Line++)
-			PrintTextClipped(Surface, tx + x, Line * GetFontLineHeight(2) + ty + y, 2, Color,
+			PrintTextClipped(Surface, tx + x, Line * GetFontLineHeight(FONT_BORDERED) + ty + y, FONT_BORDERED, Color,
 				GetTalkboxLine(Talkbox, Line), Alignment, TRect(x, y, ScreenWidth, ScreenHeight));
 	}
 	if (GetStatusMessage() != nullptr) {
 		const int MessageWidth = Width, MessageHeight = Height;
-		const int Length = GetFittingTextLength(2, GetStatusMessage(), MessageWidth);
-		PrintTextPart(Surface, MessageWidth / 2 + x, MessageHeight - GetFontHeight(2) + y, 2,
+		const int Length = GetFittingTextLength(FONT_BORDERED, GetStatusMessage(), MessageWidth);
+		PrintTextPart(Surface, MessageWidth / 2 + x, MessageHeight - GetFontHeight(FONT_BORDERED) + y, FONT_BORDERED,
 			TRGBColor(255, 255, 255), GetStatusMessage(), Length, 1);
 	}
 
@@ -742,19 +742,19 @@ void TMapWindow::Draw(int Surface, int x, int y)
 					tx = tx * Width / 480;
 					ty = ty * Height / 352;
 				}
-				Limit(tx, GetTextWidth(2, Text) / 2, Width - GetTextWidth(2, Text) / 2);
-				Limit(ty, 0, Height - GetFontHeight(2));
-				PrintText(Surface, tx + x, ty + y, 2, TRGBColor(Color), Text, 1);
+				Limit(tx, GetTextWidth(FONT_BORDERED, Text) / 2, Width - GetTextWidth(FONT_BORDERED, Text) / 2);
+				Limit(ty, 0, Height - GetFontHeight(FONT_BORDERED));
+				PrintText(Surface, tx + x, ty + y, FONT_BORDERED, TRGBColor(Color), Text, 1);
 			}
 		}
 	}
 
 	// The hint button while there is an event help to show.
-	if (GetShowNewHints() && GetEventHelp() != 0 && HintButton == nullptr) {
-		HintButton = new TBlinkingButton(0, 0, 61, 62, 63, 64, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
+	if (GetShowNewHints() && GetEventHelp() != HINT_NONE && HintButton == nullptr) {
+		HintButton = new TBlinkingButton(0, 0, SKIN_HINT_BUTTON_UP1, SKIN_HINT_BUTTON_DOWN1, SKIN_HINT_BUTTON_UP2, SKIN_HINT_BUTTON_DOWN2, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
 		InsertChild(HintButton);
 		Arrange();
-		if (GetEventHelp() == 1)
+		if (GetEventHelp() == HINT_FIRST_LOGIN)
 			HandleEvent(EVENT_MAP_HINT);
 	} else if (!GetShowNewHints() && HintButton != nullptr) {
 		DeleteChild(HintButton);
@@ -1348,16 +1348,16 @@ void TMapWindow::ArrangeTalkboxes()
 		BoxWidth[Talkbox - 1] = 0;
 		const int Lines = GetTalkboxLines(Talkbox);
 		for (int Line = 0; Line < Lines; Line++) {
-			const int LineWidth = GetTextWidth(2, GetTalkboxLine(Talkbox, Line));
+			const int LineWidth = GetTextWidth(FONT_BORDERED, GetTalkboxLine(Talkbox, Line));
 			BoxWidth[Talkbox - 1] = BoxWidth[Talkbox - 1] > LineWidth ? BoxWidth[Talkbox - 1] : LineWidth;
 		}
-		BoxHeight[Talkbox - 1] = GetFontLineHeight(2) * Lines;
+		BoxHeight[Talkbox - 1] = GetFontLineHeight(FONT_BORDERED) * Lines;
 	}
 	int StatusHeight;
 	if (GetStatusMessage() == nullptr)
 		StatusHeight = 0;
 	else
-		StatusHeight = GetFontHeight(2) + 10;
+		StatusHeight = GetFontHeight(FONT_BORDERED) + 10;
 	const bool NoStretching = GetNoStretching();
 	const int BorderX = (480 - Width) / 2;
 	const int BorderY = (352 - Height) / 2;
@@ -1387,7 +1387,7 @@ void TMapWindow::ArrangeTalkboxes()
 				cy = y * 32 - BorderY - 32;
 			else
 				cy = (y - 1) * Height / 11;
-			cy -= GetTalkboxLines(Talkbox) * GetFontLineHeight(2) / 2;
+			cy -= GetTalkboxLines(Talkbox) * GetFontLineHeight(FONT_BORDERED) / 2;
 			CentreY = cy;
 			const int HalfWidth = BoxWidth[i] / 2;
 			MinX[i] = HalfWidth + 1 > cx - HalfWidth ? HalfWidth + 1 : cx - HalfWidth;
@@ -1596,50 +1596,50 @@ TMapFrame::TMapFrame()
 // follows it.
 void TMapFrame::SetSize(int Width, int Height)
 {
-	const int Border = SkinProperties().Data13C;
+	const int Border = SkinProperties().MapFrameBorder;
 	const int MaxWidth = (Height - Border * 2) * 15 / 11 + 2;
 	ViewWidth = Width - Border * 2 < MaxWidth ? Width - Border * 2 : MaxWidth;
 	if (GetNoStretching())
 		ViewWidth = ViewWidth < 480 ? ViewWidth : 480;
 	ViewHeight = (int)floor(ViewWidth * (11.0f / 15.0f));
-	ViewX = (Width - SkinProperties().Data13C * 2 - ViewWidth) / 2 + SkinProperties().Data13C;
-	ViewY = SkinProperties().Data13C;
+	ViewX = (Width - SkinProperties().MapFrameBorder * 2 - ViewWidth) / 2 + SkinProperties().MapFrameBorder;
+	ViewY = SkinProperties().MapFrameBorder;
 	MapWindow->SetSize(ViewWidth, ViewHeight);
 	MapWindow->SetPosition(ViewX, ViewY);
-	TWindow::SetSize(Width, ViewHeight + SkinProperties().Data13C * 2);
+	TWindow::SetSize(Width, ViewHeight + SkinProperties().MapFrameBorder * 2);
 	Arrange();
 }
 
 // 0x4c1ea0, line 1595
 int TMapFrame::getMinimumWidth()
 {
-	return MapWindow->getMinimumWidth() + SkinProperties().Data13C * 2;
+	return MapWindow->getMinimumWidth() + SkinProperties().MapFrameBorder * 2;
 }
 
 // 0x4c2040, line 1606
 int TMapFrame::getMinimumHeight()
 {
-	return MapWindow->getMinimumHeight() + SkinProperties().Data13C * 2;
+	return MapWindow->getMinimumHeight() + SkinProperties().MapFrameBorder * 2;
 }
 
 // 0x4c21e0. No exception frame. The border (skins 8-11) and skin 7 tiled
 // over the rest, its pattern aligned to the frame.
 void TMapFrame::Arrange()
 {
-	DrawingList[0] = TDrawing(9, ViewX - Skins()[11].width, ViewY - Skins()[9].height,
-		Skins()[10].width + Skins()[11].width + ViewWidth, Skins()[9].height, 0, 0);
-	DrawingList[1] = TDrawing(11, ViewX - Skins()[11].width, ViewY, Skins()[11].width, Skins()[8].height + ViewHeight, 0, 0);
-	DrawingList[2] = TDrawing(10, ViewX + ViewWidth, ViewY, Skins()[10].width, Skins()[8].height + ViewHeight, 0, 0);
-	DrawingList[3] = TDrawing(8, ViewX, ViewY + ViewHeight, ViewWidth, Skins()[8].height, 0, 0);
-	const int Top = ViewY - Skins()[9].height;
-	const int Left = ViewX - Skins()[11].width;
-	const int Right = Skins()[10].width + ViewX + ViewWidth;
+	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, ViewX - Skins()[SKIN_FRAME_EDGE_LEFT].width, ViewY - Skins()[SKIN_FRAME_EDGE_TOP].height,
+		Skins()[SKIN_FRAME_EDGE_RIGHT].width + Skins()[SKIN_FRAME_EDGE_LEFT].width + ViewWidth, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
+	DrawingList[1] = TDrawing(SKIN_FRAME_EDGE_LEFT, ViewX - Skins()[SKIN_FRAME_EDGE_LEFT].width, ViewY, Skins()[SKIN_FRAME_EDGE_LEFT].width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height + ViewHeight, 0, 0);
+	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_RIGHT, ViewX + ViewWidth, ViewY, Skins()[SKIN_FRAME_EDGE_RIGHT].width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height + ViewHeight, 0, 0);
+	DrawingList[3] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, ViewX, ViewY + ViewHeight, ViewWidth, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
+	const int Top = ViewY - Skins()[SKIN_FRAME_EDGE_TOP].height;
+	const int Left = ViewX - Skins()[SKIN_FRAME_EDGE_LEFT].width;
+	const int Right = Skins()[SKIN_FRAME_EDGE_RIGHT].width + ViewX + ViewWidth;
 	const int RightWidth = Width - Right;
-	const int Bottom = Skins()[8].height + ViewY + ViewHeight;
-	DrawingList[4] = TDrawing(7, 0, 0, Width, Top, 0, 0);
-	DrawingList[5] = TDrawing(7, 0, Top, Left, Height - Top, 0, Top % Skins()[7].height);
-	DrawingList[6] = TDrawing(7, Right, Top, RightWidth, Height - Top, Right % Skins()[7].width, Top % Skins()[7].height);
-	DrawingList[7] = TDrawing(7, Left, Bottom, Width - RightWidth - Left, Height - Bottom, Left % Skins()[7].width,
-		Bottom % Skins()[7].height);
+	const int Bottom = Skins()[SKIN_FRAME_EDGE_BOTTOM].height + ViewY + ViewHeight;
+	DrawingList[4] = TDrawing(SKIN_BACKGROUND, 0, 0, Width, Top, 0, 0);
+	DrawingList[5] = TDrawing(SKIN_BACKGROUND, 0, Top, Left, Height - Top, 0, Top % Skins()[SKIN_BACKGROUND].height);
+	DrawingList[6] = TDrawing(SKIN_BACKGROUND, Right, Top, RightWidth, Height - Top, Right % Skins()[SKIN_BACKGROUND].width, Top % Skins()[SKIN_BACKGROUND].height);
+	DrawingList[7] = TDrawing(SKIN_BACKGROUND, Left, Bottom, Width - RightWidth - Left, Height - Bottom, Left % Skins()[SKIN_BACKGROUND].width,
+		Bottom % Skins()[SKIN_BACKGROUND].height);
 }
 // NOLINTEND(cppcoreguidelines-owning-memory)

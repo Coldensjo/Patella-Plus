@@ -115,11 +115,11 @@ void patella::TInteraction::SetMouseCursor(int Cursor)
 int patella::TInteraction::GetMouseCursor() const
 {
 	if (ActionState == ACTIONSTATE_HELP)
-		return 6;
+		return CURSOR_MAGNIFIER;
 	if (ActionState == ACTIONSTATE_DRAGGING)
-		return 5;
+		return CURSOR_DRAG;
 	if (ActionState == ACTIONSTATE_USE_WITH || ActionState == ACTIONSTATE_TRADE_WITH)
-		return 4;
+		return CURSOR_CROSSHAIR;
 	return MouseCursor;
 }
 
@@ -270,7 +270,7 @@ int patella::TInteraction::GetTradeInfo() const
 
 // 0x4e71e0. 0 offline, 1 resolving the login server name, 2 connecting to a
 // login server, 4 talking to the login server, 5 connecting to the game
-// server; the game uses higher values (see ReceivePackets in Control.cpp).
+// server; the game uses higher values. All are named in Events.h (CONNECTION_*).
 void patella::TSession::SetConnectionState(int State)
 {
 	ConnectionState = State;
@@ -708,7 +708,7 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	UseObject.Data = 0;
 	UseObject.Data2 = 0;
 	TradeInfo = 0;
-	ActionState = 0;
+	ActionState = ACTIONSTATE_NONE;
 	MouseOverText = nullptr;
 	PendingActionState = 0;
 	PendingActionNumber = 0;
@@ -720,7 +720,7 @@ void patella::TSession::InitSession(bool Value)
 {
 	Gamemaster = Value;
 	ClearRights();
-	ConnectionState = 0;
+	ConnectionState = CONNECTION_OFFLINE;
 	AccountNumber = 0;
 	AccountPassword[0] = 0;
 	AccountCharacters = 0;

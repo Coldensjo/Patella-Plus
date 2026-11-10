@@ -114,7 +114,7 @@ protected:
 	void OnClose() override; // the destructor's zoom and hotkeys (issue #108)
 };
 
-// The capacity and the soul points of the inventory (Style3E0, Style428).
+// The capacity and the soul points of the inventory (CapacityLabel, SoulLabel).
 class TCapacityLabel final : public TElement {
 public:
 	// The constructor and the destructor are the implicit ones.
@@ -211,7 +211,7 @@ public:
 
 // TSubWindowBody, the content of a TSubWindow, is DialogWindow.h's since issue #118.
 
-// The objects of a container in rows of SkinProperties.Data62C slots, with
+// The objects of a container in rows of SkinProperties.ContainerSlotsPerRow slots, with
 // a scroll bar.
 class TContainerWindowBody : public TSubWindowBody {
 public:
@@ -232,19 +232,19 @@ public:
 	[[nodiscard]] int GetSlotAt(int x, int y, bool Occupied) const; // 0x42e2c0, line 1940
 	void UpdateUpButton();                                          // 0x42e4e0, line 1960
 	// Inline: emitted at the start of the object (0x425a10, 0x425a40).
-	// Odd, kept: the rows start at Data630.x (the left edge of the
-	// first slot, the same as Data630.y in the game's skin).
+	// Odd, kept: the rows start at ContainerFirstSlot.x (the left edge of the
+	// first slot, the same as ContainerFirstSlot.y in the game's skin).
 	int GetInitialHeight() override
 	{
-		return (ObjectCount / SkinProperties().Data62C + (ObjectCount % SkinProperties().Data62C > 0))
-			* SkinProperties().Data64C
-			+ SkinProperties().Data630.x;
+		return (ObjectCount / SkinProperties().ContainerSlotsPerRow + (ObjectCount % SkinProperties().ContainerSlotsPerRow > 0))
+			* SkinProperties().ContainerRowHeight
+			+ SkinProperties().ContainerFirstSlot.x;
 	}
 	int GetContentHeight() override
 	{
-		return (Capacity / SkinProperties().Data62C + (Capacity % SkinProperties().Data62C > 0))
-			* SkinProperties().Data64C
-			+ SkinProperties().Data630.x;
+		return (Capacity / SkinProperties().ContainerSlotsPerRow + (Capacity % SkinProperties().ContainerSlotsPerRow > 0))
+			* SkinProperties().ContainerRowHeight
+			+ SkinProperties().ContainerFirstSlot.x;
 	}
 
 	TScrollBar *ScrollBar; // +0x30

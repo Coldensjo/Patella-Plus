@@ -832,9 +832,9 @@ void OnCaptureChanged()
 void OnHostResolved(int Error)
 {
 	if (Error == 0) {
-		if (GetConnectionState() != 1) {
+		if (GetConnectionState() != CONNECTION_RESOLVING_LOGIN_SERVER) {
 			SetConnectionTimeout(0);
-			SetConnectionState(0);
+			SetConnectionState(CONNECTION_OFFLINE);
 			Disconnect(true);
 			// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue, freed with its message
 			char *Text = new char[1024];
@@ -844,10 +844,10 @@ void OnHostResolved(int Error)
 		}
 		SetConnectionTimeout(0);
 		SetServerIPAddress(GetResolvedIPAddress());
-		SetConnectionState(2);
+		SetConnectionState(CONNECTION_CONNECTING_LOGIN_SERVER);
 	} else {
 		SetConnectionTimeout(0);
-		SetConnectionState(0);
+		SetConnectionState(CONNECTION_OFFLINE);
 		SetServerError(Error);
 	}
 	ConnectToLoginServer();
@@ -1183,7 +1183,7 @@ void SetDisplayMode(int ViewMode)
 		Redraw(false);
 		SDL_SetWindowFullscreen(Window, true);
 		SDL_SyncWindow(Window);
-		if (patella::bridge::GraphicsEngine().curEngine == 2)
+		if (patella::bridge::GraphicsEngine().curEngine == ENGINE_DIRECTX9)
 			Resize(0, 0);
 	} else {
 		SetFrameStyle(0, WS_EX_APPWINDOW | WS_EX_CLIENTEDGE);
@@ -1217,12 +1217,12 @@ void UpdateMouseCursor()
 	if (GetWindowsMousepointer()) {
 		Cursor = DefaultCursor;
 		switch (GetMouseCursor()) {
-		case 1: Cursor = ArrowCursor; break;
-		case 2: Cursor = SizeCursor; break;
-		case 3: Cursor = WaitCursor; break;
-		case 4:
-		case 5: break;
-		case 6: Cursor = HandCursor; break;
+		case CURSOR_ARROW: Cursor = ArrowCursor; break;
+		case CURSOR_SIZENS: Cursor = SizeCursor; break;
+		case CURSOR_WAIT: Cursor = WaitCursor; break;
+		case CURSOR_CROSSHAIR:
+		case CURSOR_DRAG: break;
+		case CURSOR_MAGNIFIER: Cursor = HandCursor; break;
 		default: return;
 		}
 	}

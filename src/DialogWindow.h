@@ -40,6 +40,20 @@ class TSkinButton; // DialogElements.h
 inline constexpr int TRADE_WINDOW = 8;
 // A container's window: this plus the container number. An enumerator for the reason in GUI.h.
 enum : int { CONTAINER_WINDOW = 0x40 }; // NOLINT(cppcoreguidelines-use-enum-class): an int constant
+// The other identifiers, named as TRADE_WINDOW is, after the windows' classes and creators (ContentWindows.h). The
+// first five are the side panel's fixed windows, the others the dialog window's, which the buttons open and close.
+// They are also the numbers of Tibia.cfg's OpenDialogs and, for the three with a stored height, ContentWindow.
+// Enumerators for the reason in GUI.h.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	INVENTORY_WINDOW = 1,
+	SMALL_INVENTORY_WINDOW = 2, // the minimised inventory, in the place of INVENTORY_WINDOW
+	AUTOMAP_WINDOW = 3,
+	STATUS_WINDOW = 4, // the hit point and mana bars
+	BUTTONS_WINDOW = 5,
+	SKILLS_WINDOW = 6,
+	BATTLE_WINDOW = 7,
+	BUDDYLIST_WINDOW = 9, // the VIP list
+};
 
 // A window in a TDialogWindow. Identifier: 1 and 2 the two inventory
 // windows, 3 the automap, 4 the status bars, 5 the buttons, 6 skills, 7 battle, TRADE_WINDOW
@@ -119,8 +133,8 @@ public:
 	// The parts are owned by the child list while they are children and by the member while they are not (a minimized
 	// window's, a hidden "up" button), so they stay raw (notes/ownership.md, section 7; issue #108).
 	TSubWindowBody *Body;        // +0x44
-	TResizer *Resizer1;          // +0x48, area Style194.Data60
-	TResizer *Resizer2;          // +0x4c, area Style194.Data70
+	TResizer *Resizer1;          // +0x48, area SubWindow.Resizer1
+	TResizer *Resizer2;          // +0x4c, area SubWindow.Resizer2
 	TComponent *UpButton;        // +0x50, a container's "up" button, shown while it has a parent
 	TComponent *CloseButton;     // +0x54, event 10
 	TSkinButton *MinimizeButton; // +0x58, event 9

@@ -246,13 +246,14 @@ bool CheckAnyRight();
 void ClearRights();
 int GetActionNumber();
 void IncrementActionNumber();
-// The action state of no action (name from MainWindow.cpp's
-// "GetActionState()==ACTIONSTATE_NONE"). The other states are named below,
-// from what the code does with them; 1, left button down, stays a number. 4
-// and 5: both buttons were down (classic control) and one has gone up; the
-// release of the other sends the left button up of BOTH_BUTTONS_RELEASED.
-inline constexpr int ACTIONSTATE_NONE = 0;
+// The action states. ACTIONSTATE_NONE, no action, is the original's name
+// (MainWindow.cpp's "GetActionState()==ACTIONSTATE_NONE"); the other states
+// are named from what the code does with them. 4 and 5: both buttons were
+// down (classic control) and one has gone up; the release of the other
+// sends the left button up of BOTH_BUTTONS_RELEASED.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	ACTIONSTATE_NONE = 0,
+	ACTIONSTATE_LEFT_BUTTON_DOWN = 1, // on the main window; moving the mouse may start a drag (CheckDragStart)
 	ACTIONSTATE_RIGHT_BUTTON_DOWN = 2,
 	ACTIONSTATE_BOTH_BUTTONS_DOWN = 3,
 	ACTIONSTATE_RIGHT_RELEASED = 4, // the left button is still down
@@ -269,6 +270,18 @@ int GetActionState();
 void SetMousePosition(int x, int y);
 int GetMouseX();
 int GetMouseY();
+// The mouse cursors of SetMouseCursor and GetMouseCursor. The number is also the skin the client draws as its own
+// cursor (Control.cpp) and chooses the Windows cursor otherwise (SdlFrame.cpp's UpdateMouseCursor), whose resource
+// identifiers the names follow: IDC_ARROW, IDC_SIZENS, IDC_WAIT, and res/resource.h's IDC_CROSSHAIR and IDC_MAGNIFIER.
+// GetMouseCursor gives the last three for an action state, whatever was set. Enumerators for the reason in GUI.h.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	CURSOR_ARROW = 1,
+	CURSOR_SIZENS = 2,    // the vertical size arrow of the splitter and the resizers
+	CURSOR_WAIT = 3,      // never set
+	CURSOR_CROSSHAIR = 4, // the player chooses what to use an object on or whom to trade with
+	CURSOR_DRAG = 5,      // dragging: the crosshair's picture, as skin and as Windows cursor
+	CURSOR_MAGNIFIER = 6, // help mode
+};
 void SetMouseCursor(int Cursor);
 int GetMouseCursor();
 void SetPendingAction(int State, int Number);

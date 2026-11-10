@@ -84,7 +84,7 @@ TVideoCacheItem::TVideoCacheItem()
 int patella::TGraphics::GetFontLineHeight(int FontNumber) const
 {
 	if (FontNumber < 0 || FontNumber > NumberOfFonts)
-		FontNumber = 3;
+		FontNumber = FONT_SMALL;
 	return Fonts[FontNumber - 1].LineHeight;
 }
 
@@ -337,10 +337,10 @@ void patella::TGraphics::InitFonts()
 	NumberOfFonts = 4;
 	static_cast<void>(Fonts.release()); // NOLINT(bugprone-unused-return-value): a table still held leaks, as in the original
 	Fonts.reset(new TFontInfo[4]);
-	InitFont(1, 3, 32, 8, 16, 1, 12);
-	InitFont(2, 5, 32, 16, 16, -1, 15);
-	InitFont(3, 6, 32, 8, 8, 0, 10);
-	InitFont(4, 8, 32, 8, 16, 1, 14);
+	InitFont(FONT_SHARP, 3, 32, 8, 16, 1, 12);
+	InitFont(FONT_BORDERED, 5, 32, 16, 16, -1, 15);
+	InitFont(FONT_SMALL, 6, 32, 8, 8, 0, 10);
+	InitFont(FONT_SMOOTH, 8, 32, 8, 16, 1, 14);
 }
 
 // --- The memory cache ------------------------------------------------------------
@@ -664,7 +664,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoSprite(int SpriteNumber)
 		Position = LeastRecentVideoItem;
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemorySprite(SpriteNumber);
-		if (Engine.curEngine == 1 || Engine.curEngine == 2)
+		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
 			GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
 		GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
 		Item.Type = SPRITE_ITEM;
@@ -688,7 +688,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoMaskedSprite(int SpriteNumber, int 
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemorySprite(SpriteNumber);
 		const TMemoryCacheItem *Mask = GetMemorySprite(MaskNumber);
-		if (Engine.curEngine == 1 || Engine.curEngine == 2)
+		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
 			GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
 		GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, Mask->Data,
 			Colors);
@@ -717,7 +717,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoPicture(int PictureNumber, int Tile
 		Position = LeastRecentVideoItem;
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemoryPicture(PictureNumber, TileX, TileY);
-		if (Engine.curEngine == 1 || Engine.curEngine == 2) {
+		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9) {
 			// NOLINTNEXTLINE(bugprone-branch-clone): the original's two identical branches (both the previous picture's key)
 			if (Pictures[PictureNumber].ColorKey != TRGBColor(1, 1, 1))
 				GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
@@ -751,7 +751,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoFontChar(int FontNumber, int TileX,
 		const TMemoryCacheItem *Tile = GetMemoryPicture(PictureNumber, TileX, TileY);
 		std::array<TRGBColor, 4> Colors = {Color, Pictures[PictureNumber - 1].ColorKey, TRGBColor(0, 0, 0),
 			TRGBColor(0, 0, 0)};
-		if (Engine.curEngine == 1 || Engine.curEngine == 2)
+		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
 			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
 		GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, nullptr,
 			Colors.data());
@@ -897,10 +897,10 @@ void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int Out
 	const int Scale = Size * 32 / PATELLA_DIVISOR(GetOutfitExactSize(OutfitNumber));
 	for (int px = 1; px <= GetOutfitWidth(OutfitNumber); px++) {
 		for (int py = 1; py <= GetOutfitHeight(OutfitNumber); py++) {
-			const int SpriteNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 1, 2, 1);
+			const int SpriteNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 1, DIRECTION_SOUTH, 1);
 			int MaskNumber;
 			if (GetOutfitLayers(OutfitNumber) == 2)
-				MaskNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 2, 2, 1);
+				MaskNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 2, DIRECTION_SOUTH, 1);
 			else
 				MaskNumber = 0;
 			DrawMaskedSpriteScaled(Surface, x - px * Scale + Size, y - py * Scale + Size, Scale, Scale,

@@ -7,6 +7,9 @@
 // class has its own numbers, so one value can have several names here. Event 1 (a dialog's OK, a link's click, a
 // trade's accept) stays a number. The windows' comments give the same numbers in decimal or hexadecimal.
 //
+// CONNECTION_* are the State of SetConnectionState and GetConnectionState (Status.cpp, and Network.h's
+// TNetworkSession), at the end of this file: Network.cpp sees this header and not Status.h.
+//
 // Enumerators for the reason GUI.h gives at the modifier flags. No names of the original are known but the two above;
 // each of these is taken from what the code that receives the number does.
 
@@ -262,4 +265,20 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	EVENT_MENU_FISHING_BAR = 10508,
 	EVENT_MENU_SHOW_ALL_BARS = 10509,
 	EVENT_MENU_HIDE_ALL_BARS = 10510,
+};
+
+// The connection states, in the order a login goes through them. ConnectToLoginServer (Network.cpp) sets 1 or 2 and
+// ConnectToGameServer 5; ConnectionEstablished (Control.cpp) sends the login packet and sets 3 or 6; ReceivePackets
+// (Control.cpp) moves 3 to 4 and 6 to 7 at the first packet, reads the login server's packets in state 4 and the game
+// server's otherwise, and sets 8 at the game server's packet 0x0a. A failure and a closed connection set 0.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	CONNECTION_OFFLINE = 0,
+	CONNECTION_RESOLVING_LOGIN_SERVER = 1,  // the lookup of the login server's name is under way (OnHostResolved)
+	CONNECTION_CONNECTING_LOGIN_SERVER = 2, // the socket connects to a login server
+	CONNECTION_LOGIN_SENT = 3,              // connected, SendLogin's packet is out and nothing has come back
+	CONNECTION_LOGIN_ANSWERED = 4,          // the login server's packets arrive
+	CONNECTION_CONNECTING_GAME_SERVER = 5,  // the socket connects to the active character's game server
+	CONNECTION_GAME_LOGIN_SENT = 6,         // connected, SendGameLogin's packet is out and nothing has come back
+	CONNECTION_GAME_LOGIN_ANSWERED = 7,     // the game server's packets arrive, the character is not in the game yet
+	CONNECTION_IN_GAME = 8,                 // from packet 0x0a (EnterGame) until the connection closes
 };

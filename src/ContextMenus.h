@@ -46,11 +46,11 @@ public:
 	// The destructor is the implicit one (deleting destructor 0x4adc40, folded).
 	void SetSize(int Width, int Height) override; // +0x34, 0x43d730, line 142
 	// Inline: emitted with the vtable after the constructor (0x4420f0, 0x442100).
-	int getMinimumWidth() override { return SkinProperties().Data150; }    // +0x3c
-	int getMinimumHeight() override { return SkinProperties().Data154; }   // +0x40
-	void Arrange() override;                                               // +0x48, 0x43d9b0
-	void Place(TWindow *Window);                                           // 0x442110, lines 257-272
-	bool FitsIn(int &x, int &y, int &Width, int &Height, TWindow *Window); // 0x43dca0, lines 289-293
+	int getMinimumWidth() override { return SkinProperties().HelpBubbleMinimumWidth; }   // +0x3c
+	int getMinimumHeight() override { return SkinProperties().HelpBubbleMinimumHeight; } // +0x40
+	void Arrange() override;                                                             // +0x48, 0x43d9b0
+	void Place(TWindow *Window);                                                         // 0x442110, lines 257-272
+	bool FitsIn(int &x, int &y, int &Width, int &Height, TWindow *Window);               // 0x43dca0, lines 289-293
 
 	TFormattedText *Text; // +0x2c
 };
@@ -80,10 +80,10 @@ public:
 	void KeyPress(int Key) override;                      // +0x6c, 0x43f030, line 460
 	// Inline: emitted with the vtable after the constructor (0x43e9f0). The
 	// subclasses override it; an entry of the base class only closes the menu.
-	void HandleEvent([[maybe_unused]] int Event) override { SetActionState(0); } // +0x70
-	void Show(int x, int y, int ParentWidth, int ParentHeight);                  // 0x442de0, lines 486-498
-	void AddEntry(int Event, const char *Text, const char *Shortcut);            // 0x442910, lines 506-521
-	void AddSeparator();                                                         // 0x43f1d0, line 542
+	void HandleEvent([[maybe_unused]] int Event) override { SetActionState(ACTIONSTATE_NONE); } // +0x70
+	void Show(int x, int y, int ParentWidth, int ParentHeight);                                 // 0x442de0, lines 486-498
+	void AddEntry(int Event, const char *Text, const char *Shortcut);                           // 0x442910, lines 506-521
+	void AddSeparator();                                                                        // 0x43f1d0, line 542
 
 	int EntryWidth; // +0x2c, the widest entry
 	bool Separator; // +0x30, the next entry starts a new group

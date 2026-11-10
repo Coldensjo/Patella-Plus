@@ -153,6 +153,22 @@ struct TPathNode {
 	TPathNode *Next;        // +0x1c, the open list, sorted by Estimate
 };
 
+// The steps of a path: FindPath's Directions, the player's PlayerSteps (Creatures.h) and the bytes of SendWalk's
+// path. Counter-clockwise from east, with the diagonals, from 1; the names are ours, from FindPath and DoPlayerStep,
+// which turn the differences of x and y into them and back. They are not a creature's DIRECTION_* (Objects.h),
+// four values clockwise from north: a step becomes one in StartMovement, by its dx and dy. Enumerators for the
+// reason in GUI.h.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	STEP_EAST = 1,
+	STEP_NORTHEAST = 2,
+	STEP_NORTH = 3,
+	STEP_NORTHWEST = 4,
+	STEP_WEST = 5,
+	STEP_SOUTHWEST = 6,
+	STEP_SOUTH = 7,
+	STEP_SOUTHEAST = 8,
+};
+
 inline constexpr int AUTOMAP_BLOCKS = 10;
 
 // The effect table (0x5d16f8): EFFECTS entries, numbered by TEffectId (issue #103; notes/decisions.md, "#102").
