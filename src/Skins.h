@@ -405,7 +405,7 @@ struct TInventoryViewProperties {
 
 // The capacity and the soul points of the inventory (TCapacityLabel and
 // TSoulLabel, ContentWindows.cpp).
-struct TSkinProperties3E0 {
+struct TInventoryLabelProperties {
 	TRect Caption; // the caption ("Cap:", "Soul:"): only x and y are read
 	TFont CaptionFont;
 	TRect Value; // the number: only x and y are read
@@ -548,7 +548,7 @@ struct TTabProperties {
 	TFont BlinkingFont; // an unread tab while it blinks
 };
 
-// The frame of a dialog (TDialog, Dialogs.cpp). Data64 and Data78 are the fonts of the dialogs'
+// The frame of a dialog (TDialog, Dialogs.cpp). TextFont and Data78 are the fonts of the dialogs'
 // texts and labels; they hold the same values and the code does not show how they differ.
 struct TDialogProperties {
 	int MinimumWidth;
@@ -558,7 +558,7 @@ struct TDialogProperties {
 	std::array<TGUIPoint, 3> Buttons; // the buttons from the right
 	TRect Separator;
 	TRect Body; // FitToChild takes it by value
-	TFont Data64;
+	TFont TextFont;
 	TFont Data78;
 };
 
@@ -757,8 +757,8 @@ struct TSkinProperties {
 	int InventoryWindowHeight;
 	TRect InventoryControlsAndView; // x, y: the position of the combat controls; width, height: that of the inventory view
 	TInventoryViewProperties InventoryView;
-	TSkinProperties3E0 CapacityLabel; // the capacity (TCapacityLabel, ContentWindows.cpp)
-	TSkinProperties3E0 SoulLabel;     // the soul points (TSoulLabel)
+	TInventoryLabelProperties CapacityLabel; // the capacity (TCapacityLabel, ContentWindows.cpp)
+	TInventoryLabelProperties SoulLabel;     // the soul points (TSoulLabel)
 	TPlayerStatesProperties PlayerStates;
 	TFont ObjectCountFont;                         // the count of an object (DrawObject)
 	TCombatControlsProperties LargeCombatControls; // the large combat controls (ContentWindows.cpp)
@@ -787,7 +787,7 @@ struct TSkinProperties {
 	TBattleWindowProperties BattleWindow;
 	TTradeWindowProperties TradeWindow;
 	TBuddylistWindowProperties BuddylistWindow;
-	int Data868;
+	int BuddylistWindowExtraHeight;
 	int ScrollBarRangeMinimumHeight; // the vertical scroll bar (DialogElements.h): its range's minimum height
 	int ScrollBarMinimumWidth;       // its and its range's minimum width
 	int ScrollBarMinimumHeight;

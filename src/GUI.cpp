@@ -785,7 +785,7 @@ void InitSkinProperties()
 	SkinProperties().BuddylistWindow.NewColor.R = 248;
 	SkinProperties().BuddylistWindow.NewColor.G = 248;
 	SkinProperties().BuddylistWindow.NewColor.B = 248;
-	SkinProperties().Data868 = 10;
+	SkinProperties().BuddylistWindowExtraHeight = 10;
 	SkinProperties().ScrollBarRangeMinimumHeight = 14;
 	SkinProperties().ScrollBarMinimumWidth = 12;
 	SkinProperties().ScrollBarMinimumHeight = 38;
@@ -978,11 +978,11 @@ void InitSkinProperties()
 	SkinProperties().Dialog.Body.y = 32;
 	SkinProperties().Dialog.Body.width = -18;
 	SkinProperties().Dialog.Body.height = -60;
-	SkinProperties().Dialog.Data64.FontNumber = FONT_SMOOTH;
-	SkinProperties().Dialog.Data64.Color.R = 192;
-	SkinProperties().Dialog.Data64.Color.G = 192;
-	SkinProperties().Dialog.Data64.Color.B = 192;
-	SkinProperties().Dialog.Data64.Alignment = 0;
+	SkinProperties().Dialog.TextFont.FontNumber = FONT_SMOOTH;
+	SkinProperties().Dialog.TextFont.Color.R = 192;
+	SkinProperties().Dialog.TextFont.Color.G = 192;
+	SkinProperties().Dialog.TextFont.Color.B = 192;
+	SkinProperties().Dialog.TextFont.Alignment = 0;
 	SkinProperties().Dialog.Data78.FontNumber = FONT_SMOOTH;
 	SkinProperties().Dialog.Data78.Color.R = 192;
 	SkinProperties().Dialog.Data78.Color.G = 192;

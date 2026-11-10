@@ -143,7 +143,7 @@ TCallback NoCallback(nullptr, 0);
 // A message; OK and Escape close it.
 TDialog *CreateMessageDialog(const char *Caption, const char *Text)
 {
-	TLabel *Label = new TLabel(0, 0, SkinProperties().Dialog.Data64, Text);
+	TLabel *Label = new TLabel(0, 0, SkinProperties().Dialog.TextFont, Text);
 	TDialog *Dialog = new TDialog(Caption, Label);
 	Dialog->SetOkButton("Ok", TCallback(Dialog, 1));
 	Dialog->SetCancelButton(nullptr, TCallback(Dialog, 1));
@@ -203,7 +203,7 @@ TDialog *CreateReconnectDialog(const char *Caption, const char *Text, int timeou
 TDialog *CreateQuestionDialog(const char *Caption, const char *Text, TComponent *Receiver, int YesEvent,
 	int NoEvent)
 {
-	TQuestionLabel *Label = new TQuestionLabel(SkinProperties().Dialog.Data64, Text, TCallback(Receiver, YesEvent),
+	TQuestionLabel *Label = new TQuestionLabel(SkinProperties().Dialog.TextFont, Text, TCallback(Receiver, YesEvent),
 		TCallback(Receiver, NoEvent));
 	TDialog *Dialog = new TDialog(Caption, Label);
 	Dialog->SetOkButton("Yes", TCallback(Receiver, YesEvent));
@@ -214,7 +214,7 @@ TDialog *CreateQuestionDialog(const char *Caption, const char *Text, TComponent 
 // Logout (506), Cancel (2) and Exit (7) go to the receiver.
 TDialog *CreateLogoutDialog(const char *Caption, const char *Text, TComponent *Receiver)
 {
-	TLogoutLabel *Label = new TLogoutLabel(SkinProperties().Dialog.Data64, Text, TCallback(Receiver, EVENT_LOGOUT),
+	TLogoutLabel *Label = new TLogoutLabel(SkinProperties().Dialog.TextFont, Text, TCallback(Receiver, EVENT_LOGOUT),
 		TCallback(Receiver, EVENT_EXIT_PROGRAM));
 	TDialog *Dialog = new TDialog(Caption, Label);
 	Dialog->SetOkButton("Logout", TCallback(Receiver, EVENT_LOGOUT));
@@ -768,14 +768,14 @@ TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 	Timeout = timeout * 10;
 	Timer.reset(new TTimer(Timeout, TCallback(this, EVENT_TIMER)));
 	SetTime(Timeout + 10);
-	TLabel *TextLabel = new TLabel(SkinProperties().Dialog.Data64, Text);
+	TLabel *TextLabel = new TLabel(SkinProperties().Dialog.TextFont, Text);
 	ProgressBar = new TProgressBar();
-	TimeLabel = new TLabel(SkinProperties().Dialog.Data64, this->Text);
+	TimeLabel = new TLabel(SkinProperties().Dialog.TextFont, this->Text);
 	int FullWidth = TextLabel->Width > ProgressBar->GetMinimumWidth() ? TextLabel->Width
 																	  : ProgressBar->GetMinimumWidth();
-	FullWidth = FullWidth > TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.Data64.FontNumber, "8888")
+	FullWidth = FullWidth > TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888")
 		? FullWidth
-		: TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.Data64.FontNumber, "8888");
+		: TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888");
 	const int TextHeight = TextLabel->Height;
 	InsertChild(TextLabel);
 	const int BarY = TextHeight + SkinProperties().ReconnectWindowSpacing;
@@ -854,10 +854,10 @@ TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 	SetChildArea(Password, SkinProperties().LoginDialogPassword);
 	InsertChild(Link);
 	SetChildArea(Link, SkinProperties().LoginDialogLink);
-	TLabel *Label = new TLabel(SkinProperties().Dialog.Data64, TextAccountNumber);
+	TLabel *Label = new TLabel(SkinProperties().Dialog.TextFont, TextAccountNumber);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().LoginDialogAccountLabel);
-	Label = new TLabel(SkinProperties().Dialog.Data64, TextPassword);
+	Label = new TLabel(SkinProperties().Dialog.TextFont, TextPassword);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().LoginDialogPasswordLabel);
 	FocusGroup->SetActive(Account);
@@ -1608,7 +1608,7 @@ TBugReportDialog::TBugReportDialog()
 	EditText = new TEditText(1024, false);
 	InsertChild(EditText);
 	SetChildArea(EditText, SkinProperties().BugReportDialogText);
-	TLabel *Label = new TLabel(SkinProperties().Dialog.Data64, TextReportBugsOnly);
+	TLabel *Label = new TLabel(SkinProperties().Dialog.TextFont, TextReportBugsOnly);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().BugReportDialogLabel);
 	EditText->SetActive(true);
@@ -1823,7 +1823,7 @@ TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 	const int Position = GetBuddyPosition(_CharacterID);
 	PATELLA_ASSERT_VALUES(Position >= 0, Position, CharacterID);
 	TComponent::SetSize(SkinProperties().EditBuddyDialog.Width, SkinProperties().EditBuddyDialog.Height);
-	TLabel *Label = new TLabel(SkinProperties().Dialog.Data64, GetBuddyListName(Position));
+	TLabel *Label = new TLabel(SkinProperties().Dialog.TextFont, GetBuddyListName(Position));
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().EditBuddyDialog.Name);
 	TSeparator *Separator = new TSeparator(true);
@@ -2049,26 +2049,26 @@ TRuleViolationDialog::TRuleViolationDialog(const char *Name, TTalkLine *Statemen
 	NameEdit->SetFocusGroup(FocusGroup.get());
 	InsertChild(NameEdit);
 	SetChildArea(NameEdit, SkinProperties().RuleViolationDialog.Name);
-	Label = new TLabel(SkinProperties().Dialog.Data64, "Reason");
+	Label = new TLabel(SkinProperties().Dialog.TextFont, "Reason");
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().RuleViolationDialog.ReasonLabel);
 	ReasonList = new TListBox(TCallback(this, EVENT_REASON_SELECTED), NoCallback);
 	InsertChild(ReasonList);
 	SetChildArea(ReasonList, SkinProperties().RuleViolationDialog.ReasonList);
-	Label = new TLabel(SkinProperties().Dialog.Data64, "Action");
+	Label = new TLabel(SkinProperties().Dialog.TextFont, "Action");
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().RuleViolationDialog.ActionLabel);
 	ActionList = new TListBox(NoCallback, NoCallback);
 	InsertChild(ActionList);
 	SetChildArea(ActionList, SkinProperties().RuleViolationDialog.ActionList);
-	Label = new TLabel(SkinProperties().Dialog.Data64, "Comment");
+	Label = new TLabel(SkinProperties().Dialog.TextFont, "Comment");
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().RuleViolationDialog.CommentLabel);
 	CommentEdit = new TEditLine(100, false);
 	CommentEdit->SetFocusGroup(FocusGroup.get());
 	InsertChild(CommentEdit);
 	SetChildArea(CommentEdit, SkinProperties().RuleViolationDialog.Comment);
-	Label = new TLabel(SkinProperties().Dialog.Data64, "Statement");
+	Label = new TLabel(SkinProperties().Dialog.TextFont, "Statement");
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().RuleViolationDialog.StatementLabel);
 	StatementEdit = new TEditLine(Statement != nullptr ? (int)strlen(Statement->Text) : 0, true);

@@ -161,7 +161,7 @@ public:
 	TWaitLabel(const TWaitLabel &) = delete;
 	TWaitLabel &operator=(const TWaitLabel &) = delete;
 	TWaitLabel(const char *_Text, bool _CloseOnMessage, bool _ClearOnAbort)
-		: TLabel(SkinProperties().Dialog.Data64, _Text)
+		: TLabel(SkinProperties().Dialog.TextFont, _Text)
 	{
 		ClearOnAbort = _ClearOnAbort;
 		Timer = nullptr;

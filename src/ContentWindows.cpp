@@ -2894,7 +2894,7 @@ int TBuddylistWindowBody::GetInitialHeight()
 
 int TBuddylistWindowBody::GetContentHeight()
 {
-	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().Data868;
+	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().BuddylistWindowExtraHeight;
 }
 
 // The row under x, y; -1 for none. Odd, kept: y is not tested against the top. y
