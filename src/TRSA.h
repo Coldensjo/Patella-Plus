@@ -21,9 +21,3 @@ public:
 private:
 	vlong m_ModulusM; // +0x4
 };
-
-// Every object that includes this header constructs its own copy (static initialisers with an atexit destructor)
-// and never uses it. The name is ours (issue #24). It stays static (issue #44): the builds put TRSA.obj's copy
-// after PublicExponent, and in an anonymous namespace MSVC puts it before (the image's order, but a change of the
-// builds' .bss, oracle and x64).
-static vlong HeaderExponent(65537); // NOLINT(bugprone-throwing-static-initialization): the binary's (issue #63)
