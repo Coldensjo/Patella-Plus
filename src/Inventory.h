@@ -89,25 +89,3 @@ private:
 
 // The one client's inventory (Client.cpp).
 patella::TInventory &Inventory();
-
-// The original's functions (the callers' names, and the golden tests'): each calls TInventory's member of the same
-// name on Inventory().
-void ClearOffers();
-int GetOwnOfferCount();
-int GetCounterOfferCount();
-TObject *GetBodyObject(int Position);
-bool IsContainerOpen(int Container);
-int GetContainerObjectCount(int Container);
-TObject GetContainerObject(int Container);
-TObject GetContainerContent(int Container, int Position);
-char *GetContainerName(int Container);
-int GetContainerCapacity(int Container);
-bool HasContainerParent(int Container);
-int GetFreeContainer();
-char *GetOwnOfferName();
-char *GetCounterOfferName();
-TObject GetOwnOfferObject(int Position);
-TObject GetCounterOfferObject(int Position);
-void InitInventory();
-void ResetInventory();
-void ExitInventory();

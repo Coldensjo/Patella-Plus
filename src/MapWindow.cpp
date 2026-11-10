@@ -266,7 +266,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			AddMessage(MESSAGE_USE_WITH, 0, 0);
 			return true;
 		}
-		SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
+		SendUseObject(ox, oy, oz, UseObj.Type, Index, Inventory().GetFreeContainer());
 		return true;
 	} else {
 		if (Flags & KEY_ALT) {
@@ -292,7 +292,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 				AddMessage(MESSAGE_USE_WITH, 0, 0);
 				return true;
 			}
-			SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
+			SendUseObject(ox, oy, oz, UseObj.Type, Index, Inventory().GetFreeContainer());
 			return true;
 		}
 		if (GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0)

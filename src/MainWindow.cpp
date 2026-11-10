@@ -559,9 +559,9 @@ void TMainWindow::OpenContainer(int Container) const
 	TContainerWindowBody *Body = static_cast<TContainerWindowBody *>(Window->Body);
 	Body->Update();
 	if (Body->IsMinimized()) {
-		Window->SetTitle(new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container)));
-		Window->SetIcon(new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false));
-		if (HasContainerParent(Container))
+		Window->SetTitle(new TLabel(SkinProperties().SubWindow.TitleFont, Inventory().GetContainerName(Container)));
+		Window->SetIcon(new TObjectIcon(Inventory().GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false));
+		if (Inventory().HasContainerParent(Container))
 			Window->ShowUpButton();
 		else
 			Window->HideUpButton();

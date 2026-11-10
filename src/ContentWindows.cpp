@@ -155,8 +155,8 @@ TSubWindow *CreateContainerWindow(int Container)
 	TSkinButton *CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_BUTTON_UP, SKIN_CLOSE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
 	TSkinButton *MinimizeButton = new TSkinButton(0, 0, SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TSkinButton *UpButton = new TSkinButton(0, 0, SKIN_HIGHER_CONTAINER_BUTTON_UP, SKIN_HIGHER_CONTAINER_BUTTON_DOWN, TCallback(Body, EVENT_CONTAINER_UP), TextShowHigherContainer, false);
-	TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
-	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container));
+	TObjectIcon *Icon = new TObjectIcon(Inventory().GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
+	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, Inventory().GetContainerName(Container));
 	Window->SetSize(SkinProperties().SideBarWidth, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
 	Window->SetCloseButton(CloseButton);
 	Window->SetMinimizeButton(MinimizeButton);
@@ -1051,7 +1051,7 @@ void TInventoryView::Draw(int Surface, int x, int y)
 		0, 0);
 	TWindow::Draw(Surface, x, y);
 	for (int i = 0; i < 10; i++) {
-		const TObject Obj = *GetBodyObject(i + 1);
+		const TObject Obj = *Inventory().GetBodyObject(i + 1);
 		DrawPicturePart(Surface, SkinProperties().InventoryView.Slots[i].x + x, SkinProperties().InventoryView.Slots[i].y + y, 4,
 			Skins()[SKIN_SLOT_FRAME].x, Skins()[SKIN_SLOT_FRAME].y, Skins()[SKIN_SLOT_FRAME].width, Skins()[SKIN_SLOT_FRAME].height);
 		const int ObjX = SkinProperties().InventoryView.Objects[i].x + x;
@@ -1077,7 +1077,7 @@ bool TInventoryView::LeftButtonDown(int x, int y, int Flags)
 		const int Slot = GetSlotAt(x, y);
 		if (Slot == 0)
 			return false;
-		const TObject *Obj = GetBodyObject(Slot);
+		const TObject *Obj = Inventory().GetBodyObject(Slot);
 		if (Obj->Type != 0)
 			SetDragObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 	}
@@ -1095,7 +1095,7 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 		if (Slot == 0)
 			return false;
 		if (GetActionState() == ACTIONSTATE_USE_WITH) {
-			const TObject *Obj = GetBodyObject(Slot);
+			const TObject *Obj = Inventory().GetBodyObject(Slot);
 			if (Obj->Type != 0) {
 				int SrcIndex, SrcX, SrcY, SrcZ;
 				const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
@@ -1142,7 +1142,7 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 		SetTradeObject(TObject(), 0, 0, 0, 0);
 		SetUseObject(TObject(), 0, 0, 0, 0);
 		SetTradeInfo(0);
-		const TObject *Obj = GetBodyObject(Slot);
+		const TObject *Obj = Inventory().GetBodyObject(Slot);
 		SetTradeObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 		SetUseObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 		if (Obj->Type != 0) {
@@ -1154,7 +1154,7 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 				else if (GetObjectFlag(Obj->Type, MULTIUSE))
 					AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
-					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, GetFreeContainer());
+					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, Inventory().GetFreeContainer());
 			} else {
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
@@ -1163,7 +1163,7 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 				else if (GetObjectFlag(Obj->Type, MULTIUSE))
 					AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
-					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, GetFreeContainer());
+					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, Inventory().GetFreeContainer());
 			}
 		}
 	}
@@ -1427,7 +1427,7 @@ void TContainerWindowBody::OnClose()
 // part below the edge.
 void TContainerWindowBody::Draw(int Surface, int x, int y)
 {
-	if (ObjectCount != GetContainerObjectCount(Container))
+	if (ObjectCount != Inventory().GetContainerObjectCount(Container))
 		Arrange();
 	if (!IsMinimized()) {
 		if (!Minimized)
@@ -1437,7 +1437,7 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
 		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
-		if (IsContainerOpen(Container)) {
+		if (Inventory().IsContainerOpen(Container)) {
 			for (int i = 0; i < Capacity; i++) {
 				const int SlotX = i % SkinProperties().ContainerSlotsPerRow * SkinProperties().ContainerColumnWidth;
 				const int SlotY = i / SkinProperties().ContainerSlotsPerRow * SkinProperties().ContainerRowHeight - ScrollY;
@@ -1456,7 +1456,7 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 					DrawPicturePart(Surface, ScreenX, ScreenY, 4, Skins()[SKIN_CONTAINER_SLOT].x, Skins()[SKIN_CONTAINER_SLOT].y, SlotWidth, ClipHeight);
 					if (i < ObjectCount)
 						DrawObject(Surface, SkinProperties().ContainerSlotSizeAndObject.width + SlotX + x,
-							SkinProperties().ContainerSlotSizeAndObject.height + SlotY + y, 32, GetContainerContent(Container, i),
+							SkinProperties().ContainerSlotSizeAndObject.height + SlotY + y, 32, Inventory().GetContainerContent(Container, i),
 							TRGBColor(0, 0, 0), TRect(ScreenX, ScreenY, SlotWidth, ClipHeight), SkinProperties().ObjectCountFont,
 							false);
 					if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
@@ -1501,16 +1501,16 @@ int TContainerWindowBody::GetMaximumHeight()
 // icon and title again.
 void TContainerWindowBody::Arrange()
 {
-	ObjectCount = GetContainerObjectCount(Container);
-	Capacity = GetContainerCapacity(Container);
+	ObjectCount = Inventory().GetContainerObjectCount(Container);
+	Capacity = Inventory().GetContainerCapacity(Container);
 	int ContentHeight = GetContentHeight();
 	if (ContentHeight <= Height)
 		ContentHeight = Height;
 	ScrollBar->Range->SetRange(0, ContentHeight - Height, ScrollBar->Range->Value, Height);
 	TSubWindow *Window = static_cast<TSubWindow *>(GetParent());
 	if (Window != nullptr) {
-		TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
-		TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container));
+		TObjectIcon *Icon = new TObjectIcon(Inventory().GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
+		TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, Inventory().GetContainerName(Container));
 		Window->SetIcon(Icon);
 		Window->SetTitle(Title);
 	}
@@ -1523,7 +1523,7 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 	if (!TWindow::LeftButtonDown(x, y, Flags)) {
 		const int Position = GetSlotAt(x, y, true);
 		if (Position != -1) {
-			const TObject Obj = GetContainerContent(Container, Position);
+			const TObject Obj = Inventory().GetContainerContent(Container, Position);
 			if (Obj.Type != 0)
 				SetDragObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 		}
@@ -1539,7 +1539,7 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 		if (GetActionState() == ACTIONSTATE_USE_WITH) {
 			const int Position = GetSlotAt(x, y, true);
 			if (Position != -1) {
-				const TObject Obj = GetContainerContent(Container, Position);
+				const TObject Obj = Inventory().GetContainerContent(Container, Position);
 				if (Obj.Type != 0) {
 					int SrcIndex, SrcX, SrcY, SrcZ;
 					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
@@ -1586,7 +1586,7 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 		SetTradeObject(TObject(), 0, 0, 0, 0);
 		SetUseObject(TObject(), 0, 0, 0, 0);
 		SetTradeInfo(0);
-		const TObject Obj = GetContainerContent(Container, Position);
+		const TObject Obj = Inventory().GetContainerContent(Container, Position);
 		SetTradeObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 		SetUseObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 		if (Obj.Type == 0)
@@ -1661,7 +1661,7 @@ int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 	if (Column < SkinProperties().ContainerSlotsPerRow && x % SkinProperties().ContainerColumnWidth <= SkinProperties().ContainerSlotSizeAndObject.x
 		&& y % SkinProperties().ContainerRowHeight <= SkinProperties().ContainerSlotSizeAndObject.y) {
 		const int Position = SkinProperties().ContainerSlotsPerRow * (y / SkinProperties().ContainerRowHeight) + Column;
-		if (Occupied && GetContainerObjectCount(Container) <= Position)
+		if (Occupied && Inventory().GetContainerObjectCount(Container) <= Position)
 			return -1;
 		return Position;
 	}
@@ -1672,7 +1672,7 @@ int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 void TContainerWindowBody::UpdateUpButton()
 {
 	TSubWindow *Window = static_cast<TSubWindow *>(GetParent());
-	if (HasContainerParent(Container)) {
+	if (Inventory().HasContainerParent(Container)) {
 		HasParent = true;
 		if (Window != nullptr)
 			Window->ShowUpButton();
@@ -2371,9 +2371,9 @@ void TTradeOffers::Draw(int Surface, int x, int y)
 		const int *ObjectOffset = Side == 0 ? &SkinProperties().TradeWindow.ObjectOffsets.x : &SkinProperties().TradeWindow.ObjectOffsets.width;
 		const int OffsetX = ObjectOffset[0];
 		const int OffsetY = ObjectOffset[1];
-		const int Count = Side == 0 ? GetOwnOfferCount() : GetCounterOfferCount();
+		const int Count = Side == 0 ? Inventory().GetOwnOfferCount() : Inventory().GetCounterOfferCount();
 		for (int i = 0; i < Count; i++) {
-			const TObject Obj = Side == 0 ? GetOwnOfferObject(i) : GetCounterOfferObject(i);
+			const TObject Obj = Side == 0 ? Inventory().GetOwnOfferObject(i) : Inventory().GetCounterOfferObject(i);
 			const int SlotX = i % SkinProperties().TradeWindow.SlotsPerRow * SkinProperties().TradeWindow.ColumnWidth;
 			const int RowY = i / SkinProperties().TradeWindow.SlotsPerRow * SkinProperties().TradeWindow.RowHeight - ScrollY;
 			if (AreaHeight + AreaY + RowY > 0 && AreaY + RowY <= Bottom) {
@@ -2415,8 +2415,8 @@ int TTradeOffers::GetMinimumHeight()
 // OwnOffer.x, the left edge of the own offer.
 int TTradeOffers::GetContentHeight()
 {
-	const int CounterCount = GetCounterOfferCount();
-	const int OwnCount = GetOwnOfferCount();
+	const int CounterCount = Inventory().GetCounterOfferCount();
+	const int OwnCount = Inventory().GetOwnOfferCount();
 	const int Count = (std::max)(OwnCount, CounterCount);
 	const int Result = SkinProperties().TradeWindow.RowHeight
 			* (Count / SkinProperties().TradeWindow.SlotsPerRow + (Count % SkinProperties().TradeWindow.SlotsPerRow > 0))
@@ -2482,7 +2482,7 @@ void TTradeOffers::GetOfferAt(int x, int y, int *Side, int *Position) const
 		const int AreaX = Area.x;
 		const int AreaY = Area.y;
 		const int AreaHeight = Area.height;
-		const int Count = i == 0 ? GetOwnOfferCount() : GetCounterOfferCount();
+		const int Count = i == 0 ? Inventory().GetOwnOfferCount() : Inventory().GetCounterOfferCount();
 		const int RelativeY = ScrollBar->Range->Value - AreaY + y;
 		const int Column = (x - AreaX) / SkinProperties().TradeWindow.ColumnWidth;
 		if (Column < SkinProperties().TradeWindow.SlotsPerRow && (x - AreaX) % SkinProperties().TradeWindow.ColumnWidth <= AreaWidth
@@ -2503,12 +2503,12 @@ TTradeNames::TTradeNames()
 {
 	Separator = new TSeparator(true);
 	InsertChild(Separator);
-	const char *Name = GetOwnOfferCount() < 1 ? "" : GetOwnOfferName();
+	const char *Name = Inventory().GetOwnOfferCount() < 1 ? "" : Inventory().GetOwnOfferName();
 	OwnName = new TLabel(SkinProperties().TradeWindow.OwnName.x, SkinProperties().TradeWindow.OwnName.y,
 		SkinProperties().TradeWindow.OwnName.width, SkinProperties().TradeWindow.OwnName.height, SkinProperties().TradeWindow.NameFont, Name,
 		true);
 	InsertChild(OwnName);
-	Name = GetCounterOfferCount() < 1 ? "" : GetCounterOfferName();
+	Name = Inventory().GetCounterOfferCount() < 1 ? "" : Inventory().GetCounterOfferName();
 	CounterName = new TLabel(SkinProperties().TradeWindow.CounterName.x, SkinProperties().TradeWindow.CounterName.y,
 		SkinProperties().TradeWindow.CounterName.width, SkinProperties().TradeWindow.CounterName.height, SkinProperties().TradeWindow.NameFont, Name,
 		true);
@@ -2534,10 +2534,10 @@ void TTradeNames::SetSize(int Width, int Height)
 // The names once the offers came.
 void TTradeNames::Arrange()
 {
-	if (GetOwnOfferCount() > 0)
-		OwnName->SetText(GetOwnOfferName(), true);
-	if (GetCounterOfferCount() > 0)
-		CounterName->SetText(GetCounterOfferName(), true);
+	if (Inventory().GetOwnOfferCount() > 0)
+		OwnName->SetText(Inventory().GetOwnOfferName(), true);
+	if (Inventory().GetCounterOfferCount() > 0)
+		CounterName->SetText(Inventory().GetCounterOfferName(), true);
 }
 
 // --- TTradeButtons ----------------------------------------------------------------
@@ -2639,9 +2639,9 @@ TTradeWindowBody::~TTradeWindowBody()
 void TTradeWindowBody::OnClose()
 {
 	try {
-		if (GetOwnOfferCount() > 0)
+		if (Inventory().GetOwnOfferCount() > 0)
 			SendRejectTrade();
-		ClearOffers();
+		Inventory().ClearOffers();
 	} catch (...) {
 		CloseWhileUnwinding([this] { TSubWindowBody::OnClose(); });
 		throw;

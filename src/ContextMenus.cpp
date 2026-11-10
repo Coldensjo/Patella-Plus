@@ -406,7 +406,7 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	Separator = true;
 	if (LookedObject != CREATURE && !GetObjectFlag(LookedObject, UNMOVE) && GetObjectFlag(LookedObject, TAKE))
 		AddEntry(EVENT_MENU_TRADE_WITH, "Trade with ...", nullptr);
-	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && HasContainerParent(LookedObjectY - POSITION_CONTAINER_BASE))
+	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && Inventory().HasContainerParent(LookedObjectY - POSITION_CONTAINER_BASE))
 		AddEntry(EVENT_MENU_MOVE_UP, "Move up", nullptr);
 	if (CreatureID != 0) {
 		if (CreatureID == GetPlayerID()) {
@@ -530,7 +530,8 @@ void TObjectContextMenu::HandleEvent(int Event)
 		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, UsedObjectY - POSITION_CONTAINER_BASE);
 		break;
 	case EVENT_MENU_OPEN_NEW_WINDOW:
-		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, GetFreeContainer());
+		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex,
+			Inventory().GetFreeContainer());
 		break;
 	case EVENT_MENU_TRADE_WITH:
 		AddMessage(MESSAGE_TRADE_WITH, 0, 0);
