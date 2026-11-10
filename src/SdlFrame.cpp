@@ -261,7 +261,7 @@ void SetDefaultWindowPosition()
 	ScreenSize(ScreenWidth, ScreenHeight);
 	const int x = (ScreenWidth - Width) / 2;
 	const int y = (ScreenHeight - Height) / 2;
-	SetWindowedMode(x, y, Width, Height, false);
+	Preferences().SetWindowedMode(x, y, Width, Height, false);
 	MoveWindowTo(x, y, Width, Height);
 }
 
@@ -278,14 +278,14 @@ void OnSize(int cx, int cy)
 void OnActivateApp()
 {
 	Keys.Reset();
-	if (GetViewMode() == 2)
+	if (Preferences().GetViewMode() == 2)
 		LeaveFullscreen = true;
 }
 
 // CMainFrame::OnDisplayChange: a screen smaller than the window in windowed mode moves it back to the default place.
 void OnDisplayChange(int Width, int Height)
 {
-	if (GetViewMode() == 1) {
+	if (Preferences().GetViewMode() == 1) {
 		const TOuterRect Rect = WindowRect();
 		if (Width < Rect.Right - Rect.Left || Height < Rect.Bottom - Rect.Top)
 			SetDefaultWindowPosition();
@@ -624,7 +624,7 @@ void OnSetCursor(float X, float Y)
 {
 	if (LeftButtonPressed || RightButtonPressed)
 		return;
-	if (GetViewMode() != 2 && !InsideClient(X, Y))
+	if (Preferences().GetViewMode() != 2 && !InsideClient(X, Y))
 		return;
 	UpdateMouseCursor();
 }
@@ -702,7 +702,7 @@ POINT EventPoint(float X, float Y)
 {
 	int x = static_cast<int>(std::floor(X));
 	int y = static_cast<int>(std::floor(Y));
-	if (GetViewMode() == 2)
+	if (Preferences().GetViewMode() == 2)
 		ClientToScreen(x, y);
 	return POINT{x, y};
 }
@@ -739,7 +739,7 @@ void OnButtonMessage(UINT Message, LPARAM LParam)
 {
 	int x = static_cast<short>(LOWORD(LParam));
 	int y = static_cast<short>(HIWORD(LParam));
-	if (GetViewMode() == 2)
+	if (Preferences().GetViewMode() == 2)
 		ClientToScreen(x, y);
 	const POINT Point{x, y};
 	switch (Message) {
@@ -805,7 +805,7 @@ void OnCaptureChanged()
 		return;
 	POINT Point;
 	platform::ReadCursorPosition(platform::Platform().Input, Point); // GetCursorPos
-	if (GetViewMode() == 1) {
+	if (Preferences().GetViewMode() == 1) {
 		int x = Point.x;
 		int y = Point.y;
 		ScreenToClient(x, y);
@@ -891,7 +891,7 @@ LRESULT CALLBACK InputProc(HWND Hwnd, UINT Message, WPARAM WParam, LPARAM LParam
 		GUI().TimerEvent();
 		return 0;
 	case WM_NCHITTEST:
-		if (GetViewMode() == 2)
+		if (Preferences().GetViewMode() == 2)
 			return HTCLIENT;
 		break;
 	case WM_NCDESTROY: RemoveWindowSubclass(Hwnd, InputProc, InputSubclassId); break;
@@ -910,7 +910,7 @@ void HandleNoted()
 {
 	if (LeaveFullscreen) {
 		LeaveFullscreen = false;
-		if (Window != nullptr && GetViewMode() == 2)
+		if (Window != nullptr && Preferences().GetViewMode() == 2)
 			SetDisplayMode(1);
 	}
 	if (DisplayChange) {
@@ -935,12 +935,12 @@ void DestroyFrame()
 {
 	if (Window == nullptr)
 		return;
-	if (GetViewMode() == 2)
+	if (Preferences().GetViewMode() == 2)
 		SetDisplayMode(1);
-	if (GetViewMode() == 1)
+	if (Preferences().GetViewMode() == 1)
 		ReadPlacement();
-	SetWindowedMode(Placement.Left, Placement.Top, Placement.Right - Placement.Left, Placement.Bottom - Placement.Top,
-		IsMaximized());
+	Preferences().SetWindowedMode(Placement.Left, Placement.Top, Placement.Right - Placement.Left,
+		Placement.Bottom - Placement.Top, IsMaximized());
 	platform::Platform().Input.StopTimer(WindowHandle, 1); // KillTimer (the loop's timer)
 	// The cursors (OnDestroy destroyed the two of the client's resources; all five are SDL's).
 	for (SDL_Cursor **Cursor : {&DefaultCursor, &HandCursor, &ArrowCursor, &SizeCursor, &WaitCursor}) {
@@ -1014,9 +1014,9 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 	WaitCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT);
 	DefaultCursor = LoadClientCursor(0x84);
 	HandCursor = LoadClientCursor(0x89);
-	SetWindowedMode(-1, -1, 0, 0, false);
+	Preferences().SetWindowedMode(-1, -1, 0, 0, false);
 	GUI().InitControl(Gamemaster);
-	SetViewMode(1);
+	Preferences().SetViewMode(1);
 
 	// Create (CFrameWnd::Create with WS_OVERLAPPEDWINDOW: SDL's resizable window), hidden, as the MFC frame is until
 	// InitInstance shows it.
@@ -1067,7 +1067,7 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 	Created = true;
 	int x, y, Width, Height;
 	bool Maximized;
-	GetWindowedMode(&x, &y, &Width, &Height, &Maximized);
+	Preferences().GetWindowedMode(&x, &y, &Width, &Height, &Maximized);
 	int ScreenWidth = 0;
 	int ScreenHeight = 0;
 	ScreenSize(ScreenWidth, ScreenHeight);
@@ -1172,9 +1172,9 @@ void SetDisplayMode(int ViewMode)
 {
 	if (Window == nullptr)
 		return;
-	if (GetViewMode() == 1)
+	if (Preferences().GetViewMode() == 1)
 		ReadPlacement();
-	SetViewMode(ViewMode);
+	Preferences().SetViewMode(ViewMode);
 	if (ViewMode == 2) {
 		SetFrameStyle(WS_EX_APPWINDOW | WS_EX_CLIENTEDGE, 0);
 		GUI().Redraw(false);
@@ -1197,7 +1197,7 @@ void SetDisplayMode(int ViewMode)
 // verb, with SW_SHOWNORMAL) gets the URL (the client's text) in UTF-8. A failure is not reported to the client.
 void OpenURL(const char *URL)
 {
-	if (GetViewMode() == 2)
+	if (Preferences().GetViewMode() == 2)
 		SetDisplayMode(1);
 	if (!SDL_OpenURL(text::Cp1252ToUtf8(URL).c_str()))
 		log::Warn("SDL_OpenURL failed: {}", SDL_GetError());
@@ -1209,7 +1209,7 @@ void OpenURL(const char *URL)
 void UpdateMouseCursor()
 {
 	SDL_Cursor *Cursor = nullptr;
-	if (GetWindowsMousepointer()) {
+	if (Preferences().GetWindowsMousepointer()) {
 		Cursor = DefaultCursor;
 		switch (Interaction().GetMouseCursor()) {
 		case CURSOR_ARROW: Cursor = ArrowCursor; break;

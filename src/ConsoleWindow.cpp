@@ -1054,7 +1054,7 @@ void TTabBar::OnClose()
 // OpenChannel).
 void TTabBar::StoreOpenChannels()
 {
-	ClearOpenChannels();
+	Preferences().ClearOpenChannels();
 	for (int i = 0; i < 3; i++) {
 		TWindow *Container;
 		if (i == 0)
@@ -1069,7 +1069,7 @@ void TTabBar::StoreOpenChannels()
 			TTalkBuffer *TextBuffer = (static_cast<TTab *>(Child))->TextBuffer;
 			Child = Next;
 			if (TextBuffer != nullptr && TextBuffer->GetChannelID() != -1 && !TextBuffer->IsPrivateChannel())
-				AddOpenChannel(TextBuffer->GetChannelID());
+				Preferences().AddOpenChannel(TextBuffer->GetChannelID());
 		}
 	}
 }
@@ -1186,7 +1186,7 @@ TConsoleWindow::TConsoleWindow()
 	GUI().AddHotkey(KEY_CONTROL | 'D', TCallback(this, EVENT_DEFAULT_CHANNEL));
 	SwitchTime = GetActionNumber() + 50;
 	int *Channels;
-	const int Count = GetOpenChannels(&Channels);
+	const int Count = Preferences().GetOpenChannels(&Channels);
 	for (int i = 0; i < Count; i++)
 		SendJoinChannel(Channels[i]);
 	if (Count > 0)
@@ -1219,7 +1219,7 @@ void TConsoleWindow::OnClose()
 {
 	try {
 		TabBar->StoreOpenChannels();
-		SetConsoleHeight(Height);
+		Preferences().SetConsoleHeight(Height);
 		if (!IsChild(VolumeButton) && VolumeButton != nullptr)
 			VolumeButton->Close();
 		if (!IsChild(CloseButton) && CloseButton != nullptr)
@@ -1429,7 +1429,7 @@ void TConsoleWindow::KeyPress(int Key)
 	else if ((Key & KEY_CONTROL) != 0)
 		Number += 24;
 	bool AutoSend;
-	const char *Text = GetHotkey(Number, &AutoSend);
+	const char *Text = Preferences().GetHotkey(Number, &AutoSend);
 	if (Text != nullptr) {
 		Input->SetText(Text);
 		if (AutoSend)

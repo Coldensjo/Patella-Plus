@@ -193,8 +193,8 @@ const char *patella::THelp::GetHelpText(int Handle)
 void patella::THelp::AddEventHelp(int Number)
 {
 	PATELLA_ASSERT_VALUES(In(Number,1,EVENTHELPS), Number);
-	if (!IsKnownHint(Number)) {
-		AddKnownHint(Number);
+	if (!Preferences().IsKnownHint(Number)) {
+		Preferences().AddKnownHint(Number);
 		EventHelps.push_back(Number);
 	}
 }

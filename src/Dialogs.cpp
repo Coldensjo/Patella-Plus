@@ -1970,7 +1970,7 @@ THintsDialog::THintsDialog()
 	InsertChild(ListBox);
 	SetChildArea(ListBox, SkinProperties().HintsDialogList);
 	for (int i = HINT_FIRST; i <= HINT_LAST; i++) {
-		if (IsKnownHint(i))
+		if (Preferences().IsKnownHint(i))
 			ListBox->AddLine(Help().GetEventHelpTitle(i));
 	}
 }
@@ -2319,7 +2319,7 @@ void TOptionsDialog::HandleEvent(int Event)
 	switch (Event) {
 	case 1:
 	case EVENT_CANCEL:
-		SavePreferences();
+		Preferences().SavePreferences(Talk());
 		break;
 	case EVENT_OPTIONS_NETWORK:
 		AddMessage(MESSAGE_NETWORK_OPTIONS_DIALOG, 0, 0);
@@ -2380,12 +2380,12 @@ TGeneralOptionsDialog::TGeneralOptionsDialog(void (*_OpenURL)(const char *URL))
 	SetChildArea(CreatureNames, SkinProperties().GeneralOptionsDialogCreatureNames);
 	SetChildArea(TextualEffects, SkinProperties().GeneralOptionsDialogTextualEffects);
 	SetChildArea(DragFullStacks, DragFullStacksArea);
-	ClassicControl->SetChecked(GetClassicControl());
-	AutoChaseOff->SetChecked(GetAutoChaseOff());
-	ShowHints->SetChecked(GetShowNewHints());
-	CreatureNames->SetChecked(GetCreatureInfo() != 0);
-	TextualEffects->SetChecked(GetTextualEffects());
-	DragFullStacks->SetChecked(GetDragFullStacks());
+	ClassicControl->SetChecked(Preferences().GetClassicControl());
+	AutoChaseOff->SetChecked(Preferences().GetAutoChaseOff());
+	ShowHints->SetChecked(Preferences().GetShowNewHints());
+	CreatureNames->SetChecked(Preferences().GetCreatureInfo() != 0);
+	TextualEffects->SetChecked(Preferences().GetTextualEffects());
+	DragFullStacks->SetChecked(Preferences().GetDragFullStacks());
 	Arrange();
 }
 
@@ -2395,12 +2395,12 @@ void TGeneralOptionsDialog::HandleEvent(int Event)
 {
 	switch (Event) {
 	case 1:
-		SetClassicControl(ClassicControl->IsChecked());
-		SetAutoChaseOff(AutoChaseOff->IsChecked());
-		SetShowNewHints(ShowHints->IsChecked());
-		SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
-		SetTextualEffects(TextualEffects->IsChecked());
-		SetDragFullStacks(DragFullStacks->IsChecked());
+		Preferences().SetClassicControl(ClassicControl->IsChecked());
+		Preferences().SetAutoChaseOff(AutoChaseOff->IsChecked());
+		Preferences().SetShowNewHints(ShowHints->IsChecked());
+		Preferences().SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
+		Preferences().SetTextualEffects(TextualEffects->IsChecked());
+		Preferences().SetDragFullStacks(DragFullStacks->IsChecked());
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_CANCEL:
@@ -2440,13 +2440,13 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 	SetChildArea(ResolutionLabel, SkinProperties().GraphicsOptionsDialogResolutionLabel);
 	SetChildArea(AdvancedLabel, SkinProperties().GraphicsOptionsDialogAdvancedLabel);
 	SetChildPosition(AdvancedButton, SkinProperties().GraphicsOptionsDialogAdvancedButton.x, SkinProperties().GraphicsOptionsDialogAdvancedButton.y);
-	Fullscreen->SetChecked(GetViewMode() == 2);
+	Fullscreen->SetChecked(Preferences().GetViewMode() == 2);
 	// GetFullscreenModes stores its new[] list (or NULL) through the pointer it is given; Modes takes it over. The
 	// surface writes the pointer before anything else.
 	TFullscreenMode *List = nullptr;
 	NumberOfModes = GraphicsEngine().GetSurface()->GetFullscreenModes(&List);
 	Modes.reset(List);
-	const TFullscreenMode *Current = GetFullscreenMode();
+	const TFullscreenMode *Current = Preferences().GetFullscreenMode();
 	for (int i = 0; i < NumberOfModes; i++) {
 		TFixedString<16> Frequency;
 		Frequency.Format(", {} Hz", Modes[i].Frequency);
@@ -2491,10 +2491,10 @@ void TGraphicsOptionsDialog::KeyPress(int Key)
 void TGraphicsOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		const int ViewMode = GetViewMode();
+		const int ViewMode = Preferences().GetViewMode();
 		const bool FullscreenChecked = Fullscreen->IsChecked();
 		if (ResolutionList->GetSelection() != -1)
-			SetFullscreenMode(&Modes[ResolutionList->GetSelection()]);
+			Preferences().SetFullscreenMode(&Modes[ResolutionList->GetSelection()]);
 		if ((ViewMode == 2) != FullscreenChecked
 			&& (!Fullscreen->IsChecked() || ResolutionList->GetSelection() != -1))
 			SetDisplayMode(Fullscreen->IsChecked() + 1);
@@ -2556,16 +2556,16 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	SetChildArea(NoStretching, SkinProperties().AdvancedGraphicsDialog.NoStretching);
 	SetChildArea(WindowsMousepointer, SkinProperties().AdvancedGraphicsDialog.WindowsMousepointer);
 	SetChildArea(Framerate, SkinProperties().AdvancedGraphicsDialog.Framerate);
-	LightEffects->SetChecked(GetLightEffects());
+	LightEffects->SetChecked(Preferences().GetLightEffects());
 	if (!GraphicsEngine().GetSurface()->CanShadeRectangles())
 		LightEffects->SetEnabled(false);
-	NoStretching->SetChecked(GetNoStretching());
-	WindowsMousepointer->SetChecked(GetWindowsMousepointer());
-	int FramerateLimit = GetConfineFramerate();
+	NoStretching->SetChecked(Preferences().GetNoStretching());
+	WindowsMousepointer->SetChecked(Preferences().GetWindowsMousepointer());
+	int FramerateLimit = Preferences().GetConfineFramerate();
 	if (FramerateLimit < 10)
 		FramerateLimit = 201;
 	Framerate->Range->SetValue(FramerateLimit);
-	if (GetViewMode() == 2) {
+	if (Preferences().GetViewMode() == 2) {
 		AutomaticButton->SetEnabled(false);
 		GpuButton->SetEnabled(false);
 		CpuButton->SetEnabled(false);
@@ -2632,12 +2632,12 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 void TAdvancedGraphicsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		const bool Rearrange = !GetNoStretching() && NoStretching->IsChecked();
-		SetNoStretching(NoStretching->IsChecked());
-		SetWindowsMousepointer(WindowsMousepointer->IsChecked());
-		SetLightEffects(LightEffects->IsChecked());
-		SetConfineFramerate(Framerate->Range->Value);
-		GraphicsEngine().GetSurface()->SetFramerateLimit(GetConfineFramerate());
+		const bool Rearrange = !Preferences().GetNoStretching() && NoStretching->IsChecked();
+		Preferences().SetNoStretching(NoStretching->IsChecked());
+		Preferences().SetWindowsMousepointer(WindowsMousepointer->IsChecked());
+		Preferences().SetLightEffects(LightEffects->IsChecked());
+		Preferences().SetConfineFramerate(Framerate->Range->Value);
+		GraphicsEngine().GetSurface()->SetFramerateLimit(Preferences().GetConfineFramerate());
 		if (Rearrange)
 			Receiver->HandleEvent(EVENT_REARRANGE);
 	} else if (Event == EVENT_HELP) {
@@ -2647,7 +2647,7 @@ void TAdvancedGraphicsDialog::HandleEvent(int Event)
 		GraphicsEngine().GetSurface()->SetFramerateLimit(Framerate->Range->Value);
 		return;
 	} else if (Event == EVENT_CANCEL) {
-		GraphicsEngine().GetSurface()->SetFramerateLimit(GetConfineFramerate());
+		GraphicsEngine().GetSurface()->SetFramerateLimit(Preferences().GetConfineFramerate());
 	}
 	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
@@ -2673,22 +2673,22 @@ TConsoleOptionsDialog::TConsoleOptionsDialog(void (*_OpenURL)(const char *URL))
 	SetChildArea(StatusMessages, SkinProperties().ConsoleOptionsDialogStatusMessages);
 	SetChildArea(TimeStamps, SkinProperties().ConsoleOptionsDialogTimeStamps);
 	SetChildArea(PrivateMessages, SkinProperties().ConsoleOptionsDialogPrivateMessages);
-	InfoMessages->SetChecked(GetInfoMessages());
-	EventMessages->SetChecked(GetEventMessages());
-	StatusMessages->SetChecked(GetStatusMessages());
-	TimeStamps->SetChecked(GetTimeStamps());
-	PrivateMessages->SetChecked(GetPrivateMessages());
+	InfoMessages->SetChecked(Preferences().GetInfoMessages());
+	EventMessages->SetChecked(Preferences().GetEventMessages());
+	StatusMessages->SetChecked(Preferences().GetStatusMessages());
+	TimeStamps->SetChecked(Preferences().GetTimeStamps());
+	PrivateMessages->SetChecked(Preferences().GetPrivateMessages());
 	Arrange();
 }
 
 void TConsoleOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		SetInfoMessages(InfoMessages->IsChecked());
-		SetEventMessages(EventMessages->IsChecked());
-		SetStatusMessages(StatusMessages->IsChecked());
-		SetTimeStamps(TimeStamps->IsChecked());
-		SetPrivateMessages(PrivateMessages->IsChecked());
+		Preferences().SetInfoMessages(InfoMessages->IsChecked());
+		Preferences().SetEventMessages(EventMessages->IsChecked());
+		Preferences().SetStatusMessages(StatusMessages->IsChecked());
+		Preferences().SetTimeStamps(TimeStamps->IsChecked());
+		Preferences().SetPrivateMessages(PrivateMessages->IsChecked());
 		SetConsoleChanged();
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextConsoleOptionsURL);
@@ -2706,14 +2706,14 @@ TNetworkOptionsDialog::TNetworkOptionsDialog(void (*_OpenURL)(const char *URL))
 	TestServerLogin = new TCheckBox("Test Server Login");
 	InsertChild(TestServerLogin);
 	SetChildArea(TestServerLogin, SkinProperties().NetworkOptionsDialogTestServerLogin);
-	TestServerLogin->SetChecked(GetTestServerLogin());
+	TestServerLogin->SetChecked(Preferences().GetTestServerLogin());
 	Arrange();
 }
 
 void TNetworkOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		SetTestServerLogin(TestServerLogin->IsChecked());
+		Preferences().SetTestServerLogin(TestServerLogin->IsChecked());
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextNetworkOptionsURL);
 		return;
@@ -2738,7 +2738,7 @@ THotkeyDialog::THotkeyDialog()
 	InsertChild(ListBox);
 	SetChildArea(ListBox, SkinProperties().HotkeyDialogList);
 	for (int i = 0; i < HOTKEYS; i++) {
-		Texts[i].Assign(GetHotkey(i, &AutoSend[i]));
+		Texts[i].Assign(Preferences().GetHotkey(i, &AutoSend[i]));
 		ListBox->AddLine(271);
 		UpdateLine(i);
 	}
@@ -2812,10 +2812,10 @@ void THotkeyDialog::HandleEvent(int Event)
 		if (Selected != -1)
 			AutoSend[Selected] = AutoSendCheckBox->IsChecked();
 		for (int i = 0; i < HOTKEYS; i++)
-			SetHotkey(i, Texts[i], AutoSend[i]);
+			Preferences().SetHotkey(i, Texts[i], AutoSend[i]);
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		if (Interaction().PeekMessageType() != MESSAGE_OPTIONS_DIALOG)
-			SavePreferences();
+			Preferences().SavePreferences(Talk());
 		break;
 	case EVENT_CANCEL:
 		Interaction().SetActionState(ACTIONSTATE_NONE);

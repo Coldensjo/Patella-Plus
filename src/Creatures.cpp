@@ -957,7 +957,7 @@ void patella::TCreatures::AddBuddy(uint32 CharacterID, const char *Name, bool On
 	Buddy->Name.Assign(Name);
 	Buddy->Online = Online;
 	Buddy->LoginAction = 0;
-	Buddy->Icon = GetBuddyIcon(CharacterID);
+	Buddy->Icon = Preferences().GetBuddyIcon(CharacterID);
 	MoveBuddyToSortedPlace(Position);
 }
 
@@ -973,7 +973,7 @@ void patella::TCreatures::SetBuddyState(uint32 CharacterID, bool Online)
 	if (Online)
 		NumberOfOnlineBuddies++;
 	Buddy->LoginAction = GUI.GetActionNumber();
-	if (Online && GetBuddyNotify(CharacterID)) {
+	if (Online && Preferences().GetBuddyNotify(CharacterID)) {
 		TFixedString<256> Text;
 		Text.Format("{} has logged in.", Buddy->Name);
 		GUI.SetStatusMessage(Text, false);
@@ -988,9 +988,9 @@ void patella::TCreatures::EditBuddy(int CharacterID, int Icon, const char *Descr
 	PATELLA_ASSERT(CharacterID!=0);
 	PATELLA_ASSERT(Description!=nullptr);
 	if (Icon == 0 && Description[0] == 0 && !Notify)
-		DeleteBuddy(CharacterID);
+		Preferences().DeleteBuddy(CharacterID);
 	else
-		SetBuddy(CharacterID, Icon, Description, Notify);
+		Preferences().SetBuddy(CharacterID, Icon, Description, Notify);
 	const int Position = GetBuddyPosition(CharacterID);
 	if (Position != -1) {
 		Buddies[Position].Icon = Icon;
@@ -1010,7 +1010,7 @@ void patella::TCreatures::RemoveBuddy(uint32 CharacterID)
 	for (int i = Position; i < NumberOfBuddies - 1; i++)
 		Buddies[i] = Buddies[i + 1];
 	NumberOfBuddies--;
-	DeleteBuddy(CharacterID);
+	Preferences().DeleteBuddy(CharacterID);
 }
 
 // Method becomes the most significant sort key. With offline buddies
@@ -1023,26 +1023,26 @@ void patella::TCreatures::SetBuddySortMethod(int Method)
 		BuddySortMethods[2] = BuddySortMethods[1];
 	BuddySortMethods[1] = BuddySortMethods[0];
 	BuddySortMethods[0] = Method;
-	if (!GetBuddyHideOffline() || Method == 2)
+	if (!Preferences().GetBuddyHideOffline() || Method == 2)
 		SortBuddies();
 	else
 		SetBuddySortMethod(2);
 	std::array<int, 3> Methods;
 	for (int i = 0; i < 3; i++)
 		Methods[i] = BuddySortMethods[i];
-	SetBuddySortmethods(Methods.data());
+	Preferences().SetBuddySortmethods(Methods.data());
 }
 
 void patella::TCreatures::HideOfflineBuddies(bool Hide)
 {
-	SetBuddyHideOffline(Hide);
+	Preferences().SetBuddyHideOffline(Hide);
 	if (Hide)
 		SetBuddySortMethod(2);
 }
 
 int patella::TCreatures::GetNumberOfBuddies() const
 {
-	if (GetBuddyHideOffline())
+	if (Preferences().GetBuddyHideOffline())
 		return NumberOfOnlineBuddies;
 	return NumberOfBuddies;
 }
@@ -1083,13 +1083,13 @@ int patella::TCreatures::GetBuddyListIcon(int Position) const
 const char *patella::TCreatures::GetBuddyListDescription(int Position) const
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,NumberOfBuddies-1), Position, NumberOfBuddies-1);
-	return GetBuddyDescription(Buddies[Position].CharacterID);
+	return Preferences().GetBuddyDescription(Buddies[Position].CharacterID);
 }
 
 bool patella::TCreatures::GetBuddyListNotify(int Position) const
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,NumberOfBuddies-1), Position, NumberOfBuddies-1);
-	return GetBuddyNotify(Buddies[Position].CharacterID);
+	return Preferences().GetBuddyNotify(Buddies[Position].CharacterID);
 }
 
 // --- Initialisation --------------------------------------------------------
@@ -1119,7 +1119,7 @@ void patella::TCreatures::ResetCreatures()
 	BuddySortMethods[1] = 1;
 	BuddySortMethods[2] = 0;
 	std::array<int, 3> Methods;
-	GetBuddySortmethods(Methods.data());
+	Preferences().GetBuddySortmethods(Methods.data());
 	for (int i = 0; i < 3; i++) {
 		if (In(Methods[i], 0, 2))
 			BuddySortMethods[i] = Methods[i];

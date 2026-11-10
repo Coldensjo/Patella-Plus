@@ -80,7 +80,7 @@ void patella::TCommunication::SendLogin(uint32 AccountID, const char *Password)
 	// filler) raised to 65537 modulo the key, as the server expects.
 	try {
 		TRSA RSA;
-		RSA.SetPublicKey(GetRsaModulus());
+		RSA.SetPublicKey(Preferences().GetRsaModulus());
 		RSA.Encrypt(Data);
 	} catch (const char *Error) {
 		std::stringstream Text;
@@ -138,7 +138,7 @@ void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, 
 	// Raw RSA, no padding, as in SendLogin.
 	try {
 		TRSA RSA;
-		RSA.SetPublicKey(GetRsaModulus());
+		RSA.SetPublicKey(Preferences().GetRsaModulus());
 		RSA.Encrypt(Data);
 	} catch (const char *Error) {
 		std::stringstream Text;
@@ -186,10 +186,10 @@ void patella::TCommunication::SendPing()
 
 void patella::TCommunication::PrepareMovement()
 {
-	if (GetAutoChaseOff()) {
+	if (Preferences().GetAutoChaseOff()) {
 		if (Creatures.GetAttackID() != 0) {
-			if (GetChaseMode() != CHASE_STAND) {
-				SetChaseMode(CHASE_STAND);
+			if (Preferences().GetChaseMode() != CHASE_STAND) {
+				Preferences().SetChaseMode(CHASE_STAND);
 				SendFightModes();
 			}
 		}
@@ -495,9 +495,9 @@ void patella::TCommunication::SendCancelRuleViolation()
 void patella::TCommunication::SendFightModes()
 {
 	Network.BeginCommand(GAME_SEND_FIGHT_MODES);
-	Network.SendByte(GetAttackMode());
-	Network.SendByte(GetChaseMode());
-	Network.SendByte(GetSecureMode());
+	Network.SendByte(Preferences().GetAttackMode());
+	Network.SendByte(Preferences().GetChaseMode());
+	Network.SendByte(Preferences().GetSecureMode());
 	Network.SendCommand(true);
 }
 
@@ -673,7 +673,7 @@ void patella::TCommunication::ReceiveLoginMessage()
 void patella::TCommunication::ReceiveMessageOfTheDay()
 {
 	const char *Text = Network.GetString();
-	if (SetMessageOfTheDay(Text))
+	if (Preferences().SetMessageOfTheDay(Text))
 		AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): GetString's text, the caller's
 	delete[] Text;

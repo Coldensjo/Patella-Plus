@@ -182,12 +182,6 @@ patella::TSkins &SkinData()
 	return patella::Client().Graphics.Skins;
 }
 
-// TPreferences' TTalkLists is TGUI's TTalk.
-patella::TTalkLists &TalkLists()
-{
-	return patella::Client().GUI.Talk;
-}
-
 patella::TGUI &GUI()
 {
 	return patella::Client().GUI;

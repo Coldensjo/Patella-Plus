@@ -175,7 +175,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 			if (ObjectTypes().GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
 				// Patella-Plus, the option Drag Full Stacks: with it a pile moves whole without Ctrl and asks for the
 				// count with it, as on a slot (AsksForCount in ContentWindows.cpp).
-				if (((Flags & KEY_CONTROL) != 0) != GetDragFullStacks()) {
+				if (((Flags & KEY_CONTROL) != 0) != Preferences().GetDragFullStacks()) {
 					SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, Count);
 					return true;
 				}
@@ -241,7 +241,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	if (CreatureID != 0)
 		Interaction().SetTradeInfo(CreatureID);
 	int Index, ox, oy, oz;
-	if (GetClassicControl()) {
+	if (Preferences().GetClassicControl()) {
 		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
 			const TObject *LookObj = Interaction().GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
@@ -310,7 +310,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMapWindow::HandleEvent(int Event)
 {
 	if (Event == EVENT_CREATURE_INFO)
-		SetCreatureInfo((GetCreatureInfo() + 1) % 3);
+		Preferences().SetCreatureInfo((Preferences().GetCreatureInfo() + 1) % 3);
 	if (Event == EVENT_REMOVE_TALKBOX)
 		Talk().RemoveOldestTalkbox();
 	if (Event == EVENT_MAP_HINT) {
@@ -350,7 +350,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		return false;
 	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
-	if (GetNoStretching()) {
+	if (Preferences().GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
 		y = FieldY * 32 - (352 - Height) / 2 - Player->GetDeltaY() - 32;
 		Help().MoveHelpPosition(x, y);
@@ -369,9 +369,9 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 PATELLA_MSVC_WARNING(suppress : 6262)
 void TMapWindow::Draw(int Surface, int x, int y)
 {
-	const bool LightEffects = GetLightEffects() && GraphicsEngine().GetSurface()->CanShadeRectangles();
-	const bool ShowTexts = GetTextualEffects();
-	const int CreatureInfo = GetCreatureInfo();
+	const bool LightEffects = Preferences().GetLightEffects() && GraphicsEngine().GetSurface()->CanShadeRectangles();
+	const bool ShowTexts = Preferences().GetTextualEffects();
+	const int CreatureInfo = Preferences().GetCreatureInfo();
 	Map().ProcessMissileEffects();
 	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
@@ -522,7 +522,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	const int ScreenWidth = Width;
 	const int ScreenHeight = Height;
 	int BorderX = 0, BorderY = 0;
-	if (GetNoStretching()) {
+	if (Preferences().GetNoStretching()) {
 		PATELLA_ASSERT_VALUES(GetWidth()<=MAP_WIDTH*32, GetWidth());
 		PATELLA_ASSERT_VALUES(GetHeight()<=MAP_HEIGHT*32, GetHeight());
 		if (Width >= 480 && Height >= 352) {
@@ -564,7 +564,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			Brightness = Brightness / 5;
 			const TRGBColor NameColor(Color.R * Brightness / 51, Color.G * Brightness / 51, Color.B * Brightness / 51);
 			int nx = Names[i].x, ny = Names[i].y;
-			if (GetNoStretching()) {
+			if (Preferences().GetNoStretching()) {
 				nx -= BorderX;
 				ny -= BorderY;
 			} else {
@@ -677,9 +677,9 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		int tx, ty, Alignment, Fixed;
 		Talk().GetTalkboxRectangle(Talkbox, &tx, &ty, &Alignment, &Fixed);
 		if ((Fixed & 1) == 0)
-			tx -= GetNoStretching() ? Player->GetDeltaX() : Player->GetDeltaX() * Width / 480;
+			tx -= Preferences().GetNoStretching() ? Player->GetDeltaX() : Player->GetDeltaX() * Width / 480;
 		if ((Fixed & 2) == 0)
-			ty -= GetNoStretching() ? Player->GetDeltaY() : Player->GetDeltaY() * Height / 352;
+			ty -= Preferences().GetNoStretching() ? Player->GetDeltaY() : Player->GetDeltaY() * Height / 352;
 		const int Lines = Talk().GetTalkboxLines(Talkbox);
 		TRGBColor Color;
 		Talk().GetTalkboxColor(&Color, Talkbox);
@@ -717,7 +717,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				const int Color = Map().GetTextualEffectColor(EffectIdOf(TextualEffects[i].EffectNumber));
 				const char *Text = Map().GetTextualEffectText(EffectIdOf(TextualEffects[i].EffectNumber));
 				int tx = TextualEffects[i].x, ty = TextualEffects[i].y;
-				if (GetNoStretching()) {
+				if (Preferences().GetNoStretching()) {
 					tx -= BorderX;
 					ty -= BorderY;
 				} else {
@@ -733,13 +733,13 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	}
 
 	// The hint button while there is an event help to show.
-	if (GetShowNewHints() && Help().GetEventHelp() != HINT_NONE && HintButton == nullptr) {
+	if (Preferences().GetShowNewHints() && Help().GetEventHelp() != HINT_NONE && HintButton == nullptr) {
 		HintButton = new TBlinkingButton(0, 0, SKIN_HINT_BUTTON_UP1, SKIN_HINT_BUTTON_DOWN1, SKIN_HINT_BUTTON_UP2, SKIN_HINT_BUTTON_DOWN2, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
 		InsertChild(HintButton);
 		Arrange();
 		if (Help().GetEventHelp() == HINT_FIRST_LOGIN)
 			HandleEvent(EVENT_MAP_HINT);
-	} else if (!GetShowNewHints() && HintButton != nullptr) {
+	} else if (!Preferences().GetShowNewHints() && HintButton != nullptr) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;
 	}
@@ -1347,7 +1347,7 @@ void TMapWindow::ArrangeTalkboxes()
 		StatusHeight = 0;
 	else
 		StatusHeight = Graphics().GetFontHeight(FONT_BORDERED) + 10;
-	const bool NoStretching = GetNoStretching();
+	const bool NoStretching = Preferences().GetNoStretching();
 	const int BorderX = (480 - Width) / 2;
 	const int BorderY = (352 - Height) / 2;
 	std::array<int, TALKBOXES> CentreX;
@@ -1511,7 +1511,7 @@ void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 {
 	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
-	if (GetNoStretching()) {
+	if (Preferences().GetNoStretching()) {
 		*FieldX = ((480 - Width) / 2 + Player->GetDeltaX() + x) / 32 + 1;
 		*FieldY = ((352 - Height) / 2 + Player->GetDeltaY() + y) / 32 + 1;
 	} else {
@@ -1553,7 +1553,7 @@ uint32 TMapWindow::GetCreatureAt(int x, int y)
 		}
 		if (!Visible)
 			continue;
-		if (GetNoStretching()) {
+		if (Preferences().GetNoStretching()) {
 			const int dx = (480 - Width) / 2 - Names[i].x + x;
 			const int dy = y - (Names[i].y - (352 - Height) / 2);
 			if (In(dx, -16, 16) && In(dy, 0, 32))
@@ -1587,7 +1587,7 @@ void TMapFrame::SetSize(int Width, int Height)
 	const int Border = SkinProperties().MapFrameBorder;
 	const int MaxWidth = (Height - Border * 2) * 15 / 11 + 2;
 	ViewWidth = Width - Border * 2 < MaxWidth ? Width - Border * 2 : MaxWidth;
-	if (GetNoStretching())
+	if (Preferences().GetNoStretching())
 		ViewWidth = ViewWidth < 480 ? ViewWidth : 480;
 	ViewHeight = (int)floor(ViewWidth * (11.0f / 15.0f));
 	ViewX = (Width - SkinProperties().MapFrameBorder * 2 - ViewWidth) / 2 + SkinProperties().MapFrameBorder;

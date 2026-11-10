@@ -78,7 +78,7 @@ void TMainWindow::OnClose()
 {
 	try {
 		if (FirstChild != nullptr && InGame) {
-			ClearOpenDialogs();
+			Preferences().ClearOpenDialogs();
 			if (SidePanel != nullptr)
 				SidePanel->StoreOpenDialogs();
 			if (DialogWindow != nullptr)
@@ -281,15 +281,15 @@ void TMainWindow::HandleEvent(int Event)
 		SendStopAttackAndWalk();
 		break;
 	case EVENT_TOGGLE_FULLSCREEN:
-		if (GetFullscreenMode()->Width != 0) {
-			TFullscreenMode Mode = *GetFullscreenMode();
+		if (Preferences().GetFullscreenMode()->Width != 0) {
+			TFullscreenMode Mode = *Preferences().GetFullscreenMode();
 			if (Mode.Width < 640 || Mode.Height < 480) {
 				Mode.Width = 640;
 				Mode.Height = 480;
-				SetFullscreenMode(&Mode);
+				Preferences().SetFullscreenMode(&Mode);
 				SetSize(640, 480);
 			}
-			GUI.SetDisplayModeCallback(GetViewMode() == 1 ? 2 : 1);
+			GUI.SetDisplayModeCallback(Preferences().GetViewMode() == 1 ? 2 : 1);
 		}
 		break;
 	case EVENT_BUG_REPORT:
@@ -359,7 +359,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 void TMainWindow::ChangeMode(bool InGame)
 {
 	if (FirstChild != nullptr && this->InGame) {
-		ClearOpenDialogs();
+		Preferences().ClearOpenDialogs();
 		if (SidePanel != nullptr)
 			SidePanel->StoreOpenDialogs();
 		if (DialogWindow != nullptr)
@@ -381,7 +381,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		SidePanel = new TDialogWindow;
 		DialogWindow = new TDialogWindow;
 		int *Dialogs;
-		const int Count = GetOpenDialogs(&Dialogs);
+		const int Count = Preferences().GetOpenDialogs(&Dialogs);
 		bool HaveAutomap = false;
 		bool HaveStatus = false;
 		bool HaveInventory = false;
@@ -429,7 +429,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		// The console keeps its stored height unless the map would get
 		// smaller than its minimum height; then it gets its own minimum.
 		int ConsoleHeight = Console->GetMinimumHeight();
-		const int StoredHeight = GetConsoleHeight();
+		const int StoredHeight = Preferences().GetConsoleHeight();
 		if (StoredHeight > ConsoleHeight)
 			ConsoleHeight = StoredHeight;
 		int MapWidth = Width - SkinProperties().SideBarWidth;

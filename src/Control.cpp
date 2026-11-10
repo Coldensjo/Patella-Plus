@@ -78,8 +78,8 @@ const char *TextRuleViolations = "Rule Violations"; // 145
 void patella::TGUI::Resize(int Width, int Height)
 {
 	Interaction.SetMouseCursor(CURSOR_ARROW);
-	if (GetViewMode() == 2) {
-		const TFullscreenMode *Mode = GetFullscreenMode();
+	if (Preferences().GetViewMode() == 2) {
+		const TFullscreenMode *Mode = Preferences().GetFullscreenMode();
 		Width = Mode->Width;
 		Height = Mode->Height;
 	}
@@ -103,10 +103,10 @@ void patella::TGUI::Resize(int Width, int Height)
 // automatic device when that fails.
 void patella::TGUI::CheckSurface(bool Force)
 {
-	TFullscreenMode *Resolution = GetFullscreenMode();
+	TFullscreenMode *Resolution = Preferences().GetFullscreenMode();
 	bool Success;
 	try {
-		Success = GraphicsEngine().GetSurface()->Init(&WindowHandle, GetViewMode(), Resolution, Force);
+		Success = GraphicsEngine().GetSurface()->Init(&WindowHandle, Preferences().GetViewMode(), Resolution, Force);
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
@@ -129,7 +129,7 @@ void patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton Button)
 	const patella::vulkan::TDeviceChoice NewChoice = patella::vulkan::ChoiceAfterButton(OldChoice, Button,
 		GetNumberOfGpus(), GetBestGpu());
 	if (NewChoice == OldChoice) {
-		SetEngine(EngineNumberOfButton(Button));
+		Preferences().SetEngine(EngineNumberOfButton(Button));
 		return;
 	}
 	SetDeviceChoice(NewChoice);
@@ -142,7 +142,7 @@ void patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton Button)
 	}
 	GraphicsEngine().GetSurface()->InitSurfaces();
 	if (Success) {
-		SetEngine(EngineNumberOfButton(Button));
+		Preferences().SetEngine(EngineNumberOfButton(Button));
 		SaveDeviceChoice();
 	}
 }
@@ -208,7 +208,7 @@ void patella::TGUI::Redraw(bool Force)
 		const TRGBColor Color = {200, 200, 200};
 		Graphics().PrintText(1, 4, 4, FONT_BORDERED, Color, Text, 0);
 	}
-	if (!GetWindowsMousepointer()) {
+	if (!Preferences().GetWindowsMousepointer()) {
 		const int Cursor = Interaction.GetMouseCursor();
 		if (Interaction.GetMouseX() >= 0 && Interaction.GetMouseY() >= 0) {
 			int x = Interaction.GetMouseX();
@@ -274,7 +274,7 @@ void patella::TGUI::LeaveGame()
 		MainWindow->SetConsoleActive(true);
 	}
 	Interaction.SetActionState(ACTIONSTATE_NONE);
-	SavePreferences();
+	Preferences().SavePreferences(Talk);
 	if (!Network.Reconnect)
 		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 }
@@ -330,7 +330,7 @@ void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 		Interaction.SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
-		if (GetClassicControl())
+		if (Preferences().GetClassicControl())
 			Interaction.SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
 		break;
 	case ACTIONSTATE_DIALOG:
@@ -403,7 +403,7 @@ void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 		Interaction.SetActionState(ACTIONSTATE_LEFT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_RIGHT_BUTTON_DOWN:
-		if (GetClassicControl())
+		if (Preferences().GetClassicControl())
 			Interaction.SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
 		break;
 	case ACTIONSTATE_DIALOG:
@@ -433,7 +433,7 @@ void patella::TGUI::RightButtonDown([[maybe_unused]] int x, [[maybe_unused]] int
 		Interaction.SetActionState(ACTIONSTATE_RIGHT_BUTTON_DOWN);
 		break;
 	case ACTIONSTATE_LEFT_BUTTON_DOWN:
-		if (GetClassicControl())
+		if (Preferences().GetClassicControl())
 			Interaction.SetActionState(ACTIONSTATE_BOTH_BUTTONS_DOWN);
 		break;
 	default:
@@ -978,7 +978,7 @@ void patella::TGUI::ProcessEvents()
 			ModalWindow = CreateGeneralOptionsDialog(URLCallback);
 			break;
 		case MESSAGE_MESSAGE_OF_THE_DAY:
-			ModalWindow = CreateMessageDialog("Message of the Day", GetMessageOfTheDay());
+			ModalWindow = CreateMessageDialog("Message of the Day", Preferences().GetMessageOfTheDay());
 			break;
 		case MESSAGE_USE_WITH:
 			Interaction.SetActionState(ACTIONSTATE_USE_WITH);
@@ -1126,7 +1126,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		Creatures().InitCreatures();
 		::Interaction().InitStatus(Gamemaster, LinkCopyWarning);
 		::Help().InitHelp();
-		InitPreferences();
+		Preferences().InitPreferences(::Talk());
 		::Talk().InitTalk();
 		Graphics().InitGraphics(0xa00000);
 		SkinData().InitSkins();
@@ -1160,7 +1160,7 @@ void patella::TGUI::ExitControl()
 	if (Current != nullptr)
 		Current->ExitSurfaces();
 	GraphicsEngine().SurfaceExitInstance();
-	ExitPreferences();
+	Preferences().ExitPreferences(::Talk());
 	::Talk().ExitTalk();
 	::Help().ExitHelp();
 	::Interaction().ExitStatus();

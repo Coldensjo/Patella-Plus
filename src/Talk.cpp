@@ -221,7 +221,7 @@ void patella::TTalk::AddTalkbox(int Mode, const char *Speaker, int x, int y, int
 	PATELLA_ASSERT_VALUES(Mode==TALK_SAY || Mode==TALK_WHISPER || Mode==TALK_YELL || Mode==TALK_PRIVATE_MESSAGE || Mode==TALK_GAMEMASTER_BROADCAST || Mode==TALK_GAMEMASTER_MESSAGE || Mode==TALK_ANIMAL_LOW || Mode==TALK_ANIMAL_LOUD, Mode);
 	PATELLA_ASSERT(Speaker!=nullptr);
 	PATELLA_ASSERT(Text!=nullptr);
-	if (Mode == TALK_PRIVATE_MESSAGE && !GetPrivateMessages())
+	if (Mode == TALK_PRIVATE_MESSAGE && !Preferences().GetPrivateMessages())
 		return;
 	const int Position = FindFreeTalkbox();
 	TTalkbox &Box = Talkboxes[Position];
@@ -611,9 +611,9 @@ void patella::TTalk::AddConsoleText(uint32 StatementID, const char *Text, int Ta
 	switch (TalkMode) {
 	case TALK_ADMIN_MESSAGE: Broadcast = true; break;
 	case TALK_EVENT_MESSAGE:
-	case TALK_EVENT_STATUS_MESSAGE: Broadcast = GetEventMessages(); break;
-	case TALK_STATUS_MESSAGE: Broadcast = GetStatusMessages(); break;
-	case TALK_INFO_MESSAGE: Broadcast = GetInfoMessages(); break;
+	case TALK_EVENT_STATUS_MESSAGE: Broadcast = Preferences().GetEventMessages(); break;
+	case TALK_STATUS_MESSAGE: Broadcast = Preferences().GetStatusMessages(); break;
+	case TALK_INFO_MESSAGE: Broadcast = Preferences().GetInfoMessages(); break;
 	case TALK_STATUS_ONLY_MESSAGE: return;
 	default: {
 		TTalkBuffer *TargetBuffer = DefaultTextBuffer;

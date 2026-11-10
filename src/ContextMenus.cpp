@@ -386,7 +386,7 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	UsedObject = *Interaction().GetUseObject(&UsedObjectIndex, &UsedObjectX, &UsedObjectY, &UsedObjectZ);
 	CreatureID = Interaction().GetTradeInfo();
 	PATELLA_ASSERT(LookedObject!=0);
-	const bool ClassicControl = GetClassicControl();
+	const bool ClassicControl = Preferences().GetClassicControl();
 	AddEntry(EVENT_MENU_LOOK, "Look", ClassicControl ? nullptr : "(Shift)");
 	if (UsedObject != 0) {
 		if (ObjectTypes().GetObjectFlag(UsedObject, CONTAINER)) {
@@ -806,9 +806,10 @@ TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int Pare
 	AddEntry(EVENT_MENU_NEW_VIP, "Add new VIP", nullptr);
 	AddEntry(EVENT_MENU_SORT_BY_NAME, "Sort by name", nullptr);
 	AddEntry(EVENT_MENU_SORT_BY_TYPE, "Sort by type", nullptr);
-	if (!GetBuddyHideOffline())
+	if (!Preferences().GetBuddyHideOffline())
 		AddEntry(EVENT_MENU_SORT_BY_STATUS, "Sort by status", nullptr);
-	AddEntry(EVENT_MENU_HIDE_OFFLINE, GetBuddyHideOffline() ? "Show offline VIPs" : "Hide offline VIPs", nullptr);
+	AddEntry(EVENT_MENU_HIDE_OFFLINE, Preferences().GetBuddyHideOffline() ? "Show offline VIPs" : "Hide offline VIPs",
+		nullptr);
 	Separator = true;
 	if (Position != -1) {
 		AddEntry(EVENT_MENU_COPY_NAME, "Copy Name", nullptr);
@@ -871,7 +872,7 @@ void TBuddyContextMenu::HandleEvent(int Event)
 		Creatures().SetBuddySortMethod(2);
 		break;
 	case EVENT_MENU_HIDE_OFFLINE:
-		Creatures().HideOfflineBuddies(!GetBuddyHideOffline());
+		Creatures().HideOfflineBuddies(!Preferences().GetBuddyHideOffline());
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -1236,15 +1237,18 @@ TSkillContextMenu::TSkillContextMenu(TSkillsWindowBody *_SkillsWindow, int x, in
 	PATELLA_ASSERT(_SkillsWindow);
 	SkillsWindow = _SkillsWindow;
 	SetSkillsWindowMenu(_SkillsWindow, this);
-	AddEntry(EVENT_MENU_LEVEL_BAR, GetLevelBar() ? "Hide Level" : "Show Level", nullptr);
-	AddEntry(EVENT_MENU_MAGIC_LEVEL_BAR, GetMagLevelBar() ? "Hide Magic Level" : "Show Magic Level", nullptr);
-	AddEntry(EVENT_MENU_FIST_BAR, GetSkillBar(0) ? "Hide Fist Fighting" : "Show Fist Fighting", nullptr);
-	AddEntry(EVENT_MENU_CLUB_BAR, GetSkillBar(1) ? "Hide Club Fighting" : "Show Club Fighting", nullptr);
-	AddEntry(EVENT_MENU_SWORD_BAR, GetSkillBar(2) ? "Hide Sword Fighting" : "Show Sword Fighting", nullptr);
-	AddEntry(EVENT_MENU_AXE_BAR, GetSkillBar(3) ? "Hide Axe Fighting" : "Show Axe Fighting", nullptr);
-	AddEntry(EVENT_MENU_DISTANCE_BAR, GetSkillBar(4) ? "Hide Distance Fighting" : "Show Distance Fighting", nullptr);
-	AddEntry(EVENT_MENU_SHIELDING_BAR, GetSkillBar(5) ? "Hide Shielding" : "Show Shielding", nullptr);
-	AddEntry(EVENT_MENU_FISHING_BAR, GetSkillBar(6) ? "Hide Fishing" : "Show Fishing", nullptr);
+	AddEntry(EVENT_MENU_LEVEL_BAR, Preferences().GetLevelBar() ? "Hide Level" : "Show Level", nullptr);
+	AddEntry(EVENT_MENU_MAGIC_LEVEL_BAR, Preferences().GetMagLevelBar() ? "Hide Magic Level" : "Show Magic Level",
+		nullptr);
+	AddEntry(EVENT_MENU_FIST_BAR, Preferences().GetSkillBar(0) ? "Hide Fist Fighting" : "Show Fist Fighting", nullptr);
+	AddEntry(EVENT_MENU_CLUB_BAR, Preferences().GetSkillBar(1) ? "Hide Club Fighting" : "Show Club Fighting", nullptr);
+	AddEntry(EVENT_MENU_SWORD_BAR, Preferences().GetSkillBar(2) ? "Hide Sword Fighting" : "Show Sword Fighting",
+		nullptr);
+	AddEntry(EVENT_MENU_AXE_BAR, Preferences().GetSkillBar(3) ? "Hide Axe Fighting" : "Show Axe Fighting", nullptr);
+	AddEntry(EVENT_MENU_DISTANCE_BAR,
+		Preferences().GetSkillBar(4) ? "Hide Distance Fighting" : "Show Distance Fighting", nullptr);
+	AddEntry(EVENT_MENU_SHIELDING_BAR, Preferences().GetSkillBar(5) ? "Hide Shielding" : "Show Shielding", nullptr);
+	AddEntry(EVENT_MENU_FISHING_BAR, Preferences().GetSkillBar(6) ? "Hide Fishing" : "Show Fishing", nullptr);
 	AddSeparator();
 	AddEntry(EVENT_MENU_SHOW_ALL_BARS, "Show all Skill Bars", nullptr);
 	AddEntry(EVENT_MENU_HIDE_ALL_BARS, "Hide all Skill Bars", nullptr);
@@ -1256,10 +1260,10 @@ void TSkillContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_MENU_LEVEL_BAR:
-		SetLevelBar(!GetLevelBar());
+		Preferences().SetLevelBar(!Preferences().GetLevelBar());
 		break;
 	case EVENT_MENU_MAGIC_LEVEL_BAR:
-		SetMagLevelBar(!GetMagLevelBar());
+		Preferences().SetMagLevelBar(!Preferences().GetMagLevelBar());
 		break;
 	case EVENT_MENU_FIST_BAR:
 	case EVENT_MENU_CLUB_BAR:
@@ -1268,19 +1272,19 @@ void TSkillContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_DISTANCE_BAR:
 	case EVENT_MENU_SHIELDING_BAR:
 	case EVENT_MENU_FISHING_BAR:
-		SetSkillBar(Event - EVENT_MENU_FIST_BAR, !GetSkillBar(Event - EVENT_MENU_FIST_BAR));
+		Preferences().SetSkillBar(Event - EVENT_MENU_FIST_BAR, !Preferences().GetSkillBar(Event - EVENT_MENU_FIST_BAR));
 		break;
 	case EVENT_MENU_SHOW_ALL_BARS:
-		SetLevelBar(true);
-		SetMagLevelBar(true);
+		Preferences().SetLevelBar(true);
+		Preferences().SetMagLevelBar(true);
 		for (int i = 0; i < 7; i++)
-			SetSkillBar(i, true);
+			Preferences().SetSkillBar(i, true);
 		break;
 	case EVENT_MENU_HIDE_ALL_BARS:
-		SetLevelBar(false);
-		SetMagLevelBar(false);
+		Preferences().SetLevelBar(false);
+		Preferences().SetMagLevelBar(false);
 		for (int i = 0; i < 7; i++)
-			SetSkillBar(i, false);
+			Preferences().SetSkillBar(i, false);
 		break;
 	default:
 		TERROR1("unknown event", Event);

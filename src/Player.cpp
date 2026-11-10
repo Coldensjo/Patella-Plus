@@ -143,7 +143,7 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 		// After a failed InitControl there is no main window and no surface (GetSurface makes one only once
 		// SurfaceInitInstance has run): SetDisplayMode's calls would fault, so the step is skipped. The original made
 		// them and left the fault to its catch (...).
-		if (GetViewMode() != 1 && GUI().MainWindow != nullptr && GraphicsEngine().GetSurface() != nullptr)
+		if (Preferences().GetViewMode() != 1 && GUI().MainWindow != nullptr && GraphicsEngine().GetSurface() != nullptr)
 			patella::sdlframe::SetDisplayMode(1); // the SDL3 window's
 	} catch (...) {                               // NOLINT(bugprone-empty-catch): as above
 	}
@@ -273,10 +273,10 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 	GUI().Redraw(false);
 	int x, y, Width, Height;
 	bool Maximized;
-	GetWindowedMode(&x, &y, &Width, &Height, &Maximized);
+	Preferences().GetWindowedMode(&x, &y, &Width, &Height, &Maximized);
 	patella::sdlframe::Show(Maximized);
 	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastMousePosition); // GetCursorPos
-	if (GetViewMode() == 1)
+	if (Preferences().GetViewMode() == 1)
 		SdlScreenToClient(LastMousePosition); // the SDL window's coordinates
 	GUI().MouseMove(LastMousePosition.x, LastMousePosition.y);
 	return TRUE;
@@ -384,7 +384,7 @@ void CPlayerApp::OnIdle()
 	patella::platform::Platform().Input.BeginIdle();
 	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastCursorPosition); // GetCursorPos
 	POINT Point = LastCursorPosition;
-	if (GetViewMode() == 1)
+	if (Preferences().GetViewMode() == 1)
 		SdlScreenToClient(Point); // the SDL window's coordinates
 	if (LastMousePosition.x != Point.x || LastMousePosition.y != Point.y) {
 		LastMousePosition.x = Point.x;

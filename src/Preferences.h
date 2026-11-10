@@ -1,8 +1,8 @@
 // Preferences.h: the options, stored in Tibia.cfg by the original and in Patella.ini by this client (Preferences.cpp).
 // The option names in the comments are the keys that the Tibia.cfg loader uses, which give the names of the members.
 //
-// The data is TPreferences', which TClient owns (Client.h); the free functions of the original's names are the bridge
-// that the callers use until they hold the object (Preferences(), defined in Client.cpp).
+// The data is TPreferences', which TClient owns (Client.h); a caller that holds no reference to it calls
+// Preferences() (Client.cpp).
 
 #pragma once
 
@@ -192,6 +192,8 @@ public:
 	void ReadTibiaCfg(TTalkLists &Lists);
 	patella::settings::TPreferenceValues GetPreferenceValues(TTalkLists &Lists);
 	void SetPreferenceValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists);
+	// InitPreferences, SavePreferences and ExitPreferences read and write Patella.ini (settings/PreferenceKeys.h); the
+	// client never writes Tibia.cfg. Lists is the one client's TTalk.
 	void InitPreferences(TTalkLists &Lists);
 	void SavePreferences(TTalkLists &Lists);
 	void ExitPreferences(TTalkLists &Lists);
@@ -261,95 +263,5 @@ private:
 
 } // namespace patella
 
-// The one client's preferences, and the talk lists they are read into and written from (Client.cpp).
+// The one client's preferences (Client.cpp).
 patella::TPreferences &Preferences();
-patella::TTalkLists &TalkLists();
-
-// The original's functions (the callers' names, and the golden tests'): each calls TPreferences' member of the
-// same name on Preferences(), with TalkLists() where it takes the lists.
-bool GetTestServerLogin();
-void SetTestServerLogin(bool Value);
-void SetViewMode(int ViewMode);
-void SetFullscreenMode(const TFullscreenMode *Mode);
-void SetWindowsMousepointer(bool Value);
-void SetLightEffects(bool Value);
-void SetTextualEffects(bool Value);
-void SetCreatureInfo(int Value);
-void SetNoStretching(bool Value);
-void SetDefaultNoStretching(bool Value);
-void SetConfineFramerate(int Value);
-void SetEngine(int Value);
-int GetViewMode();
-TFullscreenMode *GetFullscreenMode();
-bool GetWindowsMousepointer();
-bool GetLightEffects();
-bool GetTextualEffects();
-int GetCreatureInfo();
-bool GetNoStretching();
-int GetConfineFramerate();
-int GetEngine();
-void SetWindowedMode(int x, int y, int Width, int Height, bool Maximized);
-void GetWindowedMode(int *x, int *y, int *Width, int *Height, bool *Maximized);
-void SetConsoleHeight(int Value);
-int GetConsoleHeight();
-void SetAutomapZoom(int Value);
-int GetAutomapZoom();
-void SetBuddySortmethods(const int *Methods);
-void GetBuddySortmethods(int *Methods);
-void SetBuddyHideOffline(bool Value);
-bool GetBuddyHideOffline();
-void ClearOpenDialogs();
-const char *GetMessageOfTheDay();
-void SetInfoMessages(bool Value);
-void SetEventMessages(bool Value);
-void SetStatusMessages(bool Value);
-void SetTimeStamps(bool Value);
-void SetPrivateMessages(bool Value);
-bool GetInfoMessages();
-bool GetEventMessages();
-bool GetStatusMessages();
-bool GetTimeStamps();
-bool GetPrivateMessages();
-void ClearOpenChannels();
-void SetClassicControl(bool Value);
-void SetAutoChaseOff(bool Value);
-bool GetClassicControl();
-bool GetAutoChaseOff();
-void SetDragFullStacks(bool Value);
-bool GetDragFullStacks();
-const char *GetRsaModulus();
-void SetAttackMode(int Value);
-void SetChaseMode(int Value);
-void SetSecureMode(bool Value);
-int GetAttackMode();
-int GetChaseMode();
-bool GetSecureMode();
-void SetShowNewHints(bool Value);
-bool GetShowNewHints();
-bool GetLevelBar();
-bool GetMagLevelBar();
-void SetLevelBar(bool Value);
-void SetMagLevelBar(bool Value);
-void SetContentWindowSize(int ID, int Size);
-int GetContentWindowSize(int ID);
-int GetOpenDialogs(int **List);
-int GetOpenChannels(int **List);
-void AddKnownHint(int Hint);
-bool IsKnownHint(int Hint);
-void SetHotkey(int Number, const char *Text, bool AutoSend);
-const char *GetHotkey(int Number, bool *AutoSend);
-void AddOpenDialog(int Identifier);
-bool SetMessageOfTheDay(const char *Text);
-void AddOpenChannel(int Identifier);
-void SetBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
-void DeleteBuddy(int CharacterID);
-int GetBuddyIcon(int CharacterID);
-const char *GetBuddyDescription(int CharacterID);
-bool GetBuddyNotify(int CharacterID);
-bool GetSkillBar(int SkillNumber);
-void SetSkillBar(int SkillNumber, bool Value);
-// InitPreferences, SavePreferences and ExitPreferences read and write Patella.ini (settings/PreferenceKeys.h); the
-// client never writes Tibia.cfg.
-void InitPreferences();
-void SavePreferences();
-void ExitPreferences();

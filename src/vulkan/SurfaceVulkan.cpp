@@ -673,9 +673,9 @@ void TSurfaceVulkan::InitSurfaces()
 	}
 	Initialized = true;
 	CanStretch = true;
-	SetDefaultNoStretching(CanStretch == false);
+	Preferences().SetDefaultNoStretching(CanStretch == false);
 	ResetFrameTimer();
-	SetFramerateLimit(GetConfineFramerate());
+	SetFramerateLimit(Preferences().GetConfineFramerate());
 }
 
 void TSurfaceVulkan::SetSourceColorKey(int ToSurface, TRGBColor Key)

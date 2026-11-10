@@ -71,10 +71,10 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	Initialised = true;
 	LoadDeviceChoice();
 	if (CommandLineEngine >= 0 && CommandLineEngine < 3) {
-		SetEngine(CommandLineEngine);
+		Preferences().SetEngine(CommandLineEngine);
 		return;
 	}
-	int Engine = GetEngine();
+	int Engine = Preferences().GetEngine();
 	if (Engine < 0 || Engine >= 3)
 		Engine = ENGINE_GPU;
 	try {
@@ -91,5 +91,5 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
-	SetEngine(Engine);
+	Preferences().SetEngine(Engine);
 }

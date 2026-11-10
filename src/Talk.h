@@ -62,7 +62,7 @@ struct TTalkLine {
 	TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, const char *_Line, int DiffTime);
 	TTalkLine(const TTalkLine &) = delete;
 	TTalkLine &operator=(const TTalkLine &) = delete;
-	[[nodiscard]] const char *GetText() const { return GetTimeStamps() ? Line : WithoutTime; }
+	[[nodiscard]] const char *GetText() const { return Preferences().GetTimeStamps() ? Line : WithoutTime; }
 };
 class TTalkBuffer;
 class TTalkBuffer {

@@ -289,7 +289,7 @@ TAutomapWindow::TAutomapWindow()
 	SetSize(SkinProperties().SideBarWidth, SkinProperties().AutomapWindowHeight);
 	Changed = true;
 	Centred = true;
-	Zoom = GetAutomapZoom();
+	Zoom = Preferences().GetAutomapZoom();
 	if (Zoom != 1 && Zoom != 2 && Zoom != 4 && Zoom != 8)
 		Zoom = 2;
 	View = new TAutomapView;
@@ -336,7 +336,7 @@ TAutomapWindow::~TAutomapWindow()
 void TAutomapWindow::OnClose()
 {
 	try {
-		SetAutomapZoom(Zoom);
+		Preferences().SetAutomapZoom(Zoom);
 		GUI().RemoveHotkey(KEY_ALT | KEY_HOME);
 		GUI().RemoveHotkey(KEY_ALT | KEY_END);
 		GUI().RemoveHotkey(KEY_ALT | KEY_PAGE_UP);
@@ -974,7 +974,7 @@ namespace {
 bool AsksForCount(int Flags)
 {
 	const bool Ctrl = (Flags & KEY_CONTROL) != 0;
-	return GetDragFullStacks() ? Ctrl : !Ctrl;
+	return Preferences().GetDragFullStacks() ? Ctrl : !Ctrl;
 }
 
 } // namespace
@@ -1147,7 +1147,7 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 		Interaction().SetTradeObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 		Interaction().SetUseObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 		if (Obj->Type != 0) {
-			if (GetClassicControl()) {
+			if (Preferences().GetClassicControl()) {
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) != 0)
@@ -1241,7 +1241,7 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 		InsertChild(new TTextButton(Layout.Buttons[8].x, Layout.Buttons[8].y, "Help", TCallback(Receiver, EVENT_HELP),
 			TextOpenHelpMenu));
 	}
-	switch (GetAttackMode()) {
+	switch (Preferences().GetAttackMode()) {
 	case ATTACK_OFFENSIVE:
 		AttackModes->Selected = Offensive;
 		break;
@@ -1254,7 +1254,7 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 	default:
 		break;
 	}
-	switch (GetChaseMode()) {
+	switch (Preferences().GetChaseMode()) {
 	case CHASE_STAND:
 		ChaseModes->Selected = StandButton;
 		break;
@@ -1264,7 +1264,7 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 	default:
 		break;
 	}
-	SecureButton->State = !GetSecureMode();
+	SecureButton->State = !Preferences().GetSecureMode();
 	Arrange();
 }
 
@@ -1272,7 +1272,7 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 // follows it.
 void TCombatControls::Draw(int Surface, int x, int y)
 {
-	switch (GetChaseMode()) {
+	switch (Preferences().GetChaseMode()) {
 	case CHASE_STAND:
 		if (ChaseModes->Selected != StandButton)
 			ChaseModes->Selected = StandButton;
@@ -1305,22 +1305,22 @@ void TCombatControls::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_ATTACK_DEFENSIVE:
-		SetAttackMode(ATTACK_DEFENSIVE);
+		Preferences().SetAttackMode(ATTACK_DEFENSIVE);
 		break;
 	case EVENT_ATTACK_BALANCED:
-		SetAttackMode(ATTACK_BALANCED);
+		Preferences().SetAttackMode(ATTACK_BALANCED);
 		break;
 	case EVENT_ATTACK_OFFENSIVE:
-		SetAttackMode(ATTACK_OFFENSIVE);
+		Preferences().SetAttackMode(ATTACK_OFFENSIVE);
 		break;
 	case EVENT_CHASE_STAND:
-		SetChaseMode(CHASE_STAND);
+		Preferences().SetChaseMode(CHASE_STAND);
 		break;
 	case EVENT_CHASE_ON:
-		SetChaseMode(CHASE_ON);
+		Preferences().SetChaseMode(CHASE_ON);
 		break;
 	case EVENT_SECURE_MODE:
-		SetSecureMode(!SecureButton->State);
+		Preferences().SetSecureMode(!SecureButton->State);
 		break;
 	default:
 		return;
@@ -1594,7 +1594,7 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 		Interaction().SetUseObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 		if (Obj.Type == 0)
 			return true;
-		if (GetClassicControl()) {
+		if (Preferences().GetClassicControl()) {
 			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
 			else if ((Flags & KEY_CONTROL) != 0)
@@ -1898,7 +1898,7 @@ int TSkillsWindowBody::GetMinimumHeight()
 // at least the minimum.
 int TSkillsWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(SKILLS_WINDOW);
+	int Height = Preferences().GetContentWindowSize(SKILLS_WINDOW);
 	if (Height == 0)
 		Height = GetMaximumHeight();
 	if (Height < GetMinimumHeight())
@@ -1944,7 +1944,7 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 	case 2:
 		Name.Assign("Level");
 		Value = PlayerState().GetPlayerLevel();
-		if (GetLevelBar())
+		if (Preferences().GetLevelBar())
 			Progress = PlayerState().GetPlayerLevelProgress();
 		else
 			Progress = -1;
@@ -1968,7 +1968,7 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 	case 7:
 		Name.Assign("Magic Level");
 		Value = PlayerState().GetPlayerMagicLevel();
-		if (GetMagLevelBar())
+		if (Preferences().GetMagLevelBar())
 			Progress = PlayerState().GetPlayerMagicLevelProgress();
 		else
 			Progress = -1;
@@ -1985,7 +1985,7 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 		const int SkillNumber = NumberOfLine - 9;
 		Name.Assign(PlayerState().GetSkillName(SkillNumber));
 		Value = PlayerState().GetPlayerSkillValue(SkillNumber);
-		if (GetSkillBar(SkillNumber))
+		if (Preferences().GetSkillBar(SkillNumber))
 			Progress = PlayerState().GetPlayerSkillProgress(SkillNumber);
 		else
 			Progress = -1;
@@ -2318,7 +2318,7 @@ int TBattleWindowBody::GetMinimumHeight()
 // The stored height ("ContentWindow" 7) or the content.
 int TBattleWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(BATTLE_WINDOW);
+	int Height = Preferences().GetContentWindowSize(BATTLE_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
 	if (Height < GetMinimumHeight())
@@ -2870,7 +2870,7 @@ int TBuddylistWindowBody::GetMinimumHeight()
 // The stored height ("ContentWindow" 9) or the content.
 int TBuddylistWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(BUDDYLIST_WINDOW);
+	int Height = Preferences().GetContentWindowSize(BUDDYLIST_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
 	if (Height < GetMinimumHeight())
