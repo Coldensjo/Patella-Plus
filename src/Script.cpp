@@ -487,15 +487,7 @@ void TReadBinaryFile::readBytes(patella::TSpan<uint8> Bytes)
 		TERROR1_REASON("out of data", Count, Filename);
 }
 
-// TryOpen, its failure thrown.
-void TWriteBinaryFile::open(const char *FileName)
-{
-	patella::TExpected<void, TError> Result = TryOpen(FileName);
-	if (!Result)
-		throw TMyException(std::move(Result.error()));
-}
-
-// open's code, its two TERROR_REASONs returned (issue #80).
+// Opens the file; its two failures are returned, not thrown (issue #80).
 patella::TExpected<void, TError> TWriteBinaryFile::TryOpen(const char *FileName)
 {
 	if (File != nullptr)

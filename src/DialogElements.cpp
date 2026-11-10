@@ -2772,9 +2772,4 @@ void TProgressBar::SetCurrent(int current)
 	Arrange();
 }
 
-void TProgressBar::SetComplete()
-{
-	Current = Maximum;
-	Arrange();
-}
 // NOLINTEND(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)

@@ -9,8 +9,6 @@
 #include <array>
 
 int GetMilliseconds();
-bool FileExists(const char *FileName);
-bool RemoveFile(const char *FileName);
 bool IsClipboardEmpty();
 const char *GetErrorText(int Error);
 const char *GetErrorHint(int Error);

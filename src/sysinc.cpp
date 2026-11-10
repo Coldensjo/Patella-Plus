@@ -46,16 +46,6 @@ int GetMilliseconds()
 	return (int)patella::platform::Platform().Clock.Milliseconds() - StartTime;
 }
 
-bool FileExists(const char *FileName)
-{
-	return MsvcAccess(FileName, 0) == 0;
-}
-
-bool RemoveFile(const char *FileName)
-{
-	return std::remove(FileName) == 0;
-}
-
 // True when the clipboard has no text. Since Patella-Modern issue #112 the clipboard's text is its UTF-16 text
 // (CF_UNICODETEXT; Windows makes it from CF_TEXT and CF_TEXT from it, so the one is there when the other is).
 // Since issue #119 the clipboard is the platform's IClipboard (platform/Clipboard.h; Win32's: TWin32Clipboard).

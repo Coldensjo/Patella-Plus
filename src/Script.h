@@ -160,10 +160,8 @@ public:
 		File.Close();
 	}
 
-	// open's failures ("file still open", "failed to open file") returned instead of thrown (issue #80); open throws
-	// them, as the original.
+	// Opens the file; a failure ("file still open", "failed to open file") is returned, not thrown (issue #80).
 	[[nodiscard]] patella::TExpected<void, TError> TryOpen(const char *FileName);
-	void open(const char *FileName);
 	void writeByte(uint8 Byte);
 	void writeWord(uint16 Word);
 	void writeQuad(uint32 Quad);

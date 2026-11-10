@@ -815,7 +815,6 @@ public:
 	void Arrange() override;
 	void SetMaximum(int maximum);
 	void SetCurrent(int current);
-	void SetComplete();
 
 	int Maximum; // +0x24
 	int Current; // +0x28

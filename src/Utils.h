@@ -49,7 +49,6 @@ public:
 	uint32 GetQuad();
 	void GetString(patella::TSpan<char> Text); // see Utils.cpp
 	char *GetString();                         // returns a new[] copy
-	void GetBytes(patella::TSpan<uint8> Bytes);
 };
 
 class TWriteBuffer : public TBuffer {

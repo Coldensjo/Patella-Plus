@@ -271,16 +271,6 @@ char *TReadBuffer::GetString()
 	return Result;
 }
 
-void TReadBuffer::GetBytes(patella::TSpan<uint8> Bytes)
-{
-	uint8 *const Buffer = Bytes.data();
-	const int Count = static_cast<int>(Bytes.size());
-	PATELLA_ASSERT(Buffer!=nullptr);
-	PATELLA_ASSERT_VALUES(Position<=Size-Count, Position, Size-Count);
-	memcpy(Buffer, &Data[Position], Count);
-	Position += Count;
-}
-
 // The parameters as in TReadBuffer's constructor.
 TWriteBuffer::TWriteBuffer(patella::TSpan<uint8> Bytes)
 {
