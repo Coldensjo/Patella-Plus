@@ -622,38 +622,38 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			// in no party.
 			int Icon1 = 0, Icon2 = 0;
 			bool Blink = true;
-			if (Creature->PARTYFlag > 0) {
+			if (Creature->PARTYFlag > PARTY_NONE) {
 				switch (Creature->PARTYFlag) {
-				case 1:
+				case PARTY_INVITER:
 					if (!IsPlayerInParty())
 						Icon1 = 252;
 					break;
-				case 2:
+				case PARTY_INVITEE:
 					Icon1 = 253;
 					break;
-				case 3:
+				case PARTY_MEMBER:
 					Icon1 = 254;
 					break;
-				case 4:
+				case PARTY_LEADER:
 					Icon1 = 255;
 					break;
 				default:
 					TERROR1B("unknown creature party flag", Creature->PARTYFlag, "[bug0001106]");
 				}
 			}
-			if (Creature->PKFlag > 0) {
+			if (Creature->PKFlag > PK_NONE) {
 				int Skull;
 				switch (Creature->PKFlag) {
-				case 1:
+				case PK_YELLOW:
 					Skull = 244;
 					break;
-				case 2:
+				case PK_GREEN:
 					Skull = 245;
 					break;
-				case 3:
+				case PK_WHITE:
 					Skull = 246;
 					break;
-				case 4:
+				case PK_RED:
 					Skull = 247;
 					break;
 				default:

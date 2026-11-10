@@ -881,19 +881,19 @@ int TPlayerStates::GetIcon(int Position)
 			break;
 		case 4:
 			switch (GetCreature(GetPlayerID())->PKFlag) {
-			case 1:
+			case PK_YELLOW:
 				Found++;
 				Skin = 236;
 				break;
-			case 2:
+			case PK_GREEN:
 				Found++;
 				Skin = 237;
 				break;
-			case 3:
+			case PK_WHITE:
 				Found++;
 				Skin = 238;
 				break;
-			case 4:
+			case PK_RED:
 				Found++;
 				Skin = 239;
 				break;
@@ -2125,20 +2125,20 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				SkinProperties().Style688.Data04.width, Creature->OutfitType, Creature->Colors,
 				SkinProperties().Style688.Data68, TRect(x, ClipY, ClipWidth, ClipHeight), SkinProperties().Data498);
 			GetSurface()->Flag26 = false;
-			if (Creature->PARTYFlag > 0) {
+			if (Creature->PARTYFlag > PARTY_NONE) {
 				int Skin = 0; // none: no shield in the party (flag 1) or an unknown flag
 				switch (Creature->PARTYFlag) {
-				case 1:
+				case PARTY_INVITER:
 					if (!IsPlayerInParty())
 						Skin = 248;
 					break;
-				case 2:
+				case PARTY_INVITEE:
 					Skin = 249;
 					break;
-				case 3:
+				case PARTY_MEMBER:
 					Skin = 250;
 					break;
-				case 4:
+				case PARTY_LEADER:
 					Skin = 251;
 					break;
 				default:
@@ -2150,19 +2150,19 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 					Offset = SkinProperties().Style688.Data24;
 				}
 			}
-			if (Creature->PKFlag > 0) {
+			if (Creature->PKFlag > PK_NONE) {
 				int Skin = 0; // none: an unknown flag
 				switch (Creature->PKFlag) {
-				case 1:
+				case PK_YELLOW:
 					Skin = 240;
 					break;
-				case 2:
+				case PK_GREEN:
 					Skin = 241;
 					break;
-				case 3:
+				case PK_WHITE:
 					Skin = 242;
 					break;
-				case 4:
+				case PK_RED:
 					Skin = 243;
 					break;
 				default:

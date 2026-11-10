@@ -116,7 +116,7 @@ bool TCreature::IsMarked() const
 // away four seconds later.
 void TCreature::SetSkull(int Skull, bool Delay)
 {
-	if (Delay && this->PKFlag != 0 && Skull == 0) {
+	if (Delay && this->PKFlag != PK_NONE && Skull == PK_NONE) {
 		SkullTime = StoreTime32(patella::platform::Platform().Clock.WallSeconds());
 		return;
 	}
@@ -710,8 +710,8 @@ TCreature *patella::TCreatures::AddCreature(uint32 RemoveID, uint32 NewCreatureI
 	TCreature *Creature = &Creatures[Index];
 	if (Creature->CreatureID == 0)
 		Creature->NextOpponent = NOT_AN_OPPONENT;
-	Creature->PKFlag = 0;
-	Creature->PARTYFlag = 0;
+	Creature->PKFlag = PK_NONE;
+	Creature->PARTYFlag = PARTY_NONE;
 	Creature->SkullTime = 0;
 	Creature->CreatureID = NewCreatureID;
 	return Creature;
@@ -737,7 +737,7 @@ void patella::TCreatures::UpdateSkulls()
 		TCreature *Creature = &Creatures[i];
 		if (Creature->SkullTime != 0 && !Creature->SkullKept(Now)) {
 			Creature->SkullTime = 0;
-			Creature->PKFlag = 0;
+			Creature->PKFlag = PK_NONE;
 		}
 	}
 }
@@ -815,7 +815,7 @@ void patella::TCreatures::CheckMonsterHint(TCreature *Creature)
 // it reads.
 void patella::TCreatures::NotifySkull(int Flag)
 {
-	if (Flag != 0)
+	if (Flag != PK_NONE)
 		GUI.AddEventHelp(HINT_PLAYER_KILLING);
 }
 
@@ -882,7 +882,7 @@ const char *patella::TPlayerState::GetSkillName(int SkillNumber)
 // 0x44d6d0. No check for a missing player creature.
 bool patella::TPlayerState::HasPlayerSkull() const
 {
-	return Creatures.GetCreature(GetPlayerID())->PKFlag != 0;
+	return Creatures.GetCreature(GetPlayerID())->PKFlag != PK_NONE;
 }
 
 // 0x44d6f0. Party flag 1, 3 or 4; ContextMenus.cpp offers "Leave Party"
@@ -890,7 +890,7 @@ bool patella::TPlayerState::HasPlayerSkull() const
 bool patella::TPlayerState::IsPlayerInParty() const
 {
 	const int Shield = Creatures.GetCreature(GetPlayerID())->PARTYFlag;
-	return Shield == 4 || Shield == 3 || Shield == 1;
+	return Shield == PARTY_LEADER || Shield == PARTY_MEMBER || Shield == PARTY_INVITER;
 }
 
 // 0x44d720

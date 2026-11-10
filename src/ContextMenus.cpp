@@ -474,9 +474,9 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 				// The binary passes the name to "Invite to Party" as well
 				// (unused; left out here, the compiler warns about it).
 				switch (GetPlayerPartyFlag()) {
-				case 0:
-				case 2:
-					if (Creature->PARTYFlag == 1) {
+				case PARTY_NONE:
+				case PARTY_INVITEE:
+					if (Creature->PARTYFlag == PARTY_INVITER) {
 						Text.Format("Join {}'s Party", Creature->Name);
 						AddEntry(EVENT_MENU_JOIN_PARTY, Text, nullptr);
 					} else {
@@ -484,19 +484,19 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 						AddEntry(EVENT_MENU_INVITE_PARTY, Text, nullptr);
 					}
 					break;
-				case 1:
-					if (Creature->PARTYFlag == 2) {
+				case PARTY_INVITER:
+					if (Creature->PARTYFlag == PARTY_INVITEE) {
 						Text.Format("Revoke {}'s Invitation", Creature->Name);
 						AddEntry(EVENT_MENU_REVOKE_PARTY_INVITE, Text, nullptr);
 					}
 					break;
-				case 3:
+				case PARTY_MEMBER:
 					break;
-				case 4:
-					if (Creature->PARTYFlag == 2) {
+				case PARTY_LEADER:
+					if (Creature->PARTYFlag == PARTY_INVITEE) {
 						Text.Format("Revoke {}'s Invitation", Creature->Name);
 						AddEntry(EVENT_MENU_REVOKE_PARTY_INVITE, Text, nullptr);
-					} else if (Creature->PARTYFlag == 3) {
+					} else if (Creature->PARTYFlag == PARTY_MEMBER) {
 						Text.Format("Pass Leadership to {}", Creature->Name);
 						AddEntry(EVENT_MENU_PASS_PARTY_LEADER, Text, nullptr);
 					} else {
@@ -680,9 +680,9 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 		Text.Format("{} {}", IsTalkIgnored(0, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 		AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
 		switch (GetPlayerPartyFlag()) {
-		case 0:
-		case 2:
-			if (Creature->PARTYFlag == 1) {
+		case PARTY_NONE:
+		case PARTY_INVITEE:
+			if (Creature->PARTYFlag == PARTY_INVITER) {
 				Text.Format("Join {}'s Party", Creature->Name);
 				AddEntry(EVENT_MENU_JOIN_PARTY, Text, nullptr);
 			} else {
@@ -690,19 +690,19 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 				AddEntry(EVENT_MENU_INVITE_PARTY, Text, nullptr);
 			}
 			break;
-		case 1:
-			if (Creature->PARTYFlag == 2) {
+		case PARTY_INVITER:
+			if (Creature->PARTYFlag == PARTY_INVITEE) {
 				Text.Format("Revoke {}'s Invitation", Creature->Name);
 				AddEntry(EVENT_MENU_REVOKE_PARTY_INVITE, Text, nullptr);
 			}
 			break;
-		case 3:
+		case PARTY_MEMBER:
 			break;
-		case 4:
-			if (Creature->PARTYFlag == 2) {
+		case PARTY_LEADER:
+			if (Creature->PARTYFlag == PARTY_INVITEE) {
 				Text.Format("Revoke {}'s Invitation", Creature->Name);
 				AddEntry(EVENT_MENU_REVOKE_PARTY_INVITE, Text, nullptr);
-			} else if (Creature->PARTYFlag == 3) {
+			} else if (Creature->PARTYFlag == PARTY_MEMBER) {
 				Text.Format("Pass Leadership to {}", Creature->Name);
 				AddEntry(EVENT_MENU_PASS_PARTY_LEADER, Text, nullptr);
 			} else {

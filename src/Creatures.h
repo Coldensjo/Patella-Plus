@@ -30,6 +30,32 @@ inline constexpr int BUDDIES = 200;   // "NumberOfBuddies<BUDDIES"
 // TCreature::NextOpponent of a creature that is not in the battle list.
 inline constexpr int NOT_AN_OPPONENT = 0x7fffffff;
 
+// The values of TCreature::PKFlag, the skull beside a creature's name, as the server sends them. The prefix is the
+// member's; the names are ours, the colours of the skull pictures (the code has only their skin numbers: 244-247 on
+// the map, 240-243 in the battle list). The texts are those of the player's own skull in the status bar
+// (ContentWindows.cpp, TPlayerStates).
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	PK_NONE = 0,
+	PK_YELLOW = 1, // "You may be attacked by other players"
+	PK_GREEN = 2,  // "You are a member of a party"
+	PK_WHITE = 3,  // "You have attacked an unmarked player"
+	PK_RED = 4,    // "You have killed too many unmarked players"
+};
+
+// The values of TCreature::PARTYFlag, the party shield beside the name: the creature's part in a party as the player
+// sees it. The prefix is the member's; the names are ours, from what the context menus offer for each
+// (ContextMenus.cpp) and from IsPlayerInParty.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	PARTY_NONE = 0,
+	// Has invited. Another creature: it invited the player ("Join <name>'s Party"), and its shield is drawn only while
+	// the player is in no party. The player: in a party (IsPlayerInParty) with invitations to revoke, nothing else.
+	PARTY_INVITER = 1,
+	// Invited by the player ("Revoke <name>'s Invitation"). The player's own counts as no party.
+	PARTY_INVITEE = 2,
+	PARTY_MEMBER = 3, // of the player's party ("Pass Leadership to <name>"); the player: the menu offers nothing
+	PARTY_LEADER = 4, // the player: may invite, revoke an invitation and pass the leadership
+};
+
 // One entry of the creature table (0x9c bytes).
 class TCreature {
 public:
@@ -81,8 +107,8 @@ public:
 	int Health;                // +0x84, percent
 	int Speed;                 // +0x88
 	bool Visible;              // +0x8c
-	int PKFlag;                // +0x90, the skull; name from "Creature->PKFlag" (MapWindow.cpp)
-	int PARTYFlag;             // +0x94, the party shield; "Creature->PARTYFlag" (MapWindow.cpp)
+	int PKFlag;                // +0x90, the skull (PK_*); name from "Creature->PKFlag" (MapWindow.cpp)
+	int PARTYFlag;             // +0x94, the party shield (PARTY_*); "Creature->PARTYFlag" (MapWindow.cpp)
 	Time32 SkullTime;          // +0x98, time a skull was removed (StoreTime32, 0: none); it stays four seconds longer
 };
 
