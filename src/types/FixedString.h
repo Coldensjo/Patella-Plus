@@ -75,8 +75,6 @@ public:
 		return Result;
 	}
 
-	[[nodiscard]] std::string_view View() const noexcept { return {Chars, Length()}; }
-
 	// strcpy: the text and its NUL, at most Capacity - 1 characters. Returns the characters written.
 	std::size_t Assign(std::string_view Text) noexcept { return Write(0, Text.data(), Text.size()); }
 	std::size_t Assign(const char *Text) noexcept { return Write(0, Text, BoundedLength(Text, Capacity - 1)); }
@@ -182,8 +180,6 @@ struct TFixedString {
 
 	std::size_t Assign(std::string_view Text) noexcept { return Buffer().Assign(Text); }
 	std::size_t Assign(const char *Text) noexcept { return Buffer().Assign(Text); }
-	std::size_t Append(std::string_view Text) noexcept { return Buffer().Append(Text); }
-	std::size_t Append(const char *Text) noexcept { return Buffer().Append(Text); }
 
 	template <typename... Arguments>
 	std::size_t Format(std::format_string<TFormatArgument<Arguments>...> Text, Arguments &&...Values)

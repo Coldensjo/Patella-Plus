@@ -185,7 +185,6 @@ public:
 	}
 	void SetActive(bool _Active);
 	[[nodiscard]] const char *getCaption() const { return Shortened ? FullCaption.get() : Caption.get(); }
-	[[nodiscard]] TTalkBuffer *getTextBuffer() const { return TextBuffer; }
 
 	TTalkBuffer *TextBuffer;             // +0x24 (with the console's filter list: not one owner, notes/ownership.md 7)
 	int LineCount;                       // +0x28, the buffer's lines when the tab last looked

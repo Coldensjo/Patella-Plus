@@ -58,8 +58,6 @@ public:
 	// Fills the subclassed main window's client area outside the device windows black in Context (its erase).
 	void FillUncovered(HDC Context) const;
 
-	[[nodiscard]] HWND Current() const { return CurrentWindow; }
-
 private:
 	static LRESULT CALLBACK ParentProc(
 		HWND Window, UINT Message, WPARAM WParam, LPARAM LParam, UINT_PTR Id, DWORD_PTR Self);

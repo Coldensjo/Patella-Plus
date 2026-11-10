@@ -132,7 +132,6 @@ public:
 
 	// Set once, by the client's start-up, before the first file is opened.
 	void SetLocations(TFileLocations Locations) { Where = std::move(Locations); }
-	[[nodiscard]] const TFileLocations &Locations() const { return Where; }
 
 	bool Open(TFile &File, const char *Name, TFile::TAccess Access, TFile::TContent Content) override
 	{

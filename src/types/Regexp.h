@@ -30,19 +30,12 @@ public:
 	// regcomp(Pattern); empty when it fails (Pattern nullptr, a syntax error, a program over 32,767 bytes).
 	explicit TRegexp(const char *Pattern) noexcept : Program(regcomp(const_cast<char *>(Pattern))) {}
 
-	// Whether regcomp gave a program.
-	[[nodiscard]] bool IsCompiled() const noexcept { return Program != nullptr; }
-	explicit operator bool() const noexcept { return IsCompiled(); }
-
 	// regexec on Text: 1 when the expression matches somewhere in it (the subexpressions then point into Text), 0
 	// when not, when Text is nullptr or the TRegexp is empty.
 	int Execute(const char *Text) noexcept { return regexec(Program.get(), const_cast<char *>(Text)); }
 
 	// Frees the program; the TRegexp is empty again.
 	void Reset() noexcept { Program.reset(); }
-
-	// The compiled program itself (nullptr when empty), for the tests that read its fields.
-	[[nodiscard]] const regexp *Get() const noexcept { return Program.get(); }
 
 private:
 	// regcomp's allocation is malloc's.
