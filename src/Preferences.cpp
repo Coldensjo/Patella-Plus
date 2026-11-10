@@ -308,6 +308,18 @@ bool TPreferences::GetDragFullStacks() const
 	return DragFullStacks;
 }
 
+// Patella-Plus, not in the original: the engine smooths what it stretches (the original always does).
+void TPreferences::SetAntialiasing(bool Value)
+{
+	Antialiasing = Value;
+}
+
+// Patella-Plus, not in the original.
+bool TPreferences::GetAntialiasing() const
+{
+	return Antialiasing;
+}
+
 // Patella-Plus, not in the original.
 const patella::settings::TServerValues &TPreferences::GetServerValues() const
 {
@@ -421,6 +433,7 @@ void TPreferences::SetDefaults(TTalkLists &Lists)
 	ClassicControl = false;
 	AutoChaseOff = true;
 	DragFullStacks = false;
+	Antialiasing = false;
 	AttackMode = ATTACK_BALANCED;
 	ChaseMode = CHASE_STAND;
 	SecureMode = true;
@@ -890,6 +903,7 @@ patella::settings::TPreferenceValues TPreferences::GetValues(TTalkLists &Lists)
 	Values.ClassicControl = ClassicControl;
 	Values.AutoChaseOff = AutoChaseOff;
 	Values.DragFullStacks = DragFullStacks;
+	Values.Antialiasing = Antialiasing;
 	Values.AttackMode = AttackMode;
 	Values.ChaseMode = ChaseMode;
 	Values.SecureMode = SecureMode;
@@ -984,6 +998,7 @@ void TPreferences::SetValues(const patella::settings::TPreferenceValues &Values,
 	ClassicControl = Values.ClassicControl;
 	AutoChaseOff = Values.AutoChaseOff;
 	DragFullStacks = Values.DragFullStacks;
+	Antialiasing = Values.Antialiasing;
 	AttackMode = Values.AttackMode;
 	ChaseMode = Values.ChaseMode;
 	SecureMode = Values.SecureMode;

@@ -611,6 +611,8 @@ public:
 	TComponent *Receiver;
 	TCheckBox *LightEffects;
 	TCheckBox *NoStretching;
+	TCheckBox *Antialiasing; // Patella-Plus, not in the original
+	int RowPitch;            // Patella-Plus: how far the Anti-aliasing row moves the frame rate's bar and texts down
 	TCheckBox *WindowsMousepointer;
 	THorizontalScrollBar *Framerate; // 10-201 (201 is no limit), event 30
 	void (*OpenURL)(const char *URL);

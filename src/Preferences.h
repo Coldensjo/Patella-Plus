@@ -155,6 +155,8 @@ public:
 	[[nodiscard]] bool GetAutoChaseOff() const;
 	void SetDragFullStacks(bool Value);
 	[[nodiscard]] bool GetDragFullStacks() const;
+	void SetAntialiasing(bool Value);
+	[[nodiscard]] bool GetAntialiasing() const;
 	[[nodiscard]] const patella::settings::TServerValues &GetServerValues() const;
 	[[nodiscard]] const char *GetRsaModulus() const;
 	void SetAttackMode(int Value);
@@ -212,6 +214,7 @@ private:
 	bool AutoChaseOff{};
 	bool ClassicControl{};
 	bool DragFullStacks{}; // Patella-Plus, not in the original
+	bool Antialiasing{};   // Patella-Plus, not in the original: stretched pictures are smoothed
 	// NumberOfOpenChannels: OpenChannels.size().
 	bool PrivateMessages{};
 	bool TimeStamps{};

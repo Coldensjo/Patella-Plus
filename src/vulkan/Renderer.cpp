@@ -1194,7 +1194,8 @@ void TRenderer::ReplaceColor(int Image, int x, int y, int Width, int Height, uin
 	S.DrawVertices(Vertices.data(), Vertices.size());
 }
 
-bool TRenderer::Present(int Image, int x, int y, int Width, int Height, uint32_t WindowWidth, uint32_t WindowHeight)
+bool TRenderer::Present(int Image, int x, int y, int Width, int Height, uint32_t WindowWidth, uint32_t WindowHeight,
+	bool Smooth)
 {
 	TState &S = *State;
 	S.EndPass();
@@ -1241,7 +1242,7 @@ bool TRenderer::Present(int Image, int x, int y, int Width, int Height, uint32_t
 	const bool OneToOne = static_cast<uint32_t>(Right - x) == S.Swapchain.extent.width
 		&& static_cast<uint32_t>(Bottom - y) == S.Swapchain.extent.height;
 	vkCmdBlitImage(S.Commands(), From.Image, VK_IMAGE_LAYOUT_GENERAL, Target, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-		&Region, OneToOne ? VK_FILTER_NEAREST : VK_FILTER_LINEAR);
+		&Region, OneToOne || !Smooth ? VK_FILTER_NEAREST : VK_FILTER_LINEAR);
 	S.ImageBarrier(Target, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 		VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_NONE, 0);
 	S.Barrier();

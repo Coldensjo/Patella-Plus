@@ -2521,8 +2521,16 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	OpenURL = _OpenURL;
 	Receiver = _Receiver;
 	DeviceGroup.reset(new TRadioButtonGroup);
+	// Patella-Plus: Anti-aliasing is a fourth row below the original three, one row's pitch further down. The frame
+	// rate's bar and texts move down by that pitch and the body grows by it (TDialog fits itself around the body).
+	RowPitch = SkinProperties().AdvancedGraphicsDialog.NoStretching.y - SkinProperties().AdvancedGraphicsDialog.LightEffects.y;
+	TRect AntialiasingArea = SkinProperties().AdvancedGraphicsDialog.WindowsMousepointer;
+	AntialiasingArea.y += RowPitch;
+	TRect FramerateArea = SkinProperties().AdvancedGraphicsDialog.Framerate;
+	FramerateArea.y += RowPitch;
 	LightEffects = new TCheckBox("Show Light Effects");
 	NoStretching = new TCheckBox("Don't stretch/shrink the Map");
+	Antialiasing = new TCheckBox("Anti-aliasing");
 	WindowsMousepointer = new TCheckBox("Windows Mouse Pointer");
 	Framerate = new THorizontalScrollBar(10, 201, 10, 11, 1, TCallback(this, EVENT_FRAMERATE));
 	// The graphics device choice in the original's engine buttons' places, with their events (MainWindow.cpp:
@@ -2551,17 +2559,20 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	InsertChild(LightEffects);
 	InsertChild(NoStretching);
 	InsertChild(WindowsMousepointer);
+	InsertChild(Antialiasing);
 	InsertChild(Framerate);
-	TComponent::SetSize(SkinProperties().AdvancedGraphicsDialog.Width, SkinProperties().AdvancedGraphicsDialog.Height);
+	TComponent::SetSize(SkinProperties().AdvancedGraphicsDialog.Width, SkinProperties().AdvancedGraphicsDialog.Height + RowPitch);
 	SetChildArea(LightEffects, SkinProperties().AdvancedGraphicsDialog.LightEffects);
 	SetChildArea(NoStretching, SkinProperties().AdvancedGraphicsDialog.NoStretching);
 	SetChildArea(WindowsMousepointer, SkinProperties().AdvancedGraphicsDialog.WindowsMousepointer);
-	SetChildArea(Framerate, SkinProperties().AdvancedGraphicsDialog.Framerate);
+	SetChildArea(Antialiasing, AntialiasingArea);
+	SetChildArea(Framerate, FramerateArea);
 	LightEffects->SetChecked(Preferences().GetLightEffects());
 	if (!GraphicsEngine().GetSurface()->CanShadeRectangles())
 		LightEffects->SetEnabled(false);
 	NoStretching->SetChecked(Preferences().GetNoStretching());
 	WindowsMousepointer->SetChecked(Preferences().GetWindowsMousepointer());
+	Antialiasing->SetChecked(Preferences().GetAntialiasing());
 	int FramerateLimit = Preferences().GetConfineFramerate();
 	if (FramerateLimit < 10)
 		FramerateLimit = 201;
@@ -2618,11 +2629,11 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 		Text.Format("Adjust framerate limit: {}", Framerate->Range->Value);
 	else
 		Text.Assign("Adjust framerate limit: max");
-	Graphics().PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.x + x, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.x + x, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.y + RowPitch + y,
 		SkinProperties().Dialog.TextFont, Text);
 	const double FPS = GraphicsEngine().GetSurface()->GetFPS();
 	Text.Format("Current framerate: {:2.2f}", FPS);
-	Graphics().PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.x + x, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.x + x, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.y + RowPitch + y,
 		SkinProperties().Dialog.TextFont, Text);
 	ShowDevice();
 }
@@ -2637,6 +2648,7 @@ void TAdvancedGraphicsDialog::HandleEvent(int Event)
 		Preferences().SetNoStretching(NoStretching->IsChecked());
 		Preferences().SetWindowsMousepointer(WindowsMousepointer->IsChecked());
 		Preferences().SetLightEffects(LightEffects->IsChecked());
+		Preferences().SetAntialiasing(Antialiasing->IsChecked());
 		Preferences().SetConfineFramerate(Framerate->Range->Value);
 		GraphicsEngine().GetSurface()->SetFramerateLimit(Preferences().GetConfineFramerate());
 		if (Rearrange)
