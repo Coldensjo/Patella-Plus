@@ -158,7 +158,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		const TObject &TradeObject = *Interaction().GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 		PATELLA_ASSERT(TradeObject!=0);
 		const uint32 CreatureID = GetCreatureAt(x, y);
-		if (CreatureID != 0 && CreatureID != PlayerState().GetPlayerID() && Creatures().IsPlayer(CreatureID)) {
+		if (CreatureID != 0 && CreatureID != PlayerState().GetID() && Creatures().IsPlayer(CreatureID)) {
 			Communication().SendRequestTrade(TradeX, TradeY, TradeZ, TradeObject.Type, TradeIndex, CreatureID);
 			return true;
 		}
@@ -191,7 +191,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 			return RightButtonUp(x, y, Flags);
 		int DestX = FieldX, DestY = FieldY, DestZ = Map().GetMapLevel();
 		Map().MapToWorld(&DestX, &DestY, &DestZ);
-		switch (PlayerState().SetPlayerDestination(DestX, DestY, DestZ, true, false)) {
+		switch (PlayerState().SetDestination(DestX, DestY, DestZ, true, false)) {
 		case 1:
 			Communication().SendWalk();
 			break;
@@ -254,7 +254,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		}
 		const uint32 Target = Interaction().GetTradeInfo();
 		TObject &UseObj = *Interaction().GetUseObject(&Index, &ox, &oy, &oz);
-		if (Target != 0 && Target != PlayerState().GetPlayerID() && UseObj.Type != 0
+		if (Target != 0 && Target != PlayerState().GetID() && UseObj.Type != 0
 			&& !ObjectTypes().GetObjectFlag(UseObj, FORCEUSE)) {
 			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
 			Communication().SendAttack(Creatures().GetAttackID());
@@ -272,7 +272,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	} else {
 		if (Flags & KEY_ALT) {
 			const uint32 Target = Interaction().GetTradeInfo();
-			if (Target == 0 || Target == PlayerState().GetPlayerID())
+			if (Target == 0 || Target == PlayerState().GetID())
 				return true;
 			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
 			Communication().SendAttack(Creatures().GetAttackID());
@@ -338,7 +338,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	int Position = 0;
 	TObject Obj = Map().GetTopLookObject(FieldX, FieldY, FieldZ, Position);
 	int Handle = HELP_NONE;
-	if (Obj.Type == CREATURE && Obj.Data == (int)PlayerState().GetPlayerID())
+	if (Obj.Type == CREATURE && Obj.Data == (int)PlayerState().GetID())
 		Handle = HELP_YOUR_CHARACTER;
 	else if (Obj.Type == CREATURE)
 		Handle = HELP_CREATURES;
@@ -348,7 +348,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		Handle = HELP_CONTAINERS;
 	if (Handle == HELP_NONE)
 		return false;
-	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetID());
 	PATELLA_ASSERT(Player!=nullptr);
 	if (Preferences().GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
@@ -373,7 +373,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	const bool ShowTexts = Preferences().GetTextualEffects();
 	const int CreatureInfo = Preferences().GetCreatureInfo();
 	Map().ProcessMissileEffects();
-	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetID());
 	PATELLA_ASSERT(Player!=nullptr);
 	ScrollX = Player->GetDeltaX() + 32;
 	ScrollY = Player->GetDeltaY() + 32;
@@ -555,7 +555,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			}
 			const TRGBColor Color = Visible ? Creature->GetHealthColor() : TRGBColor(192, 192, 192);
 			int Brightness = Light[cx][cy].R;
-			if (Creature->CreatureID == PlayerState().GetPlayerID()) {
+			if (Creature->CreatureID == PlayerState().GetID()) {
 				int Strength = Creature->LightStrength;
 				Limit(Strength, 2, 5);
 				if (Brightness <= Strength * 51)
@@ -605,7 +605,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			if (Creature->PARTYFlag > PARTY_NONE) {
 				switch (Creature->PARTYFlag) {
 				case PARTY_INVITER:
-					if (!PlayerState().IsPlayerInParty())
+					if (!PlayerState().IsInParty())
 						Icon1 = SKIN_MAP_SHIELD_1;
 					break;
 				case PARTY_INVITEE:
@@ -916,7 +916,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			DrawCreature(ShiftX[i] - Elevation + ox + posx, ShiftY[i] - Elevation + oy + posy, FieldZ, Creatures[i]);
 		}
 		if (Mode == 0) {
-			if ((::Creatures().IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == PlayerState().GetPlayerID())
+			if ((::Creatures().IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == PlayerState().GetID())
 				&& FieldZ == Map().GetMapLevel()) {
 				Names[NumberOfNames].CreatureID = Creatures[i]->CreatureID;
 				Names[NumberOfNames].x = ox - Elevation + posx + 16;
@@ -927,7 +927,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			AddLightSource(lx, ly, FieldZ, Creatures[i]->LightStrength, TRGBColor(Creatures[i]->LightColor));
 			if (OutfitType != 0 && ObjectTypes().GetOutfitFlag(OutfitType, LIGHT))
 				AddLightSource(lx, ly, FieldZ, ObjectTypes().GetOutfitBrightness(OutfitType), TRGBColor(ObjectTypes().GetOutfitLightColor(OutfitType)));
-			if (Creatures[i]->CreatureID == PlayerState().GetPlayerID() && Creatures[i]->LightStrength < 2)
+			if (Creatures[i]->CreatureID == PlayerState().GetID() && Creatures[i]->LightStrength < 2)
 				AddLightSource(lx, ly, FieldZ, 2, TRGBColor(255, 255, 255));
 		}
 	}
@@ -935,7 +935,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (EffectNumber < 0 || EffectNumber >= EFFECTS) {
 			std::stringstream s;
 			s << "EffectNumber: " << EffectNumber << " X: " << FieldX << " Y: " << FieldY << " Z: " << FieldZ;
-			const TCreature *Player = ::Creatures().GetCreature(PlayerState().GetPlayerID());
+			const TCreature *Player = ::Creatures().GetCreature(PlayerState().GetID());
 			if (Player != nullptr)
 				s << " PlayerX: " << Player->RealX << " PlayerY: " << Player->RealY << " PlayerZ: " << Player->RealZ;
 			throw TMYEXCEPTION("effect number out of range [bug0000913]", "", 0, "", 0, s.str());
@@ -1509,7 +1509,7 @@ void TMapWindow::ArrangeTalkboxes()
 // on the field; 0 if there is none.
 void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 {
-	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetID());
 	PATELLA_ASSERT(Player!=nullptr);
 	if (Preferences().GetNoStretching()) {
 		*FieldX = ((480 - Width) / 2 + Player->GetDeltaX() + x) / 32 + 1;

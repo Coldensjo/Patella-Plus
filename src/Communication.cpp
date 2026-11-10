@@ -204,10 +204,10 @@ void patella::TCommunication::PrepareMovement()
 void patella::TCommunication::SendWalk()
 {
 	PrepareMovement();
-	const int Steps = PlayerState.GetNumberOfPlayerSteps();
+	const int Steps = PlayerState.GetNumberOfSteps();
 	PATELLA_ASSERT_VALUES(Steps>0, Steps);
 	if (Steps == 1) {
-		switch (PlayerState.GetPlayerStep(0)) {
+		switch (PlayerState.GetStep(0)) {
 		case STEP_EAST: Network.BeginCommand(GAME_SEND_WALK_EAST); break;
 		case STEP_NORTHEAST: Network.BeginCommand(GAME_SEND_WALK_NORTH_EAST); break;
 		case STEP_NORTH: Network.BeginCommand(GAME_SEND_WALK_NORTH); break;
@@ -222,13 +222,14 @@ void patella::TCommunication::SendWalk()
 		Network.BeginCommand(GAME_SEND_WALK);
 		Network.SendByte(Steps);
 		for (int i = 0; i < Steps; i++)
-			Network.SendByte(PlayerState.GetPlayerStep(i));
+			Network.SendByte(PlayerState.GetStep(i));
 	}
 	Network.SendCommand(true);
 }
 
 // The server ends the walk it carries out for the player: the steps of the last SendWalk that it has not taken yet.
-// Sent when a new destination is set while those steps are still being walked (SetPlayerDestination's result 2).
+// Sent when a new destination is set while those steps are still being walked (TPlayerState::SetDestination's
+// result 2).
 void patella::TCommunication::SendStopWalk()
 {
 	PrepareMovement();
@@ -267,7 +268,7 @@ void patella::TCommunication::SendMoveObject(int x, int y, int z, int ObjectType
 		return;
 	}
 	if (x != POSITION_NOT_ON_MAP)
-		PlayerState.ClearPlayerSteps();
+		PlayerState.ClearSteps();
 	Network.BeginCommand(GAME_SEND_MOVE_OBJECT);
 	Network.SendWord(x);
 	Network.SendWord(y);
@@ -283,7 +284,7 @@ void patella::TCommunication::SendMoveObject(int x, int y, int z, int ObjectType
 
 void patella::TCommunication::SendRequestTrade(int x, int y, int z, int ObjectType, int Position, uint32 CreatureID)
 {
-	PlayerState.ClearPlayerSteps();
+	PlayerState.ClearSteps();
 	Network.BeginCommand(GAME_SEND_REQUEST_TRADE);
 	Network.SendWord(x);
 	Network.SendWord(y);
@@ -317,7 +318,7 @@ void patella::TCommunication::SendRejectTrade()
 void patella::TCommunication::SendUseObject(int x, int y, int z, int ObjectType, int Position, int Container)
 {
 	if (x != POSITION_NOT_ON_MAP)
-		PlayerState.ClearPlayerSteps();
+		PlayerState.ClearSteps();
 	Network.BeginCommand(GAME_SEND_USE_OBJECT);
 	Network.SendWord(x);
 	Network.SendWord(y);
@@ -331,7 +332,7 @@ void patella::TCommunication::SendUseObject(int x, int y, int z, int ObjectType,
 void patella::TCommunication::SendUseObjectWith(int x1, int y1, int z1, int ObjectType1, int Position1, int x2, int y2, int z2, int ObjectType2, int Position2)
 {
 	if (x1 != POSITION_NOT_ON_MAP || x2 != POSITION_NOT_ON_MAP)
-		PlayerState.ClearPlayerSteps();
+		PlayerState.ClearSteps();
 	Network.BeginCommand(GAME_SEND_USE_OBJECT_WITH);
 	Network.SendWord(x1);
 	Network.SendWord(y1);
@@ -348,7 +349,7 @@ void patella::TCommunication::SendUseObjectWith(int x1, int y1, int z1, int Obje
 
 void patella::TCommunication::SendUseObjectOnCreature(int x, int y, int z, int ObjectType, int Position, uint32 CreatureID)
 {
-	PlayerState.ClearPlayerSteps();
+	PlayerState.ClearSteps();
 	Network.BeginCommand(GAME_SEND_USE_OBJECT_ON_CREATURE);
 	Network.SendWord(x);
 	Network.SendWord(y);
@@ -504,7 +505,7 @@ void patella::TCommunication::SendFightModes()
 void patella::TCommunication::SendAttack(uint32 CreatureID)
 {
 	if (CreatureID != 0)
-		PlayerState.ClearPlayerSteps();
+		PlayerState.ClearSteps();
 	Network.BeginCommand(GAME_SEND_ATTACK);
 	Network.SendQuad(CreatureID);
 	Network.SendCommand(true);
@@ -513,7 +514,7 @@ void patella::TCommunication::SendAttack(uint32 CreatureID)
 void patella::TCommunication::SendFollow(uint32 CreatureID)
 {
 	if (CreatureID != 0)
-		PlayerState.ClearPlayerSteps();
+		PlayerState.ClearSteps();
 	Network.BeginCommand(GAME_SEND_FOLLOW);
 	Network.SendQuad(CreatureID);
 	Network.SendCommand(true);
@@ -733,7 +734,7 @@ void patella::TCommunication::ReceiveGameLogin()
 {
 	Session.ClearRights();
 	const uint32 CreatureID = Network.GetQuad();
-	PlayerState.SetPlayerID(CreatureID);
+	PlayerState.SetID(CreatureID);
 	const int Beat = Network.GetWord();
 	Creatures.SetBeat(Beat);
 	const uint8 value = Network.GetByte();
@@ -947,7 +948,7 @@ void patella::TCommunication::ReceiveMap()
 	Creatures.HideAllCreatures();
 	ReadMap(0, 0, 17, 13);
 	Talk().SetTalkChanged();
-	PlayerState.StopPlayer();
+	PlayerState.Stop();
 	Help().CheckEventHelpPosition(PlayerX, PlayerY, PlayerZ);
 }
 
@@ -1179,8 +1180,8 @@ void patella::TCommunication::ReceiveMoveCreature()
 		Creature = Creatures.GetCreature(Object.Data);
 		if (Creature != nullptr) {
 			if (Teleport) {
-				if (Creature->CreatureID == PlayerState.GetPlayerID())
-					PlayerState.StopPlayer();
+				if (Creature->CreatureID == PlayerState.GetID())
+					PlayerState.Stop();
 				if (dx > 0)
 					Creature->Direction = DIRECTION_EAST;
 				else if (dx < 0)
@@ -1189,7 +1190,7 @@ void patella::TCommunication::ReceiveMoveCreature()
 					Creature->Direction = DIRECTION_NORTH;
 				else if (dy > 0)
 					Creature->Direction = DIRECTION_SOUTH;
-				if (Creature->CreatureID != PlayerState.GetPlayerID())
+				if (Creature->CreatureID != PlayerState.GetID())
 					Creature->StartMovement(0, 0, 0);
 			} else {
 				const TObject Bank = Map.GetFirstObject(zx, zy, zz);
@@ -1620,12 +1621,12 @@ void patella::TCommunication::ReceivePlayerStats()
 	const int MagicLevel = Network.GetByte();
 	const int MagicLevelPercent = Network.GetByte();
 	const int Soul = Network.GetByte();
-	PlayerState.SetPlayerHealth(Health, MaxHealth);
-	PlayerState.SetPlayerCapacity(Capacity);
-	PlayerState.SetPlayerMana(Mana, MaxMana);
-	PlayerState.SetPlayerSoul(Soul);
-	PlayerState.SetPlayerExperience(Experience, Level, LevelPercent);
-	PlayerState.SetPlayerMagicLevel(MagicLevel, MagicLevelPercent);
+	PlayerState.SetHealth(Health, MaxHealth);
+	PlayerState.SetCapacity(Capacity);
+	PlayerState.SetMana(Mana, MaxMana);
+	PlayerState.SetSoul(Soul);
+	PlayerState.SetExperience(Experience, Level, LevelPercent);
+	PlayerState.SetMagicLevel(MagicLevel, MagicLevelPercent);
 }
 
 void patella::TCommunication::ReceivePlayerSkills()
@@ -1634,14 +1635,14 @@ void patella::TCommunication::ReceivePlayerSkills()
 	for (i = 0; i < 7; i++) {
 		const int Level = Network.GetByte();
 		const int Percent = Network.GetByte();
-		PlayerState.SetPlayerSkill(i, Level, Percent);
+		PlayerState.SetSkill(i, Level, Percent);
 	}
 }
 
 void patella::TCommunication::ReceivePlayerIcons()
 {
 	const int Icons = Network.GetByte();
-	PlayerState.SetPlayerState(Icons);
+	PlayerState.SetState(Icons);
 }
 
 void patella::TCommunication::ReceiveCancelAttack()
@@ -1855,7 +1856,7 @@ void patella::TCommunication::ReceiveCancelWalk()
 	int x;
 	int y;
 	int z;
-	PlayerState.GetPlayerPosition(&x, &y, &z);
+	PlayerState.GetPosition(&x, &y, &z);
 	if (x == LastCancelX && y == LastCancelY && z == LastCancelZ)
 		CancelCount++;
 	else
@@ -1864,12 +1865,12 @@ void patella::TCommunication::ReceiveCancelWalk()
 	LastCancelY = y;
 	LastCancelZ = z;
 	if (CancelCount > 15) {
-		PlayerState.ClearPlayerSteps();
+		PlayerState.ClearSteps();
 		Creatures.SetAttackID(0);
 		SendStopAttackAndWalk();
 		CancelCount = 0;
 	}
-	if (PlayerState.CancelPlayerWalk(Direction))
+	if (PlayerState.CancelWalk(Direction))
 		SendWalk();
 }
 
@@ -1904,7 +1905,7 @@ void patella::TCommunication::ReceiveFloorUp()
 		ReadFloor(4);
 	}
 	Talk().SetTalkChanged();
-	PlayerState.StopPlayer();
+	PlayerState.Stop();
 	Help().CheckEventHelpPosition(x, y, z);
 	for (int rx = 0; rx < 18; rx++) {
 		for (int ry = 0; ry < 14; ry++)
@@ -1936,7 +1937,7 @@ void patella::TCommunication::ReceiveFloorDown()
 			ReadFloor(0);
 	}
 	Talk().SetTalkChanged();
-	PlayerState.StopPlayer();
+	PlayerState.Stop();
 	Help().CheckEventHelpPosition(x, y, z);
 	for (int rx = 0; rx < 18; rx++) {
 		for (int ry = 0; ry < 14; ry++)

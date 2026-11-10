@@ -1666,9 +1666,9 @@ void TConsoleWindow::ReportRuleViolation(const char *Question)
 	OpenChannel(TALK_GAMEMASTER_ANSWER, TALK_PLAYER_ANSWER, nullptr, -1, TextReportRuleViolation);
 	TextBuffer = Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
 	PATELLA_ASSERT(TextBuffer!=nullptr);
-	PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
+	PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
 	Talk().AddTextBufferLine(TextBuffer, 0, Question, TALK_PLAYER_ANSWER,
-		Creatures().GetCreature(PlayerState().GetPlayerID())->Name, 0);
+		Creatures().GetCreature(PlayerState().GetID())->Name, 0);
 	Talk().AddTextBufferLine(TextBuffer, 0, TextWaitForGamemaster, TALK_ADMIN_MESSAGE, nullptr, 0);
 	Communication().SendTalk(TALK_GAMEMASTER_REQUEST, Question);
 	TextBuffer->SetWriteEnabled(false);
@@ -1750,10 +1750,10 @@ void TConsoleWindow::SendInput()
 		case TALK_GAMEMASTER_MESSAGE:
 		case TALK_ANONYMOUS_MESSAGE:
 			PATELLA_ASSERT(Addressee!=nullptr);
-			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
-			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text, TalkMode,
+			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetID())->Name, Text, TalkMode,
 				Addressee, ChannelID);
-			if (CompareStrings(Addressee, Creatures().GetCreature(PlayerState().GetPlayerID())->Name, -1) != 0)
+			if (CompareStrings(Addressee, Creatures().GetCreature(PlayerState().GetID())->Name, -1) != 0)
 				Communication().SendTalk(TalkMode, Addressee, Text);
 			break;
 		case TALK_CHANNEL_CALL:
@@ -1764,15 +1764,15 @@ void TConsoleWindow::SendInput()
 			break;
 		case TALK_GAMEMASTER_ANSWER:
 			PATELLA_ASSERT(Addressee!=nullptr);
-			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
+			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
 			Communication().SendTalk(TALK_GAMEMASTER_ANSWER, Addressee, Text);
-			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text,
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetID())->Name, Text,
 				TALK_PLAYER_ANSWER, Addressee, -1);
 			break;
 		case TALK_PLAYER_ANSWER:
-			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
+			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
 			Communication().SendTalk(TALK_PLAYER_ANSWER, Text);
-			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text,
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetID())->Name, Text,
 				TALK_GAMEMASTER_ANSWER, "", -1);
 			break;
 		default:

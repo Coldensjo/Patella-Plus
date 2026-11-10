@@ -34,11 +34,12 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumera
 
 // The values of TCreature::PARTYFlag, the party shield beside the name: the creature's part in a party as the player
 // sees it. The prefix is the member's; the names are ours, from what the context menus offer for each
-// (ContextMenus.cpp) and from IsPlayerInParty.
+// (ContextMenus.cpp) and from TPlayerState::IsInParty.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
 	PARTY_NONE = 0,
 	// Has invited. Another creature: it invited the player ("Join <name>'s Party"), and its shield is drawn only while
-	// the player is in no party. The player: in a party (IsPlayerInParty) with invitations to revoke, nothing else.
+	// the player is in no party. The player: in a party (TPlayerState::IsInParty) with invitations to revoke, nothing
+	// else.
 	PARTY_INVITER = 1,
 	// Invited by the player ("Revoke <name>'s Invitation"). The player's own counts as no party.
 	PARTY_INVITEE = 2,
@@ -255,55 +256,55 @@ public:
 	~TPlayerState() = default;
 
 	// The player's creature, steps and statistics.
-	[[nodiscard]] int GetNumberOfPlayerSteps() const;
-	void GetPlayerPosition(int *x, int *y, int *z) const; // including the step not confirmed yet
-	void ClearPlayerSteps();
-	void SetPlayerID(uint32 CreatureID);
-	void SetPlayerHealth(int Health, int MaxHealth);
-	void SetPlayerMagicLevel(int Level, int Progress);
-	void SetPlayerMana(int Mana, int MaxMana);
-	void SetPlayerSoul(int Soul);
-	void SetPlayerCapacity(int Capacity);
-	void SetPlayerState(int State);
-	[[nodiscard]] uint32 GetPlayerID() const;
-	[[nodiscard]] int GetPlayerHealth() const;
-	[[nodiscard]] int GetPlayerMaxHealth() const;
-	[[nodiscard]] int GetPlayerExperience() const;
-	[[nodiscard]] int GetPlayerLevel() const;
-	[[nodiscard]] int GetPlayerLevelProgress() const;
-	[[nodiscard]] int GetPlayerMana() const;
-	[[nodiscard]] int GetPlayerMaxMana() const;
-	[[nodiscard]] int GetPlayerSoul() const;
-	[[nodiscard]] int GetPlayerMagicLevel() const;
-	[[nodiscard]] int GetPlayerMagicLevelProgress() const;
-	[[nodiscard]] int GetPlayerCapacity() const;
-	[[nodiscard]] bool IsPlayerPoisoned() const;     // state bit 0
-	[[nodiscard]] bool IsPlayerBurning() const;      // bit 1
-	[[nodiscard]] bool IsPlayerElectrified() const;  // bit 2
-	[[nodiscard]] bool IsPlayerDrunk() const;        // bit 3
-	[[nodiscard]] bool IsPlayerManaShielded() const; // bit 4
-	[[nodiscard]] bool IsPlayerParalyzed() const;    // bit 5
-	[[nodiscard]] bool IsPlayerHasted() const;       // bit 6
-	[[nodiscard]] bool IsPlayerInFight() const;      // bit 7
-	[[nodiscard]] int GetPlayerStep(int Step) const;
-	void StartPlayerStep();
-	int FindPlayerPath();
-	int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
-	void StopPlayer();
-	bool CancelPlayerWalk(int NewDirection);
-	void SetPlayerExperience(int Experience, int Level, int Progress);
-	void SetPlayerSkill(int SkillNumber, int Value, int Progress);
-	[[nodiscard]] int GetPlayerSkillValue(int SkillNumber) const;
-	[[nodiscard]] int GetPlayerSkillProgress(int SkillNumber) const;
+	[[nodiscard]] int GetNumberOfSteps() const;
+	void GetPosition(int *x, int *y, int *z) const; // including the step not confirmed yet
+	void ClearSteps();
+	void SetID(uint32 CreatureID);
+	void SetHealth(int Health, int MaxHealth);
+	void SetMagicLevel(int Level, int Progress);
+	void SetMana(int Mana, int MaxMana);
+	void SetSoul(int Soul);
+	void SetCapacity(int Capacity);
+	void SetState(int State);
+	[[nodiscard]] uint32 GetID() const;
+	[[nodiscard]] int GetHealth() const;
+	[[nodiscard]] int GetMaxHealth() const;
+	[[nodiscard]] int GetExperience() const;
+	[[nodiscard]] int GetLevel() const;
+	[[nodiscard]] int GetLevelProgress() const;
+	[[nodiscard]] int GetMana() const;
+	[[nodiscard]] int GetMaxMana() const;
+	[[nodiscard]] int GetSoul() const;
+	[[nodiscard]] int GetMagicLevel() const;
+	[[nodiscard]] int GetMagicLevelProgress() const;
+	[[nodiscard]] int GetCapacity() const;
+	[[nodiscard]] bool IsPoisoned() const;     // state bit 0
+	[[nodiscard]] bool IsBurning() const;      // bit 1
+	[[nodiscard]] bool IsElectrified() const;  // bit 2
+	[[nodiscard]] bool IsDrunk() const;        // bit 3
+	[[nodiscard]] bool IsManaShielded() const; // bit 4
+	[[nodiscard]] bool IsParalyzed() const;    // bit 5
+	[[nodiscard]] bool IsHasted() const;       // bit 6
+	[[nodiscard]] bool IsInFight() const;      // bit 7
+	[[nodiscard]] int GetStep(int Step) const;
+	void StartStep();
+	int FindPath();
+	int SetDestination(int x, int y, int z, bool Exact, bool Diagonal);
+	void Stop();
+	bool CancelWalk(int NewDirection);
+	void SetExperience(int Experience, int Level, int Progress);
+	void SetSkill(int SkillNumber, int Value, int Progress);
+	[[nodiscard]] int GetSkillValue(int SkillNumber) const;
+	[[nodiscard]] int GetSkillProgress(int SkillNumber) const;
 	static const char *GetSkillName(int SkillNumber);
-	[[nodiscard]] bool HasPlayerSkull() const;
-	[[nodiscard]] bool IsPlayerInParty() const;
-	[[nodiscard]] int GetPlayerPartyFlag() const;
+	[[nodiscard]] bool HasSkull() const;
+	[[nodiscard]] bool IsInParty() const;
+	[[nodiscard]] int GetPartyFlag() const;
 
 	// Ours (TCreaturesPlayer): MoveCreatures' continuation of the walk (true if a new walk is to be sent) and
 	// ResetCreatures' writes of the player's state, the original's code of those two functions.
-	bool ContinuePlayerWalk();
-	void ResetPlayer();
+	bool ContinueWalk();
+	void Reset();
 
 private:
 	friend class ::TCreature;

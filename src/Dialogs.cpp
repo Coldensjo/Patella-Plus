@@ -1667,7 +1667,7 @@ void TNewChannelDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const char *Name = NameEdit->Text.get();
 		if (strlen(Name) != 0) {
-			TCreature *Creature = Creatures().GetCreature(PlayerState().GetPlayerID());
+			TCreature *Creature = Creatures().GetCreature(PlayerState().GetID());
 			PATELLA_ASSERT(Creature!=nullptr);
 			if (CompareStrings(Creature->Name, Name, -1) == 0)
 				Talk().SetStatusMessage(TextNoPrivateChannelWithYourself, false);

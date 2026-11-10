@@ -33,8 +33,8 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 };
 
 // The way a creature faces: TCreature::Direction and MoveDirection, the player's PlayerStepDirection (Creatures.h),
-// the direction the server sends with a creature and with a refused step (CancelPlayerWalk's NewDirection), and the
-// Direction of GetOutfitSpriteNumber, which is the outfit's pattern column less one. Clockwise from north; the names
+// the direction the server sends with a creature and with a refused step (TPlayerState::CancelWalk's NewDirection), and
+// the Direction of GetOutfitSpriteNumber, which is the outfit's pattern column less one. Clockwise from north; the names
 // are ours, from StartMovement, which turns a step's dx and dy into them (east or west for a diagonal step). The steps
 // of a path have their own numbers, STEP_* in Map.h. Enumerators for the reason in GUI.h.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants

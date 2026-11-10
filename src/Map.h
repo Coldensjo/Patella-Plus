@@ -138,8 +138,8 @@ struct TPathNode {
 };
 
 // The steps of a path: FindPath's Directions, the player's PlayerSteps (Creatures.h) and the bytes of SendWalk's
-// path. Counter-clockwise from east, with the diagonals, from 1; the names are ours, from FindPath and StartPlayerStep,
-// which turn the differences of x and y into them and back. They are not a creature's DIRECTION_* (Objects.h),
+// path. Counter-clockwise from east, with the diagonals, from 1; the names are ours, from FindPath and
+// TPlayerState::StartStep, which turn the differences of x and y into them and back. They are not a creature's DIRECTION_* (Objects.h),
 // four values clockwise from north: a step becomes one in StartMovement, by its dx and dy. Enumerators for the
 // reason in GUI.h.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants

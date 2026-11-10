@@ -411,9 +411,9 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && Inventory().HasContainerParent(LookedObjectY - POSITION_CONTAINER_BASE))
 		AddEntry(EVENT_MENU_MOVE_UP, "Move up", nullptr);
 	if (CreatureID != 0) {
-		if (CreatureID == PlayerState().GetPlayerID()) {
+		if (CreatureID == PlayerState().GetID()) {
 			AddEntry(EVENT_MENU_SET_OUTFIT, "Set Outfit", nullptr);
-			if (PlayerState().IsPlayerInParty() && !PlayerState().IsPlayerInFight())
+			if (PlayerState().IsInParty() && !PlayerState().IsInFight())
 				AddEntry(EVENT_MENU_LEAVE_PARTY, "Leave Party", nullptr);
 		} else {
 			if (CreatureID == Creatures().GetAttackID())
@@ -436,7 +436,7 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 					AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
 				Text.Format("{} {}", Talk().IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 				AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
-				switch (PlayerState().GetPlayerPartyFlag()) {
+				switch (PlayerState().GetPartyFlag()) {
 				case PARTY_NONE:
 				case PARTY_INVITEE:
 					if (Creature->PARTYFlag == PARTY_INVITER) {
@@ -468,13 +468,13 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 					}
 					break;
 				default:
-					TERROR1("unknown player party flag", PlayerState().GetPlayerPartyFlag());
+					TERROR1("unknown player party flag", PlayerState().GetPartyFlag());
 				}
 			}
 		}
 		Separator = true;
 		AddEntry(EVENT_MENU_COPY, "Copy Name", nullptr);
-		if (Creatures().IsPlayer(CreatureID) && CreatureID != PlayerState().GetPlayerID()
+		if (Creatures().IsPlayer(CreatureID) && CreatureID != PlayerState().GetID()
 			&& Session().CheckAnyRight()) {
 			Separator = true;
 			AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
@@ -645,7 +645,7 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 		Text.Format("{} {}", Talk().IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore",
 			Creature->Name);
 		AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
-		switch (PlayerState().GetPlayerPartyFlag()) {
+		switch (PlayerState().GetPartyFlag()) {
 		case PARTY_NONE:
 		case PARTY_INVITEE:
 			if (Creature->PARTYFlag == PARTY_INVITER) {
@@ -677,7 +677,7 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 			}
 			break;
 		default:
-			TERROR1("unknown player party flag", PlayerState().GetPlayerPartyFlag());
+			TERROR1("unknown player party flag", PlayerState().GetPartyFlag());
 		}
 		Separator = true;
 	}
@@ -796,7 +796,7 @@ TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int Pare
 		AddEntry(EVENT_MENU_EDIT_VIP, Text, nullptr);
 		Text.Format("Remove {}", Creatures().GetBuddyListName(Position));
 		AddEntry(EVENT_MENU_REMOVE_VIP, Text, nullptr);
-		if (CharacterID != PlayerState().GetPlayerID() && Creatures().IsBuddyOnline(Position)) {
+		if (CharacterID != PlayerState().GetID() && Creatures().IsBuddyOnline(Position)) {
 			Text.Format("Message to {}", Creatures().GetBuddyListName(Position));
 			AddEntry(EVENT_MENU_MESSAGE_VIP, Text, nullptr);
 		}
@@ -889,7 +889,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 	int ParentHeight)
 {
 	PATELLA_ASSERT(_TextWindow!=nullptr);
-	PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
+	PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
 	TextWindow = _TextWindow;
 	LineNumber = _LineNumber;
 	TTalkLine *Line = TextWindow->GetTalkLine(_LineNumber);
@@ -899,7 +899,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 		const char *Speaker = Line->Addressee;
 		if (Speaker != nullptr && strlen(Speaker) != 0) {
 			HasSpeaker = true;
-			if (strcmp(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Speaker) != 0)
+			if (strcmp(Creatures().GetCreature(PlayerState().GetID())->Name, Speaker) != 0)
 				OtherSpeaker = true;
 		}
 		if (TextWindow->TextBuffer->IsRuleViolation() && Line->Mode == TALK_GAMEMASTER_ANSWER) {
@@ -1210,7 +1210,7 @@ void TMarkContextMenu::HandleEvent(int Event)
 		break;
 	case EVENT_MENU_GO_TO_MARK:
 		if (Data.Mark.x != 0 && Data.Mark.y != 0) {
-			switch (PlayerState().SetPlayerDestination(Data.Mark.x, Data.Mark.y, Data.Coordinate.z, false, false)) {
+			switch (PlayerState().SetDestination(Data.Mark.x, Data.Mark.y, Data.Coordinate.z, false, false)) {
 			case 1:
 				Communication().SendWalk();
 				break;

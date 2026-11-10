@@ -95,8 +95,8 @@ void LogDiagnostics() noexcept
 	} catch (...) { // NOLINT(bugprone-empty-catch): this part left out
 	}
 	try {
-		if (PlayerState().GetPlayerID() != 0) {
-			const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
+		if (PlayerState().GetID() != 0) {
+			const TCreature *Player = Creatures().GetCreature(PlayerState().GetID());
 			if (Player != nullptr)
 				patella::log::Debug("Player position: [{},{},{}]", Player->RealX, Player->RealY, Player->RealZ);
 		}

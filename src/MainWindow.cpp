@@ -276,7 +276,7 @@ void TMainWindow::HandleEvent(int Event)
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_STOP:
-		PlayerState().ClearPlayerSteps();
+		PlayerState().ClearSteps();
 		Creatures().SetAttackID(0);
 		Communication().SendStopAttackAndWalk();
 		break;
@@ -514,13 +514,13 @@ int TMainWindow::GetConsoleWindowHeight() const
 	return Console->Height;
 }
 
-// SetPlayerDestination returns 1 when the step can be walked and 2 when
+// TPlayerState::SetDestination returns 1 when the step can be walked and 2 when
 // the player has to stop.
 void TMainWindow::Walk(int dx, int dy, bool Diagonal)
 {
 	int x, y, z;
-	PlayerState().GetPlayerPosition(&x, &y, &z);
-	switch (PlayerState().SetPlayerDestination(x + dx, y + dy, z, true, Diagonal)) {
+	PlayerState().GetPosition(&x, &y, &z);
+	switch (PlayerState().SetDestination(x + dx, y + dy, z, true, Diagonal)) {
 	case 1:
 		Communication().SendWalk();
 		break;

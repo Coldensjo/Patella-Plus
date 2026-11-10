@@ -76,21 +76,21 @@ void TCreature::SetSkull(int Skull, bool Delay)
 	this->PKFlag = Skull;
 }
 
-int patella::TPlayerState::GetNumberOfPlayerSteps() const
+int patella::TPlayerState::GetNumberOfSteps() const
 {
 	return NumberOfPlayerSteps;
 }
 
 // The map centre (GetMapPosition) plus the step that the server has not
 // confirmed yet.
-void patella::TPlayerState::GetPlayerPosition(int *x, int *y, int *z) const
+void patella::TPlayerState::GetPosition(int *x, int *y, int *z) const
 {
 	Map.GetMapPosition(x, y, z);
 	*x += PlayerStepDX;
 	*y += PlayerStepDY;
 }
 
-void patella::TPlayerState::ClearPlayerSteps()
+void patella::TPlayerState::ClearSteps()
 {
 	DestinationX = 0;
 	NumberOfPlayerSteps = 0;
@@ -114,141 +114,141 @@ bool patella::TCreatures::IsPlayer(uint32 CreatureID)
 	return CreatureID < 0x40000000;
 }
 
-void patella::TPlayerState::SetPlayerID(uint32 CreatureID)
+void patella::TPlayerState::SetID(uint32 CreatureID)
 {
 	PlayerID = CreatureID;
 }
 
-void patella::TPlayerState::SetPlayerHealth(int Health, int MaxHealth)
+void patella::TPlayerState::SetHealth(int Health, int MaxHealth)
 {
 	PlayerHealth = Health;
 	PlayerMaxHealth = MaxHealth;
 }
 
-void patella::TPlayerState::SetPlayerMagicLevel(int Level, int Progress)
+void patella::TPlayerState::SetMagicLevel(int Level, int Progress)
 {
 	PlayerMagicLevel = Level;
 	PlayerMagicLevelProgress = Progress;
 }
 
-void patella::TPlayerState::SetPlayerMana(int Mana, int MaxMana)
+void patella::TPlayerState::SetMana(int Mana, int MaxMana)
 {
 	PlayerMana = Mana;
 	PlayerMaxMana = MaxMana;
 }
 
-void patella::TPlayerState::SetPlayerSoul(int Soul)
+void patella::TPlayerState::SetSoul(int Soul)
 {
 	PlayerSoul = Soul;
 }
 
-void patella::TPlayerState::SetPlayerCapacity(int Capacity)
+void patella::TPlayerState::SetCapacity(int Capacity)
 {
 	PlayerCapacity = Capacity;
 }
 
-void patella::TPlayerState::SetPlayerState(int State)
+void patella::TPlayerState::SetState(int State)
 {
 	PlayerState = State;
 }
 
-uint32 patella::TPlayerState::GetPlayerID() const
+uint32 patella::TPlayerState::GetID() const
 {
 	return PlayerID;
 }
 
-int patella::TPlayerState::GetPlayerHealth() const
+int patella::TPlayerState::GetHealth() const
 {
 	return PlayerHealth;
 }
 
-int patella::TPlayerState::GetPlayerMaxHealth() const
+int patella::TPlayerState::GetMaxHealth() const
 {
 	return PlayerMaxHealth;
 }
 
-int patella::TPlayerState::GetPlayerExperience() const
+int patella::TPlayerState::GetExperience() const
 {
 	return PlayerExperience;
 }
 
-int patella::TPlayerState::GetPlayerLevel() const
+int patella::TPlayerState::GetLevel() const
 {
 	return PlayerLevel;
 }
 
-int patella::TPlayerState::GetPlayerLevelProgress() const
+int patella::TPlayerState::GetLevelProgress() const
 {
 	return PlayerLevelProgress;
 }
 
-int patella::TPlayerState::GetPlayerMana() const
+int patella::TPlayerState::GetMana() const
 {
 	return PlayerMana;
 }
 
-int patella::TPlayerState::GetPlayerMaxMana() const
+int patella::TPlayerState::GetMaxMana() const
 {
 	return PlayerMaxMana;
 }
 
-int patella::TPlayerState::GetPlayerSoul() const
+int patella::TPlayerState::GetSoul() const
 {
 	return PlayerSoul;
 }
 
-int patella::TPlayerState::GetPlayerMagicLevel() const
+int patella::TPlayerState::GetMagicLevel() const
 {
 	return PlayerMagicLevel;
 }
 
-int patella::TPlayerState::GetPlayerMagicLevelProgress() const
+int patella::TPlayerState::GetMagicLevelProgress() const
 {
 	return PlayerMagicLevelProgress;
 }
 
-int patella::TPlayerState::GetPlayerCapacity() const
+int patella::TPlayerState::GetCapacity() const
 {
 	return PlayerCapacity;
 }
 
 // The state bits in the order of the protocol's icons.
-bool patella::TPlayerState::IsPlayerPoisoned() const
+bool patella::TPlayerState::IsPoisoned() const
 {
 	return (PlayerState & 1) != 0;
 }
 
-bool patella::TPlayerState::IsPlayerBurning() const
+bool patella::TPlayerState::IsBurning() const
 {
 	return (PlayerState >> 1 & 1) != 0;
 }
 
-bool patella::TPlayerState::IsPlayerElectrified() const
+bool patella::TPlayerState::IsElectrified() const
 {
 	return (PlayerState >> 2 & 1) != 0;
 }
 
-bool patella::TPlayerState::IsPlayerDrunk() const
+bool patella::TPlayerState::IsDrunk() const
 {
 	return (PlayerState >> 3 & 1) != 0;
 }
 
-bool patella::TPlayerState::IsPlayerManaShielded() const
+bool patella::TPlayerState::IsManaShielded() const
 {
 	return (PlayerState >> 4 & 1) != 0;
 }
 
-bool patella::TPlayerState::IsPlayerParalyzed() const
+bool patella::TPlayerState::IsParalyzed() const
 {
 	return (PlayerState >> 5 & 1) != 0;
 }
 
-bool patella::TPlayerState::IsPlayerHasted() const
+bool patella::TPlayerState::IsHasted() const
 {
 	return (PlayerState >> 6 & 1) != 0;
 }
 
-bool patella::TPlayerState::IsPlayerInFight() const
+bool patella::TPlayerState::IsInFight() const
 {
 	return (PlayerState >> 7 & 1) != 0;
 }
@@ -346,7 +346,7 @@ int TCreature::GetDrawDirection() const
 }
 
 // Starts the animation of a step by (dx,dy) onto a ground with the given
-// waypoints. For the player a step that StartPlayerStep predicted only clears
+// waypoints. For the player a step that TPlayerState::StartStep predicted only clears
 // the prediction (the animation runs already); any other step counts as the
 // next one of the walk. A diagonal step blocks the next step for three
 // times the unrounded duration.
@@ -418,7 +418,7 @@ int TCreature::GetAnimationPhase(int AvailablePhases) const
 
 // --- The player's walk -----------------------------------------------------
 
-int patella::TPlayerState::GetPlayerStep(int Step) const
+int patella::TPlayerState::GetStep(int Step) const
 {
 	PATELLA_ASSERT_VALUES(In(Step,0,NumberOfPlayerSteps-1), Step, NumberOfPlayerSteps-1);
 	return PlayerSteps[Step];
@@ -427,12 +427,12 @@ int patella::TPlayerState::GetPlayerStep(int Step) const
 // Starts the current step of the walk at once, before the server confirms
 // it, if the field is free and not more than one level higher. The map
 // functions take screen coordinates; the player stands at (8,6).
-void patella::TPlayerState::StartPlayerStep()
+void patella::TPlayerState::StartStep()
 {
 	PATELLA_ASSERT_VALUES(CurrentPlayerStep<NumberOfPlayerSteps, CurrentPlayerStep);
 	if (NewPlayerDestination || PlayerHealth == 0)
 		return;
-	TCreature *Player = Creatures.GetCreature(GetPlayerID());
+	TCreature *Player = Creatures.GetCreature(GetID());
 	if (Player == nullptr)
 		return;
 	if (PlayerStepDX != 0 || PlayerStepDY != 0) {
@@ -478,14 +478,14 @@ void patella::TPlayerState::StartPlayerStep()
 // Computes the path to the destination and starts its first step; 1 if
 // there is a path. A result of 2 from the path finder (FindPath) keeps
 // the destination.
-int patella::TPlayerState::FindPlayerPath()
+int patella::TPlayerState::FindPath()
 {
 	NumberOfPlayerSteps = 0;
 	NewPlayerDestination = false;
 	if (DestinationX == 0)
 		return 0;
 	if (abs(PlayerStepDY) + abs(PlayerStepDX) > 1) {
-		TCreature *Player = Creatures.GetCreature(GetPlayerID());
+		TCreature *Player = Creatures.GetCreature(GetID());
 		if (Player != nullptr)
 			Player->Moving = true;
 		return 0;
@@ -500,7 +500,7 @@ int patella::TPlayerState::FindPlayerPath()
 		DestinationX = 0;
 	if (Result > 0) {
 		CurrentPlayerStep = 0;
-		StartPlayerStep();
+		StartStep();
 		return 1;
 	}
 	switch (Result) {
@@ -522,14 +522,14 @@ int patella::TPlayerState::FindPlayerPath()
 	return 0;
 }
 
-// 0 if nothing is to be sent, otherwise the result of FindPlayerPath, or 2
+// 0 if nothing is to be sent, otherwise the result of TPlayerState::FindPath, or 2
 // when the new path waits for the current step. The second comparison adds
-// the unconfirmed step twice (GetPlayerPosition has added it already);
+// the unconfirmed step twice (TPlayerState::GetPosition has added it already);
 // kept from the binary.
-int patella::TPlayerState::SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal)
+int patella::TPlayerState::SetDestination(int x, int y, int z, bool Exact, bool Diagonal)
 {
 	int PlayerX, PlayerY, PlayerZ;
-	GetPlayerPosition(&PlayerX, &PlayerY, &PlayerZ);
+	GetPosition(&PlayerX, &PlayerY, &PlayerZ);
 	if (x == DestinationX && y == DestinationY && z == DestinationZ)
 		return 0;
 	if (x == PlayerX + PlayerStepDX && y == PlayerY + PlayerStepDY && z == PlayerZ)
@@ -549,7 +549,7 @@ int patella::TPlayerState::SetPlayerDestination(int x, int y, int z, bool Exact,
 	}
 	if (!NewPlayerDestination) {
 		if (NumberOfPlayerSteps == 0)
-			return FindPlayerPath();
+			return FindPath();
 		if (CurrentPlayerStep < NumberOfPlayerSteps) {
 			NewPlayerDestination = true;
 			return 2;
@@ -558,7 +558,7 @@ int patella::TPlayerState::SetPlayerDestination(int x, int y, int z, bool Exact,
 	return 0;
 }
 
-void patella::TPlayerState::StopPlayer()
+void patella::TPlayerState::Stop()
 {
 	DestinationX = 0;
 	NumberOfPlayerSteps = 0;
@@ -566,7 +566,7 @@ void patella::TPlayerState::StopPlayer()
 	NewPlayerDestination = false;
 	PlayerStepDX = 0;
 	PlayerStepDY = 0;
-	TCreature *Player = Creatures.GetCreature(GetPlayerID());
+	TCreature *Player = Creatures.GetCreature(GetID());
 	if (Player != nullptr) {
 		Player->MoveDirection = Player->Direction;
 		Player->Moving = false;
@@ -577,10 +577,10 @@ void patella::TPlayerState::StopPlayer()
 
 // The server refused a step: turn to NewDirection and plan the path
 // again; true if a new walk is to be sent.
-bool patella::TPlayerState::CancelPlayerWalk(int NewDirection)
+bool patella::TPlayerState::CancelWalk(int NewDirection)
 {
 	NumberOfPlayerSteps = 0;
-	TCreature *Player = Creatures.GetCreature(GetPlayerID());
+	TCreature *Player = Creatures.GetCreature(GetID());
 	if (Player == nullptr) {
 		PlayerStepDX = 0;
 		PlayerStepDY = 0;
@@ -588,7 +588,7 @@ bool patella::TPlayerState::CancelPlayerWalk(int NewDirection)
 		Player->Direction = NewDirection;
 		if (PlayerStepDX != 0 || PlayerStepDY != 0 || !Player->Moving) {
 			Player->StartMovement(0, 0, -1);
-			return FindPlayerPath() == 1;
+			return FindPath() == 1;
 		}
 	}
 	return false;
@@ -722,7 +722,7 @@ void patella::TCreatures::NotifySkull(int Flag)
 
 // The help hints for the first experience and the levels 2, 8 and 20; none
 // while the level is unknown (0).
-void patella::TPlayerState::SetPlayerExperience(int Experience, int Level, int Progress)
+void patella::TPlayerState::SetExperience(int Experience, int Level, int Progress)
 {
 	PATELLA_ASSERT_VALUES(In(Progress,-1,100), Progress);
 	if (PlayerLevel != 0 && PlayerExperience == 0 && Experience > 0)
@@ -739,7 +739,7 @@ void patella::TPlayerState::SetPlayerExperience(int Experience, int Level, int P
 }
 
 // SkillNumber is not checked.
-void patella::TPlayerState::SetPlayerSkill(int SkillNumber, int Value, int Progress)
+void patella::TPlayerState::SetSkill(int SkillNumber, int Value, int Progress)
 {
 	PATELLA_ASSERT_VALUES(In(Progress,0,100), Progress);
 	if (PlayerSkillValue[SkillNumber] != 0 && PlayerSkillValue[SkillNumber] < Value)
@@ -748,13 +748,13 @@ void patella::TPlayerState::SetPlayerSkill(int SkillNumber, int Value, int Progr
 	PlayerSkillValue[SkillNumber] = Value;
 }
 
-int patella::TPlayerState::GetPlayerSkillValue(int SkillNumber) const
+int patella::TPlayerState::GetSkillValue(int SkillNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(SkillNumber,0,SKILLS-1), SkillNumber);
 	return PlayerSkillValue[SkillNumber];
 }
 
-int patella::TPlayerState::GetPlayerSkillProgress(int SkillNumber) const
+int patella::TPlayerState::GetSkillProgress(int SkillNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(SkillNumber,0,SKILLS-1), SkillNumber);
 	return PlayerSkillProgress[SkillNumber];
@@ -776,21 +776,21 @@ const char *patella::TPlayerState::GetSkillName(int SkillNumber)
 }
 
 // No check for a missing player creature.
-bool patella::TPlayerState::HasPlayerSkull() const
+bool patella::TPlayerState::HasSkull() const
 {
-	return Creatures.GetCreature(GetPlayerID())->PKFlag != PK_NONE;
+	return Creatures.GetCreature(GetID())->PKFlag != PK_NONE;
 }
 
 // Party flag 1, 3 or 4; ContextMenus.cpp offers "Leave Party" then.
-bool patella::TPlayerState::IsPlayerInParty() const
+bool patella::TPlayerState::IsInParty() const
 {
-	const int Shield = Creatures.GetCreature(GetPlayerID())->PARTYFlag;
+	const int Shield = Creatures.GetCreature(GetID())->PARTYFlag;
 	return Shield == PARTY_LEADER || Shield == PARTY_MEMBER || Shield == PARTY_INVITER;
 }
 
-int patella::TPlayerState::GetPlayerPartyFlag() const
+int patella::TPlayerState::GetPartyFlag() const
 {
-	return Creatures.GetCreature(GetPlayerID())->PARTYFlag;
+	return Creatures.GetCreature(GetID())->PARTYFlag;
 }
 
 // --- The battle list -------------------------------------------------------
@@ -1128,7 +1128,7 @@ void patella::TCreatures::ResetCreatures()
 
 // Ours (TCreaturesPlayer): ResetCreatures' writes of the player's state, in its order (it wrote AttackID and FollowID
 // between PlayerCapacity and PlayerState; nothing reads between the writes).
-void patella::TPlayerState::ResetPlayer()
+void patella::TPlayerState::Reset()
 {
 	PlayerStepDX = 0;
 	PlayerStepDY = 0;
@@ -1156,13 +1156,13 @@ void patella::TPlayerState::ResetPlayer()
 
 // Ours (TCreaturesPlayer): MoveCreatures' code for the player's creature once its step is over: the next step of the
 // walk, or the path again; true if a new walk is to be sent.
-bool patella::TPlayerState::ContinuePlayerWalk()
+bool patella::TPlayerState::ContinueWalk()
 {
 	if (CurrentPlayerStep < NumberOfPlayerSteps) {
-		StartPlayerStep();
+		StartStep();
 		return false;
 	}
-	return FindPlayerPath() == 1;
+	return FindPath() == 1;
 }
 
 // Empty. ExitControl calls it where Creatures.cpp's exit belongs in the reverse order of InitControl.
