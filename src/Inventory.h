@@ -39,10 +39,10 @@ namespace patella {
 class TObjectTypes;
 
 // Inventory.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the
-// subsystem objects" and "#106"): the body slots, the open containers and the two offers (0x5ced60-0x5d1643), in the
-// original's .bss order, every member 0 at the start; the functions are the members of the same names. TMapState owns
-// it (MapState.h), last; it reads TObjectTypes' NoObject. OwnOffer and CounterOffer are public: the golden Errors test
-// sets their counts (TestErrorStatics); the others private, as the file-local statics were.
+// subsystem objects" and "#106"): the body slots, the open containers and the two offers, in the original's .bss
+// order, every member 0 at the start; the functions are the members of the same names. TMapState owns it (MapState.h),
+// last; it reads TObjectTypes' NoObject. OwnOffer and CounterOffer are public: the golden Errors test sets their
+// counts (TestErrorStatics); the others private, as the file-local statics were.
 class TInventory {
 public:
 	explicit TInventory(TObjectTypes &ObjectTypes);
@@ -83,18 +83,18 @@ public:
 	[[nodiscard]] TObject GetCounterOfferObject(int Position) const;
 	void InitInventory();
 	void ResetInventory();
-	static void ExitInventory(); // empty, folded into 0x496160
+	static void ExitInventory();
 
 private:
 	TObjectTypes &ObjectTypes;
 
 	// Data, in .bss order.
-	std::array<TObject, BODY_POSITIONS> Body{};           // 0x5ced60
-	std::array<TContainer, OPEN_CONTAINERS> Containers{}; // 0x5cedd8
+	std::array<TObject, BODY_POSITIONS> Body{};
+	std::array<TContainer, OPEN_CONTAINERS> Containers{};
 
 public:
-	TOffer OwnOffer{};     // 0x5d0c98; public: the golden Errors test
-	TOffer CounterOffer{}; // 0x5d1170 (4 bytes after OwnOffer's end); public: the golden Errors test
+	TOffer OwnOffer{};     // public: the golden Errors test
+	TOffer CounterOffer{}; // public: the golden Errors test
 
 private:
 	// The arrays std::arrays (issue #60): their sizes.
@@ -144,4 +144,4 @@ TObject GetOwnOfferObject(int Position);
 TObject GetCounterOfferObject(int Position);
 void InitInventory();
 void ResetInventory();
-void ExitInventory(); // empty, folded into 0x496160
+void ExitInventory();

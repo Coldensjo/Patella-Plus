@@ -1,10 +1,10 @@
-// vlong: arbitrary-precision unsigned arithmetic for RSA, at 0x50bff0-0x50eae7.
+// vlong: arbitrary-precision unsigned arithmetic for RSA.
 //
 // This is George Barwood's public-domain vlong library (1999), with CipSoft's
-// changes: a virtual destructor (vtable 0x574048), conversions between vlong and
-// big-endian byte arrays or decimal text, and overloads taking an integer by
-// reference. The file name "vlong" matches the link order (right after Utils).
-// Errors are thrown as const char*.
+// changes: a virtual destructor, conversions between vlong and big-endian byte
+// arrays or decimal text, and overloads taking an integer by reference. The file
+// name "vlong" matches the link order (right after Utils). Errors are thrown as
+// const char*.
 
 #pragma once
 
@@ -75,12 +75,12 @@ public:
 
 	friend inline int operator!=(const vlong &x, const vlong &y) { return x.cf(y) != 0; }
 	friend inline int operator==(const vlong &x, const vlong &y) { return x.cf(y) == 0; }
-	friend inline int operator>=(const vlong &x, const vlong &y) { return x.cf(y) >= 0; } // 0x508970
+	friend inline int operator>=(const vlong &x, const vlong &y) { return x.cf(y) >= 0; }
 	friend inline int operator<=(const vlong &x, const vlong &y) { return x.cf(y) <= 0; }
 	friend inline int operator>(const vlong &x, const vlong &y) { return x.cf(y) > 0; }
 	friend inline int operator<(const vlong &x, const vlong &y) { return x.cf(y) < 0; }
 
-	// CipSoft additions; the binary has out-of-line copies (0x50d660, 0x50d750, 0x50d840). The
+	// CipSoft additions. The
 	// casts are the conversions the 32-bit build does implicitly; long has 8 bytes on Linux (issue #7).
 	friend vlong operator+(const vlong &x, const long &y) { return x + vlong((unsigned)y); }
 	friend vlong operator*(const vlong &x, const long &y) { return x * vlong((unsigned)y); }
@@ -88,7 +88,7 @@ public:
 
 	vlong(unsigned x = 0);
 	vlong(const vlong &x);
-	virtual ~vlong(); // scalar deleting destructor at 0x50db70
+	virtual ~vlong();
 	vlong &operator=(const vlong &x);
 
 private:
@@ -105,6 +105,6 @@ vlong modexp(const vlong &x, const vlong &e, const vlong &m); // m must be odd
 vlong modinv(const vlong &a, const vlong &m);
 
 // CipSoft additions. Byte arrays are big-endian. The original's pointer and uint16 size are a span (issue #60).
-void ByteArrayToVlong(patella::TSpan<const uint8> Data, vlong &Number); // 0x50c660
-void VlongToByteArray(vlong Number, patella::TSpan<uint8> Data);        // 0x50d530
-void DecimalToVlong(const char *pDecimal, vlong &Number);               // 0x50e360
+void ByteArrayToVlong(patella::TSpan<const uint8> Data, vlong &Number);
+void VlongToByteArray(vlong Number, patella::TSpan<uint8> Data);
+void DecimalToVlong(const char *pDecimal, vlong &Number);

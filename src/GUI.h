@@ -31,9 +31,9 @@
 #include <memory>
 #include <vector>
 
-void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int srcx, int srcy); // 0x497a00
+void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int srcx, int srcy);
 void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin, int ClipX, int ClipY,
-	int ClipWidth, int ClipHeight, int skinoffsetx, int skinoffsety); // 0x4a1690
+	int ClipWidth, int ClipHeight, int skinoffsetx, int skinoffsety);
 
 // --- Window classes -------------------------------------------------------
 
@@ -43,8 +43,8 @@ class TComponent;
 
 // One entry of a component's drawing list (0x1c bytes): a skin drawn at an
 // offset in the component, tiled to width x height when they are not 0. The
-// constructors are inlined: new TDrawing[8] zeroes the entries (MapWindow.cpp
-// 0x4c1ab4), and the subclasses assign whole entries.
+// constructors are inlined: new TDrawing[8] zeroes the entries
+// (MapWindow.cpp), and the subclasses assign whole entries.
 struct TDrawing {
 	TDrawing() : skin(0), x(0), y(0), width(0), height(0), srcx(0), srcy(0) {}
 	TDrawing(int _skin, int _x, int _y, int _width, int _height, int _srcx, int _srcy)
@@ -58,9 +58,9 @@ struct TDrawing {
 	int srcy;   // +0x18
 };
 
-// The abstract base class of every window element (vtable 0x5644a0). Slots
-// with _purecall in the binary are pure; the child functions throw "not
-// possible" (only TWindow has children).
+// The abstract base class of every window element. Slots with _purecall in
+// the binary are pure; the child functions throw "not possible" (only
+// TWindow has children).
 class TComponent {
 public:
 	TComponent(const TComponent &) = delete;
@@ -68,40 +68,39 @@ public:
 	// Inlined into the constructors of TWindow and TElement.
 	TComponent() : DrawingList(nullptr), DrawingListLength(0), Parent(nullptr), Next(nullptr), OffsetX(0),
 				   OffsetY(0), Width(0), Height(0) {}
-	virtual ~TComponent();                                                  // +0x00, 0x496040 (deleting 0x496520); noexcept (issue #108)
-	virtual void InsertChild(TComponent *Child);                            // +0x04, 0x49b450, line 993
-	virtual void AppendChild(TComponent *Child);                            // +0x08, 0x49b570, line 1001
-	virtual void RemoveChild(TComponent *Child);                            // +0x0c, 0x49b690, line 1009
-	virtual void DeleteChild(TComponent *Child);                            // +0x10, 0x49b7b0, line 1017
-	virtual void InsertChildAfter(TComponent *Previous, TComponent *Child); // +0x14, 0x49b8d0, line 1025
-	virtual void SwapChildren(TComponent *Child1, TComponent *Child2);      // +0x18, 0x49b9f0, line 1041
-	virtual bool IsChild(TComponent *Child);                                // +0x1c, 0x49bb10, line 1049
-	// GUI.h lines 681 and 682 (0x417de0, 0x417f00, kept in an earlier object).
-	virtual TComponent *GetFirstChild() { TERROR("not possible"); }  // +0x20
-	virtual TComponent *GetLastChild() { TERROR("not possible"); }   // +0x24
-	virtual TComponent *GetNext() { return Next; }                   // +0x28, 0x417680
-	virtual TComponent *GetPrevious();                               // +0x2c, 0x49bc30, lines 1057-1066
-	virtual TComponent *GetParent() { return Parent; }               // +0x30, 0x417690
-	virtual void SetSize(int _Width, int _Height);                   // +0x34, 0x49bee0, lines 1092-1093
-	virtual void SetPosition(int _OffsetX, int _OffsetY);            // +0x38, 0x496060
-	virtual int getMinimumWidth() { return 0; }                      // +0x3c, 0x417a20
-	virtual int getMinimumHeight() { return 0; }                     // +0x40, 0x417a20
-	virtual void Draw(int Surface, int x, int y);                    // +0x44, 0x4a1fb0, lines 1118-1163
-	virtual void Arrange() {}                                        // +0x48, empty (0x496160); rebuilds the drawing list in subclasses
-	virtual bool MouseMove(int x, int y) = 0;                        // +0x4c
-	virtual bool LeftButtonDown(int x, int y, int Flags) = 0;        // +0x50
-	virtual bool LeftButtonUp(int x, int y, int Flags) = 0;          // +0x54, Flags 0x200: both buttons
-	virtual bool LeftButtonDoubleClick(int x, int y, int Flags) = 0; // +0x58
-	virtual bool RightButtonUp(int x, int y, int Flags) = 0;         // +0x5c
-	virtual bool MouseWheel(int x, int y, int Direction) = 0;        // +0x60, 1 up, 2 down, 6 left button held
-	virtual void MouseHover(int x, int y) = 0;                       // +0x64
-	virtual bool HelpMouseMove(int x, int y) = 0;                    // +0x68, action state 9
-	virtual void KeyPress([[maybe_unused]] int Key) {}               // +0x6c, empty (0x4eac00)
-	virtual void HandleEvent([[maybe_unused]] int Event) {}          // +0x70, empty (0x4eac00); see TCallback
-	virtual void PositionChanged() {}                                // +0x74, empty (0x496160); the parent moved
-	virtual void SetCapture(TComponent *Component) = 0;              // +0x78
-	virtual void ReleaseCapture(TComponent *Component) = 0;          // +0x7c
-	virtual void StopDragging() = 0;                                 // +0x80
+	virtual ~TComponent(); // noexcept (issue #108)
+	virtual void InsertChild(TComponent *Child);
+	virtual void AppendChild(TComponent *Child);
+	virtual void RemoveChild(TComponent *Child);
+	virtual void DeleteChild(TComponent *Child);
+	virtual void InsertChildAfter(TComponent *Previous, TComponent *Child);
+	virtual void SwapChildren(TComponent *Child1, TComponent *Child2);
+	virtual bool IsChild(TComponent *Child);
+	virtual TComponent *GetFirstChild() { TERROR("not possible"); }
+	virtual TComponent *GetLastChild() { TERROR("not possible"); }
+	virtual TComponent *GetNext() { return Next; }
+	virtual TComponent *GetPrevious();
+	virtual TComponent *GetParent() { return Parent; }
+	virtual void SetSize(int _Width, int _Height);
+	virtual void SetPosition(int _OffsetX, int _OffsetY);
+	virtual int getMinimumWidth() { return 0; }
+	virtual int getMinimumHeight() { return 0; }
+	virtual void Draw(int Surface, int x, int y);
+	virtual void Arrange() {} // rebuilds the drawing list in subclasses
+	virtual bool MouseMove(int x, int y) = 0;
+	virtual bool LeftButtonDown(int x, int y, int Flags) = 0;
+	virtual bool LeftButtonUp(int x, int y, int Flags) = 0; // Flags 0x200: both buttons
+	virtual bool LeftButtonDoubleClick(int x, int y, int Flags) = 0;
+	virtual bool RightButtonUp(int x, int y, int Flags) = 0;
+	virtual bool MouseWheel(int x, int y, int Direction) = 0; // 1 up, 2 down, 6 left button held
+	virtual void MouseHover(int x, int y) = 0;
+	virtual bool HelpMouseMove(int x, int y) = 0; // action state 9
+	virtual void KeyPress([[maybe_unused]] int Key) {}
+	virtual void HandleEvent([[maybe_unused]] int Event) {} // see TCallback
+	virtual void PositionChanged() {}                       // the parent moved
+	virtual void SetCapture(TComponent *Component) = 0;
+	virtual void ReleaseCapture(TComponent *Component) = 0;
+	virtual void StopDragging() = 0;
 
 	// The work of the original's destructors that can fail or acts outside the component (issue #108): the Send
 	// functions, the preferences, the hotkeys, the assertions, DeleteTextBuffer. Close does it, once, in the order the
@@ -112,8 +111,8 @@ public:
 	// is left allocated and marked closed (the original had freed it): see notes/ownership.md, section 7.
 	void Close();
 
-	[[nodiscard]] int getWidth() const { return Width; }   // "Child->getWidth()" (line 1725), inlined
-	[[nodiscard]] int getHeight() const { return Height; } // "Child->getHeight()" (line 1726), inlined
+	[[nodiscard]] int getWidth() const { return Width; }   // "Child->getWidth()"
+	[[nodiscard]] int getHeight() const { return Height; } // "Child->getHeight()"
 
 	std::unique_ptr<TDrawing[]> DrawingList; // +0x04, allocated by the subclasses (issue #58: the list's only owner)
 	int DrawingListLength;                   // +0x08
@@ -149,73 +148,71 @@ protected:
 // close throws, the component is not deleted and the exception passes on.
 void DeleteComponent(TComponent *Component);
 
-// A component without children (vtable 0x5645c8, 0x24 bytes). It takes
-// every mouse event; a double click is a second button press. The inline
-// slots are kept in earlier objects (ConsoleWindow.obj and the
-// Communication/ConsoleWindow gap).
+// A component without children. It takes every mouse event; a double
+// click is a second button press. The inline slots are kept in earlier
+// objects (ConsoleWindow.obj and the Communication/ConsoleWindow gap).
 class TElement : public TComponent {
 public:
-	TElement(); // 0x496100
-	// The destructor is the implicit one (deleting destructor 0x496550).
-	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return true; }                                  // +0x4c, 0x4259f0
-	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return true; } // +0x50, 0x425a00
-	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return true; }   // +0x54, 0x425a00
-	bool LeftButtonDoubleClick(int x, int y, int Flags) override { return LeftButtonDown(x, y, Flags); }                      // +0x58, 0x41acb0
-	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return true; }  // +0x5c, 0x425a00
-	bool MouseWheel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Direction) override { return true; } // +0x60, 0x425a00
-	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override {}                                               // +0x64, 0x417a30
-	bool HelpMouseMove(int x, int y) override;                                                                                // +0x68, 0x417a40 (inline, below)
-	void SetCapture(TComponent *Component) override;                                                                          // +0x78, 0x4a0bc0, line 1893
-	void ReleaseCapture(TComponent *Component) override;                                                                      // +0x7c, 0x4a0d60, line 1905
-	void StopDragging() override {}                                                                                           // +0x80, empty (0x496160)
+	TElement();
+	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return true; }
+	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return true; }
+	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return true; }
+	bool LeftButtonDoubleClick(int x, int y, int Flags) override { return LeftButtonDown(x, y, Flags); }
+	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return true; }
+	bool MouseWheel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Direction) override { return true; }
+	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override {}
+	bool HelpMouseMove(int x, int y) override;
+	void SetCapture(TComponent *Component) override;
+	void ReleaseCapture(TComponent *Component) override;
+	void StopDragging() override {}
 };
 
-// A component with children (vtable 0x564528, 0x2c bytes); the base of the
-// main window, the dialogs and the context menus. Children are a singly
-// linked list through Next; Capture is the child that gets every mouse
-// event while it is set (a drag).
+// A component with children; the base of the main window, the dialogs and
+// the context menus. Children are a singly linked list through Next;
+// Capture is the child that gets every mouse event while it is set (a
+// drag).
 class TWindow : public TComponent {
 public:
 	TWindow(const TWindow &) = delete;
 	TWindow &operator=(const TWindow &) = delete;
-	TWindow();                                                               // 0x496080
-	~TWindow() override;                                                     // +0x00, 0x4a2590 (deleting 0x4a29e0)
-	void InsertChild(TComponent *Child) override;                            // +0x04, 0x49c190, lines 1193-1194
-	void AppendChild(TComponent *Child) override;                            // +0x08, 0x49c430, lines 1206-1207
-	void RemoveChild(TComponent *Child) override;                            // +0x0c, 0x49c890, lines 1239-1260
-	void DeleteChild(TComponent *Child) override;                            // +0x10, 0x49c6f0, line 1231
-	void InsertChildAfter(TComponent *Previous, TComponent *Child) override; // +0x14, 0x49cd00, lines 1269-1287
-	void SwapChildren(TComponent *Child1, TComponent *Child2) override;      // +0x18, 0x49d200, lines 1295-1347
-	bool IsChild(TComponent *Child) override;                                // +0x1c, 0x4960b0
-	TComponent *GetFirstChild() override { return FirstChild; }              // +0x20, 0x4176a0
-	TComponent *GetLastChild() override;                                     // +0x24, 0x4960e0
-	void SetPosition(int _OffsetX, int _OffsetY) override;                   // +0x38, 0x49da60, line 1389
-	void Draw(int Surface, int x, int y) override;                           // +0x44, 0x4a2600, line 1408
-	void Arrange() override;                                                 // +0x48, 0x49dc20, line 1424
-	bool MouseMove(int x, int y) override;                                   // +0x4c, 0x49ddc0, line 1448
-	bool LeftButtonDown(int x, int y, int Flags) override;                   // +0x50, 0x49dff0, line 1472
-	bool LeftButtonUp(int x, int y, int Flags) override;                     // +0x54, 0x49e230, line 1496
-	bool LeftButtonDoubleClick(int x, int y, int Flags) override;            // +0x58, 0x49e470, line 1520
-	bool RightButtonUp(int x, int y, int Flags) override;                    // +0x5c, 0x49e6b0, line 1544
-	bool MouseWheel(int x, int y, int Direction) override;                   // +0x60, 0x49e8f0, line 1568
-	void MouseHover(int x, int y) override;                                  // +0x64, 0x49eb30, line 1588
-	bool HelpMouseMove(int x, int y) override;                               // +0x68, 0x49ed10, line 1611
-	void SetCapture(TComponent *Component) override;                         // +0x78, 0x49ef10, lines 1633-1638
-	void ReleaseCapture(TComponent *Component) override;                     // +0x7c, 0x49f1a0, lines 1648-1653
-	void StopDragging() override;                                            // +0x80, 0x49f430, line 1668
-	virtual TComponent *GetCapture() { return Capture; }                     // +0x84, 0x4176b0
-	virtual void SetChildPosition(TComponent *Child, int x, int y);          // +0x88, 0x49fa40, lines 1700-1708
+	TWindow();
+	~TWindow() override;
+	void InsertChild(TComponent *Child) override;
+	void AppendChild(TComponent *Child) override;
+	void RemoveChild(TComponent *Child) override;
+	void DeleteChild(TComponent *Child) override;
+	void InsertChildAfter(TComponent *Previous, TComponent *Child) override;
+	void SwapChildren(TComponent *Child1, TComponent *Child2) override;
+	bool IsChild(TComponent *Child) override;
+	TComponent *GetFirstChild() override { return FirstChild; }
+	TComponent *GetLastChild() override;
+	void SetPosition(int _OffsetX, int _OffsetY) override;
+	void Draw(int Surface, int x, int y) override;
+	void Arrange() override;
+	bool MouseMove(int x, int y) override;
+	bool LeftButtonDown(int x, int y, int Flags) override;
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	bool LeftButtonDoubleClick(int x, int y, int Flags) override;
+	bool RightButtonUp(int x, int y, int Flags) override;
+	bool MouseWheel(int x, int y, int Direction) override;
+	void MouseHover(int x, int y) override;
+	bool HelpMouseMove(int x, int y) override;
+	void SetCapture(TComponent *Component) override;
+	void ReleaseCapture(TComponent *Component) override;
+	void StopDragging() override;
+	virtual TComponent *GetCapture() { return Capture; }
+	virtual void SetChildPosition(TComponent *Child, int x, int y);
 	// The area is a 16-byte block passed by value (every caller builds it
 	// with sub esp,0x10 and four stores, issue #27).
-	virtual void SetChildArea(TComponent *Child, TRect Area);                   // +0x8c, 0x49f5d0, lines 1679-1690
-	virtual void Fit(bool Notify) { FitToChildren(TRect(0, 0, 0, 0), Notify); } // +0x90, 0x4176c0
+	virtual void SetChildArea(TComponent *Child, TRect Area);
+	virtual void Fit(bool Notify) { FitToChildren(TRect(0, 0, 0, 0), Notify); }
 	// The margins are one 16-byte block passed by value (the callers, Fit and
 	// ContextMenus.cpp, build it with sub esp,0x10): a TRect whose x, y,
 	// Width and Height are the left, top, right and bottom margins.
-	virtual void FitToChildren(TRect Margin, bool Notify); // +0x94, 0x4a0300, lines 1772-1794
-	// The area is a 16-byte block passed by value as well (0x4882c0).
-	virtual void FitToChild(TComponent *Child, TRect Area, bool Notify); // +0x98, 0x49fe70, lines 1724-1738
-	virtual void ClipChildren(bool Strict);                              // +0x9c, 0x4a0920, line 1860
+	virtual void FitToChildren(TRect Margin, bool Notify);
+	// The area is a 16-byte block passed by value as well.
+	virtual void FitToChild(TComponent *Child, TRect Area, bool Notify);
+	virtual void ClipChildren(bool Strict);
 
 	TComponent *FirstChild; // +0x24
 	TComponent *Capture;    // +0x28
@@ -286,24 +283,24 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, as Obje
 
 // --- Timers ---------------------------------------------------------------
 
-// A countdown (vtable 0x5646e8, 0x14 bytes) registered in the timer list
-// while it runs. UpdateTimers counts it down and sends its callback on every
-// update, the last time when it reaches 0.
+// A countdown registered in the timer list while it runs. UpdateTimers
+// counts it down and sends its callback on every update, the last time when
+// it reaches 0.
 class TTimer {
 public:
-	TTimer(int Time, TCallback Callback); // 0x49b290, line 905; Time in tenths of a second
-	virtual ~TTimer();                    // +0x00, inlined into the deleting destructor 0x4a1dc0
-	[[nodiscard]] int GetTime() const;    // 0x496000, tenths of a second left
-	[[nodiscard]] bool IsExpired() const; // 0x496020
-	void Update(int elapsed);             // 0x4a1df0, line 947
-	int Remaining;                        // +0x04, milliseconds
-	bool Active;                          // +0x08
-	TCallback Callback;                   // +0x0c
+	TTimer(int Time, TCallback Callback); // Time in tenths of a second
+	virtual ~TTimer();
+	[[nodiscard]] int GetTime() const; // tenths of a second left
+	[[nodiscard]] bool IsExpired() const;
+	void Update(int elapsed);
+	int Remaining;      // +0x04, milliseconds
+	bool Active;        // +0x08
+	TCallback Callback; // +0x0c
 };
 
-void AddTimer(TTimer *Timer);    // 0x49af20, line 851
-void RemoveTimer(TTimer *Timer); // 0x49b0d0, line 868
-void UpdateTimers();             // 0x4a27c0, line 887
+void AddTimer(TTimer *Timer);
+void RemoveTimer(TTimer *Timer);
+void UpdateTimers();
 
 // --- Hotkeys --------------------------------------------------------------
 
@@ -312,18 +309,18 @@ struct THotkey {        // 12 bytes
 	TCallback Callback; // +0x04
 };
 
-void InitHotkeys();                          // 0x496150
-void ExitHotkeys();                          // empty, folded into 0x496160
-void AddHotkey(int Key, TCallback Callback); // 0x4a10a0, line 1965
-void RemoveHotkey(int Key);                  // 0x4a12a0, line 1983
-bool CheckHotkey(int Key);                   // 0x4a1480, line 2004
+void InitHotkeys();
+void ExitHotkeys();
+void AddHotkey(int Key, TCallback Callback);
+void RemoveHotkey(int Key);
+bool CheckHotkey(int Key);
 
 // --- Skin properties ------------------------------------------------------
 
 // SkinProperties and its types are Skins.h's since issue #116 (TGraphics' TSkins); InitSkinProperties, which fills it,
 // stays GUI.cpp's.
 
-void InitSkinProperties(); // 0x498160
+void InitSkinProperties();
 
 class TMainWindow;
 
@@ -413,40 +410,40 @@ public:
 	TInteraction Interaction; // Status.cpp's user interaction
 
 	// Data, in the original's address order; public where another file or a golden test reads it (named).
-	TFixedString<100> AutomapMouseOverText{}; // 0x5c4398, ContentWindows.cpp: a mark's text (TAutomapWindow::MouseHover)
-	TFixedString<256> SkillMouseOverText{};   // 0x5c4400, ContentWindows.cpp: "You have %d percent to go"
-	// Control.cpp's (0x5c4540-0x5c4553 is not used by any code); the golden Control test reads and sets them.
-	int LastMouseMove{};                     // 0x5c4528, timer tick of the last mouse move, 0 after a click
-	void (*URLCallback)(const char *URL){};  // 0x5c452c
-	void (*DisplayModeCallback)(int Mode){}; // 0x5c4530
-	void (*ExitCallback)(){};                // 0x5c4538, stored but not used
-	platform::TWindowHandle WindowHandle{};  // 0x5c453c
-	bool ShowFPS{};                          // 0x5c4554, toggled by key 0x907
+	TFixedString<100> AutomapMouseOverText{}; // ContentWindows.cpp: a mark's text (TAutomapWindow::MouseHover)
+	TFixedString<256> SkillMouseOverText{};   // ContentWindows.cpp: "You have %d percent to go"
+	// Control.cpp's; the golden Control test reads and sets them.
+	int LastMouseMove{}; // timer tick of the last mouse move, 0 after a click
+	void (*URLCallback)(const char *URL){};
+	void (*DisplayModeCallback)(int Mode){};
+	void (*ExitCallback)(){}; // stored but not used
+	platform::TWindowHandle WindowHandle{};
+	bool ShowFPS{}; // toggled by key 0x907
 
 private:
-	// GUI.cpp's (SkinProperties, 0x5ccfc8, is TGraphics' since issue #116: Skins.h).
-	// 0x5ccf98 NumberOfHotkeys, the used entries of Hotkeys: Hotkeys.size() (issue #100).
-	// 0x5ccfa4 (initialiser 0x559e30), the original's vector<TTimer *>(0, 0, 2, NULL): AddTimer takes the first
+	// GUI.cpp's (SkinProperties is TGraphics' since issue #116: Skins.h).
+	// NumberOfHotkeys, the used entries of Hotkeys: Hotkeys.size() (issue #100).
+	// The original's vector<TTimer *>(0, 0, 2, NULL): AddTimer takes the first
 	// NULL entry from 0 or appends, RemoveTimer sets the entry to NULL, UpdateTimers goes through the entries in
 	// order. Its min stays 0 and max + 1 is the size, so a std::vector (issue #100; notes/decisions.md, "#100").
 	std::vector<TTimer *> Timers;
-	// 0x5ce4f0 (initialiser 0x559e60), the original's vector<THotkey>(0, 50, 10) with NumberOfHotkeys: a lookup by
+	// The original's vector<THotkey>(0, 50, 10) with NumberOfHotkeys: a lookup by
 	// key, each key at most once (AddHotkey replaces its callback), the order never read (RemoveHotkey moves the
 	// last entry into the gap). A std::flat_map from the key to the callback (issue #100).
 	std::flat_map<int, TCallback> Hotkeys;
-	int LastTime{};     // 0x5ce518, UpdateTimers' static
-	bool LastTimeSet{}; // its guard (0x5ce51c)
+	int LastTime{};     // UpdateTimers' static
+	bool LastTimeSet{}; // its guard
 
 public:
 	// MainWindow.cpp's: the callbacks InitMainWindow stores, the modal window and the main window.
-	void (*OpenURLCallback)(const char *URL){}; // 0x5d16a0
-	void (*SetDisplayModeCallback)(int Mode){}; // 0x5d16a4
-	void (*ExitProgramCallback)(){};            // 0x5d16a8
+	void (*OpenURLCallback)(const char *URL){};
+	void (*SetDisplayModeCallback)(int Mode){};
+	void (*ExitProgramCallback)(){};
 	// The dialog on top. Raw (one owner, but not a std::unique_ptr; issue #108): MouseMove's help bubble leaves it
 	// pointing to the bubble it deleted when the new bubble or its Place throws (issue #36), which the golden Control
 	// test compares ("deleted ..."), and an owner cannot hold a freed window. Never destroyed at exit (a raw pointer).
-	TWindow *ModalWindow{};                  // 0x5d16ac
-	std::unique_ptr<TMainWindow> MainWindow; // 0x5d16b0 (issue #108: its owner)
+	TWindow *ModalWindow{};
+	std::unique_ptr<TMainWindow> MainWindow; // issue #108: its owner
 
 	// Issue #108: leaves the main window allocated, neither closed nor freed, and MainWindow empty: what the
 	// original's global was at exit(1). Called by CPlayerApp::FatalError before it, so that TClient's static

@@ -2,18 +2,8 @@
 // the path finder (c:\mud\tibiaplayer\Map.cpp).
 //
 // Functions in source order (assertion and catch lines). The functions of the
-// MainWindow/Map gap (0x4b08a0-0x4b0b10: the map position and the ambient
+// MainWindow/Map gap (the map position and the ambient
 // light) have no line evidence and come first, where the binary has them.
-//
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none.
-//
-// Container.h instances of this object: array<TMapPoint> (0x4b0bc0, 0x4b5900),
-// matrix3d<int> (0x4b0d70, 0x4b5b40), matrix<TPathNode> (0x4b1100, 0x4b5e90,
-// 0x4b0b20); vector<TMark> is used through the copies kept from an earlier
-// object (0x426170, 0x425b20). Compiler-generated: TMapPoint's constructor
-// 0x4b0b40, TAutomapBlock's destructor 0x4b0b30; the inline constructors of
-// TPathNode (0x4b0880) and TAutomapBlock (0x4b1410) are in Map.h.
 //
 // Names: see Map.h and notes/decisions.md ("Map.cpp").
 
@@ -38,9 +28,9 @@
 #include <sstream>
 #include <vector>
 
-// The data (0x5d16c0-0x5d4c4b, 0x7152d0-0x7152e7) is TMap's (Map.h, issue #106).
+// The data is TMap's (Map.h, issue #106).
 
-// 0x559f40, 0x559f60, 0x559f90: the initialisers of Fields, FieldNumber and AutomapBlocks are the members'.
+// The initialisers of Fields, FieldNumber and AutomapBlocks are the members'.
 patella::TMap::TMap(TObjectTypes &ObjectTypesRef, TMapConsole &ConsoleRef) : ObjectTypes(ObjectTypesRef), Console(ConsoleRef) {}
 
 // TMark's arrays std::arrays and its Text a TFixedString (issue #60), no pointers: the same on x64. TMapPoint's layout
@@ -49,7 +39,6 @@ static_assert(sizeof(TMark) == 0x70 && offsetof(TMark, Text) == 0x0c && sizeof(T
 
 // --- Position (the MainWindow/Map gap) ------------------------------------
 
-// 0x4b08a0
 void patella::TMap::SetMapPosition(int x, int y, int z)
 {
 	MapX = x;
@@ -57,7 +46,6 @@ void patella::TMap::SetMapPosition(int x, int y, int z)
 	MapZ = z;
 }
 
-// 0x4b08c0
 void patella::TMap::GetMapPosition(int *x, int *y, int *z) const
 {
 	*x = MapX;
@@ -65,8 +53,8 @@ void patella::TMap::GetMapPosition(int *x, int *y, int *z) const
 	*z = MapZ;
 }
 
-// 0x4b08f0. The map level (rz) of the centre's floor: above ground all eight
-// floors are on the map, below ground two above and two below.
+// The map level (rz) of the centre's floor: above ground all eight floors
+// are on the map, below ground two above and two below.
 int patella::TMap::GetMapLevel() const
 {
 	if (MapZ <= 7)
@@ -74,8 +62,8 @@ int patella::TMap::GetMapLevel() const
 	return 2;
 }
 
-// 0x4b0910. Map coordinates to world coordinates; every floor above the
-// centre's is shifted by one field to the north-west.
+// Map coordinates to world coordinates; every floor above the centre's
+// is shifted by one field to the north-west.
 void patella::TMap::RelativeToAbsolute(int *x, int *y, int *z) const
 {
 	const int dz = *z - GetMapLevel();
@@ -84,7 +72,6 @@ void patella::TMap::RelativeToAbsolute(int *x, int *y, int *z) const
 	*z = MapZ - dz;
 }
 
-// 0x4b0960
 void patella::TMap::AbsoluteToRelative(int *x, int *y, int *z) const
 {
 	const int dz = MapZ - *z;
@@ -93,7 +80,6 @@ void patella::TMap::AbsoluteToRelative(int *x, int *y, int *z) const
 	*z = GetMapLevel() + dz;
 }
 
-// 0x4b09d0
 bool patella::TMap::GetAutomapChanged()
 {
 	const bool Result = AutomapChanged;
@@ -101,8 +87,8 @@ bool patella::TMap::GetAutomapChanged()
 	return Result;
 }
 
-// 0x4b09e0. Color is a palette index. After SetAmbientLight(-1, ...) the next
-// call takes effect at once instead of fading.
+// Color is a palette index. After SetAmbientLight(-1, ...) the next call
+// takes effect at once instead of fading.
 void patella::TMap::SetAmbientLight(int Brightness, int Color)
 {
 	const bool Immediately = AmbienteBrightness == -1;
@@ -114,7 +100,7 @@ void patella::TMap::SetAmbientLight(int Brightness, int Color)
 	}
 }
 
-// 0x4b0a70. One step of the fade toward the set light.
+// One step of the fade toward the set light.
 void patella::TMap::UpdateAmbientLight()
 {
 	if (AmbienteActualBrightness < AmbienteBrightness)
@@ -135,7 +121,6 @@ void patella::TMap::UpdateAmbientLight()
 		AmbienteActualColor.B--;
 }
 
-// 0x4b0af0
 TRGBColor patella::TMap::GetAmbientColor() const
 {
 	return AmbienteActualColor;
@@ -143,8 +128,8 @@ TRGBColor patella::TMap::GetAmbientColor() const
 
 // --- Objects ---------------------------------------------------------------
 
-// 0x4b6140, lines 169-171. Starts an iteration over the objects of a point in
-// drawing order; NoObject (Type 0) ends it.
+// Starts an iteration over the objects of a point in drawing order; NoObject
+// (Type 0) ends it.
 TObject patella::TMap::GetFirstObject(int rx, int ry, int rz)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -158,7 +143,6 @@ TObject patella::TMap::GetFirstObject(int rx, int ry, int rz)
 	return PointObject(Point, Point.Order[0]);
 }
 
-// 0x4b6510
 TObject patella::TMap::GetNextObject()
 {
 	ObjectIteratorCount++;
@@ -168,7 +152,7 @@ TObject patella::TMap::GetNextObject()
 	return PointObject(Point, Point.Order[ObjectIteratorCount]);
 }
 
-// 0x4b6580, lines 197-202. The object at a stack position (0 is the bottom).
+// The object at a stack position (0 is the bottom).
 TObject patella::TMap::GetMapObject(int rx, int ry, int rz, int Position)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -181,9 +165,8 @@ TObject patella::TMap::GetMapObject(int rx, int ry, int rz, int Position)
 	return ObjectTypes.NoObject;
 }
 
-// 0x4b6a00, lines 213-228. The lowest object that is no ground, border,
-// bottom or top object and no creature, or the one below it when it cannot
-// be moved.
+// The lowest object that is no ground, border, bottom or top object and no
+// creature, or the one below it when it cannot be moved.
 TObject patella::TMap::GetTopMoveObject(int rx, int ry, int rz, int &Position)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -203,8 +186,7 @@ TObject patella::TMap::GetTopMoveObject(int rx, int ry, int rz, int &Position)
 	return PointObject(Point, Position);
 }
 
-// 0x4b6ee0, lines 237-250. The lowest object that is no ground, border,
-// bottom or top object.
+// The lowest object that is no ground, border, bottom or top object.
 TObject patella::TMap::GetTopLookObject(int rx, int ry, int rz, int &Position)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -222,9 +204,9 @@ TObject patella::TMap::GetTopLookObject(int rx, int ry, int rz, int &Position)
 	return PointObject(Point, Position);
 }
 
-// 0x4b73a0, lines 259-275. The first object with FORCEUSE, else the lowest
-// object that is no ground, border, bottom or top object and no creature,
-// stepping down over creatures and liquid pools.
+// The first object with FORCEUSE, else the lowest object that is no
+// ground, border, bottom or top object and no creature, stepping down over
+// creatures and liquid pools.
 TObject patella::TMap::GetTopUseObject(int rx, int ry, int rz, int &Position)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -247,8 +229,8 @@ TObject patella::TMap::GetTopUseObject(int rx, int ry, int rz, int &Position)
 	return PointObject(Point, Position);
 }
 
-// 0x4b78d0, lines 284-299. Like GetTopUseObject, but creatures count and only
-// one liquid pool is stepped over.
+// Like GetTopUseObject, but creatures count and only one liquid pool is
+// stepped over.
 TObject patella::TMap::GetTopMultiUseObject(int rx, int ry, int rz, int &Position)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -270,9 +252,9 @@ TObject patella::TMap::GetTopMultiUseObject(int rx, int ry, int rz, int &Positio
 	return PointObject(Point, Position);
 }
 
-// 0x4b7de0, lines 314-341. Computes the drawing order (the ground, border and
-// bottom objects from the bottom, then the rest from the top) and the side
-// of a hanging object from the hook it hangs on.
+// Computes the drawing order (the ground, border and bottom objects from the
+// bottom, then the rest from the top) and the side of a hanging object from
+// the hook it hangs on.
 void patella::TMap::SortObjects(int rx, int ry, int rz)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -301,9 +283,8 @@ void patella::TMap::SortObjects(int rx, int ry, int rz)
 		Hanging->Data2 = ObjectTypes.GetObjectFlag(Hook->Type, HOOKSOUTH) ? HOOKSOUTH : HOOKEAST;
 }
 
-// 0x4b8310, lines 351-366. Inserts an object at a stack position; on a full
-// point the top object falls off. The try block starts only after the
-// assertions.
+// Inserts an object at a stack position; on a full point the top object
+// falls off.
 void patella::TMap::InsertObject(int rx, int ry, int rz, int Position, TObject Obj)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -316,10 +297,9 @@ void patella::TMap::InsertObject(int rx, int ry, int rz, int Position, TObject O
 	SortObjects(rx, ry, rz);
 }
 
-// 0x4b88f0, lines 376-401. Inserts an object where it belongs: ground
-// objects first, then borders, bottom objects, top objects, and new
-// creatures above the creatures, other objects below them. Nothing happens
-// on a full point.
+// Inserts an object where it belongs: ground objects first, then borders,
+// bottom objects, top objects, and new creatures above the creatures,
+// other objects below them. Nothing happens on a full point.
 void patella::TMap::AddObject(int rx, int ry, int rz, TObject Obj)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -331,7 +311,7 @@ void patella::TMap::AddObject(int rx, int ry, int rz, TObject Obj)
 		InsertObject(rx, ry, rz, Position, Obj);
 }
 
-// 0x4b8ec0, lines 410-431. Puts an object on top of the stack.
+// Puts an object on top of the stack.
 void patella::TMap::AppendObject(int rx, int ry, int rz, TObject Obj)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -342,8 +322,8 @@ void patella::TMap::AppendObject(int rx, int ry, int rz, TObject Obj)
 	InsertObject(rx, ry, rz, PointObjectCount(Point), Obj);
 }
 
-// 0x4b9420, lines 441-454. True when the point was full, so that the objects
-// that fell off it have to be requested again.
+// True when the point was full, so that the objects that fell off it have to
+// be requested again.
 bool patella::TMap::DeleteObject(int rx, int ry, int rz, int Position)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -356,7 +336,6 @@ bool patella::TMap::DeleteObject(int rx, int ry, int rz, int Position)
 	return WasFull;
 }
 
-// 0x4b9940, lines 463-473
 void patella::TMap::ChangeObject(int rx, int ry, int rz, int Position, TObject Obj)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -370,8 +349,7 @@ void patella::TMap::ChangeObject(int rx, int ry, int rz, int Position, TObject O
 
 // --- Effects -----------------------------------------------------------------
 
-// 0x4b9e30, lines 508-516. The n-th effect of the iterated point, None after
-// the last.
+// The n-th effect of the iterated point, None after the last.
 TEffectId patella::TMap::GetEffectIteratorNumber(int n)
 {
 	const TMapPoint &Point = Fields(EffectIteratorField);
@@ -384,7 +362,6 @@ TEffectId patella::TMap::GetEffectIteratorNumber(int n)
 	return TEffectId::None;
 }
 
-// 0x4ba100, lines 524-534
 TEffectId patella::TMap::GetFirstEffect(int rx, int ry, int rz)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -395,21 +372,18 @@ TEffectId patella::TMap::GetFirstEffect(int rx, int ry, int rz)
 	return GetEffectIteratorNumber(0);
 }
 
-// 0x4ba540, line 548
 TEffectId patella::TMap::GetNextEffect()
 {
 	EffectIteratorCount++;
 	return GetEffectIteratorNumber(EffectIteratorCount);
 }
 
-// 0x4b1440, line 556. Like the getters below, without a try block.
 int patella::TMap::GetEffectStatus(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
 	return Effects.Get(EffectNumber).Status;
 }
 
-// 0x4b15a0, lines 565-566
 int patella::TMap::GetGraphicalEffectType(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -417,7 +391,6 @@ int patella::TMap::GetGraphicalEffectType(TEffectId EffectNumber) const
 	return Effects.Get(EffectNumber).Type;
 }
 
-// 0x4b1860, lines 575-576
 int patella::TMap::GetGraphicalEffectPhase(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -425,7 +398,6 @@ int patella::TMap::GetGraphicalEffectPhase(TEffectId EffectNumber) const
 	return Effects.Get(EffectNumber).Phase;
 }
 
-// 0x4b1b20, lines 585-586
 int patella::TMap::GetTextualEffectColor(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -433,7 +405,6 @@ int patella::TMap::GetTextualEffectColor(TEffectId EffectNumber) const
 	return Effects.Get(EffectNumber).Type;
 }
 
-// 0x4b1de0, lines 595-596
 char *patella::TMap::GetTextualEffectText(TEffectId EffectNumber)
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -441,7 +412,6 @@ char *patella::TMap::GetTextualEffectText(TEffectId EffectNumber)
 	return Effects[EffectNumber].Text; // Status 2: a taken entry
 }
 
-// 0x4b20a0, lines 605-606
 int patella::TMap::GetTextualEffectPhase(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -449,7 +419,6 @@ int patella::TMap::GetTextualEffectPhase(TEffectId EffectNumber) const
 	return Effects.Get(EffectNumber).TextPhase;
 }
 
-// 0x4b2360, lines 615-616
 int patella::TMap::GetMissileEffectType(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -457,7 +426,6 @@ int patella::TMap::GetMissileEffectType(TEffectId EffectNumber) const
 	return Effects.Get(EffectNumber).Type;
 }
 
-// 0x4b2620, lines 625-626
 int patella::TMap::GetMissileEffectDirection(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -465,7 +433,7 @@ int patella::TMap::GetMissileEffectDirection(TEffectId EffectNumber) const
 	return Effects.Get(EffectNumber).Direction;
 }
 
-// 0x4b28e0, lines 635-636. Pixels from the field the missile is linked to.
+// Pixels from the field the missile is linked to.
 int patella::TMap::GetMissileEffectX(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -474,7 +442,6 @@ int patella::TMap::GetMissileEffectX(TEffectId EffectNumber) const
 	return (Effect.DestX - Effect.x) * 32 + Effect.OffsetX;
 }
 
-// 0x4b2bb0, lines 645-646
 int patella::TMap::GetMissileEffectY(TEffectId EffectNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(EffectNumber),0,EFFECTS-1), EffectNumberOf(EffectNumber));
@@ -483,8 +450,8 @@ int patella::TMap::GetMissileEffectY(TEffectId EffectNumber) const
 	return (Effect.DestY - Effect.y) * 32 + Effect.OffsetY;
 }
 
-// 0x4ba6e0, lines 678-688. Takes a free entry (-1 if there is none) and puts
-// it first on the point; coordinates off the map mean point 0,0,0.
+// Takes a free entry (-1 if there is none) and puts it first on the point;
+// coordinates off the map mean point 0,0,0.
 TEffectId patella::TMap::NewEffect(int Status, int rx, int ry, int rz)
 {
 	const TEffectId Number = Effects.New();
@@ -510,7 +477,6 @@ TEffectId patella::TMap::NewEffect(int Status, int rx, int ry, int rz)
 	return Number;
 }
 
-// 0x4bab40, line 703
 void patella::TMap::AddGraphicalEffect(int rx, int ry, int rz, int Type)
 {
 	const TEffectId Number = NewEffect(1, rx, ry, rz);
@@ -520,7 +486,6 @@ void patella::TMap::AddGraphicalEffect(int rx, int ry, int rz, int Type)
 	}
 }
 
-// 0x4bad00, lines 712-721
 void patella::TMap::AddTextualEffect(int rx, int ry, int rz, int Color, const char *Text)
 {
 	PATELLA_ASSERT(Text!=nullptr);
@@ -533,10 +498,10 @@ void patella::TMap::AddTextualEffect(int rx, int ry, int rz, int Color, const ch
 	}
 }
 
-// 0x4bb0c0, lines 730-768. Only missiles on the centre's floor are shown.
-// The flight takes 150 ms times the fourth root of the squared distance,
-// truncated; the direction is one of eight sectors of 45 degrees (tan 22.5
-// and tan 67.5 as 106/256 and 618/256).
+// Only missiles on the centre's floor are shown. The flight takes 150 ms
+// times the fourth root of the squared distance, truncated; the direction
+// is one of eight sectors of 45 degrees (tan 22.5 and tan 67.5 as 106/256
+// and 618/256).
 void patella::TMap::AddMissileEffect(int sx, int sy, int sz, int dx, int dy, int dz, int Type)
 {
 	PATELLA_ASSERT_VALUES(Type>0, Type);
@@ -590,7 +555,6 @@ void patella::TMap::AddMissileEffect(int sx, int sy, int sz, int dx, int dy, int
 	Effect.y = sy;
 }
 
-// 0x4bb520, lines 776-789. No try block.
 void patella::TMap::DeleteEffect(TEffectId Number)
 {
 	PATELLA_ASSERT_VALUES(In(EffectNumberOf(Number),0,EFFECTS-1), EffectNumberOf(Number));
@@ -611,8 +575,8 @@ void patella::TMap::DeleteEffect(TEffectId Number)
 	}
 }
 
-// 0x4bba70, lines 807-817. One animation step of the graphical effects and
-// texts; a text lasts ten steps.
+// One animation step of the graphical effects and texts; a text lasts ten
+// steps.
 void patella::TMap::ProcessEffects()
 {
 	int i = 0;
@@ -636,9 +600,9 @@ void patella::TMap::ProcessEffects()
 	}
 }
 
-// 0x4bbd40, lines 841-878. Moves the missiles toward their destinations and
-// links them to the field they are over; a missile that has arrived is
-// deleted. The offsets shrink by single pixels until they fit the time left.
+// Moves the missiles toward their destinations and links them to the field
+// they are over; a missile that has arrived is deleted. The offsets shrink
+// by single pixels until they fit the time left.
 void patella::TMap::ProcessMissileEffects()
 {
 	int i = 0;
@@ -704,9 +668,9 @@ void patella::TMap::ProcessMissileEffects()
 
 // --- Map points ----------------------------------------------------------------
 
-// 0x4bc720, lines 891-913. Empties a point; its creatures go to the
-// callback. The binary sets i to -1 after the object loop, so an error while
-// deleting the effects reports i = -1.
+// Empties a point; its creatures go to the callback. The binary sets i to -1
+// after the object loop, so an error while deleting the effects reports i =
+// -1.
 void patella::TMap::ClearField(int rx, int ry, int rz, bool DeleteEffects)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -731,7 +695,7 @@ void patella::TMap::ClearField(int rx, int ry, int rz, bool DeleteEffects)
 	}
 }
 
-// 0x4bccb0. Empties every point and deletes every effect; no try block.
+// Empties every point and deletes every effect.
 void patella::TMap::ClearMap()
 {
 	for (int i = 0; i < MAPSIZE_X * MAPSIZE_Y * MAPSIZE_Z; i++) {
@@ -742,9 +706,8 @@ void patella::TMap::ClearMap()
 	Effects.Clear();
 }
 
-// 0x4bcd20, line 945. The points move one field west (the centre moved
-// east); the column that comes in on the east is cleared. Ghidra splits
-// this and the five functions below at their loops (0x4bcd50 ...).
+// The points move one field west (the centre moved east); the column
+// that comes in on the east is cleared.
 void patella::TMap::ShiftMapWest()
 {
 	for (int z = 0; z < MAPSIZE_Z; z++) {
@@ -758,7 +721,6 @@ void patella::TMap::ShiftMapWest()
 	}
 }
 
-// 0x4bcf30, line 964
 void patella::TMap::ShiftMapEast()
 {
 	for (int z = 0; z < MAPSIZE_Z; z++) {
@@ -772,7 +734,6 @@ void patella::TMap::ShiftMapEast()
 	}
 }
 
-// 0x4bd140, line 983
 void patella::TMap::ShiftMapNorth()
 {
 	for (int z = 0; z < MAPSIZE_Z; z++) {
@@ -786,7 +747,6 @@ void patella::TMap::ShiftMapNorth()
 	}
 }
 
-// 0x4bd350, line 1002
 void patella::TMap::ShiftMapSouth()
 {
 	for (int z = 0; z < MAPSIZE_Z; z++) {
@@ -800,8 +760,7 @@ void patella::TMap::ShiftMapSouth()
 	}
 }
 
-// 0x4bd560, line 1018. dx, dy: how far the points move (the centre moves the
-// other way).
+// Dx, dy: how far the points move (the centre moves the other way).
 void patella::TMap::ShiftMap(int dx, int dy)
 {
 	MapX -= dx;
@@ -816,7 +775,7 @@ void patella::TMap::ShiftMap(int dx, int dy)
 		ShiftMapNorth();
 }
 
-// 0x4bd750, line 1037. The points move one level up; level 0 is cleared.
+// The points move one level up; level 0 is cleared.
 void patella::TMap::ShiftMapUp()
 {
 	for (int x = 0; x < MAPSIZE_X; x++) {
@@ -830,7 +789,6 @@ void patella::TMap::ShiftMapUp()
 	}
 }
 
-// 0x4bd960, line 1056
 void patella::TMap::ShiftMapDown()
 {
 	for (int x = 0; x < MAPSIZE_X; x++) {
@@ -844,8 +802,8 @@ void patella::TMap::ShiftMapDown()
 	}
 }
 
-// 0x4bdb70, line 1074. After moving up, the levels 5-7 are cleared as well
-// (the binary decides this on dz before the loops count it down).
+// After moving up, the levels 5-7 are cleared as well (the binary decides
+// this on dz before the loops count it down).
 void patella::TMap::ShiftMapLevel(int dz)
 {
 	const bool Up = dz > 0;
@@ -861,13 +819,12 @@ void patella::TMap::ShiftMapLevel(int dz)
 	}
 }
 
-// 0x4bdd70, line 1085
 void patella::TMap::RequestFieldRefresh(int rx, int ry, int rz)
 {
 	Fields(FieldNumber(rx, ry, rz)).RefreshRequested = true;
 }
 
-// 0x4bdf30, line 1104. The number of objects with HEIGHT.
+// The number of objects with HEIGHT.
 int patella::TMap::GetFieldHeight(int rx, int ry, int rz)
 {
 	int Height = 0;
@@ -880,9 +837,9 @@ int patella::TMap::GetFieldHeight(int rx, int ry, int rz)
 	return Height;
 }
 
-// 0x4be130, line 1127. False if an object blocks the point. With CheckHeight,
-// a point without ground above a pile of more than two HEIGHT objects, or any
-// point while the centre stands on such a pile, is passable.
+// False if an object blocks the point. With CheckHeight, a point without
+// ground above a pile of more than two HEIGHT objects, or any point while the
+// centre stands on such a pile, is passable.
 bool patella::TMap::IsFieldPassable(int rx, int ry, int rz, bool CheckHeight)
 {
 	if (CheckHeight) {
@@ -903,7 +860,7 @@ bool patella::TMap::IsFieldPassable(int rx, int ry, int rz, bool CheckHeight)
 	return true;
 }
 
-// 0x4be390, line 1141. False if an object blocks throwing.
+// False if an object blocks throwing.
 bool patella::TMap::IsFieldThrowable(int rx, int ry, int rz)
 {
 	TObject Obj = GetFirstObject(rx, ry, rz);
@@ -915,7 +872,6 @@ bool patella::TMap::IsFieldThrowable(int rx, int ry, int rz)
 	return true;
 }
 
-// 0x4be570, line 1153
 bool patella::TMap::IsFieldTranslucent(int rx, int ry, int rz)
 {
 	TObject Obj = GetFirstObject(rx, ry, rz);
@@ -927,15 +883,13 @@ bool patella::TMap::IsFieldTranslucent(int rx, int ry, int rz)
 	return false;
 }
 
-// 0x4be750, line 1164
 bool patella::TMap::FieldRefreshRequested(int rx, int ry, int rz)
 {
 	return Fields(FieldNumber(rx, ry, rz)).RefreshRequested;
 }
 
-// 0x4be910, line 1191. The automap colour and speed of a point: the ground's
-// speed (at most 250), the last AUTOMAP colour, 255 for an empty or blocked
-// point.
+// The automap colour and speed of a point: the ground's speed (at most 250),
+// the last AUTOMAP colour, 255 for an empty or blocked point.
 void patella::TMap::GetFieldAutomapInfo(int rx, int ry, int rz, uint8 *Color, uint8 *Speed)
 {
 	*Color = 0;
@@ -983,11 +937,10 @@ static_assert(TAutomapLayer::TView::mapping_type()(0, 1) == AutomapFileOffset(0,
 		&& TAutomapLayer::TView::mapping_type().required_span_size() == static_cast<int>(AUTOMAP_FILE_LAYER_BYTES),
 	"a layer's view [x, y]: the file's byte x * 256 + y");
 
-// 0x4b2e80, lines 1199-1304. Loads a block into cache entry Position. A
-// missing file leaves the block empty (speed 250 everywhere); a damaged one
-// empties it again and reports that in the default console. The inner
-// message says "colors" where it reads the colours and speeds, "flags" for
-// the marks.
+// Loads a block into cache entry Position. A missing file leaves the block
+// empty (speed 250 everywhere); a damaged one empties it again and reports
+// that in the default console. The inner message says "colors" where it
+// reads the colours and speeds, "flags" for the marks.
 void patella::TMap::LoadAutomapBlock(int Position, int bx, int by, int bz)
 {
 	PATELLA_ASSERT_VALUES(In(bx,0,999), bx);
@@ -1064,9 +1017,9 @@ void patella::TMap::LoadAutomapBlock(int Position, int bx, int by, int bz)
 	}
 }
 
-// 0x4b36e0, lines 1317-1411. Writes a changed block back; marks at 0,0 are
-// deleted ones and are skipped. A file that cannot be opened or written is
-// reported in the default console; the block counts as saved either way.
+// Writes a changed block back; marks at 0,0 are deleted ones and are
+// skipped. A file that cannot be opened or written is reported in the
+// default console; the block counts as saved either way.
 void patella::TMap::SaveAutomapBlock(int Position)
 {
 	TAutomapBlock &Block = AutomapBlocks[Position];
@@ -1128,10 +1081,10 @@ void patella::TMap::SaveAutomapBlock(int Position)
 	Block.Changed = false;
 }
 
-// 0x4b3e80, lines 1420-1446. The cached block, loaded into the least recently
-// used entry if necessary, becomes the most recently used one. (The binary
-// keeps Position in bx's stack slot while the entry is replaced, the only
-// part that can fail; the catch block reads it from there.)
+// The cached block, loaded into the least recently used entry if necessary,
+// becomes the most recently used one. (The binary keeps Position in bx's
+// stack slot while the entry is replaced, the only part that can fail; the
+// catch block reads it from there.)
 TAutomapBlock *patella::TMap::GetAutomapBlock(int bx, int by, int bz)
 {
 	PATELLA_ASSERT_VALUES(bx>=0, bx);
@@ -1168,7 +1121,7 @@ TAutomapBlock *patella::TMap::GetAutomapBlock(int bx, int by, int bz)
 	return &AutomapBlocks[Position];
 }
 
-// 0x4beb90, line 1465. Records a point of the centre's level in the automap.
+// Records a point of the centre's level in the automap.
 void patella::TMap::UpdateAutomap(int rx, int ry)
 {
 	int x = rx;
@@ -1181,7 +1134,7 @@ void patella::TMap::UpdateAutomap(int rx, int ry)
 	AutomapChanged = true;
 }
 
-// 0x4b4370, lines 1473-1479. Black for negative coordinates.
+// Black for negative coordinates.
 TRGBColor patella::TMap::GetAutomapColor(int x, int y, int z)
 {
 	PATELLA_ASSERT_VALUES(In(z,0,15), z);
@@ -1192,8 +1145,8 @@ TRGBColor patella::TMap::GetAutomapColor(int x, int y, int z)
 	return TRGBColor(0, 0, 0);
 }
 
-// 0x4b4680, lines 1485-1493. Copies the marks of a block; x and y are block
-// coordinates here, despite their names.
+// Copies the marks of a block; x and y are block coordinates here, despite
+// their names.
 //
 // Marks was the caller's vector<TMark>(0, 0, 10), filled from 0 up: a std::vector since issue #100, its entries 0 to
 // the count - 1 set (appended past its size), the others left as they were.
@@ -1213,7 +1166,7 @@ void patella::TMap::GetAutomapMarks(int x, int y, int z, std::vector<TMark> *Mar
 	}
 }
 
-// 0x4b4960, lines 1500-1506. Negative coordinates are blocked.
+// Negative coordinates are blocked.
 bool patella::TMap::IsAutomapBlocked(int x, int y, int z)
 {
 	PATELLA_ASSERT_VALUES(In(z,0,15), z);
@@ -1224,7 +1177,6 @@ bool patella::TMap::IsAutomapBlocked(int x, int y, int z)
 	return true;
 }
 
-// 0x4b4c60, lines 1514-1520
 int patella::TMap::GetAutomapSpeed(int x, int y, int z)
 {
 	PATELLA_ASSERT_VALUES(In(z,0,15), z);
@@ -1235,7 +1187,6 @@ int patella::TMap::GetAutomapSpeed(int x, int y, int z)
 	return 1;
 }
 
-// 0x4b4f60, lines 1538-1557
 void patella::TMap::AddAutomapMark(TCoordinate &Coordinate, const char *Text, int Type)
 {
 	PATELLA_ASSERT(Text!=nullptr);
@@ -1253,9 +1204,9 @@ void patella::TMap::AddAutomapMark(TCoordinate &Coordinate, const char *Text, in
 	AutomapChanged = true;
 }
 
-// 0x4b5410, line 1578. Deletes the marks at the position of Deleted by moving
-// them to 0,0; only its x and y are read. Its caller, ContextMenus.cpp's mark
-// menu, passes the mark it was opened for.
+// Deletes the marks at the position of Deleted by moving them to 0,0; only
+// its x and y are read. Its caller, ContextMenus.cpp's mark menu, passes the
+// mark it was opened for.
 void patella::TMap::DeleteAutomapMark(TMark &Deleted, int z)
 {
 	int i = 0;
@@ -1273,15 +1224,14 @@ void patella::TMap::DeleteAutomapMark(TMark &Deleted, int z)
 
 // --- Paths ----------------------------------------------------------------------
 
-// 0x4bee00, line 1738. Finds a path of at most ten steps over the automap of
-// the start's floor, searching from the destination (Dijkstra with an
-// estimate, MinSpeed per step, sorted open list). Directions: 1 east, then
-// counter-clockwise to 8 south-east. Returns -1 if the destination is above,
-// -2 below, -3 more than 110 fields away, -4 without a path, 0 for no step,
-// 1 for a complete path and 2 for one cut off after ten steps or at the
-// edge of the visible map. Without MustReach a blocked destination ends the
-// path before it. Errors get the parameters added; there is only this one
-// handler.
+// Finds a path of at most ten steps over the automap of the start's floor,
+// searching from the destination (Dijkstra with an estimate, MinSpeed per
+// step, sorted open list). Directions: 1 east, then counter-clockwise to 8
+// south-east. Returns -1 if the destination is above, -2 below, -3 more than
+// 110 fields away, -4 without a path, 0 for no step, 1 for a complete path
+// and 2 for one cut off after ten steps or at the edge of the visible map.
+// Without MustReach a blocked destination ends the path before it. Errors
+// get the parameters added; there is only this one handler.
 int patella::TMap::FindPath(int StartX, int StartY, int StartZ, int DestX, int DestY, int DestZ, bool MustReach,
 	int *Steps, int *Directions, bool ForceDiagonal)
 {
@@ -1449,15 +1399,14 @@ int patella::TMap::FindPath(int StartX, int StartY, int StartZ, int DestX, int D
 
 // --- Initialisation --------------------------------------------------------------
 
-// 0x4b5610, line 1784. No try block.
 int patella::TMap::GetAmbientBrightness() const
 {
 	PATELLA_ASSERT_VALUES(AmbienteActualBrightness>=0, AmbienteActualBrightness);
 	return AmbienteActualBrightness;
 }
 
-// 0x4bf620, line 1830. Every map position gets its own point; the automap
-// cache is empty. Callback receives the creatures ClearField removes.
+// Every map position gets its own point; the automap cache is empty.
+// Callback receives the creatures ClearField removes.
 void patella::TMap::InitMap(void (*Callback)(int CreatureID))
 {
 	for (int x = 0; x < MAPSIZE_X; x++)
@@ -1482,7 +1431,7 @@ void patella::TMap::InitMap(void (*Callback)(int CreatureID))
 	CreatureCallback = Callback;
 }
 
-// 0x4b5760, line 1842. Saves the cached automap blocks.
+// Saves the cached automap blocks.
 void patella::TMap::ExitMap()
 {
 	int i = 0;

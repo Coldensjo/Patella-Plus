@@ -1,16 +1,12 @@
-// Status.cpp: reconstructed from Tibia.exe 7.72 (0x4e6dc0-0x4ea860).
+// Status.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The functions without line evidence (0x4e6dc0-0x4e7f00, all of them small
-// accessors) come first, in binary order (the error report list's,
-// 0x4e7380 and 0x4e7bb0-0x4e7ed0, and its vector at 0x71c648 are gone since
-// Patella-Modern issue #74, decision D2); the rest follow the assertion and
-// catch line numbers, which are also their binary order. The gap before the
-// first assertion (line 91) belongs here because its globals (0x71c458-
-// 0x71c64f) are interleaved with those of the asserted functions; only the
-// skin table at its start is a separate file (Skins.cpp).
+// The functions without line evidence (all of them small accessors) come
+// first, in binary order (the error report list's and its vector are gone
+// since Patella-Modern issue #74, decision D2); the rest follow the assertion
+// and catch line numbers, which are also their binary order.
 //
 // Of all functions here only CheckClipboardText had a try block (its catch
-// wrapper at line 869, gone since issue #78); the others have assertions only.
+// wrapper, gone since issue #78); the others have assertions only.
 
 #include "Status.h"
 #include "Utils.h"
@@ -37,14 +33,12 @@ static_assert(sizeof(std::unique_ptr<TCharacter[]>) == sizeof(TCharacter *)
 		&& alignof(std::unique_ptr<TCharacter[]>) == alignof(TCharacter *),
 	"std::unique_ptr<TCharacter[]> is a pointer");
 
-// Status.obj's only .data, LinkPattern (0x5c2560), is its copy of Status.h's. The .bss (0x71c458-0x71c64f) is
-// TInteraction's (the user interaction, issue #107) and TSession's (the session, 0x71c478-0x71c58b, issue #105), both
-// in Status.h.
+// Status.obj's only .data, LinkPattern, is its copy of Status.h's. The .bss is TInteraction's (the user interaction,
+// issue #107) and TSession's (the session, issue #105), both in Status.h.
 
 
-// 0x4e6dc0. Inlined into CheckRight. Only the first 32 rights are checked
-// (the loop ends at 0x71c4f8), the ones GetRightName has names for; rights
-// 32-49 never count.
+// Only the first 32 rights are checked, the ones GetRightName has names
+// for; rights 32-49 never count.
 bool patella::TSession::CheckAnyRight() const
 {
 	for (int i = 0; i < 32; i++) {
@@ -54,64 +48,57 @@ bool patella::TSession::CheckAnyRight() const
 	return false;
 }
 
-// 0x4e6de0. Inlined into InitStatus.
+// Inlined into InitStatus.
 void patella::TSession::ClearRights()
 {
 	for (int i = 0; i < RIGHT_ANY; i++)
 		Rights[i] = 0;
 }
 
-// 0x4e6e00
 int patella::TInteraction::GetActionNumber() const
 {
 	return ActionNumber;
 }
 
-// 0x4e6e10
 void patella::TInteraction::IncrementActionNumber()
 {
 	ActionNumber++;
 }
 
-// 0x4e6e20. Values seen: 1 normal, 6 dragging, 7 use with, 8 trade with,
-// 9, 10 and 11 (a modal window has the mouse).
+// Values seen: 1 normal, 6 dragging, 7 use with, 8 trade with, 9, 10 and
+// 11 (a modal window has the mouse).
 void patella::TInteraction::SetActionState(int State)
 {
 	ActionState = State;
 }
 
-// 0x4e6e30
 int patella::TInteraction::GetActionState() const
 {
 	return ActionState;
 }
 
-// 0x4e6e40
 void patella::TInteraction::SetMousePosition(int x, int y)
 {
 	MouseX = x;
 	MouseY = y;
 }
 
-// 0x4e6e60
 int patella::TInteraction::GetMouseX() const
 {
 	return MouseX;
 }
 
-// 0x4e6e70
 int patella::TInteraction::GetMouseY() const
 {
 	return MouseY;
 }
 
-// 0x4e6e80
 void patella::TInteraction::SetMouseCursor(int Cursor)
 {
 	MouseCursor = Cursor;
 }
 
-// 0x4e6e90. The action state overrides the cursor that was set.
+// The action state overrides the cursor that was set.
 int patella::TInteraction::GetMouseCursor() const
 {
 	if (ActionState == ACTIONSTATE_HELP)
@@ -123,45 +110,39 @@ int patella::TInteraction::GetMouseCursor() const
 	return MouseCursor;
 }
 
-// 0x4e6ec0
 void patella::TInteraction::SetPendingAction(int State, int Number)
 {
 	PendingActionState = State;
 	PendingActionNumber = Number;
 }
 
-// 0x4e6ee0
 int patella::TInteraction::GetPendingActionState() const
 {
 	return PendingActionState;
 }
 
-// 0x4e6ef0
 int patella::TInteraction::GetPendingActionNumber() const
 {
 	return PendingActionNumber;
 }
 
-// 0x4e6f00
 void patella::TInteraction::SetWindowSize(int Width, int Height)
 {
 	WindowWidth = Width;
 	WindowHeight = Height;
 }
 
-// 0x4e6f20
 int patella::TInteraction::GetWindowWidth() const
 {
 	return WindowWidth;
 }
 
-// 0x4e6f30
 int patella::TInteraction::GetWindowHeight() const
 {
 	return WindowHeight;
 }
 
-// 0x4e6f40. Clears the drag object; SetDragObject sets it afterwards.
+// Clears the drag object; SetDragObject sets it afterwards.
 void patella::TInteraction::SetDragStart(int x, int y)
 {
 	DragStartX = x;
@@ -171,7 +152,6 @@ void patella::TInteraction::SetDragStart(int x, int y)
 	DraggedObject.Data2 = 0;
 }
 
-// 0x4e6f70
 void patella::TInteraction::SetDragObject(TObject Obj, int Index, int x, int y, int z)
 {
 	DraggedObject = Obj;
@@ -181,7 +161,6 @@ void patella::TInteraction::SetDragObject(TObject Obj, int Index, int x, int y, 
 	DragZ = z;
 }
 
-// 0x4e6fc0
 void patella::TInteraction::SetDragTarget(int x, int y, int z)
 {
 	DragTargetX = x;
@@ -189,8 +168,8 @@ void patella::TInteraction::SetDragTarget(int x, int y, int z)
 	DragTargetZ = z;
 }
 
-// 0x4e6fe0. Starts dragging once the mouse is more than 3 pixels away from
-// where the button went down.
+// Starts dragging once the mouse is more than 3 pixels away from where the
+// button went down.
 void patella::TInteraction::CheckDragStart(int x, int y)
 {
 	if (ActionState != ACTIONSTATE_DRAGGING && DraggedObject.Type != 0
@@ -198,7 +177,6 @@ void patella::TInteraction::CheckDragStart(int x, int y)
 		ActionState = ACTIONSTATE_DRAGGING;
 }
 
-// 0x4e7030
 TObject *patella::TInteraction::GetDragObject(int *Index, int *x, int *y, int *z)
 {
 	*Index = DragIndex;
@@ -208,7 +186,6 @@ TObject *patella::TInteraction::GetDragObject(int *Index, int *x, int *y, int *z
 	return &DraggedObject;
 }
 
-// 0x4e7070
 void patella::TInteraction::GetDragTarget(int *x, int *y, int *z) const
 {
 	*x = DragTargetX;
@@ -216,7 +193,6 @@ void patella::TInteraction::GetDragTarget(int *x, int *y, int *z) const
 	*z = DragTargetZ;
 }
 
-// 0x4e70a0
 void patella::TInteraction::SetTradeObject(TObject Obj, int Index, int x, int y, int z)
 {
 	TradeObject = Obj;
@@ -226,7 +202,6 @@ void patella::TInteraction::SetTradeObject(TObject Obj, int Index, int x, int y,
 	TradeZ = z;
 }
 
-// 0x4e70f0
 void patella::TInteraction::SetUseObject(TObject Obj, int Index, int x, int y, int z)
 {
 	UseObject = Obj;
@@ -236,13 +211,12 @@ void patella::TInteraction::SetUseObject(TObject Obj, int Index, int x, int y, i
 	UseZ = z;
 }
 
-// 0x4e7140. Set together with the trade and use objects; meaning unknown.
+// Set together with the trade and use objects; meaning unknown.
 void patella::TInteraction::SetTradeInfo(int Info)
 {
 	TradeInfo = Info;
 }
 
-// 0x4e7150
 TObject *patella::TInteraction::GetTradeObject(int *Index, int *x, int *y, int *z)
 {
 	*Index = TradeIndex;
@@ -252,7 +226,6 @@ TObject *patella::TInteraction::GetTradeObject(int *Index, int *x, int *y, int *
 	return &TradeObject;
 }
 
-// 0x4e7190
 TObject *patella::TInteraction::GetUseObject(int *Index, int *x, int *y, int *z)
 {
 	*Index = UseIndex;
@@ -262,57 +235,51 @@ TObject *patella::TInteraction::GetUseObject(int *Index, int *x, int *y, int *z)
 	return &UseObject;
 }
 
-// 0x4e71d0
 int patella::TInteraction::GetTradeInfo() const
 {
 	return TradeInfo;
 }
 
-// 0x4e71e0. 0 offline, 1 resolving the login server name, 2 connecting to a
-// login server, 4 talking to the login server, 5 connecting to the game
-// server; the game uses higher values. All are named in Events.h (CONNECTION_*).
+// 0 offline, 1 resolving the login server name, 2 connecting to a login server,
+// 4 talking to the login server, 5 connecting to the game server; the game uses
+// higher values. All are named in Events.h (CONNECTION_*).
 void patella::TSession::SetConnectionState(int State)
 {
 	ConnectionState = State;
 }
 
-// 0x4e71f0
 int patella::TSession::GetConnectionState() const
 {
 	return ConnectionState;
 }
 
-// 0x4e7200. Download progress in percent, -1 when there is none.
+// Download progress in percent, -1 when there is none.
 void patella::TSession::SetProgress(int Value)
 {
 	Progress = Value;
 }
 
-// 0x4e7210
 int patella::TSession::GetProgress() const
 {
 	return Progress;
 }
 
-// 0x4e7220
 int patella::TSession::GetAccountNumber() const
 {
 	return AccountNumber;
 }
 
-// 0x4e7230
 const char *patella::TSession::GetAccountNumberString() const
 {
 	return AccountNumberString;
 }
 
-// 0x4e7240
 const char *patella::TSession::GetAccountPassword() const
 {
 	return AccountPassword;
 }
 
-// 0x4e7250. Replaces the character list with Number empty entries.
+// Replaces the character list with Number empty entries.
 void patella::TSession::SetAccountCharacters(int Number)
 {
 	AccountCharacters = Number;
@@ -323,63 +290,55 @@ void patella::TSession::SetAccountCharacters(int Number)
 		Characters.reset(new TCharacter[Number]);
 }
 
-// 0x4e7290
 void patella::TSession::SetPremiumDays(int Days)
 {
 	PremiumDays = Days;
 }
 
-// 0x4e72a0
 int patella::TSession::GetAccountCharacters() const
 {
 	return AccountCharacters;
 }
 
-// 0x4e72b0
 int patella::TSession::GetPremiumDays() const
 {
 	return PremiumDays;
 }
 
-// 0x4e72c0
 int patella::TSession::GetActiveCharacter() const
 {
 	return ActiveCharacter;
 }
 
-// 0x4e72d0
 bool patella::TSession::GetGamemaster() const
 {
 	return Gamemaster;
 }
 
-// 0x4e72e0. The text is not copied.
+// The text is not copied.
 void patella::TInteraction::SetMouseOverText(const char *Text)
 {
 	MouseOverText = Text;
 }
 
-// 0x4e72f0
 void patella::TInteraction::SetMouseOverTextPosition(int x, int y)
 {
 	MouseOverTextX = x;
 	MouseOverTextY = y;
 }
 
-// 0x4e7310
 const char *patella::TInteraction::GetMouseOverText() const
 {
 	return MouseOverText;
 }
 
-// 0x4e7320
 void patella::TInteraction::GetMouseOverTextPosition(int *x, int *y) const
 {
 	*x = MouseOverTextX;
 	*y = MouseOverTextY;
 }
 
-// 0x4e7340. Called once per main loop iteration.
+// Called once per main loop iteration.
 void patella::TInteraction::UpdateBlinkState()
 {
 	const int Now = GetMilliseconds();
@@ -389,13 +348,12 @@ void patella::TInteraction::UpdateBlinkState()
 	}
 }
 
-// 0x4e7370
 bool patella::TInteraction::GetBlinkState() const
 {
 	return BlinkState;
 }
 
-// 0x4e75d0. Type of the first message, 0 when the queue is empty.
+// Type of the first message, 0 when the queue is empty.
 int patella::TInteraction::PeekMessageType()
 {
 	if (Messages.empty())
@@ -403,8 +361,8 @@ int patella::TInteraction::PeekMessageType()
 	return Messages.front().Type;
 }
 
-// 0x4e75f0. Removes the first message; all zero when the queue is empty.
-// The parameters now belong to the caller.
+// Removes the first message; all zero when the queue is empty. The
+// parameters now belong to the caller.
 void patella::TInteraction::FetchMessage(int *Type, std::intptr_t *Param1, std::intptr_t *Param2)
 {
 	if (!Messages.empty()) {
@@ -419,8 +377,8 @@ void patella::TInteraction::FetchMessage(int *Type, std::intptr_t *Param1, std::
 	*Param2 = 0;
 }
 
-// 0x4e76e0. Frees the parameters that each message type owns. Type 14's
-// Param2 points to two more blocks.
+// Frees the parameters that each message type owns. Type 14's Param2
+// points to two more blocks.
 void patella::TInteraction::ClearMessages()
 {
 	for (const TMessage &Message : Messages) {
@@ -473,10 +431,10 @@ void patella::TInteraction::ClearMessages()
 	Messages.clear();
 }
 
-// 0x4e7f00. TaintedClipboardText is freed but not cleared, and the queued
-// messages are not freed. The original cleared the error reports first (gone
-// since issue #74). LinkRegexp is freed and, since issue #129 (TRegexp),
-// cleared too: the original left it dangling until InitStatus.
+// TaintedClipboardText is freed but not cleared, and the queued messages are
+// not freed. The original cleared the error reports first (gone since issue
+// #74). LinkRegexp is freed and, since issue #129 (TRegexp), cleared too:
+// the original left it dangling until InitStatus.
 void patella::TInteraction::ExitStatus()
 {
 	patella::bridge::Session().ExitSession(); // the character list (issue #105)
@@ -485,15 +443,14 @@ void patella::TInteraction::ExitStatus()
 	LinkRegexp.Reset();
 }
 
-// 0x4e8580, line 91
 void patella::TSession::SetRight(int rightid, int Value)
 {
 	PATELLA_ASSERT_VALUES(In(rightid,0,RIGHT_ANY-1), rightid);
 	Rights[rightid] = Value;
 }
 
-// 0x4e86e0, line 100. Bit -1 asks for any bit. The RIGHT_ANY branch cannot
-// be reached after the assertion; it is in the binary.
+// Bit -1 asks for any bit. The RIGHT_ANY branch cannot be reached after
+// the assertion; it is in the binary.
 bool patella::TSession::CheckRight(int rightid, int Bit) const
 {
 	PATELLA_ASSERT_VALUES(In(rightid,0,RIGHT_ANY-1), rightid);
@@ -504,7 +461,7 @@ bool patella::TSession::CheckRight(int rightid, int Bit) const
 	return (Rights[rightid] & (1 << Bit)) != 0;
 }
 
-// 0x4e88c0, line 165. Reasons of the gamemaster report dialog.
+// Reasons of the gamemaster report dialog.
 const char *GetRightName(int rightid)
 {
 	switch (rightid) {
@@ -545,7 +502,6 @@ const char *GetRightName(int rightid)
 	}
 }
 
-// 0x4e8de0, line 183
 const char *GetActionName(int actionid)
 {
 	switch (actionid) {
@@ -562,22 +518,21 @@ const char *GetActionName(int actionid)
 	}
 }
 
-// 0x4e9020, line 197. Appends a message; the queue takes ownership of the
-// parameters that ClearMessages frees.
+// Appends a message; the queue takes ownership of the parameters that
+// ClearMessages frees.
 void patella::TInteraction::AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2)
 {
 	PATELLA_ASSERT_VALUES(In(Type,MESSAGE_NONE,MESSAGE_STARTPATCHER), Type);
 	Messages.push_back({Type, Param1, Param2});
 }
 
-// 0x4e91d0, line 209. Inserts a message at the front of the queue.
+// Inserts a message at the front of the queue.
 void patella::TInteraction::AddMessageFirst(int Type, std::intptr_t Param1, std::intptr_t Param2)
 {
 	PATELLA_ASSERT_VALUES(In(Type,MESSAGE_NONE,MESSAGE_STARTPATCHER), Type);
 	Messages.insert(Messages.begin(), {Type, Param1, Param2});
 }
 
-// 0x4e93d0, lines 621-622
 void patella::TSession::SetAccount(int Number, const char *Password)
 {
 	PATELLA_ASSERT(Password!=nullptr);
@@ -593,7 +548,7 @@ void patella::TSession::SetAccount(int Number, const char *Password)
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 }
 
-// 0x4e96d0, lines 669-673. Address is the IPv4 address in network order.
+// Address is the IPv4 address in network order.
 void patella::TSession::SetCharacter(int Number, const char *Name, const char *World, const uint8 *Address, int Port)
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,AccountCharacters-1), Number);
@@ -611,45 +566,39 @@ void patella::TSession::SetCharacter(int Number, const char *Name, const char *W
 	Character->Port = Port;
 }
 
-// 0x4e9c50, line 696
 void patella::TSession::SetActiveCharacter(int Number)
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,AccountCharacters-1), Number);
 	ActiveCharacter = Number;
 }
 
-// 0x4e9db0, line 713
 const char *patella::TSession::GetCharacterName(int Number) const
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,AccountCharacters-1), Number);
 	return Characters[Number].Name;
 }
 
-// 0x4e9f20, line 722
 const char *patella::TSession::GetCharacterWorld(int Number) const
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,AccountCharacters-1), Number);
 	return Characters[Number].World;
 }
 
-// 0x4ea090, line 740
 const char *patella::TSession::GetCharacterIPAddress(int Number) const
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,AccountCharacters-1), Number);
 	return Characters[Number].IPAddress;
 }
 
-// 0x4ea200, line 749
 int patella::TSession::GetCharacterPort(int Number) const
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,AccountCharacters-1), Number);
 	return Characters[Number].Port;
 }
 
-// 0x4ea370, line 869. Keeps a copy of the text; if its lower-case form
-// contains something like a web or IP address, the link warning handler is
-// called instead of copying (it can copy later with
-// CopyTaintedClipboardText). Text and Length are the span's pointer and its size as an int (issue #69).
+// Keeps a copy of the text; if its lower-case form contains something like a web or IP address, the
+// link warning handler is called instead of copying (it can copy later with CopyTaintedClipboardText).
+// Text and Length are the span's pointer and its size as an int (issue #69).
 void patella::TInteraction::CheckClipboardText(patella::TSpan<const char> Characters)
 {
 	const char *const Text = Characters.data();
@@ -671,22 +620,20 @@ void patella::TInteraction::CheckClipboardText(patella::TSpan<const char> Charac
 	SetClipboardText(TaintedClipboardText);
 }
 
-// 0x4ea5b0, line 875
 void patella::TInteraction::CopyToClipboard(const char *text)
 {
 	PATELLA_ASSERT(text);
 	CheckClipboardText(patella::TSpan<const char>(text, strlen(text)));
 }
 
-// 0x4ea710, line 882
 void patella::TInteraction::CopyTaintedClipboardText()
 {
 	PATELLA_ASSERT(TaintedClipboardText);
 	SetClipboardText(TaintedClipboardText);
 }
 
-// 0x4ea860, line 1051. Not everything is reset: the mouse, window and drag
-// positions keep their values.
+// Not everything is reset: the mouse, window and drag positions keep their
+// values.
 void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventhandler)())
 {
 	PATELLA_ASSERT(linkwarningeventhandler!=nullptr);
@@ -714,7 +661,7 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	PendingActionNumber = 0;
 }
 
-// InitStatus's part (0x4ea860, issue #105): the session's members in the order InitStatus wrote them (Gamemaster and
+// InitStatus's part (issue #105): the session's members in the order InitStatus wrote them (Gamemaster and
 // the rights first, ClearRights inlined there; the rest after its other data).
 void patella::TSession::InitSession(bool Value)
 {
@@ -730,7 +677,7 @@ void patella::TSession::InitSession(bool Value)
 	Progress = -1;
 }
 
-// ExitStatus's part (0x4e7f00, issue #105): the character list, freed first.
+// ExitStatus's part (issue #105): the character list, freed first.
 void patella::TSession::ExitSession()
 {
 	if (Characters != nullptr)

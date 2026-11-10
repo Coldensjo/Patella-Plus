@@ -620,7 +620,7 @@ bool TSurfaceVulkan::Init(patella::platform::TWindowHandle *Window, int VMode, T
 }
 
 // The display modes as surfaceDX9.cpp's DirectDraw 4 EnumDisplayModes(0) and its callback (SurfaceDX.obj's
-// copy 0x4ec810) gave them (issue #20): the display's modes in the order EnumDisplaySettings lists them,
+// copy) gave them (issue #20): the display's modes in the order EnumDisplaySettings lists them,
 // each size and depth once (without DDEDM_REFRESHRATES DirectDraw folds the refresh rates), at least
 // 640x480 and 16 bits. Frequency is 0: DirectDraw then reports none, and the callback tested the refresh
 // rate's flag in the pixel format's flags, where it is never set. On the machine of issue #20 both lists

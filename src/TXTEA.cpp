@@ -1,4 +1,4 @@
-// TXTEA.cpp: reconstructed from Tibia.exe 7.72 (0x508c70-0x508f98).
+// TXTEA.cpp: reconstructed from Tibia.exe 7.72.
 // Standard XTEA with 32 cycles; the compiler unrolled the loop four cycles per
 // iteration. Blocks are two little-endian 32-bit words.
 
@@ -11,7 +11,6 @@ namespace {
 
 const uint32 DELTA = 0x9e3779b9;
 
-// 0x508cd0
 void EncryptXTEA(uint32 *Block, const uint32 *Key)
 {
 	uint32 v0 = Block[0];
@@ -26,7 +25,6 @@ void EncryptXTEA(uint32 *Block, const uint32 *Key)
 	Block[1] = v1;
 }
 
-// 0x508e00
 void DecryptXTEA(uint32 *Block, const uint32 *Key)
 {
 	uint32 v0 = Block[0];
@@ -44,7 +42,6 @@ void DecryptXTEA(uint32 *Block, const uint32 *Key)
 } // namespace
 
 
-// 0x508c70
 TXTEA::TXTEA()
 {
 	Key[0] = 0;
@@ -53,7 +50,6 @@ TXTEA::TXTEA()
 	Key[3] = 0;
 }
 
-// 0x508ca0
 void TXTEA::SetKey(TKey Key)
 {
 	if (Key.data() != nullptr) {
@@ -64,7 +60,6 @@ void TXTEA::SetKey(TKey Key)
 	}
 }
 
-// 0x508f60
 void TXTEA::EncryptBlock(TBlock Block)
 {
 	if (Block.data() != nullptr) {
@@ -78,7 +73,6 @@ void TXTEA::EncryptBlock(TBlock Block)
 	}
 }
 
-// 0x508f80
 void TXTEA::DecryptBlock(TBlock Block)
 {
 	if (Block.data() != nullptr) {

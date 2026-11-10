@@ -59,7 +59,7 @@ struct TTalkLine {
 	TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, const char *_Line, int DiffTime);
 	TTalkLine(const TTalkLine &) = delete;
 	TTalkLine &operator=(const TTalkLine &) = delete;
-	// 0x4fd6c0, Talk.h inline.
+	// Talk.h inline.
 	[[nodiscard]] const char *GetText() const { return GetTimeStamps() ? Line : WithoutTime; }
 };
 class TTalkBuffer;
@@ -67,12 +67,11 @@ class TTalkBuffer {
 public:
 	TTalkBuffer(const TTalkBuffer &) = delete;
 	TTalkBuffer &operator=(const TTalkBuffer &) = delete;
-	// 0x4fd5a0, Talk.h inline; Closed is deliberately not initialized.
+	// Talk.h inline; Closed is deliberately not initialized.
 	TTalkBuffer(int TalkMode) : ReceiveTalkMode(TalkMode), SendTalkMode(TalkMode),
 								Changed(true), first(nullptr), last(nullptr), cursor(nullptr), lines(0), limit(1000),
 								ShowMessages(false), Enabled(true), Complete(true), LinesChanged(true), Locked(false), Selected(false) {}
 	~TTalkBuffer(); // noexcept (issue #81)
-	// 0x4fd5f0-0x4fd6b7, Talk.h inlines, in vtable order.
 	virtual bool GetChanged()
 	{
 		const bool Result = Changed;
@@ -95,9 +94,9 @@ public:
 	virtual bool SetWriteEnabled([[maybe_unused]] bool Value) { return true; }
 	virtual void Append(TTalkLine *line);
 	virtual void AddText(int Mode, const char *text, int DiffTime);
-	// The binary's vtable (0x573738) has Remove(int) at +0x1c and
-	// Remove(TTalkLine *) at +0x20; MSVC puts overloaded virtuals in reverse
-	// order of declaration, so Remove(TTalkLine *) is declared first (issue #36).
+	// The binary's vtable has Remove(int) at +0x1c and Remove(TTalkLine *) at
+	// +0x20; MSVC puts overloaded virtuals in reverse order of declaration, so
+	// Remove(TTalkLine *) is declared first (issue #36).
 	virtual void Remove(TTalkLine *line);
 	virtual void Remove(int lineNumber);
 	virtual void Clear();
@@ -138,21 +137,20 @@ public:
 class TPrivateTalkBuffer final : public TTalkBuffer {
 public:
 	TPrivateTalkBuffer(int TalkMode, const char *_Addressee);
-	// 0x506eb0, Talk.h inline.
+	// Talk.h inline.
 	const char *GetAddressee() override { return Addressee; }
 	TFixedString<30> Addressee;
 };
 class TChannelTalkBuffer : public TTalkBuffer {
 public:
 	TChannelTalkBuffer(int TalkMode, int _ChannelID);
-	// 0x507060, Talk.h inline.
+	// Talk.h inline.
 	int GetChannelID() override { return ChannelID; }
 	int ChannelID;
 };
 class TRuleViolationTalkBuffer final : public TTalkBuffer {
 public:
 	TRuleViolationTalkBuffer(int ReceiveTalkMode, int SendTalkMode, const char *_Addressee);
-	// 0x507260 and 0x507270, Talk.h inline.
 	bool SetWriteEnabled(bool Value) override
 	{
 		WriteEnabled = Value;
@@ -172,7 +170,6 @@ public:
 	int GetChannelID() override { return ChannelID; }
 	int ChannelID;
 	void Append(TTalkLine *line) override;
-	// 0x5075c0, Talk.h line 321.
 	void AddText([[maybe_unused]] int Mode, [[maybe_unused]] const char *text, [[maybe_unused]] int DiffTime) override
 	{
 		TERROR("not possible");
@@ -185,14 +182,13 @@ public:
 class TPrivateChannel final : public TChannelTalkBuffer {
 public:
 	TPrivateChannel(int TalkMode, int _ChannelID);
-	// Folded with 0x467420/0x467430 from another header instantiation.
 	bool SetWriteEnabled(bool Value) override
 	{
 		WriteEnabled = Value;
 		return Value;
 	}
 	bool CanWrite() override { return WriteEnabled; }
-	// 0x5079f0, Talk.h inline.
+	// Talk.h inline.
 	bool IsPrivateChannel() override { return GetChannelID() >= 8; }
 	bool WriteEnabled;
 };
@@ -206,9 +202,9 @@ struct TTalkFilter {
 namespace patella {
 
 // Talk.cpp's state (issue #107, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#107"): the
-// globals 0x71dbd0-0x71eff4 of the original are the members, in its .bss order with the same initial values, and the
-// file's functions the members of the same names. TGUI owns it (GUI.h). It is TPreferences' TTalkLists: the White
-// and Ignore lists that the options read and write.
+// globals of the original are the members, in its .bss order with the same initial values, and the file's functions
+// the members of the same names. TGUI owns it (GUI.h). It is TPreferences' TTalkLists: the White and Ignore lists
+// that the options read and write.
 class TTalk final : public TTalkLists {
 public:
 	TTalk() = default;
@@ -290,29 +286,29 @@ public:
 
 private:
 	// Data, in the original's .bss order.
-	bool IgnoreListEnabled{};                           // 0x71dbd0
-	bool BuddyIgnore{};                                 // 0x71dbd1
-	bool IgnoreEnabled{};                               // 0x71dbd2
-	bool ConsoleChanged{};                              // 0x71dbd3
-	int StatusMessageTime{};                            // 0x71dbdc
-	TFixedString<STATUSMESSAGE_LENGTH> StatusMessage{}; // 0x71dbe0
-	int TalkOrder{};                                    // 0x71dde0
-	bool TalkChanged{};                                 // 0x71dde4
-	std::array<TTalkbox, TALKBOXES> Talkboxes{};        // 0x71dde8
+	bool IgnoreListEnabled{};
+	bool BuddyIgnore{};
+	bool IgnoreEnabled{};
+	bool ConsoleChanged{};
+	int StatusMessageTime{};
+	TFixedString<STATUSMESSAGE_LENGTH> StatusMessage{};
+	int TalkOrder{};
+	bool TalkChanged{};
+	std::array<TTalkbox, TALKBOXES> Talkboxes{};
 
 public:
-	// 0x71ef68; public: MainWindow.cpp, Map.cpp, TTalkBuffer::isDefault, the test mode's state dump and the golden
-	// Talk, MainWindow and Map tests read it.
+	// Public: MainWindow.cpp, Map.cpp, TTalkBuffer::isDefault, the test mode's state dump and the golden Talk,
+	// MainWindow and Map tests read it.
 	TTalkBuffer *DefaultTextBuffer{};
 
 private:
-	int TalkThrottle{};                                                   // 0x71ef6c
-	TIndexedVector<TTalkFilter *> BuddyExemptionList{0, 9, 10, nullptr};  // 0x71ef70, initialiser 0x55a140
-	TIndexedVector<TTalkFilter *> TemporaryIgnoreList{0, 9, 10, nullptr}; // 0x71ef90, initialiser 0x55a160
-	TIndexedVector<TTalkFilter *> IgnoreList{0, 9, 10, nullptr};          // 0x71efb0, initialiser 0x55a180
-	TIndexedVector<TTalkFilter *> ConsoleFilterList{0, 4, 5, nullptr};    // 0x71efd0, initialiser 0x55a1a0
-	int LastTime{};                                                       // 0x71eff0, UpdateTalkboxes' static
-	bool LastTimeSet{};                                                   // its guard (0x71eff4)
+	int TalkThrottle{};
+	TIndexedVector<TTalkFilter *> BuddyExemptionList{0, 9, 10, nullptr};
+	TIndexedVector<TTalkFilter *> TemporaryIgnoreList{0, 9, 10, nullptr};
+	TIndexedVector<TTalkFilter *> IgnoreList{0, 9, 10, nullptr};
+	TIndexedVector<TTalkFilter *> ConsoleFilterList{0, 4, 5, nullptr};
+	int LastTime{};     // UpdateTalkboxes' static
+	bool LastTimeSet{}; // its guard
 
 	static_assert(sizeof(Talkboxes) == TALKBOXES * sizeof(TTalkbox), "Talkboxes");
 };

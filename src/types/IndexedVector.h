@@ -1,5 +1,5 @@
 // IndexedVector.h: TIndexedVector<T>, CipSoft's growable vector<T> of Container.h (c:\mud\tibiaplayer\Container.h,
-// lines 353-370 and its operator()) over a std::vector. Patella-Modern issue #99 (notes/modernization-plan.md, section
+// and its operator()) over a std::vector. Patella-Modern issue #99 (notes/modernization-plan.md, section
 // 7, M7; notes/decisions.md, "TIndexedVector over std::vector"). The semantics are the original's, unchanged:
 //
 // - The entries are indexed from min to max, the lowest and highest index used so far; entry[0] is index start, and
@@ -14,10 +14,9 @@
 //   without a constructor keeps the memory's bytes, one with a constructor runs it). std::vector's own allocator
 //   value-initialises (zeros an int), so the storage has its own allocator, TArrayNewAllocator.
 //
-// The members are the original's, in its order and with its names (the Container test compares min ... init, with
-// their padding, by the original's offsets; the storage, the original's T *entry, is the last member). Instances of the
-// original and their addresses: Container.h's list. The members are initialised with braces: <windows.h>'s min and
-// max macros take a parenthesis after the name.
+// The members are the original's, in its order and with its names (the Container test compares min ... init, with their
+// padding, by the original's offsets; the storage, the original's T *entry, is the last member). The members are
+// initialised with braces: <windows.h>'s min and max macros take a parenthesis after the name.
 
 #pragma once
 
@@ -114,7 +113,6 @@ private:
 	void Grow(int Below, int Above);
 };
 
-// Lines 353-358 (0x453300, 0x425e70, 0x4973f0, 0x4fd6e0).
 template <class T>
 TIndexedVector<T>::TIndexedVector(int Min, int Max, int Block, T Init)
 	: min{Min}, max{Max}, start{Min}, space{Max - Min + 1}, block{Block}, initialized{true}, init{Init}
@@ -126,7 +124,6 @@ TIndexedVector<T>::TIndexedVector(int Min, int Max, int Block, T Init)
 		entry[Offset(i)] = init;
 }
 
-// Lines 368-370.
 template <class T>
 TIndexedVector<T>::TIndexedVector(int Min, int Max, int Block)
 	: min{Min}, max{Max}, start{Min}, space{Max - Min + 1}, block{Block}, initialized{false}

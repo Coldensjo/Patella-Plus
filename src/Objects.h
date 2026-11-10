@@ -18,13 +18,12 @@
 #include <type_traits>
 
 // A reference to an object (12 bytes, passed by value). Type is named in
-// MapWindow.cpp's "SrcObj.Type!=CREATURE" (CREATURE is 99), Data in
-// Dialogs.cpp's "In(DraggedObject.Data,1,100)" (the count); Data2 is ours.
-// The default constructor clears the object: Map.cpp's TMapPoint, ten
-// TObjects and plain ints, has a compiler-generated constructor (0x4b0b40)
-// that zeroes exactly the ten objects. Written with default member
-// initializers so that the type stays an aggregate. MapWindow.cpp compares
-// objects with numbers ("SrcObj!=0", "Obj!=CREATURE") and prints one as the
+// MapWindow.cpp's "SrcObj.Type!=CREATURE" (CREATURE is 99), Data in Dialogs.cpp's
+// "In(DraggedObject.Data,1,100)" (the count); Data2 is ours. The default constructor
+// clears the object: Map.cpp's TMapPoint, ten TObjects and plain ints, has a
+// compiler-generated constructor that zeroes exactly the ten objects. Written with
+// default member initializers so that the type stays an aggregate. MapWindow.cpp
+// compares objects with numbers ("SrcObj!=0", "Obj!=CREATURE") and prints one as the
 // int value of Obj in its catch wrapper: the original converts a TObject to its Type.
 struct TObject {
 	int Type = 0;
@@ -110,7 +109,7 @@ struct TProperties {
 	int PatternDepth;  // +0x18
 	int Phases;        // +0x1c
 	uint16 *Sprites;   // +0x20, Width*Height*Layers*PatternWidth*PatternHeight*PatternDepth*Phases
-	uint8 Flags[4];    // +0x24, bit Flag%8 of Flags[Flag/8]; NOLINT(modernize-avoid-c-arrays): the assertion of line 67 reads *(int*)Entry.Flags, frozen until M5 (issue #60)
+	uint8 Flags[4];    // +0x24, bit Flag%8 of Flags[Flag/8]; NOLINT(modernize-avoid-c-arrays): an assertion reads *(int*)Entry.Flags, frozen until M5 (issue #60)
 	int Waypoints;     // +0x28, BANK
 	int MaxLength;     // +0x2c, WRITE and WRITEONCE
 	int Brightness;    // +0x30, LIGHT
@@ -140,10 +139,10 @@ namespace patella {
 
 // Objects.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the
 // subsystem objects" and "#106"): Tibia.dat's four tables, read once, then read-only, and the functions of the same
-// names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. The data
-// (0x719d8c-0x719dab, .bss: every member starts empty) is public: the golden Objects, Divisions, Errors, Graphics, Map
-// and MapWindow tests read the tables, the Objects test NoObject and DatSignature, the Communication world sets both;
-// Communication.cpp sends DatSignature and compares with NoObject, Inventory.cpp and Map.cpp return NoObject.
+// names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. The data (.bss:
+// every member starts empty) is public: the golden Objects, Divisions, Errors, Graphics, Map and MapWindow tests read
+// the tables, the Objects test NoObject and DatSignature, the Communication world sets both; Communication.cpp sends
+// DatSignature and compares with NoObject, Inventory.cpp and Map.cpp return NoObject.
 class TObjectTypes {
 public:
 	TObjectTypes() = default;
@@ -220,12 +219,12 @@ public:
 
 	// Data, in .bss order. The four tables own their arrays (std::unique_ptr since issue #58; the entries' Sprites
 	// stay raw, freed by ReleaseObjects).
-	std::unique_ptr<array<TProperties>> MissileProperties; // 0x719d8c
-	std::unique_ptr<array<TProperties>> EffectProperties;  // 0x719d90
-	std::unique_ptr<array<TProperties>> OutfitProperties;  // 0x719d94
-	std::unique_ptr<array<TProperties>> ObjectProperties;  // 0x719d98, from 100
-	uint32 DatSignature{};                                 // 0x719d9c, sent at login and when patching
-	TObject NoObject;                                      // 0x719da0, never written; owner inferred from the address
+	std::unique_ptr<array<TProperties>> MissileProperties;
+	std::unique_ptr<array<TProperties>> EffectProperties;
+	std::unique_ptr<array<TProperties>> OutfitProperties;
+	std::unique_ptr<array<TProperties>> ObjectProperties; // from 100
+	uint32 DatSignature{};                                // sent at login and when patching
+	TObject NoObject;                                     // never written; owner inferred from the address
 };
 
 // The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the object

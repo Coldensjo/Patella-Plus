@@ -86,8 +86,7 @@ static_assert(sizeof(TEffect) == 0x44 && offsetof(TEffect, Text) == 0x08 && offs
 		&& offsetof(TEffect, Field) == 0x38,
 	"TEffect's layout");
 
-// An automap mark (0x70 bytes). The constructor (inlined in the vector<TMark>
-// constructor 0x426170 and in LoadAutomapBlock) clears it.
+// An automap mark (0x70 bytes). The constructor clears it.
 struct TMark {
 	TMark()
 	{
@@ -111,10 +110,10 @@ struct TCoordinate {
 };
 
 // One automap block: 256x256 fields of one floor (0x200a8 bytes). The
-// inline constructor is 0x4b1410, the compiler-generated destructor (which
-// frees Marks) 0x4b0b30. Color and Speed were uint8 [256][256], indexed [x][y];
-// since Patella-Modern issue #101 they are TAutomapLayer (AutomapLayer.h), the
-// same bytes in the same order, indexed through Color.view()[x, y].
+// compiler-generated destructor frees Marks. Color and Speed were uint8
+// [256][256], indexed [x][y]; since Patella-Modern issue #101 they are
+// TAutomapLayer (AutomapLayer.h), the same bytes in the same order, indexed
+// through Color.view()[x, y].
 struct TAutomapBlock {
 	TAutomapBlock() : Marks(0, 0, 10) { MarkCount = 0; }
 
@@ -133,7 +132,7 @@ struct TAutomapBlock {
 	int MarkCount;               // +0x200a4
 };
 
-// A node of FindPath's search (0x20 bytes); constructor 0x4b0880.
+// A node of FindPath's search (0x20 bytes).
 struct TPathNode {
 	TPathNode()
 	{
@@ -171,7 +170,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 
 inline constexpr int AUTOMAP_BLOCKS = 10;
 
-// The effect table (0x5d16f8): EFFECTS entries, numbered by TEffectId (issue #103; notes/decisions.md, "#102").
+// The effect table: EFFECTS entries, numbered by TEffectId (issue #103; notes/decisions.md, "#102").
 using TEffectTable = TSlotTable<TEffect, EFFECTS, TEffectId>;
 
 // The effects of one map point, first to last, by their Next links (issue #103): TEffectTable::Chain from the point's
@@ -204,10 +203,9 @@ protected:
 
 // Map.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the subsystem
 // objects" and "#106"): the map points and their position, the effect table and the two iterators, the automap blocks
-// and their cache list, the ambient light (0x5d16c0-0x5d4c4b, 0x7152d0-0x7152e7), private as the file-local statics
-// were, with the same initial values (Fields and FieldNumber as their initialisers 0x559f40 and 0x559f60 made them,
-// the others 0). The functions are the members of the same names, the file-local ones private. TMapState owns it
-// (MapState.h), after TObjectTypes, which it reads.
+// and their cache list, the ambient light, private as the file-local statics were, with the same initial values
+// (Fields and FieldNumber as their initialisers made them, the others 0). The functions are the members of the same
+// names, the file-local ones private. TMapState owns it (MapState.h), after TObjectTypes, which it reads.
 class TMap {
 public:
 	TMap(TObjectTypes &ObjectTypes, TMapConsole &Console);
@@ -312,25 +310,25 @@ private:
 	TMapConsole &Console; // issue #118
 
 	// Data, in the original's .data/.bss order.
-	void (*CreatureCallback)(int CreatureID){};                                      // 0x5d16c0, called for every creature ClearField removes
-	int AmbienteActualBrightness{};                                                  // 0x5d16c4, follows AmbienteBrightness step by step
-	int AmbienteBrightness{};                                                        // 0x5d16c8, -1: take the next value at once
-	bool AutomapChanged{};                                                           // 0x5d16cc
-	int LeastRecentBlock{};                                                          // 0x5d16d0, tail of the block cache's LRU list
-	int MostRecentBlock{};                                                           // 0x5d16d4, head
-	int EffectIteratorCount{};                                                       // 0x5d16d8
-	int EffectIteratorField{};                                                       // 0x5d16dc
-	int ObjectIteratorCount{};                                                       // 0x5d16e0
-	int ObjectIteratorField{};                                                       // 0x5d16e4
-	int MapZ{};                                                                      // 0x5d16e8, world position of the map's centre
-	int MapY{};                                                                      // 0x5d16ec
-	int MapX{};                                                                      // 0x5d16f0
-	TEffectTable Effects;                                                            // 0x5d16f8, an array of EFFECTS until issue #102
-	array<TMapPoint> Fields{0, MAPSIZE_X * MAPSIZE_Y * MAPSIZE_Z - 1};               // 0x5d4c18, initialiser at 0x559f40
-	matrix3d<int> FieldNumber{0, MAPSIZE_X - 1, 0, MAPSIZE_Y - 1, 0, MAPSIZE_Z - 1}; // 0x5d4c24, 0x559f60
-	std::array<TAutomapBlock, AUTOMAP_BLOCKS> AutomapBlocks;                         // 0x5d4c40, initialiser at 0x559f90
-	TRGBColor AmbienteColor;                                                         // 0x7152d0
-	TRGBColor AmbienteActualColor;                                                   // 0x7152dc
+	void (*CreatureCallback)(int CreatureID){}; // called for every creature ClearField removes
+	int AmbienteActualBrightness{};             // follows AmbienteBrightness step by step
+	int AmbienteBrightness{};                   // -1: take the next value at once
+	bool AutomapChanged{};
+	int LeastRecentBlock{}; // tail of the block cache's LRU list
+	int MostRecentBlock{};  // head
+	int EffectIteratorCount{};
+	int EffectIteratorField{};
+	int ObjectIteratorCount{};
+	int ObjectIteratorField{};
+	int MapZ{}; // world position of the map's centre
+	int MapY{};
+	int MapX{};
+	TEffectTable Effects; // an array of EFFECTS until issue #102
+	array<TMapPoint> Fields{0, MAPSIZE_X * MAPSIZE_Y * MAPSIZE_Z - 1};
+	matrix3d<int> FieldNumber{0, MAPSIZE_X - 1, 0, MAPSIZE_Y - 1, 0, MAPSIZE_Z - 1};
+	std::array<TAutomapBlock, AUTOMAP_BLOCKS> AutomapBlocks;
+	TRGBColor AmbienteColor;
+	TRGBColor AmbienteActualColor;
 
 	static_assert(sizeof(AutomapBlocks) == AUTOMAP_BLOCKS * sizeof(TAutomapBlock), "AutomapBlocks");
 };

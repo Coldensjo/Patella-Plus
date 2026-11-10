@@ -1,14 +1,14 @@
-// Communication.cpp: reconstructed from Tibia.exe 7.72 (0x401000, 0x404350-0x417270).
+// Communication.cpp: reconstructed from Tibia.exe 7.72.
 // The client-to-server packets (Send*) and the handlers of the server's
 // packets (Receive*), which ReceivePackets in Control.cpp dispatches.
 // Functions are in original source order from the assertion and catch line
 // numbers; see notes/Communication.md for the details of this file.
 //
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none
-// apart from the handlers of their own: the encryption failures of SendLogin
-// and SendGameLogin (TRSA's const char *) and ReceiveMoveCreature's cylinder
-// loop (an error while listing the fields goes into the message).
+// The original's catch wrappers (common.h) are gone since issue #78; the
+// functions here have no handlers apart from their own: the encryption
+// failures of SendLogin and SendGameLogin (TRSA's const char *) and
+// ReceiveMoveCreature's cylinder loop (an error while listing the fields
+// goes into the message).
 
 #include "Communication.h"
 #include "Help.h"
@@ -57,27 +57,12 @@ static_assert(offsetof(TCreature, Direction) == 0x50, "creature direction");
 static_assert(offsetof(TCreature, OutfitType) == 0x60, "creature outfit");
 static_assert(offsetof(TCreature, PKFlag) == 0x90, "creature skull");
 
-// Not in this file's source: the linker placed VC7.1 STL template code that
-// this file instantiates (through std::stringstream in SendLogin and
-// SendGameLogin) and two compiler-generated TMyException members in the
-// address range. They are listed in names.tsv as kind "stl":
-//   0x412a60 stringstream::str, 0x412a80 num_put::do_put(double),
-//   0x412be0 num_put::_Ffmt, 0x412c40 num_put::_Fput,
-//   0x4131f0 string::append(count, char), 0x4132c0 string::insert(pos, count, char),
-//   0x4133e0 string::append(ptr, count), 0x4134f0 string::append(string, pos, count),
-//   0x4135e0 num_put::do_put(long double),
-//   0x4044f0 TMyException copy constructor, 0x404570 its scalar deleting destructor.
-// The same holds for 0x401010-0x404341 before the file's other functions
-// (string, stringstream and locale code; names.tsv rows std_<address>).
-
-// 0x401000, the first function of the image (no line evidence). Called by
-// InitControl. The original cleared the patch transfer's buffer; since issue #75 (the patcher removed) there is
-// nothing left to set up.
+// Called by InitControl. The original cleared the patch transfer's buffer; since issue #75 (the patcher
+// removed) there is nothing left to set up.
 void patella::TCommunication::InitCommunication()
 {
 }
 
-// 0x413780, lines 41-96
 void patella::TCommunication::SendLogin(uint32 AccountID, const char *Password)
 {
 	PATELLA_ASSERT(Password!=nullptr);
@@ -135,7 +120,6 @@ void patella::TCommunication::SendLogin(uint32 AccountID, const char *Password)
 	Network.SendCommand(false);
 }
 
-// 0x413de0, lines 109-166
 void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, const char *Password)
 {
 	PATELLA_ASSERT(Name!=nullptr);
@@ -192,22 +176,18 @@ void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, 
 	Network.SendCommand(false);
 }
 
-// 0x404350, lines 178-178
-// The body is in the leading gap, but its Communication.cpp catch identifies source line 178.
 void patella::TCommunication::SendLogout()
 {
 	Network.BeginCommand(GAME_SEND_LOGOUT);
 	Network.SendCommand(true);
 }
 
-// 0x404590, lines 190-190
 void patella::TCommunication::SendPing()
 {
 	Network.BeginCommand(GAME_SEND_PING);
 	Network.SendCommand(true);
 }
 
-// 0x414530, lines 208-208
 void patella::TCommunication::PrepareMovement()
 {
 	if (GetAutoChaseOff()) {
@@ -224,7 +204,6 @@ void patella::TCommunication::PrepareMovement()
 	}
 }
 
-// 0x414700, lines 219-238
 // An invalid single-step direction still sends the existing command buffer.
 void patella::TCommunication::SendWalk()
 {
@@ -252,7 +231,6 @@ void patella::TCommunication::SendWalk()
 	Network.SendCommand(true);
 }
 
-// 0x414a10, lines 251-251
 void patella::TCommunication::SendStop()
 {
 	PrepareMovement();
@@ -260,35 +238,30 @@ void patella::TCommunication::SendStop()
 	Network.SendCommand(true);
 }
 
-// 0x404730, lines 263-263
 void patella::TCommunication::SendTurnNorth()
 {
 	Network.BeginCommand(GAME_SEND_TURN_NORTH);
 	Network.SendCommand(true);
 }
 
-// 0x4048d0, lines 275-275
 void patella::TCommunication::SendTurnEast()
 {
 	Network.BeginCommand(GAME_SEND_TURN_EAST);
 	Network.SendCommand(true);
 }
 
-// 0x404a70, lines 287-287
 void patella::TCommunication::SendTurnSouth()
 {
 	Network.BeginCommand(GAME_SEND_TURN_SOUTH);
 	Network.SendCommand(true);
 }
 
-// 0x404c10, lines 299-299
 void patella::TCommunication::SendTurnWest()
 {
 	Network.BeginCommand(GAME_SEND_TURN_WEST);
 	Network.SendCommand(true);
 }
 
-// 0x404db0, lines 325-325
 void patella::TCommunication::SendMoveObject(int x, int y, int z, int ObjectType, int Position, int DestinationX, int DestinationY, int DestinationZ, int Count)
 {
 	if (ObjectTypes.GetObjectFlag(ObjectType, 13)) {
@@ -310,7 +283,6 @@ void patella::TCommunication::SendMoveObject(int x, int y, int z, int ObjectType
 	Network.SendCommand(true);
 }
 
-// 0x405000, lines 344-344
 void patella::TCommunication::SendRequestTrade(int x, int y, int z, int ObjectType, int Position, uint32 CreatureID)
 {
 	PlayerState.ClearPlayerSteps();
@@ -324,7 +296,6 @@ void patella::TCommunication::SendRequestTrade(int x, int y, int z, int ObjectTy
 	Network.SendCommand(true);
 }
 
-// 0x4051f0, lines 358-358
 void patella::TCommunication::SendInspectTrade(int Side, int Position)
 {
 	Network.BeginCommand(GAME_SEND_INSPECT_TRADE);
@@ -333,21 +304,18 @@ void patella::TCommunication::SendInspectTrade(int Side, int Position)
 	Network.SendCommand(true);
 }
 
-// 0x4053b0, lines 370-370
 void patella::TCommunication::SendAcceptTrade()
 {
 	Network.BeginCommand(GAME_SEND_ACCEPT_TRADE);
 	Network.SendCommand(true);
 }
 
-// 0x405550, lines 382-382
 void patella::TCommunication::SendRejectTrade()
 {
 	Network.BeginCommand(GAME_SEND_REJECT_TRADE);
 	Network.SendCommand(true);
 }
 
-// 0x4056f0, lines 401-401
 void patella::TCommunication::SendUseObject(int x, int y, int z, int ObjectType, int Position, int Container)
 {
 	if (x != POSITION_NOT_ON_MAP)
@@ -362,7 +330,6 @@ void patella::TCommunication::SendUseObject(int x, int y, int z, int ObjectType,
 	Network.SendCommand(true);
 }
 
-// 0x4058f0, lines 424-424
 void patella::TCommunication::SendUseObjectWith(int x1, int y1, int z1, int ObjectType1, int Position1, int x2, int y2, int z2, int ObjectType2, int Position2)
 {
 	if (x1 != POSITION_NOT_ON_MAP || x2 != POSITION_NOT_ON_MAP)
@@ -381,7 +348,6 @@ void patella::TCommunication::SendUseObjectWith(int x1, int y1, int z1, int Obje
 	Network.SendCommand(true);
 }
 
-// 0x405b20, lines 443-443
 void patella::TCommunication::SendUseObjectOnCreature(int x, int y, int z, int ObjectType, int Position, uint32 CreatureID)
 {
 	PlayerState.ClearPlayerSteps();
@@ -395,7 +361,6 @@ void patella::TCommunication::SendUseObjectOnCreature(int x, int y, int z, int O
 	Network.SendCommand(true);
 }
 
-// 0x405d10, lines 460-460
 void patella::TCommunication::SendRotateObject(int x, int y, int z, int ObjectType, int Position)
 {
 	Network.BeginCommand(GAME_SEND_ROTATE_OBJECT);
@@ -407,7 +372,6 @@ void patella::TCommunication::SendRotateObject(int x, int y, int z, int ObjectTy
 	Network.SendCommand(true);
 }
 
-// 0x405ef0, lines 473-473
 void patella::TCommunication::SendCloseContainer(int Container)
 {
 	Network.BeginCommand(GAME_SEND_CLOSE_CONTAINER);
@@ -415,7 +379,6 @@ void patella::TCommunication::SendCloseContainer(int Container)
 	Network.SendCommand(true);
 }
 
-// 0x4060a0, lines 486-486
 void patella::TCommunication::SendContainerUp(int Container)
 {
 	Network.BeginCommand(GAME_SEND_CONTAINER_UP);
@@ -423,7 +386,6 @@ void patella::TCommunication::SendContainerUp(int Container)
 	Network.SendCommand(true);
 }
 
-// 0x406250, lines 500-500
 void patella::TCommunication::SendEditText(uint32 ObjectNumber, const char *Text)
 {
 	Network.BeginCommand(GAME_SEND_EDIT_TEXT);
@@ -432,7 +394,6 @@ void patella::TCommunication::SendEditText(uint32 ObjectNumber, const char *Text
 	Network.SendCommand(true);
 }
 
-// 0x406410, lines 515-515
 void patella::TCommunication::SendEditHouseText(int Type, uint32 Identifier, const char *Text)
 {
 	Network.BeginCommand(GAME_SEND_EDIT_HOUSE_TEXT);
@@ -442,7 +403,6 @@ void patella::TCommunication::SendEditHouseText(int Type, uint32 Identifier, con
 	Network.SendCommand(true);
 }
 
-// 0x4065e0, lines 532-532
 void patella::TCommunication::SendLook(int x, int y, int z, int ObjectType, int Position)
 {
 	Network.BeginCommand(GAME_SEND_LOOK);
@@ -454,7 +414,6 @@ void patella::TCommunication::SendLook(int x, int y, int z, int ObjectType, int 
 	Network.SendCommand(true);
 }
 
-// 0x4067c0, lines 541-549
 void patella::TCommunication::SendTalk(int Mode, const char *Text)
 {
 	PATELLA_ASSERT_VALUES(Mode==TALK_SAY || Mode==TALK_WHISPER || Mode==TALK_YELL || Mode==TALK_GAMEMASTER_REQUEST || Mode==TALK_PLAYER_ANSWER || Mode==TALK_GAMEMASTER_BROADCAST || Mode==TALK_ANONYMOUS_BROADCAST, Mode);
@@ -465,7 +424,6 @@ void patella::TCommunication::SendTalk(int Mode, const char *Text)
 	Network.SendCommand(true);
 }
 
-// 0x406b40, lines 557-567
 void patella::TCommunication::SendTalk(int Mode, const char *Addressee, const char *Text)
 {
 	PATELLA_ASSERT_VALUES(Mode==TALK_PRIVATE_MESSAGE || Mode==TALK_GAMEMASTER_ANSWER || Mode==TALK_GAMEMASTER_MESSAGE || Mode==TALK_ANONYMOUS_MESSAGE, Mode);
@@ -478,7 +436,6 @@ void patella::TCommunication::SendTalk(int Mode, const char *Addressee, const ch
 	Network.SendCommand(true);
 }
 
-// 0x406f90, lines 575-584
 void patella::TCommunication::SendTalk(int Mode, int ChannelID, const char *Text)
 {
 	PATELLA_ASSERT_VALUES(Mode==TALK_CHANNEL_CALL || Mode==TALK_GAMEMASTER_CHANNELCALL || Mode==TALK_ANONYMOUS_CHANNELCALL, Mode);
@@ -490,14 +447,12 @@ void patella::TCommunication::SendTalk(int Mode, int ChannelID, const char *Text
 	Network.SendCommand(true);
 }
 
-// 0x407300, lines 596-596
 void patella::TCommunication::SendRequestChannels()
 {
 	Network.BeginCommand(GAME_SEND_REQUEST_CHANNELS);
 	Network.SendCommand(true);
 }
 
-// 0x4074a0, lines 609-609
 void patella::TCommunication::SendJoinChannel(int ChannelID)
 {
 	Network.BeginCommand(GAME_SEND_JOIN_CHANNEL);
@@ -505,7 +460,6 @@ void patella::TCommunication::SendJoinChannel(int ChannelID)
 	Network.SendCommand(true);
 }
 
-// 0x407650, lines 622-622
 void patella::TCommunication::SendLeaveChannel(int ChannelID)
 {
 	Network.BeginCommand(GAME_SEND_LEAVE_CHANNEL);
@@ -513,7 +467,6 @@ void patella::TCommunication::SendLeaveChannel(int ChannelID)
 	Network.SendCommand(true);
 }
 
-// 0x407800, lines 635-635
 void patella::TCommunication::SendOpenPrivateConversation(const char *Name)
 {
 	Network.BeginCommand(GAME_SEND_OPEN_PRIVATE_CONVERSATION);
@@ -521,7 +474,6 @@ void patella::TCommunication::SendOpenPrivateConversation(const char *Name)
 	Network.SendCommand(true);
 }
 
-// 0x4079b0, lines 648-648
 void patella::TCommunication::SendProcessRuleViolation(const char *Name)
 {
 	Network.BeginCommand(GAME_SEND_PROCESS_RULE_VIOLATION);
@@ -529,7 +481,6 @@ void patella::TCommunication::SendProcessRuleViolation(const char *Name)
 	Network.SendCommand(true);
 }
 
-// 0x407b60, lines 661-661
 void patella::TCommunication::SendCloseRuleViolation(const char *Name)
 {
 	Network.BeginCommand(GAME_SEND_CLOSE_RULE_VIOLATION);
@@ -537,14 +488,12 @@ void patella::TCommunication::SendCloseRuleViolation(const char *Name)
 	Network.SendCommand(true);
 }
 
-// 0x407d10, lines 673-673
 void patella::TCommunication::SendCancelRuleViolation()
 {
 	Network.BeginCommand(GAME_SEND_CANCEL_RULE_VIOLATION);
 	Network.SendCommand(true);
 }
 
-// 0x407eb0, lines 689-689
 void patella::TCommunication::SendFightModes()
 {
 	Network.BeginCommand(GAME_SEND_FIGHT_MODES);
@@ -554,7 +503,6 @@ void patella::TCommunication::SendFightModes()
 	Network.SendCommand(true);
 }
 
-// 0x408080, lines 703-703
 void patella::TCommunication::SendAttack(uint32 CreatureID)
 {
 	if (CreatureID != 0)
@@ -564,7 +512,6 @@ void patella::TCommunication::SendAttack(uint32 CreatureID)
 	Network.SendCommand(true);
 }
 
-// 0x408230, lines 717-717
 void patella::TCommunication::SendFollow(uint32 CreatureID)
 {
 	if (CreatureID != 0)
@@ -574,14 +521,12 @@ void patella::TCommunication::SendFollow(uint32 CreatureID)
 	Network.SendCommand(true);
 }
 
-// 0x4083e0, lines 729-729
 void patella::TCommunication::SendOpenPrivateChannel()
 {
 	Network.BeginCommand(GAME_SEND_OPEN_PRIVATE_CHANNEL);
 	Network.SendCommand(true);
 }
 
-// 0x408580, lines 742-742
 void patella::TCommunication::SendInviteToPrivateChannel(const char *Name)
 {
 	Network.BeginCommand(GAME_SEND_INVITE_TO_PRIVATE_CHANNEL);
@@ -589,7 +534,6 @@ void patella::TCommunication::SendInviteToPrivateChannel(const char *Name)
 	Network.SendCommand(true);
 }
 
-// 0x408730, lines 755-755
 void patella::TCommunication::SendExcludeFromPrivateChannel(const char *Name)
 {
 	Network.BeginCommand(GAME_SEND_EXCLUDE_FROM_PRIVATE_CHANNEL);
@@ -597,7 +541,6 @@ void patella::TCommunication::SendExcludeFromPrivateChannel(const char *Name)
 	Network.SendCommand(true);
 }
 
-// 0x4088e0, lines 768-768
 void patella::TCommunication::SendInviteToParty(uint32 CharacterID)
 {
 	Network.BeginCommand(GAME_SEND_INVITE_TO_PARTY);
@@ -605,7 +548,6 @@ void patella::TCommunication::SendInviteToParty(uint32 CharacterID)
 	Network.SendCommand(true);
 }
 
-// 0x408a90, lines 781-781
 void patella::TCommunication::SendJoinParty(uint32 CharacterID)
 {
 	Network.BeginCommand(GAME_SEND_JOIN_PARTY);
@@ -613,7 +555,6 @@ void patella::TCommunication::SendJoinParty(uint32 CharacterID)
 	Network.SendCommand(true);
 }
 
-// 0x408c40, lines 794-794
 void patella::TCommunication::SendRevokePartyInvitation(uint32 CharacterID)
 {
 	Network.BeginCommand(GAME_SEND_REVOKE_PARTY_INVITATION);
@@ -621,7 +562,6 @@ void patella::TCommunication::SendRevokePartyInvitation(uint32 CharacterID)
 	Network.SendCommand(true);
 }
 
-// 0x408df0, lines 807-807
 void patella::TCommunication::SendPassPartyLeadership(uint32 CharacterID)
 {
 	Network.BeginCommand(GAME_SEND_PASS_PARTY_LEADERSHIP);
@@ -629,21 +569,18 @@ void patella::TCommunication::SendPassPartyLeadership(uint32 CharacterID)
 	Network.SendCommand(true);
 }
 
-// 0x408fa0, lines 818-818
 void patella::TCommunication::SendLeaveParty()
 {
 	Network.BeginCommand(GAME_SEND_LEAVE_PARTY);
 	Network.SendCommand(true);
 }
 
-// 0x409140, lines 830-830
 void patella::TCommunication::SendCancel()
 {
 	Network.BeginCommand(GAME_SEND_CANCEL);
 	Network.SendCommand(true);
 }
 
-// 0x4092e0, lines 847-847
 void patella::TCommunication::SendRefreshField(int x, int y, int z)
 {
 	Network.BeginCommand(GAME_SEND_REFRESH_FIELD);
@@ -655,7 +592,6 @@ void patella::TCommunication::SendRefreshField(int x, int y, int z)
 	Map.RequestFieldRefresh(x, y, z);
 }
 
-// 0x4094d0, lines 860-860
 void patella::TCommunication::SendRefreshContainer(int Container)
 {
 	Network.BeginCommand(GAME_SEND_REFRESH_CONTAINER);
@@ -663,7 +599,6 @@ void patella::TCommunication::SendRefreshContainer(int Container)
 	Network.SendCommand(true);
 }
 
-// 0x409680, lines 875-875
 // The request flag is set before sending and is not rolled back on an exception.
 void patella::TCommunication::SendRequestOutfit()
 {
@@ -674,7 +609,6 @@ void patella::TCommunication::SendRequestOutfit()
 	}
 }
 
-// 0x409830, lines 883-893
 void patella::TCommunication::SendOutfit(int OutfitType, const int *Colors)
 {
 	PATELLA_ASSERT(Colors!=nullptr);
@@ -687,7 +621,6 @@ void patella::TCommunication::SendOutfit(int OutfitType, const int *Colors)
 	Network.SendCommand(true);
 }
 
-// 0x409b00, lines 902-908
 void patella::TCommunication::SendAddBuddy(const char *Name)
 {
 	PATELLA_ASSERT(Name!=nullptr);
@@ -696,7 +629,6 @@ void patella::TCommunication::SendAddBuddy(const char *Name)
 	Network.SendCommand(true);
 }
 
-// 0x409d90, lines 921-921
 void patella::TCommunication::SendRemoveBuddy(uint32 CharacterID)
 {
 	Network.BeginCommand(GAME_SEND_REMOVE_BUDDY);
@@ -704,7 +636,6 @@ void patella::TCommunication::SendRemoveBuddy(uint32 CharacterID)
 	Network.SendCommand(true);
 }
 
-// 0x409f40, lines 934-934
 void patella::TCommunication::SendBugReport(const char *Text)
 {
 	Network.BeginCommand(GAME_SEND_BUG_REPORT);
@@ -712,7 +643,6 @@ void patella::TCommunication::SendBugReport(const char *Text)
 	Network.SendCommand(true);
 }
 
-// 0x40a0f0, lines 953-953
 void patella::TCommunication::SendRuleViolationReport(const char *Name, uint8 Reason, uint8 Action, const char *Comment, uint32 StatementID, bool IPBanishment)
 {
 	Network.BeginCommand(GAME_SEND_RULE_VIOLATION_REPORT);
@@ -725,10 +655,9 @@ void patella::TCommunication::SendRuleViolationReport(const char *Name, uint8 Re
 	Network.SendCommand(true);
 }
 
-// 0x40a2f0, line 969, SendDebugReport (client packet 0xe8: an error report of error.txt) is gone since
-// Patella-Modern issue #74 (decision D2).
+// SendDebugReport (client packet 0xe8: an error report of error.txt) is gone since Patella-Modern
+// issue #74 (decision D2).
 
-// 0x40a4c0, lines 994-994
 void patella::TCommunication::ReceiveLoginError()
 {
 	const char *Text = Network.GetString();
@@ -737,14 +666,12 @@ void patella::TCommunication::ReceiveLoginError()
 	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
 
-// 0x40a670, lines 1006-1006
 void patella::TCommunication::ReceiveLoginMessage()
 {
 	const char *Text = Network.GetString();
 	AddMessage(1, reinterpret_cast<std::intptr_t>("For Your Information"), reinterpret_cast<std::intptr_t>(Text));
 }
 
-// 0x40a810, lines 1020-1020
 void patella::TCommunication::ReceiveMessageOfTheDay()
 {
 	const char *Text = Network.GetString();
@@ -754,13 +681,13 @@ void patella::TCommunication::ReceiveMessageOfTheDay()
 	delete[] Text;
 }
 
-// 0x40a9c0 ReceivePatch (lines 1033-1045, packet 0x1e: a difference patch of a file), 0x40ae70 ReceiveWholeFile
-// (1061-1073, 0x1f: a whole file) and 0x40b290 ReceivePatchBlock (1083-1135, 0x20: a block of either) are gone since
-// Patella-Modern issue #75 (decision D9): with them a login server could rewrite Tibia.exe (as Tibia.bak), Tibia.dat,
-// Tibia.spr, Tibia.pic and Patch.exe, and have Patch.exe run. ReceiveUpdateRequest takes all three: the login ends as
-// a login error does, in the same dialog ("Sorry"), with TextUpdateRefused. The rest of what the server sent (the
-// patch's header or block, the packets after it in this frame and in the frames already received) is read and
-// dropped, so that nothing of it reaches the game server's table once the connection state is 0.
+// ReceivePatch (packet 0x1e: a difference patch of a file), ReceiveWholeFile (0x1f: a whole file) and
+// ReceivePatchBlock (0x20: a block of either) are gone since Patella-Modern issue #75 (decision D9): with them a
+// login server could rewrite Tibia.exe (as Tibia.bak), Tibia.dat, Tibia.spr, Tibia.pic and Patch.exe, and have
+// Patch.exe run. ReceiveUpdateRequest takes all three: the login ends as a login error does, in the same dialog
+// ("Sorry"), with TextUpdateRefused. The rest of what the server sent (the patch's header or block, the packets after
+// it in this frame and in the frames already received) is read and dropped, so that nothing of it reaches the game
+// server's table once the connection state is 0.
 void patella::TCommunication::ReceiveUpdateRequest()
 {
 	while (Network.GetNextCommand() != -1) {
@@ -774,7 +701,6 @@ void patella::TCommunication::ReceiveUpdateRequest()
 	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
 
-// 0x40b8b0, lines 1162-1162
 void patella::TCommunication::ReceiveCharacterList()
 {
 	int Count = 0;
@@ -796,10 +722,9 @@ void patella::TCommunication::ReceiveCharacterList()
 	AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 }
 
-// 0x40bac0, CancelPatch (line 1178: the update dialog's Cancel, the transfer dropped and the connection closed), is
-// gone with the update dialog since Patella-Modern issue #75.
+// CancelPatch (the update dialog's Cancel, the transfer dropped and the connection closed), is gone with
+// the update dialog since Patella-Modern issue #75.
 
-// 0x40bc80, lines 1192-1192
 void patella::TCommunication::ReceiveLoginServerOverloaded()
 {
 	Network.SetConnectionTimeout(0);
@@ -809,7 +734,6 @@ void patella::TCommunication::ReceiveLoginServerOverloaded()
 	Network.ConnectToLoginServer();
 }
 
-// 0x40be30, lines 1215-1215
 void patella::TCommunication::ReceiveGameLogin()
 {
 	Session.ClearRights();
@@ -822,7 +746,6 @@ void patella::TCommunication::ReceiveGameLogin()
 	SetActionState(ACTIONSTATE_NONE);
 }
 
-// 0x40c000, lines 1232-1232
 void patella::TCommunication::ReceiveGamemasterActions()
 {
 	int i;
@@ -833,7 +756,6 @@ void patella::TCommunication::ReceiveGamemasterActions()
 	}
 }
 
-// 0x40c1b0, lines 1246-1246
 void patella::TCommunication::ReceiveGameError()
 {
 	const char *Text = Network.GetString();
@@ -842,14 +764,12 @@ void patella::TCommunication::ReceiveGameError()
 	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
 
-// 0x40c360, lines 1258-1258
 void patella::TCommunication::ReceiveGameMessage()
 {
 	const char *Text = Network.GetString();
 	AddMessage(1, reinterpret_cast<std::intptr_t>("For Your Information"), reinterpret_cast<std::intptr_t>(Text));
 }
 
-// 0x40c500, lines 1271-1271
 void patella::TCommunication::ReceiveLoginWait()
 {
 	const char *Text = Network.GetString();
@@ -857,13 +777,11 @@ void patella::TCommunication::ReceiveLoginWait()
 	AddMessage(MESSAGE_RECONNECT_DIALOG, reinterpret_cast<std::intptr_t>(Text), Delay);
 }
 
-// 0x40c6a0, lines 1282-1282
 void patella::TCommunication::ReceivePing()
 {
 	SendPing();
 }
 
-// 0x40c830, lines 1302-1368
 // A missing known creature consumes a byte, not a word, for outfit type and skips no skull/shield bytes.
 uint32 patella::TCommunication::ReadCreature(int Type, int x, int y, int z)
 {
@@ -953,7 +871,7 @@ uint32 patella::TCommunication::ReadCreature(int Type, int x, int y, int z)
 	return CreatureID;
 }
 
-// 0x414bb0, lines 1401-1416. OldType only the original's catch wrapper read (issue #78).
+// OldType only the original's catch wrapper read (issue #78).
 void patella::TCommunication::ReadField(int rx, int ry, int rz)
 {
 	uint16 Type = 0;
@@ -992,7 +910,6 @@ void patella::TCommunication::ReadField(int rx, int ry, int rz)
 		Map.UpdateAutomap(rx, ry);
 }
 
-// 0x414ff0, lines 1437-1437
 void patella::TCommunication::ReadMap(int xmin, int ymin, int xmax, int ymax)
 {
 	int PlayerX;
@@ -1022,7 +939,6 @@ void patella::TCommunication::ReadMap(int xmin, int ymin, int xmax, int ymax)
 	}
 }
 
-// 0x415200, lines 1460-1460
 void patella::TCommunication::ReceiveMap()
 {
 	uint16 PlayerX = 0;
@@ -1039,7 +955,6 @@ void patella::TCommunication::ReceiveMap()
 	CheckEventHelpPosition(PlayerX, PlayerY, PlayerZ);
 }
 
-// 0x4153f0, lines 1476-1476
 void patella::TCommunication::ReceiveMapNorth()
 {
 	Map.ShiftMap(0, 1);
@@ -1052,7 +967,6 @@ void patella::TCommunication::ReceiveMapNorth()
 	CheckEventHelpPosition(x, y, z);
 }
 
-// 0x4155c0, lines 1492-1492
 void patella::TCommunication::ReceiveMapEast()
 {
 	Map.ShiftMap(-1, 0);
@@ -1065,7 +979,6 @@ void patella::TCommunication::ReceiveMapEast()
 	CheckEventHelpPosition(x, y, z);
 }
 
-// 0x415790, lines 1508-1508
 void patella::TCommunication::ReceiveMapSouth()
 {
 	Map.ShiftMap(0, -1);
@@ -1078,7 +991,6 @@ void patella::TCommunication::ReceiveMapSouth()
 	CheckEventHelpPosition(x, y, z);
 }
 
-// 0x415960, lines 1524-1524
 void patella::TCommunication::ReceiveMapWest()
 {
 	Map.ShiftMap(1, 0);
@@ -1091,7 +1003,6 @@ void patella::TCommunication::ReceiveMapWest()
 	CheckEventHelpPosition(x, y, z);
 }
 
-// 0x415b30, lines 1546-1546
 // ReadField already refreshes visible-floor lighting; this handler deliberately does it again.
 void patella::TCommunication::ReceiveField()
 {
@@ -1109,7 +1020,6 @@ void patella::TCommunication::ReceiveField()
 		Map.UpdateAutomap(rx, ry);
 }
 
-// 0x40cd10, lines 1575-1575
 void patella::TCommunication::ReceiveAddObject()
 {
 	int rx = 0;
@@ -1142,7 +1052,6 @@ void patella::TCommunication::ReceiveAddObject()
 		Map.UpdateAutomap(rx, ry);
 }
 
-// 0x40cfa0, lines 1594-1630
 void patella::TCommunication::ReceiveChangeObject()
 {
 	int rx = 0;
@@ -1151,7 +1060,7 @@ void patella::TCommunication::ReceiveChangeObject()
 	rx = Network.GetWord();
 	ry = Network.GetWord();
 	rz = Network.GetByte();
-	const int Position = Network.GetByte(); // read before the conversion (0x40cff3)
+	const int Position = Network.GetByte(); // read before the conversion
 	Map.AbsoluteToRelative(&rx, &ry, &rz);
 	const TObject OldObject = Map.GetMapObject(rx, ry, rz, Position);
 	if (OldObject.Type == ObjectTypes.NoObject.Type) {
@@ -1197,7 +1106,6 @@ void patella::TCommunication::ReceiveChangeObject()
 	}
 }
 
-// 0x40d440, lines 1649-1661
 void patella::TCommunication::ReceiveDeleteObject()
 {
 	int rx = 0;
@@ -1226,7 +1134,6 @@ void patella::TCommunication::ReceiveDeleteObject()
 	}
 }
 
-// 0x415d40, lines 1879-1895
 // Diagnostics may follow creature mutation; a missing creature record still moves the map object.
 void patella::TCommunication::ReceiveMoveCreature()
 {
@@ -1370,7 +1277,6 @@ void patella::TCommunication::ReceiveMoveCreature()
 		Map.UpdateAutomap(zx, zy);
 }
 
-// 0x40d7d0, lines 1922-1922
 void patella::TCommunication::ReceiveOpenContainer(int &Container)
 {
 	Container = Network.GetByte();
@@ -1396,7 +1302,6 @@ void patella::TCommunication::ReceiveOpenContainer(int &Container)
 	}
 }
 
-// 0x40da70, lines 1934-1934
 void patella::TCommunication::ReceiveCloseContainer(int &Container)
 {
 	Container = Network.GetByte();
@@ -1404,7 +1309,6 @@ void patella::TCommunication::ReceiveCloseContainer(int &Container)
 		Inventory.CloseContainer(Container);
 }
 
-// 0x40dc20, lines 1953-1953
 void patella::TCommunication::ReceiveContainerAddObject()
 {
 	int Container = 0;
@@ -1422,7 +1326,6 @@ void patella::TCommunication::ReceiveContainerAddObject()
 		Inventory.InsertContainerObject(Container, TObject{Type, (int)Data, 0});
 }
 
-// 0x40de40, lines 1974-1974
 void patella::TCommunication::ReceiveContainerChangeObject()
 {
 	int Container = 0;
@@ -1441,7 +1344,6 @@ void patella::TCommunication::ReceiveContainerChangeObject()
 		Inventory.ChangeContainerObject(Container, Position, TObject{Type, (int)Data, 0});
 }
 
-// 0x40e060, lines 1992-1992
 void patella::TCommunication::ReceiveContainerDeleteObject()
 {
 	int Container = 0;
@@ -1454,7 +1356,6 @@ void patella::TCommunication::ReceiveContainerDeleteObject()
 	}
 }
 
-// 0x40e230, lines 2011-2011
 void patella::TCommunication::ReceiveInventoryObject()
 {
 	int Position = 0;
@@ -1471,7 +1372,6 @@ void patella::TCommunication::ReceiveInventoryObject()
 	Inventory.SetBodyObject(Position, TObject{Type, (int)Data, 0});
 }
 
-// 0x40e440, lines 2024-2024
 void patella::TCommunication::ReceiveDeleteInventoryObject()
 {
 	int Position = 0;
@@ -1479,7 +1379,6 @@ void patella::TCommunication::ReceiveDeleteInventoryObject()
 	Inventory.DeleteBodyObject(Position);
 }
 
-// 0x40e5e0, lines 2046-2046
 void patella::TCommunication::ReceiveOwnTrade()
 {
 	TFixedString<40> Name;
@@ -1499,7 +1398,6 @@ void patella::TCommunication::ReceiveOwnTrade()
 	}
 }
 
-// 0x40e800, lines 2068-2068
 void patella::TCommunication::ReceiveCounterTrade()
 {
 	TFixedString<40> Name;
@@ -1520,13 +1418,11 @@ void patella::TCommunication::ReceiveCounterTrade()
 	}
 }
 
-// 0x40ea30, lines 2079-2079
 void patella::TCommunication::ReceiveCloseTrade()
 {
 	Inventory.ClearOffers();
 }
 
-// 0x40ebc0, lines 2092-2092
 void patella::TCommunication::ReceiveWorldLight()
 {
 	const int Brightness = Network.GetByte();
@@ -1534,7 +1430,6 @@ void patella::TCommunication::ReceiveWorldLight()
 	Map.SetAmbientLight(Brightness, Color);
 }
 
-// 0x40ed60, lines 2111-2111
 void patella::TCommunication::ReceiveMagicEffect()
 {
 	int rx = 0;
@@ -1548,7 +1443,6 @@ void patella::TCommunication::ReceiveMagicEffect()
 	Map.AddGraphicalEffect(rx, ry, rz, Effect);
 }
 
-// 0x40ef50, lines 2132-2132
 void patella::TCommunication::ReceiveAnimatedText()
 {
 	int rx = 0;
@@ -1564,7 +1458,6 @@ void patella::TCommunication::ReceiveAnimatedText()
 	Map.AddTextualEffect(rx, ry, rz, Color, Text);
 }
 
-// 0x40f150, lines 2155-2155
 void patella::TCommunication::ReceiveDistanceEffect()
 {
 	int sx = 0;
@@ -1582,7 +1475,6 @@ void patella::TCommunication::ReceiveDistanceEffect()
 	Map.AddMissileEffect(sx, sy, sz, dx, dy, dz, Effect);
 }
 
-// 0x40f380, lines 2170-2170
 void patella::TCommunication::ReceiveCreatureMark()
 {
 	uint32 CreatureID = 0;
@@ -1596,7 +1488,6 @@ void patella::TCommunication::ReceiveCreatureMark()
 	Network.GetByte();
 }
 
-// 0x40f550, lines 2185-2185
 void patella::TCommunication::ReceiveCreatureHealth()
 {
 	uint32 CreatureID = 0;
@@ -1610,7 +1501,6 @@ void patella::TCommunication::ReceiveCreatureHealth()
 	Network.GetByte();
 }
 
-// 0x40f710, lines 2205-2205
 void patella::TCommunication::ReceiveCreatureLight()
 {
 	uint32 CreatureID = 0;
@@ -1625,7 +1515,6 @@ void patella::TCommunication::ReceiveCreatureLight()
 	Network.GetByte();
 }
 
-// 0x40f8e0, lines 2235-2235
 void patella::TCommunication::ReceiveCreatureOutfit()
 {
 	uint32 CreatureID = 0;
@@ -1654,7 +1543,6 @@ void patella::TCommunication::ReceiveCreatureOutfit()
 	Creature->Colors[0] = Network.GetWord();
 }
 
-// 0x40fb20, lines 2250-2250
 void patella::TCommunication::ReceiveCreatureSpeed()
 {
 	uint32 CreatureID = 0;
@@ -1668,7 +1556,6 @@ void patella::TCommunication::ReceiveCreatureSpeed()
 	Network.GetWord();
 }
 
-// 0x40fce0, lines 2267-2267
 void patella::TCommunication::ReceiveCreatureSkull()
 {
 	uint32 CreatureID = 0;
@@ -1683,7 +1570,6 @@ void patella::TCommunication::ReceiveCreatureSkull()
 	Network.GetByte();
 }
 
-// 0x40fec0, lines 2283-2283
 void patella::TCommunication::ReceiveCreatureShield()
 {
 	uint32 CreatureID = 0;
@@ -1697,7 +1583,6 @@ void patella::TCommunication::ReceiveCreatureShield()
 	Network.GetByte();
 }
 
-// 0x410080, lines 2303-2303
 void patella::TCommunication::ReceiveEditText()
 {
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
@@ -1714,7 +1599,6 @@ void patella::TCommunication::ReceiveEditText()
 	AddMessage(MESSAGE_TEXT_DIALOG, reinterpret_cast<std::intptr_t>(Info), reinterpret_cast<std::intptr_t>(Strings));
 }
 
-// 0x410260, lines 2318-2318
 void patella::TCommunication::ReceiveEditHouseText()
 {
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
@@ -1725,7 +1609,6 @@ void patella::TCommunication::ReceiveEditHouseText()
 	AddMessage(MESSAGE_EDIT_LIST_DIALOG, reinterpret_cast<std::intptr_t>(Info), reinterpret_cast<std::intptr_t>(Text));
 }
 
-// 0x410410, lines 2347-2347
 void patella::TCommunication::ReceivePlayerStats()
 {
 	const int Health = Network.GetWord();
@@ -1747,7 +1630,6 @@ void patella::TCommunication::ReceivePlayerStats()
 	PlayerState.SetPlayerMagicLevel(MagicLevel, MagicLevelPercent);
 }
 
-// 0x410660, lines 2363-2363
 void patella::TCommunication::ReceivePlayerSkills()
 {
 	int i;
@@ -1758,20 +1640,17 @@ void patella::TCommunication::ReceivePlayerSkills()
 	}
 }
 
-// 0x410810, lines 2374-2374
 void patella::TCommunication::ReceivePlayerIcons()
 {
 	const int Icons = Network.GetByte();
 	PlayerState.SetPlayerState(Icons);
 }
 
-// 0x4109b0, lines 2386-2386
 void patella::TCommunication::ReceiveCancelAttack()
 {
 	Creatures.SetAttackID(0);
 }
 
-// 0x410b40, lines 2461-2466
 void patella::TCommunication::ReceiveTalk()
 {
 	int Mode = TALK_SAY;
@@ -1847,7 +1726,6 @@ void patella::TCommunication::ReceiveTalk()
 	AddConsoleText(StatementID, Text, Mode, Name, TargetChannel, Time);
 }
 
-// 0x411030, lines 2487-2487
 void patella::TCommunication::ReceiveChannelList()
 {
 	int Count = 0;
@@ -1866,7 +1744,6 @@ void patella::TCommunication::ReceiveChannelList()
 	AddMessage(MESSAGE_NEW_CHANNEL_DIALOG, reinterpret_cast<std::intptr_t>(Channels), reinterpret_cast<std::intptr_t>(Names));
 }
 
-// 0x411230, lines 2502-2502
 void patella::TCommunication::ReceiveOpenChannel()
 {
 	int ChannelID = 0;
@@ -1877,7 +1754,6 @@ void patella::TCommunication::ReceiveOpenChannel()
 	AddMessage(MESSAGE_OPEN_CHANNEL, ChannelID, reinterpret_cast<std::intptr_t>(Name));
 }
 
-// 0x4113f0, lines 2515-2515
 void patella::TCommunication::ReceiveOpenPrivateConversation()
 {
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
@@ -1886,7 +1762,6 @@ void patella::TCommunication::ReceiveOpenPrivateConversation()
 	AddMessage(MESSAGE_OPEN_PRIVATE_CONVERSATION, 0, reinterpret_cast<std::intptr_t>(Name));
 }
 
-// 0x4115a0, lines 2530-2530
 void patella::TCommunication::ReceiveRuleViolationChannel()
 {
 	int ChannelID = 0;
@@ -1897,7 +1772,6 @@ void patella::TCommunication::ReceiveRuleViolationChannel()
 	AddMessage(MESSAGE_RULE_VIOLATION_CHANNEL, reinterpret_cast<std::intptr_t>(Channel), 0);
 }
 
-// 0x411760, lines 2551-2551
 void patella::TCommunication::ReceiveRemoveRuleViolation()
 {
 	TFixedString<44> Name;
@@ -1917,7 +1791,6 @@ void patella::TCommunication::ReceiveRemoveRuleViolation()
 	}
 }
 
-// 0x411940, lines 2569-2569
 void patella::TCommunication::ReceiveCancelRuleViolation()
 {
 	TFixedString<44> Name;
@@ -1931,7 +1804,6 @@ void patella::TCommunication::ReceiveCancelRuleViolation()
 	}
 }
 
-// 0x411b20, lines 2584-2584
 void patella::TCommunication::ReceiveLockRuleViolation()
 {
 	TTalkBuffer *Channel = GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
@@ -1942,7 +1814,6 @@ void patella::TCommunication::ReceiveLockRuleViolation()
 	}
 }
 
-// 0x411ce0, lines 2606-2606
 void patella::TCommunication::ReceiveOwnChannel()
 {
 	int ChannelID = 0;
@@ -1953,7 +1824,6 @@ void patella::TCommunication::ReceiveOwnChannel()
 	AddMessage(MESSAGE_OPEN_OWN_CHANNEL, ChannelID, reinterpret_cast<std::intptr_t>(Name));
 }
 
-// 0x411ea0, lines 2623-2623
 void patella::TCommunication::ReceiveCloseChannel()
 {
 	int ChannelID = 0;
@@ -1966,7 +1836,6 @@ void patella::TCommunication::ReceiveCloseChannel()
 	}
 }
 
-// 0x412060, lines 2634-2641
 void patella::TCommunication::ReceiveTextMessage()
 {
 	int Mode = 0;
@@ -1982,7 +1851,6 @@ void patella::TCommunication::ReceiveTextMessage()
 		AddConsoleText(0, Text, Mode, nullptr, -1, 0);
 }
 
-// 0x416c40, lines 2672-2672
 void patella::TCommunication::ReceiveCancelWalk()
 {
 	const int Direction = Network.GetByte();
@@ -2007,18 +1875,15 @@ void patella::TCommunication::ReceiveCancelWalk()
 		SendWalk();
 }
 
-// 0x416e60, lines 2685-2685
-// 0x416e90 is this loop's interior basic block, misidentified as a second function.
 void patella::TCommunication::ReadFloor(int rz)
 {
-	// 0x416e90, lines 2685-2685. Interior loop, not a separately callable function.
+	// Interior loop, not a separately callable function.
 	for (int rx = 0; rx < 18; rx++) {
 		for (int ry = 0; ry < 14; ry++)
 			ReadField(rx, ry, rz);
 	}
 }
 
-// 0x417020, lines 2717-2717
 void patella::TCommunication::ReceiveFloorUp()
 {
 	int x;
@@ -2050,7 +1915,6 @@ void patella::TCommunication::ReceiveFloorUp()
 	}
 }
 
-// 0x417270, lines 2749-2749
 void patella::TCommunication::ReceiveFloorDown()
 {
 	int x;
@@ -2083,7 +1947,6 @@ void patella::TCommunication::ReceiveFloorDown()
 	}
 }
 
-// 0x412350, lines 2768-2768
 void patella::TCommunication::ReceiveOutfit()
 {
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
@@ -2098,7 +1961,6 @@ void patella::TCommunication::ReceiveOutfit()
 	AddMessage(MESSAGE_OUTFIT_DIALOG, reinterpret_cast<std::intptr_t>(Outfit), 0);
 }
 
-// 0x412540, lines 2785-2785
 // Only the byte value 1 means online, not every nonzero value.
 void patella::TCommunication::ReceiveBuddy()
 {
@@ -2112,7 +1974,6 @@ void patella::TCommunication::ReceiveBuddy()
 	AddMessage(MESSAGE_TEMPORARY_IGNORE, reinterpret_cast<std::intptr_t>(Copy), 0);
 }
 
-// 0x412720, lines 2798-2798
 void patella::TCommunication::ReceiveBuddyLogin()
 {
 	uint32 CharacterID = 0;
@@ -2120,7 +1981,6 @@ void patella::TCommunication::ReceiveBuddyLogin()
 	Creatures.SetBuddyState(CharacterID, true);
 }
 
-// 0x4128c0, lines 2811-2811
 void patella::TCommunication::ReceiveBuddyLogout()
 {
 	uint32 CharacterID = 0;
@@ -2128,8 +1988,7 @@ void patella::TCommunication::ReceiveBuddyLogout()
 	Creatures.SetBuddyState(CharacterID, false);
 }
 
-// Empty; the linker kept one copy of the identical empty functions (0x496160,
-// GUI.obj). ExitControl calls it where Communication.cpp's exit belongs in the reverse
+// Empty. ExitControl calls it where Communication.cpp's exit belongs in the reverse
 // order of InitControl (name ours, low confidence).
 void patella::TCommunication::ExitCommunication()
 {

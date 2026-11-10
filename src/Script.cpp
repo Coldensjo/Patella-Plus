@@ -1,12 +1,11 @@
-// Script.cpp: reconstructed from Tibia.exe 7.72 (0x4df6d0-0x4e3c9f).
+// Script.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The script-file tokenizer and writer and binary file access; the patching of
-// the data files with patches from the login server is gone (issue #75). In
-// line order, which is also binary order, except that the compiler placed
-// readString of TReadBinaryFile (line 644, 0x4e3a10) and the readIdentifier,
-// readNumber, readString and readSymbol helpers (no line evidence,
-// 0x4e3920-0x4e3a0f) after InstallPatch (0x4e3610, gone). readString is here
-// in line order; the helpers stay at the end, where the binary has them.
+// The script-file tokenizer and writer and binary file access; the patching of the
+// data files with patches from the login server is gone (issue #75). In line order,
+// which is also binary order, except that the compiler placed readString of
+// TReadBinaryFile and the readIdentifier, readNumber, readString and readSymbol
+// helpers (no line evidence) after InstallPatch (gone). readString is here in line
+// order; the helpers stay at the end, where the binary has them.
 //
 // Most errors are TERRORs thrown at the start of a function. The original's
 // catch wrappers (common.h) around the calls to other members are gone (issue #78).
@@ -29,7 +28,7 @@
 // the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
-// 0x4df6d0, lines 48-50: TryOpen, its failure thrown.
+// TryOpen, its failure thrown.
 void TReadScriptFile::open(const char *FileName)
 {
 	patella::TExpected<void, TError> Result = TryOpen(FileName);
@@ -50,9 +49,8 @@ patella::TExpected<void, TError> TReadScriptFile::TryOpen(const char *FileName)
 	return {};
 }
 
-// 0x4df9b0, line 84. Closes the file and throws; the message names the file
-// and line, the reason is Text. The message buffer has 1056 bytes but only
-// 1054 are used.
+// Closes the file and throws; the message names the file and line, the
+// reason is Text. The message buffer has 1056 bytes but only 1054 are used.
 void TReadScriptFile::error(const char *Text)
 {
 	char Message[1056] = {}; // NOLINT(modernize-avoid-c-arrays): TMYEXCEPTION(84)'s argument, frozen until M5 (issue #60)
@@ -67,13 +65,13 @@ void TReadScriptFile::error(const char *Text)
 	throw TMYEXCEPTION(Message, "", 0, "", 0, Text);
 }
 
-// 0x4dfb60, lines 93-230. A state machine over getc. String is cleared
-// first, so identifiers and strings need no terminator; Bytes shares its
-// buffer. Identifiers start with a letter; '-' before a number is a SPECIAL
-// token (readNumber handles the sign). IsAlpha compares with signed chars,
-// so umlauts from getc (0xe4 and so on) are not letters here: they become
-// SPECIAL tokens. The jump table has the 24 cases
-// below; states 9 and 18-21 do not exist and go to the default.
+// A state machine over getc. String is cleared first, so identifiers and
+// strings need no terminator; Bytes shares its buffer. Identifiers start
+// with a letter; '-' before a number is a SPECIAL token (readNumber handles
+// the sign). IsAlpha compares with signed chars, so umlauts from getc (0xe4
+// and so on) are not letters here: they become SPECIAL tokens. The jump
+// table has the 24 cases below; states 9 and 18-21 do not exist and go to
+// the default.
 void TReadScriptFile::nextToken()
 {
 	if (File == nullptr)
@@ -365,7 +363,6 @@ void TReadScriptFile::nextToken()
 	}
 }
 
-// 0x4e0420
 char *TReadScriptFile::getIdentifier()
 {
 	if (Token != TOKEN::IDENTIFIER)
@@ -374,7 +371,6 @@ char *TReadScriptFile::getIdentifier()
 	return String;
 }
 
-// 0x4e0450
 int TReadScriptFile::getNumber()
 {
 	if (Token != TOKEN::NUMBER)
@@ -382,7 +378,6 @@ int TReadScriptFile::getNumber()
 	return Number;
 }
 
-// 0x4e0470
 char *TReadScriptFile::getString()
 {
 	if (Token != TOKEN::STRING)
@@ -390,7 +385,6 @@ char *TReadScriptFile::getString()
 	return String;
 }
 
-// 0x4e0490
 char TReadScriptFile::getSpecial()
 {
 	if (Token != TOKEN::SPECIAL)
@@ -398,7 +392,7 @@ char TReadScriptFile::getSpecial()
 	return Special;
 }
 
-// 0x4e04b0, lines 403-405: TryOpen, its failure thrown.
+// TryOpen, its failure thrown.
 void TWriteScriptFile::open(const char *FileName)
 {
 	patella::TExpected<void, TError> Result = TryOpen(FileName);
@@ -419,7 +413,7 @@ patella::TExpected<void, TError> TWriteScriptFile::TryOpen(const char *FileName)
 	return {};
 }
 
-// 0x4e0790, line 441. The file is binary, so the line ends in CR LF.
+// The file is binary, so the line ends in CR LF.
 void TWriteScriptFile::writeLn()
 {
 	if (File == nullptr)
@@ -428,7 +422,6 @@ void TWriteScriptFile::writeLn()
 	File.PutChar('\n');
 }
 
-// 0x4e08f0, lines 451-452
 void TWriteScriptFile::writeText(const char *Text)
 {
 	if (File == nullptr)
@@ -441,8 +434,7 @@ void TWriteScriptFile::writeText(const char *Text)
 	}
 }
 
-// 0x4e0bb0, lines 462-463. Quotes, escaping '"' and '\\', and writes a
-// line break as "\n".
+// Quotes, escaping '"' and '\\', and writes a line break as "\n".
 void TWriteScriptFile::writeString(const char *Text)
 {
 	if (File == nullptr)
@@ -464,7 +456,6 @@ void TWriteScriptFile::writeString(const char *Text)
 	File.PutChar('"');
 }
 
-// 0x4e0ec0, line 481
 void TWriteScriptFile::writeNumber(int Number)
 {
 	if (File == nullptr)
@@ -474,7 +465,7 @@ void TWriteScriptFile::writeNumber(int Number)
 	writeText(Help);
 }
 
-// 0x4e1040, lines 552-554: TryOpen, its failure thrown.
+// TryOpen, its failure thrown.
 void TReadBinaryFile::open(const char *FileName)
 {
 	patella::TExpected<void, TError> Result = TryOpen(FileName);
@@ -497,7 +488,6 @@ patella::TExpected<void, TError> TReadBinaryFile::TryOpen(const char *FileName)
 	return {};
 }
 
-// 0x4e1320, lines 572-573
 void TReadBinaryFile::seek(int Offset)
 {
 	if (File == nullptr)
@@ -507,7 +497,6 @@ void TReadBinaryFile::seek(int Offset)
 	File.Seek(Offset, SEEK_SET);
 }
 
-// 0x4e15e0, line 582
 bool TReadBinaryFile::eof() const
 {
 	if (File == nullptr)
@@ -515,7 +504,6 @@ bool TReadBinaryFile::eof() const
 	return MsvcEof(File.Descriptor()) != 0;
 }
 
-// 0x4e1740, lines 603-605
 uint8 TReadBinaryFile::readByte()
 {
 	if (File == nullptr)
@@ -526,8 +514,7 @@ uint8 TReadBinaryFile::readByte()
 	return Byte;
 }
 
-// 0x4e1a00, line 619. Little-endian. Returns a 16-bit value: every caller
-// zero-extends AX.
+// Little-endian. Returns a 16-bit value: every caller zero-extends AX.
 uint16 TReadBinaryFile::readWord()
 {
 	const uint8 Low = readByte();
@@ -535,7 +522,6 @@ uint16 TReadBinaryFile::readWord()
 	return (uint16)(Low | (High << 8));
 }
 
-// 0x4e1ba0, lines 627-635
 int TReadBinaryFile::readQuad()
 {
 	if (File == nullptr)
@@ -547,7 +533,7 @@ int TReadBinaryFile::readQuad()
 	return Byte0 | (Byte1 << 8) | (Byte2 << 16) | (Byte3 << 24);
 }
 
-// 0x4e3a10, lines 644-653. The caller frees the string with delete[].
+// The caller frees the string with delete[].
 char *TReadBinaryFile::readString()
 {
 	if (File == nullptr)
@@ -560,8 +546,8 @@ char *TReadBinaryFile::readString()
 	return Text;
 }
 
-// 0x4e1e50, lines 661-664. The original's parameters (Buffer, Count) are the span's pointer and its size as an int, the
-// name the "out of data" error's text uses (issue #69, as #59).
+// The original's parameters (Buffer, Count) are the span's pointer and its size as an int, the name the "out of data"
+// error's text uses (issue #69, as #59).
 void TReadBinaryFile::readBytes(patella::TSpan<uint8> Bytes)
 {
 	uint8 *const Buffer = Bytes.data();
@@ -574,7 +560,7 @@ void TReadBinaryFile::readBytes(patella::TSpan<uint8> Bytes)
 		TERROR1_REASON("out of data", Count, Filename);
 }
 
-// 0x4e21a0, lines 706-708: TryOpen, its failure thrown.
+// TryOpen, its failure thrown.
 void TWriteBinaryFile::open(const char *FileName)
 {
 	patella::TExpected<void, TError> Result = TryOpen(FileName);
@@ -597,7 +583,6 @@ patella::TExpected<void, TError> TWriteBinaryFile::TryOpen(const char *FileName)
 	return {};
 }
 
-// 0x4e2480, lines 727-729
 void TWriteBinaryFile::writeByte(uint8 Byte)
 {
 	if (File == nullptr)
@@ -606,7 +591,6 @@ void TWriteBinaryFile::writeByte(uint8 Byte)
 		TERROR_REASON("failed to write file", Filename);
 }
 
-// 0x4e2750, lines 737-742
 void TWriteBinaryFile::writeWord(uint16 Word)
 {
 	if (File == nullptr)
@@ -615,7 +599,6 @@ void TWriteBinaryFile::writeWord(uint16 Word)
 	writeByte((uint8)(Word >> 8));
 }
 
-// 0x4e29e0, lines 750-757
 void TWriteBinaryFile::writeQuad(uint32 Quad)
 {
 	if (File == nullptr)
@@ -626,9 +609,8 @@ void TWriteBinaryFile::writeQuad(uint32 Quad)
 	writeByte((uint8)(Quad >> 24));
 }
 
-// 0x4e2c80, lines 765-766. Writes one item of Count bytes, so Count 0 fails
-// (writeString does not call it for an empty string). Buffer and Count are the span's pointer and its size as an int
-// (issue #69).
+// Writes one item of Count bytes, so Count 0 fails (writeString does not call it for an empty string). Buffer and
+// Count are the span's pointer and its size as an int (issue #69).
 void TWriteBinaryFile::writeBytes(patella::TSpan<const uint8> Bytes)
 {
 	const uint8 *const Buffer = Bytes.data();
@@ -639,8 +621,8 @@ void TWriteBinaryFile::writeBytes(patella::TSpan<const uint8> Bytes)
 		TERROR1_REASON("failed to write file", Count, Filename);
 }
 
-// 0x4e2f50, line 779. A word with the length, then the characters; longer
-// strings are cut to the low 16 bits of their length.
+// A word with the length, then the characters; longer strings are cut to
+// the low 16 bits of their length.
 void TWriteBinaryFile::writeString(const char *Text)
 {
 	const int Length = (int)strlen(Text);
@@ -649,19 +631,18 @@ void TWriteBinaryFile::writeString(const char *Text)
 		writeBytes(patella::TSpan<const uint8>(reinterpret_cast<const uint8 *>(Text), (uint16)Length));
 }
 
-// 0x4e3100 ApplyPatch (a difference patch of a file), 0x4e3500 ApplyFullPatch (a whole new file), both written next
-// to the file ("Tibia.exe" as "Tibia.bak", any other name with '_' as its last character), and 0x4e3610 InstallPatch
-// (lines 879-883: the written file moved into place) are gone with the patcher since Patella-Modern issue #75
-// (decision D9).
+// ApplyPatch (a difference patch of a file), ApplyFullPatch (a whole new file), both written next to the file
+// ("Tibia.exe" as "Tibia.bak", any other name with '_' as its last character), and InstallPatch (the written file
+// moved into place) are gone with the patcher since Patella-Modern issue #75 (decision D9).
 
-// 0x4e3920. The next token, which must be an identifier, in lower case.
+// The next token, which must be an identifier, in lower case.
 char *TReadScriptFile::readIdentifier()
 {
 	nextToken();
 	return getIdentifier();
 }
 
-// 0x4e3950. Accepts a '-' token before the number.
+// Accepts a '-' token before the number.
 int TReadScriptFile::readNumber()
 {
 	int Sign = 1;
@@ -673,14 +654,12 @@ int TReadScriptFile::readNumber()
 	return getNumber() * Sign;
 }
 
-// 0x4e39a0
 char *TReadScriptFile::readString()
 {
 	nextToken();
 	return getString();
 }
 
-// 0x4e39d0
 void TReadScriptFile::readSymbol(char Symbol)
 {
 	nextToken();

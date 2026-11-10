@@ -1,10 +1,10 @@
-// Surface.cpp: reconstructed from Tibia.exe 7.72 (0x4eaa80-0x4eae6f).
+// Surface.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The first part of the Status/SurfaceDX gap: the current graphics engine,
-// the surface object of that engine, the engine selection at start-up, and
-// the base class TSurface, and the data the engines share. The file name is
+// The first part of the Status/SurfaceDX gap: the current graphics engine, the
+// surface object of that engine, the engine selection at start-up, and the
+// base class TSurface, and the data the engines share. The file name is
 // inferred (see Surface.h). No function has line evidence, so they are in
-// binary order. The DirectDraw surface code after 0x4eae70 is SurfaceDX.cpp's.
+// binary order.
 
 // The Windows x64 client (PATELLA_VULKAN, cmake/WindowsX64.cmake) has one engine since Patella-Modern
 // issue #20: the Vulkan engine (src/vulkan/SurfaceVulkan.h) as engine 2, without SurfaceDX.cpp,
@@ -20,10 +20,9 @@
 bool IsVulkanInstalled();
 TSurface *CreateSurfaceVulkan(patella::platform::TSurfaceShared &Shared);
 
-// Data: TGraphicsEngine's members since issue #116 (Surface.h), in the original's .data and .bss order. The shared
-// data the engines use lies around this file's own; 0x71d0f8 and up are SurfaceDX.cpp's.
+// Data: TGraphicsEngine's members since issue #116 (Surface.h), in the original's .data and .bss order.
 
-// 0x4eaa80. Was written to error.txt as "Graphic Engine"; no caller in the client since issue #74.
+// Was written to error.txt as "Graphic Engine"; no caller in the client since issue #74.
 int patella::TGraphicsEngine::GetCurrentEngine() const
 {
 	return curEngine;
@@ -37,7 +36,6 @@ TSurface *patella::TGraphicsEngine::GetSurface()
 	return Surface;
 }
 
-// 0x4eab60
 void patella::TGraphicsEngine::SurfaceExitInstance()
 {
 	if (Surface != nullptr)
@@ -45,14 +43,14 @@ void patella::TGraphicsEngine::SurfaceExitInstance()
 	Surface = nullptr;
 }
 
-// 0x4eab80. The default test only takes the main window (the engine's shared data since issue #138).
+// The default test only takes the main window (the engine's shared data since issue #138).
 bool TSurface::TestEngine()
 {
 	hWindow = Shared.SurfaceWindow;
 	return true;
 }
 
-// 0x4eab90. Shared: issue #138's (platform/Surface.h).
+// Shared: issue #138's (platform/Surface.h).
 TSurface::TSurface(patella::platform::TSurfaceShared &Shared) : Shared(Shared)
 {
 	NumberOfModes = 0;
@@ -61,29 +59,26 @@ TSurface::TSurface(patella::platform::TSurfaceShared &Shared) : Shared(Shared)
 	Flag26 = false;
 }
 
-// 0x4eabb0
 void TSurface::SetColorKey(int Surface, TRGBColor ColorKey)
 {
 	SetSourceColorKey(Surface, ColorKey);
 }
 
-// 0x4eabd0
 TSurface::~TSurface() = default;
 
-// 0x4eabe0. A member (Dialogs.cpp calls it on GetSurface()) that reads only the
-// global (TGraphicsEngine's since issue #116, the engine's shared data since issue #138).
+// A member (Dialogs.cpp calls it on GetSurface()) that reads only the global
+// (TGraphicsEngine's since issue #116, the engine's shared data since issue #138).
 uint8 TSurface::GetAvailableEngines() // NOLINT(readability-make-member-function-const): the golden corpus's table takes it as a pointer to this non-const member
 {
 	return Shared.AvailableEngines;
 }
 
-// 0x4eabf0
 void TSurface::SetSurfaceRect([[maybe_unused]] int Surface, [[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Width, [[maybe_unused]] int Height)
 {
 }
 
-// 0x4eac00: SelectSurface and SetTextureFilter share this copy (identical
-// code). Only SurfaceGL.cpp overrides them.
+// SelectSurface and SetTextureFilter share this copy (identical code).
+// Only SurfaceGL.cpp overrides them.
 void TSurface::SelectSurface([[maybe_unused]] int Surface)
 {
 }
@@ -92,13 +87,11 @@ void TSurface::SetTextureFilter([[maybe_unused]] int Filter)
 {
 }
 
-// 0x4eac10. Only SurfaceGL.cpp overrides it.
+// Only SurfaceGL.cpp overrides it.
 void TSurface::AddDirtyRect([[maybe_unused]] TRect Rect)
 {
 }
 
-// The linker kept the copy of this empty body from another object
-// (0x496160, folded with other empty functions).
 void TSurface::AttachWindow()
 {
 }

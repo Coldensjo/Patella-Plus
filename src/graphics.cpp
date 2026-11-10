@@ -1,24 +1,15 @@
-// graphics.cpp: reconstructed from Tibia.exe 7.72 (0x48b380-0x49547f).
+// graphics.cpp: reconstructed from Tibia.exe 7.72.
 //
-// Sprites (Tibia.spr), pictures (Tibia.pic), the fonts cut from pictures, the
-// memory and video caches of 32x32 tiles, and the functions that draw
-// sprites, objects, outfits, pictures and text through the engine's surface
-// (Surface.h). Functions in line order. Those without line evidence stay
-// where the binary has them: the three of the DialogWindow/graphics gap
-// (0x48b430-0x48b549) first, the Find functions next to the other cache
-// functions, GetTextPosition after GetFittingTextLength. The compiler placed
-// InitFont and InitFonts (lines 348-403) after ReloadSprites, GetTextWidth
-// (1373) before ReloadPictures, DrawObject and DrawOutfit (1100, 1137) at
-// the end.
+// Sprites (Tibia.spr), pictures (Tibia.pic), the fonts cut from pictures, the memory and video caches of
+// 32x32 tiles, and the functions that draw sprites, objects, outfits, pictures and text through the
+// engine's surface (Surface.h). Functions in line order. Those without line evidence stay where the
+// binary has them: the three of the DialogWindow/graphics gap first, the Find functions next to the
+// other cache functions, GetTextPosition after GetFittingTextLength. The compiler placed InitFont and
+// InitFonts after ReloadSprites, GetTextWidth before ReloadPictures, DrawObject and DrawOutfit at the
+// end.
 //
-// Also in this object: the out-of-line copies of TRGBColor's operator== and
-// operator!= (0x48b380, 0x48b3b0; inline members of TRGBColor in
-// types/GraphicsTypes.h since issue #116) and TVideoCacheItem's constructor (0x48b3f0, below), which the
-// binary emits before the first function.
-//
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none apart from the
-// loaders' inner handlers, which turn a file error into a PROGRAM_ERROR.
+// The original's catch wrappers (common.h) are gone since issue #78; the functions here have no handlers
+// apart from the loaders' inner handlers, which turn a file error into a PROGRAM_ERROR.
 //
 // Names: see graphics.h and notes/decisions.md ("graphics.cpp").
 
@@ -66,9 +57,9 @@ static_assert(sizeof(patella::TGraphics::MemoryHashTable) == HASH_TABLE_SIZE * s
 		&& sizeof(patella::TGraphics::VideoHashTable) == HASH_TABLE_SIZE * sizeof(int),
 	"the hash tables");
 
-// 0x48b3f0, passed to the eh vector constructor iterator by InitVideoCache.
-// It clears the four colours, then the font colour, which overlaps them
-// (the binary stores both).
+// Passed to the eh vector constructor iterator by InitVideoCache. It clears
+// the four colours, then the font colour, which overlaps them (the binary
+// stores both).
 TVideoCacheItem::TVideoCacheItem()
 {
 	for (int i = 0; i < 4; i++)
@@ -78,9 +69,8 @@ TVideoCacheItem::TVideoCacheItem()
 
 // --- The DialogWindow/graphics gap -------------------------------------------
 
-// 0x48b430. The line distance of a font. Numbers below 0 or above
-// NumberOfFonts give font 3's; 0 is not caught and reads before the table
-// (sic).
+// The line distance of a font. Numbers below 0 or above NumberOfFonts
+// give font 3's; 0 is not caught and reads before the table (sic).
 int patella::TGraphics::GetFontLineHeight(int FontNumber) const
 {
 	if (FontNumber < 0 || FontNumber > NumberOfFonts)
@@ -88,7 +78,7 @@ int patella::TGraphics::GetFontLineHeight(int FontNumber) const
 	return Fonts[FontNumber - 1].LineHeight;
 }
 
-// 0x48b460. Empties every memory cache item without touching the LRU list.
+// Empties every memory cache item without touching the LRU list.
 void patella::TGraphics::ClearMemoryCache()
 {
 	for (int i = 0; i < MemoryCacheSize; i++)
@@ -97,7 +87,7 @@ void patella::TGraphics::ClearMemoryCache()
 		MemoryHashTable[i] = -1;
 }
 
-// 0x48b4a0. Called by ExitControl.
+// Called by ExitControl.
 void patella::TGraphics::ExitGraphics()
 {
 	VideoCache.reset();
@@ -118,9 +108,9 @@ void patella::TGraphics::ExitGraphics()
 
 // --- Files ---------------------------------------------------------------------
 
-// 0x48b550, lines 130-148. Tibia.spr: signature, number of sprites, one
-// offset per sprite. A file error becomes PROGRAM_ERROR 2. The file is
-// closed twice: by close() and by the destructor.
+// Tibia.spr: signature, number of sprites, one offset per sprite. A
+// file error becomes PROGRAM_ERROR 2. The file is closed twice: by
+// close() and by the destructor.
 void patella::TGraphics::LoadSprites(const char *FileName)
 {
 	PATELLA_ASSERT(FileName!=nullptr);
@@ -141,13 +131,11 @@ void patella::TGraphics::LoadSprites(const char *FileName)
 	}
 }
 
-// 0x48b9a0, lines 156-212. Decodes a sprite into 32*32 RGB triples: the
-// colour key, then runs of transparent and coloured pixels. Opens Tibia.spr
-// for every sprite. An empty sprite (offset 0) gets the colour key 0,0,0. A
-// file error becomes PROGRAM_ERROR 4. Patella-Modern issue #139, item 3, a deliberate difference
-// (notes/decisions.md, "#139"): a run past the 1024th pixel is a data error too (each byte is read, then the pixel
-// checked, then written, so every sprite the binary decoded without writing past the buffer decodes as before);
-// the binary wrote past the buffer.
+// Decodes a sprite into 32*32 RGB triples: the colour key, then runs of transparent and coloured pixels. Opens
+// Tibia.spr for every sprite. An empty sprite (offset 0) gets the colour key 0,0,0. A file error becomes
+// PROGRAM_ERROR 4. Patella-Modern issue #139, item 3, a deliberate difference (notes/decisions.md, "#139"): a run
+// past the 1024th pixel is a data error too (each byte is read, then the pixel checked, then written, so every
+// sprite the binary decoded without writing past the buffer decodes as before); the binary wrote past the buffer.
 void patella::TGraphics::LoadSprite(int SpriteNumber, uint8 *Buffer)
 {
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
@@ -199,9 +187,9 @@ void patella::TGraphics::LoadSprite(int SpriteNumber, uint8 *Buffer)
 	}
 }
 
-// 0x48bea0, lines 244-272. Tibia.pic: signature, number of pictures, then
-// per picture its size in tiles, its colour key and the tile offsets. A file
-// error becomes PROGRAM_ERROR 3.
+// Tibia.pic: signature, number of pictures, then per picture its size in
+// tiles, its colour key and the tile offsets. A file error becomes
+// PROGRAM_ERROR 3.
 void patella::TGraphics::LoadPictures(const char *FileName)
 {
 	PATELLA_ASSERT(FileName!=nullptr);
@@ -236,10 +224,9 @@ void patella::TGraphics::LoadPictures(const char *FileName)
 	}
 }
 
-// 0x48c3b0, lines 280-322. Decodes one tile of a picture like a sprite. The
-// tile assertions are inside the inner try block, so a bad tile also becomes
-// PROGRAM_ERROR 5, like a file error; since Patella-Modern issue #139, item 3, so does a run past the 1024th pixel
-// (as in LoadSprite).
+// Decodes one tile of a picture like a sprite. The tile assertions are inside the inner try block, so a bad tile
+// also becomes PROGRAM_ERROR 5, like a file error; since Patella-Modern issue #139, item 3, so does a run past the
+// 1024th pixel (as in LoadSprite).
 void patella::TGraphics::LoadPictureTile(int PictureNumber, int TileX, int TileY, uint8 *Buffer)
 {
 	PATELLA_ASSERT_VALUES(In(PictureNumber,1,NumberOfPictures), PictureNumber, NumberOfPictures);
@@ -281,13 +268,13 @@ void patella::TGraphics::LoadPictureTile(int PictureNumber, int TileX, int TileY
 
 // --- Fonts ---------------------------------------------------------------------
 
-// 0x492640, lines 348-387. The
-// picture holds 224 characters, CharsPerLine per row. The visible width of a
-// character is one more than its rightmost column with a pixel that is not
-// the colour key, searched from column CharWidth-1 down to 1; without one it
-// is CharWidth. The visible height likewise from the rows CharHeight-1 down
-// to 1, else 1. Column 0 and row 0 are never looked at. Height becomes the
-// highest row found (not the stored height: a blank character counts -1).
+// The picture holds 224 characters, CharsPerLine per row. The visible width
+// of a character is one more than its rightmost column with a pixel that is
+// not the colour key, searched from column CharWidth-1 down to 1; without
+// one it is CharWidth. The visible height likewise from the rows
+// CharHeight-1 down to 1, else 1. Column 0 and row 0 are never looked at.
+// Height becomes the highest row found (not the stored height: a blank
+// character counts -1).
 void patella::TGraphics::InitFont(int FontName, int PictureNumber, int CharsPerLine, int CharWidth, int CharHeight,
 	int Spacing, int LineHeight)
 {
@@ -331,7 +318,7 @@ void patella::TGraphics::InitFont(int FontName, int PictureNumber, int CharsPerL
 	}
 }
 
-// 0x492c30, line 403. The four fonts and their pictures.
+// The four fonts and their pictures.
 void patella::TGraphics::InitFonts()
 {
 	NumberOfFonts = 4;
@@ -345,7 +332,7 @@ void patella::TGraphics::InitFonts()
 
 // --- The memory cache ------------------------------------------------------------
 
-// 0x48c9c0, line 458. Items in one LRU list, item 0 the most recent.
+// Items in one LRU list, item 0 the most recent.
 void patella::TGraphics::InitMemoryCache(int MemoryCacheBytes)
 {
 	MemoryCacheSize = MemoryCacheBytes / (32 * 32 * 3);
@@ -371,7 +358,7 @@ void patella::TGraphics::InitMemoryCache(int MemoryCacheBytes)
 		MemoryHashTable[i] = -1;
 }
 
-// 0x48cc30, line 466. Makes an item the most recent one.
+// Makes an item the most recent one.
 void patella::TGraphics::TouchMemoryItem(int Position)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,MemoryCacheSize-1), Position);
@@ -390,9 +377,6 @@ void patella::TGraphics::TouchMemoryItem(int Position)
 	MostRecentMemoryItem = Position;
 }
 
-// 0x48ce00. The handlers of the original's catch wrappers here and in the
-// other Find functions were removed by the compiler (nothing in them can
-// throw); the exception states remain.
 int patella::TGraphics::FindMemorySprite(int SpriteNumber) const
 {
 	int Position = MemoryHashTable[SpriteNumber % HASH_TABLE_SIZE];
@@ -405,7 +389,6 @@ int patella::TGraphics::FindMemorySprite(int SpriteNumber) const
 	return -1;
 }
 
-// 0x48ce70
 int patella::TGraphics::FindMemoryPicture(int PictureNumber, int TileX, int TileY) const
 {
 	int Position = MemoryHashTable[(PictureNumber + TileX + TileY) % HASH_TABLE_SIZE];
@@ -419,7 +402,7 @@ int patella::TGraphics::FindMemoryPicture(int PictureNumber, int TileX, int Tile
 	return -1;
 }
 
-// 0x48cef0, line 522. Empties an item and takes it out of its hash chain.
+// Empties an item and takes it out of its hash chain.
 void patella::TGraphics::RemoveMemoryItem(int Position)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,MemoryCacheSize-1), Position);
@@ -435,7 +418,7 @@ void patella::TGraphics::RemoveMemoryItem(int Position)
 		MemoryHashTable[Item.HashValue] = Item.HashNext;
 }
 
-// 0x48d0a0, lines 536-539. Puts a filled item at the head of a hash chain.
+// Puts a filled item at the head of a hash chain.
 void patella::TGraphics::InsertMemoryItem(int Position, int HashValue)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,MemoryCacheSize-1), Position);
@@ -450,7 +433,7 @@ void patella::TGraphics::InsertMemoryItem(int Position, int HashValue)
 	MemoryHashTable[HashValue] = Position;
 }
 
-// 0x48d440, lines 553-569. A missing sprite replaces the least recent item.
+// A missing sprite replaces the least recent item.
 TMemoryCacheItem *patella::TGraphics::GetMemorySprite(int SpriteNumber)
 {
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
@@ -469,7 +452,6 @@ TMemoryCacheItem *patella::TGraphics::GetMemorySprite(int SpriteNumber)
 	return &MemoryCache[Position];
 }
 
-// 0x48d740, lines 578-595
 TMemoryCacheItem *patella::TGraphics::GetMemoryPicture(int PictureNumber, int TileX, int TileY)
 {
 	PATELLA_ASSERT_VALUES(In(PictureNumber,1,NumberOfPictures), PictureNumber, NumberOfPictures);
@@ -491,10 +473,10 @@ TMemoryCacheItem *patella::TGraphics::GetMemoryPicture(int PictureNumber, int Ti
 
 // --- The video cache -------------------------------------------------------------
 
-// 0x48da50, line 636. Called by Player.cpp once the surfaces exist and by
-// ResetVideoCache. The slots fill the cache surfaces (all as large as
-// surface 6) row by row. Without cache surfaces the cache is NULL and
-// VideoCacheSize keeps its old value.
+// Called by Player.cpp once the surfaces exist and by ResetVideoCache.
+// The slots fill the cache surfaces (all as large as surface 6) row by
+// row. Without cache surfaces the cache is NULL and VideoCacheSize keeps
+// its old value.
 void patella::TGraphics::InitVideoCache()
 {
 	const int Surfaces = GetSurface()->GetCacheSurfaces();
@@ -528,7 +510,6 @@ void patella::TGraphics::InitVideoCache()
 		VideoHashTable[i] = -1;
 }
 
-// 0x48dd70, line 644
 void patella::TGraphics::TouchVideoItem(int Position)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,VideoCacheSize-1), Position);
@@ -547,8 +528,8 @@ void patella::TGraphics::TouchVideoItem(int Position)
 	MostRecentVideoItem = Position;
 }
 
-// 0x48df40. The video Find functions give up after VideoCacheSize+2 chain
-// steps: the chains can be corrupt, see RemoveVideoItem.
+// The video Find functions give up after VideoCacheSize+2 chain steps:
+// the chains can be corrupt, see RemoveVideoItem.
 int patella::TGraphics::FindVideoSprite(int SpriteNumber) const
 {
 	int Position = VideoHashTable[SpriteNumber % HASH_TABLE_SIZE];
@@ -564,8 +545,6 @@ int patella::TGraphics::FindVideoSprite(int SpriteNumber) const
 	return -1;
 }
 
-// 0x48dfc0. The fourth colour is compared through the out-of-line
-// operator==, the others inline.
 int patella::TGraphics::FindVideoMaskedSprite(int SpriteNumber, int MaskNumber, TRGBColor *Colors) const
 {
 	int Position = VideoHashTable[(MaskNumber + SpriteNumber) % HASH_TABLE_SIZE];
@@ -583,7 +562,7 @@ int patella::TGraphics::FindVideoMaskedSprite(int SpriteNumber, int MaskNumber, 
 	return -1;
 }
 
-// 0x48e0f0. Matches font characters of the picture too (sic).
+// Matches font characters of the picture too (sic).
 int patella::TGraphics::FindVideoPicture(int PictureNumber, int TileX, int TileY) const
 {
 	int Position = VideoHashTable[(TileX + PictureNumber + TileY) % HASH_TABLE_SIZE];
@@ -600,7 +579,7 @@ int patella::TGraphics::FindVideoPicture(int PictureNumber, int TileX, int TileY
 	return -1;
 }
 
-// 0x48e190. A plain picture tile matches colour 0,0,0 (sic).
+// A plain picture tile matches colour 0,0,0 (sic).
 int patella::TGraphics::FindVideoFontChar(int PictureNumber, int TileX, int TileY, TRGBColor Color) const
 {
 	int Position = VideoHashTable[(TileX + PictureNumber + TileY) % HASH_TABLE_SIZE];
@@ -617,9 +596,9 @@ int patella::TGraphics::FindVideoFontChar(int PictureNumber, int TileX, int Tile
 	return -1;
 }
 
-// 0x48e250, line 762. Unlike RemoveMemoryItem this ignores position 0 (sic):
-// when slot 0 is reused it stays in its old hash chain, and InsertVideoItem
-// links it into a second one.
+// Unlike RemoveMemoryItem this ignores position 0 (sic): when slot 0 is
+// reused it stays in its old hash chain, and InsertVideoItem links it into a
+// second one.
 void patella::TGraphics::RemoveVideoItem(int Position)
 {
 	if (Position <= 0)
@@ -637,7 +616,6 @@ void patella::TGraphics::RemoveVideoItem(int Position)
 		VideoHashTable[Item.HashValue] = Item.HashNext;
 }
 
-// 0x48e410, lines 776-779
 void patella::TGraphics::InsertVideoItem(int Position, int HashValue)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,VideoCacheSize-1), Position);
@@ -652,8 +630,8 @@ void patella::TGraphics::InsertVideoItem(int Position, int HashValue)
 	VideoHashTable[HashValue] = Position;
 }
 
-// 0x48e7b0, lines 793-814. OpenGL and DirectX 9 (engines 1 and 2) get the
-// colour key of the slot's surface first.
+// OpenGL and DirectX 9 (engines 1 and 2) get the colour key of the slot's
+// surface first.
 TVideoCacheItem *patella::TGraphics::GetVideoSprite(int SpriteNumber)
 {
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
@@ -676,7 +654,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoSprite(int SpriteNumber)
 	return &VideoCache[Position];
 }
 
-// 0x48eb30, lines 824-850. A sprite coloured through a mask (outfits).
+// A sprite coloured through a mask (outfits).
 TVideoCacheItem *patella::TGraphics::GetVideoMaskedSprite(int SpriteNumber, int MaskNumber, TRGBColor *Colors)
 {
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
@@ -703,10 +681,9 @@ TVideoCacheItem *patella::TGraphics::GetVideoMaskedSprite(int SpriteNumber, int 
 	return &VideoCache[Position];
 }
 
-// 0x48f020, lines 859-885. The colour key test reads the next picture's key
-// (Pictures[PictureNumber], past the end for the last picture), and both of
-// its branches set the same key (sic). Under AddressSanitizer that read is a heap overflow (issue #70), in
-// TRGBColor::operator== (graphics.h).
+// The colour key test reads the next picture's key (Pictures[PictureNumber], past the end for the last
+// picture), and both of its branches set the same key (sic). Under AddressSanitizer that read is a heap
+// overflow (issue #70), in TRGBColor::operator== (graphics.h).
 TVideoCacheItem *patella::TGraphics::GetVideoPicture(int PictureNumber, int TileX, int TileY)
 {
 	PATELLA_ASSERT_VALUES(In(PictureNumber,1,NumberOfPictures), PictureNumber, NumberOfPictures);
@@ -736,8 +713,8 @@ TVideoCacheItem *patella::TGraphics::GetVideoPicture(int PictureNumber, int Tile
 	return &VideoCache[Position];
 }
 
-// 0x48f430, lines 894-919. A tile of a font's picture in a text colour: the
-// surface paints the pixels that are not the colour key in Color.
+// A tile of a font's picture in a text colour: the surface paints the
+// pixels that are not the colour key in Color.
 TVideoCacheItem *patella::TGraphics::GetVideoFontChar(int FontNumber, int TileX, int TileY, TRGBColor Color)
 {
 	PATELLA_ASSERT_VALUES(In(FontNumber,1,NumberOfFonts), FontNumber, NumberOfFonts);
@@ -768,7 +745,6 @@ TVideoCacheItem *patella::TGraphics::GetVideoFontChar(int FontNumber, int TileX,
 
 // --- Sprites ---------------------------------------------------------------------
 
-// 0x48f870, line 933. No try block.
 void patella::TGraphics::DrawSprite(int Surface, int x, int y, int SpriteNumber)
 {
 	if (SpriteNumber == 0)
@@ -779,7 +755,7 @@ void patella::TGraphics::DrawSprite(int Surface, int x, int y, int SpriteNumber)
 		Sprites[SpriteNumber - 1].ColorKey);
 }
 
-// 0x48fa60, lines 948-953. Unlike DrawSprite this skips negative numbers too.
+// Unlike DrawSprite this skips negative numbers too.
 void patella::TGraphics::DrawSpriteClipped(int Surface, int x, int y, int SpriteNumber, TRect Clip)
 {
 	if (SpriteNumber <= 0)
@@ -790,7 +766,6 @@ void patella::TGraphics::DrawSpriteClipped(int Surface, int x, int y, int Sprite
 		Sprites[SpriteNumber - 1].ColorKey, Clip);
 }
 
-// 0x48fd80, lines 979-984
 void patella::TGraphics::DrawSpriteScaled(int Surface, int x, int y, int Width, int Height, int SpriteNumber,
 	TRGBColor Highlight, TRect Clip)
 {
@@ -802,7 +777,6 @@ void patella::TGraphics::DrawSpriteScaled(int Surface, int x, int y, int Width, 
 		TRect(Item->x, Item->y, 32, 32), Sprites[SpriteNumber - 1].ColorKey, Highlight, Clip);
 }
 
-// 0x4900d0, lines 998-1003. The assertions are inside the try block here.
 void patella::TGraphics::DrawMaskedSprite(int Surface, int x, int y, int SpriteNumber, int MaskNumber, TRGBColor *Colors)
 {
 	if (MaskNumber == 0) {
@@ -816,7 +790,6 @@ void patella::TGraphics::DrawMaskedSprite(int Surface, int x, int y, int SpriteN
 		Sprites[SpriteNumber - 1].ColorKey);
 }
 
-// 0x4904b0, lines 1059-1064
 void patella::TGraphics::DrawMaskedSpriteScaled(int Surface, int x, int y, int Width, int Height, int SpriteNumber,
 	int MaskNumber, TRGBColor *Colors, TRGBColor Highlight, TRect Clip)
 {
@@ -831,13 +804,12 @@ void patella::TGraphics::DrawMaskedSpriteScaled(int Surface, int x, int y, int W
 		TRect(Item->x, Item->y, 32, 32), Sprites[SpriteNumber - 1].ColorKey, Highlight, Clip);
 }
 
-// 0x494ca0, line 1100. An
-// object in a Size x Size box whose bottom right corner is x+Size, y+Size,
-// in the animation phase of the action counter; the count of a cumulative
-// object above 1 (or any count with ShowCount) is written in its bottom
-// right corner. Count holds three digits; more overflow it (sic). A phase
-// count or exact size of 0 in Tibia.dat throws a TMyException
-// (PATELLA_DIVISOR, issue #67).
+// An object in a Size x Size box whose bottom right corner is x+Size,
+// y+Size, in the animation phase of the action counter; the count of a
+// cumulative object above 1 (or any count with ShowCount) is written in
+// its bottom right corner. Count holds three digits; more overflow it
+// (sic). A phase count or exact size of 0 in Tibia.dat throws a
+// TMyException (PATELLA_DIVISOR, issue #67).
 void patella::TGraphics::DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip,
 	TFont Font, bool ShowCount)
 {
@@ -870,10 +842,10 @@ void patella::TGraphics::DrawObject(int Surface, int x, int y, int Size, TObject
 	}
 }
 
-// 0x495080, line 1137. A creature's outfit facing south (direction 2) in
-// its four colours (indices of the outfit palette), with the colour mask on
-// layer 2. Outfit 0 shows the object Colors[0] instead (none if 0). An exact
-// size of 0 in Tibia.dat throws a TMyException (PATELLA_DIVISOR, issue #67).
+// A creature's outfit facing south (direction 2) in its four colours
+// (indices of the outfit palette), with the colour mask on layer 2. Outfit 0
+// shows the object Colors[0] instead (none if 0). An exact size of 0 in
+// Tibia.dat throws a TMyException (PATELLA_DIVISOR, issue #67).
 void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int OutfitNumber, patella::TSpan<const int, 4> Colors,
 	TRGBColor Highlight, TRect Clip, TFont Font)
 {
@@ -911,8 +883,6 @@ void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int Out
 
 // --- Pictures --------------------------------------------------------------------
 
-// 0x490920, lines 1145-1155. The binary interleaves the loops with the
-// catch blocks (Ghidra splits off 0x490a58).
 void patella::TGraphics::DrawPicture(int Surface, int x, int y, int PictureNumber)
 {
 	PATELLA_ASSERT_VALUES(In(PictureNumber,1,NumberOfPictures), PictureNumber, NumberOfPictures);
@@ -926,11 +896,7 @@ void patella::TGraphics::DrawPicture(int Surface, int x, int y, int PictureNumbe
 	}
 }
 
-// 0x490c60, lines 1164-1182. The part SourceX, SourceY, Width, Height of a
-// picture, tile by tile. The exception tables have the states of two more
-// assertions between the first one and the try block; the empty part returns
-// before them, so the compiler dropped them (their line numbers are
-// unknown).
+// The part SourceX, SourceY, Width, Height of a picture, tile by tile.
 void patella::TGraphics::DrawPicturePart(int Surface, int x, int y, int PictureNumber, int SourceX, int SourceY,
 	int Width, int Height)
 {
@@ -961,8 +927,8 @@ void patella::TGraphics::DrawPicturePart(int Surface, int x, int y, int PictureN
 	}
 }
 
-// 0x4910e0, lines 1191-1206. As DrawPicturePart, with a clipping rectangle;
-// an empty part fails the assertions.
+// As DrawPicturePart, with a clipping rectangle; an empty part fails the
+// assertions.
 void patella::TGraphics::DrawPicturePartClipped(int Surface, int x, int y, int PictureNumber, int SourceX, int SourceY,
 	int Width, int Height, TRect Clip)
 {
@@ -994,10 +960,10 @@ void patella::TGraphics::DrawPicturePartClipped(int Surface, int x, int y, int P
 
 // --- Text ------------------------------------------------------------------------
 
-// 0x492e30, lines 1215-1239. The first Length characters of Text; x is the
-// left end, the middle or the right end by Alignment. Each character is cut
-// from its font picture's tile in Color. A blank advances by the width of
-// character index 12 (',') (sic).
+// The first Length characters of Text; x is the left end, the middle or the
+// right end by Alignment. Each character is cut from its font picture's
+// tile in Color. A blank advances by the width of character index 12 (',')
+// (sic).
 void patella::TGraphics::PrintTextPart(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text,
 	int Length, int Alignment)
 {
@@ -1038,7 +1004,7 @@ void patella::TGraphics::PrintTextPart(int Surface, int x, int y, int FontNumber
 	}
 }
 
-// 0x4934e0, lines 1249-1273. The whole text, with a clipping rectangle.
+// The whole text, with a clipping rectangle.
 void patella::TGraphics::PrintTextClipped(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text,
 	int Alignment, TRect Clip)
 {
@@ -1079,7 +1045,7 @@ void patella::TGraphics::PrintTextClipped(int Surface, int x, int y, int FontNum
 	}
 }
 
-// 0x493af0, lines 1282-1288. The whole text.
+// The whole text.
 void patella::TGraphics::PrintText(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text,
 	int Alignment)
 {
@@ -1089,7 +1055,6 @@ void patella::TGraphics::PrintText(int Surface, int x, int y, int FontNumber, TR
 	PrintTextPart(Surface, x, y, FontNumber, Color, Text, (int)strlen(Text), Alignment);
 }
 
-// 0x493f60, lines 1295-1299
 void patella::TGraphics::PrintFormattedText(int Surface, int x, int y, TFont Format, const char *Text)
 {
 	PATELLA_ASSERT_VALUES(Format.Alignment==LEFT_ALIGN || Format.Alignment==CENTER_ALIGN || Format.Alignment==RIGHT_ALIGN,
@@ -1097,28 +1062,23 @@ void patella::TGraphics::PrintFormattedText(int Surface, int x, int y, TFont For
 	PrintText(Surface, x, y, Format.FontNumber, Format.Color, Text, Format.Alignment);
 }
 
-// 0x4941d0, line 1309
 void patella::TGraphics::PrintFormattedTextClipped(int Surface, int x, int y, TFont Format, const char *Text, TRect Clip)
 {
 	PrintTextClipped(Surface, x, y, Format.FontNumber, Format.Color, Text, Format.Alignment, Clip);
 }
 
-// 0x4943b0, line 1319
 void patella::TGraphics::PrintFormattedTextPart(int Surface, int x, int y, TFont Format, const char *Text, int Length)
 {
 	PrintTextPart(Surface, x, y, Format.FontNumber, Format.Color, Text, Length, Format.Alignment);
 }
 
-// 0x491710, line 1343. No try block.
 int patella::TGraphics::GetFontHeight(int FontNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(FontNumber,1,NumberOfFonts), FontNumber, NumberOfFonts);
 	return Fonts[FontNumber - 1].Height;
 }
 
-// 0x491880, lines 1352-1353. The highest visible character of the text.
-// The handlers of the original's catch wrappers here and of the two following
-// functions were removed by the compiler; the exception states remain.
+// The highest visible character of the text.
 int patella::TGraphics::GetTextHeight(int FontNumber, const char *Text) const
 {
 	PATELLA_ASSERT_VALUES(In(FontNumber,1,NumberOfFonts), FontNumber, NumberOfFonts);
@@ -1142,7 +1102,6 @@ int patella::TGraphics::GetTextHeight(int FontNumber, const char *Text) const
 	return Height;
 }
 
-// 0x494570, lines 1373-1378
 int patella::TGraphics::GetTextWidth(int FontNumber, const char *Text) const
 {
 	PATELLA_ASSERT_VALUES(In(FontNumber,1,NumberOfFonts), FontNumber, NumberOfFonts);
@@ -1150,8 +1109,8 @@ int patella::TGraphics::GetTextWidth(int FontNumber, const char *Text) const
 	return GetTextPartWidth(FontNumber, Text, (int)strlen(Text));
 }
 
-// 0x491b80, lines 1386-1388. The width of the first Length characters,
-// without the spacing after the last.
+// The width of the first Length characters, without the spacing after
+// the last.
 int patella::TGraphics::GetTextPartWidth(int FontNumber, const char *Text, int Length) const
 {
 	PATELLA_ASSERT_VALUES(In(FontNumber,1,NumberOfFonts), FontNumber, NumberOfFonts);
@@ -1180,9 +1139,9 @@ int patella::TGraphics::GetTextPartWidth(int FontNumber, const char *Text, int L
 	return Width;
 }
 
-// 0x491f50, lines 1410-1411. The number of characters that fit into Width:
-// the index of the first character whose right end (with its spacing) lies
-// beyond Width, else the length.
+// The number of characters that fit into Width: the index of the first
+// character whose right end (with its spacing) lies beyond Width, else the
+// length.
 int patella::TGraphics::GetFittingTextLength(int FontNumber, const char *Text, int Width) const
 {
 	PATELLA_ASSERT_VALUES(In(FontNumber,1,NumberOfFonts), FontNumber, NumberOfFonts);
@@ -1211,8 +1170,8 @@ int patella::TGraphics::GetFittingTextLength(int FontNumber, const char *Text, i
 	return Length;
 }
 
-// 0x492260. Where a text with Format goes in the box x, y, Width, Height:
-// horizontally by its alignment, vertically centred. No exception frame.
+// Where a text with Format goes in the box x, y, Width, Height:
+// horizontally by its alignment, vertically centred.
 void patella::TGraphics::GetTextPosition(int *TextX, int *TextY, int x, int y, int Width, int Height, TFont *Format) const
 {
 	int Offset = 0;
@@ -1228,8 +1187,8 @@ void patella::TGraphics::GetTextPosition(int *TextX, int *TextY, int x, int y, i
 
 // --- Start-up and shut-down ----------------------------------------------------
 
-// 0x4922c0, line 1474. Empties the video cache and builds it again for the
-// current surface (ChangeEngine calls it after a new surface is set up).
+// Empties the video cache and builds it again for the current surface
+// (ChangeEngine calls it after a new surface is set up).
 void patella::TGraphics::ResetVideoCache()
 {
 	if (VideoCache != nullptr) {
@@ -1244,7 +1203,7 @@ void patella::TGraphics::ResetVideoCache()
 	InitVideoCache();
 }
 
-// 0x492490, line 1498. After Tibia.spr was patched (event 0x46).
+// After Tibia.spr was patched (event 0x46).
 void patella::TGraphics::ReloadSprites()
 {
 	ResetVideoCache();
@@ -1254,7 +1213,7 @@ void patella::TGraphics::ReloadSprites()
 	LoadSprites("Tibia.spr");
 }
 
-// 0x494900, line 1517. After Tibia.pic was patched (event 0x47).
+// After Tibia.pic was patched (event 0x47).
 void patella::TGraphics::ReloadPictures()
 {
 	ResetVideoCache();
@@ -1269,8 +1228,8 @@ void patella::TGraphics::ReloadPictures()
 	InitFonts();
 }
 
-// 0x494af0, line 1539. Called by InitControl with 10 MB. The video cache
-// comes later (InitVideoCache), when the surfaces exist.
+// Called by InitControl with 10 MB. The video cache comes later
+// (InitVideoCache), when the surfaces exist.
 void patella::TGraphics::InitGraphics(int MemoryCacheBytes)
 {
 	LoadSprites("Tibia.spr");

@@ -1,15 +1,6 @@
-// ContextMenus.cpp: reconstructed from Tibia.exe 7.72 (0x43d6f0-0x4458ff).
+// ContextMenus.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The help bubble and the context menus; see ContextMenus.h. The object
-// opens with the skill menu's destructor (0x43d6f0, no frame, no line); the
-// ContentWindows/ContextMenus gap 0x43d6f0-0x43d86b is this file's (the
-// destructor and its deleting form use the vtable 0x55f5f0 of the skill menu,
-// whose constructor is here; 0x43d730 is line 142). The functions follow in
-// line order. The binary moves the help bubble's constructor and Place, and
-// TContextMenu's AddEntry and Show, behind the event handlers, followed by
-// the menus' constructors: each calls a function defined further down (the
-// pattern noted for Creatures.cpp and DialogWindow.cpp). The inline functions
-// of ContextMenus.h are emitted with the vtables after the constructors.
+// The help bubble and the context menus; see ContextMenus.h.
 //
 // A menu is built by its constructor: AddEntry for every entry (Separator =
 // true starts a new group, AddSeparator draws the line), then Show, which
@@ -17,9 +8,6 @@
 // around them and keeps it on the screen. A click on an entry sends its
 // event to the menu (TCallback), which acts in HandleEvent; any button
 // release or Escape ends the action state, and Control.cpp deletes the menu.
-//
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none.
 
 #include "ContextMenus.h"
 #include "Communication.h"
@@ -52,20 +40,13 @@
 
 namespace {
 
-// At 0x5c4508, constructed by the static initialiser 0x559de0 as
-// TCallback(NULL, 0) and never used (the other window files have one too);
-// ContextMenus.obj's only datum, right after ContentWindows.obj's
-// NoCallback (0x5c4500, initialiser 0x559dd0) and before Control.obj's .bss
-// (0x5c4510).
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
 TCallback NoCallback(nullptr, 0);
 
 } // namespace
 
 
-// --- Functions without line evidence at the start ------------------------------
-
-// 0x43d6f0 (deleting destructor 0x43d710). The skill window forgets the menu.
+// The skill window forgets the menu.
 TSkillContextMenu::~TSkillContextMenu()
 {
 	if (SkillsWindow != nullptr)
@@ -74,8 +55,7 @@ TSkillContextMenu::~TSkillContextMenu()
 
 // --- THelpBubble ---------------------------------------------------------------
 
-// 0x441d60, lines 106-121. The assertion comes before the try block. The text
-// is fitted twice: before and after it has laid itself out.
+// The text is fitted twice: before and after it has laid itself out.
 THelpBubble::THelpBubble(const char *HelpText)
 {
 	PATELLA_ASSERT(HelpText!=nullptr);
@@ -89,9 +69,9 @@ THelpBubble::THelpBubble(const char *HelpText)
 	FitToChild(Text, SkinProperties().HelpBubbleTextMargins, true);
 }
 
-// 0x43d730, line 142. The size is rounded up to HelpBubbleSizeRemainder modulo HelpBubbleSizeStep and
-// kept between the minimum and HelpBubbleMaximumWidth/HelpBubbleMaximumHeight (the larger of the two wins
-// when the minimum is above the maximum).
+// The size is rounded up to HelpBubbleSizeRemainder modulo HelpBubbleSizeStep and kept between the
+// minimum and HelpBubbleMaximumWidth/HelpBubbleMaximumHeight (the larger of the two wins when the minimum
+// is above the maximum).
 void THelpBubble::SetSize(int Width, int Height)
 {
 	const int MaxWidth = SkinProperties().HelpBubbleMaximumWidth;
@@ -129,7 +109,7 @@ void THelpBubble::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x43d9b0. The frame: corners 52-55, edges 56-59, the middle 60.
+// The frame: corners 52-55, edges 56-59, the middle 60.
 void THelpBubble::Arrange()
 {
 	DrawingList[0] = TDrawing(SKIN_PANEL_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
@@ -148,14 +128,12 @@ void THelpBubble::Arrange()
 		Height - Skins()[SKIN_PANEL_EDGE_BOTTOM].height - Skins()[SKIN_PANEL_EDGE_TOP].height, 0, 0);
 }
 
-// 0x442110, lines 257-272. Tries eight places next to the help area (left
-// and right of it at its top, at its bottom and at its bottom moved up by
-// the margin and kept in the window; then below and above it) and takes the
-// first that fits; FitsIn moves a coordinate of 0 to the margin. Without one
-// the bubble goes to the top right corner while the mouse is in the left
-// half of the window, else to the top left one. The second assertion of
-// that case (line 263, newY) is folded into the first by the compiler, and
-// that path skips lines 267-268.
+// Tries eight places next to the help area (left and right of it at its top,
+// at its bottom and at its bottom moved up by the margin and kept in the
+// window; then below and above it) and takes the first that fits; FitsIn
+// moves a coordinate of 0 to the margin. Without one the bubble goes to the
+// top right corner while the mouse is in the left half of the window, else
+// to the top left one.
 void THelpBubble::Place(TWindow *Window)
 {
 	const int Margin = SkinProperties().HelpBubbleMargin;
@@ -228,8 +206,8 @@ void THelpBubble::Place(TWindow *Window)
 	SetSize(w, h);
 }
 
-// 0x43dca0, lines 289-293. The bubble fits at x, y if it keeps the margin to
-// every edge of the window; a coordinate of 0 becomes the margin first.
+// The bubble fits at x, y if it keeps the margin to every edge of the
+// window; a coordinate of 0 becomes the margin first.
 bool THelpBubble::FitsIn(int &x, int &y, int &Width, int &Height, TWindow *Window)
 {
 	const int Margin = SkinProperties().HelpBubbleMargin;
@@ -248,8 +226,8 @@ bool THelpBubble::FitsIn(int &x, int &y, int &Width, int &Height, TWindow *Windo
 
 // --- TContextMenuEntry ---------------------------------------------------------
 
-// 0x43dfe0, line 316. As wide as the text, the gap and the shortcut, and
-// as high as a line of the font, plus the space around both.
+// As wide as the text, the gap and the shortcut, and as high as a line
+// of the font, plus the space around both.
 TContextMenuEntry::TContextMenuEntry(const char *_Text, const char *_Shortcut, TCallback _Callback)
 	: Callback(nullptr, 0)
 {
@@ -267,8 +245,8 @@ TContextMenuEntry::TContextMenuEntry(const char *_Text, const char *_Shortcut, T
 	SetSize(w, h);
 }
 
-// 0x43e210, line 338. The entry under the mouse gets a background as high
-// as the font (not the line); the shortcut is right-aligned.
+// The entry under the mouse gets a background as high as the font (not
+// the line); the shortcut is right-aligned.
 void TContextMenuEntry::Draw(int Surface, int x, int y)
 {
 	if (In(GetMouseX() - x, 0, Width - 1) && In(GetMouseY() - y, 0, Height - 1)) {
@@ -286,14 +264,13 @@ void TContextMenuEntry::Draw(int Surface, int x, int y)
 	}
 }
 
-// 0x43e4d0, line 349
 bool TContextMenuEntry::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
 	Callback.Send();
 	return true;
 }
 
-// 0x43e660, line 361. The last entry loses the space below the font.
+// The last entry loses the space below the font.
 void TContextMenuEntry::SetLast()
 {
 	// The original's order: the left operand first (MSVC; GCC and Clang may differ, issue #91).
@@ -303,7 +280,7 @@ void TContextMenuEntry::SetLast()
 
 // --- TContextMenu --------------------------------------------------------------
 
-// 0x43e820, line 381. Nine frame skins (Arrange).
+// Nine frame skins (Arrange).
 TContextMenu::TContextMenu()
 {
 	DrawingListLength = 9;
@@ -313,7 +290,7 @@ TContextMenu::TContextMenu()
 	Empty = true;
 }
 
-// 0x43ea00. The frame: corners 208-211, edges 212-215, the middle 207.
+// The frame: corners 208-211, edges 212-215, the middle 207.
 void TContextMenu::Arrange()
 {
 	DrawingList[0] = TDrawing(SKIN_MENU_CORNER_TOPLEFT, 0, 0, 0, 0, 0, 0);
@@ -332,7 +309,7 @@ void TContextMenu::Arrange()
 		Height - Skins()[SKIN_MENU_EDGE_BOTTOM].height - Skins()[SKIN_MENU_EDGE_TOP].height, 0, 0);
 }
 
-// 0x43ecf0, line 437. The entry under the mouse sends its event first.
+// The entry under the mouse sends its event first.
 bool TContextMenu::LeftButtonUp(int x, int y, int Flags)
 {
 	TWindow::LeftButtonUp(x, y, Flags);
@@ -340,24 +317,23 @@ bool TContextMenu::LeftButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x43eea0, line 449
 bool TContextMenu::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
 	SetActionState(ACTIONSTATE_NONE);
 	return true;
 }
 
-// 0x43f030, line 460. Escape closes the menu.
+// Escape closes the menu.
 void TContextMenu::KeyPress(int Key)
 {
 	if (Key == KEY_ESCAPE)
 		SetActionState(ACTIONSTATE_NONE);
 }
 
-// 0x442de0, lines 486-498. Opens the menu at x, y, or left of and above it
-// where it would reach the right or bottom edge. A menu without entries gets
-// an empty one; that one is added after the entries were laid out, so it
-// keeps its own width and the position 0,0.
+// Opens the menu at x, y, or left of and above it where it would reach the
+// right or bottom edge. A menu without entries gets an empty one; that one
+// is added after the entries were laid out, so it keeps its own width and
+// the position 0,0.
 void TContextMenu::Show(int x, int y, int ParentWidth, int ParentHeight)
 {
 	int Position = 0;
@@ -384,9 +360,8 @@ void TContextMenu::Show(int x, int y, int ParentWidth, int ParentHeight)
 	SetPosition(x, y);
 }
 
-// 0x442910, lines 506-521. The assertions come before the try block. A
-// pending separator is drawn only between entries, and it stays pending
-// while the menu is empty.
+// A pending separator is drawn only between entries, and it stays
+// pending while the menu is empty.
 void TContextMenu::AddEntry(int Event, const char *Text, const char *Shortcut)
 {
 	PATELLA_ASSERT(Text!=nullptr);
@@ -403,7 +378,7 @@ void TContextMenu::AddEntry(int Event, const char *Text, const char *Shortcut)
 	Empty = false;
 }
 
-// 0x43f1d0, line 542. Show widens the line to the entries.
+// Show widens the line to the entries.
 void TContextMenu::AddSeparator()
 {
 	TSeparator *Line = new TSeparator(true);
@@ -413,9 +388,8 @@ void TContextMenu::AddSeparator()
 
 // --- TObjectContextMenu --------------------------------------------------------
 
-// 0x443130, lines 560-670. The shortcuts are shown with the modern controls
-// only. The rotate test reads the flags of the used object even when there
-// is none (type 0).
+// The shortcuts are shown with the modern controls only. The rotate test
+// reads the flags of the used object even when there is none (type 0).
 TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int ParentHeight)
 {
 	LookedObject = *GetTradeObject(&LookedObjectIndex, &LookedObjectX, &LookedObjectY, &LookedObjectZ);
@@ -520,10 +494,9 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	Show(x, y, ParentWidth, ParentHeight);
 }
 
-// 0x43f3a0, lines 712-780; jump table 0x43fd98 with the byte table 0x43fdfc
-// (Event-10001, 0-202). "Move up" moves the object to z 0xfe of its
-// container's position, the parent container; "Open" opens a container in
-// the window of the one it is in.
+// "Move up" moves the object to z 0xfe of its container's position, the
+// parent container; "Open" opens a container in the window of the one it is
+// in.
 void TObjectContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -654,8 +627,8 @@ void TObjectContextMenu::HandleEvent(int Event)
 
 // --- TCreatureContextMenu ------------------------------------------------------
 
-// 0x443960, lines 845-862. Like the creature part of the object menu,
-// without the shortcuts and the test for the own character.
+// Like the creature part of the object menu, without the shortcuts
+// and the test for the own character.
 TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int ParentWidth, int ParentHeight)
 {
 	this->CreatureID = CreatureID;
@@ -724,8 +697,6 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 	Show(x, y, ParentWidth, ParentHeight);
 }
 
-// 0x43fed0, lines 934-937; jump table 0x440350 with the byte table 0x44038c
-// (Event-10004, 0-199).
 void TCreatureContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -819,9 +790,9 @@ void TCreatureContextMenu::HandleEvent(int Event)
 
 // --- TBuddyContextMenu ---------------------------------------------------------
 
-// 0x443e20, line 987. _CharacterID is not in the list when the menu is
-// opened on the free space. "Sort by status" is offered only while the
-// offline VIPs are shown.
+// _CharacterID is not in the list when the menu is opened on the free
+// space. "Sort by status" is offered only while the offline VIPs are
+// shown.
 TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int ParentWidth, int ParentHeight)
 {
 	CharacterID = _CharacterID;
@@ -858,8 +829,6 @@ TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int Pare
 	Show(x, y, ParentWidth, ParentHeight);
 }
 
-// 0x440460, lines 1040-1043; a compare tree with the jump table 0x4408d8
-// (Event-10303, 0-4). The cases are written in the order of their code.
 void TBuddyContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -919,10 +888,9 @@ void TBuddyContextMenu::HandleEvent(int Event)
 
 // --- TTextContextMenu ----------------------------------------------------------
 
-// 0x444160, lines 1056-1120. The assertions come before the try block. The
-// entries for the speaker are offered for lines of other characters only,
-// and none for a game master's answer in the rule violation channel. The
-// test of the addressee array against NULL is the binary's.
+// The entries for the speaker are offered for lines of other characters
+// only, and none for a game master's answer in the rule violation channel.
+// The test of the addressee array against NULL is the binary's.
 TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, int x, int y, int ParentWidth,
 	int ParentHeight)
 {
@@ -975,8 +943,8 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 	Show(x, y, ParentWidth, ParentHeight);
 }
 
-// 0x4408f0, line 1173. Unknown events do nothing. "Rule Violation" passes a
-// copy of the line, or nothing without one.
+// Unknown events do nothing. "Rule Violation" passes a copy of the line, or
+// nothing without one.
 void TTextContextMenu::HandleEvent(int Event)
 {
 	TTalkLine *Line = TextWindow->GetTalkLine(LineNumber);
@@ -1050,7 +1018,6 @@ void TTextContextMenu::HandleEvent(int Event)
 
 // --- TRequestContextMenu -------------------------------------------------------
 
-// 0x444720, lines 1181-1203. The assertion comes before the try block.
 TRequestContextMenu::TRequestContextMenu(TConsoleWindow *_ConsoleWindow, int _LineNumber, int x, int y,
 	int ParentWidth, int ParentHeight)
 {
@@ -1071,8 +1038,8 @@ TRequestContextMenu::TRequestContextMenu(TConsoleWindow *_ConsoleWindow, int _Li
 	Show(x, y, ParentWidth, ParentHeight);
 }
 
-// 0x440c60, lines 1221-1241. "Process" opens the reporter's channel with the
-// request as its first line. Unknown events do nothing.
+// "Process" opens the reporter's channel with the request as its first line.
+// Unknown events do nothing.
 void TRequestContextMenu::HandleEvent(int Event)
 {
 	TTalkLine *Line = ConsoleWindow->CurrentConsole->TextWindow->GetTalkLine(LineNumber);
@@ -1113,8 +1080,7 @@ void TRequestContextMenu::HandleEvent(int Event)
 
 // --- TChannelContextMenu -------------------------------------------------------
 
-// 0x444a70, lines 1248-1275. The first assertion comes before the try
-// block. The default channel cannot be closed; a private channel of the
+// The default channel cannot be closed; a private channel of the
 // player's own gets "Invite player" and "Exclude player".
 TChannelContextMenu::TChannelContextMenu(TConsoleWindow *_ConsoleWindow, int x, int y, int ParentWidth,
 	int ParentHeight)
@@ -1141,8 +1107,8 @@ TChannelContextMenu::TChannelContextMenu(TConsoleWindow *_ConsoleWindow, int x, 
 	Show(x, y, ParentWidth, ParentHeight);
 }
 
-// 0x440fe0, lines 1307-1312. The invitation and exclusion go through dialogs
-// (Control.cpp's events 0x13 and 0x14).
+// The invitation and exclusion go through dialogs (Control.cpp's events 0x13
+// and 0x14).
 void TChannelContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -1174,7 +1140,6 @@ void TChannelContextMenu::HandleEvent(int Event)
 
 // --- TEditContextMenu ----------------------------------------------------------
 
-// 0x444eb0, lines 1324-1349. The assertion comes before the try block.
 TEditContextMenu::TEditContextMenu(TEditLine *_Edit, int x, int y, int ParentWidth, int ParentHeight)
 {
 	PATELLA_ASSERT(_Edit!=nullptr);
@@ -1195,8 +1160,7 @@ TEditContextMenu::TEditContextMenu(TEditLine *_Edit, int x, int y, int ParentWid
 	Show(x, y, ParentWidth, ParentHeight);
 }
 
-// 0x441370, lines 1363-1366; jump table 0x44163c (Event-10200, 0-6). The
-// edit line does the work (its HandleEvent).
+// The edit line does the work (its HandleEvent).
 void TEditContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -1222,8 +1186,7 @@ void TEditContextMenu::HandleEvent(int Event)
 
 // --- TMarkContextMenu ----------------------------------------------------------
 
-// 0x4451e0, lines 1379-1397. The assertion comes before the try block; the
-// menu keeps a copy of the data and deletes the original.
+// The menu keeps a copy of the data and deletes the original.
 TMarkContextMenu::TMarkContextMenu(TMarkMenuData *_Data, int x, int y, int ParentWidth, int ParentHeight)
 {
 	PATELLA_ASSERT(_Data!=nullptr);
@@ -1238,9 +1201,9 @@ TMarkContextMenu::TMarkContextMenu(TMarkMenuData *_Data, int x, int y, int Paren
 	delete _Data;
 }
 
-// 0x441660, lines 1426-1429; jump table 0x4419ec (Event-10400, 0-3). The
-// mark dialog (Control.cpp's events 0x1d and 0x1e) gets copies of the
-// position and the mark. Event 10402 (walk to the mark) has no entry.
+// The mark dialog (Control.cpp's events 0x1d and 0x1e) gets copies of
+// the position and the mark. Event 10402 (walk to the mark) has no
+// entry.
 void TMarkContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -1274,8 +1237,7 @@ void TMarkContextMenu::HandleEvent(int Event)
 
 // --- TSkillContextMenu ---------------------------------------------------------
 
-// 0x4454f0, lines 1442-1465. The assertion comes before the try block. The
-// separator before the last two entries is drawn directly.
+// The separator before the last two entries is drawn directly.
 TSkillContextMenu::TSkillContextMenu(TSkillsWindowBody *_SkillsWindow, int x, int y, int ParentWidth,
 	int ParentHeight)
 {
@@ -1297,8 +1259,7 @@ TSkillContextMenu::TSkillContextMenu(TSkillsWindowBody *_SkillsWindow, int x, in
 	Show(x, y, ParentWidth, ParentHeight);
 }
 
-// 0x441a00, lines 1525-1530; jump table 0x441d34 with the byte table 0x441d48
-// (Event-10500, 0-10). The skill window is laid out again.
+// The skill window is laid out again.
 void TSkillContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {

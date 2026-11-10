@@ -16,10 +16,6 @@
 // _ButtonRange, Number, Key, Code, Event, Surface, x, y, Width, Height).
 // TCheckBox is named after SkinProperties.CheckBox. The other class, member
 // and function names are ours; see notes/decisions.md, "DialogElements.cpp".
-//
-// Several header functions have out-of-line copies at the start of
-// DialogElements.obj (0x4524e0-0x452cb0 and the destructors up to 0x4532ff),
-// some only called by Dialogs.cpp.
 
 #pragma once
 
@@ -42,36 +38,33 @@
 
 // --- Separator, resizer and frame -----------------------------------------------
 
-// A line between groups (vtable 0x5610b0, 0x28 bytes): skins 9 and 8 one above
-// the other across the width, or 11 and 10 side by side down the height.
+// A line between groups: skins 9 and 8 one above the other across the width,
+// or 11 and 10 side by side down the height.
 class TSeparator : public TElement {
 public:
-	// Inline (out-of-line copy 0x452cb0).
 	TSeparator(bool _Horizontal)
 	{
 		Horizontal = _Horizontal;
 		DrawingListLength = 2;
 		DrawingList.reset(new TDrawing[2]);
 	}
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	void SetSize(int Width, int Height) override; // +0x34, 0x453930, line 42
-	void Arrange() override;                      // +0x48, 0x453ad0
+	void SetSize(int Width, int Height) override;
+	void Arrange() override;
 
 	bool Horizontal; // +0x24
 };
 
-// The resize handle of a window (vtable 0x5612b0, 0x38 bytes): dragging it
-// changes ToResize's width and/or height by the mouse movement.
+// The resize handle of a window: dragging it changes ToResize's width
+// and/or height by the mouse movement.
 class TResizer : public TElement {
 public:
-	TResizer(TComponent *_ToResize, bool _ResizeWidth, bool _ResizeHeight, bool _Invisible); // 0x453be0, line 74
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	void SetSize(int Width, int Height) override;          // +0x34, 0x453dc0, line 94
-	void Arrange() override;                               // +0x48, 0x453f60
-	bool MouseMove(int x, int y) override;                 // +0x4c, 0x453fe0, lines 113-122
-	bool LeftButtonDown(int x, int y, int Flags) override; // +0x50, 0x4542a0, lines 129-137
-	bool LeftButtonUp(int x, int y, int Flags) override;   // +0x54, 0x454530, lines 144-154
-	void ReleaseCapture(TComponent *Component) override    // +0x7c, 0x453db0
+	TResizer(TComponent *_ToResize, bool _ResizeWidth, bool _ResizeHeight, bool _Invisible);
+	void SetSize(int Width, int Height) override;
+	void Arrange() override;
+	bool MouseMove(int x, int y) override;
+	bool LeftButtonDown(int x, int y, int Flags) override;
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	void ReleaseCapture(TComponent *Component) override
 	{
 		Dragging = false;
 		TElement::ReleaseCapture(Component);
@@ -87,20 +80,19 @@ public:
 };
 
 // A frame of nine skins (corners, edges and an optional background) around one
-// window (vtable 0x561358, 0x68 bytes).
+// window.
 class TBorder : public TWindow {
 public:
-	TBorder(TComponent *_Window, int _Border); // 0x4547f0, lines 166-184, the skins 26-33
+	TBorder(TComponent *_Window, int _Border); // the skins 26-33
 	TBorder(TComponent *_Window, int _TopLeft, int _Top, int _TopRight, int _Left, int _Right, int _BottomLeft,
-		int _Bottom, int _BottomRight, int _Border); // 0x454b10, lines 192-210
+		int _Bottom, int _BottomRight, int _Border);
 	TBorder(TComponent *_Window, int _TopLeft, int _Top, int _TopRight, int _Left, int _Right, int _BottomLeft,
-		int _Bottom, int _BottomRight, int _Background, int _Border); // 0x454e30, lines 217-235
-	// The destructor is the implicit one (deleting destructor 0x4adc40, folded).
-	void SetSize(int Width, int Height) override;                                                         // +0x34, 0x455150, lines 242-251
-	int getMinimumWidth() override { return Skins()[Right].width + Skins()[Left].width + 2 * Border; }    // +0x3c, 0x4525a0
-	int getMinimumHeight() override { return Skins()[Bottom].height + Skins()[Top].height + 2 * Border; } // +0x40, 0x452570
-	void Arrange() override;                                                                              // +0x48, 0x4556b0
-	void FitToWindow();                                                                                   // 0x455500, line 262
+		int _Bottom, int _BottomRight, int _Background, int _Border);
+	void SetSize(int Width, int Height) override;
+	int getMinimumWidth() override { return Skins()[Right].width + Skins()[Left].width + 2 * Border; }
+	int getMinimumHeight() override { return Skins()[Bottom].height + Skins()[Top].height + 2 * Border; }
+	void Arrange() override;
+	void FitToWindow();
 
 	TComponent *Window; // +0x2c, a window or an element (the outfit dialog frames its icon)
 	int TopLeft;        // +0x30, skins
@@ -118,16 +110,15 @@ public:
 
 // --- Texts ------------------------------------------------------------------------
 
-// A text of one or more lines (vtable 0x560bb8, 0x4c bytes). The constructors
-// without an area size the label to the text. Mouse events go through it.
+// A text of one or more lines. The constructors without an area size the
+// label to the text. Mouse events go through it.
 class TLabel : public TElement {
 public:
 	TLabel(const TLabel &) = delete;
 	TLabel &operator=(const TLabel &) = delete;
-	TLabel(int x, int y, int Width, int Height, TFont _Font, const char *_Text, bool Shorten); // 0x465510, lines 337-348
-	TLabel(int x, int y, TFont _Font, const char *_Text);                                      // 0x465810, lines 355-369
-	TLabel(TFont _Font, const char *_Text);                                                    // 0x465b40, lines 376-389
-	// Inline (out-of-line copy 0x4525d0, deleting destructor 0x452d50).
+	TLabel(int x, int y, int Width, int Height, TFont _Font, const char *_Text, bool Shorten);
+	TLabel(int x, int y, TFont _Font, const char *_Text);
+	TLabel(TFont _Font, const char *_Text);
 	~TLabel() override
 	{
 		if (Text != nullptr)
@@ -137,13 +128,13 @@ public:
 		if (Line != nullptr)
 			Line.reset();
 	}
-	void Draw(int Surface, int x, int y) override;                                                                             // +0x44, 0x455a50, line 413
-	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return false; }                                  // +0x4c, 0x452620
-	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; } // +0x50, 0x457700 (folded)
-	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }   // +0x54, 0x457700
-	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }  // +0x5c, 0x457700
-	void MouseHover(int x, int y) override;                                                                                    // +0x64, 0x455ca0, line 423
-	virtual void SetText(const char *_Text, bool Shorten);                                                                     // +0x84, 0x455e40, lines 431-472
+	void Draw(int Surface, int x, int y) override;
+	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return false; }
+	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	void MouseHover(int x, int y) override;
+	virtual void SetText(const char *_Text, bool Shorten);
 
 	std::unique_ptr<char[]> Text;     // +0x24, the lines, each terminated (issue #58)
 	std::unique_ptr<char[]> FullText; // +0x28, the text as given (the tooltip of a shortened text; issue #58)
@@ -154,15 +145,13 @@ public:
 };
 
 // A text with formatting tokens (<br>, <p>, <hr>, <vspace=n>, <hspace=n>,
-// <indent=n>, colours ...), laid out as one TLabel per piece (vtable 0x560c40,
-// 0x38 bytes); the help bubble's text. A width or height below 1 means "as
-// large as the text".
+// <indent=n>, colours ...), laid out as one TLabel per piece; the help
+// bubble's text. A width or height below 1 means "as large as the text".
 class TFormattedText : public TWindow {
 public:
 	TFormattedText(const TFormattedText &) = delete;
 	TFormattedText &operator=(const TFormattedText &) = delete;
-	TFormattedText(const char *_Text); // 0x465e60, line 508
-	// Inline (out-of-line copy 0x452630, deleting destructor 0x452d70).
+	TFormattedText(const char *_Text);
 	~TFormattedText() override
 	{
 		if (Text != nullptr)
@@ -170,10 +159,10 @@ public:
 		if (Line != nullptr)
 			Line.reset();
 	}
-	void SetSize(int Width, int Height) override;                   // +0x34, 0x456200, line 531
-	void Arrange() override;                                        // +0x48, 0x466010, lines 684-715
-	virtual void SetText(const char *_Text, bool Rearrange);        // +0xa0, 0x456810, lines 723-734
-	int GetToken(const char *Text, int &TokenType, int &TokenData); // 0x4563d0, line 577
+	void SetSize(int Width, int Height) override;
+	void Arrange() override;
+	virtual void SetText(const char *_Text, bool Rearrange);
+	int GetToken(const char *Text, int &TokenType, int &TokenData);
 
 	std::unique_ptr<char[]> Text; // +0x2c (issue #58)
 	std::unique_ptr<char[]> Line; // +0x30, the piece being laid out, a buffer as large as Text (issue #58)
@@ -183,21 +172,20 @@ public:
 
 class TTextButton;
 
-// A text with a button that opens Destination with OpenURL (vtable 0x560ce8,
-// 0x3c bytes): the dialogs' links to the web site.
+// A text with a button that opens Destination with OpenURL: the dialogs'
+// links to the web site.
 class TLink final : public TWindow {
 public:
 	TLink(const TLink &) = delete;
 	TLink &operator=(const TLink &) = delete;
 	TLink(const char *_Text, const char *ButtonText, const char *_Destination, void (*_OpenURL)(const char *URL),
-		TFont Font); // 0x46b030, lines 785-796
-	// Inline (out-of-line copy 0x452670, deleting destructor 0x452d90).
+		TFont Font);
 	~TLink() override { Destination.reset(); }
-	void SetSize(int Width, int Height) override; // +0x34, 0x456df0, line 838
-	int getMinimumWidth() override;               // +0x3c, 0x4526a0 (inline, below)
-	int getMinimumHeight() override;              // +0x40, 0x452690 (inline, below)
-	void Arrange() override;                      // +0x48, 0x456b00, lines 812-824
-	void HandleEvent(int Event) override;         // +0x70, 0x456fa0, line 848
+	void SetSize(int Width, int Height) override;
+	int getMinimumWidth() override;
+	int getMinimumHeight() override;
+	void Arrange() override;
+	void HandleEvent(int Event) override;
 
 	void (*OpenURL)(const char *URL);    // +0x2c
 	std::unique_ptr<char[]> Destination; // +0x30 (issue #58)
@@ -207,20 +195,18 @@ public:
 
 // --- Icons ------------------------------------------------------------------------
 
-// An outfit with its four colours (vtable 0x561970, 0x48 bytes).
+// An outfit with its four colours.
 class TOutfitIcon final : public TElement {
 public:
-	TOutfitIcon(int _Outfit, int _Direction, int *ColorData, const TRGBColor *_Highlight); // 0x4666a0, line 899
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	void Draw(int Surface, int x, int y) override;                                                                             // +0x44, 0x457140, lines 908-911
-	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return false; }                                  // +0x4c, 0x452620
-	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; } // +0x50, 0x457700
-	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }   // +0x54, 0x457700
-	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }  // +0x5c, 0x457700
-	// Inline (out-of-line copy 0x4526b0, called by Dialogs.cpp).
+	TOutfitIcon(int _Outfit, int _Direction, int *ColorData, const TRGBColor *_Highlight);
+	void Draw(int Surface, int x, int y) override;
+	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return false; }
+	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
 	void SetOutfit(int _Outfit) { Outfit = _Outfit; }
-	void SetColor(int Mask, int Color);   // 0x457440, line 934
-	void SetColors(const int *ColorData); // 0x4575a0, line 942
+	void SetColor(int Mask, int Color);
+	void SetColors(const int *ColorData);
 
 	int Outfit;                // +0x24
 	std::array<int, 4> Colors; // +0x28, head, body, legs, feet
@@ -228,32 +214,29 @@ public:
 	TRGBColor Highlight;       // +0x3c
 };
 
-// One skin, sized to it (vtable 0x5614f8, 0x28 bytes).
+// One skin, sized to it.
 class TSkinIcon : public TElement {
 public:
-	TSkinIcon(int _Skin); // 0x457710, line 1002
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	void Draw(int Surface, int x, int y) override;                                                                             // +0x44, 0x4578c0, lines 1009-1014
-	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return false; }                                  // +0x4c, 0x452620
-	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; } // +0x50, 0x457700
-	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }   // +0x54, 0x457700
-	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }  // +0x5c, 0x457700
-	bool MouseWheel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Direction) override { return false; } // +0x60, 0x457700
+	TSkinIcon(int _Skin);
+	void Draw(int Surface, int x, int y) override;
+	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return false; }
+	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool MouseWheel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Direction) override { return false; }
 
 	int Skin; // +0x24
 };
 
-// An object (vtable 0x560d88, 0x50 bytes), optionally in a frame (skin 102).
+// An object, optionally in a frame (skin 102).
 class TObjectIcon final : public TElement {
 public:
-	// Inline (out-of-line copy 0x4526c0).
 	TObjectIcon(TObject _Obj, const TRGBColor *_Highlight, bool _Framed);
-	// The destructor is the implicit one (deleting destructor 0x429590).
-	void Draw(int Surface, int x, int y) override;                                                                             // +0x44, 0x457c40, lines 1052-1063
-	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return false; }                                  // +0x4c, 0x452620
-	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; } // +0x50, 0x457700
-	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }   // +0x54, 0x457700
-	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }  // +0x5c, 0x457700
+	void Draw(int Surface, int x, int y) override;
+	bool MouseMove([[maybe_unused]] int x, [[maybe_unused]] int y) override { return false; }
+	bool LeftButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
+	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
 
 	TRect Unused24;      // +0x24, cleared, never read
 	bool Framed;         // +0x34
@@ -266,29 +249,27 @@ public:
 struct TRadioButtonGroup;
 
 // A button drawn with two skins (released, pressed) that sends Callback when
-// it is released over itself (vtable 0x5619f8, 0x44 bytes). Repeat sends
-// Callback again on every held-button tick (MouseWheel code 6). A button of a
-// radio group shows as pressed while it is the group's selection.
+// it is released over itself. Repeat sends Callback again on every
+// held-button tick (MouseWheel code 6). A button of a radio group shows as
+// pressed while it is the group's selection.
 class TSkinButton : public TElement {
 public:
 	TSkinButton(int x, int y, int _ButtonUp, int _ButtonDown, TCallback _Callback, const char *_Tooltip,
-		bool _Repeat); // 0x466860, line 1113
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	void Draw(int Surface, int x, int y) override;                                                          // +0x44, 0x458150, lines 1122-1127
-	bool MouseMove(int x, int y) override;                                                                  // +0x4c, 0x4584e0
-	bool LeftButtonDown(int x, int y, int Flags) override;                                                  // +0x50, 0x458540, line 1155
-	bool LeftButtonUp(int x, int y, int Flags) override;                                                    // +0x54, 0x458710, line 1174
-	bool MouseWheel(int x, int y, int Code) override;                                                       // +0x60, 0x4588f0, line 1192
-	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(Tooltip); } // +0x64, 0x452780
-	void ReleaseCapture(TComponent *Component) override                                                     // +0x7c, 0x452770
+		bool _Repeat);
+	void Draw(int Surface, int x, int y) override;
+	bool MouseMove(int x, int y) override;
+	bool LeftButtonDown(int x, int y, int Flags) override;
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	bool MouseWheel(int x, int y, int Code) override;
+	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(Tooltip); }
+	void ReleaseCapture(TComponent *Component) override
 	{
 		Pressed = false;
 		TElement::ReleaseCapture(Component);
 	}
-	virtual bool IsPressed();                           // +0x84, 0x458ab0
-	void SetSkins(int _ButtonUp, int _ButtonDown);      // 0x458b20, lines 1228-1229
-	void SetRadioButtonGroup(TRadioButtonGroup *Group); // 0x458de0, line 1239
-	// Inline (out-of-line copy 0x452730, called by Dialogs.cpp).
+	virtual bool IsPressed();
+	void SetSkins(int _ButtonUp, int _ButtonDown);
+	void SetRadioButtonGroup(TRadioButtonGroup *Group);
 	void SetEnabled(bool _Enabled) { Enabled = _Enabled; }
 
 	int ButtonUp;                        // +0x24
@@ -302,9 +283,7 @@ public:
 	bool Enabled;                        // +0x40
 };
 
-// The buttons of a radio group (0x28 bytes; the type name is ours). The
-// constructor and the destructor are inline (ContentWindows.cpp's
-// TCombatControls; the out-of-line vector constructor is 0x425e70); Selected
+// The buttons of a radio group (0x28 bytes; the type name is ours). Selected
 // is left uninitialised.
 struct TRadioButtonGroup {
 	TRadioButtonGroup() : Buttons(0, 0, 10, nullptr) { Count = 0; }
@@ -313,33 +292,33 @@ struct TRadioButtonGroup {
 	int Count;                             // +0x24
 };
 
-// A button on a coloured background (vtable 0x561a80, 0x50 bytes).
+// A button on a coloured background.
 class TColorButton final : public TSkinButton {
 public:
 	TColorButton(int x, int y, TRGBColor _Color, int _ButtonUp, int _ButtonDown, TCallback _Callback,
-		const char *_Tooltip);                     // 0x466a60
-	void Draw(int Surface, int x, int y) override; // +0x44, 0x458f50, line 1274
+		const char *_Tooltip);
+	void Draw(int Surface, int x, int y) override;
 
 	TRGBColor Color; // +0x44
 };
 
-// A button with an icon skin on it (vtable 0x561b08, 0x48 bytes).
+// A button with an icon skin on it.
 class TIconButton final : public TSkinButton {
 public:
 	TIconButton(int x, int y, int _Icon, int _ButtonUp, int _ButtonDown, TCallback _Callback,
-		const char *_Tooltip);                     // 0x466ad0
-	void Draw(int Surface, int x, int y) override; // +0x44, 0x459130, lines 1305-1310
+		const char *_Tooltip);
+	void Draw(int Surface, int x, int y) override;
 
 	int Icon; // +0x44
 };
 
-// A button that alternates between two pairs of skins (vtable 0x561b90, 0x5c
-// bytes): MapWindow.cpp's hint button.
+// A button that alternates between two pairs of skins: MapWindow.cpp's hint
+// button.
 class TBlinkingButton : public TSkinButton {
 public:
 	TBlinkingButton(int x, int y, int _ButtonUp1, int _ButtonDown1, int _ButtonUp2, int _ButtonDown2,
-		TCallback _Callback, const char *_Tooltip); // 0x466b20
-	void Draw(int Surface, int x, int y) override;  // +0x44, 0x4594e0, line 1363
+		TCallback _Callback, const char *_Tooltip);
+	void Draw(int Surface, int x, int y) override;
 
 	int NextChange;  // +0x44, GetMilliseconds() time
 	int Phase;       // +0x48, 1 or 2
@@ -349,14 +328,14 @@ public:
 	int ButtonDown2; // +0x58
 };
 
-// A button with a text (vtable 0x561c40, 0x78 bytes).
+// A button with a text.
 class TTextButton : public TSkinButton {
 public:
 	TTextButton(int x, int y, const char *_Text, int _ButtonUp, int _ButtonDown, TCallback _Callback,
-		const char *_Tooltip);                                                               // 0x466bc0, lines 1378-1379
-	TTextButton(int x, int y, const char *_Text, TCallback _Callback, const char *_Tooltip); // 0x466ed0, lines 1390-1391
-	void Draw(int Surface, int x, int y) override;                                           // +0x44, 0x4596d0, line 1410
-	virtual void SetText(const char *_Text) { Text.Assign(_Text); }                          // +0x88, 0x466eb0
+		const char *_Tooltip);
+	TTextButton(int x, int y, const char *_Text, TCallback _Callback, const char *_Tooltip);
+	void Draw(int Surface, int x, int y) override;
+	virtual void SetText(const char *_Text) { Text.Assign(_Text); }
 
 	TFixedString<50> Text; // +0x44
 };
@@ -377,55 +356,53 @@ inline int TLink::getMinimumHeight()
 	return Button->Height;
 }
 
-// A button that stays pressed while State is set; a click toggles it
-// (vtable 0x561cd0, 0x50 bytes). The tooltips belong to the two states.
+// A button that stays pressed while State is set; a click toggles it.
+// The tooltips belong to the two states.
 class TToggleButton : public TSkinButton {
 public:
 	TToggleButton(int x, int y, int _ButtonUp, int _ButtonDown, TCallback _Callback, const char *_Tooltip1,
-		const char *_Tooltip2, bool _State);                                                                                    // 0x4671e0
-	bool LeftButtonUp(int x, int y, int Flags) override;                                                                        // +0x54, 0x459940, line 1454
-	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(State ? Tooltip2 : Tooltip1); } // +0x64, 0x4671b0
-	bool IsPressed() override;                                                                                                  // +0x84, 0x459b00
+		const char *_Tooltip2, bool _State);
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(State ? Tooltip2 : Tooltip1); }
+	bool IsPressed() override;
 
 	bool State;           // +0x44
 	const char *Tooltip1; // +0x48
 	const char *Tooltip2; // +0x4c
 };
 
-// A text button with a state (vtable 0x561d58, 0x84 bytes): ContentWindows.cpp's
-// TButtonsWindow sets State while it draws.
+// A text button with a state: ContentWindows.cpp's TButtonsWindow sets State
+// while it draws.
 class TTextToggleButton : public TTextButton {
 public:
 	TTextToggleButton(int x, int y, const char *_Text, int _ButtonUp, int _ButtonDown, TCallback _Callback,
-		const char *_Tooltip1, const char *_Tooltip2, bool _State);                                                             // 0x467230
-	bool LeftButtonUp(int x, int y, int Flags) override;                                                                        // +0x54, 0x459b70, line 1511
-	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(State ? Tooltip2 : Tooltip1); } // +0x64, 0x467290
-	bool IsPressed() override;                                                                                                  // +0x84, 0x459d30
+		const char *_Tooltip1, const char *_Tooltip2, bool _State);
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(State ? Tooltip2 : Tooltip1); }
+	bool IsPressed() override;
 
 	bool State;           // +0x78
 	const char *Tooltip1; // +0x7c
 	const char *Tooltip2; // +0x80
 };
 
-// A button that steps through States states, each with its skins and callback
-// (vtable 0x560e10, 0x58 bytes): the console's volume. The constructor takes
-// the first state's skins and callback, then those of the other states.
+// A button that steps through States states, each with its skins and
+// callback: the console's volume. The constructor takes the first state's
+// skins and callback, then those of the other states.
 class TMultiStateButton : public TSkinButton {
 public:
 	TMultiStateButton(const TMultiStateButton &) = delete;
 	TMultiStateButton &operator=(const TMultiStateButton &) = delete;
 	TMultiStateButton(int x, int y, const char *_Tooltip, int _States, int _ButtonUp, int _ButtonDown,
-		TCallback _Callback, ...); // 0x4672d0
-	// Inline (out-of-line copy 0x452740, deleting destructor 0x452db0).
+		TCallback _Callback, ...);
 	~TMultiStateButton() override
 	{
 		ButtonUps.reset();
 		ButtonDowns.reset();
 		Callbacks.reset();
 	}
-	bool LeftButtonUp(int x, int y, int Flags) override; // +0x54, 0x459da0, line 1609
-	// Inline (out-of-line copy 0x452790): State is set past the last state,
-	// which wraps to state 0.
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	// State is set past the last state, which wraps to state 0.
 	void Reset()
 	{
 		State = States + 1;
@@ -442,22 +419,21 @@ public:
 	std::unique_ptr<TCallback[]> Callbacks; // +0x54
 };
 
-// A check box with a text (vtable 0x561de8, 0x34 bytes).
+// A check box with a text.
 class TCheckBox final : public TWindow {
 public:
-	TCheckBox(const char *_Text); // 0x467440, lines 1686-1699
-	// The destructor is the implicit one (deleting destructor 0x4adc40, folded).
-	void Draw(int Surface, int x, int y) override;                                                         // +0x44, 0x459f90, lines 1711-1716
-	void Arrange() override;                                                                               // +0x48, 0x45a360
-	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override // +0x54, 0x4527c0
+	TCheckBox(const char *_Text);
+	void Draw(int Surface, int x, int y) override;
+	void Arrange() override;
+	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override
 	{
 		if (Enabled)
 			Checked = !Checked;
 		return true;
 	}
-	virtual void SetChecked(bool _Checked) { Checked = _Checked; } // +0xa0, 0x467420
-	virtual bool IsChecked() { return Checked; }                   // +0xa4, 0x467430
-	void SetEnabled(bool _Enabled);                                // 0x4678d0, line 1768
+	virtual void SetChecked(bool _Checked) { Checked = _Checked; }
+	virtual bool IsChecked() { return Checked; }
+	void SetEnabled(bool _Enabled);
 
 	TLabel *Label; // +0x2c
 	bool Checked;  // +0x30
@@ -468,48 +444,45 @@ public:
 
 class TFocusGroup;
 
-// A line of text input (vtable 0x560e98, 0x68 bytes; "_Edit" in ContextMenus.cpp),
-// the console's Input. HandleEvent takes 16 copy, 17 cut, 18 paste, 19 delete
-// and 20 select all. A read-only line (ReadOnly) allows only moving, copying
-// and selecting; a disabled one (Disabled) shows no text and takes no input.
+// A line of text input ("_Edit" in ContextMenus.cpp), the console's Input.
+// HandleEvent takes 16 copy, 17 cut, 18 paste, 19 delete and 20 select all. A
+// read-only line (ReadOnly) allows only moving, copying and selecting; a disabled
+// one (Disabled) shows no text and takes no input.
 class TEditLine : public TWindow {
 public:
 	TEditLine(const TEditLine &) = delete;
 	TEditLine &operator=(const TEditLine &) = delete;
-	TEditLine(TRect Area, int _MaxLength, bool _ReadOnly); // 0x467b50, lines 1878-1900
-	TEditLine(int _MaxLength, bool _ReadOnly);             // 0x45a4c0, lines 1908-1927
-	// Inline (out-of-line copy 0x4527e0, deleting destructor 0x452dd0).
+	TEditLine(TRect Area, int _MaxLength, bool _ReadOnly);
+	TEditLine(int _MaxLength, bool _ReadOnly);
 	~TEditLine() override { Text.reset(); }
-	void SetSize(int Width, int Height) override;                 // +0x34, 0x45ac40, line 1974
-	void Draw(int Surface, int x, int y) override;                // +0x44, 0x45a800, line 1963
-	void Arrange() override;                                      // +0x48, 0x45ade0
-	bool MouseMove(int x, int y) override;                        // +0x4c, 0x45af40, line 2014
-	bool LeftButtonDown(int x, int y, int Flags) override;        // +0x50, 0x467ec0, line 2037
-	bool LeftButtonUp(int x, int y, int Flags) override;          // +0x54, 0x45b130, line 2058
-	bool LeftButtonDoubleClick(int x, int y, int Flags) override; // +0x58, 0x45b2e0, line 2078
-	bool RightButtonUp(int x, int y, int Flags) override;         // +0x5c, 0x45b5b0, line 2093
-	void KeyPress(int Key) override;                              // +0x6c, 0x4680c0, line 2156
-	void HandleEvent(int Event) override;                         // +0x70, 0x45b790, lines 2206-2209
-	void ReleaseCapture(TComponent *Component) override           // +0x7c, 0x452800
+	void SetSize(int Width, int Height) override;
+	void Draw(int Surface, int x, int y) override;
+	void Arrange() override;
+	bool MouseMove(int x, int y) override;
+	bool LeftButtonDown(int x, int y, int Flags) override;
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	bool LeftButtonDoubleClick(int x, int y, int Flags) override;
+	bool RightButtonUp(int x, int y, int Flags) override;
+	void KeyPress(int Key) override;
+	void HandleEvent(int Event) override;
+	void ReleaseCapture(TComponent *Component) override
 	{
 		Selecting = false;
 		TWindow::ReleaseCapture(Component);
 	}
-	virtual void SetText(const char *_Text);                                    // +0xa0, 0x45bcc0, lines 2243-2252
-	virtual void Clear();                                                       // +0xa4, 0x45c980, line 2342
-	virtual void DeleteText(int start, int length);                             // +0xa8, 0x45c760, line 2327
-	virtual void DeleteChar(int Position) { DeleteText(Position, 1); }          // +0xac, 0x452810
-	virtual int InsertText(int Position, const char *String, int insertlength); // +0xb0, 0x45bf70, lines 2263-2294
-	virtual void InsertChar(int Position, char c);                              // +0xb4, 0x45c490, lines 2302-2309
-	virtual void SetDisabled(bool _Disabled) { Disabled = _Disabled; }          // +0xb8, 0x452830
-	virtual bool IsDisabled() { return Disabled; }                              // +0xbc, 0x452840
-	virtual void SetFont(TFont _Font) { Font = _Font; }                         // +0xc0, 0x452850
-	virtual int GetPosition(int x, int y);                                      // +0xc4, 0x4528e0 (inline, below)
-	void SetActive(bool _Active);                                               // 0x45bc80
-	void SetFocusGroup(TFocusGroup *_FocusGroup);                               // 0x468470, lines 2230-2235
-	// Inline (out-of-line copy 0x417520 in ConsoleWindow.obj).
+	virtual void SetText(const char *_Text);
+	virtual void Clear();
+	virtual void DeleteText(int start, int length);
+	virtual void DeleteChar(int Position) { DeleteText(Position, 1); }
+	virtual int InsertText(int Position, const char *String, int insertlength);
+	virtual void InsertChar(int Position, char c);
+	virtual void SetDisabled(bool _Disabled) { Disabled = _Disabled; }
+	virtual bool IsDisabled() { return Disabled; }
+	virtual void SetFont(TFont _Font) { Font = _Font; }
+	virtual int GetPosition(int x, int y);
+	void SetActive(bool _Active);
+	void SetFocusGroup(TFocusGroup *_FocusGroup);
 	[[nodiscard]] bool HasSelection() const { return SelectionStart != -1 && SelectionLength != 0; }
-	// Inline (out-of-line copies 0x4524e0, 0x452530, 0x452880).
 	void SetCursor(int Position)
 	{
 		Cursor = Position;
@@ -554,44 +527,41 @@ inline int TEditLine::GetPosition(int x, int y)
 	return Position;
 }
 
-// An edit line that shows stars (vtable 0x560f60, 0x6c bytes). It only pastes.
+// An edit line that shows stars. It only pastes.
 class TPasswordEditLine final : public TEditLine {
 public:
 	TPasswordEditLine(const TPasswordEditLine &) = delete;
 	TPasswordEditLine &operator=(const TPasswordEditLine &) = delete;
-	TPasswordEditLine(int _MaxLength); // 0x45cb50
-	// Inline (out-of-line copy 0x452980, deleting destructor 0x452df0).
+	TPasswordEditLine(int _MaxLength);
 	~TPasswordEditLine() override { Stars.reset(); }
-	void Draw(int Surface, int x, int y) override; // +0x44, 0x45cbb0, line 2420
+	void Draw(int Surface, int x, int y) override;
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
-	bool MouseMove(int x, int y) override { return TWindow::MouseMove(x, y); } // +0x4c, 0x4529c0, no selecting
+	bool MouseMove(int x, int y) override { return TWindow::MouseMove(x, y); } // no selecting
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
-	bool RightButtonUp(int x, int y, int Flags) override { return TWindow::RightButtonUp(x, y, Flags); } // +0x5c, 0x4529b0, no menu
-	void HandleEvent(int Event) override;                                                                // +0x70, 0x45cda0, line 2430
+	bool RightButtonUp(int x, int y, int Flags) override { return TWindow::RightButtonUp(x, y, Flags); } // no menu
+	void HandleEvent(int Event) override;
 
 	std::unique_ptr<char[]> Stars; // +0x68 (issue #81)
 };
 
-// A multi-line edit field with a scroll bar (vtable 0x562040, 0x9c bytes).
-// LineStart holds the first character of every line (Lines entries, then the
-// text's end).
+// A multi-line edit field with a scroll bar. LineStart holds the first
+// character of every line (Lines entries, then the text's end).
 class TScrollBar;
 class TEditText final : public TEditLine {
 public:
-	TEditText(int MaxLength, bool _ReadOnly); // 0x46b570, line 2466
-	// The destructor is the implicit one (0x46b540, deleting destructor 0x46b520).
-	int getMinimumWidth() override;                   // +0x3c, 0x46b500 (inline, below)
-	int getMinimumHeight() override;                  // +0x40, 0x46b510 (inline, below)
-	void Draw(int Surface, int x, int y) override;    // +0x44, 0x45cf30, line 2503
-	void Arrange() override;                          // +0x48, 0x4686f0, line 2536
-	bool MouseWheel(int x, int y, int Code) override; // +0x60, 0x45d400, line 2549
-	void KeyPress(int Key) override;                  // +0x6c, 0x468a60, line 2703
-	int GetPosition(int x, int y) override;           // +0xc4, 0x45d770, line 2762
+	TEditText(int MaxLength, bool _ReadOnly);
+	int getMinimumWidth() override;
+	int getMinimumHeight() override;
+	void Draw(int Surface, int x, int y) override;
+	void Arrange() override;
+	bool MouseWheel(int x, int y, int Code) override;
+	void KeyPress(int Key) override;
+	int GetPosition(int x, int y) override;
 	// NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method): the original's virtual over TEditLine's plain one
-	virtual void SetActive(bool _Active);                       // +0xc8, 0x45d5d0, line 2728
-	virtual void SetText(const char *_Text, bool KeepPosition); // +0xcc, 0x469120, line 2711
-	using TEditLine::SetText;                                   // TEditLine's SetText(Text) too (GCC's -Woverloaded-virtual, issue #111)
-	void FormatText();                                          // 0x45da90, lines 2770-2795
+	virtual void SetActive(bool _Active);
+	virtual void SetText(const char *_Text, bool KeepPosition);
+	using TEditLine::SetText; // TEditLine's SetText(Text) too (GCC's -Woverloaded-virtual, issue #111)
+	void FormatText();
 
 	TIndexedVector<int> LineStart; // +0x68
 	TScrollBar *ScrollBar;         // +0x88
@@ -605,11 +575,11 @@ public:
 // (0x28 bytes).
 class TFocusGroup {
 public:
-	TFocusGroup();                     // 0x45ddf0
-	void SetActive(TEditLine *Member); // 0x45de20, line 2828
-	void AddMember(TEditLine *Member); // 0x45dfc0, lines 2835-2836
-	void Next();                       // 0x45e290, lines 2846-2860
-	void Previous();                   // 0x45e630, lines 2868-2882
+	TFocusGroup();
+	void SetActive(TEditLine *Member);
+	void AddMember(TEditLine *Member);
+	void Next();
+	void Previous();
 
 	TEditLine *Active;                      // +0x00
 	TIndexedVector<TEditLine *> MemberList; // +0x04
@@ -618,27 +588,26 @@ public:
 
 // --- Scroll bars ------------------------------------------------------------------
 
-// The track and slider of a horizontal scroll bar (vtable 0x5617e0, 0x54
-// bytes); Callback is sent on every change of Value.
+// The track and slider of a horizontal scroll bar; Callback is sent on
+// every change of Value.
 class THorizontalScrollBarRange final : public TElement {
 public:
-	THorizontalScrollBarRange(int _Min, int _Max, int _Value, int _Visible, TCallback _Callback); // 0x45e9e0, lines 2925-2944
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	void SetSize(int Width, int Height) override;                                                    // +0x34, 0x45eff0, line 2986
-	int getMinimumWidth() override { return SkinProperties().HorizontalScrollBarRangeMinimumWidth; } // +0x3c, 0x45ee00
-	int getMinimumHeight() override { return SkinProperties().HorizontalScrollBarHeight; }           // +0x40, 0x45edf0
-	void Arrange() override;                                                                         // +0x48, 0x45f1a0
-	bool MouseMove(int x, int y) override;                                                           // +0x4c, 0x45f3d0, line 3039
-	bool LeftButtonDown(int x, int y, int Flags) override;                                           // +0x50, 0x45f5c0, line 3057
-	bool LeftButtonUp(int x, int y, int Flags) override;                                             // +0x54, 0x45f790, line 3081
-	bool MouseWheel(int x, int y, int Code) override;                                                // +0x60, 0x45f9d0, line 3113
-	void KeyPress(int Key) override;                                                                 // +0x6c, 0x45fca0, line 3131
-	void ReleaseCapture(TComponent *Component) override                                              // +0x7c, 0x45ede0
+	THorizontalScrollBarRange(int _Min, int _Max, int _Value, int _Visible, TCallback _Callback);
+	void SetSize(int Width, int Height) override;
+	int getMinimumWidth() override { return SkinProperties().HorizontalScrollBarRangeMinimumWidth; }
+	int getMinimumHeight() override { return SkinProperties().HorizontalScrollBarHeight; }
+	void Arrange() override;
+	bool MouseMove(int x, int y) override;
+	bool LeftButtonDown(int x, int y, int Flags) override;
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	bool MouseWheel(int x, int y, int Code) override;
+	void KeyPress(int Key) override;
+	void ReleaseCapture(TComponent *Component) override
 	{
 		Dragging = false;
 		TElement::ReleaseCapture(Component);
 	}
-	void SetValue(int _Value); // 0x45ee10, line 2974
+	void SetValue(int _Value);
 
 	int ButtonRange;    // +0x24, the step of a button or wheel
 	int Min;            // +0x28
@@ -655,18 +624,17 @@ public:
 	TCallback Callback; // +0x4c
 };
 
-// A horizontal scroll bar: two buttons and the range (vtable 0x561ed0, 0x38
-// bytes). The height is always SkinProperties.HorizontalScrollBarHeight.
+// A horizontal scroll bar: two buttons and the range. The height is always
+// SkinProperties.HorizontalScrollBarHeight.
 class THorizontalScrollBar final : public TWindow {
 public:
-	THorizontalScrollBar(int Min, int Max, int _Value, int _Visible, int _ButtonRange, TCallback _Callback); // 0x4692d0, lines 3158-3169
-	// The destructor is the implicit one (deleting destructor 0x4adc40, folded).
-	void SetSize(int Width, int Height) override;                                               // +0x34, 0x45fe90, line 3188
-	int getMinimumWidth() override { return SkinProperties().HorizontalScrollBarMinimumWidth; } // +0x3c, 0x4692c0
-	int getMinimumHeight() override { return SkinProperties().HorizontalScrollBarHeight; }      // +0x40, 0x45edf0
-	bool MouseWheel(int x, int y, int Code) override;                                           // +0x60, 0x4600c0, line 3200
-	void KeyPress(int Key) override;                                                            // +0x6c, 0x4731d0 (inline, below)
-	void HandleEvent(int Event) override;                                                       // +0x70, 0x460280, line 3213
+	THorizontalScrollBar(int Min, int Max, int _Value, int _Visible, int _ButtonRange, TCallback _Callback);
+	void SetSize(int Width, int Height) override;
+	int getMinimumWidth() override { return SkinProperties().HorizontalScrollBarMinimumWidth; }
+	int getMinimumHeight() override { return SkinProperties().HorizontalScrollBarHeight; }
+	bool MouseWheel(int x, int y, int Code) override;
+	void KeyPress(int Key) override;
+	void HandleEvent(int Event) override;
 
 	THorizontalScrollBarRange *Range; // +0x2c
 	TSkinButton *LeftButton;          // +0x30, event 5
@@ -678,27 +646,26 @@ inline void THorizontalScrollBar::KeyPress(int Key)
 	Range->KeyPress(Key);
 }
 
-// The track and slider of a vertical scroll bar (vtable 0x561868, 0x4c bytes).
+// The track and slider of a vertical scroll bar.
 class TScrollBarRange : public TElement {
 public:
-	TScrollBarRange(int x, int y, int Width, int Height, int _Min, int _Max, int _Value, int _Visible); // 0x469670, lines 3227-3248
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	void SetSize(int Width, int Height) override;                                            // +0x34, 0x4608e0, line 3315
-	int getMinimumWidth() override { return SkinProperties().ScrollBarMinimumWidth; }        // +0x3c, 0x469e60
-	int getMinimumHeight() override { return SkinProperties().ScrollBarRangeMinimumHeight; } // +0x40, 0x460440
-	void Arrange() override;                                                                 // +0x48, 0x460a90
-	bool MouseMove(int x, int y) override;                                                   // +0x4c, 0x460cc0, line 3367
-	bool LeftButtonDown(int x, int y, int Flags) override;                                   // +0x50, 0x460eb0, line 3385
-	bool LeftButtonUp(int x, int y, int Flags) override;                                     // +0x54, 0x461080, line 3408
-	bool MouseWheel(int x, int y, int Code) override;                                        // +0x60, 0x4612c0, line 3438
-	void KeyPress(int Key) override;                                                         // +0x6c, 0x461580, line 3455
-	void ReleaseCapture(TComponent *Component) override                                      // +0x7c, 0x460430
+	TScrollBarRange(int x, int y, int Width, int Height, int _Min, int _Max, int _Value, int _Visible);
+	void SetSize(int Width, int Height) override;
+	int getMinimumWidth() override { return SkinProperties().ScrollBarMinimumWidth; }
+	int getMinimumHeight() override { return SkinProperties().ScrollBarRangeMinimumHeight; }
+	void Arrange() override;
+	bool MouseMove(int x, int y) override;
+	bool LeftButtonDown(int x, int y, int Flags) override;
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	bool MouseWheel(int x, int y, int Code) override;
+	void KeyPress(int Key) override;
+	void ReleaseCapture(TComponent *Component) override
 	{
 		Dragging = false;
 		TElement::ReleaseCapture(Component);
 	}
-	void SetRange(int _Min, int _Max, int _Value, int _Visible); // 0x460450, lines 3281-3291
-	void SetValue(int _Value);                                   // 0x460710, line 3303
+	void SetRange(int _Min, int _Max, int _Value, int _Visible);
+	void SetValue(int _Value);
 
 	int ButtonRange;    // +0x24
 	int Min;            // +0x28
@@ -714,18 +681,17 @@ public:
 	bool Enabled;       // +0x49
 };
 
-// A vertical scroll bar: two buttons and the range (vtable 0x561f70, 0x38
-// bytes). The width is always SkinProperties.ScrollBarWidth.
+// A vertical scroll bar: two buttons and the range. The width is always
+// SkinProperties.ScrollBarWidth.
 class TScrollBar : public TWindow {
 public:
-	TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, int _ButtonRange); // 0x469a80, lines 3462-3475
-	// The destructor is the implicit one (deleting destructor 0x4adc40, folded).
-	void SetSize(int Width, int Height) override;                                       // +0x34, 0x461770, line 3509
-	int getMinimumWidth() override { return SkinProperties().ScrollBarMinimumWidth; }   // +0x3c, 0x469e60
-	int getMinimumHeight() override { return SkinProperties().ScrollBarMinimumHeight; } // +0x40, 0x469e50
-	bool MouseWheel(int x, int y, int Code) override;                                   // +0x60, 0x4619a0, line 3521
-	void KeyPress(int Key) override { Range->KeyPress(Key); }                           // +0x6c, 0x4731d0 (folded)
-	void HandleEvent(int Event) override;                                               // +0x70, 0x461b60, line 3534
+	TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, int _ButtonRange);
+	void SetSize(int Width, int Height) override;
+	int getMinimumWidth() override { return SkinProperties().ScrollBarMinimumWidth; }
+	int getMinimumHeight() override { return SkinProperties().ScrollBarMinimumHeight; }
+	bool MouseWheel(int x, int y, int Code) override;
+	void KeyPress(int Key) override { Range->KeyPress(Key); }
+	void HandleEvent(int Event) override;
 
 	TScrollBarRange *Range;  // +0x2c
 	TSkinButton *UpButton;   // +0x30, event 3
@@ -744,16 +710,15 @@ inline int TEditText::getMinimumHeight()
 
 // --- List boxes -------------------------------------------------------------------
 
-// A list of text lines with a selection and a scroll bar (vtable 0x561138,
-// 0x7c bytes). SelectCallback goes out when a line is clicked or selected by
-// key, ActionCallback on a double click. An editable list edits the selected
-// line in EditLine (a double click starts, Return or another line ends).
+// A list of text lines with a selection and a scroll bar. SelectCallback
+// goes out when a line is clicked or selected by key, ActionCallback on a
+// double click. An editable list edits the selected line in EditLine (a
+// double click starts, Return or another line ends).
 class TListBox : public TWindow {
 public:
 	TListBox(const TListBox &) = delete;
 	TListBox &operator=(const TListBox &) = delete;
-	TListBox(TCallback _SelectCallback, TCallback _ActionCallback); // 0x469e70, line 3596
-	// Inline (out-of-line copy 0x452e10, deleting destructor 0x453230).
+	TListBox(TCallback _SelectCallback, TCallback _ActionCallback);
 	~TListBox() override
 	{
 		for (int i = 0; i < Lines; i++)
@@ -761,23 +726,22 @@ public:
 		if (!Editing && EditLine != nullptr)
 			delete EditLine;
 	}
-	void SetSize(int Width, int Height) override;                 // +0x34, 0x4620e0, line 3646
-	void Draw(int Surface, int x, int y) override;                // +0x44, 0x461d10, line 3635
-	void Arrange() override;                                      // +0x48, 0x46a120, line 3676
-	bool LeftButtonDown(int x, int y, int Flags) override;        // +0x50, 0x46a460, line 3696
-	bool LeftButtonDoubleClick(int x, int y, int Flags) override; // +0x58, 0x46a640, line 3720
-	bool MouseWheel(int x, int y, int Code) override;             // +0x60, 0x462290, line 3747
-	void MouseHover(int x, int y) override;                       // +0x64, 0x46a830, line 3734
-	void KeyPress(int _Key) override;                             // +0x6c, 0x46aa30, line 3791
-	virtual void StartEdit();                                     // +0xa0, 0x463060, line 3957
-	virtual void StopEdit();                                      // +0xa4, 0x463280, line 3971
-	void AddLine(const char *Text);                               // 0x462460, lines 3799-3806
-	void SetLine(int Number, const char *Text);                   // 0x462730, lines 3831-3839
-	char *GetLine(int Number);                                    // 0x462b20, line 3847
-	void SetSelection(int Number);                                // 0x46ad10, lines 3891-3896
-	void Clear();                                                 // 0x462ca0, line 3921
-	[[nodiscard]] int GetLineAt(int x, int y) const;              // 0x462e70, line 3938
-	// Inline (out-of-line copies 0x4529d0 and 0x4529f0, called by Dialogs.cpp).
+	void SetSize(int Width, int Height) override;
+	void Draw(int Surface, int x, int y) override;
+	void Arrange() override;
+	bool LeftButtonDown(int x, int y, int Flags) override;
+	bool LeftButtonDoubleClick(int x, int y, int Flags) override;
+	bool MouseWheel(int x, int y, int Code) override;
+	void MouseHover(int x, int y) override;
+	void KeyPress(int _Key) override;
+	virtual void StartEdit();
+	virtual void StopEdit();
+	void AddLine(const char *Text);
+	void SetLine(int Number, const char *Text);
+	char *GetLine(int Number);
+	void SetSelection(int Number);
+	void Clear();
+	[[nodiscard]] int GetLineAt(int x, int y) const;
 	[[nodiscard]] int GetSelection() const
 	{
 		if (Selected < 0 || Selected > Lines - 1)
@@ -785,8 +749,6 @@ public:
 		return Selected;
 	}
 	void SetEditable(bool _Editable) { Editable = _Editable; }
-	// Inline (Dialogs.cpp; the out-of-line copy is folded with Talk.h's
-	// TChannelTalkBuffer::GetChannelID 0x507060).
 	[[nodiscard]] int GetNumberOfLines() const { return Lines; }
 
 	int Lines;                       // +0x2c
@@ -804,45 +766,43 @@ public:
 };
 
 // A line of a TFontListBox (0x18 bytes; the type name is ours). The
-// constructor is implicit (0x452c70, TFont's defaults; Text is left as it is).
+// constructor is implicit (TFont's defaults; Text is left as it is).
 struct TListBoxLine {
 	char *Text; // +0x00
 	TFont Font; // +0x04
 };
 
-// A list box whose lines have their own fonts (vtable 0x5611e0, 0xb0 bytes).
-// It keeps its lines in FontLines; the base's LineText stays empty.
+// A list box whose lines have their own fonts. It keeps its lines in
+// FontLines; the base's LineText stays empty.
 class TFontListBox final : public TListBox {
 public:
 	TFontListBox(const TFontListBox &) = delete;
 	TFontListBox &operator=(const TFontListBox &) = delete;
-	TFontListBox(TCallback _SelectCallback, TCallback _ActionCallback); // 0x46afc0
-	// Inline (out-of-line copy 0x453250, deleting destructor 0x4532e0).
+	TFontListBox(TCallback _SelectCallback, TCallback _ActionCallback);
 	~TFontListBox() override
 	{
 		for (int i = 0; i < Lines; i++)
 			delete[] FontLines(i).Text;
 	}
-	void Draw(int Surface, int x, int y) override;          // +0x44, 0x463430, line 4029
-	void MouseHover(int x, int y) override;                 // +0x64, 0x464670, line 4133
-	void StartEdit() override;                              // +0xa0, 0x464870, line 4163
-	void StopEdit() override;                               // +0xa4, 0x464af0, line 4183
-	void AddLine(const char *Text, TFont Font);             // 0x463820, lines 4051-4059
-	void AddLine(int MaxLength);                            // 0x463b10, lines 4067-4074
-	void SetLine(int Number, const char *Text, TFont Font); // 0x463dc0, lines 4082-4091
+	void Draw(int Surface, int x, int y) override;
+	void MouseHover(int x, int y) override;
+	void StartEdit() override;
+	void StopEdit() override;
+	void AddLine(const char *Text, TFont Font);
+	void AddLine(int MaxLength);
+	void SetLine(int Number, const char *Text, TFont Font);
 	// NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method): the original's, called on a TFontListBox only
-	void Clear();                           // 0x4641e0, line 4105
-	char *GetLine(int Number, TFont *Font); // 0x4643a0, lines 4113-4118
+	void Clear();
+	char *GetLine(int Number, TFont *Font);
 
 	TIndexedVector<TListBoxLine> FontLines; // +0x7c
 };
 
 // --- Progress bar -----------------------------------------------------------------
 
-// A bar filled to current/maximum (vtable 0x561028, 0x2c bytes).
+// A bar filled to current/maximum.
 class TProgressBar final : public TElement {
 public:
-	// Inline (out-of-line copy 0x452a00).
 	TProgressBar()
 	{
 		DrawingListLength = 6;
@@ -850,13 +810,12 @@ public:
 		Current = 0;
 		Maximum = 100;
 	}
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	int getMinimumWidth() override { return Skins()[SKIN_PROGRESS_LEFT].width + Skins()[SKIN_PROGRESS_RIGHT].width + Skins()[SKIN_PROGRESS_MIDDLE].width; } // +0x3c, 0x452a90
-	int getMinimumHeight() override { return Skins()[SKIN_PROGRESS_LEFT].height; }                                                                          // +0x40, 0x452ab0
-	void Arrange() override;                                                                                                                                // +0x48, 0x464d00
-	void SetMaximum(int maximum);                                                                                                                           // 0x464f40, lines 4271-4276
-	void SetCurrent(int current);                                                                                                                           // 0x4651c0, line 4289
-	void SetComplete();                                                                                                                                     // 0x465380, line 4301
+	int getMinimumWidth() override { return Skins()[SKIN_PROGRESS_LEFT].width + Skins()[SKIN_PROGRESS_RIGHT].width + Skins()[SKIN_PROGRESS_MIDDLE].width; }
+	int getMinimumHeight() override { return Skins()[SKIN_PROGRESS_LEFT].height; }
+	void Arrange() override;
+	void SetMaximum(int maximum);
+	void SetCurrent(int current);
+	void SetComplete();
 
 	int Maximum; // +0x24
 	int Current; // +0x28

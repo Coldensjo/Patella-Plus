@@ -59,16 +59,16 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumera
 // One entry of the creature table (0x9c bytes).
 class TCreature {
 public:
-	[[nodiscard]] TRGBColor GetHealthColor() const;                 // 0x44b740
-	[[nodiscard]] bool IsMarked() const;                            // 0x44b800
-	void SetSkull(int Skull, bool Delay);                           // 0x44b820
-	void SetPosition(int x, int y, int z);                          // 0x452320, line 108
-	[[nodiscard]] int GetDeltaX() const;                            // 0x44bbf0
-	[[nodiscard]] int GetDeltaY() const;                            // 0x44bc10
-	[[nodiscard]] int GetDrawDirection() const;                     // 0x44bc30
-	void StartMovement(int dx, int dy, int Waypoints);              // 0x44bc70, line 142
-	void SetMark(int Value);                                        // 0x44bf20, line 154
-	[[nodiscard]] int GetAnimationPhase(int AvailablePhases) const; // 0x44c0d0, lines 163-169
+	[[nodiscard]] TRGBColor GetHealthColor() const;
+	[[nodiscard]] bool IsMarked() const;
+	void SetSkull(int Skull, bool Delay);
+	void SetPosition(int x, int y, int z);
+	[[nodiscard]] int GetDeltaX() const;
+	[[nodiscard]] int GetDeltaY() const;
+	[[nodiscard]] int GetDrawDirection() const;
+	void StartMovement(int dx, int dy, int Waypoints);
+	void SetMark(int Value);
+	[[nodiscard]] int GetAnimationPhase(int AvailablePhases) const;
 	// Ours (issue #62): the skull SetSkull kept (Delay) is still shown at Now, the wall clock's 64-bit time:
 	// SkullTime is set, and Now is from it to four seconds after it. SkullTime holds the original's 4 bytes of the
 	// time (StoreTime32, types/Time32.h); the comparison is in 64 bits (LoadTime32), the original's 32-bit one up
@@ -172,10 +172,10 @@ protected:
 
 // Creatures.cpp's creature table, battle list and VIP list (Patella-Modern issue #106, M7; notes/decisions.md, "#104:
 // TClient and the subsystem objects" and "#106"): Creatures, FirstOpponent, LastOpponent, Beat, the attack, follow and
-// highlight targets and the buddy window's list, in the original's .bss order (0x5c4560-0x5c67d7, 0x5c6814-0x5c681f,
-// 0x5c68a0-0x5cc417), every member 0 at the start; the functions that use them are the members of the same names.
-// NumberOfBuddies is public (the golden Errors test sets it, TestErrorStatics), the others private as the file-local
-// statics were; TCreature's StartMovement reads Beat (a friend). TMapState owns it (MapState.h), after TMap.
+// highlight targets and the buddy window's list, in the original's .bss order, every member 0 at the start; the
+// functions that use them are the members of the same names. NumberOfBuddies is public (the golden Errors test sets
+// it, TestErrorStatics), the others private as the file-local statics were; TCreature's StartMovement reads Beat (a
+// friend). TMapState owns it (MapState.h), after TMap.
 class TCreatures {
 public:
 	TCreatures(TCreaturesPlayer &PlayerState, TCreaturesGUI &GUI);
@@ -186,55 +186,55 @@ public:
 	~TCreatures() = default;
 
 	// The beat, the battle and follow targets and the buddy list's lookups.
-	void HideAllCreatures();                                      // 0x44b8e0
-	void SetBeat(int Value);                                      // 0x44b900
-	static bool IsPlayer(uint32 CreatureID);                      // 0x44b910
-	void SetAttackID(uint32 CreatureID);                          // 0x44bb00, clears the follow target
-	void SetFollowID(uint32 CreatureID);                          // 0x44bb20, clears the attack target
-	void SetHighlightID(uint32 CreatureID);                       // 0x44bb40, battle list entry under the mouse
-	[[nodiscard]] uint32 GetAttackID() const;                     // 0x44bb50
-	[[nodiscard]] uint32 GetFollowID() const;                     // 0x44bb60
-	[[nodiscard]] uint32 GetHighlightID() const;                  // 0x44bb70
-	[[nodiscard]] int GetBuddyPosition(uint32 CharacterID) const; // 0x44bb80, position or -1
-	bool IsBuddy(const char *Name) const;                         // 0x44bbb0
+	void HideAllCreatures();
+	void SetBeat(int Value);
+	static bool IsPlayer(uint32 CreatureID);
+	void SetAttackID(uint32 CreatureID);    // clears the follow target
+	void SetFollowID(uint32 CreatureID);    // clears the attack target
+	void SetHighlightID(uint32 CreatureID); // battle list entry under the mouse
+	[[nodiscard]] uint32 GetAttackID() const;
+	[[nodiscard]] uint32 GetFollowID() const;
+	[[nodiscard]] uint32 GetHighlightID() const;
+	[[nodiscard]] int GetBuddyPosition(uint32 CharacterID) const; // position or -1
+	bool IsBuddy(const char *Name) const;
 
 	// The creature table.
-	TCreature *AddCreature(uint32 RemoveID, uint32 NewCreatureID); // 0x44c530, line 450
-	TCreature *GetCreature(uint32 CreatureID);                     // 0x44c6e0, line 476
-	void UpdateSkulls();                                           // 0x44c860
-	void HideCreature(int CreatureID);                             // 0x44c8c0, line 517; a callback for Map.cpp
-	bool MoveCreatures();                                          // 0x451ab0, line 549
-	void CheckMonsterHint(TCreature *Creature);                    // 0x451db0, lines 573-592
-	void NotifySkull(int Flag);                                    // 0x44ca60, line 604
+	TCreature *AddCreature(uint32 RemoveID, uint32 NewCreatureID);
+	TCreature *GetCreature(uint32 CreatureID);
+	void UpdateSkulls();
+	void HideCreature(int CreatureID); // a callback for Map.cpp
+	bool MoveCreatures();
+	void CheckMonsterHint(TCreature *Creature);
+	void NotifySkull(int Flag);
 
 	// The battle list.
-	bool IsOpponent(TCreature *Creature); // 0x44d740, lines 987-994
-	int GetNumberOfOpponents();           // 0x44d9f0, line 1029; also updates the list
-	TCreature *GetOpponent(int Number);   // 0x44dc70, line 1037
+	bool IsOpponent(TCreature *Creature);
+	int GetNumberOfOpponents(); // also updates the list
+	TCreature *GetOpponent(int Number);
 
 	// The VIP list.
-	[[nodiscard]] bool CompareBuddies(int i, int j) const;                           // 0x44de20, lines 1069-1071
-	void SwapBuddies(int i, int j);                                                  // 0x44e260, lines 1097-1099
-	void SortBuddies();                                                              // 0x44e600, line 1116
-	void SortBuddy(int i);                                                           // 0x44e7d0, lines 1124-1135
-	void AddBuddy(uint32 CharacterID, const char *Name, bool Online);                // 0x44eab0, lines 1144-1170
-	void SetBuddyState(uint32 CharacterID, bool Online);                             // 0x44f000, line 1192
-	void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify); // 0x44f230, lines 1200-1210
-	void RemoveBuddy(uint32 CharacterID);                                            // 0x44f5e0, line 1227
-	void SetBuddySortMethod(int Method);                                             // 0x44f810, line 1247
-	void HideOfflineBuddies(bool Hide);                                              // 0x44fa00, line 1259
-	[[nodiscard]] int GetNumberOfBuddies() const;                                    // 0x44fba0, line 1280; only the online ones when they are hidden
-	[[nodiscard]] uint32 GetBuddyListID(int Position) const;                         // 0x44fd40, line 1288
-	[[nodiscard]] const char *GetBuddyListName(int Position) const;                  // 0x44feb0, line 1297
-	[[nodiscard]] bool GetBuddyListOnline(int Position) const;                       // 0x450020, line 1306
-	[[nodiscard]] bool GetBuddyListNew(int Position) const;                          // 0x450190, line 1316
-	[[nodiscard]] int GetBuddyListIcon(int Position) const;                          // 0x450330, line 1325
-	[[nodiscard]] const char *GetBuddyListDescription(int Position) const;           // 0x4504a0, lines 1334-1338
-	[[nodiscard]] bool GetBuddyListNotify(int Position) const;                       // 0x450740, lines 1346-1350
+	[[nodiscard]] bool CompareBuddies(int i, int j) const;
+	void SwapBuddies(int i, int j);
+	void SortBuddies();
+	void SortBuddy(int i);
+	void AddBuddy(uint32 CharacterID, const char *Name, bool Online);
+	void SetBuddyState(uint32 CharacterID, bool Online);
+	void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
+	void RemoveBuddy(uint32 CharacterID);
+	void SetBuddySortMethod(int Method);
+	void HideOfflineBuddies(bool Hide);
+	[[nodiscard]] int GetNumberOfBuddies() const; // only the online ones when they are hidden
+	[[nodiscard]] uint32 GetBuddyListID(int Position) const;
+	[[nodiscard]] const char *GetBuddyListName(int Position) const;
+	[[nodiscard]] bool GetBuddyListOnline(int Position) const;
+	[[nodiscard]] bool GetBuddyListNew(int Position) const;
+	[[nodiscard]] int GetBuddyListIcon(int Position) const;
+	[[nodiscard]] const char *GetBuddyListDescription(int Position) const;
+	[[nodiscard]] bool GetBuddyListNotify(int Position) const;
 
-	void InitCreatures();        // 0x452190, line 1366
-	static void ExitCreatures(); // empty, folded into 0x496160
-	void ResetCreatures();       // 0x4509e0, line 1414
+	void InitCreatures();
+	static void ExitCreatures();
+	void ResetCreatures();
 
 private:
 	friend class ::TCreature;
@@ -242,22 +242,22 @@ private:
 	TCreaturesPlayer &PlayerState;
 	TCreaturesGUI &GUI; // issue #118
 
-	// Data, in .bss order. 0x5c456c and 0x5c68ac are not used by any code.
-	std::array<int, 3> BuddySortMethods{};      // 0x5c4560, 0 name, 1 icon, 2 online; most significant first
-	std::array<TBuddyEntry, BUDDIES> Buddies{}; // 0x5c4570
-	int NumberOfOnlineBuddies{};                // 0x5c67d0
+	// Data, in .bss order.
+	std::array<int, 3> BuddySortMethods{}; // 0 name, 1 icon, 2 online; most significant first
+	std::array<TBuddyEntry, BUDDIES> Buddies{};
+	int NumberOfOnlineBuddies{};
 
 public:
-	int NumberOfBuddies{}; // 0x5c67d4; public: the golden Errors test
+	int NumberOfBuddies{}; // public: the golden Errors test
 
 private:
-	uint32 HighlightID{};                         // 0x5c6814
-	uint32 FollowID{};                            // 0x5c6818
-	uint32 AttackID{};                            // 0x5c681c
-	int Beat{};                                   // 0x5c68a0, step durations are rounded up to a multiple
-	int LastOpponent{};                           // 0x5c68a4, battle list ends (slot numbers, -1: empty)
-	int FirstOpponent{};                          // 0x5c68a8
-	std::array<TCreature, CREATURES> Creatures{}; // 0x5c68b0
+	uint32 HighlightID{};
+	uint32 FollowID{};
+	uint32 AttackID{};
+	int Beat{};         // step durations are rounded up to a multiple
+	int LastOpponent{}; // battle list ends (slot numbers, -1: empty)
+	int FirstOpponent{};
+	std::array<TCreature, CREATURES> Creatures{};
 
 	// The arrays std::arrays (issue #60).
 	static_assert(sizeof(BuddySortMethods) == 3 * sizeof(int) && sizeof(Buddies) == BUDDIES * sizeof(TBuddyEntry)
@@ -267,10 +267,10 @@ private:
 
 // Creatures.cpp's player state (Patella-Modern issue #106; notes/decisions.md, "#104" and "#106"): PlayerID, the
 // statistics and skills, the state icons and the walk (the steps, the destination, the step not confirmed yet), in the
-// original's .bss order (0x5c67d8-0x5c6813, 0x5c6820-0x5c689f), every member 0 at the start; the functions that use
-// them are the members of the same names. NumberOfPlayerSteps is public (the golden Errors test sets it), the others
-// private; TCreature's members read and write the step not confirmed yet (a friend). TMapState owns it, after
-// TCreatures, whose creature table it reads; it reads the map and the object types too.
+// original's .bss order, every member 0 at the start; the functions that use them are the members of the same names.
+// NumberOfPlayerSteps is public (the golden Errors test sets it), the others private; TCreature's members read and
+// write the step not confirmed yet (a friend). TMapState owns it, after TCreatures, whose creature table it reads; it
+// reads the map and the object types too.
 class TPlayerState {
 public:
 	TPlayerState(TObjectTypes &ObjectTypes, TMap &Map, TCreatures &Creatures, TCreaturesGUI &GUI);
@@ -281,50 +281,50 @@ public:
 	~TPlayerState() = default;
 
 	// The player's creature, steps and statistics.
-	[[nodiscard]] int GetNumberOfPlayerSteps() const;                         // 0x44b870
-	void GetPlayerPosition(int *x, int *y, int *z) const;                     // 0x44b880, including the step not confirmed yet
-	void ClearPlayerSteps();                                                  // 0x44b8c0
-	void SetPlayerID(uint32 CreatureID);                                      // 0x44b920
-	void SetPlayerHealth(int Health, int MaxHealth);                          // 0x44b930
-	void SetPlayerMagicLevel(int Level, int Progress);                        // 0x44b950
-	void SetPlayerMana(int Mana, int MaxMana);                                // 0x44b970
-	void SetPlayerSoul(int Soul);                                             // 0x44b990
-	void SetPlayerCapacity(int Capacity);                                     // 0x44b9a0
-	void SetPlayerState(int State);                                           // 0x44b9b0
-	[[nodiscard]] uint32 GetPlayerID() const;                                 // 0x44b9c0
-	[[nodiscard]] int GetPlayerHealth() const;                                // 0x44b9d0
-	[[nodiscard]] int GetPlayerMaxHealth() const;                             // 0x44b9e0
-	[[nodiscard]] int GetPlayerExperience() const;                            // 0x44b9f0
-	[[nodiscard]] int GetPlayerLevel() const;                                 // 0x44ba00
-	[[nodiscard]] int GetPlayerLevelProgress() const;                         // 0x44ba10
-	[[nodiscard]] int GetPlayerMana() const;                                  // 0x44ba20
-	[[nodiscard]] int GetPlayerMaxMana() const;                               // 0x44ba30
-	[[nodiscard]] int GetPlayerSoul() const;                                  // 0x44ba40
-	[[nodiscard]] int GetPlayerMagicLevel() const;                            // 0x44ba50
-	[[nodiscard]] int GetPlayerMagicLevelProgress() const;                    // 0x44ba60
-	[[nodiscard]] int GetPlayerCapacity() const;                              // 0x44ba70
-	[[nodiscard]] bool IsPlayerPoisoned() const;                              // 0x44ba80, state bit 0
-	[[nodiscard]] bool IsPlayerBurning() const;                               // 0x44ba90, bit 1
-	[[nodiscard]] bool IsPlayerElectrified() const;                           // 0x44baa0, bit 2
-	[[nodiscard]] bool IsPlayerDrunk() const;                                 // 0x44bab0, bit 3
-	[[nodiscard]] bool IsPlayerManaShielded() const;                          // 0x44bac0, bit 4
-	[[nodiscard]] bool IsPlayerParalyzed() const;                             // 0x44bad0, bit 5
-	[[nodiscard]] bool IsPlayerHasted() const;                                // 0x44bae0, bit 6
-	[[nodiscard]] bool IsPlayerInFight() const;                               // 0x44baf0, bit 7
-	[[nodiscard]] int GetPlayerStep(int Step) const;                          // 0x44c3c0, line 259
-	void DoPlayerStep();                                                      // 0x450c80, lines 278-312
-	int FindPlayerPath();                                                     // 0x4510f0, line 347
-	int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal); // 0x451400, line 383
-	void StopPlayer();                                                        // 0x4516e0, line 413
-	bool CancelPlayerWalk(int NewDirection);                                  // 0x4518b0, line 435
-	void SetPlayerExperience(int Experience, int Level, int Progress);        // 0x44cc00, lines 634-644
-	void SetPlayerSkill(int SkillNumber, int Value, int Progress);            // 0x44cf10, lines 687-693
-	[[nodiscard]] int GetPlayerSkillValue(int SkillNumber) const;             // 0x44d1c0, line 804
-	[[nodiscard]] int GetPlayerSkillProgress(int SkillNumber) const;          // 0x44d320, line 813
-	static const char *GetSkillName(int SkillNumber);                         // 0x44d480, line 822
-	[[nodiscard]] bool HasPlayerSkull() const;                                // 0x44d6d0
-	[[nodiscard]] bool IsPlayerInParty() const;                               // 0x44d6f0
-	[[nodiscard]] int GetPlayerPartyFlag() const;                             // 0x44d720
+	[[nodiscard]] int GetNumberOfPlayerSteps() const;
+	void GetPlayerPosition(int *x, int *y, int *z) const; // including the step not confirmed yet
+	void ClearPlayerSteps();
+	void SetPlayerID(uint32 CreatureID);
+	void SetPlayerHealth(int Health, int MaxHealth);
+	void SetPlayerMagicLevel(int Level, int Progress);
+	void SetPlayerMana(int Mana, int MaxMana);
+	void SetPlayerSoul(int Soul);
+	void SetPlayerCapacity(int Capacity);
+	void SetPlayerState(int State);
+	[[nodiscard]] uint32 GetPlayerID() const;
+	[[nodiscard]] int GetPlayerHealth() const;
+	[[nodiscard]] int GetPlayerMaxHealth() const;
+	[[nodiscard]] int GetPlayerExperience() const;
+	[[nodiscard]] int GetPlayerLevel() const;
+	[[nodiscard]] int GetPlayerLevelProgress() const;
+	[[nodiscard]] int GetPlayerMana() const;
+	[[nodiscard]] int GetPlayerMaxMana() const;
+	[[nodiscard]] int GetPlayerSoul() const;
+	[[nodiscard]] int GetPlayerMagicLevel() const;
+	[[nodiscard]] int GetPlayerMagicLevelProgress() const;
+	[[nodiscard]] int GetPlayerCapacity() const;
+	[[nodiscard]] bool IsPlayerPoisoned() const;     // state bit 0
+	[[nodiscard]] bool IsPlayerBurning() const;      // bit 1
+	[[nodiscard]] bool IsPlayerElectrified() const;  // bit 2
+	[[nodiscard]] bool IsPlayerDrunk() const;        // bit 3
+	[[nodiscard]] bool IsPlayerManaShielded() const; // bit 4
+	[[nodiscard]] bool IsPlayerParalyzed() const;    // bit 5
+	[[nodiscard]] bool IsPlayerHasted() const;       // bit 6
+	[[nodiscard]] bool IsPlayerInFight() const;      // bit 7
+	[[nodiscard]] int GetPlayerStep(int Step) const;
+	void DoPlayerStep();
+	int FindPlayerPath();
+	int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
+	void StopPlayer();
+	bool CancelPlayerWalk(int NewDirection);
+	void SetPlayerExperience(int Experience, int Level, int Progress);
+	void SetPlayerSkill(int SkillNumber, int Value, int Progress);
+	[[nodiscard]] int GetPlayerSkillValue(int SkillNumber) const;
+	[[nodiscard]] int GetPlayerSkillProgress(int SkillNumber) const;
+	static const char *GetSkillName(int SkillNumber);
+	[[nodiscard]] bool HasPlayerSkull() const;
+	[[nodiscard]] bool IsPlayerInParty() const;
+	[[nodiscard]] int GetPlayerPartyFlag() const;
 
 	// Ours (TCreaturesPlayer): MoveCreatures' continuation of the walk (true if a new walk is to be sent) and
 	// ResetCreatures' writes of the player's state, the original's code of those two functions.
@@ -340,37 +340,37 @@ private:
 	TCreaturesGUI &GUI; // issue #118
 
 	// Data, in .bss order.
-	int PlayerState{};                             // 0x5c67d8, the state icons, one bit each
-	std::array<int, SKILLS> PlayerSkillProgress{}; // 0x5c67dc
-	std::array<int, SKILLS> PlayerSkillValue{};    // 0x5c67f8
-	int PlayerCapacity{};                          // 0x5c6820
-	int PlayerSoul{};                              // 0x5c6824
-	int PlayerMaxMana{};                           // 0x5c6828
-	int PlayerMana{};                              // 0x5c682c
-	int PlayerMagicLevelProgress{};                // 0x5c6830
-	int PlayerLevelProgress{};                     // 0x5c6834
-	int PlayerMagicLevel{};                        // 0x5c6838
-	int PlayerLevel{};                             // 0x5c683c
-	int PlayerExperience{};                        // 0x5c6840
-	int PlayerMaxHealth{};                         // 0x5c6844
-	int PlayerHealth{};                            // 0x5c6848
-	uint32 PlayerID{};                             // 0x5c684c
-	bool NewPlayerDestination{};                   // 0x5c6850, a destination came while the old path was walked
-	int CurrentPlayerStep{};                       // 0x5c6854
+	int PlayerState{}; // the state icons, one bit each
+	std::array<int, SKILLS> PlayerSkillProgress{};
+	std::array<int, SKILLS> PlayerSkillValue{};
+	int PlayerCapacity{};
+	int PlayerSoul{};
+	int PlayerMaxMana{};
+	int PlayerMana{};
+	int PlayerMagicLevelProgress{};
+	int PlayerLevelProgress{};
+	int PlayerMagicLevel{};
+	int PlayerLevel{};
+	int PlayerExperience{};
+	int PlayerMaxHealth{};
+	int PlayerHealth{};
+	uint32 PlayerID{};
+	bool NewPlayerDestination{}; // a destination came while the old path was walked
+	int CurrentPlayerStep{};
 
 public:
-	int NumberOfPlayerSteps{}; // 0x5c6858; public: the golden Errors test
+	int NumberOfPlayerSteps{}; // public: the golden Errors test
 
 private:
-	std::array<int, 10> PlayerSteps{}; // 0x5c685c, 1 east, 2 north-east, ..., 8 south-east (STEP_*, Map.h); the path finder stops at 10
-	bool DestinationDiagonal{};        // 0x5c6884, passed on to the path finder
-	bool DestinationExact{};           // 0x5c6885, passed on to the path finder
-	int DestinationZ{};                // 0x5c6888
-	int DestinationY{};                // 0x5c688c
-	int DestinationX{};                // 0x5c6890, 0: no destination
-	int PlayerStepDirection{};         // 0x5c6894, Direction of the step not confirmed yet
-	int PlayerStepDY{};                // 0x5c6898, the step sent but not confirmed by the server
-	int PlayerStepDX{};                // 0x5c689c
+	std::array<int, 10> PlayerSteps{}; // 1 east, 2 north-east, ..., 8 south-east (STEP_*, Map.h); the path finder stops at 10
+	bool DestinationDiagonal{};        // passed on to the path finder
+	bool DestinationExact{};           // passed on to the path finder
+	int DestinationZ{};
+	int DestinationY{};
+	int DestinationX{};        // 0: no destination
+	int PlayerStepDirection{}; // Direction of the step not confirmed yet
+	int PlayerStepDY{};        // the step sent but not confirmed by the server
+	int PlayerStepDX{};
 
 	// The arrays std::arrays (issue #60).
 	static_assert(sizeof(PlayerSkillProgress) == SKILLS * sizeof(int) && sizeof(PlayerSkillValue) == SKILLS * sizeof(int)
@@ -390,98 +390,98 @@ TPlayerState &PlayerState();
 // The original's functions (the callers' names, and the golden tests'): each calls the member of the same name of
 // TCreatures on bridge::Creatures() or of TPlayerState on bridge::PlayerState().
 // The player's creature, steps and statistics.
-int GetNumberOfPlayerSteps();                                             // 0x44b870
-void GetPlayerPosition(int *x, int *y, int *z);                           // 0x44b880, including the step not confirmed yet
-void ClearPlayerSteps();                                                  // 0x44b8c0
-void HideAllCreatures();                                                  // 0x44b8e0
-void SetBeat(int Beat);                                                   // 0x44b900
-bool IsPlayer(uint32 CreatureID);                                         // 0x44b910
-void SetPlayerID(uint32 CreatureID);                                      // 0x44b920
-void SetPlayerHealth(int Health, int MaxHealth);                          // 0x44b930
-void SetPlayerMagicLevel(int Level, int Progress);                        // 0x44b950
-void SetPlayerMana(int Mana, int MaxMana);                                // 0x44b970
-void SetPlayerSoul(int Soul);                                             // 0x44b990
-void SetPlayerCapacity(int Capacity);                                     // 0x44b9a0
-void SetPlayerState(int State);                                           // 0x44b9b0
-uint32 GetPlayerID();                                                     // 0x44b9c0
-int GetPlayerHealth();                                                    // 0x44b9d0
-int GetPlayerMaxHealth();                                                 // 0x44b9e0
-int GetPlayerExperience();                                                // 0x44b9f0
-int GetPlayerLevel();                                                     // 0x44ba00
-int GetPlayerLevelProgress();                                             // 0x44ba10
-int GetPlayerMana();                                                      // 0x44ba20
-int GetPlayerMaxMana();                                                   // 0x44ba30
-int GetPlayerSoul();                                                      // 0x44ba40
-int GetPlayerMagicLevel();                                                // 0x44ba50
-int GetPlayerMagicLevelProgress();                                        // 0x44ba60
-int GetPlayerCapacity();                                                  // 0x44ba70
-bool IsPlayerPoisoned();                                                  // 0x44ba80, state bit 0
-bool IsPlayerBurning();                                                   // 0x44ba90, bit 1
-bool IsPlayerElectrified();                                               // 0x44baa0, bit 2
-bool IsPlayerDrunk();                                                     // 0x44bab0, bit 3
-bool IsPlayerManaShielded();                                              // 0x44bac0, bit 4
-bool IsPlayerParalyzed();                                                 // 0x44bad0, bit 5
-bool IsPlayerHasted();                                                    // 0x44bae0, bit 6
-bool IsPlayerInFight();                                                   // 0x44baf0, bit 7
-void SetAttackID(uint32 CreatureID);                                      // 0x44bb00, clears the follow target
-void SetFollowID(uint32 CreatureID);                                      // 0x44bb20, clears the attack target
-void SetHighlightID(uint32 CreatureID);                                   // 0x44bb40, battle list entry under the mouse
-uint32 GetAttackID();                                                     // 0x44bb50
-uint32 GetFollowID();                                                     // 0x44bb60
-uint32 GetHighlightID();                                                  // 0x44bb70
-int GetBuddyPosition(uint32 CharacterID);                                 // 0x44bb80, position or -1
-bool IsBuddy(const char *Name);                                           // 0x44bbb0
-int GetPlayerStep(int Step);                                              // 0x44c3c0, line 259
-void DoPlayerStep();                                                      // 0x450c80, lines 278-312
-int FindPlayerPath();                                                     // 0x4510f0, line 347
-int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal); // 0x451400, line 383
-void StopPlayer();                                                        // 0x4516e0, line 413
-bool CancelPlayerWalk(int NewDirection);                                  // 0x4518b0, line 435
+int GetNumberOfPlayerSteps();
+void GetPlayerPosition(int *x, int *y, int *z); // including the step not confirmed yet
+void ClearPlayerSteps();
+void HideAllCreatures();
+void SetBeat(int Beat);
+bool IsPlayer(uint32 CreatureID);
+void SetPlayerID(uint32 CreatureID);
+void SetPlayerHealth(int Health, int MaxHealth);
+void SetPlayerMagicLevel(int Level, int Progress);
+void SetPlayerMana(int Mana, int MaxMana);
+void SetPlayerSoul(int Soul);
+void SetPlayerCapacity(int Capacity);
+void SetPlayerState(int State);
+uint32 GetPlayerID();
+int GetPlayerHealth();
+int GetPlayerMaxHealth();
+int GetPlayerExperience();
+int GetPlayerLevel();
+int GetPlayerLevelProgress();
+int GetPlayerMana();
+int GetPlayerMaxMana();
+int GetPlayerSoul();
+int GetPlayerMagicLevel();
+int GetPlayerMagicLevelProgress();
+int GetPlayerCapacity();
+bool IsPlayerPoisoned();                // state bit 0
+bool IsPlayerBurning();                 // bit 1
+bool IsPlayerElectrified();             // bit 2
+bool IsPlayerDrunk();                   // bit 3
+bool IsPlayerManaShielded();            // bit 4
+bool IsPlayerParalyzed();               // bit 5
+bool IsPlayerHasted();                  // bit 6
+bool IsPlayerInFight();                 // bit 7
+void SetAttackID(uint32 CreatureID);    // clears the follow target
+void SetFollowID(uint32 CreatureID);    // clears the attack target
+void SetHighlightID(uint32 CreatureID); // battle list entry under the mouse
+uint32 GetAttackID();
+uint32 GetFollowID();
+uint32 GetHighlightID();
+int GetBuddyPosition(uint32 CharacterID); // position or -1
+bool IsBuddy(const char *Name);
+int GetPlayerStep(int Step);
+void DoPlayerStep();
+int FindPlayerPath();
+int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
+void StopPlayer();
+bool CancelPlayerWalk(int NewDirection);
 
 // The creature table.
-TCreature *AddCreature(uint32 RemoveID, uint32 NewCreatureID); // 0x44c530, line 450
-TCreature *GetCreature(uint32 CreatureID);                     // 0x44c6e0, line 476
-void UpdateSkulls();                                           // 0x44c860
-void HideCreature(int CreatureID);                             // 0x44c8c0, line 517; a callback for Map.cpp
-bool MoveCreatures();                                          // 0x451ab0, line 549
-void CheckMonsterHint(TCreature *Creature);                    // 0x451db0, lines 573-592
-void NotifySkull(int Flag);                                    // 0x44ca60, line 604
+TCreature *AddCreature(uint32 RemoveID, uint32 NewCreatureID);
+TCreature *GetCreature(uint32 CreatureID);
+void UpdateSkulls();
+void HideCreature(int CreatureID); // a callback for Map.cpp
+bool MoveCreatures();
+void CheckMonsterHint(TCreature *Creature);
+void NotifySkull(int Flag);
 
 // Experience and skills.
-void SetPlayerExperience(int Experience, int Level, int Progress); // 0x44cc00, lines 634-644
-void SetPlayerSkill(int SkillNumber, int Value, int Progress);     // 0x44cf10, lines 687-693
-int GetPlayerSkillValue(int SkillNumber);                          // 0x44d1c0, line 804
-int GetPlayerSkillProgress(int SkillNumber);                       // 0x44d320, line 813
-const char *GetSkillName(int SkillNumber);                         // 0x44d480, line 822
-bool HasPlayerSkull();                                             // 0x44d6d0
-bool IsPlayerInParty();                                            // 0x44d6f0
-int GetPlayerPartyFlag();                                          // 0x44d720
+void SetPlayerExperience(int Experience, int Level, int Progress);
+void SetPlayerSkill(int SkillNumber, int Value, int Progress);
+int GetPlayerSkillValue(int SkillNumber);
+int GetPlayerSkillProgress(int SkillNumber);
+const char *GetSkillName(int SkillNumber);
+bool HasPlayerSkull();
+bool IsPlayerInParty();
+int GetPlayerPartyFlag();
 
 // The battle list.
-bool IsOpponent(TCreature *Creature); // 0x44d740, lines 987-994
-int GetNumberOfOpponents();           // 0x44d9f0, line 1029; also updates the list
-TCreature *GetOpponent(int Number);   // 0x44dc70, line 1037
+bool IsOpponent(TCreature *Creature);
+int GetNumberOfOpponents(); // also updates the list
+TCreature *GetOpponent(int Number);
 
 // The VIP list.
-bool CompareBuddies(int i, int j);                                               // 0x44de20, lines 1069-1071
-void SwapBuddies(int i, int j);                                                  // 0x44e260, lines 1097-1099
-void SortBuddies();                                                              // 0x44e600, line 1116
-void SortBuddy(int i);                                                           // 0x44e7d0, lines 1124-1135
-void AddBuddy(uint32 CharacterID, const char *Name, bool Online);                // 0x44eab0, lines 1144-1170
-void SetBuddyState(uint32 CharacterID, bool Online);                             // 0x44f000, line 1192
-void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify); // 0x44f230, lines 1200-1210
-void RemoveBuddy(uint32 CharacterID);                                            // 0x44f5e0, line 1227
-void SetBuddySortMethod(int Method);                                             // 0x44f810, line 1247
-void HideOfflineBuddies(bool Hide);                                              // 0x44fa00, line 1259
-int GetNumberOfBuddies();                                                        // 0x44fba0, line 1280; only the online ones when they are hidden
-uint32 GetBuddyListID(int Position);                                             // 0x44fd40, line 1288
-const char *GetBuddyListName(int Position);                                      // 0x44feb0, line 1297
-bool GetBuddyListOnline(int Position);                                           // 0x450020, line 1306
-bool GetBuddyListNew(int Position);                                              // 0x450190, line 1316
-int GetBuddyListIcon(int Position);                                              // 0x450330, line 1325
-const char *GetBuddyListDescription(int Position);                               // 0x4504a0, lines 1334-1338
-bool GetBuddyListNotify(int Position);                                           // 0x450740, lines 1346-1350
+bool CompareBuddies(int i, int j);
+void SwapBuddies(int i, int j);
+void SortBuddies();
+void SortBuddy(int i);
+void AddBuddy(uint32 CharacterID, const char *Name, bool Online);
+void SetBuddyState(uint32 CharacterID, bool Online);
+void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
+void RemoveBuddy(uint32 CharacterID);
+void SetBuddySortMethod(int Method);
+void HideOfflineBuddies(bool Hide);
+int GetNumberOfBuddies(); // only the online ones when they are hidden
+uint32 GetBuddyListID(int Position);
+const char *GetBuddyListName(int Position);
+bool GetBuddyListOnline(int Position);
+bool GetBuddyListNew(int Position);
+int GetBuddyListIcon(int Position);
+const char *GetBuddyListDescription(int Position);
+bool GetBuddyListNotify(int Position);
 
-void InitCreatures();  // 0x452190, line 1366
-void ExitCreatures();  // empty, folded into 0x496160
-void ResetCreatures(); // 0x4509e0, line 1414
+void InitCreatures();
+void ExitCreatures();
+void ResetCreatures();

@@ -1,18 +1,10 @@
-// Objects.cpp: reconstructed from Tibia.exe 7.72 (0x4cfbb0-0x4d7cc9).
+// Objects.cpp: reconstructed from Tibia.exe 7.72.
 //
 // The properties of objects, outfits, effects and missiles from Tibia.dat,
 // one array<TProperties> each, and their accessors. Functions in line order.
 // Where the binary order differs: the entry loader (line 939) sits right
 // after GetEntrySpriteNumber, and ExitObjects (line 1023) before
 // ReloadObjects (line 1012).
-//
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none.
-//
-// The array<TProperties> constructor (0x4cfa30) and operator() (0x4d1a10)
-// are Container.h code. The gap after this file (0x4d7cd0-0x4d913e) is
-// Player.obj: the message map of the application class, its constructor and
-// destructor, MFC and STL code that Player.cpp uses (file-ranges.tsv).
 //
 // The source has unreferenced functions the linker dropped: the line gaps
 // 70-91 and 281-303 fit an accessor of MaxLength (+0x2c) at each level, and
@@ -29,7 +21,7 @@ static_assert(sizeof(std::unique_ptr<array<TProperties>>) == sizeof(array<TPrope
 		&& alignof(std::unique_ptr<array<TProperties>>) == alignof(array<TProperties> *),
 	"std::unique_ptr<array<TProperties>> is a pointer");
 
-// The data (0x719d8c-0x719dab) is TObjectTypes' (Objects.h, issue #106).
+// The data is TObjectTypes' (Objects.h, issue #106).
 
 namespace {
 
@@ -42,65 +34,54 @@ inline bool GetEntryFlag(TProperties &Entry, int Flag)
 
 // --- Entry accessors -------------------------------------------------------
 
-// 0x4cfbb0, lines 67-70
 int GetEntryWaypoints(TProperties &Entry)
 {
 	PATELLA_ASSERT_VALUES(GetEntryFlag(Entry,BANK), *reinterpret_cast<const int*>(Entry.Flags));
 	return Entry.Waypoints;
 }
 
-// 0x4cfe20, lines 91-94
 int GetEntryBrightness(TProperties &Entry)
 {
 	PATELLA_ASSERT(GetEntryFlag(Entry,LIGHT));
 	return Entry.Brightness;
 }
 
-// 0x4d0090, lines 103-106
 int GetEntryLightColor(TProperties &Entry)
 {
 	PATELLA_ASSERT(GetEntryFlag(Entry,LIGHT));
 	return Entry.LightColor;
 }
 
-// 0x4d0300, lines 115-118
 int GetEntryShiftX(TProperties &Entry)
 {
 	PATELLA_ASSERT(GetEntryFlag(Entry,SHIFT));
 	return Entry.ShiftX;
 }
 
-// 0x4d0570, lines 127-130
 int GetEntryShiftY(TProperties &Entry)
 {
 	PATELLA_ASSERT(GetEntryFlag(Entry,SHIFT));
 	return Entry.ShiftY;
 }
 
-// 0x4d07e0, lines 139-142
 int GetEntryElevation(TProperties &Entry)
 {
 	PATELLA_ASSERT(GetEntryFlag(Entry,HEIGHT));
 	return Entry.Elevation;
 }
 
-// 0x4d0a50, lines 151-154
 int GetEntryAutomapColor(TProperties &Entry)
 {
 	PATELLA_ASSERT(GetEntryFlag(Entry,AUTOMAP));
 	return Entry.AutomapColor;
 }
 
-// 0x4d0cc0, lines 163-166
 int GetEntryLensHelp(TProperties &Entry)
 {
 	PATELLA_ASSERT(GetEntryFlag(Entry,LENSHELP));
 	return Entry.LensHelp;
 }
 
-// 0x4d0f30, lines 238-244. No try block. The binary inlines In() for the
-// first five checks and calls its out-of-line copy (0x4174d0) for the last
-// two.
 int GetEntrySpriteNumber(TProperties &Entry, int X, int Y, int Layer, int PatternX, int PatternY,
 	int PatternZ, int Phase)
 {
@@ -127,7 +108,6 @@ int GetEntrySpriteNumber(TProperties &Entry, int X, int Y, int Layer, int Patter
 
 // --- Object types ------------------------------------------------------------
 
-// 0x4d1c40, lines 267-270
 bool patella::TObjectTypes::GetObjectFlag(int Type, int Flag) const
 {
 	if (Type == CREATURE)
@@ -136,103 +116,86 @@ bool patella::TObjectTypes::GetObjectFlag(int Type, int Flag) const
 	return GetEntryFlag((*ObjectProperties)(Type), Flag);
 }
 
-// 0x4d1f30, line 281
 int patella::TObjectTypes::GetObjectWaypoints(int Type) const
 {
 	return GetEntryWaypoints((*ObjectProperties)(Type));
 }
 
-// 0x4d20d0, line 303
 int patella::TObjectTypes::GetObjectBrightness(int Type) const
 {
 	return GetEntryBrightness((*ObjectProperties)(Type));
 }
 
-// 0x4d2270, line 314
 int patella::TObjectTypes::GetObjectLightColor(int Type) const
 {
 	return GetEntryLightColor((*ObjectProperties)(Type));
 }
 
-// 0x4d2410, line 325
 int patella::TObjectTypes::GetObjectShiftX(int Type) const
 {
 	return GetEntryShiftX((*ObjectProperties)(Type));
 }
 
-// 0x4d25b0, line 336
 int patella::TObjectTypes::GetObjectShiftY(int Type) const
 {
 	return GetEntryShiftY((*ObjectProperties)(Type));
 }
 
-// 0x4d2750, line 347
 int patella::TObjectTypes::GetObjectElevation(int Type) const
 {
 	return GetEntryElevation((*ObjectProperties)(Type));
 }
 
-// 0x4d28f0, line 358
 int patella::TObjectTypes::GetObjectAutomapColor(int Type) const
 {
 	return GetEntryAutomapColor((*ObjectProperties)(Type));
 }
 
-// 0x4d2a90, line 369
 int patella::TObjectTypes::GetObjectLensHelp(int Type) const
 {
 	return GetEntryLensHelp((*ObjectProperties)(Type));
 }
 
-// 0x4d2c30, line 380
 int patella::TObjectTypes::GetObjectWidth(int Type) const
 {
 	return (*ObjectProperties)(Type).Width;
 }
 
-// 0x4d2dd0, line 391
 int patella::TObjectTypes::GetObjectHeight(int Type) const
 {
 	return (*ObjectProperties)(Type).Height;
 }
 
-// 0x4d2f70, line 402
 int patella::TObjectTypes::GetObjectExactSize(int Type) const
 {
 	return (*ObjectProperties)(Type).ExactSize;
 }
 
-// 0x4d3110, line 413
 int patella::TObjectTypes::GetObjectLayers(int Type) const
 {
 	return (*ObjectProperties)(Type).Layers;
 }
 
-// 0x4d32b0, line 424
 int patella::TObjectTypes::GetObjectPatternWidth(int Type) const
 {
 	return (*ObjectProperties)(Type).PatternWidth;
 }
 
-// 0x4d3450, line 435
 int patella::TObjectTypes::GetObjectPatternHeight(int Type) const
 {
 	return (*ObjectProperties)(Type).PatternHeight;
 }
 
-// 0x4d35f0, line 446
 int patella::TObjectTypes::GetObjectPatternDepth(int Type) const
 {
 	return (*ObjectProperties)(Type).PatternDepth;
 }
 
-// 0x4d3790, line 457
 int patella::TObjectTypes::GetObjectPhases(int Type) const
 {
 	return (*ObjectProperties)(Type).Phases;
 }
 
-// 0x4d3930, line 468
 int patella::TObjectTypes::GetObjectSpriteNumber(int Type, int X, int Y, int Layer, int PatternX, int PatternY, int PatternZ,
 	int Phase) const
 {
@@ -242,67 +205,58 @@ int patella::TObjectTypes::GetObjectSpriteNumber(int Type, int X, int Y, int Lay
 
 // --- Outfits -----------------------------------------------------------------
 
-// 0x4d3af0, line 484. Unlike GetObjectFlag, no range check.
+// Unlike GetObjectFlag, no range check.
 bool patella::TObjectTypes::GetOutfitFlag(int Number, int Flag) const
 {
 	return GetEntryFlag((*OutfitProperties)(Number), Flag);
 }
 
-// 0x4d3cc0, line 495
 int patella::TObjectTypes::GetOutfitBrightness(int Number) const
 {
 	return GetEntryBrightness((*OutfitProperties)(Number));
 }
 
-// 0x4d3e60, line 506
 int patella::TObjectTypes::GetOutfitLightColor(int Number) const
 {
 	return GetEntryLightColor((*OutfitProperties)(Number));
 }
 
-// 0x4d4000, line 517
 int patella::TObjectTypes::GetOutfitShiftX(int Number) const
 {
 	return GetEntryShiftX((*OutfitProperties)(Number));
 }
 
-// 0x4d41a0, line 528
 int patella::TObjectTypes::GetOutfitShiftY(int Number) const
 {
 	return GetEntryShiftY((*OutfitProperties)(Number));
 }
 
-// 0x4d4340, line 539
 int patella::TObjectTypes::GetOutfitWidth(int Number) const
 {
 	return (*OutfitProperties)(Number).Width;
 }
 
-// 0x4d44e0, line 550. Comes before the height, unlike the object accessors.
+// Comes before the height, unlike the object accessors.
 int patella::TObjectTypes::GetOutfitExactSize(int Number) const
 {
 	return (*OutfitProperties)(Number).ExactSize;
 }
 
-// 0x4d4680, line 561
 int patella::TObjectTypes::GetOutfitHeight(int Number) const
 {
 	return (*OutfitProperties)(Number).Height;
 }
 
-// 0x4d4820, line 572
 int patella::TObjectTypes::GetOutfitLayers(int Number) const
 {
 	return (*OutfitProperties)(Number).Layers;
 }
 
-// 0x4d49c0, line 583
 int patella::TObjectTypes::GetOutfitPhases(int Number) const
 {
 	return (*OutfitProperties)(Number).Phases;
 }
 
-// 0x4d4b60, line 594
 int patella::TObjectTypes::GetOutfitSpriteNumber(int Number, int X, int Y, int Layer, int Direction, int Phase) const
 {
 	return GetEntrySpriteNumber((*OutfitProperties)(Number), X, Y, Layer, Direction + 1, 1, 1, Phase);
@@ -310,49 +264,41 @@ int patella::TObjectTypes::GetOutfitSpriteNumber(int Number, int X, int Y, int L
 
 // --- Effects -----------------------------------------------------------------
 
-// 0x4d4d20, line 610
 bool patella::TObjectTypes::GetEffectFlag(int Number, int Flag) const
 {
 	return GetEntryFlag((*EffectProperties)(Number), Flag);
 }
 
-// 0x4d4ef0, line 621
 int patella::TObjectTypes::GetEffectBrightness(int Number) const
 {
 	return GetEntryBrightness((*EffectProperties)(Number));
 }
 
-// 0x4d5090, line 632
 int patella::TObjectTypes::GetEffectLightColor(int Number) const
 {
 	return GetEntryLightColor((*EffectProperties)(Number));
 }
 
-// 0x4d5230, line 643
 int patella::TObjectTypes::GetEffectWidth(int Number) const
 {
 	return (*EffectProperties)(Number).Width;
 }
 
-// 0x4d53d0, line 654
 int patella::TObjectTypes::GetEffectHeight(int Number) const
 {
 	return (*EffectProperties)(Number).Height;
 }
 
-// 0x4d5570, line 665
 int patella::TObjectTypes::GetEffectLayers(int Number) const
 {
 	return (*EffectProperties)(Number).Layers;
 }
 
-// 0x4d5710, line 676
 int patella::TObjectTypes::GetEffectPhases(int Number) const
 {
 	return (*EffectProperties)(Number).Phases;
 }
 
-// 0x4d58b0, line 687
 int patella::TObjectTypes::GetEffectSpriteNumber(int Number, int X, int Y, int Layer, int Phase) const
 {
 	return GetEntrySpriteNumber((*EffectProperties)(Number), X, Y, Layer, 1, 1, 1, Phase);
@@ -360,46 +306,39 @@ int patella::TObjectTypes::GetEffectSpriteNumber(int Number, int X, int Y, int L
 
 // --- Missiles ----------------------------------------------------------------
 
-// 0x4d5a70, line 703
 bool patella::TObjectTypes::GetMissileFlag(int Number, int Flag) const
 {
 	return GetEntryFlag((*MissileProperties)(Number), Flag);
 }
 
-// 0x4d5c40, line 714
 int patella::TObjectTypes::GetMissileBrightness(int Number) const
 {
 	return GetEntryBrightness((*MissileProperties)(Number));
 }
 
-// 0x4d5de0, line 725
 int patella::TObjectTypes::GetMissileLightColor(int Number) const
 {
 	return GetEntryLightColor((*MissileProperties)(Number));
 }
 
-// 0x4d5f80, line 736
 int patella::TObjectTypes::GetMissileWidth(int Number) const
 {
 	return (*MissileProperties)(Number).Width;
 }
 
-// 0x4d6120, line 747
 int patella::TObjectTypes::GetMissileHeight(int Number) const
 {
 	return (*MissileProperties)(Number).Height;
 }
 
-// 0x4d62c0, line 758
 int patella::TObjectTypes::GetMissileLayers(int Number) const
 {
 	return (*MissileProperties)(Number).Layers;
 }
 
-// 0x4d6460, lines 766-780. The assertion comes before the try block. The
-// 3x3 pattern holds the eight directions around its centre, clockwise from
-// north (PatternX 2, PatternY 1). The default case cannot be reached; the
-// binary returns 0 there.
+// The 3x3 pattern holds the eight directions around its centre,
+// clockwise from north (PatternX 2, PatternY 1). The default case
+// cannot be reached; the binary returns 0 there.
 int patella::TObjectTypes::GetMissileSpriteNumber(int Number, int X, int Y, int Layer, int Direction) const
 {
 	PATELLA_ASSERT_VALUES(In(Direction,0,7), Direction);
@@ -428,10 +367,9 @@ int patella::TObjectTypes::GetMissileSpriteNumber(int Number, int X, int Y, int 
 
 // --- Patterns ----------------------------------------------------------------
 
-// 0x4d6800, lines 796-810. Obj.Data is the count: 1, 2, 3, 4, then up to
-// 9, 24, 49 and more in the second row. Both results wrap around the
-// object's pattern size.
-// A pattern size of 0 in Tibia.dat throws a TMyException (PATELLA_DIVISOR, issue #67).
+// Obj.Data is the count: 1, 2, 3, 4, then up to 9, 24, 49 and more in the second row.
+// Both results wrap around the object's pattern size. A pattern size of 0 in Tibia.dat
+// throws a TMyException (PATELLA_DIVISOR, issue #67).
 void patella::TObjectTypes::GetCumulativePattern(TObject &Obj, int *PatternX, int *PatternY) const
 {
 	PATELLA_ASSERT(GetObjectFlag(Obj,CUMULATIVE));
@@ -463,8 +401,8 @@ void patella::TObjectTypes::GetCumulativePattern(TObject &Obj, int *PatternX, in
 	*PatternY = *PatternY % PATELLA_DIVISOR(GetObjectPatternHeight(Obj.Type)) + 1;
 }
 
-// 0x4d6b20, lines 821-826. Obj.Data is the liquid: four columns per row.
-// A pattern size of 0 in Tibia.dat throws a TMyException (PATELLA_DIVISOR, issue #67).
+// Obj.Data is the liquid: four columns per row. A pattern size of 0 in Tibia.dat
+// throws a TMyException (PATELLA_DIVISOR, issue #67).
 void patella::TObjectTypes::GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY) const
 {
 	PATELLA_ASSERT(GetObjectFlag(Obj,LIQUIDPOOL) || GetObjectFlag(Obj,LIQUIDCONTAINER));
@@ -472,9 +410,9 @@ void patella::TObjectTypes::GetLiquidPattern(TObject &Obj, int *PatternX, int *P
 	*PatternY = Obj.Data / 4 % PATELLA_DIVISOR(GetObjectPatternHeight(Obj.Type)) + 1;
 }
 
-// 0x4d6df0, lines 837-853. Obj.Data2 holds the wall flag the object hangs
-// on (HOOKSOUTH or HOOKEAST); the second and third columns are used only
-// when the object has them.
+// Obj.Data2 holds the wall flag the object hangs on (HOOKSOUTH or
+// HOOKEAST); the second and third columns are used only when the object
+// has them.
 void patella::TObjectTypes::GetHangPattern(TObject &Obj, int *PatternX, int *PatternY) const
 {
 	PATELLA_ASSERT(GetObjectFlag(Obj,HANG));
@@ -489,7 +427,7 @@ void patella::TObjectTypes::GetHangPattern(TObject &Obj, int *PatternX, int *Pat
 
 // --- Loading -------------------------------------------------------------------
 
-// 0x4d70c0, line 888. Frees the four arrays and their sprite tables.
+// Frees the four arrays and their sprite tables.
 void patella::TObjectTypes::ReleaseObjects()
 {
 	if (ObjectProperties != nullptr) {
@@ -524,11 +462,11 @@ void patella::TObjectTypes::ReleaseObjects()
 
 namespace {
 
-// 0x4d1650, line 939. Reads one entry: flags with their values up to 0xff,
-// then the sizes and the sprite numbers. Unknown flags are only recorded;
-// a flag above 31 (not in Tibia.dat) sets a bit in the fields after Flags,
-// up to offset 0x43, as in the binary. The binary stores Waypoints when the
-// BANK case jumps back into the zeroing code, which ends with that store.
+// Reads one entry: flags with their values up to 0xff, then the sizes and
+// the sprite numbers. Unknown flags are only recorded; a flag above 31 (not
+// in Tibia.dat) sets a bit in the fields after Flags, up to offset 0x43, as
+// in the binary. The binary stores Waypoints when the BANK case jumps back
+// into the zeroing code, which ends with that store.
 void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 {
 	for (int i = 0; i < 4; i++)
@@ -597,10 +535,9 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 
 } // namespace
 
-// 0x4d7380, lines 948-978. The assertion comes before the try block.
-// Header: signature, then the highest object type (types start at 100) and
-// the numbers of outfits, effects and missiles. The file is closed twice:
-// by close() and by the destructor.
+// Header: signature, then the highest object type (types start at 100)
+// and the numbers of outfits, effects and missiles. The file is closed
+// twice: by close() and by the destructor.
 void patella::TObjectTypes::LoadObjects(const char *FileName)
 {
 	PATELLA_ASSERT(FileName!=nullptr);
@@ -643,10 +580,10 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 	File.close();
 }
 
-// 0x4d77f0, line 1000. An exception while loading becomes PROGRAM_ERROR 1
-// (name of the value unknown); InitControl then shuts down. The original
-// catches a TMyException; its LoadObjects' catch wrapper made every other
-// exception one (LoadProperties' new[] of a size from Tibia.dat can throw
+// An exception while loading becomes PROGRAM_ERROR 1 (name of the value
+// unknown); InitControl then shuts down. The original catches a
+// TMyException; its LoadObjects' catch wrapper made every other exception
+// one (LoadProperties' new[] of a size from Tibia.dat can throw
 // std::bad_array_new_length or std::bad_alloc). That wrapper is gone (issue
 // #78), so the boundary catches everything (LoadObjects throws no
 // PROGRAM_ERROR): the outcome is the original's.
@@ -664,14 +601,13 @@ void patella::TObjectTypes::InitObjects()
 	}
 }
 
-// 0x4d7b40, line 1012. After Tibia.dat was patched (event 0x45).
+// After Tibia.dat was patched (event 0x45).
 void patella::TObjectTypes::ReloadObjects()
 {
 	ExitObjects();
 	InitObjects();
 }
 
-// 0x4d79b0, line 1023
 void patella::TObjectTypes::ExitObjects()
 {
 	ReleaseObjects();

@@ -6,13 +6,7 @@
 // further down, the pattern of Creatures.cpp): the creators come last, after
 // the constructors of the bodies and of TAutomapWindow, TInventoryView's
 // mouse handlers, TStatusWindow's and the container body's constructors.
-// Functions without line evidence go where the binary has them. The inline
-// header code at the start of the object (0x425920-0x425b20 and the
-// destructors 0x425a70-0x425e6f) is in ContentWindows.h, common.h and
-// Container.h.
-//
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none.
+// Functions without line evidence go where the binary has them.
 
 #include "ContentWindows.h"
 #include <cstdint>
@@ -55,12 +49,6 @@
 
 namespace {
 
-// Data, in .bss order. ContentWindows.obj's copy of the text table is
-// Text.h's (0x5c0678-0x5c08c3, then its copy of DefaultFontColor).
-// 0x5c4398 AutomapMouseOverText and 0x5c4400 SkillMouseOverText are TGUI's (GUI.h, issue #107).
-// At 0x5c4500, constructed by the static initialiser 0x559dd0 as
-// TCallback(NULL, 0) like the other window files' (ConsoleWindow.obj's is at
-// 0x5c4390, initialiser 0x559dc0); here TTradeButtons' constructor copies it.
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
 TCallback NoCallback(nullptr, 0);
 
@@ -71,8 +59,8 @@ static_assert(sizeof(patella::bridge::GUI().AutomapMouseOverText) == 100 && size
 
 // --- The creators -----------------------------------------------------------------
 
-// 0x4362b0, line 106. The inventory: a plain content window with the body
-// slots and the large combat controls.
+// The inventory: a plain content window with the body slots and the large
+// combat controls.
 TContentWindow *CreateInventoryWindow(TWindow *Receiver)
 {
 	TContentWindow *Window = new TContentWindow(INVENTORY_WINDOW, true);
@@ -87,8 +75,8 @@ TContentWindow *CreateInventoryWindow(TWindow *Receiver)
 	return Window;
 }
 
-// 0x436510, line 140. The small inventory: the small combat controls, the
-// "maximise" button (event 24 of the main window), capacity, soul and states.
+// The small inventory: the small combat controls, the "maximise" button
+// (event 24 of the main window), capacity, soul and states.
 TContentWindow *CreateSmallInventoryWindow(TWindow *Receiver)
 {
 	TSmallInventoryWindow *Window = new TSmallInventoryWindow;
@@ -111,10 +99,10 @@ TContentWindow *CreateSmallInventoryWindow(TWindow *Receiver)
 	return Window;
 }
 
-// 0x43c520, line 170. A container's window: close (event 10) and minimize
-// (event 9) go to the window, "up" (event 3) to the body; the icon is the
-// container object, the title its name. The window gets the body's initial
-// height before MainWindow.cpp adds it to the column.
+// A container's window: close (event 10) and minimize (event 9) go to the
+// window, "up" (event 3) to the body; the icon is the container object,
+// the title its name. The window gets the body's initial height before
+// MainWindow.cpp adds it to the column.
 TSubWindow *CreateContainerWindow(int Container)
 {
 	TContainerWindowBody *Body = new TContainerWindowBody(Container);
@@ -134,7 +122,6 @@ TSubWindow *CreateContainerWindow(int Container)
 	return Window;
 }
 
-// 0x43c920, line 197
 TSubWindow *CreateSkillsWindow()
 {
 	TSkillsWindowBody *Body = new TSkillsWindowBody;
@@ -152,7 +139,6 @@ TSubWindow *CreateSkillsWindow()
 	return Window;
 }
 
-// 0x43cc90, line 225
 TSubWindow *CreateBattleWindow()
 {
 	TBattleWindowBody *Body = new TBattleWindowBody;
@@ -170,7 +156,7 @@ TSubWindow *CreateBattleWindow()
 	return Window;
 }
 
-// 0x43d000, line 253. The cancel button closes the window (event 10).
+// The cancel button closes the window (event 10).
 TSubWindow *CreateTradeWindow()
 {
 	TTradeWindowBody *Body = new TTradeWindowBody;
@@ -190,7 +176,6 @@ TSubWindow *CreateTradeWindow()
 	return Window;
 }
 
-// 0x43d390, line 280
 TSubWindow *CreateBuddylistWindow()
 {
 	TBuddylistWindowBody *Body = new TBuddylistWindowBody;
@@ -210,8 +195,6 @@ TSubWindow *CreateBuddylistWindow()
 
 // --- TButtonsWindow ---------------------------------------------------------------
 
-// 0x426480, lines 292-309. The assertion comes before the try block (after
-// the base class).
 TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
 	: TContentWindow(BUTTONS_WINDOW, true)
 {
@@ -232,7 +215,7 @@ TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
 	InsertChild(LogoutButton);
 }
 
-// 0x4268c0, line 322. A button shows as pressed while its window is open.
+// A button shows as pressed while its window is open.
 void TButtonsWindow::Draw(int Surface, int x, int y)
 {
 	SkillsButton->State = CheckObject->hasContentWindow(SKILLS_WINDOW);
@@ -241,7 +224,6 @@ void TButtonsWindow::Draw(int Surface, int x, int y)
 	TContentWindow::Draw(Surface, x, y);
 }
 
-// 0x426aa0, line 334
 bool TButtonsWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_CONTROL_BUTTONS);
@@ -251,10 +233,9 @@ bool TButtonsWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int 
 
 // --- TAutomapWindow ---------------------------------------------------------------
 
-// 0x4368c0, line 387. The try block starts after the base class. The zoom
-// comes from the preferences (2 unless it is 1, 2, 4 or 8); the hotkeys
-// Alt+Home/End zoom, Alt+PageUp/PageDown change the floor, Alt+cursor
-// scrolls.
+// The zoom comes from the preferences (2 unless it is 1, 2, 4 or 8);
+// the hotkeys Alt+Home/End zoom, Alt+PageUp/PageDown change the
+// floor, Alt+cursor scrolls.
 TAutomapWindow::TAutomapWindow()
 	: TContentWindow(AUTOMAP_WINDOW, true)
 {
@@ -299,15 +280,14 @@ TAutomapWindow::TAutomapWindow()
 	AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
 }
 
-// 0x426c40, line 406 (deleting destructor 0x436e80). Its work is the close
-// since issue #108.
+// Its work is the close since issue #108.
 TAutomapWindow::~TAutomapWindow()
 {
 	CheckClosed("TAutomapWindow");
 }
 
-// The destructor's work until issue #108 (0x426c40): the zoom goes back into
-// the preferences, the hotkeys are removed; then the children.
+// The destructor's work until issue #108: the zoom goes back into the
+// preferences, the hotkeys are removed; then the children.
 void TAutomapWindow::OnClose()
 {
 	try {
@@ -327,7 +307,6 @@ void TAutomapWindow::OnClose()
 	TContentWindow::OnClose();
 }
 
-// 0x426e40, line 418
 bool TAutomapWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_AUTOMAP);
@@ -335,10 +314,10 @@ bool TAutomapWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int 
 	return true;
 }
 
-// 0x426fe0, line 433. The text of the mark under the mouse. Odd, kept: a
-// mark is taken only when both of its coordinates are not 0, and the buffer
-// is printed to stdout every time (a debugging leftover; printf("%s\n"), since
-// issue #64 compat/print.h's PrintLine, the same bytes).
+// The text of the mark under the mouse. Odd, kept: a mark is taken only when
+// both of its coordinates are not 0, and the buffer is printed to stdout every
+// time (a debugging leftover; printf("%s\n"), since issue #64 compat/print.h's
+// PrintLine, the same bytes).
 void TAutomapWindow::MouseHover(int x, int y)
 {
 	patella::TGUI &GUI = patella::bridge::GUI();
@@ -353,8 +332,8 @@ void TAutomapWindow::MouseHover(int x, int y)
 	patella::compat::PrintLine("{}", static_cast<const char *>(GUI.AutomapMouseOverText));
 }
 
-// 0x427200, line 465. The frame around the view: skins 9 (top), 11 (left),
-// 10 (right) and 8 (bottom) along the edges of AutomapFrame.
+// The frame around the view: skins 9 (top), 11 (left), 10 (right) and 8
+// (bottom) along the edges of AutomapFrame.
 void TAutomapWindow::Arrange()
 {
 	TContentWindow::Arrange();
@@ -369,9 +348,8 @@ void TAutomapWindow::Arrange()
 		SkinProperties().AutomapFrame.width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
 }
 
-// 0x436ea0, line 523. The jump table 0x43716c (byte table 0x437194, Event-3)
-// has the cases 3, 4 and 106-112. A scrolled view leaves the player first
-// (the view's centre is fixed where it is).
+// A scrolled view leaves the player first (the view's centre is fixed where
+// it is).
 void TAutomapWindow::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -428,8 +406,8 @@ void TAutomapWindow::HandleEvent(int Event)
 	}
 }
 
-// 0x4274c0, line 550. 0 centres the view; 1-4 move it by 24 pixels (north,
-// south, west, east; the jump table 0x4276e0 has 1-4).
+// 0 centres the view; 1-4 move it by 24 pixels (north,
+// south, west, east).
 void TAutomapWindow::Scroll(int Direction)
 {
 	if (Direction == 0) {
@@ -463,13 +441,11 @@ void TAutomapWindow::Scroll(int Direction)
 
 // --- TAutomapView -----------------------------------------------------------------
 
-// 0x4276f0, line 652. The map is rendered into the cache surface 5 only when
-// it changed (or the surface was lost): 106x106 pixels from the automap
-// colours, a white cross at the player's position and the marks of the four
-// 256x256 blocks around the view (skins 74 and up, 11x11); then the surface
-// is copied to the screen. Odd, kept: at zoom 1 the centre is rounded down
-// to even coordinates once per pixel, inside the loop. MSVC's analysis (C6262, issue #111): the pixels' buffer
-// on the stack, the original's.
+// The map is rendered into the cache surface 5 only when it changed (or the surface was lost): 106x106 pixels
+// from the automap colours, a white cross at the player's position and the marks of the four 256x256 blocks
+// around the view (skins 74 and up, 11x11); then the surface is copied to the screen. Odd, kept: at zoom 1 the
+// centre is rounded down to even coordinates once per pixel, inside the loop. MSVC's analysis (C6262, issue
+// #111): the pixels' buffer on the stack, the original's.
 PATELLA_MSVC_WARNING(suppress : 6262)
 void TAutomapView::Draw(int Surface, int x, int y)
 {
@@ -561,8 +537,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 	GetSurface()->BlitRect(Surface, x, y, 5, TRect(0, 0, 106, 106));
 }
 
-// 0x427e40, line 696. A click walks to the mark under the mouse, else to the
-// point clicked.
+// A click walks to the mark under the mouse, else to the point clicked.
 bool TAutomapView::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 {
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
@@ -581,8 +556,8 @@ bool TAutomapView::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	return true;
 }
 
-// 0x428080, line 732. The mark menu (Control.cpp's message 59) gets the
-// point clicked and the mark under the mouse.
+// The mark menu (Control.cpp's message 59) gets the point clicked and
+// the mark under the mouse.
 bool TAutomapView::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 {
 	TMarkMenuData *Data = new TMarkMenuData;
@@ -598,8 +573,8 @@ bool TAutomapView::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	return true;
 }
 
-// 0x4282e0, line 784. The last mark of the four blocks that lies within 5
-// pixels of x, y; an empty mark if there is none.
+// The last mark of the four blocks that lies within 5 pixels of x, y; an
+// empty mark if there is none.
 TMark TAutomapView::GetMark(int x, int y)
 {
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
@@ -629,22 +604,20 @@ TMark TAutomapView::GetMark(int x, int y)
 
 // --- TCompassRose -----------------------------------------------------------------
 
-// 0x428680, line 791. No try block; the assertion is the only EH state.
 TCompassRose::TCompassRose(int _RoseSkin)
 {
 	PATELLA_ASSERT_VALUES(_RoseSkin<patella::bridge::Skins().NumberOfSkins, _RoseSkin, patella::bridge::Skins().NumberOfSkins);
 	RoseSkin = _RoseSkin;
 }
 
-// 0x428800, line 803
 void TCompassRose::Draw(int Surface, int x, int y)
 {
 	DrawPicturePart(Surface, x, y, 4, Skins()[RoseSkin].x, Skins()[RoseSkin].y, Skins()[RoseSkin].width,
 		Skins()[RoseSkin].height);
 }
 
-// 0x4289c0, line 825. The middle (10x10 pixels) centres the view, the four
-// arms scroll it (Scroll's directions); the later tests win.
+// The middle (10x10 pixels) centres the view, the four arms scroll it
+// (Scroll's directions); the later tests win.
 bool TCompassRose::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 {
 	int Direction = -1;
@@ -663,7 +636,6 @@ bool TCompassRose::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	return true;
 }
 
-// 0x428cb0, line 836
 void TCompassRose::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetMouseOverText(TextScrollAutomap);
@@ -671,7 +643,6 @@ void TCompassRose::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 
 // --- TCapacityLabel, TSoulLabel ---------------------------------------------------
 
-// 0x428e40, line 858
 void TCapacityLabel::Draw(int Surface, int x, int y)
 {
 	TFixedString<20> Text;
@@ -682,7 +653,6 @@ void TCapacityLabel::Draw(int Surface, int x, int y)
 		SkinProperties().CapacityLabel.ValueFont, Text);
 }
 
-// 0x429090, line 875
 void TSoulLabel::Draw(int Surface, int x, int y)
 {
 	TFixedString<20> Text;
@@ -695,8 +665,8 @@ void TSoulLabel::Draw(int Surface, int x, int y)
 
 // --- TPlayerStates ----------------------------------------------------------------
 
-// 0x4292e0, line 901. The try block starts after the base class. The small
-// row has a background (skin 100) with a right edge (101).
+// The small row has a background (skin 100) with a right edge
+// (101).
 TPlayerStates::TPlayerStates(bool islarge)
 {
 	IsLarge = islarge;
@@ -716,8 +686,7 @@ TPlayerStates::TPlayerStates(bool islarge)
 	}
 }
 
-// 0x437210, lines 920-925. The icons side by side, PlayerStates.IconDistance
-// pixels apart.
+// The icons side by side, PlayerStates.IconDistance pixels apart.
 void TPlayerStates::Draw(int Surface, int x, int y)
 {
 	TComponent::Draw(Surface, x, y);
@@ -740,7 +709,6 @@ void TPlayerStates::Draw(int Surface, int x, int y)
 	}
 }
 
-// 0x4295b0, line 947
 int TPlayerStates::GetNumberOfIcons() const
 {
 	int Count = IsPlayerPoisoned() ? 1 : 0;
@@ -765,7 +733,6 @@ int TPlayerStates::GetNumberOfIcons() const
 	return Count;
 }
 
-// 0x437630, lines 973-976. The jump table 0x4378f8 has the skins 228-239.
 void TPlayerStates::MouseHover(int x, int y)
 {
 	const int Position = GetIconAt(x, y);
@@ -818,8 +785,8 @@ void TPlayerStates::MouseHover(int x, int y)
 	}
 }
 
-// 0x4297a0, line 995. The icon under x, y; -1 for none. Each icon area is
-// one pixel larger than the distance.
+// The icon under x, y; -1 for none. Each icon area is one pixel larger
+// than the distance.
 int TPlayerStates::GetIconAt(int x, int y) const
 {
 	const int Icons = GetNumberOfIcons();
@@ -838,14 +805,12 @@ int TPlayerStates::GetIconAt(int x, int y) const
 	return -1;
 }
 
-// 0x429990, lines 1036-1070. The assertion comes before the try block. The
-// skin of the Position'th state that is on, in the order of the jump
-// table 0x429e78 (0-9; the skull has its own table 0x429ea0, 1-4); 0 when fewer
-// states are on. State 9 has no icon. The original's default, never reached
-// (i is 0-9), was TERROR1(1063, "index out of range", i); it does nothing
-// here (issue #79): MSVC x86 removed its code but kept the function's exception
-// frame, without the frame's handler in the SafeSEH table, so an exception of
-// a callee ended the program (notes/decisions.md, issue #79).
+// The skin of the Position'th state that is on; 0 when fewer states are on.
+// State 9 has no icon. The original's default, never reached (i is 0-9), was
+// TERROR1(1063, "index out of range", i); it does nothing here (issue #79):
+// MSVC x86 removed its code but kept the function's exception frame, without
+// the frame's handler in the SafeSEH table, so an exception of a callee ended
+// the program (notes/decisions.md, issue #79).
 int TPlayerStates::GetIcon(int Position)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,SkinProperties().PlayerStates.NumberOfIcons-1), Position,
@@ -937,7 +902,6 @@ int TPlayerStates::GetIcon(int Position)
 
 // --- TSmallInventoryWindow --------------------------------------------------------
 
-// 0x429eb0, line 1083. The try block starts after the base class.
 TSmallInventoryWindow::TSmallInventoryWindow()
 	: TContentWindow(SMALL_INVENTORY_WINDOW, true)
 {
@@ -947,8 +911,7 @@ TSmallInventoryWindow::TSmallInventoryWindow()
 		SkinProperties().SmallInventoryDropArea.height, 0, 0);
 }
 
-// 0x42a0c0, line 1099. A white frame around the drop area while an object
-// is dragged over it.
+// A white frame around the drop area while an object is dragged over it.
 void TSmallInventoryWindow::Draw(int Surface, int x, int y)
 {
 	TContentWindow::Draw(Surface, x, y);
@@ -976,9 +939,9 @@ bool AsksForCount(int Flags)
 
 } // namespace
 
-// 0x42a300, line 1127. An object dropped on the area goes into the
-// inventory (0xffff, 0, 0: the first free slot); a pile asks for the count
-// or moves whole (AsksForCount), and Shift (0x200) moves one.
+// An object dropped on the area goes into the inventory (0xffff, 0, 0: the
+// first free slot); a pile asks for the count or moves whole
+// (AsksForCount), and Shift (0x200) moves one.
 bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TContentWindow::LeftButtonUp(x, y, Flags);
@@ -998,7 +961,6 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 	return Result;
 }
 
-// 0x42a590, line 1141
 bool TSmallInventoryWindow::HelpMouseMove(int x, int y)
 {
 	if (!TWindow::HelpMouseMove(x, y)) {
@@ -1010,8 +972,7 @@ bool TSmallInventoryWindow::HelpMouseMove(int x, int y)
 
 // --- TInventoryView ---------------------------------------------------------------
 
-// 0x42a750, line 1170. The try block starts after the base class. The
-// "minimise" button is event 23 of the main window.
+// The "minimise" button is event 23 of the main window.
 TInventoryView::TInventoryView(TWindow *Receiver)
 {
 	SetSize(SkinProperties().InventoryView.Width, SkinProperties().InventoryView.Height);
@@ -1030,10 +991,10 @@ TInventoryView::TInventoryView(TWindow *Receiver)
 	Arrange();
 }
 
-// 0x42aa90, lines 1181-1209. The backgrounds of capacity and soul (skin 98),
-// the children, then the ten slots: a frame (skin 102), the object or the
-// slot's empty picture (skins InventoryView.EmptySlotSkins), and a white frame while an
-// object is dragged over a slot.
+// The backgrounds of capacity and soul (skin 98), the children, then the ten slots: a
+// frame (skin 102), the object or the slot's empty picture (skins
+// InventoryView.EmptySlotSkins), and a white frame while an object is dragged over a
+// slot.
 void TInventoryView::Draw(int Surface, int x, int y)
 {
 	int destx = SkinProperties().InventoryView.Capacity.x + x;
@@ -1068,7 +1029,7 @@ void TInventoryView::Draw(int Surface, int x, int y)
 	}
 }
 
-// 0x437930, line 1229. A press on a filled slot starts dragging its object.
+// A press on a filled slot starts dragging its object.
 bool TInventoryView::LeftButtonDown(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonDown(x, y, Flags)) {
@@ -1082,10 +1043,10 @@ bool TInventoryView::LeftButtonDown(int x, int y, int Flags)
 	return true;
 }
 
-// 0x437b30, lines 1251-1277. Action state 7 uses the use object with the
-// slot's object, 8 asks for a player, 6 drops the dragged object into the
-// slot (a pile asks for the count or moves whole, AsksForCount, and Shift
-// moves one); a release with flags is a right click.
+// Action state 7 uses the use object with the slot's object, 8 asks for a
+// player, 6 drops the dragged object into the slot (a pile asks for the
+// count or moves whole, AsksForCount, and Shift moves one); a release
+// with flags is a right click.
 bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
@@ -1127,10 +1088,10 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x437fe0, line 1329. The trade and use objects become the slot's object.
-// Shift looks at it; with classic controls Ctrl opens the menu (message 52)
-// and a plain click uses it, otherwise the other way round. An object used
-// with something (MULTIUSE) starts action state 7 (message 44).
+// The trade and use objects become the slot's object. Shift looks at it;
+// with classic controls Ctrl opens the menu (message 52) and a plain click
+// uses it, otherwise the other way round. An object used with something
+// (MULTIUSE) starts action state 7 (message 44).
 bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
@@ -1168,7 +1129,6 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x42b1b0, lines 1339-1344
 bool TInventoryView::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_INVENTORY);
@@ -1179,8 +1139,8 @@ bool TInventoryView::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int 
 	return true;
 }
 
-// 0x42b450. The body slot (1-10) whose area (InventoryView.Slots) holds x, y;
-// 0 for none. The try block was dropped (nothing in it can throw).
+// The body slot (1-10) whose area (InventoryView.Slots) holds x, y; 0 for
+// none.
 int TInventoryView::GetSlotAt(int x, int y)
 {
 	for (int i = 0; i < 10; i++) {
@@ -1193,10 +1153,9 @@ int TInventoryView::GetSlotAt(int x, int y)
 
 // --- TCombatControls --------------------------------------------------------------
 
-// 0x42b4d0, line 1425. The try block starts after the base class. The
-// layout (LargeCombatControls for the large controls, SmallCombatControls for the small ones) is
-// copied first. The radio groups have no selection until the modes are read
-// at the end (none for an unknown mode).
+// The layout (LargeCombatControls for the large controls, SmallCombatControls for the small
+// ones) is copied first. The radio groups have no selection until the modes are read at the
+// end (none for an unknown mode).
 TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 {
 	IsLarge = Large;
@@ -1267,8 +1226,8 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 	Arrange();
 }
 
-// 0x42bb70, line 1450. The chase mode can change elsewhere (Escape):
-// the selection follows it.
+// The chase mode can change elsewhere (Escape): the selection
+// follows it.
 void TCombatControls::Draw(int Surface, int x, int y)
 {
 	switch (GetChaseMode()) {
@@ -1286,7 +1245,6 @@ void TCombatControls::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 }
 
-// 0x42bd30, lines 1461-1466
 bool TCombatControls::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	if (!IsLarge)
@@ -1300,8 +1258,7 @@ bool TCombatControls::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int
 	return true;
 }
 
-// 0x42bff0, line 1502. The jump table 0x42c1c8 has 100-105; every change is
-// sent to the server.
+// Every change is sent to the server.
 void TCombatControls::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -1331,7 +1288,6 @@ void TCombatControls::HandleEvent(int Event)
 
 // --- TStatusWindow ----------------------------------------------------------------
 
-// 0x438310, line 1522. The try block starts after the base class.
 TStatusWindow::TStatusWindow()
 	: TContentWindow(STATUS_WINDOW, true)
 {
@@ -1343,8 +1299,8 @@ TStatusWindow::TStatusWindow()
 	Arrange();
 }
 
-// 0x42c1e0, lines 1550-1559. The values, then the bars cut to the share of
-// the maximum (full when the value is not below it).
+// The values, then the bars cut to the share of the maximum (full when the
+// value is not below it).
 void TStatusWindow::Draw(int Surface, int x, int y)
 {
 	TContentWindow::Draw(Surface, x, y);
@@ -1375,7 +1331,6 @@ void TStatusWindow::Draw(int Surface, int x, int y)
 		Skins()[SKIN_MANA_BAR].height, SKIN_MANA_BAR, 0, 0);
 }
 
-// 0x42c830, line 1571
 bool TStatusWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_STATUS_BARS);
@@ -1383,8 +1338,7 @@ bool TStatusWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y
 	return true;
 }
 
-// 0x42c9d0, line 1598. Two pictures (skins 119, 122) and the two bars' backgrounds
-// (120, 123).
+// Two pictures (skins 119, 122) and the two bars' backgrounds (120, 123).
 void TStatusWindow::Arrange()
 {
 	TContentWindow::Arrange();
@@ -1400,7 +1354,6 @@ void TStatusWindow::Arrange()
 
 // --- TContainerWindowBody ---------------------------------------------------------
 
-// 0x438500, line 1618. The try block starts after the base class.
 TContainerWindowBody::TContainerWindowBody(int _Container)
 {
 	Container = _Container;
@@ -1410,15 +1363,14 @@ TContainerWindowBody::TContainerWindowBody(int _Container)
 	Arrange();
 }
 
-// 0x42cc70, line 1628 (deleting destructor 0x438700). Its work is the close
-// since issue #108.
+// Its work is the close since issue #108.
 TContainerWindowBody::~TContainerWindowBody()
 {
 	CheckClosed("TContainerWindowBody");
 }
 
-// The destructor's work until issue #108 (0x42cc70): closing the window
-// closes the container; then the children.
+// The destructor's work until issue #108: closing the window closes the
+// container; then the children.
 void TContainerWindowBody::OnClose()
 {
 	try {
@@ -1430,11 +1382,11 @@ void TContainerWindowBody::OnClose()
 	TSubWindowBody::OnClose();
 }
 
-// 0x42ce10, lines 1644-1666. The background (skin 7, scrolled with the
-// view), then the slots row by row, cut at the top and the bottom edge:
-// the slot picture (skin 125), the object and, while an object is dragged
-// over the slot, a white frame. Odd, kept: a slot cut at the top shows the
-// top of its picture, not the part below the edge.
+// The background (skin 7, scrolled with the view), then the slots row by
+// row, cut at the top and the bottom edge: the slot picture (skin 125),
+// the object and, while an object is dragged over the slot, a white frame.
+// Odd, kept: a slot cut at the top shows the top of its picture, not the
+// part below the edge.
 void TContainerWindowBody::Draw(int Surface, int x, int y)
 {
 	if (ObjectCount != GetContainerObjectCount(Container))
@@ -1482,8 +1434,8 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 	}
 }
 
-// 0x42d420, lines 1675-1683. A window taller than its content keeps its
-// height but does not grow; the scroll bar stays at the right edge.
+// A window taller than its content keeps its height but does not grow;
+// the scroll bar stays at the right edge.
 void TContainerWindowBody::SetSize(int Width, int Height)
 {
 	const int ScrollbarX = Width - ScrollBar->Width;
@@ -1497,20 +1449,18 @@ void TContainerWindowBody::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x42d6f0, line 1693
 int TContainerWindowBody::getMinimumHeight()
 {
 	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().ContainerMinimumHeight);
 }
 
-// 0x42d890, line 1712
 int TContainerWindowBody::GetMaximumHeight()
 {
 	return GetContentHeight();
 }
 
-// 0x42da20, line 1744. The counts of the container, the scroll range and,
-// in a window, the icon and title again.
+// The counts of the container, the scroll range and, in a window, the
+// icon and title again.
 void TContainerWindowBody::Arrange()
 {
 	ObjectCount = GetContainerObjectCount(Container);
@@ -1528,8 +1478,8 @@ void TContainerWindowBody::Arrange()
 	}
 }
 
-// 0x438720, line 1764. A press on a filled slot starts dragging its object
-// (from 0xffff, 0x40 plus the container, the slot).
+// A press on a filled slot starts dragging its object (from 0xffff, 0x40
+// plus the container, the slot).
 bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonDown(x, y, Flags)) {
@@ -1543,8 +1493,8 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 	return true;
 }
 
-// 0x438920, lines 1785-1812. As TInventoryView::LeftButtonUp for a
-// container slot; a drop may go into an empty slot.
+// As TInventoryView::LeftButtonUp for a container slot; a drop may
+// go into an empty slot.
 bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
@@ -1587,8 +1537,8 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x438dd0, line 1862. As TInventoryView::RightButtonUp; a container's
-// object is used into the container itself.
+// As TInventoryView::RightButtonUp; a container's object is used into
+// the container itself.
 bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
@@ -1626,7 +1576,7 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x42dcb0, line 1875. The wheel scrolls the view (1 up, 2 down).
+// The wheel scrolls the view (1 up, 2 down).
 bool TContainerWindowBody::MouseWheel(int x, int y, int Code)
 {
 	if (!TWindow::MouseWheel(x, y, Code) && (Code == 1 || Code == 2))
@@ -1634,7 +1584,6 @@ bool TContainerWindowBody::MouseWheel(int x, int y, int Code)
 	return true;
 }
 
-// 0x42de80, lines 1885-1890
 bool TContainerWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_OPEN_CONTAINERS);
@@ -1645,8 +1594,8 @@ bool TContainerWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]
 	return true;
 }
 
-// 0x42e120, line 1904. The "up" button (event 3) opens the container the
-// container is in, once.
+// The "up" button (event 3) opens the container the container is in,
+// once.
 void TContainerWindowBody::HandleEvent(int Event)
 {
 	if (Event == EVENT_CONTAINER_UP && HasParent) {
@@ -1655,8 +1604,8 @@ void TContainerWindowBody::HandleEvent(int Event)
 	}
 }
 
-// 0x439100, line 1917. MainWindow.cpp's OpenContainer on an open window:
-// the view goes back to the top.
+// MainWindow.cpp's OpenContainer on an open window: the view goes back
+// to the top.
 void TContainerWindowBody::Update()
 {
 	ScrollBar->Range->SetValue(0);
@@ -1664,12 +1613,12 @@ void TContainerWindowBody::Update()
 	UpdateUpButton();
 }
 
-// 0x42e2c0, line 1940. The slot under x, y (counted over the whole
-// capacity); -1 for none, or, with Occupied, for an empty one.
+// The slot under x, y (counted over the whole capacity); -1 for
+// none, or, with Occupied, for an empty one.
 int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 {
-	// x and y become positions in the slot grid in their own stack slots
-	// (0x42e302, 0x42e30c): the original's catch wrapper printed them (issue #34).
+	// x and y become positions in the slot grid in their own variables: the
+	// original's catch wrapper printed them (issue #34).
 	x -= SkinProperties().ContainerFirstSlot.x;
 	y += ScrollBar->Range->Value - SkinProperties().ContainerFirstSlot.y;
 	const int Column = x / SkinProperties().ContainerColumnWidth;
@@ -1683,8 +1632,7 @@ int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 	return -1;
 }
 
-// 0x42e4e0, line 1960. Also called by TSubWindow::Arrange for the windows
-// of containers.
+// Also called by TSubWindow::Arrange for the windows of containers.
 void TContainerWindowBody::UpdateUpButton()
 {
 	TSubWindow *Window = static_cast<TSubWindow *>(GetParent());
@@ -1701,8 +1649,7 @@ void TContainerWindowBody::UpdateUpButton()
 
 // --- TSkillsWindowBody ------------------------------------------------------------
 
-// 0x4392a0, line 1980. The try block starts after the base class. The
-// scroll bar moves by half a line.
+// The scroll bar moves by half a line.
 TSkillsWindowBody::TSkillsWindowBody()
 {
 	ContextMenu = nullptr;
@@ -1713,8 +1660,7 @@ TSkillsWindowBody::TSkillsWindowBody()
 	Arrange();
 }
 
-// 0x42e6b0 (deleting destructor 0x4394b0). An open skill menu forgets the
-// window. The try block was dropped (nothing in it can throw).
+// An open skill menu forgets the window.
 TSkillsWindowBody::~TSkillsWindowBody()
 {
 	if (ContextMenu != nullptr)
@@ -1739,11 +1685,10 @@ void UpdateContainerUpButton(TSubWindowBody *Body)
 	(static_cast<TContainerWindowBody *>(Body))->UpdateUpButton();
 }
 
-// 0x4394d0, lines 2003-2063. One line per skill: the name on the left, the
-// value on the right; a bar of the progress below it when the skill's bar
-// is on (SkillsFirstBarsColor for the first seven lines, then SkillsOtherBarsColor); line 8 is a
-// separator. Odd, kept: a line with a bar is 10 pixels taller here, but 9
-// in MouseHover and GetContentHeight.
+// One line per skill: the name on the left, the value on the right; a bar of the progress below
+// it when the skill's bar is on (SkillsFirstBarsColor for the first seven lines, then
+// SkillsOtherBarsColor); line 8 is a separator. Odd, kept: a line with a bar is 10 pixels taller
+// here, but 9 in MouseHover and GetContentHeight.
 void TSkillsWindowBody::Draw(int Surface, int x, int y)
 {
 	if (!IsMinimized()) {
@@ -1813,7 +1758,6 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 	}
 }
 
-// 0x42e700, line 2076
 bool TSkillsWindowBody::MouseWheel(int x, int y, int Code)
 {
 	if (!TWindow::MouseWheel(x, y, Code) && (Code == 1 || Code == 2))
@@ -1821,7 +1765,6 @@ bool TSkillsWindowBody::MouseWheel(int x, int y, int Code)
 	return true;
 }
 
-// 0x42e8d0, lines 2086-2091
 bool TSkillsWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_SKILLS);
@@ -1832,7 +1775,7 @@ bool TSkillsWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] i
 	return true;
 }
 
-// 0x439c30, line 2133. Over a line with a bar: the percent still to go.
+// Over a line with a bar: the percent still to go.
 void TSkillsWindowBody::MouseHover(int x, int y)
 {
 	patella::TGUI &GUI = patella::bridge::GUI();
@@ -1873,14 +1816,14 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 	}
 }
 
-// 0x42eb70, line 2144. Opens the skill menu (Control.cpp's message 60).
+// Opens the skill menu (Control.cpp's message 60).
 bool TSkillsWindowBody::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
 	AddMessage(MESSAGE_SKILL_MENU, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }
 
-// 0x42ed10, lines 2153-2160. Not higher than the content.
+// Not higher than the content.
 void TSkillsWindowBody::SetSize(int Width, int Height)
 {
 	const int ScrollbarX = Width - ScrollBar->Width;
@@ -1894,8 +1837,7 @@ void TSkillsWindowBody::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x42efd0, line 2173. The visible part leaves the margin (SkillsVerticalMargin) at the
-// top and the bottom.
+// The visible part leaves the margin (SkillsVerticalMargin) at the top and the bottom.
 void TSkillsWindowBody::Arrange()
 {
 	int ContentHeight = GetContentHeight();
@@ -1905,7 +1847,7 @@ void TSkillsWindowBody::Arrange()
 	ScrollBar->Range->SetRange(0, ContentHeight - Visible, ScrollBar->Range->Value, Visible);
 }
 
-// 0x42f190, line 2183. At least one line.
+// At least one line.
 int TSkillsWindowBody::getMinimumHeight()
 {
 	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
@@ -1913,8 +1855,8 @@ int TSkillsWindowBody::getMinimumHeight()
 	return (std::max)(ScrollBar->getMinimumHeight(), LineHeight);
 }
 
-// 0x42f330, line 2196. The stored height ("ContentWindow" 6 in Tibia.cfg)
-// or the full height, at least the minimum.
+// The stored height ("ContentWindow" 6 in Tibia.cfg) or the full height,
+// at least the minimum.
 int TSkillsWindowBody::GetInitialHeight()
 {
 	int Height = GetContentWindowSize(SKILLS_WINDOW);
@@ -1925,13 +1867,11 @@ int TSkillsWindowBody::GetInitialHeight()
 	return Height;
 }
 
-// 0x42f500, line 2206
 int TSkillsWindowBody::GetMaximumHeight()
 {
 	return GetContentHeight() + SkinProperties().SkillsVerticalMargin * 2;
 }
 
-// 0x439ef0, line 2225
 int TSkillsWindowBody::GetContentHeight()
 {
 	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
@@ -1948,10 +1888,9 @@ int TSkillsWindowBody::GetContentHeight()
 	return Result;
 }
 
-// 0x42f6a0, lines 2234-2280. The assertion comes before the try block. The
-// jump table 0x42fc44 has the lines 1-15: experience, level, hit points,
-// mana, soul points, capacity, magic level, a separator (false, without the
-// checks below) and the seven skills. Progress is -1 without a bar.
+// The lines are 1-15: experience, level, hit points, mana, soul points,
+// capacity, magic level, a separator (false, without the checks below) and
+// the seven skills. Progress is -1 without a bar.
 bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &Progress) const
 {
 	PATELLA_ASSERT_VALUES(In(NumberOfLine,1,Lines), NumberOfLine, Lines);
@@ -2023,8 +1962,7 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 
 // --- TBattleWindowBody ------------------------------------------------------------
 
-// 0x43a0c0, line 2300. The try block starts after the base class. The
-// scroll bar moves by a third of a row.
+// The scroll bar moves by a third of a row.
 TBattleWindowBody::TBattleWindowBody()
 {
 	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0,
@@ -2035,7 +1973,7 @@ TBattleWindowBody::TBattleWindowBody()
 	Arrange();
 }
 
-// The inline destructor's work until issue #108 (0x425a70): no creature is
+// The inline destructor's work until issue #108: no creature is
 // highlighted any more; then the children.
 void TBattleWindowBody::OnClose()
 {
@@ -2048,12 +1986,12 @@ void TBattleWindowBody::OnClose()
 	TSubWindowBody::OnClose();
 }
 
-// 0x43a2c0, lines 2328-2452. One row per opponent: a frame in the colour of
-// the mouse (the opponent under it becomes the highlighted creature), the
-// attack or the follow target, the outfit, the party shield (248-251; 248
-// only while the player is in no party) and the skull (240-243, blinking
-// for four seconds after SkullTime), the name (shortened to the width) and
-// the health bar. The children are drawn before the background.
+// One row per opponent: a frame in the colour of the mouse (the opponent
+// under it becomes the highlighted creature), the attack or the follow
+// target, the outfit, the party shield (248-251; 248 only while the player
+// is in no party) and the skull (240-243, blinking for four seconds after
+// SkullTime), the name (shortened to the width) and the health bar. The
+// children are drawn before the background.
 void TBattleWindowBody::Draw(int Surface, int x, int y)
 {
 	SetHighlightID(0);
@@ -2210,7 +2148,6 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 	}
 }
 
-// 0x42fc80, lines 2465-2472
 void TBattleWindowBody::SetSize(int Width, int Height)
 {
 	const int ScrollbarX = Width - ScrollBar->Width;
@@ -2221,7 +2158,6 @@ void TBattleWindowBody::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x42ff30, line 2487
 void TBattleWindowBody::Arrange()
 {
 	int ContentHeight = GetContentHeight();
@@ -2230,16 +2166,16 @@ void TBattleWindowBody::Arrange()
 	ScrollBar->Range->SetRange(0, ContentHeight - Height, ScrollBar->Range->Value, Height);
 }
 
-// 0x4300e0, line 2498. A press is taken even where no child takes it.
+// A press is taken even where no child takes it.
 bool TBattleWindowBody::LeftButtonDown(int x, int y, int Flags)
 {
 	TWindow::LeftButtonDown(x, y, Flags);
 	return true;
 }
 
-// 0x43ae20, lines 2521-2544. Action state 7 uses the use object on a
-// monster (not on players), 8 offers a trade to a player; a plain click is
-// a right click with 0x800 (attack, RightButtonUp).
+// Action state 7 uses the use object on a monster (not on players), 8
+// offers a trade to a player; a plain click is a right click with 0x800
+// (attack, RightButtonUp).
 bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
@@ -2278,8 +2214,8 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x43b2f0, line 2573. 0x800 (a left click) attacks the opponent or stops
-// attacking it, Shift looks at it, otherwise its menu opens (message 53).
+// 0x800 (a left click) attacks the opponent or stops attacking it, Shift
+// looks at it, otherwise its menu opens (message 53).
 bool TBattleWindowBody::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
@@ -2302,7 +2238,7 @@ bool TBattleWindowBody::RightButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x43b510, line 2593. A shortened name in full.
+// A shortened name in full.
 void TBattleWindowBody::MouseHover(int x, int y)
 {
 	const int Position = GetOpponentAt(x, y);
@@ -2319,7 +2255,6 @@ void TBattleWindowBody::MouseHover(int x, int y)
 	}
 }
 
-// 0x430280, line 2606
 bool TBattleWindowBody::MouseWheel(int x, int y, int Code)
 {
 	if (!TWindow::MouseWheel(x, y, Code) && (Code == 1 || Code == 2))
@@ -2327,7 +2262,6 @@ bool TBattleWindowBody::MouseWheel(int x, int y, int Code)
 	return true;
 }
 
-// 0x430450, lines 2616-2621
 bool TBattleWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_BATTLE);
@@ -2338,13 +2272,13 @@ bool TBattleWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] i
 	return true;
 }
 
-// 0x4306f0, line 2631. At least one row.
+// At least one row.
 int TBattleWindowBody::getMinimumHeight()
 {
 	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BattleWindow.RowHeight);
 }
 
-// 0x430890, line 2644. The stored height ("ContentWindow" 7) or the content.
+// The stored height ("ContentWindow" 7) or the content.
 int TBattleWindowBody::GetInitialHeight()
 {
 	int Height = GetContentWindowSize(BATTLE_WINDOW);
@@ -2355,13 +2289,12 @@ int TBattleWindowBody::GetInitialHeight()
 	return Height;
 }
 
-// 0x430a50, line 2654
 int TBattleWindowBody::GetContentHeight()
 {
 	return GetNumberOfOpponents() * SkinProperties().BattleWindow.RowHeight + 1;
 }
 
-// 0x430be0, line 2668. The row under x, y; -1 for none.
+// The row under x, y; -1 for none.
 int TBattleWindowBody::GetOpponentAt(int x, int y)
 {
 	y += ScrollBar->Range->Value;
@@ -2373,7 +2306,6 @@ int TBattleWindowBody::GetOpponentAt(int x, int y)
 
 // --- TTradeOffers -----------------------------------------------------------------
 
-// 0x430dc0, line 2687. The try block starts after the base class.
 TTradeOffers::TTradeOffers()
 {
 	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0, 10);
@@ -2382,9 +2314,8 @@ TTradeOffers::TTradeOffers()
 	InsertChild(Separator);
 }
 
-// 0x430fd0, lines 2698-2730. Both offers side by side (TradeWindow.OwnOffer the
-// own, CounterOffer the partner's) in rows of SlotsPerRow slots (skin 125), scrolled
-// together.
+// Both offers side by side (TradeWindow.OwnOffer the own, CounterOffer the
+// partner's) in rows of SlotsPerRow slots (skin 125), scrolled together.
 void TTradeOffers::Draw(int Surface, int x, int y)
 {
 	const int ScrollY = ScrollBar->Range->Value;
@@ -2431,7 +2362,6 @@ void TTradeOffers::Draw(int Surface, int x, int y)
 	}
 }
 
-// 0x4317b0, line 2745
 void TTradeOffers::SetSize(int Width, int Height)
 {
 	const int ScrollBarWidth = ScrollBar->Width;
@@ -2442,14 +2372,13 @@ void TTradeOffers::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x4319b0, line 2755
 int TTradeOffers::getMinimumHeight()
 {
 	return ScrollBar->getMinimumHeight();
 }
 
-// 0x431b40, line 2769. The rows of the longer offer. Odd, kept: the top
-// margin added is OwnOffer.x, the left edge of the own offer.
+// The rows of the longer offer. Odd, kept: the top margin added is
+// OwnOffer.x, the left edge of the own offer.
 int TTradeOffers::GetContentHeight()
 {
 	const int CounterCount = GetCounterOfferCount();
@@ -2461,7 +2390,6 @@ int TTradeOffers::GetContentHeight()
 	return (std::max)(getMinimumHeight(), Result);
 }
 
-// 0x431d10, line 2782
 void TTradeOffers::Arrange()
 {
 	int ContentHeight = GetContentHeight();
@@ -2470,7 +2398,7 @@ void TTradeOffers::Arrange()
 	ScrollBar->Range->SetRange(0, ContentHeight - Height, ScrollBar->Range->Value, Height);
 }
 
-// 0x43b710, line 2801. A click on an object of either offer inspects it.
+// A click on an object of either offer inspects it.
 bool TTradeOffers::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
@@ -2483,14 +2411,12 @@ bool TTradeOffers::LeftButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x431ec0, line 2812
 bool TTradeOffers::LeftButtonDown(int x, int y, int Flags)
 {
 	TWindow::LeftButtonDown(x, y, Flags);
 	return true;
 }
 
-// 0x43b900, line 2831
 bool TTradeOffers::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
@@ -2503,7 +2429,6 @@ bool TTradeOffers::RightButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x432060, line 2844
 bool TTradeOffers::MouseWheel(int x, int y, int Code)
 {
 	if (!TWindow::MouseWheel(x, y, Code) && (Code == 1 || Code == 2))
@@ -2511,8 +2436,8 @@ bool TTradeOffers::MouseWheel(int x, int y, int Code)
 	return true;
 }
 
-// 0x432230, line 2877. The offer (0 own, 1 the partner's) and the position
-// under x, y; -1, -1 for none.
+// The offer (0 own, 1 the partner's) and the position under x, y; -1, -1
+// for none.
 void TTradeOffers::GetOfferAt(int x, int y, int *Side, int *Position) const
 {
 	*Position = -1;
@@ -2540,7 +2465,6 @@ void TTradeOffers::GetOfferAt(int x, int y, int *Side, int *Position) const
 
 // --- TTradeNames ------------------------------------------------------------------
 
-// 0x432470, line 2894. The try block starts after the base class.
 TTradeNames::TTradeNames()
 {
 	Separator = new TSeparator(true);
@@ -2557,7 +2481,6 @@ TTradeNames::TTradeNames()
 	InsertChild(CounterName);
 }
 
-// 0x432770, lines 2901-2907. Both assertions come before the try block.
 void TTradeNames::Draw(int Surface, int x, int y)
 {
 	PATELLA_ASSERT_VALUES(x>=0, x);
@@ -2566,7 +2489,6 @@ void TTradeNames::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 }
 
-// 0x432b00, line 2919
 void TTradeNames::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
@@ -2575,7 +2497,7 @@ void TTradeNames::SetSize(int Width, int Height)
 	SetChildArea(Separator, SkinProperties().TradeWindow.NamesSeparator);
 }
 
-// 0x432d40, line 2930. The names once the offers came.
+// The names once the offers came.
 void TTradeNames::Arrange()
 {
 	if (GetOwnOfferCount() > 0)
@@ -2586,8 +2508,7 @@ void TTradeNames::Arrange()
 
 // --- TTradeButtons ----------------------------------------------------------------
 
-// 0x432f00, line 2947. The try block starts after the base class (and the
-// callback member). Until the partner offers, a text asks to wait.
+// Until the partner offers, a text asks to wait.
 TTradeButtons::TTradeButtons()
 	: Callback(nullptr, 0)
 {
@@ -2601,7 +2522,6 @@ TTradeButtons::TTradeButtons()
 	InsertChild(Separator);
 }
 
-// 0x433140, lines 2954-2960. Both assertions come before the try block.
 void TTradeButtons::Draw(int Surface, int x, int y)
 {
 	PATELLA_ASSERT_VALUES(x>=0, x);
@@ -2610,7 +2530,6 @@ void TTradeButtons::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 }
 
-// 0x4334d0, line 2974
 void TTradeButtons::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
@@ -2623,8 +2542,8 @@ void TTradeButtons::SetSize(int Width, int Height)
 		SetChildPosition(AcceptButton, SkinProperties().TradeWindow.AcceptAndCancelButtons.x, SkinProperties().TradeWindow.AcceptAndCancelButtons.y);
 }
 
-// 0x433720, line 2988. "Cancel" before the partner offered, "Reject"
-// after; both send Callback.
+// "Cancel" before the partner offered, "Reject" after; both send
+// Callback.
 void TTradeButtons::SetCancelButton(bool Cancel)
 {
 	if (CancelButton != nullptr)
@@ -2637,9 +2556,9 @@ void TTradeButtons::SetCancelButton(bool Cancel)
 	SetSize(Width, Height);
 }
 
-// 0x433940, lines 2995-3005. The assertion comes before the try block. The
-// counter offer came: "Reject" and "Accept" (event 1 of EventComponent).
-// Odd, kept: the wait text is deleted without a NULL check.
+// The counter offer came: "Reject" and "Accept" (event 1 of
+// EventComponent). Odd, kept: the wait text is deleted without a NULL
+// check.
 void TTradeButtons::ShowAcceptButton(TComponent *EventComponent)
 {
 	PATELLA_ASSERT(EventComponent!=nullptr);
@@ -2652,8 +2571,7 @@ void TTradeButtons::ShowAcceptButton(TComponent *EventComponent)
 	Arrange();
 }
 
-// 0x433c40, line 3020. Accepted: wait for the partner (again without a
-// NULL check).
+// Accepted: wait for the partner (again without a NULL check).
 void TTradeButtons::Wait()
 {
 	DeleteChild(AcceptButton);
@@ -2666,7 +2584,6 @@ void TTradeButtons::Wait()
 
 // --- TTradeWindowBody -------------------------------------------------------------
 
-// 0x43baf0, line 3037. The try block starts after the base class.
 TTradeWindowBody::TTradeWindowBody()
 {
 	Buttons = new TTradeButtons;
@@ -2678,15 +2595,14 @@ TTradeWindowBody::TTradeWindowBody()
 	SetSize(170, 100);
 }
 
-// 0x433e60, line 3048 (deleting destructor 0x43bd20). Its work is the close
-// since issue #108.
+// Its work is the close since issue #108.
 TTradeWindowBody::~TTradeWindowBody()
 {
 	CheckClosed("TTradeWindowBody");
 }
 
-// The destructor's work until issue #108 (0x433e60): closing the window
-// rejects an open offer; then the children.
+// The destructor's work until issue #108: closing the window rejects an
+// open offer; then the children.
 void TTradeWindowBody::OnClose()
 {
 	try {
@@ -2700,17 +2616,16 @@ void TTradeWindowBody::OnClose()
 	TSubWindowBody::OnClose();
 }
 
-// 0x434000 (no frame)
 int TTradeWindowBody::GetContentHeight()
 {
 	return getMinimumHeight();
 }
 
-// 0x434010, line 3066. The height is limited to the range between the
-// minimum and the maximum height (both read twice, in either order). The
-// calls go in the binary's order (0x43403f-0x434064: maximum, minimum, for
-// the lower bound, then again for the upper one) in their own variables:
-// in one expression our compiler called them in another order (issue #34).
+// The height is limited to the range between the minimum and the maximum
+// height (both read twice, in either order). The calls go in the binary's
+// order (maximum, minimum, for the lower bound, then again for the upper
+// one) in their own variables: in one expression our compiler called them
+// in another order (issue #34).
 void TTradeWindowBody::SetSize(int Width, int Height)
 {
 	int Maximum = GetMaximumHeight();
@@ -2726,7 +2641,6 @@ void TTradeWindowBody::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x4342b0, lines 3076-3081
 bool TTradeWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_TRADE);
@@ -2737,19 +2651,16 @@ bool TTradeWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] in
 	return true;
 }
 
-// 0x434550, line 3092
 int TTradeWindowBody::getMinimumHeight()
 {
 	return (std::max)(Offers->getMinimumHeight(), SkinProperties().TradeWindow.MinimumHeight);
 }
 
-// 0x4346f0, line 3102
 int TTradeWindowBody::GetInitialHeight()
 {
 	return GetMaximumHeight();
 }
 
-// 0x434880, line 3112
 int TTradeWindowBody::GetMaximumHeight()
 {
 	const int NamesHeight = Names->Height;
@@ -2757,8 +2668,8 @@ int TTradeWindowBody::GetMaximumHeight()
 	return Offers->GetContentHeight() + ButtonsHeight + NamesHeight;
 }
 
-// 0x434a20, line 3130. Event 21: the partner's offer came (MainWindow.cpp's
-// UpdateTrade); event 1: "Accept".
+// Event 21: the partner's offer came (MainWindow.cpp's UpdateTrade); event
+// 1: "Accept".
 void TTradeWindowBody::HandleEvent(int Event)
 {
 	if (Event == EVENT_TRADE_COUNTER_OFFER) {
@@ -2773,8 +2684,7 @@ void TTradeWindowBody::HandleEvent(int Event)
 
 // --- TBuddylistWindowBody ---------------------------------------------------------
 
-// 0x43bd40, line 3150. The try block starts after the base class. The
-// scroll bar moves by half a row.
+// The scroll bar moves by half a row.
 TBuddylistWindowBody::TBuddylistWindowBody()
 {
 	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0,
@@ -2785,9 +2695,9 @@ TBuddylistWindowBody::TBuddylistWindowBody()
 	Arrange();
 }
 
-// 0x434bf0, lines 3176-3214. One row per buddy: the icon (skins 218 and
-// up), the name (shortened to the width) in the colour of its state (online,
-// offline, new). Clipped to the whole window.
+// One row per buddy: the icon (skins 218 and up), the name (shortened to the
+// width) in the colour of its state (online, offline, new). Clipped to the
+// whole window.
 void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 {
 	if (NumberOfBuddies != GetNumberOfBuddies()) {
@@ -2839,7 +2749,6 @@ void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 	}
 }
 
-// 0x4352e0, lines 3225-3232
 void TBuddylistWindowBody::SetSize(int Width, int Height)
 {
 	const int ScrollbarX = Width - ScrollBar->Width;
@@ -2850,7 +2759,7 @@ void TBuddylistWindowBody::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x43bf40, line 3249. The VIP menu (message 54), also for no buddy (0).
+// The VIP menu (message 54), also for no buddy (0).
 bool TBuddylistWindowBody::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
@@ -2860,7 +2769,7 @@ bool TBuddylistWindowBody::RightButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x43c110, line 3267. A double click opens a private channel.
+// A double click opens a private channel.
 bool TBuddylistWindowBody::LeftButtonDoubleClick(int x, int y, int Flags)
 {
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
@@ -2872,7 +2781,6 @@ bool TBuddylistWindowBody::LeftButtonDoubleClick(int x, int y, int Flags)
 	return true;
 }
 
-// 0x435590, line 3280
 bool TBuddylistWindowBody::MouseWheel(int x, int y, int Code)
 {
 	if (!TWindow::MouseWheel(x, y, Code) && (Code == 1 || Code == 2))
@@ -2880,7 +2788,7 @@ bool TBuddylistWindowBody::MouseWheel(int x, int y, int Code)
 	return true;
 }
 
-// 0x43c2e0, line 3312. A shortened name in full, in a new buffer each time.
+// A shortened name in full, in a new buffer each time.
 void TBuddylistWindowBody::MouseHover(int x, int y)
 {
 	const int Position = GetBuddyAt(x, y);
@@ -2900,7 +2808,6 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 	}
 }
 
-// 0x435760, lines 3322-3327
 bool TBuddylistWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	SetHelpHandle(HELP_VIP);
@@ -2911,7 +2818,6 @@ bool TBuddylistWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]
 	return true;
 }
 
-// 0x435a00, line 3340
 void TBuddylistWindowBody::Arrange()
 {
 	int ContentHeight = GetContentHeight();
@@ -2920,13 +2826,13 @@ void TBuddylistWindowBody::Arrange()
 	ScrollBar->Range->SetRange(0, ContentHeight - Height, ScrollBar->Range->Value, Height);
 }
 
-// 0x435bb0, line 3350. At least one row.
+// At least one row.
 int TBuddylistWindowBody::getMinimumHeight()
 {
 	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BuddylistWindow.RowHeight);
 }
 
-// 0x435d50, line 3363. The stored height ("ContentWindow" 9) or the content.
+// The stored height ("ContentWindow" 9) or the content.
 int TBuddylistWindowBody::GetInitialHeight()
 {
 	int Height = GetContentWindowSize(BUDDYLIST_WINDOW);
@@ -2937,16 +2843,14 @@ int TBuddylistWindowBody::GetInitialHeight()
 	return Height;
 }
 
-// 0x435f20, line 3374
 int TBuddylistWindowBody::GetContentHeight()
 {
 	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().Data868;
 }
 
-// 0x4360c0, line 3389. The row under x, y; -1 for none. Odd, kept: y is
-// not tested against the top. y gets the scroll position in place
-// (0x43611f, the parameter's slot): the original's catch wrapper printed the moved
-// y (issue #34).
+// The row under x, y; -1 for none. Odd, kept: y is not tested against the top. y
+// gets the scroll position in place (the parameter's slot): the original's catch
+// wrapper printed the moved y (issue #34).
 int TBuddylistWindowBody::GetBuddyAt(int x, int y)
 {
 	if (!IsMinimized()) {

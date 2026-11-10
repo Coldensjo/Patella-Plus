@@ -1,10 +1,9 @@
-// MapWindow.cpp: reconstructed from Tibia.exe 7.72 (0x4bf860-0x4ca0df).
+// MapWindow.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The map view (TMapWindow) and its frame (TMapFrame); see MapWindow.h. The
-// inline members of TMapWindow (destructor, minimum size, IsFieldVisible,
-// SetLightColor) are in the header; their out-of-line copies open the object
-// (0x4bf860-0x4bf9ff). The functions follow in line order; TMapFrame::Arrange
-// has no line evidence and stays at the end, where the binary has it.
+// The map view (TMapWindow) and its frame (TMapFrame); see MapWindow.h. The inline
+// members of TMapWindow (destructor, minimum size, IsFieldVisible, SetLightColor)
+// are in the header. The functions follow in line order; TMapFrame::Arrange has no
+// line evidence and stays at the end, where the binary has it.
 //
 // The drawing works on two surfaces: 2 is the map surface (480x352, the
 // visible 15x11 fields of the 18x14 map), 4 the cache of 16x12 field tiles.
@@ -15,9 +14,9 @@
 // blitted (FlushField). Light sources add up in Light[][], which is drawn
 // last as shaded rectangles or as darkness tiles of picture 7.
 //
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none apart from
-// AddLightSource's, which names the object whose flag could not be read.
+// The original's catch wrappers (common.h) are gone since issue #78; the functions
+// here have no handlers apart from AddLightSource's, which names the object whose
+// flag could not be read.
 
 #include "MapWindow.h"
 #include "Communication.h"
@@ -53,9 +52,6 @@
 
 namespace {
 
-// At 0x7152e8, constructed by the static initialiser 0x559fc0 as
-// TCallback(NULL, 0) and never used; the only datum of MapWindow.obj besides its copy of the
-// text table (Text.h).
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
 TCallback NoCallback(nullptr, 0);
 
@@ -90,9 +86,8 @@ static_assert(sizeof(TCacheField) == 0x8c && offsetof(TCacheField, Sprite) == 0x
 
 // --- TMapWindow ------------------------------------------------------------
 
-// 0x4bfa00, line 130. The light array is cleared before the try block (its
-// TRGBColor constructors). The hotkey 0x44e (Ctrl+N) cycles the creature
-// info, the hotkey 0x457 (Ctrl+W) removes the oldest talkbox.
+// The hotkey 0x44e (Ctrl+N) cycles the creature info, the hotkey 0x457
+// (Ctrl+W) removes the oldest talkbox.
 TMapWindow::TMapWindow()
 {
 	HintButton = nullptr;
@@ -108,7 +103,6 @@ TMapWindow::TMapWindow()
 	}
 }
 
-// 0x4bfc30, line 152
 void TMapWindow::SetSize(int Width, int Height)
 {
 	SetTalkChanged();
@@ -116,16 +110,16 @@ void TMapWindow::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x4bfde0, line 164. The area is the TRect SkinProperties.MapHintButton, copied
-// as one 16-byte block (sub esp,0x10 and four stores).
+// The area is the TRect SkinProperties.MapHintButton, copied as one 16-byte
+// block (sub esp,0x10 and four stores).
 void TMapWindow::Arrange()
 {
 	if (HintButton != nullptr)
 		SetChildArea(HintButton, SkinProperties().MapHintButton);
 }
 
-// 0x4c24d0, line 196. Starts dragging the top movable object of the field.
-// Always reports the click as handled.
+// Starts dragging the top movable object of the field. Always reports the
+// click as handled.
 bool TMapWindow::LeftButtonDown(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonDown(x, y, Flags)) {
@@ -142,13 +136,11 @@ bool TMapWindow::LeftButtonDown(int x, int y, int Flags)
 	return true;
 }
 
-// 0x4c2710, lines 219-272. Action state 7: use the object chosen before
-// with the top multi-use object of the field (or the creature on it);
-// 8: offer the trade object to the player under the mouse; 6: drop the
-// dragged object here (a cumulative pile asks for the count unless Ctrl
-// (0x400) moves it whole or 0x200, Shift or both buttons released, moves one); otherwise a click
-// without both buttons walks to the field, Flags != 0 is handled as a
-// right-button release.
+// Action state 7: use the object chosen before with the top multi-use object of the field (or
+// the creature on it); 8: offer the trade object to the player under the mouse; 6: drop the
+// dragged object here (a cumulative pile asks for the count unless Ctrl (0x400) moves it whole
+// or 0x200, Shift or both buttons released, moves one); otherwise a click without both buttons
+// walks to the field, Flags != 0 is handled as a right-button release.
 bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	if (TWindow::LeftButtonUp(x, y, Flags))
@@ -225,14 +217,13 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x4c2e50, lines 335-368. A field the player cannot see gives "You can't
-// see anything." (fields next to him always count as visible). Otherwise the
-// look and use objects of the field and the creature under the mouse
-// become the trade object, use object and trade info (Status.cpp). With the
-// classic control, Shift or both buttons (0x200) looks, Ctrl (0x400) on an object
-// opens the context menu (message 0x34), and a plain click attacks the
-// creature (unless the use object has FORCEUSE) or uses the object
-// (message 0x2c for a multi-use one). Otherwise 0x800 attacks, 0x200
+// A field the player cannot see gives "You can't see anything." (fields next to
+// him always count as visible). Otherwise the look and use objects of the field
+// and the creature under the mouse become the trade object, use object and trade
+// info (Status.cpp). With the classic control, Shift or both buttons (0x200)
+// looks, Ctrl (0x400) on an object opens the context menu (message 0x34), and a
+// plain click attacks the creature (unless the use object has FORCEUSE) or uses
+// the object (message 0x2c for a multi-use one). Otherwise 0x800 attacks, 0x200
 // looks, 0x400 uses and a plain click opens the context menu.
 bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 {
@@ -322,9 +313,8 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	}
 }
 
-// 0x4bffa0, lines 382-388. Events 600 and 601 are the hotkeys of the
-// constructor, 27 the hint button: it shows the next event help as a message.
-// GCC's analyzer (issue #111): the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
+// Events 600 and 601 are the hotkeys of the constructor, 27 the hint button: it shows the next event help as a message. GCC's
+// analyzer (issue #111): the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMapWindow::HandleEvent(int Event)
@@ -346,9 +336,9 @@ void TMapWindow::HandleEvent(int Event)
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// 0x4c3520, lines 417-432. Help mode: the help bubble for the creature or
-// object under the mouse (1001 the player, 1000 another creature, the
-// object's lens help, 1002 a container), placed over the field.
+// Help mode: the help bubble for the creature or object under the mouse
+// (1001 the player, 1000 another creature, the object's lens help, 1002 a
+// container), placed over the field.
 bool TMapWindow::HelpMouseMove(int x, int y)
 {
 	int FieldX, FieldY, FieldZ;
@@ -370,10 +360,9 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		return false;
 	const TCreature *Player = GetCreature(GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
-	// The help position goes into x and y (the binary stores it in the
-	// parameters' stack slots, 0x4c372a/0x4c3751 and 0x4c3793/0x4c37bd), so
-	// the original's catch wrapper printed it after an error in
-	// MoveHelpPosition or SetHelpSize (issue #34).
+	// The help position goes into x and y, so the original's catch wrapper
+	// printed it after an error in MoveHelpPosition or SetHelpSize (issue
+	// #34).
 	if (GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
 		y = FieldY * 32 - (352 - Height) / 2 - Player->GetDeltaY() - 32;
@@ -389,10 +378,8 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	return true;
 }
 
-// 0x4c7580, lines 456-834 (Ghidra split it at 0x4c7750). The blocks with
-// their own try (lines 477, 495, 527, 550, 757 with 599 inside, 776, 815
-// with 794 inside, 830) follow the binary's exception table. MSVC's analysis (C6262, issue #111): the original's
-// buffers on the stack.
+// The blocks with their own try follow the binary's exception table. MSVC's analysis (C6262, issue #111): the
+// original's buffers on the stack.
 PATELLA_MSVC_WARNING(suppress : 6262)
 void TMapWindow::Draw(int Surface, int x, int y)
 {
@@ -763,14 +750,13 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 }
 
-// 0x4c5520, lines 874-1062. One field at map surface position posx/posy.
-// Mode 0 draws everything; Mode 1 (the fields left of and above a lying
-// object, drawn again over it) skips the objects below the top ones, and
-// both lights and animated texts are only collected in Mode 0. Objects are
-// raised by the HEIGHT of the objects below them (at most 24 pixels).
-// Creatures are drawn from the 3x3 fields around, those whose figure ends on
-// this field, at most 10, sorted from the back; they get the highlight,
-// attack and follow frames and their mark.
+// One field at map surface position posx/posy. Mode 0 draws everything; Mode
+// 1 (the fields left of and above a lying object, drawn again over it) skips
+// the objects below the top ones, and both lights and animated texts are
+// only collected in Mode 0. Objects are raised by the HEIGHT of the objects
+// below them (at most 24 pixels). Creatures are drawn from the 3x3 fields
+// around, those whose figure ends on this field, at most 10, sorted from the
+// back; they get the highlight, attack and follow frames and their mark.
 void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int FieldZ, int Mode)
 {
 	int x = FieldX, y = FieldY, z = FieldZ;
@@ -802,8 +788,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (Elevation > 24)
 			Elevation = 24;
 	}
-	// The catch block prints the object (0x4c72da, line 874: "Obj" and the
-	// type at [ebp-0x4c]; issue #34).
+	// The catch block prints the object ("Obj" and the type; issue #34).
 	if (Lying) {
 		if (FieldX > 0) {
 			if (FieldY > 0)
@@ -1024,10 +1009,10 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		DrawObject(posx, posy, FieldZ, TopObject, x, y, z);
 }
 
-// 0x4c4af0, lines 1071-1094. The pattern comes from the absolute position
-// (x, y, z), the count, the liquid or the hook; objects with several phases
-// are animated and bypass the field cache. A pattern size or phase count of 0
-// in Tibia.dat throws a TMyException (PATELLA_DIVISOR, issue #67).
+// The pattern comes from the absolute position (x, y, z), the count, the
+// liquid or the hook; objects with several phases are animated and bypass the
+// field cache. A pattern size or phase count of 0 in Tibia.dat throws a
+// TMyException (PATELLA_DIVISOR, issue #67).
 void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, int y, int z)
 {
 	PATELLA_ASSERT(Obj.Type!=0);
@@ -1058,9 +1043,9 @@ void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, i
 	}
 }
 
-// 0x4c4f80, lines 1106-1129. Outfits are always animated; the second layer
-// is the colour mask (head, body, legs, feet). A phase count of 0 in
-// Tibia.dat throws a TMyException (PATELLA_DIVISOR, issue #67).
+// Outfits are always animated; the second layer is the colour mask (head,
+// body, legs, feet). A phase count of 0 in Tibia.dat throws a TMyException
+// (PATELLA_DIVISOR, issue #67).
 void TMapWindow::DrawCreature(int posx, int posy, int Level, TCreature *Creature)
 {
 	PATELLA_ASSERT(Creature!=nullptr);
@@ -1099,8 +1084,8 @@ void TMapWindow::DrawCreature(int posx, int posy, int Level, TCreature *Creature
 	}
 }
 
-// 0x4c02c0, lines 1138-1144. One of the darkness tiles of picture 7 (0
-// darkest; brightness 1-27 gets tile 1, from 224 on nothing is drawn).
+// One of the darkness tiles of picture 7 (0 darkest; brightness 1-27
+// gets tile 1, from 224 on nothing is drawn).
 void TMapWindow::DrawLightMask(int posx, int posy, int Brightness)
 {
 	PATELLA_ASSERT_VALUES(In(Brightness,0,255), Brightness);
@@ -1113,9 +1098,9 @@ void TMapWindow::DrawLightMask(int posx, int posy, int Brightness)
 		DrawPicturePart(2, posx, posy, 7, Tile << 5, 0, 32, 32);
 }
 
-// 0x4c46a0, line 1180. A sprite at map surface position x/y on the fields it
-// covers that Level shows on. Static sprites go into the cache tiles; an
-// animated (or masked) sprite flushes those tiles and is drawn directly.
+// A sprite at map surface position x/y on the fields it covers that Level
+// shows on. Static sprites go into the cache tiles; an animated (or masked)
+// sprite flushes those tiles and is drawn directly.
 void TMapWindow::DrawFieldSprite(int x, int y, int Level, bool Animated, int SpriteNumber, int MaskNumber,
 	TRGBColor *Colors)
 {
@@ -1161,12 +1146,12 @@ void TMapWindow::DrawFieldSprite(int x, int y, int Level, bool Animated, int Spr
 	}
 }
 
-// 0x4c41e0, line 1231. Adds a sprite at offset dx/dy to a field's cache
-// tile. A tile that holds the same sprites as in the last frame is not drawn
-// again; on the first difference its sprites are drawn again from the start
-// (without clearing the tile). A full tile (10 sprites) or one already
-// blitted to the map surface gets the sprite drawn directly onto the map
-// surface, clipped to the field.
+// Adds a sprite at offset dx/dy to a field's cache tile. A tile that holds
+// the same sprites as in the last frame is not drawn again; on the first
+// difference its sprites are drawn again from the start (without clearing
+// the tile). A full tile (10 sprites) or one already blitted to the map
+// surface gets the sprite drawn directly onto the map surface, clipped to
+// the field.
 void TMapWindow::CacheSprite(int FieldX, int FieldY, int SpriteNumber, int dx, int dy)
 {
 	if (!In(FieldX, 0, MAPSIZE_X - 1) || !In(FieldY, 0, MAPSIZE_Y - 1))
@@ -1234,9 +1219,9 @@ void TMapWindow::CacheSprite(int FieldX, int FieldY, int SpriteNumber, int dx, i
 	Field->Sprites++;
 }
 
-// 0x4c3980, line 1256. Blits a field's cache tile to the map surface, once
-// per frame. If the tile holds more sprites than this frame's, they are
-// drawn again over it first (without clearing it).
+// Blits a field's cache tile to the map surface, once per frame. If the
+// tile holds more sprites than this frame's, they are drawn again over it
+// first (without clearing it).
 void TMapWindow::FlushField(int FieldX, int FieldY)
 {
 	if (In(FieldX, 0, MAPSIZE_X - 1) && In(FieldY, 0, MAPSIZE_Y - 1)) {
@@ -1266,8 +1251,8 @@ void TMapWindow::FlushField(int FieldX, int FieldY)
 	}
 }
 
-// 0x4c0590, lines 1264-1265. No try block. The tiles wrap with the map
-// position, so a field keeps its tile while the map scrolls.
+// The tiles wrap with the map position, so a field keeps its tile
+// while the map scrolls.
 TCacheField *TMapWindow::GetCacheField(int FieldX, int FieldY)
 {
 	PATELLA_ASSERT_VALUES(In(FieldX,0,MAPSIZE_X-1), FieldX);
@@ -1275,12 +1260,11 @@ TCacheField *TMapWindow::GetCacheField(int FieldX, int FieldY)
 	return &Cache[(PositionX + FieldX) % 16][(PositionY + FieldY) % 12];
 }
 
-// 0x4c3c80, lines 1338-1347. Lights the fields within Brightness fields of
-// map surface position posx/posy (which are moved to field pixels first;
-// the catch blocks print the moved values): the colour falls off linearly
-// over Brightness*32 pixels (scaled by 1/160), by a further 1/5 on fields
-// without a ground, and each field keeps the brightest value of each
-// component.
+// Lights the fields within Brightness fields of map surface position
+// posx/posy (which are moved to field pixels first; the catch blocks print
+// the moved values): the colour falls off linearly over Brightness*32
+// pixels (scaled by 1/160), by a further 1/5 on fields without a ground,
+// and each field keeps the brightest value of each component.
 void TMapWindow::AddLightSource(int posx, int posy, int z, int Brightness, TRGBColor Color)
 {
 	if (Brightness <= 0)
@@ -1333,12 +1317,12 @@ void TMapWindow::AddLightSource(int posx, int posy, int z, int Brightness, TRGBC
 	}
 }
 
-// 0x4c0880, lines 1405-1470. Places the talkboxes: a box of a speaking
-// creature over its field (Alignment 0-2 tells which side the creature is
-// on), the others in the middle by talk mode. Overlapping boxes are pushed
-// apart pixel by pixel within their limits while the total overlap shrinks.
-// Fixed bit 1/2: the box sticks to a left/right or top/bottom edge, or has
-// no creature (then it does not follow the walk).
+// Places the talkboxes: a box of a speaking creature over its field
+// (Alignment 0-2 tells which side the creature is on), the others in the
+// middle by talk mode. Overlapping boxes are pushed apart pixel by pixel
+// within their limits while the total overlap shrinks. Fixed bit 1/2: the
+// box sticks to a left/right or top/bottom edge, or has no creature (then
+// it does not follow the walk).
 void TMapWindow::ArrangeTalkboxes()
 {
 	std::array<int, TALKBOXES> BoxWidth;
@@ -1515,9 +1499,9 @@ void TMapWindow::ArrangeTalkboxes()
 	}
 }
 
-// 0x4c12e0, lines 1480-1499. The map field under window position x/y: the
-// level is the highest one down from MaxLevel with a ground or a BOTTOM
-// object (first or second) on the field; 0 if there is none.
+// The map field under window position x/y: the level is the highest one
+// down from MaxLevel with a ground or a BOTTOM object (first or second)
+// on the field; 0 if there is none.
 void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 {
 	const TCreature *Player = GetCreature(GetPlayerID());
@@ -1541,9 +1525,9 @@ void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 	}
 }
 
-// 0x4c16b0, line 1545. The creature whose figure (its name position, the
-// top centre) is under window position x/y, among the creatures with a name
-// that no ground hides; 0 if there is none.
+// The creature whose figure (its name position, the top centre) is under
+// window position x/y, among the creatures with a name that no ground
+// hides; 0 if there is none.
 uint32 TMapWindow::GetCreatureAt(int x, int y)
 {
 	const int FieldWidth = Width / 15;
@@ -1581,8 +1565,8 @@ uint32 TMapWindow::GetCreatureAt(int x, int y)
 
 // --- TMapFrame -------------------------------------------------------------
 
-// 0x4c1a40, line 1564. Eight drawing list entries: the four border sides
-// and the background around them.
+// Eight drawing list entries: the four border sides and the background
+// around them.
 TMapFrame::TMapFrame()
 {
 	MapWindow = new TMapWindow;
@@ -1591,9 +1575,8 @@ TMapFrame::TMapFrame()
 	DrawingList.reset(new TDrawing[8]);
 }
 
-// 0x4c1c40, line 1584. The map view keeps 15:11 (at most 480 pixels wide
-// without stretching) and is centred horizontally; the frame's height
-// follows it.
+// The map view keeps 15:11 (at most 480 pixels wide without stretching)
+// and is centred horizontally; the frame's height follows it.
 void TMapFrame::SetSize(int Width, int Height)
 {
 	const int Border = SkinProperties().MapFrameBorder;
@@ -1610,20 +1593,18 @@ void TMapFrame::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x4c1ea0, line 1595
 int TMapFrame::getMinimumWidth()
 {
 	return MapWindow->getMinimumWidth() + SkinProperties().MapFrameBorder * 2;
 }
 
-// 0x4c2040, line 1606
 int TMapFrame::getMinimumHeight()
 {
 	return MapWindow->getMinimumHeight() + SkinProperties().MapFrameBorder * 2;
 }
 
-// 0x4c21e0. No exception frame. The border (skins 8-11) and skin 7 tiled
-// over the rest, its pattern aligned to the frame.
+// The border (skins 8-11) and skin 7 tiled over the rest, its pattern
+// aligned to the frame.
 void TMapFrame::Arrange()
 {
 	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_TOP, ViewX - Skins()[SKIN_FRAME_EDGE_LEFT].width, ViewY - Skins()[SKIN_FRAME_EDGE_TOP].height,

@@ -46,11 +46,11 @@ protected:
 	~TLoginSignatures() = default;
 };
 
-// Communication.cpp's data and functions (issue #105): the globals of the original (0x5c4340-0x5c4387), with
-// Control.cpp's LastPacketType, LastPacketIndex and LastPacketTypes (0x5c0d8c, 0x5c4510-0x5c451d), are the members,
-// with the same initial values, and the functions the members of the same names; Status.cpp's session is its TSession
-// (Status.h). It sends and reads through its TNetwork; the packet handlers write the game state through TMapState's
-// five objects (issue #106) and call the windows through those files' functions until TGUI (#107) is an object.
+// Communication.cpp's data and functions (issue #105): the globals of the original, with Control.cpp's
+// LastPacketType, LastPacketIndex and LastPacketTypes, are the members, with the same initial values, and the
+// functions the members of the same names; Status.cpp's session is its TSession (Status.h). It sends and reads
+// through its TNetwork; the packet handlers write the game state through TMapState's five objects (issue #106) and
+// call the windows through those files' functions until TGUI (#107) is an object.
 class TCommunication {
 public:
 	TCommunication(TNetwork &NetworkRef, TMapState &MapState, TLoginSignatures &SignaturesRef);
@@ -63,7 +63,7 @@ public:
 	// Empty, so static: no this (Clang's UBSan would check it, and the golden Communication test reads
 	// ExitCommunication's code as the original's single ret).
 	static void InitCommunication();
-	static void ExitCommunication(); // empty, folded into 0x496160
+	static void ExitCommunication();
 	void SendLogin(uint32 AccountID, const char *Password);
 	void SendGameLogin(uint32 AccountID, const char *Name, const char *Password);
 	void SendLogout();
@@ -194,20 +194,20 @@ public:
 	// Data, in the original's .data/.bss order. Public: Control.cpp writes OutfitRequested and the packet types
 	// (ReceivePackets, InitWindow), the golden Communication and Control tests set them; Status.cpp's functions reach
 	// Session through bridge::Session().
-	int LastPacketType = -1;                 // 0x5c0d8c, Control.cpp's: only written (ReceivePackets)
-	bool OutfitRequested{};                  // 0x5c4358; also reset by Control.cpp
-	int LastPacketIndex{};                   // 0x5c4510, Control.cpp's: next slot in LastPacketTypes
-	std::array<uint8, 10> LastPacketTypes{}; // 0x5c4514, Control.cpp's: the last ten packet types, a ring
-	TSession Session;                        // 0x71c478-0x71c58b, Status.cpp's
+	int LastPacketType = -1;                 // Control.cpp's: only written (ReceivePackets)
+	bool OutfitRequested{};                  // also reset by Control.cpp
+	int LastPacketIndex{};                   // Control.cpp's: next slot in LastPacketTypes
+	std::array<uint8, 10> LastPacketTypes{}; // Control.cpp's: the last ten packet types, a ring
+	TSession Session;                        // Status.cpp's
 
 private:
-	int SkipFields{}; // 0x5c4340
-	// 0x5c4344-0x5c4357, the patch transfer's state (PatchData, PatchWholeFile, PatchDataCount, PatchDataSize,
+	int SkipFields{};
+	// The patch transfer's state (PatchData, PatchWholeFile, PatchDataCount, PatchDataSize,
 	// PatchFileNumber) is gone with the patcher since Patella-Modern issue #75 (decision D9).
-	int CancelCount{}; // 0x5c4378
-	int LastCancelZ{}; // 0x5c437c
-	int LastCancelY{}; // 0x5c4380
-	int LastCancelX{}; // 0x5c4384
+	int CancelCount{};
+	int LastCancelZ{};
+	int LastCancelY{};
+	int LastCancelX{};
 
 	TNetwork &Network;
 	// TMapState's objects (issue #106).
@@ -233,7 +233,7 @@ TCommunication &Communication();
 // The original's functions (the callers' names, and the golden tests'): each calls TCommunication's member of the
 // same name on bridge::Communication().
 void InitCommunication();
-void ExitCommunication(); // empty, folded into 0x496160
+void ExitCommunication();
 void SendLogin(uint32 AccountID, const char *Password);
 void SendGameLogin(uint32 AccountID, const char *Name, const char *Password);
 void SendLogout();
