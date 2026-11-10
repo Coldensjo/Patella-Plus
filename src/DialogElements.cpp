@@ -105,7 +105,7 @@ void TResizer::Arrange()
 // 0x453fe0, lines 113-122. The cursor is set before the assertion.
 bool TResizer::MouseMove(int x, int y)
 {
-	SetMouseCursor(2);
+	SetMouseCursor(CURSOR_SIZENS);
 	PATELLA_ASSERT(ToResize!=nullptr);
 	if (Dragging) {
 		int NewWidth = ToResize->Width;

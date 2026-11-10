@@ -59,9 +59,9 @@ const std::array<int, 8> TitleKey = {16, 34, 227, 56, 3, 110, 64, 173};         
 const std::array<int, 11> ClassNameKey = {109, 168, 131, 83, 237, 53, 175, 191, 138, 154, 253}; // 0x56ddb8
 
 // Data, in .data/.bss order.
-int LastMouseCursor = 1;  // 0x5c2518
-int NumberOfTibiaWindows; // 0x719db0, counted by CountTibiaWindows
-POINT LastMousePosition;  // 0x719db4
+int LastMouseCursor = CURSOR_ARROW; // 0x5c2518
+int NumberOfTibiaWindows;           // 0x719db0, counted by CountTibiaWindows
+POINT LastMousePosition;            // 0x719db4
 // Not in the original (Patella-Modern issue #127): OnIdle's local. Where Windows cannot read the cursor (another desktop:
 // the lock screen, UAC's secure desktop; GetCursorPos fails) the point stays what it last was; the original read an
 // uninitialised local there, in practice the stack slot's previous value.

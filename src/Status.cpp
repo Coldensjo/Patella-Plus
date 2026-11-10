@@ -115,11 +115,11 @@ void patella::TInteraction::SetMouseCursor(int Cursor)
 int patella::TInteraction::GetMouseCursor() const
 {
 	if (ActionState == ACTIONSTATE_HELP)
-		return 6;
+		return CURSOR_MAGNIFIER;
 	if (ActionState == ACTIONSTATE_DRAGGING)
-		return 5;
+		return CURSOR_DRAG;
 	if (ActionState == ACTIONSTATE_USE_WITH || ActionState == ACTIONSTATE_TRADE_WITH)
-		return 4;
+		return CURSOR_CROSSHAIR;
 	return MouseCursor;
 }
 

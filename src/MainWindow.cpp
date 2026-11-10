@@ -762,7 +762,7 @@ void TSplitter::Arrange()
 bool TSplitter::MouseMove([[maybe_unused]] int x, int y)
 {
 	const patella::TGUI &GUI = patella::bridge::GUI();
-	SetMouseCursor(2);
+	SetMouseCursor(CURSOR_SIZENS);
 	if (Dragging) {
 		GUI.MainWindow->ResizeConsole(DragY - y + GUI.MainWindow->GetConsoleWindowHeight());
 		GUI.MainWindow->SetSize(GUI.MainWindow->Width, GUI.MainWindow->Height);

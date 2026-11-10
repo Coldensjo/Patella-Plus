@@ -269,6 +269,18 @@ int GetActionState();
 void SetMousePosition(int x, int y);
 int GetMouseX();
 int GetMouseY();
+// The mouse cursors of SetMouseCursor and GetMouseCursor. The number is also the skin the client draws as its own
+// cursor (Control.cpp) and chooses the Windows cursor otherwise (SdlFrame.cpp's UpdateMouseCursor), whose resource
+// identifiers the names follow: IDC_ARROW, IDC_SIZENS, IDC_WAIT, and res/resource.h's IDC_CROSSHAIR and IDC_MAGNIFIER.
+// GetMouseCursor gives the last three for an action state, whatever was set. Enumerators for the reason in GUI.h.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	CURSOR_ARROW = 1,
+	CURSOR_SIZENS = 2,    // the vertical size arrow of the splitter and the resizers
+	CURSOR_WAIT = 3,      // never set
+	CURSOR_CROSSHAIR = 4, // the player chooses what to use an object on or whom to trade with
+	CURSOR_DRAG = 5,      // dragging: the crosshair's picture, as skin and as Windows cursor
+	CURSOR_MAGNIFIER = 6, // help mode
+};
 void SetMouseCursor(int Cursor);
 int GetMouseCursor();
 void SetPendingAction(int State, int Number);

@@ -1217,12 +1217,12 @@ void UpdateMouseCursor()
 	if (GetWindowsMousepointer()) {
 		Cursor = DefaultCursor;
 		switch (GetMouseCursor()) {
-		case 1: Cursor = ArrowCursor; break;
-		case 2: Cursor = SizeCursor; break;
-		case 3: Cursor = WaitCursor; break;
-		case 4:
-		case 5: break;
-		case 6: Cursor = HandCursor; break;
+		case CURSOR_ARROW: Cursor = ArrowCursor; break;
+		case CURSOR_SIZENS: Cursor = SizeCursor; break;
+		case CURSOR_WAIT: Cursor = WaitCursor; break;
+		case CURSOR_CROSSHAIR:
+		case CURSOR_DRAG: break;
+		case CURSOR_MAGNIFIER: Cursor = HandCursor; break;
 		default: return;
 		}
 	}

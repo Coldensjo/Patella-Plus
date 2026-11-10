@@ -94,7 +94,7 @@ TCallback NoCallback(nullptr, 0);
 // help bubble (9) follows the main window.
 void patella::TGUI::Resize(int Width, int Height)
 {
-	SetMouseCursor(1);
+	SetMouseCursor(CURSOR_ARROW);
 	if (GetViewMode() == 2) {
 		const TFullscreenMode *Mode = GetFullscreenMode();
 		Width = Mode->Width;
@@ -251,27 +251,27 @@ void patella::TGUI::Redraw(bool Force)
 			int x = GetMouseX();
 			int y = GetMouseY();
 			switch (Cursor) {
-			case 1:
+			case CURSOR_ARROW:
 				x -= SkinProperties().CursorHotspot1.x;
 				y -= SkinProperties().CursorHotspot1.y;
 				break;
-			case 2:
+			case CURSOR_SIZENS:
 				x -= SkinProperties().CursorHotspot2.x;
 				y -= SkinProperties().CursorHotspot2.y;
 				break;
-			case 3:
+			case CURSOR_WAIT:
 				x -= SkinProperties().CursorHotspot3.x;
 				y -= SkinProperties().CursorHotspot3.y;
 				break;
-			case 4:
+			case CURSOR_CROSSHAIR:
 				x -= SkinProperties().CursorHotspot4.x;
 				y -= SkinProperties().CursorHotspot4.y;
 				break;
-			case 5:
+			case CURSOR_DRAG:
 				x -= SkinProperties().CursorHotspot5.x;
 				y -= SkinProperties().CursorHotspot5.y;
 				break;
-			case 6:
+			case CURSOR_MAGNIFIER:
 				x -= SkinProperties().CursorHotspot6.x;
 				y -= SkinProperties().CursorHotspot6.y;
 				break;
@@ -322,7 +322,7 @@ void patella::TGUI::LeaveGame()
 void patella::TGUI::MouseMove(int x, int y)
 {
 	SetMousePosition(x, y);
-	SetMouseCursor(1);
+	SetMouseCursor(CURSOR_ARROW);
 	switch (GetActionState()) {
 	case 1:
 		CheckDragStart(x, y);
@@ -1162,7 +1162,7 @@ void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgra
 	ExitCallback = ExitProgram;
 	DisplayModeCallback = SetDisplayMode;
 	URLCallback = OpenURL;
-	SetMouseCursor(1);
+	SetMouseCursor(CURSOR_ARROW);
 	memset(Communication.LastPacketTypes.data(), 0, sizeof(patella::TCommunication::LastPacketTypes));
 	Communication.LastPacketIndex = 0;
 	Network.Reconnect = false;
