@@ -28,11 +28,6 @@
 // the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-// Characters owns its array as a std::unique_ptr<TCharacter[]> (issue #58): a pointer, as the original's.
-static_assert(sizeof(std::unique_ptr<TCharacter[]>) == sizeof(TCharacter *)
-		&& alignof(std::unique_ptr<TCharacter[]>) == alignof(TCharacter *),
-	"std::unique_ptr<TCharacter[]> is a pointer");
-
 // The data is TInteraction's (the user interaction, issue #107) and TSession's (the session, issue #105), both in
 // Status.h.
 

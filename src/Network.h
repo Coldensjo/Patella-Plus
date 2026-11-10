@@ -40,13 +40,6 @@ struct TServer {
 	bool Resolved;  // Address is a numeric IP address
 	int ErrorCode;  // last error for this server
 };
-// The original's layout (no pointers: the same on x64), with Address a TFixedString (issue #57).
-static_assert(IsFixedStringLayout<100>);
-static_assert(sizeof(TServer) == 0x70 && alignof(TServer) == 4, "TServer is 0x70 bytes");
-static_assert(offsetof(TServer, Address) == 0x00 && offsetof(TServer, Port) == 0x64
-		&& offsetof(TServer, Available) == 0x68 && offsetof(TServer, Resolved) == 0x69
-		&& offsetof(TServer, ErrorCode) == 0x6c,
-	"TServer's fields");
 
 namespace patella {
 
@@ -181,9 +174,10 @@ private:
 	TNetworkSession &Session;
 	platform::ISocket &Sockets;
 
-	// The arrays std::arrays (issue #60).
+	// Their sizes are byte counts: InitServerList clears Servers and PrepareNextPacket the header with a memset,
+	// OnReceive receives into what is left of ReceiveData.
 	static_assert(sizeof(Servers) == NUMBEROFSERVER * sizeof(TServer) && sizeof(ReceiveData) == 0x4000
-			&& sizeof(SendData) == 0x800 && sizeof(PacketHeader) == 16,
+			&& sizeof(PacketHeader) == 16,
 		"Network.cpp's arrays");
 };
 
@@ -209,7 +203,6 @@ int GetNextCommand();
 void CheckConnectionTimeout();
 // Message is the caller's new char[ERROR_MESSAGE_SIZE]: a fixed extent, passed as the pointer was (issue #69).
 void GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int ErrorCode, int ErrorType);
-static_assert(patella::IsSpanLayout<char, ERROR_MESSAGE_SIZE>, "a pointer's size: the golden tests' fakes take char *");
 const char *GetResolvedIPAddress();
 void Disconnect(bool force);
 void ConnectToLoginServer();

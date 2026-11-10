@@ -22,8 +22,6 @@ enum class TDeviceKind : int {
 	Gpu,       // a GPU only (GpuIndex: the n-th, -1 the best)
 	Cpu,       // the CPU driver only
 };
-static_assert(sizeof(TDeviceKind) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<TDeviceKind>, int>);
 
 struct TDeviceChoice {
 	TDeviceKind Kind = TDeviceKind::Automatic;
@@ -38,8 +36,6 @@ enum class TDeviceButton : int {
 	Gpu,
 	Cpu,
 };
-static_assert(sizeof(TDeviceButton) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<TDeviceButton>, int>);
 
 // "auto", "gpu", "gpu1", "gpu:1", "cpu", without regard to ASCII case or the spaces around it; nothing
 // for anything else (an empty text included).

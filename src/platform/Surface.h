@@ -34,8 +34,6 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	WINDOWED_MODE = 1,
 	FULLSCREEN_MODE = 2,
 };
-static_assert(sizeof(decltype(WINDOWED_MODE)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(WINDOWED_MODE)>, int>);
 
 // The surfaces of an engine, by index (the int Surface/ToSurface/FromSurface
 // arguments of the drawing slots). SPRITE_SURFACE is the first of the video
@@ -51,8 +49,6 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	AUTOMAP_SURFACE = 5,
 	SPRITE_SURFACE = 6,
 };
-static_assert(sizeof(decltype(PRIMARY_SURFACE)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(PRIMARY_SURFACE)>, int>);
 
 namespace patella::platform {
 

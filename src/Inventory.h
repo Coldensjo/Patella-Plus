@@ -92,12 +92,6 @@ private:
 public:
 	TOffer OwnOffer{};     // public: the golden Errors test
 	TOffer CounterOffer{}; // public: the golden Errors test
-
-private:
-	// The arrays std::arrays (issue #60): their sizes.
-	static_assert(sizeof(Body) == BODY_POSITIONS * sizeof(TObject)
-			&& sizeof(Containers) == OPEN_CONTAINERS * sizeof(TContainer),
-		"Body and Containers");
 };
 
 // The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the

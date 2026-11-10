@@ -34,27 +34,11 @@
 
 // Data: TGraphics' members since issue #116 (graphics.h), in the original's .bss order.
 
-// The six tables as std::unique_ptr (issue #58): each a pointer, as the original's. Their elements have no
+// The six tables are std::unique_ptrs (issue #58). Their elements have no
 // destructors that act (a picture's Offsets stays raw: ExitGraphics frees them first), so a table
 // still set when FatalError calls exit(1) is only memory freed during static destruction. Where the original stored a
 // new table over one it may still have held (InitMemoryCache, InitFonts, LoadSprites, LoadPictures, InitVideoCache;
 // the golden tests call them again), release() drops the old one unfreed first: the leak is the original's.
-static_assert(sizeof(std::unique_ptr<uint8[]>) == sizeof(uint8 *) && alignof(std::unique_ptr<uint8[]>) == alignof(uint8 *)
-		&& sizeof(std::unique_ptr<TVideoCacheItem[]>) == sizeof(TVideoCacheItem *)
-		&& sizeof(std::unique_ptr<TMemoryCacheItem[]>) == sizeof(TMemoryCacheItem *)
-		&& sizeof(std::unique_ptr<TSprite[]>) == sizeof(TSprite *) && sizeof(std::unique_ptr<TPicture[]>) == sizeof(TPicture *)
-		&& sizeof(std::unique_ptr<TFontInfo[]>) == sizeof(TFontInfo *),
-	"the graphics tables' std::unique_ptrs are pointers");
-
-// The arrays std::arrays (issue #60): the original's layouts (no pointers: the same on x64).
-static_assert(sizeof(TFontInfo) == 0x71c && offsetof(TFontInfo, Widths) == 0x010 && offsetof(TFontInfo, Heights) == 0x390
-		&& sizeof(TFontInfo::Widths) == 0x380,
-	"TFontInfo's layout");
-static_assert(sizeof(TVideoCacheItem) == 0x5c && offsetof(TVideoCacheItem, Colors) == 0x18 && sizeof(TVideoCacheItem::Colors) == 0x30,
-	"TVideoCacheItem's layout");
-static_assert(sizeof(patella::TGraphics::MemoryHashTable) == HASH_TABLE_SIZE * sizeof(int)
-		&& sizeof(patella::TGraphics::VideoHashTable) == HASH_TABLE_SIZE * sizeof(int),
-	"the hash tables");
 
 // Passed to the eh vector constructor iterator by InitVideoCache. It clears
 // the four colours, then the font colour, which overlaps them (the binary

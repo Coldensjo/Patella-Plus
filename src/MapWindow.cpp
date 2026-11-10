@@ -80,11 +80,6 @@ inline void Limit(int &Value, int Bound1, int Bound2)
 
 } // namespace
 
-// The arrays std::arrays (issue #60). TCacheField has no pointers (the same on x64); TMapWindow has a vtable.
-static_assert(sizeof(TCacheField) == 0x8c && offsetof(TCacheField, Sprite) == 0x0c && offsetof(TCacheField, SpriteX) == 0x34
-		&& offsetof(TCacheField, SpriteY) == 0x5c,
-	"TCacheField's layout");
-
 // A thrown error whose expression text is a bug number, like Map.cpp's
 // assertions ("unknown creature party flag", "[bug0001106]").
 #define TERROR1B(Message, V1, Bug) throw TMYEXCEPTION(Message, #V1, V1, "", 0, Bug)

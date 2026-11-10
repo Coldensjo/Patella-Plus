@@ -217,7 +217,7 @@ private:
 	TInventory &Inventory;
 	TLoginSignatures &Signatures; // issue #110
 
-	// LastPacketTypes a std::array (issue #60).
+	// Control.cpp clears LastPacketTypes with a memset over its size.
 	static_assert(sizeof(LastPacketTypes) == 10, "LastPacketTypes");
 };
 

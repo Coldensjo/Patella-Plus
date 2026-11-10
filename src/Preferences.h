@@ -69,7 +69,7 @@ struct TBuddy {
 	TFixedString<BUDDYDESCRIPTION_LENGTH> Description;
 	bool Notify;
 };
-// The original's layout (no pointers: the same on x64), with Description a TFixedString (issue #57).
+// AssignDescriptionRead writes through the entry's bytes from Description on: Notify and the padding follow it.
 static_assert(sizeof(TBuddy) == 0x8c && offsetof(TBuddy, Description) == 0x08 && offsetof(TBuddy, Notify) == 0x88,
 	"TBuddy's layout");
 
@@ -260,10 +260,8 @@ private:
 	// Not the original's: GetBuddyDescription's text, the entry's description with a NUL (issue #86).
 	TFixedString<BUDDYDESCRIPTION_LENGTH + 1> BuddyDescription{};
 
-	// The arrays std::arrays (issue #60).
-	static_assert(sizeof(SkillBars) == SKILLS && sizeof(BuddySortmethods) == 3 * sizeof(int)
-			&& sizeof(HotkeyAutoSend) == HOTKEYS && sizeof(Hotkeys) == HOTKEYS * HOTKEY_LENGTH,
-		"Preferences' arrays");
+	// SetDefaultPreferences clears HotkeyAutoSend with a memset over its size.
+	static_assert(sizeof(HotkeyAutoSend) == HOTKEYS, "HotkeyAutoSend");
 };
 
 // The transition's access path (issue #104; notes/decisions.md, "#104: TClient and the subsystem objects"): the

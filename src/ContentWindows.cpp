@@ -106,8 +106,8 @@ TCallback NoCallback(nullptr, 0);
 
 } // namespace
 
-// The texts TFixedStrings (issue #60).
-static_assert(sizeof(patella::bridge::GUI().AutomapMouseOverText) == 100 && sizeof(patella::bridge::GUI().SkillMouseOverText) == 256, "the mouse-over texts");
+// TSkillsWindowBody::MouseHover formats the skill's text with this size.
+static_assert(sizeof(patella::bridge::GUI().SkillMouseOverText) == 256, "the skill's mouse-over text");
 
 // --- The creators -----------------------------------------------------------------
 

@@ -30,28 +30,13 @@
 // the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-// TComponent::DrawingList as a std::unique_ptr<TDrawing[]> (issue #58): a pointer at the original's offset. The
+// TComponent::DrawingList is a std::unique_ptr<TDrawing[]> (issue #58). The
 // subclasses' constructors allocate it with reset(new TDrawing[n]) (each list is the first: TComponent's constructor
 // leaves it null, and no class allocates over a base's), ~TComponent frees it with reset() where the original had
 // delete[]; TDrawing's destructor is trivial, so the reset cannot throw.
-static_assert(sizeof(std::unique_ptr<TDrawing[]>) == sizeof(TDrawing *)
-		&& alignof(std::unique_ptr<TDrawing[]>) == alignof(TDrawing *),
-	"std::unique_ptr<TDrawing[]> is a pointer");
 
 // The data of .bss (NumberOfHotkeys, Timers, Hotkeys, UpdateTimers' static LastTime) is TGUI's (GUI.h, issue #107);
 // SkinProperties is TGraphics' TSkins' (Skins.h, issue #116), which InitSkinProperties below fills.
-
-// The skins' arrays std::arrays (issue #60): the original's layouts (no pointers: the same on x64).
-static_assert(sizeof(TInventoryViewProperties) == 0x158 && offsetof(TInventoryViewProperties, Objects) == 0x10
-		&& offsetof(TInventoryViewProperties, Slots) == 0x60 && offsetof(TInventoryViewProperties, EmptySlotSkins) == 0x100,
-	"TInventoryViewProperties's layout");
-static_assert(sizeof(TDialogProperties) == 0x8c && offsetof(TDialogProperties, Buttons) == 0x2c, "TDialogProperties's layout");
-static_assert(sizeof(TEditBuddyDialogProperties) == 0xc0 && offsetof(TEditBuddyDialogProperties, IconButtons) == 0x38, "TEditBuddyDialogProperties's layout");
-static_assert(sizeof(TCombatControlsProperties) == 0x50 && offsetof(TCombatControlsProperties, Buttons) == 0x08,
-	"TCombatControlsProperties' layout");
-static_assert(sizeof(TSkinProperties) == 0x1528 && offsetof(TSkinProperties, OutfitDialogPartButtons) == 0xc88
-		&& offsetof(TSkinProperties, EditMarkDialogTypeButtons) == 0x1204,
-	"TSkinProperties' layout");
 
 int TTimer::GetTime() const
 {
@@ -76,17 +61,6 @@ TComponent::~TComponent()
 
 static_assert(std::is_nothrow_destructible_v<TComponent> && std::is_nothrow_destructible_v<TWindow>,
 	"issue #108: the window classes' destructors are noexcept");
-// offsetof of a class with virtual functions: conditionally supported, and supported by every compiler here (GCC's
-// and Clang's -Winvalid-offsetof, issue #111).
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winvalid-offsetof"
-#endif
-static_assert(sizeof(void *) != 8 || (sizeof(TComponent) == 56 && offsetof(TComponent, Parent) == 24),
-	"issue #108: Closed is in the padding after DrawingListLength, TComponent's x64 layout unchanged");
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 
 // Issue #108 (not in the original). Closed is set first: a close that throws is
 // not run again, as the original's destructor was not.

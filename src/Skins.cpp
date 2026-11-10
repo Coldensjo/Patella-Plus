@@ -19,10 +19,8 @@
 // GUI.cpp's SkinProperties. The original's free functions InitSkins and ExitSkins forward to the members from
 // graphics.cpp (the client's; this file is patella_core's, which has no bridge).
 
-// The table as a std::unique_ptr (issue #58): a pointer, as the original's. TSkin has no destructor, so a table
+// The table is a std::unique_ptr (issue #58). TSkin has no destructor, so a table
 // still set when FatalError calls exit(1) is only memory freed during static destruction.
-static_assert(sizeof(std::unique_ptr<TSkin[]>) == sizeof(TSkin *) && alignof(std::unique_ptr<TSkin[]>) == alignof(TSkin *),
-	"std::unique_ptr<TSkin[]> is a pointer");
 
 // Fills the rectangles of the GUI graphics in Tibia.pic. The table is a local
 // array, so it is written to the stack on every call (12,506 bytes of code).

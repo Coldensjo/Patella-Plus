@@ -4,9 +4,8 @@
 //
 // TFixedString<N> is exactly char[N]: its only member is that array, so it has the array's size and alignment
 // (1), it is standard layout, trivially copyable and an aggregate (no constructor: a local is as uninitialised as
-// the array was, `= {}` zeroes it, `= {"Text"}` initialises it from a literal). A char[N] member of a frozen
-// structure becomes a TFixedString<N> without moving anything (plan, section 2, rule 4: each structure checks it
-// with static_asserts in the oracle build; IsFixedStringLayout<N> below for the type itself).
+// the array was, `= {}` zeroes it, `= {"Text"}` initialises it from a literal). IsFixedStringLayout<N> below
+// checks it.
 //
 // It converts to char * and const char * as the array did, so the code that reads it (strlen, strcmp, the error
 // macros' expressions, whose text must not change until M5: `strlen(Address)<100`) stays as it is. Never pass it
@@ -193,7 +192,8 @@ struct TFixedString {
 	}
 };
 
-// The layout the frozen structures rely on: exactly char[N].
+// The layout the code relies on, exactly char[N]: sizeof is the capacity, and a fixed string is cleared and
+// copied as bytes, alone and inside the structures that hold one.
 template <std::size_t N>
 inline constexpr bool IsFixedStringLayout = sizeof(TFixedString<N>) == N && alignof(TFixedString<N>) == 1
 	&& std::is_standard_layout_v<TFixedString<N>> && std::is_trivially_copyable_v<TFixedString<N>>

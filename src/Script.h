@@ -25,7 +25,7 @@ inline constexpr int MAX_IDENT_LENGTH = 20;    // "identifier too long"
 inline constexpr int MAX_STRING_LENGTH = 1000; // "string too long" at 999 characters
 
 // The kind of the current token (TReadScriptFile::Token). Only assigned and
-// compared, so it is scoped (issue #37); int as before, the member's 4 bytes.
+// compared, so it is scoped (issue #37).
 enum class TOKEN : int {
 	ENDOFFILE,
 	IDENTIFIER,
@@ -35,8 +35,6 @@ enum class TOKEN : int {
 	COORDINATE, // "[x,y,z]"
 	SPECIAL,    // any other character; "<=" 'L', ">=" 'G', "<>" 'N', "->" 'I'
 };
-static_assert(sizeof(TOKEN) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<TOKEN>, int>);
 
 class TReadScriptFile {
 public:
@@ -161,5 +159,3 @@ public:
 	TFile File;
 	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason, frozen until M5 (issue #60)
 };
-
-// The FILE * members are TFiles (issue #64): the same 4 bytes in the original's layout.

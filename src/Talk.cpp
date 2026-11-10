@@ -36,11 +36,6 @@ const char *TextPermanentlyIgnoring = "You are permanently ignoring players."; /
 
 // The data is TTalk's (Talk.h, issue #107).
 
-static_assert(sizeof(TTalkbox) == 0x1c0, "talkbox layout");
-static_assert(offsetof(TTalkbox, Text) == 0x20 && offsetof(TTalkbox, Left) == 0x1b0, "talkbox lines (TFixedString, issue #57)");
-// No pointers: the same on x64. Text a std::array of TFixedStrings (issue #60).
-static_assert(sizeof(TTalkbox) == 0x1c0 && offsetof(TTalkbox, Text) == 0x20 && sizeof(TTalkbox::Text) == 0x190,
-	"TTalkbox's layout");
 static_assert(sizeof(TTalkLine::Time) == 4, "statement time: the original's 4 bytes (Time32, issue #62)");
 
 bool patella::TTalk::TakeTalkChanged()

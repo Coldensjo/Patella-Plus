@@ -360,7 +360,7 @@ struct TIgnoreEntry {
 	TFixedString<30> Name;
 	bool Permanent;
 };
-// The original's layout (no pointers: the same on x64), with Name a TFixedString (issue #57).
+// AssignName writes through the entry's bytes: the name first, Permanent right after it, and nothing else.
 static_assert(sizeof(TIgnoreEntry) == 0x1f && offsetof(TIgnoreEntry, Name) == 0 && offsetof(TIgnoreEntry, Permanent) == 0x1e,
 	"TIgnoreEntry's layout");
 

@@ -17,11 +17,8 @@ constexpr auto BPU = 8 * sizeof(unsigned); // bits per unit (size_t, as the macr
 #define hi(x) ((x) >> (BPU / 2))
 #define lh(x) ((x) << (BPU / 2))
 
-// flex_unit::a as a std::unique_ptr<unsigned[]> (issue #58): a pointer at the original's offset. reserve() frees the
+// flex_unit::a is a std::unique_ptr<unsigned[]> (issue #58): reserve() frees the
 // old block (reset()) before it moves the new one in, the destructor frees it where the original had delete[].
-static_assert(sizeof(std::unique_ptr<unsigned[]>) == sizeof(unsigned *)
-		&& alignof(std::unique_ptr<unsigned[]>) == alignof(unsigned *),
-	"std::unique_ptr<unsigned[]> is a pointer");
 
 void flex_unit::reserve(unsigned x)
 {

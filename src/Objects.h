@@ -94,8 +94,6 @@ enum : int {  // NOLINT(cppcoreguidelines-use-enum-class): int constants ("The o
 	LENSHELP = 29, // reads LensHelp
 	FULLBANK = 30, // ours: a ground that covers the whole field; MapWindow.cpp hides the levels below
 };
-static_assert(sizeof(decltype(BANK)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(BANK)>, int>);
 
 // One Tibia.dat entry; the same layout serves objects, outfits,
 // effects and missiles.

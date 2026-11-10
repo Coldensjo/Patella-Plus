@@ -1,9 +1,7 @@
 // File.h: TFile, the client's open files (the C library's FILE *) with an owner. Patella-Modern issue #64
 // (notes/modernization-plan.md, section 7, M4: "an RAII TFile instead of FILE *"). Not part of the original source.
 //
-// TFile is exactly a FILE *: its only member is the pointer, so it has the pointer's size and alignment and a
-// FILE * member of a frozen structure (Script.h's four file classes) becomes a TFile without moving anything
-// (IsFileLayout below; the classes check it in the oracle build). It closes its file when it is destroyed, it
+// TFile holds a FILE *, its only member. It closes its file when it is destroyed, it
 // moves but does not copy, and it compares with nullptr (and NULL) as the pointer did, so the conditions the
 // original wrote (`File != NULL`, the assertion `F!=NULL`) stay as they were.
 //
@@ -317,8 +315,3 @@ private:
 	}
 #endif
 };
-
-// The layout the frozen structures rely on: exactly a FILE *.
-inline constexpr bool IsFileLayout = sizeof(TFile) == sizeof(std::FILE *) && alignof(TFile) == alignof(std::FILE *)
-	&& std::is_standard_layout_v<TFile>;
-static_assert(IsFileLayout);

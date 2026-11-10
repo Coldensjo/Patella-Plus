@@ -43,14 +43,10 @@ enum TALK_MODE : int { // NOLINT(cppcoreguidelines-use-enum-class): int constant
 	TALK_RED_CONSOLE_MESSAGE = 25,  // in the console only, in red
 	TALK_MODE_BEYONDLAST = 27
 };
-static_assert(sizeof(TALK_MODE) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<TALK_MODE>, int>);
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants ("The other ten stay unscoped")
 	TALKBOXES = 10,
 	STATUSMESSAGE_LENGTH = 512,
 };
-static_assert(sizeof(decltype(TALKBOXES)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(TALKBOXES)>, int>);
 struct TTalkbox {
 	int State, Order, RemainingTime, Mode;
 	int x, y, z, Lines;
@@ -316,8 +312,6 @@ private:
 	TIndexedVector<TTalkFilter *> ConsoleFilterList{0, 4, 5, nullptr};
 	int LastTime{};     // UpdateTalkboxes' static
 	bool LastTimeSet{}; // its guard
-
-	static_assert(sizeof(Talkboxes) == TALKBOXES * sizeof(TTalkbox), "Talkboxes");
 };
 
 // The transition's access path (issue #107; notes/decisions.md, "#104: TClient and the subsystem objects"): the one

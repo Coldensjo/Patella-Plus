@@ -17,8 +17,6 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	CENTER_ALIGN = 1,
 	RIGHT_ALIGN = 2,
 };
-static_assert(sizeof(decltype(LEFT_ALIGN)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(LEFT_ALIGN)>, int>);
 
 // --- Graphics types -----------------------------------------------------------
 // The types of the drawing interface, used by every window file (GUI.h

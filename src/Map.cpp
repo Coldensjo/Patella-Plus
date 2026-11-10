@@ -33,10 +33,6 @@
 // The initialisers of Fields, FieldNumber and AutomapBlocks are the members'.
 patella::TMap::TMap(TObjectTypes &ObjectTypesRef, TMapConsole &ConsoleRef) : ObjectTypes(ObjectTypesRef), Console(ConsoleRef) {}
 
-// TMark's arrays std::arrays and its Text a TFixedString (issue #60), no pointers: the same on x64. TMapPoint's layout
-// is free since issue #102 (MapPoint.h: its objects a TStaticVector).
-static_assert(sizeof(TMark) == 0x70 && offsetof(TMark, Text) == 0x0c && sizeof(TMark::Text) == 100, "TMark's layout");
-
 // --- Position (the MainWindow/Map gap) ------------------------------------
 
 void patella::TMap::SetMapPosition(int x, int y, int z)

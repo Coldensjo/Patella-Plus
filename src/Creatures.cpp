@@ -28,18 +28,7 @@
 
 // The data is TCreatures' and TPlayerState's (Creatures.h, issue #106).
 
-static_assert(sizeof(TCreature) == 0x9c, "TCreature is 0x9c bytes");
-static_assert(offsetof(TCreature, SkullTime) == 0x98 && sizeof(TCreature::SkullTime) == 4, "TCreature's 4-byte skull time (Time32, issue #62)");
-static_assert(sizeof(TBuddyEntry) == 0x2c, "TBuddyEntry is 0x2c bytes");
-// Name a TFixedString (issue #57): the original's offsets.
-static_assert(offsetof(TBuddyEntry, Name) == 0x04 && offsetof(TBuddyEntry, Online) == 0x22
-		&& offsetof(TBuddyEntry, LoginAction) == 0x24 && offsetof(TBuddyEntry, Icon) == 0x28,
-	"TBuddyEntry's fields");
-// Name a TFixedString and Colors a std::array (issue #60); the globals std::arrays.
-static_assert(offsetof(TCreature, Name) == 0x04 && sizeof(TCreature::Name) == 32 && offsetof(TCreature, Colors) == 0x64
-		&& sizeof(TCreature::Colors) == 16,
-	"TCreature's arrays");
-// The globals' arrays: TCreatures' and TPlayerState's static_asserts (Creatures.h).
+static_assert(sizeof(TCreature::SkullTime) == 4, "TCreature's 4-byte skull time (Time32, issue #62)");
 
 patella::TCreatures::TCreatures(TCreaturesPlayer &PlayerStateRef, TCreaturesGUI &GUIRef)
 	: PlayerState(PlayerStateRef), GUI(GUIRef)

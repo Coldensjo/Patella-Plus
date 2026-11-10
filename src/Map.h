@@ -81,10 +81,6 @@ struct TEffect {
 #pragma GCC diagnostic pop
 #endif
 PATELLA_MSVC_WARNING(pop)
-// The original's layout (no pointers: the same on x64), with Text a TFixedString (issue #57).
-static_assert(sizeof(TEffect) == 0x44 && offsetof(TEffect, Text) == 0x08 && offsetof(TEffect, TextPhase) == 0x14
-		&& offsetof(TEffect, Field) == 0x38,
-	"TEffect's layout");
 
 // An automap mark. The constructor clears it.
 struct TMark {
@@ -329,8 +325,6 @@ private:
 	std::array<TAutomapBlock, AUTOMAP_BLOCKS> AutomapBlocks;
 	TRGBColor AmbienteColor;
 	TRGBColor AmbienteActualColor;
-
-	static_assert(sizeof(AutomapBlocks) == AUTOMAP_BLOCKS * sizeof(TAutomapBlock), "AutomapBlocks");
 };
 
 // The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the map

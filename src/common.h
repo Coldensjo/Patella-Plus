@@ -98,15 +98,12 @@ enum class PROGRAM_ERROR : int {
 	AUTOMAP_SURFACE = 17,
 	SPRITE_SURFACE = 18,
 };
-static_assert(sizeof(PROGRAM_ERROR) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<PROGRAM_ERROR>, int>);
 
 // A thrown PROGRAM_ERROR (issue #80). Caught by reference: catch (const
-// TProgramError &Error), Error.Code. The size of the original's thrown enum.
+// TProgramError &Error), Error.Code.
 struct TProgramError {
 	PROGRAM_ERROR Code;
 };
-static_assert(sizeof(TProgramError) == sizeof(PROGRAM_ERROR) && std::is_trivially_copyable_v<TProgramError>);
 
 // The assertions: PATELLA_ASSERT and PATELLA_ASSERT_VALUES (Patella-Modern issue
 // #79; until then three macros here, which named the original's line).

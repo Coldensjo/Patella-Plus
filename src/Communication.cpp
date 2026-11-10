@@ -61,10 +61,6 @@ patella::TCommunication::TCommunication(TNetwork &NetworkRef, TMapState &MapStat
 {
 }
 
-static_assert(offsetof(TCreature, Direction) == 0x50, "creature direction");
-static_assert(offsetof(TCreature, OutfitType) == 0x60, "creature outfit");
-static_assert(offsetof(TCreature, PKFlag) == 0x90, "creature skull");
-
 // Called by InitControl. The original cleared the patch transfer's buffer; since issue #75 (the patcher
 // removed) there is nothing left to set up.
 void patella::TCommunication::InitCommunication()

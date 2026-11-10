@@ -16,11 +16,6 @@
 #include "common.h"
 #include <memory>
 
-// The tables as std::unique_ptr (issue #58): each a pointer, as the original's.
-static_assert(sizeof(std::unique_ptr<array<TProperties>>) == sizeof(array<TProperties> *)
-		&& alignof(std::unique_ptr<array<TProperties>>) == alignof(array<TProperties> *),
-	"std::unique_ptr<array<TProperties>> is a pointer");
-
 // The data is TObjectTypes' (Objects.h, issue #106).
 
 namespace {

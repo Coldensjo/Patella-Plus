@@ -31,8 +31,6 @@
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): an int constant, as in platform/Surface.h
 	NUMBER_OF_SURFACES_VULKAN = 22
 };
-static_assert(sizeof(decltype(NUMBER_OF_SURFACES_VULKAN)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(NUMBER_OF_SURFACES_VULKAN)>, int>);
 
 class TSurfaceVulkan final : public TSurface {
 public:

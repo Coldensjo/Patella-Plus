@@ -44,8 +44,6 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class)
 	SPRITE_ITEM = 1,
 	PICTURE_ITEM = 2,
 };
-static_assert(sizeof(decltype(EMPTY_ITEM)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(EMPTY_ITEM)>, int>);
 
 // A sprite of Tibia.spr. Offset 0 is an empty sprite.
 struct TSprite {
@@ -277,7 +275,6 @@ void DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor High
 // Colors: the four outfit colours (TCreature::Colors); a fixed extent, passed as the pointer was (issue #69).
 void DrawOutfit(int Surface, int x, int y, int Size, int OutfitNumber, patella::TSpan<const int, 4> Colors,
 	TRGBColor Highlight, TRect Clip, TFont Font);
-static_assert(patella::IsSpanLayout<const int, 4>, "a pointer's size: the golden tests' fakes take int *");
 
 // Pictures.
 void DrawPicture(int Surface, int x, int y, int PictureNumber);

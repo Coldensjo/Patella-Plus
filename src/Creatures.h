@@ -259,10 +259,8 @@ private:
 	int FirstOpponent{};
 	std::array<TCreature, CREATURES> Creatures{};
 
-	// The arrays std::arrays (issue #60).
-	static_assert(sizeof(BuddySortMethods) == 3 * sizeof(int) && sizeof(Buddies) == BUDDIES * sizeof(TBuddyEntry)
-			&& sizeof(Creatures) == CREATURES * sizeof(TCreature),
-		"TCreatures' arrays");
+	// ResetCreatures clears the table with a memset over its size.
+	static_assert(sizeof(Creatures) == CREATURES * sizeof(TCreature), "Creatures");
 };
 
 // Creatures.cpp's player state (Patella-Modern issue #106; notes/decisions.md, "#104" and "#106"): PlayerID, the
@@ -372,10 +370,8 @@ private:
 	int PlayerStepDY{};        // the step sent but not confirmed by the server
 	int PlayerStepDX{};
 
-	// The arrays std::arrays (issue #60).
-	static_assert(sizeof(PlayerSkillProgress) == SKILLS * sizeof(int) && sizeof(PlayerSkillValue) == SKILLS * sizeof(int)
-			&& sizeof(PlayerSteps) == 10 * sizeof(int),
-		"TPlayerState's arrays");
+	// TMap::FindPath writes up to ten steps into PlayerSteps through a pointer.
+	static_assert(sizeof(PlayerSteps) == 10 * sizeof(int), "PlayerSteps");
 };
 
 // The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the

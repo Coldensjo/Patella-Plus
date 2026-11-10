@@ -52,10 +52,6 @@ struct TCharacter {
 	TFixedString<16> IPAddress; // dotted text
 	int Port;
 };
-// The original's layout (no pointers: the same on x64), with the names TFixedStrings (issue #57).
-static_assert(sizeof(TCharacter) == 0x54 && offsetof(TCharacter, World) == 0x1e && offsetof(TCharacter, IP) == 0x3c
-		&& offsetof(TCharacter, IPAddress) == 0x40 && offsetof(TCharacter, Port) == 0x50,
-	"TCharacter's layout");
 
 namespace patella {
 
@@ -114,10 +110,8 @@ private:
 	int AccountNumber{};
 	int ConnectionState{}; // see SetConnectionState
 
-	// The arrays std::arrays and TFixedStrings (issue #60).
-	static_assert(sizeof(Rights) == RIGHT_ANY * sizeof(int) && sizeof(AccountPassword) == 30
-			&& sizeof(AccountNumberString) == 12,
-		"Status.cpp's arrays");
+	// SetAccount copies up to 30 bytes of the password and ends the number's text at its twelfth byte.
+	static_assert(sizeof(AccountPassword) == 30 && sizeof(AccountNumberString) == 12, "SetAccount's buffers");
 };
 
 // Status.cpp's user interaction (issue #107): the globals that are not the session's are the

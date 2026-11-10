@@ -125,9 +125,6 @@ private:
 	// appends at its count and pops at 0, read below the count only, so a std::vector (issue #100).
 	std::vector<int> EventHelps;
 	TFixedString<2048> HelpText{};
-
-	// HelpText a TFixedString (issue #60).
-	static_assert(sizeof(HelpText) == 2048, "HelpText");
 };
 
 // The transition's access path (issue #107; notes/decisions.md, "#104: TClient and the subsystem objects"): the one
