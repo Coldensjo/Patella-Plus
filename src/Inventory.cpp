@@ -245,7 +245,7 @@ TObject patella::TInventory::GetCounterOfferObject(int Position) const
 	return CounterOffer.Objects[Position];
 }
 
-void patella::TInventory::InitInventory()
+void patella::TInventory::Init()
 {
 	ClearBody();
 	for (int i = 0; i < OPEN_CONTAINERS; i++)
@@ -254,12 +254,12 @@ void patella::TInventory::InitInventory()
 	CounterOffer.Count = 0;
 }
 
-void patella::TInventory::ResetInventory()
+void patella::TInventory::Reset()
 {
-	InitInventory();
+	Init();
 }
 
 // Empty. ExitControl calls it where Inventory.cpp's exit belongs in the reverse order of InitControl.
-void patella::TInventory::ExitInventory()
+void patella::TInventory::Exit()
 {
 }

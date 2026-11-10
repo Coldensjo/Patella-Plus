@@ -257,7 +257,7 @@ void patella::TGUI::EnterGame()
 		MainWindow->SetConsoleActive(true);
 	}
 	Map().Clear();
-	Inventory().InitInventory();
+	Inventory().Init();
 	Creatures().Reset();
 	Talk.Reset();
 	Talk.ShowPermanentIgnoreWarning();
@@ -1124,7 +1124,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		InitSysinc();
 		ObjectTypes().Init();
 		Map().Init([](int CreatureID) { Creatures().HideCreature(CreatureID); });
-		Inventory().ResetInventory();
+		Inventory().Reset();
 		Creatures().Init();
 		::Interaction().InitStatus(Gamemaster, LinkCopyWarning);
 		::Help().Init();
@@ -1167,7 +1167,7 @@ void patella::TGUI::ExitControl()
 	::Help().Exit();
 	::Interaction().ExitStatus();
 	Creatures().Exit();
-	Inventory().ExitInventory();
+	Inventory().Exit();
 	Map().Exit();
 	ObjectTypes().Exit();
 	ExitSysinc();

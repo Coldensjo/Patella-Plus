@@ -72,9 +72,9 @@ public:
 	char *GetCounterOfferName();
 	[[nodiscard]] TObject GetOwnOfferObject(int Position) const;
 	[[nodiscard]] TObject GetCounterOfferObject(int Position) const;
-	void InitInventory();
-	void ResetInventory();
-	static void ExitInventory();
+	void Init();
+	void Reset();
+	static void Exit();
 
 private:
 	TObjectTypes &ObjectTypes;
