@@ -1124,7 +1124,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 {
 	try {
 		InitSysinc();
-		InitObjects();
+		ObjectTypes().InitObjects();
 		Map().InitMap([](int CreatureID) { Creatures().HideCreature(CreatureID); });
 		Inventory().ResetInventory();
 		Creatures().InitCreatures();
@@ -1170,7 +1170,7 @@ void patella::TGUI::ExitControl()
 	Creatures().ExitCreatures();
 	Inventory().ExitInventory();
 	Map().ExitMap();
-	ExitObjects();
+	ObjectTypes().ExitObjects();
 	ExitSysinc();
 }
 

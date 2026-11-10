@@ -768,24 +768,25 @@ void patella::TGraphics::DrawObject(int Surface, int x, int y, int Size, TObject
 		return;
 	int PatternX = 1;
 	int PatternY = 1;
-	if (GetObjectFlag(Obj.Type, CUMULATIVE))
-		GetCumulativePattern(Obj, &PatternX, &PatternY);
-	if (GetObjectFlag(Obj.Type, LIQUIDPOOL) || GetObjectFlag(Obj.Type, LIQUIDCONTAINER))
-		GetLiquidPattern(Obj, &PatternX, &PatternY);
+	if (ObjectTypes().GetObjectFlag(Obj.Type, CUMULATIVE))
+		ObjectTypes().GetCumulativePattern(Obj, &PatternX, &PatternY);
+	if (ObjectTypes().GetObjectFlag(Obj.Type, LIQUIDPOOL) || ObjectTypes().GetObjectFlag(Obj.Type, LIQUIDCONTAINER))
+		ObjectTypes().GetLiquidPattern(Obj, &PatternX, &PatternY);
 	const int Action = GetActionNumber();
-	const int Phase = Action / 5 % PATELLA_DIVISOR(GetObjectPhases(Obj.Type)) + 1;
-	const int Scale = Size * 32 / PATELLA_DIVISOR(GetObjectExactSize(Obj.Type));
-	for (int Layer = 1; Layer <= GetObjectLayers(Obj.Type); Layer++) {
-		for (int px = 1; px <= GetObjectWidth(Obj.Type); px++) {
-			for (int py = 1; py <= GetObjectHeight(Obj.Type); py++) {
-				const int SpriteNumber = GetObjectSpriteNumber(Obj.Type, px, py, Layer, PatternX, PatternY, 1,
+	const int Phase = Action / 5 % PATELLA_DIVISOR(ObjectTypes().GetObjectPhases(Obj.Type)) + 1;
+	const int Scale = Size * 32 / PATELLA_DIVISOR(ObjectTypes().GetObjectExactSize(Obj.Type));
+	for (int Layer = 1; Layer <= ObjectTypes().GetObjectLayers(Obj.Type); Layer++) {
+		for (int px = 1; px <= ObjectTypes().GetObjectWidth(Obj.Type); px++) {
+			for (int py = 1; py <= ObjectTypes().GetObjectHeight(Obj.Type); py++) {
+				const int SpriteNumber = ObjectTypes().GetObjectSpriteNumber(Obj.Type, px, py, Layer, PatternX,
+					PatternY, 1,
 					Phase);
 				DrawSpriteScaled(Surface, x - px * Scale + Size, y - py * Scale + Size, Scale, Scale,
 					SpriteNumber, Highlight, Clip);
 			}
 		}
 	}
-	if (GetObjectFlag(Obj.Type, CUMULATIVE) && (Obj.Data > 1 || ShowCount)) {
+	if (ObjectTypes().GetObjectFlag(Obj.Type, CUMULATIVE) && (Obj.Data > 1 || ShowCount)) {
 		TFixedString<4> Count; // the count, a byte of the server (three digits)
 		Count.Format("{}", Obj.Data);
 		const int Height = GetTextHeight(Font.FontNumber, Count);
@@ -817,13 +818,13 @@ void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int Out
 	OutfitColors[2] = TRGBColor(R, G, B);
 	GetOutfitColor(Colors[3], &R, &G, &B);
 	OutfitColors[3] = TRGBColor(R, G, B);
-	const int Scale = Size * 32 / PATELLA_DIVISOR(GetOutfitExactSize(OutfitNumber));
-	for (int px = 1; px <= GetOutfitWidth(OutfitNumber); px++) {
-		for (int py = 1; py <= GetOutfitHeight(OutfitNumber); py++) {
-			const int SpriteNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 1, DIRECTION_SOUTH, 1);
+	const int Scale = Size * 32 / PATELLA_DIVISOR(ObjectTypes().GetOutfitExactSize(OutfitNumber));
+	for (int px = 1; px <= ObjectTypes().GetOutfitWidth(OutfitNumber); px++) {
+		for (int py = 1; py <= ObjectTypes().GetOutfitHeight(OutfitNumber); py++) {
+			const int SpriteNumber = ObjectTypes().GetOutfitSpriteNumber(OutfitNumber, px, py, 1, DIRECTION_SOUTH, 1);
 			int MaskNumber;
-			if (GetOutfitLayers(OutfitNumber) == 2)
-				MaskNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 2, DIRECTION_SOUTH, 1);
+			if (ObjectTypes().GetOutfitLayers(OutfitNumber) == 2)
+				MaskNumber = ObjectTypes().GetOutfitSpriteNumber(OutfitNumber, px, py, 2, DIRECTION_SOUTH, 1);
 			else
 				MaskNumber = 0;
 			DrawMaskedSpriteScaled(Surface, x - px * Scale + Size, y - py * Scale + Size, Scale, Scale,

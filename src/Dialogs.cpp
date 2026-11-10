@@ -291,7 +291,8 @@ TDialog *CreateTextDialog(const int *ObjectData, const char *Author, const char 
 	Description[0] = 0;
 	TTextDialog *Body;
 	TDialog *Dialog;
-	if (GetObjectFlag(Type, WRITE) || (GetObjectFlag(Type, WRITEONCE) && strlen(Text) == 0)) {
+	if (ObjectTypes().GetObjectFlag(Type, WRITE)
+		|| (ObjectTypes().GetObjectFlag(Type, WRITEONCE) && strlen(Text) == 0)) {
 		if (strlen(Text) == 0)
 			TStringBuffer(Description, 255).Format("{}\n{}", TextItIsCurrentlyEmpty, TextYouCanEnterNewText);
 		else if (strlen(Author) != 0)
@@ -1023,8 +1024,8 @@ void TMoveObjectsDialog::Draw(int Surface, int x, int y)
 	DraggedObject.Data = ScrollBar->Range->Value;
 	int PatternX = 1;
 	int PatternY = 1;
-	if (GetObjectFlag(DraggedObject, CUMULATIVE))
-		GetCumulativePattern(DraggedObject, &PatternX, &PatternY);
+	if (ObjectTypes().GetObjectFlag(DraggedObject, CUMULATIVE))
+		ObjectTypes().GetCumulativePattern(DraggedObject, &PatternX, &PatternY);
 	DrawObject(Surface, SkinProperties().MoveObjectsDialogObject.x + x, SkinProperties().MoveObjectsDialogObject.y + y, 32, DraggedObject,
 		TRGBColor(0, 0, 0), TRect(SkinProperties().MoveObjectsDialogObject.x + x, SkinProperties().MoveObjectsDialogObject.y + y, 32, 32),
 		SkinProperties().ObjectCountFont, true);
@@ -1185,7 +1186,8 @@ TTextDialog::TTextDialog(int MaximumLength, const char *Text, uint32 _ObjectNumb
 	ObjectNumber = _ObjectNumber;
 	Obj = _Obj;
 	TComponent::SetSize(SkinProperties().TextDialogWidth, SkinProperties().TextDialogHeight);
-	const bool ReadOnly = !GetObjectFlag(Obj, WRITE) && !(GetObjectFlag(Obj, WRITEONCE) && strlen(Text) == 0);
+	const bool ReadOnly = !ObjectTypes().GetObjectFlag(Obj, WRITE)
+		&& !(ObjectTypes().GetObjectFlag(Obj, WRITEONCE) && strlen(Text) == 0);
 	EditText = new TEditText(MaximumLength, ReadOnly);
 	InsertChild(EditText);
 	SetChildArea(EditText, SkinProperties().TextDialogText);

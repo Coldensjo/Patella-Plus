@@ -989,7 +989,8 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 		&& In(y - SkinProperties().SmallInventoryDropArea.y, 0, SkinProperties().SmallInventoryDropArea.height - 1) && Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 		int Index, SrcX, SrcY, SrcZ;
 		const TObject *Obj = Interaction().GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
-		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+		if (!ObjectTypes().GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2
+			|| (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, 1);
 		} else if (AsksForCount(Flags)) {
 			Interaction().SetDragTarget(POSITION_NOT_ON_MAP, 0, 0);
@@ -1111,7 +1112,7 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 			int DragIndex, DragX, DragY, DragZ;
 			const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != POSITION_NOT_ON_MAP || DragY != Slot) {
-				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+				if (!ObjectTypes().GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Slot, 0, 1);
 				} else if (AsksForCount(Flags)) {
 					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Slot, 0);
@@ -1151,7 +1152,7 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) != 0)
 					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
-				else if (GetObjectFlag(Obj->Type, MULTIUSE))
+				else if (ObjectTypes().GetObjectFlag(Obj->Type, MULTIUSE))
 					AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
 					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, Inventory().GetFreeContainer());
@@ -1160,7 +1161,7 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) == 0)
 					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
-				else if (GetObjectFlag(Obj->Type, MULTIUSE))
+				else if (ObjectTypes().GetObjectFlag(Obj->Type, MULTIUSE))
 					AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
 					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, Inventory().GetFreeContainer());
@@ -1558,7 +1559,7 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 			int DragIndex, DragX, DragY, DragZ;
 			const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != POSITION_NOT_ON_MAP || DragY != Container + POSITION_CONTAINER_BASE || DragZ != Position) {
-				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+				if (!ObjectTypes().GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						1);
 				} else if (AsksForCount(Flags)) {
@@ -1598,7 +1599,7 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
 			else if ((Flags & KEY_CONTROL) != 0)
 				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
-			else if (GetObjectFlag(Obj.Type, MULTIUSE))
+			else if (ObjectTypes().GetObjectFlag(Obj.Type, MULTIUSE))
 				AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
 				SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
@@ -1607,7 +1608,7 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
 			else if ((Flags & KEY_CONTROL) == 0)
 				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
-			else if (GetObjectFlag(Obj.Type, MULTIUSE))
+			else if (ObjectTypes().GetObjectFlag(Obj.Type, MULTIUSE))
 				AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
 				SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);

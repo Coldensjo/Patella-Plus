@@ -172,7 +172,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
 		Map().MapToWorld(&DestX, &DestY, &DestZ);
 		if (DragX != DestX || DragY != DestY || DragZ != DestZ) {
-			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
+			if (ObjectTypes().GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
 				// Patella-Plus, the option Drag Full Stacks: with it a pile moves whole without Ctrl and asks for the
 				// count with it, as on a slot (AsksForCount in ContentWindows.cpp).
 				if (((Flags & KEY_CONTROL) != 0) != GetDragFullStacks()) {
@@ -255,7 +255,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		const uint32 Target = Interaction().GetTradeInfo();
 		TObject &UseObj = *Interaction().GetUseObject(&Index, &ox, &oy, &oz);
 		if (Target != 0 && Target != PlayerState().GetPlayerID() && UseObj.Type != 0
-			&& !GetObjectFlag(UseObj, FORCEUSE)) {
+			&& !ObjectTypes().GetObjectFlag(UseObj, FORCEUSE)) {
 			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
 			SendAttack(Creatures().GetAttackID());
 			return true;
@@ -263,7 +263,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		if (UseObj.Type == 0)
 			return true;
 		PATELLA_ASSERT(UseObj!=CREATURE);
-		if (GetObjectFlag(UseObj, MULTIUSE)) {
+		if (ObjectTypes().GetObjectFlag(UseObj, MULTIUSE)) {
 			AddMessage(MESSAGE_USE_WITH, 0, 0);
 			return true;
 		}
@@ -289,7 +289,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			if (UseObj.Type == 0)
 				return true;
 			PATELLA_ASSERT(UseObj!=CREATURE);
-			if (GetObjectFlag(UseObj, MULTIUSE)) {
+			if (ObjectTypes().GetObjectFlag(UseObj, MULTIUSE)) {
 				AddMessage(MESSAGE_USE_WITH, 0, 0);
 				return true;
 			}
@@ -342,9 +342,9 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		Handle = HELP_YOUR_CHARACTER;
 	else if (Obj.Type == CREATURE)
 		Handle = HELP_CREATURES;
-	else if (GetObjectFlag(Obj, LENSHELP))
-		Handle = GetObjectLensHelp(Obj.Type);
-	else if (GetObjectFlag(Obj, CONTAINER))
+	else if (ObjectTypes().GetObjectFlag(Obj, LENSHELP))
+		Handle = ObjectTypes().GetObjectLensHelp(Obj.Type);
+	else if (ObjectTypes().GetObjectFlag(Obj, CONTAINER))
 		Handle = HELP_CONTAINERS;
 	if (Handle == HELP_NONE)
 		return false;
@@ -391,12 +391,13 @@ void TMapWindow::Draw(int Surface, int x, int y)
 					for (int z = Level + 1; z < 8 && FieldX - z + Level >= 0 && FieldY - z + Level >= 0; z++) {
 						if (z - 1 < MaxLevel) {
 							Obj = Map().GetFirstObject(FieldX - z + Level, FieldY - z + Level, z);
-							if (Obj.Type != 0 && GetObjectFlag(Obj, BANK) && !GetObjectFlag(Obj, DONTHIDE))
+							if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK)
+								&& !ObjectTypes().GetObjectFlag(Obj, DONTHIDE))
 								MaxLevel = z - 1;
 							Obj = Map().GetFirstObject(FieldX, FieldY, z);
 							if (Obj.Type != 0 && z - 1 < MaxLevel
-								&& (GetObjectFlag(Obj, BANK) || GetObjectFlag(Obj, BOTTOM))
-								&& !GetObjectFlag(Obj, DONTHIDE))
+								&& (ObjectTypes().GetObjectFlag(Obj, BANK) || ObjectTypes().GetObjectFlag(Obj, BOTTOM))
+								&& !ObjectTypes().GetObjectFlag(Obj, DONTHIDE))
 								MaxLevel = z - 1;
 						}
 					}
@@ -412,7 +413,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				CoverLevel[FieldX][FieldY] = 0;
 				for (int z = MaxLevel; z > 0; z--) {
 					Obj = Map().GetFirstObject(FieldX, FieldY, z);
-					if (Obj.Type != 0 && GetObjectFlag(Obj, FULLBANK)) {
+					if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, FULLBANK)) {
 						CoverLevel[FieldX][FieldY] = z;
 						break;
 					}
@@ -455,7 +456,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			for (int FieldX = 0; FieldX < MAPSIZE_X; FieldX++) {
 				for (int FieldY = 0; FieldY < MAPSIZE_Y; FieldY++) {
 					Obj = Map().GetFirstObject(FieldX, FieldY, z);
-					if (z == 0 || (Obj.Type != 0 && GetObjectFlag(Obj, BANK))) {
+					if (z == 0 || (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK))) {
 						const TRGBColor Old = Light[FieldX][FieldY];
 						SetLightColor(FieldX, FieldY, PositionZ <= 7 ? Map().GetAmbientBrightness() : 0);
 						if (z > 0 && Map().IsFieldTranslucent(FieldX, FieldY, z)) {
@@ -548,7 +549,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				while (++cz <= MaxLevel) {
 					TObject Obj;
 					Obj = Map().GetFirstObject(cx, cy, cz);
-					if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
+					if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK))
 						Visible = false;
 				}
 			}
@@ -704,7 +705,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 					Visible = true;
 					while (++z <= MaxLevel) {
 						Obj = Map().GetFirstObject(FieldX, FieldY, z);
-						if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
+						if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK))
 							Visible = false;
 					}
 				}
@@ -759,23 +760,23 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 	int Elevation = 0;
 	TObject TopObject;
 	for (Obj = Map().GetFirstObject(FieldX, FieldY, FieldZ); Obj.Type != 0; Obj = Map().GetNextObject()) {
-		if (Mode == 0 && Obj.Type != CREATURE && GetObjectFlag(Obj, LIGHT)) {
+		if (Mode == 0 && Obj.Type != CREATURE && ObjectTypes().GetObjectFlag(Obj, LIGHT)) {
 			int ShiftX = 0, ShiftY = 0;
-			if (GetObjectFlag(Obj, SHIFT)) {
-				ShiftX = GetObjectShiftX(Obj.Type);
-				ShiftY = GetObjectShiftY(Obj.Type);
+			if (ObjectTypes().GetObjectFlag(Obj, SHIFT)) {
+				ShiftX = ObjectTypes().GetObjectShiftX(Obj.Type);
+				ShiftY = ObjectTypes().GetObjectShiftY(Obj.Type);
 			}
 			AddLightSource(posx - ShiftX - Elevation + 16, posy - ShiftY - Elevation + 16, FieldZ,
-				GetObjectBrightness(Obj.Type), TRGBColor(GetObjectLightColor(Obj.Type)));
+				ObjectTypes().GetObjectBrightness(Obj.Type), TRGBColor(ObjectTypes().GetObjectLightColor(Obj.Type)));
 		}
-		if (GetObjectFlag(Obj, TOP)) {
+		if (ObjectTypes().GetObjectFlag(Obj, TOP)) {
 			TopObject = Obj;
 		} else if (Obj.Type != CREATURE && Mode != 1) {
 			DrawObject(posx - Elevation, posy - Elevation, FieldZ, Obj, x, y, z);
-			if (GetObjectFlag(Obj, LYINGOBJECT))
+			if (ObjectTypes().GetObjectFlag(Obj, LYINGOBJECT))
 				Lying = true;
 		}
-		Elevation += GetObjectFlag(Obj, HEIGHT) ? GetObjectElevation(Obj.Type) : 0;
+		Elevation += ObjectTypes().GetObjectFlag(Obj, HEIGHT) ? ObjectTypes().GetObjectElevation(Obj.Type) : 0;
 		if (Elevation > 24)
 			Elevation = 24;
 	}
@@ -806,14 +807,14 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 					continue;
 				int sx = 0, sy = 0;
 				if (Creature->OutfitType != 0) {
-					if (GetOutfitFlag(Creature->OutfitType, SHIFT)) {
-						sx = GetOutfitShiftX(Creature->OutfitType);
-						sy = GetOutfitShiftY(Creature->OutfitType);
+					if (ObjectTypes().GetOutfitFlag(Creature->OutfitType, SHIFT)) {
+						sx = ObjectTypes().GetOutfitShiftX(Creature->OutfitType);
+						sy = ObjectTypes().GetOutfitShiftY(Creature->OutfitType);
 					}
 				} else if (Creature->Colors[0] != 0) {
-					if (GetObjectFlag(Creature->Colors[0], SHIFT)) {
-						sx = GetObjectShiftX(Creature->Colors[0]);
-						sy = GetObjectShiftY(Creature->Colors[0]);
+					if (ObjectTypes().GetObjectFlag(Creature->Colors[0], SHIFT)) {
+						sx = ObjectTypes().GetObjectShiftX(Creature->Colors[0]);
+						sy = ObjectTypes().GetObjectShiftY(Creature->Colors[0]);
 					}
 				} else if (::Creatures().IsPlayer(Creature->CreatureID)) {
 					sx = 8;
@@ -893,7 +894,8 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (OutfitType == 0) {
 			if (Creatures[i]->Colors[0] == 0) {
 				// An invisible creature: the sparkles of effect 13.
-				const int SpriteNumber = GetEffectSpriteNumber(13, 1, 1, 1, GetActionNumber() / 3 % 3 + 2);
+				const int SpriteNumber = ObjectTypes().GetEffectSpriteNumber(13, 1, 1, 1,
+					GetActionNumber() / 3 % 3 + 2);
 				const int sx = ox + ShiftX[i], sy = oy + ShiftY[i];
 				const int cx = (ScrollX - Elevation + sx + posx - 8) / 32, cy = (ScrollY - Elevation + sy + posy - 8) / 32;
 				FlushField(cx, cy);
@@ -919,8 +921,8 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			}
 			const int lx = ox - Elevation + posx + 16, ly = oy - Elevation + posy + 16;
 			AddLightSource(lx, ly, FieldZ, Creatures[i]->LightStrength, TRGBColor(Creatures[i]->LightColor));
-			if (OutfitType != 0 && GetOutfitFlag(OutfitType, LIGHT))
-				AddLightSource(lx, ly, FieldZ, GetOutfitBrightness(OutfitType), TRGBColor(GetOutfitLightColor(OutfitType)));
+			if (OutfitType != 0 && ObjectTypes().GetOutfitFlag(OutfitType, LIGHT))
+				AddLightSource(lx, ly, FieldZ, ObjectTypes().GetOutfitBrightness(OutfitType), TRGBColor(ObjectTypes().GetOutfitLightColor(OutfitType)));
 			if (Creatures[i]->CreatureID == PlayerState().GetPlayerID() && Creatures[i]->LightStrength < 2)
 				AddLightSource(lx, ly, FieldZ, 2, TRGBColor(255, 255, 255));
 		}
@@ -938,10 +940,10 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			const int Type = Map().GetGraphicalEffectType(EffectIdOf(EffectNumber));
 			if (Type != -1) {
 				const int Phase = Map().GetGraphicalEffectPhase(EffectIdOf(EffectNumber));
-				for (int X = 1; X <= GetEffectWidth(Type); X++) {
-					for (int Y = 1; Y <= GetEffectHeight(Type); Y++) {
-						for (int Layer = 1; Layer <= GetEffectLayers(Type); Layer++) {
-							const int SpriteNumber = GetEffectSpriteNumber(Type, X, Y, Layer, Phase);
+				for (int X = 1; X <= ObjectTypes().GetEffectWidth(Type); X++) {
+					for (int Y = 1; Y <= ObjectTypes().GetEffectHeight(Type); Y++) {
+						for (int Layer = 1; Layer <= ObjectTypes().GetEffectLayers(Type); Layer++) {
+							const int SpriteNumber = ObjectTypes().GetEffectSpriteNumber(Type, X, Y, Layer, Phase);
 							if (SpriteNumber > 0)
 								DrawFieldSprite(posx - X * 32 - Elevation + 32, posy - Y * 32 - Elevation + 32, FieldZ,
 									false, SpriteNumber, 0, nullptr);
@@ -952,14 +954,14 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 				// effect's brightness. The binary passes the level and the
 				// brightness the wrong way round (the missile light below
 				// has them right): the level becomes the radius.
-				if (Mode == 0 && GetEffectFlag(Type, LIGHT)) {
-					const int Rest = GetEffectPhases(Type) - Phase + 1;
+				if (Mode == 0 && ObjectTypes().GetEffectFlag(Type, LIGHT)) {
+					const int Rest = ObjectTypes().GetEffectPhases(Type) - Phase + 1;
 					int Brightness = Phase < Rest ? Phase : Rest;
-					const int Maximum = GetEffectBrightness(Type);
+					const int Maximum = ObjectTypes().GetEffectBrightness(Type);
 					if (Brightness >= Maximum)
 						Brightness = Maximum;
 					AddLightSource(posx - Elevation + 16, posy - Elevation + 16, Brightness, FieldZ,
-						TRGBColor(GetEffectLightColor(Type)));
+						TRGBColor(ObjectTypes().GetEffectLightColor(Type)));
 				}
 			}
 		}
@@ -978,10 +980,10 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (Map().GetEffectStatus(EffectIdOf(EffectNumber)) == 3) {
 			const int Type = Map().GetMissileEffectType(EffectIdOf(EffectNumber));
 			if (Type != -1) {
-				for (int X = 1; X <= GetMissileWidth(Type); X++) {
-					for (int Y = 1; Y <= GetMissileHeight(Type); Y++) {
-						for (int Layer = 1; Layer <= GetMissileLayers(Type); Layer++) {
-							const int SpriteNumber = GetMissileSpriteNumber(Type, X, Y, Layer,
+				for (int X = 1; X <= ObjectTypes().GetMissileWidth(Type); X++) {
+					for (int Y = 1; Y <= ObjectTypes().GetMissileHeight(Type); Y++) {
+						for (int Layer = 1; Layer <= ObjectTypes().GetMissileLayers(Type); Layer++) {
+							const int SpriteNumber = ObjectTypes().GetMissileSpriteNumber(Type, X, Y, Layer,
 								Map().GetMissileEffectDirection(EffectIdOf(EffectNumber)));
 							if (SpriteNumber > 0)
 								DrawFieldSprite(
@@ -991,10 +993,10 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 						}
 					}
 				}
-				if (Mode == 0 && GetMissileFlag(Type, LIGHT))
+				if (Mode == 0 && ObjectTypes().GetMissileFlag(Type, LIGHT))
 					AddLightSource(Map().GetMissileEffectX(EffectIdOf(EffectNumber)) - Elevation + posx + 16,
 						Map().GetMissileEffectY(EffectIdOf(EffectNumber)) - Elevation + posy + 16, FieldZ,
-						GetMissileBrightness(Type), TRGBColor(GetMissileLightColor(Type)));
+						ObjectTypes().GetMissileBrightness(Type), TRGBColor(ObjectTypes().GetMissileLightColor(Type)));
 			}
 		}
 	}
@@ -1009,28 +1011,28 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, int y, int z)
 {
 	PATELLA_ASSERT(Obj.Type!=0);
-	int PatternX = x % PATELLA_DIVISOR(GetObjectPatternWidth(Obj.Type)) + 1;
-	int PatternY = y % PATELLA_DIVISOR(GetObjectPatternHeight(Obj.Type)) + 1;
-	const int PatternZ = z % PATELLA_DIVISOR(GetObjectPatternDepth(Obj.Type)) + 1;
-	const int Phase = GetActionNumber() / 5 % PATELLA_DIVISOR(GetObjectPhases(Obj.Type)) + 1;
-	if (GetObjectFlag(Obj, CUMULATIVE))
-		GetCumulativePattern(Obj, &PatternX, &PatternY);
-	if (GetObjectFlag(Obj, LIQUIDPOOL) || GetObjectFlag(Obj, LIQUIDCONTAINER))
-		GetLiquidPattern(Obj, &PatternX, &PatternY);
-	if (GetObjectFlag(Obj, HANG))
-		GetHangPattern(Obj, &PatternX, &PatternY);
+	int PatternX = x % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternWidth(Obj.Type)) + 1;
+	int PatternY = y % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternHeight(Obj.Type)) + 1;
+	const int PatternZ = z % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternDepth(Obj.Type)) + 1;
+	const int Phase = GetActionNumber() / 5 % PATELLA_DIVISOR(ObjectTypes().GetObjectPhases(Obj.Type)) + 1;
+	if (ObjectTypes().GetObjectFlag(Obj, CUMULATIVE))
+		ObjectTypes().GetCumulativePattern(Obj, &PatternX, &PatternY);
+	if (ObjectTypes().GetObjectFlag(Obj, LIQUIDPOOL) || ObjectTypes().GetObjectFlag(Obj, LIQUIDCONTAINER))
+		ObjectTypes().GetLiquidPattern(Obj, &PatternX, &PatternY);
+	if (ObjectTypes().GetObjectFlag(Obj, HANG))
+		ObjectTypes().GetHangPattern(Obj, &PatternX, &PatternY);
 	int ShiftX = 0, ShiftY = 0;
-	if (GetObjectFlag(Obj, SHIFT)) {
-		ShiftX = GetObjectShiftX(Obj.Type);
-		ShiftY = GetObjectShiftY(Obj.Type);
+	if (ObjectTypes().GetObjectFlag(Obj, SHIFT)) {
+		ShiftX = ObjectTypes().GetObjectShiftX(Obj.Type);
+		ShiftY = ObjectTypes().GetObjectShiftY(Obj.Type);
 	}
-	for (int X = 1; X <= GetObjectWidth(Obj.Type); X++) {
-		for (int Y = 1; Y <= GetObjectHeight(Obj.Type); Y++) {
-			for (int Layer = 1; Layer <= GetObjectLayers(Obj.Type); Layer++) {
-				const int SpriteNumber = GetObjectSpriteNumber(Obj.Type, X, Y, Layer, PatternX, PatternY, PatternZ, Phase);
+	for (int X = 1; X <= ObjectTypes().GetObjectWidth(Obj.Type); X++) {
+		for (int Y = 1; Y <= ObjectTypes().GetObjectHeight(Obj.Type); Y++) {
+			for (int Layer = 1; Layer <= ObjectTypes().GetObjectLayers(Obj.Type); Layer++) {
+				const int SpriteNumber = ObjectTypes().GetObjectSpriteNumber(Obj.Type, X, Y, Layer, PatternX, PatternY, PatternZ, Phase);
 				if (SpriteNumber > 0)
 					DrawFieldSprite(posx - X * 32 - ShiftX + 32, posy - Y * 32 - ShiftY + 32, Level,
-						GetObjectPhases(Obj.Type) > 1, SpriteNumber, 0, nullptr);
+						ObjectTypes().GetObjectPhases(Obj.Type) > 1, SpriteNumber, 0, nullptr);
 			}
 		}
 	}
@@ -1055,20 +1057,21 @@ void TMapWindow::DrawCreature(int posx, int posy, int Level, TCreature *Creature
 	GetOutfitColor(Creature->Colors[3], &R, &G, &B);
 	Colors[3] = TRGBColor(R, G, B);
 	int ShiftX = 0, ShiftY = 0;
-	if (GetOutfitFlag(OutfitType, SHIFT)) {
-		ShiftX = GetOutfitShiftX(OutfitType);
-		ShiftY = GetOutfitShiftY(OutfitType);
+	if (ObjectTypes().GetOutfitFlag(OutfitType, SHIFT)) {
+		ShiftX = ObjectTypes().GetOutfitShiftX(OutfitType);
+		ShiftY = ObjectTypes().GetOutfitShiftY(OutfitType);
 	}
 	int Phase;
-	if (GetOutfitFlag(OutfitType, ANIMATEALWAYS))
-		Phase = GetActionNumber() / 3 % PATELLA_DIVISOR(GetOutfitPhases(OutfitType)) + 1;
+	if (ObjectTypes().GetOutfitFlag(OutfitType, ANIMATEALWAYS))
+		Phase = GetActionNumber() / 3 % PATELLA_DIVISOR(ObjectTypes().GetOutfitPhases(OutfitType)) + 1;
 	else
-		Phase = Creature->GetAnimationPhase(GetOutfitPhases(OutfitType));
-	for (int X = 1; X <= GetOutfitWidth(OutfitType); X++) {
-		for (int Y = 1; Y <= GetOutfitHeight(OutfitType); Y++) {
-			const int SpriteNumber = GetOutfitSpriteNumber(OutfitType, X, Y, 1, Creature->GetDrawDirection(), Phase);
-			const int MaskNumber = GetOutfitLayers(OutfitType) == 2
-				? GetOutfitSpriteNumber(OutfitType, X, Y, 2, Creature->GetDrawDirection(), Phase)
+		Phase = Creature->GetAnimationPhase(ObjectTypes().GetOutfitPhases(OutfitType));
+	for (int X = 1; X <= ObjectTypes().GetOutfitWidth(OutfitType); X++) {
+		for (int Y = 1; Y <= ObjectTypes().GetOutfitHeight(OutfitType); Y++) {
+			const int SpriteNumber = ObjectTypes().GetOutfitSpriteNumber(OutfitType, X, Y, 1,
+				Creature->GetDrawDirection(), Phase);
+			const int MaskNumber = ObjectTypes().GetOutfitLayers(OutfitType) == 2
+				? ObjectTypes().GetOutfitSpriteNumber(OutfitType, X, Y, 2, Creature->GetDrawDirection(), Phase)
 				: 0;
 			if (SpriteNumber > 0)
 				DrawFieldSprite(posx - X * 32 - ShiftX + 32, posy - Y * 32 - ShiftY + 32, Level, true, SpriteNumber,
@@ -1279,7 +1282,7 @@ void TMapWindow::AddLightSource(int posx, int posy, int z, int Brightness, TRGBC
 			int R = Color.R * Intensity / 160;
 			TObject Obj = Map().GetMapObject(x, y, z, 0);
 			try {
-				if (Obj.Type == 0 || !GetObjectFlag(Obj, BANK)) {
+				if (Obj.Type == 0 || !ObjectTypes().GetObjectFlag(Obj, BANK)) {
 					B = B * 4 / 5;
 					G = G * 4 / 5;
 					R = R * 4 / 5;
@@ -1509,10 +1512,10 @@ void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 	for (*FieldZ = MaxLevel; *FieldZ > 0; (*FieldZ)--) {
 		TObject Obj = Map().GetFirstObject(*FieldX, *FieldY, *FieldZ);
 		if (Obj.Type != 0) {
-			if (GetObjectFlag(Obj, BANK) || GetObjectFlag(Obj, BOTTOM))
+			if (ObjectTypes().GetObjectFlag(Obj, BANK) || ObjectTypes().GetObjectFlag(Obj, BOTTOM))
 				return;
 			Obj = Map().GetNextObject();
-			if (Obj.Type != 0 && GetObjectFlag(Obj, BOTTOM))
+			if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BOTTOM))
 				return;
 		}
 	}
@@ -1536,7 +1539,7 @@ uint32 TMapWindow::GetCreatureAt(int x, int y)
 		bool Visible = true;
 		while (++cz <= MaxLevel) {
 			TObject Obj = Map().GetFirstObject(cx, cy, cz);
-			if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
+			if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK))
 				Visible = false;
 		}
 		if (!Visible)

@@ -388,23 +388,24 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	const bool ClassicControl = GetClassicControl();
 	AddEntry(EVENT_MENU_LOOK, "Look", ClassicControl ? nullptr : "(Shift)");
 	if (UsedObject != 0) {
-		if (GetObjectFlag(UsedObject, CONTAINER)) {
+		if (ObjectTypes().GetObjectFlag(UsedObject, CONTAINER)) {
 			if (UsedObjectX == POSITION_NOT_ON_MAP && UsedObjectY >= POSITION_CONTAINER_BASE) {
 				AddEntry(EVENT_MENU_OPEN, "Open", ClassicControl ? nullptr : "(Ctrl)");
 				AddEntry(EVENT_MENU_OPEN_NEW_WINDOW, "Open in new window", nullptr);
 			} else {
 				AddEntry(EVENT_MENU_OPEN_NEW_WINDOW, "Open", ClassicControl ? nullptr : "(Ctrl)");
 			}
-		} else if (GetObjectFlag(UsedObject, MULTIUSE)) {
+		} else if (ObjectTypes().GetObjectFlag(UsedObject, MULTIUSE)) {
 			AddEntry(EVENT_MENU_USE_WITH, "Use with ...", ClassicControl ? nullptr : "(Ctrl)");
 		} else {
 			AddEntry(EVENT_MENU_USE, "Use", ClassicControl ? nullptr : "(Ctrl)");
 		}
 	}
-	if (GetObjectFlag(UsedObject, ROTATE))
+	if (ObjectTypes().GetObjectFlag(UsedObject, ROTATE))
 		AddEntry(EVENT_MENU_ROTATE, "Rotate", nullptr);
 	Separator = true;
-	if (LookedObject != CREATURE && !GetObjectFlag(LookedObject, UNMOVE) && GetObjectFlag(LookedObject, TAKE))
+	if (LookedObject != CREATURE && !ObjectTypes().GetObjectFlag(LookedObject, UNMOVE)
+		&& ObjectTypes().GetObjectFlag(LookedObject, TAKE))
 		AddEntry(EVENT_MENU_TRADE_WITH, "Trade with ...", nullptr);
 	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && Inventory().HasContainerParent(LookedObjectY - POSITION_CONTAINER_BASE))
 		AddEntry(EVENT_MENU_MOVE_UP, "Move up", nullptr);
@@ -523,7 +524,7 @@ void TObjectContextMenu::HandleEvent(int Event)
 		PATELLA_ASSERT_VALUES(LookedObjectX==0xFFFF, LookedObjectX);
 		PATELLA_ASSERT(LookedObject.Type!=CREATURE);
 		SendMoveObject(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type, LookedObjectIndex,
-			LookedObjectX, LookedObjectY, POSITION_PARENT_CONTAINER, GetObjectFlag(LookedObject, CUMULATIVE) ? LookedObject.Data : 1);
+			LookedObjectX, LookedObjectY, POSITION_PARENT_CONTAINER, ObjectTypes().GetObjectFlag(LookedObject, CUMULATIVE) ? LookedObject.Data : 1);
 		break;
 	case EVENT_MENU_OPEN:
 		PATELLA_ASSERT_VALUES(UsedObjectX==0xFFFF, UsedObjectX);
