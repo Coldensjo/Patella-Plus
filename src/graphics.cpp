@@ -4,9 +4,8 @@
 // 32x32 tiles, and the functions that draw sprites, objects, outfits, pictures and text through the
 // engine's surface (Surface.h). Functions in line order. Those without line evidence stay where the
 // binary has them: the three of the DialogWindow/graphics gap first, the Find functions next to the
-// other cache functions, GetTextPosition after GetFittingTextLength. The compiler placed InitFont and
-// InitFonts after ReloadSprites, GetTextWidth before ReloadPictures, DrawObject and DrawOutfit at the
-// end.
+// other cache functions, GetTextPosition after GetFittingTextLength. The compiler placed InitFont,
+// InitFonts and GetTextWidth out of line order, DrawObject and DrawOutfit at the end.
 //
 // The original's catch wrappers (common.h) are gone since issue #78; the functions here have no handlers
 // apart from the loaders' inner handlers, which turn a file error into a PROGRAM_ERROR.
@@ -36,7 +35,7 @@
 // Data: TGraphics' members since issue #116 (graphics.h), in the original's .bss order.
 
 // The six tables as std::unique_ptr (issue #58): each a pointer, as the original's. Their elements have no
-// destructors that act (a picture's Offsets stays raw: ExitGraphics and ReloadPictures free them first), so a table
+// destructors that act (a picture's Offsets stays raw: ExitGraphics frees them first), so a table
 // still set when FatalError calls exit(1) is only memory freed during static destruction. Where the original stored a
 // new table over one it may still have held (InitMemoryCache, InitFonts, LoadSprites, LoadPictures, InitVideoCache;
 // the golden tests call them again), release() drops the old one unfreed first: the leak is the original's.
@@ -76,15 +75,6 @@ int patella::TGraphics::GetFontLineHeight(int FontNumber) const
 	if (FontNumber < 0 || FontNumber > NumberOfFonts)
 		FontNumber = FONT_SMALL;
 	return Fonts[FontNumber - 1].LineHeight;
-}
-
-// Empties every memory cache item without touching the LRU list.
-void patella::TGraphics::ClearMemoryCache()
-{
-	for (int i = 0; i < MemoryCacheSize; i++)
-		MemoryCache[i].Type = EMPTY_ITEM;
-	for (int i = 0; i < HASH_TABLE_SIZE; i++)
-		MemoryHashTable[i] = -1;
 }
 
 // Called by ExitControl.
@@ -203,8 +193,8 @@ void patella::TGraphics::LoadPictures(const char *FileName)
 		static_cast<void>(Pictures.release()); // NOLINT(bugprone-unused-return-value): a table still held leaks, as in the original
 		Pictures.reset(new TPicture[NumberOfPictures]);
 		// Patella-Modern issue #139, item 2, a deliberate difference (notes/decisions.md, "#139"): every picture's
-		// offsets start empty, so ExitGraphics and ReloadPictures, after a file that ends before the last picture,
-		// delete only the tables allocated here. The binary left the later pictures' Offsets indeterminate.
+		// offsets start empty, so ExitGraphics, after a file that ends before the last picture,
+		// deletes only the tables allocated here. The binary left the later pictures' Offsets indeterminate.
 		for (int i = 0; i < NumberOfPictures; i++)
 			Pictures[i].Offsets = nullptr;
 		for (int i = 0; i < NumberOfPictures; i++) {
@@ -1203,31 +1193,6 @@ void patella::TGraphics::ResetVideoCache()
 	InitVideoCache();
 }
 
-// After Tibia.spr was patched (event 0x46).
-void patella::TGraphics::ReloadSprites()
-{
-	ResetVideoCache();
-	ClearMemoryCache();
-	Sprites.reset();
-	Sprites = nullptr;
-	LoadSprites("Tibia.spr");
-}
-
-// After Tibia.pic was patched (event 0x47).
-void patella::TGraphics::ReloadPictures()
-{
-	ResetVideoCache();
-	ClearMemoryCache();
-	Fonts.reset();
-	Fonts = nullptr;
-	for (int i = 0; i < NumberOfPictures; i++)
-		delete[] Pictures[i].Offsets;
-	Pictures.reset();
-	Pictures = nullptr;
-	LoadPictures("Tibia.pic");
-	InitFonts();
-}
-
 // Called by InitControl with 10 MB. The video cache comes later
 // (InitVideoCache), when the surfaces exist.
 void patella::TGraphics::InitGraphics(int MemoryCacheBytes)
@@ -1254,16 +1219,6 @@ void InitVideoCache()
 void ResetVideoCache()
 {
 	patella::bridge::Graphics().ResetVideoCache();
-}
-
-void ReloadSprites()
-{
-	patella::bridge::Graphics().ReloadSprites();
-}
-
-void ReloadPictures()
-{
-	patella::bridge::Graphics().ReloadPictures();
 }
 
 void ExitGraphics()
@@ -1304,11 +1259,6 @@ void InitFonts()
 void InitMemoryCache(int MemoryCacheBytes)
 {
 	patella::bridge::Graphics().InitMemoryCache(MemoryCacheBytes);
-}
-
-void ClearMemoryCache()
-{
-	patella::bridge::Graphics().ClearMemoryCache();
 }
 
 void TouchMemoryItem(int Position)

@@ -3,8 +3,7 @@
 // The properties of objects, outfits, effects and missiles from Tibia.dat,
 // one array<TProperties> each, and their accessors. Functions in line order.
 // Where the binary order differs: the entry loader (line 939) sits right
-// after GetEntrySpriteNumber, and ExitObjects (line 1023) before
-// ReloadObjects (line 1012).
+// after GetEntrySpriteNumber.
 //
 // The source has unreferenced functions the linker dropped: the line gaps
 // 70-91 and 281-303 fit an accessor of MaxLength (+0x2c) at each level, and
@@ -601,13 +600,6 @@ void patella::TObjectTypes::InitObjects()
 	}
 }
 
-// After Tibia.dat was patched (event 0x45).
-void patella::TObjectTypes::ReloadObjects()
-{
-	ExitObjects();
-	InitObjects();
-}
-
 void patella::TObjectTypes::ExitObjects()
 {
 	ReleaseObjects();
@@ -863,11 +855,6 @@ void LoadObjects(const char *FileName)
 void InitObjects()
 {
 	patella::bridge::ObjectTypes().InitObjects();
-}
-
-void ReloadObjects()
-{
-	patella::bridge::ObjectTypes().ReloadObjects();
 }
 
 void ExitObjects()

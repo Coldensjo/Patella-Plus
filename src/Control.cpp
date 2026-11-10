@@ -1101,7 +1101,7 @@ void patella::TGUI::ProcessEvents()
 			}
 			break;
 		// 0x40 (wait until the login connection is closed), 0x41-0x44 (InstallPatch: Tibia.dat, .spr, .pic,
-		// Patch.exe), 0x45-0x47 (ReloadObjects, ReloadSprites, ReloadPictures after a patch) and 0x48 (CloseCallback:
+		// Patch.exe), 0x45-0x47 (Tibia.dat, .spr and .pic loaded again after a patch) and 0x48 (CloseCallback:
 		// the client closes and runs patch.exe) were posted only by ReceivePatchBlock; they are gone with it since
 		// Patella-Modern issue #75 (decision D9), and with 0x40 the shared exit block it jumped to (#42).
 		default:

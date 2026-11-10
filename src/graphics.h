@@ -148,8 +148,6 @@ public:
 	void InitGraphics(int MemoryCacheBytes);
 	void InitVideoCache();
 	void ResetVideoCache();
-	void ReloadSprites();
-	void ReloadPictures();
 	void ExitGraphics();
 
 	// The files and the fonts.
@@ -163,7 +161,6 @@ public:
 
 	// The memory cache.
 	void InitMemoryCache(int MemoryCacheBytes);
-	void ClearMemoryCache();
 	void TouchMemoryItem(int Position);
 	[[nodiscard]] int FindMemorySprite(int SpriteNumber) const;
 	[[nodiscard]] int FindMemoryPicture(int PictureNumber, int TileX, int TileY) const;
@@ -268,8 +265,6 @@ TGraphics &Graphics();
 void InitGraphics(int MemoryCacheBytes);
 void InitVideoCache();
 void ResetVideoCache();
-void ReloadSprites();
-void ReloadPictures();
 void ExitGraphics();
 
 // The files and the fonts.
@@ -283,7 +278,6 @@ void InitFonts();
 
 // The memory cache.
 void InitMemoryCache(int MemoryCacheBytes);
-void ClearMemoryCache();
 void TouchMemoryItem(int Position);
 int FindMemorySprite(int SpriteNumber);
 int FindMemoryPicture(int PictureNumber, int TileX, int TileY);

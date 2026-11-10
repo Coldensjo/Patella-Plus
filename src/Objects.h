@@ -214,7 +214,6 @@ public:
 	void ReleaseObjects();
 	void LoadObjects(const char *FileName);
 	void InitObjects();
-	void ReloadObjects();
 	void ExitObjects();
 
 	// Data, in .bss order. The four tables own their arrays (std::unique_ptr since issue #58; the entries' Sprites
@@ -299,5 +298,4 @@ void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY);
 void ReleaseObjects();
 void LoadObjects(const char *FileName);
 void InitObjects();
-void ReloadObjects();
 void ExitObjects();
