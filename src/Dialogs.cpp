@@ -1987,7 +1987,7 @@ THintsDialog::THintsDialog()
 	ListBox = new TListBox(NoCallback, TCallback(this, 1));
 	InsertChild(ListBox);
 	SetChildArea(ListBox, SkinProperties().HintsDialogList);
-	for (int i = HINT_FIRST; i < HINT_LAST + 1; i++) {
+	for (int i = HINT_FIRST; i <= HINT_LAST; i++) {
 		if (IsKnownHint(i))
 			ListBox->AddLine(GetEventHelpTitle(i));
 	}
@@ -2010,7 +2010,7 @@ void THintsDialog::HandleEvent(int Event)
 	if (Event == 1 && ListBox->GetSelection() != -1) {
 		const char *Title = ListBox->GetLine(ListBox->GetSelection());
 		int Number = -1;
-		for (int i = HINT_FIRST; i < HINT_LAST + 1; i++) {
+		for (int i = HINT_FIRST; i <= HINT_LAST; i++) {
 			if (CompareStrings(Title, GetEventHelpTitle(i), -1) == 0) {
 				Number = i;
 				break;

@@ -99,7 +99,7 @@ void patella::TInventory::InsertContainerObject(int Container, TObject Object)
 {
 	PATELLA_ASSERT_VALUES(In(Container,0,OPEN_CONTAINERS-1), Container);
 	PATELLA_ASSERT(Containers[Container].IsOpen);
-	if (Containers[Container].Count > CONTAINER_OBJECTS - 1)
+	if (Containers[Container].Count >= CONTAINER_OBJECTS)
 		DeleteContainerObject(Container, Containers[Container].Count - 1);
 	for (int i = Containers[Container].Count; i > 0; i--)
 		Containers[Container].Objects[i] = Containers[Container].Objects[i - 1];

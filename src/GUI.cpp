@@ -2287,7 +2287,7 @@ bool patella::TGUI::CheckHotkey(int Key)
 {
 	if ((Key & KEY_SHIFT) != 0)
 		Key -= KEY_SHIFT;
-	if ((Key & KEY_CODE_MASK) > 0x60 && (Key & KEY_CODE_MASK) < 0x7b)
+	if ((Key & KEY_CODE_MASK) >= 'a' && (Key & KEY_CODE_MASK) <= 'z')
 		Key -= 'a' - 'A';
 	const auto Hotkey = Hotkeys.find(Key);
 	if (Hotkey == Hotkeys.end())

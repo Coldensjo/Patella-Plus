@@ -57,7 +57,7 @@ enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 // return and what Preferences.cpp's KnownHints holds: the event helps, 1 to EVENTHELPS. The prefix is the original's
 // other word for them ("unknown hint", the Hint of MapWindow.cpp's assertion), because EVENT_HELP and EVENT_HINTS
 // are event numbers (Events.h). The names follow GetEventHelpTitle's titles. HINT_FIRST and HINT_LAST bound the loops
-// of THintsDialog (Dialogs.cpp), written "i < HINT_LAST + 1" because "i <= HINT_LAST" compiles to other code.
+// of THintsDialog (Dialogs.cpp).
 enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	HINT_NONE = 0, // GetEventHelp and PopEventHelp: the queue is empty
 	HINT_FIRST_LOGIN = 1,

@@ -317,7 +317,7 @@ void TTextWindow::FormatLines()
 			TRGBColor Color;
 			GetTalkColor(&Color, TextLine->Mode);
 			int NextIndent = 10;
-			if (TextLine->Mode > TALK_ANIMAL_LOUD && TextLine->Mode < TALK_STATUS_ONLY_MESSAGE)
+			if (TextLine->Mode >= TALK_ADMIN_MESSAGE && TextLine->Mode <= TALK_INFO_MESSAGE)
 				NextIndent = 0;
 			const char *Text = TextLine->GetText();
 			int Indent = 0;

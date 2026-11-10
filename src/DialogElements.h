@@ -742,7 +742,7 @@ public:
 	[[nodiscard]] int GetLineAt(int x, int y) const;
 	[[nodiscard]] int GetSelection() const
 	{
-		if (Selected < 0 || Selected > Lines - 1)
+		if (Selected < 0 || Selected >= Lines)
 			return -1;
 		return Selected;
 	}

@@ -1334,7 +1334,7 @@ void TEditLine::KeyPress(int Key)
 			// the original's catch wrapper then prints the code.
 			if ((Key & KEY_CONTROL) == 0 || (Key & KEY_ALT) != 0) {
 				Key = Code;
-				if (Key > 0x1f && Key < KEY_F1 && (int)strlen(Text.get()) < MaxLength) {
+				if (Key >= ' ' && Key < KEY_F1 && (int)strlen(Text.get()) < MaxLength) {
 					if (HasSelection())
 						HandleEvent(EVENT_DELETE);
 					InsertChar(Cursor, (char)Key);
