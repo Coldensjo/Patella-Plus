@@ -259,7 +259,7 @@ void patella::TGUI::EnterGame()
 	Map().Clear();
 	Inventory().InitInventory();
 	Creatures().ResetCreatures();
-	Talk.ResetTalk();
+	Talk.Reset();
 	Talk.ShowPermanentIgnoreWarning();
 	Map().SetAmbientLight(-1, 0);
 }
@@ -1129,7 +1129,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		::Interaction().InitStatus(Gamemaster, LinkCopyWarning);
 		::Help().Init();
 		Preferences().InitPreferences(::Talk());
-		::Talk().InitTalk();
+		::Talk().Init();
 		Graphics().InitGraphics(0xa00000);
 		SkinData().InitSkins();
 		InitSkinProperties();
@@ -1163,7 +1163,7 @@ void patella::TGUI::ExitControl()
 		Current->ExitSurfaces();
 	GraphicsEngine().SurfaceExitInstance();
 	Preferences().ExitPreferences(::Talk());
-	::Talk().ExitTalk();
+	::Talk().Exit();
 	::Help().Exit();
 	::Interaction().ExitStatus();
 	Creatures().ExitCreatures();

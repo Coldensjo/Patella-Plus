@@ -57,8 +57,8 @@ void patella::TTalk::SetBuddyIgnore(bool Value) { BuddyIgnore = Value; }
 bool patella::TTalk::GetBuddyIgnore() const { return BuddyIgnore; }
 void patella::TTalk::SetIgnoreListEnabled(bool Value) { IgnoreListEnabled = Value; }
 bool patella::TTalk::GetIgnoreListEnabled() const { return IgnoreListEnabled; }
-void patella::TTalk::StartTalkThrottle() { TalkThrottle = GetMilliseconds() + 1000; }
-bool patella::TTalk::IsTalkThrottled()
+void patella::TTalk::StartThrottle() { TalkThrottle = GetMilliseconds() + 1000; }
+bool patella::TTalk::IsThrottled()
 {
 	if (TalkThrottle != 0) {
 		if (GetMilliseconds() < TalkThrottle)
@@ -75,7 +75,7 @@ bool patella::TTalk::TakeConsoleChanged()
 }
 void patella::TTalk::SetConsoleChanged() { ConsoleChanged = true; }
 
-TRGBColor *patella::TTalk::GetTalkColor(TRGBColor *Color, int TalkMode)
+TRGBColor *patella::TTalk::GetColor(TRGBColor *Color, int TalkMode)
 {
 	switch (TalkMode) {
 		// clang-format off
@@ -138,7 +138,7 @@ void patella::TTalk::GetTalkboxRectangle(int Number, int *x, int *y, int *Width,
 }
 TRGBColor *patella::TTalk::GetTalkboxColor(TRGBColor *Color, int Number)
 {
-	GetTalkColor(Color, GetTalkbox(Number)->Mode);
+	GetColor(Color, GetTalkbox(Number)->Mode);
 	return Color;
 }
 int patella::TTalk::GetTalkboxLines(int Number)
@@ -420,7 +420,7 @@ void patella::TTalk::AddTalkFilter(int Mode, const char *Addressee, int Channel,
 	List(i) = Filter;
 }
 // Buddy/temporary exceptions suppress the ignore list.
-bool patella::TTalk::IsTalkIgnored(int Mode, const char *Name, int Channel)
+bool patella::TTalk::IsIgnored(int Mode, const char *Name, int Channel)
 {
 	if (IgnoreEnabled) {
 		if (BuddyIgnore)
@@ -979,7 +979,7 @@ TTalkLine::TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, con
 	Text = WithoutTime + strlen(Addressee) + 2;
 	TrimString(Text, _Line);
 }
-void patella::TTalk::ResetTalk()
+void patella::TTalk::Reset()
 {
 	for (int Position = 0; Position < TALKBOXES; Position++)
 		Talkboxes[Position].State = 0;
@@ -988,19 +988,19 @@ void patella::TTalk::ResetTalk()
 	SetStatusMessage(nullptr, false);
 	ClearDefaultTextBuffer();
 }
-void patella::TTalk::InitTalk()
+void patella::TTalk::Init()
 {
 	IgnoreEnabled = true;
 	BuddyIgnore = false;
 	IgnoreListEnabled = true;
-	ResetTalk();
+	Reset();
 	DefaultTextBuffer = new (std::nothrow) TTalkBuffer(TALK_SAY);
 }
 TPrivateChannel::TPrivateChannel(int TalkMode, int _ChannelID) : TChannelTalkBuffer(TalkMode, _ChannelID)
 {
 	WriteEnabled = true;
 }
-void patella::TTalk::ExitTalk()
+void patella::TTalk::Exit()
 {
 	ClearBuddyIgnore();
 	ClearTemporaryIgnore();

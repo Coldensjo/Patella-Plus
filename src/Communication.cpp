@@ -1669,8 +1669,8 @@ void patella::TCommunication::ReceiveTalk()
 		const int y = Network.GetWord();
 		const int z = Network.GetByte();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
-		if (Talk().IsTalkIgnored(Mode, Name, -1)) {
-			Talk().StartTalkThrottle();
+		if (Talk().IsIgnored(Mode, Name, -1)) {
+			Talk().StartThrottle();
 			return;
 		}
 		Talk().AddTalkbox(Mode, Name, x, y, z, Text);
@@ -1680,8 +1680,8 @@ void patella::TCommunication::ReceiveTalk()
 	case TALK_GAMEMASTER_BROADCAST:
 	case TALK_GAMEMASTER_MESSAGE:
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
-		if (Talk().IsTalkIgnored(Mode, Name, -1)) {
-			Talk().StartTalkThrottle();
+		if (Talk().IsIgnored(Mode, Name, -1)) {
+			Talk().StartThrottle();
 			return;
 		}
 		Talk().AddTalkbox(Mode, Name, 0, 0, 0, Text);
@@ -1692,8 +1692,8 @@ void patella::TCommunication::ReceiveTalk()
 	case TALK_ANONYMOUS_CHANNELCALL:
 		Channel = Network.GetWord();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
-		if (Talk().IsTalkIgnored(Mode, Name, -1)) {
-			Talk().StartTalkThrottle();
+		if (Talk().IsIgnored(Mode, Name, -1)) {
+			Talk().StartThrottle();
 			return;
 		}
 		TargetChannel = Channel;
@@ -1712,11 +1712,11 @@ void patella::TCommunication::ReceiveTalk()
 		const int y = Network.GetWord();
 		const int z = Network.GetByte();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
-		if (!Talk().IsTalkIgnored(Mode, Name, -1)) {
+		if (!Talk().IsIgnored(Mode, Name, -1)) {
 			Talk().AddTalkbox(Mode, Name, x, y, z, Text);
 			return;
 		}
-		Talk().StartTalkThrottle();
+		Talk().StartThrottle();
 		return;
 	}
 	default:

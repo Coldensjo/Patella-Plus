@@ -217,9 +217,9 @@ public:
 	[[nodiscard]] bool GetBuddyIgnore() const;
 	void SetIgnoreListEnabled(bool Value);
 	[[nodiscard]] bool GetIgnoreListEnabled() const;
-	bool IsTalkThrottled();
+	bool IsThrottled();
 	bool TakeConsoleChanged();
-	TRGBColor *GetTalkColor(TRGBColor *Color, int TalkMode);
+	TRGBColor *GetColor(TRGBColor *Color, int TalkMode);
 	TTalkbox *GetTalkbox(int Number);
 	int GetTalkboxMode(int Number);
 	void GetTalkboxPosition(int Number, int *x, int *y, int *z);
@@ -257,14 +257,14 @@ public:
 	void DeleteTextBuffer(TTalkBuffer *TextBuffer);
 	TTalkBuffer *CreateTextBuffer(int ReceiveTalkMode, int SendTalkMode, const char *Name, int Channel);
 	void SetTalkChanged();
-	void StartTalkThrottle();
+	void StartThrottle();
 	void SetConsoleChanged();
 	void AddTalkbox(int Mode, const char *Speaker, int x, int y, int z, const char *Text);
 	void AddMessageTalkbox(int Mode, const char *Text);
 	void UpdateTalkboxes();
 	void SetStatusMessage(const char *Message, bool Permanent);
 	void UpdateStatusMessage();
-	bool IsTalkIgnored(int Mode, const char *Name, int Channel);
+	bool IsIgnored(int Mode, const char *Name, int Channel);
 	void AddTemporaryIgnore(const char *Addressee);
 	void RemoveTemporaryIgnore(const char *Addressee);
 	void ClearIgnoreList() override;
@@ -273,9 +273,9 @@ public:
 		int TalkMode, const char *Name, int Time);
 	void AddConsoleText(uint32 StatementID, const char *Text, int TalkMode, const char *Name, int Channel, int Time);
 	TTalkBuffer *GetTextBuffer(int Mode, const char *Name, int Channel);
-	void ResetTalk();
-	void InitTalk();
-	void ExitTalk();
+	void Reset();
+	void Init();
+	void Exit();
 
 
 private:

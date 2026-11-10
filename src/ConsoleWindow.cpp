@@ -313,7 +313,7 @@ void TTextWindow::FormatLines()
 		TTalkLine *TextLine = TextBuffer->GetFirst();
 		while (TextLine != nullptr) {
 			TRGBColor Color;
-			Talk().GetTalkColor(&Color, TextLine->Mode);
+			Talk().GetColor(&Color, TextLine->Mode);
 			int NextIndent = 10;
 			if (TextLine->Mode >= TALK_ADMIN_MESSAGE && TextLine->Mode <= TALK_INFO_MESSAGE)
 				NextIndent = 0;
@@ -1277,7 +1277,7 @@ void TConsoleWindow::Draw(int Surface, int x, int y)
 		SetActive(TextBuffer->CanWrite());
 		Input->SetDisabled(!TextBuffer->CanWrite());
 	}
-	IgnoreButton->SetSkins(Talk().IsTalkThrottled() ? SKIN_IGNORE_BUTTON_UP_THROTTLED : SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN);
+	IgnoreButton->SetSkins(Talk().IsThrottled() ? SKIN_IGNORE_BUTTON_UP_THROTTLED : SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN);
 	const bool Changed = TabBar->Changed;
 	TabBar->Changed = false;
 	if (Changed)
