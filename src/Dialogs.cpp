@@ -1969,7 +1969,7 @@ THintsDialog::THintsDialog()
 	SetChildArea(ListBox, SkinProperties().HintsDialogList);
 	for (int i = HINT_FIRST; i <= HINT_LAST; i++) {
 		if (IsKnownHint(i))
-			ListBox->AddLine(GetEventHelpTitle(i));
+			ListBox->AddLine(Help().GetEventHelpTitle(i));
 	}
 }
 
@@ -1991,18 +1991,18 @@ void THintsDialog::HandleEvent(int Event)
 		const char *Title = ListBox->GetLine(ListBox->GetSelection());
 		int Number = -1;
 		for (int i = HINT_FIRST; i <= HINT_LAST; i++) {
-			if (CompareStrings(Title, GetEventHelpTitle(i), -1) == 0) {
+			if (CompareStrings(Title, Help().GetEventHelpTitle(i), -1) == 0) {
 				Number = i;
 				break;
 			}
 		}
 		PATELLA_ASSERT(Number!=-1);
-		const char *HelpText = GetEventHelpText(Number);
+		const char *HelpText = Help().GetEventHelpText(Number);
 		const std::size_t Size = strlen(HelpText) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(HelpText);
 		AddMessageFirst(MESSAGE_HINTS_DIALOG, 0, 0);
-		AddMessageFirst(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
+		AddMessageFirst(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(Help().GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
 	}
 	SetActionState(ACTIONSTATE_NONE);
 }

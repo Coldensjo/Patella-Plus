@@ -316,12 +316,12 @@ void TMapWindow::HandleEvent(int Event)
 	if (Event == EVENT_MAP_HINT) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;
-		const int Hint = PopEventHelp();
+		const int Hint = Help().PopEventHelp();
 		PATELLA_ASSERT_VALUES(In(Hint,1,EVENTHELPS), Hint);
-		const std::size_t Size = strlen(GetEventHelpText(Hint)) + 1;
+		const std::size_t Size = strlen(Help().GetEventHelpText(Hint)) + 1;
 		char *Text = new char[Size];
-		TStringBuffer(Text, Size).Assign(GetEventHelpText(Hint));
-		AddMessage(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
+		TStringBuffer(Text, Size).Assign(Help().GetEventHelpText(Hint));
+		AddMessage(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(Help().GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
 	}
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
@@ -353,15 +353,15 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	if (GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
 		y = FieldY * 32 - (352 - Height) / 2 - Player->GetDeltaY() - 32;
-		MoveHelpPosition(x, y);
-		SetHelpSize(32, 32);
+		Help().MoveHelpPosition(x, y);
+		Help().SetHelpSize(32, 32);
 	} else {
 		x = (FieldX * 32 - Player->GetDeltaX() - 32) * Width / 480;
 		y = (FieldY * 32 - Player->GetDeltaY() - 32) * Height / 352;
-		MoveHelpPosition(x, y);
-		SetHelpSize(Width * 32 / 480, Height * 32 / 352);
+		Help().MoveHelpPosition(x, y);
+		Help().SetHelpSize(Width * 32 / 480, Height * 32 / 352);
 	}
-	SetHelpHandle(Handle);
+	Help().SetHelpHandle(Handle);
 	return true;
 }
 
@@ -728,11 +728,11 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	}
 
 	// The hint button while there is an event help to show.
-	if (GetShowNewHints() && GetEventHelp() != HINT_NONE && HintButton == nullptr) {
+	if (GetShowNewHints() && Help().GetEventHelp() != HINT_NONE && HintButton == nullptr) {
 		HintButton = new TBlinkingButton(0, 0, SKIN_HINT_BUTTON_UP1, SKIN_HINT_BUTTON_DOWN1, SKIN_HINT_BUTTON_UP2, SKIN_HINT_BUTTON_DOWN2, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
 		InsertChild(HintButton);
 		Arrange();
-		if (GetEventHelp() == HINT_FIRST_LOGIN)
+		if (Help().GetEventHelp() == HINT_FIRST_LOGIN)
 			HandleEvent(EVENT_MAP_HINT);
 	} else if (!GetShowNewHints() && HintButton != nullptr) {
 		DeleteChild(HintButton);

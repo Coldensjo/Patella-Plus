@@ -946,7 +946,7 @@ void patella::TCommunication::ReceiveMap()
 	ReadMap(0, 0, 17, 13);
 	SetTalkChanged();
 	PlayerState.StopPlayer();
-	CheckEventHelpPosition(PlayerX, PlayerY, PlayerZ);
+	Help().CheckEventHelpPosition(PlayerX, PlayerY, PlayerZ);
 }
 
 void patella::TCommunication::ReceiveMapNorth()
@@ -958,7 +958,7 @@ void patella::TCommunication::ReceiveMapNorth()
 	int y;
 	int z;
 	Map.GetMapPosition(&x, &y, &z);
-	CheckEventHelpPosition(x, y, z);
+	Help().CheckEventHelpPosition(x, y, z);
 }
 
 void patella::TCommunication::ReceiveMapEast()
@@ -970,7 +970,7 @@ void patella::TCommunication::ReceiveMapEast()
 	int y;
 	int z;
 	Map.GetMapPosition(&x, &y, &z);
-	CheckEventHelpPosition(x, y, z);
+	Help().CheckEventHelpPosition(x, y, z);
 }
 
 void patella::TCommunication::ReceiveMapSouth()
@@ -982,7 +982,7 @@ void patella::TCommunication::ReceiveMapSouth()
 	int y;
 	int z;
 	Map.GetMapPosition(&x, &y, &z);
-	CheckEventHelpPosition(x, y, z);
+	Help().CheckEventHelpPosition(x, y, z);
 }
 
 void patella::TCommunication::ReceiveMapWest()
@@ -994,7 +994,7 @@ void patella::TCommunication::ReceiveMapWest()
 	int y;
 	int z;
 	Map.GetMapPosition(&x, &y, &z);
-	CheckEventHelpPosition(x, y, z);
+	Help().CheckEventHelpPosition(x, y, z);
 }
 
 // ReadField already refreshes visible-floor lighting; this handler deliberately does it again.
@@ -1901,7 +1901,7 @@ void patella::TCommunication::ReceiveFloorUp()
 	}
 	SetTalkChanged();
 	PlayerState.StopPlayer();
-	CheckEventHelpPosition(x, y, z);
+	Help().CheckEventHelpPosition(x, y, z);
 	for (int rx = 0; rx < 18; rx++) {
 		for (int ry = 0; ry < 14; ry++)
 			Map.UpdateAutomap(rx, ry);
@@ -1933,7 +1933,7 @@ void patella::TCommunication::ReceiveFloorDown()
 	}
 	SetTalkChanged();
 	PlayerState.StopPlayer();
-	CheckEventHelpPosition(x, y, z);
+	Help().CheckEventHelpPosition(x, y, z);
 	for (int rx = 0; rx < 18; rx++) {
 		for (int ry = 0; ry < 14; ry++)
 			Map.UpdateAutomap(rx, ry);

@@ -396,61 +396,6 @@ void patella::THelp::ExitHelp()
 
 // The functions of the original: each calls its member on the one TClient's THelp.
 
-void SetHelpPosition(int x, int y)
-{
-	Help().SetHelpPosition(x, y);
-}
-
-void MoveHelpPosition(int dx, int dy)
-{
-	Help().MoveHelpPosition(dx, dy);
-}
-
-void SetHelpSize(int Width, int Height)
-{
-	Help().SetHelpSize(Width, Height);
-}
-
-void SetHelpHandle(int Handle)
-{
-	Help().SetHelpHandle(Handle);
-}
-
-void GetHelpArea(int *x, int *y, int *Width, int *Height)
-{
-	Help().GetHelpArea(x, y, Width, Height);
-}
-
-int GetHelpHandle()
-{
-	return Help().GetHelpHandle();
-}
-
-bool TakeHelpHandleChanged()
-{
-	return Help().TakeHelpHandleChanged();
-}
-
-void InitHelp()
-{
-	Help().InitHelp();
-}
-
-void ExitHelp()
-{
-	patella::THelp::ExitHelp();
-}
-
-int GetEventHelp()
-{
-	return Help().GetEventHelp();
-}
-
-int PopEventHelp()
-{
-	return Help().PopEventHelp();
-}
-
 void AddEventHelp(int Number)
 {
 	Help().AddEventHelp(Number);
@@ -459,24 +404,4 @@ void AddEventHelp(int Number)
 void CheckEventHelpName(const char *Name)
 {
 	Help().CheckEventHelpName(Name);
-}
-
-void CheckEventHelpPosition(int x, int y, int z)
-{
-	Help().CheckEventHelpPosition(x, y, z);
-}
-
-const char *GetEventHelpTitle(int Number)
-{
-	return Help().GetEventHelpTitle(Number);
-}
-
-const char *GetEventHelpText(int Number)
-{
-	return Help().GetEventHelpText(Number);
-}
-
-const char *GetCurrentHelpText()
-{
-	return Help().GetCurrentHelpText();
 }

@@ -1952,11 +1952,11 @@ bool TWindow::HelpMouseMove(int x, int y)
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->Next) {
 		if (In(x - Child->OffsetX, 0, Child->Width - 1) && In(y - Child->OffsetY, 0, Child->Height - 1)
 			&& Child->HelpMouseMove(x - Child->OffsetX, y - Child->OffsetY)) {
-			MoveHelpPosition(Child->OffsetX, Child->OffsetY);
+			Help().MoveHelpPosition(Child->OffsetX, Child->OffsetY);
 			return true;
 		}
 	}
-	SetHelpHandle(HELP_NONE);
+	Help().SetHelpHandle(HELP_NONE);
 	return false;
 }
 

@@ -126,20 +126,5 @@ private:
 patella::THelp &Help();
 
 // Help.cpp's functions: each calls THelp's member of the same name on Help().
-void SetHelpPosition(int x, int y);
-void MoveHelpPosition(int dx, int dy);
-void SetHelpSize(int Width, int Height);
-void SetHelpHandle(int Handle);
-void GetHelpArea(int *x, int *y, int *Width, int *Height);
-int GetHelpHandle();
-bool TakeHelpHandleChanged();
-void InitHelp();
-void ExitHelp();
-int GetEventHelp();
-int PopEventHelp();
 void AddEventHelp(int Number);
 void CheckEventHelpName(const char *Name);
-void CheckEventHelpPosition(int x, int y, int z);
-const char *GetEventHelpTitle(int Number);
-const char *GetEventHelpText(int Number);
-const char *GetCurrentHelpText();
