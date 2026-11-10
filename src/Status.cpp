@@ -429,7 +429,7 @@ void patella::TInteraction::ClearMessages()
 // dangling until InitStatus.
 void patella::TInteraction::ExitStatus()
 {
-	Session().ExitSession(); // the character list
+	Session().Exit(); // the character list
 	if (TaintedClipboardText != nullptr)
 		delete[] TaintedClipboardText;
 	LinkRegexp.Reset();
@@ -634,8 +634,8 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	// The original set LinkRegexp to NULL first, so a second InitStatus without ExitStatus leaked the program;
 	// TRegexp's assignment frees it.
 	LinkRegexp = patella::TRegexp(LinkPattern);
-	Session().InitSession(Gamemaster); // the session's part, in its order below
-	Messages.clear();                  // the parameters not freed, as the original
+	Session().Init(Gamemaster); // the session's part, in its order below
+	Messages.clear();           // the parameters not freed, as the original
 	ActionNumber = 0;
 	DraggedObject.Type = 0;
 	DraggedObject.Data = 0;
@@ -655,7 +655,7 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 
 // InitStatus's part: the session's members in the order InitStatus wrote them (Gamemaster and the rights first, the
 // rest after its other data).
-void patella::TSession::InitSession(bool Value)
+void patella::TSession::Init(bool Value)
 {
 	Gamemaster = Value;
 	ClearRights();
@@ -669,7 +669,7 @@ void patella::TSession::InitSession(bool Value)
 }
 
 // ExitStatus's part: the character list, freed first.
-void patella::TSession::ExitSession()
+void patella::TSession::Exit()
 {
 	if (Characters != nullptr)
 		Characters.reset();

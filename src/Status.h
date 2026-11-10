@@ -50,7 +50,7 @@ struct TCharacter {
 namespace patella {
 
 // Status.cpp's session: the globals of the original are the members, with the same initial values (0), and the
-// functions that read and write only them the members of the same names. InitSession and ExitSession are InitStatus's
+// functions that read and write only them the members of the same names. Init and Exit are InitStatus's
 // and ExitStatus's part of them (not functions of the original).
 class TSession {
 public:
@@ -83,8 +83,8 @@ public:
 	[[nodiscard]] const char *GetCharacterWorld(int Number) const;
 	[[nodiscard]] const char *GetCharacterIPAddress(int Number) const;
 	[[nodiscard]] int GetCharacterPort(int Number) const;
-	void InitSession(bool Value);
-	void ExitSession();
+	void Init(bool Value);
+	void Exit();
 
 private:
 	std::array<int, RIGHT_ANY> Rights{};
