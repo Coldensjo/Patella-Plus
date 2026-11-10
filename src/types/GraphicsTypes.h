@@ -16,16 +16,12 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 
 // --- Graphics types -----------------------------------------------------------
 // The types of the drawing interface, used by every window file (GUI.h
-// includes graphics.h, which exports this header). Default construction zeroes them, as the binary's
-// compiler-generated constructors do (SkinProperties' constructor,
-// the new TSprite[] and new TPicture[] loops, DrawOutfit's colours).
+// includes graphics.h, which exports this header). Default construction
+// zeroes them.
 
-// A rectangle: position and size. The members are named by the assertions
-// "FromRect.width>0 && FromRect.height>0" (the surfaces' Blit and BlitRect)
-// and "ToRect.width<=..." (StretchBlit), and by the TRect members of
-// SkinProperties that GUI.cpp's assertions name with .x and .y
-// (StatusWindow.HitpointsBar.x, BuddylistWindow.Logo.y); TSkin (Skins.h) and
-// TDrawing (GUI.h) have the same lower-case names.
+// A rectangle: position and size. The lower-case names are the original's
+// (its assertions' texts have them), as TSkin's (Skins.h) and TDrawing's
+// (GUI.h).
 struct TRect { // passed by value
 	constexpr TRect() : x(0), y(0), width(0), height(0) {}
 	// The parameters are not named as the members: patella_core's GCC -Wshadow, since Skins.h includes this header.
@@ -43,7 +39,6 @@ struct TRGBColor { // passed by value
 		B = Color % 6 * 51;
 		G = Color / 6 % 6 * 51;
 	}
-	// operator!= negates the inlined operator==, as the binary's does.
 	// Not checked by AddressSanitizer: GetVideoPicture compares the colour key of the picture after the one it
 	// draws, past the end of Pictures for the last one, as the original does (graphics.cpp).
 	PATELLA_NO_SANITIZE_ADDRESS bool operator==(TRGBColor Other) const
@@ -57,9 +52,7 @@ struct TRGBColor { // passed by value
 	int R, G, B;
 };
 
-// The colour TFont's default constructor reads from memory. Every object
-// that constructs a TFont has its own copy, so it is a constant defined in a
-// header (internal linkage). The name is ours.
+// The colour of TFont's default constructor.
 constexpr TRGBColor DefaultFontColor(224, 224, 224);
 
 // The numbers of the four fonts (TFont::FontNumber, the FontNumber parameters, InitFont's FontName), 1 to
@@ -72,8 +65,7 @@ enum : int {           // NOLINT(cppcoreguidelines-use-enum-class): int constant
 	FONT_SMOOTH = 4,   // picture 8, FONT_SHARP's characters with smoothed edges: TFont's default and the console's text
 };
 
-// A text format: font, colour and alignment ("Format.Alignment" in
-// PrintFormattedText's assertion).
+// A text format: font, colour and alignment.
 struct TFont { // passed by value
 	TFont() : FontNumber(FONT_SMOOTH), Color(DefaultFontColor), Alignment(LEFT_ALIGN) {}
 	int FontNumber;

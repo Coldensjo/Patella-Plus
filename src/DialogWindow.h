@@ -32,7 +32,7 @@ inline constexpr int TRADE_WINDOW = 8;
 enum : int { CONTAINER_WINDOW = 0x40 }; // NOLINT(cppcoreguidelines-use-enum-class): an int constant
 // The other identifiers, named as TRADE_WINDOW is, after the windows' classes and creators (ContentWindows.h). The
 // first five are the side panel's fixed windows, the others the dialog window's, which the buttons open and close.
-// They are also the numbers of Tibia.cfg's OpenDialogs and, for the three with a stored height, ContentWindow.
+// They are also the numbers of Patella.ini's OpenDialogs and, for the three with a stored height, ContentWindow.
 // Enumerators for the reason in GUI.h.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	INVENTORY_WINDOW = 1,
@@ -67,8 +67,7 @@ public:
 };
 
 // The content of a TSubWindow (ContentWindows.h's bodies derive from it; here, so that DialogWindow.cpp, which calls
-// its virtual functions, does not include ContentWindows.h). Its constructor and its virtual functions are inline; no
-// vtable of its own is left (the constructors of the subclasses store theirs right after Minimized).
+// its virtual functions, does not include ContentWindows.h).
 class TSubWindowBody : public TWindow {
 public:
 	TSubWindowBody() { Minimized = false; }
@@ -114,7 +113,6 @@ public:
 	void SetIcon(TComponent *_Icon);
 	void SetTitle(TComponent *_Title);
 	static int GetFrameHeight(); // the title bar and the bottom edge
-	// Inline ("Window->GetBody()!=NULL", MainWindow.cpp).
 	[[nodiscard]] TSubWindowBody *GetBody() const { return Body; }
 
 	// The parts are owned by the child list while they are children and by the member while they are not (a minimized
@@ -153,7 +151,6 @@ public:
 	virtual void Rearrange(int Strategy, TComponent *Work);
 	TContentWindow *GetContentWindow(int Identifier);
 	void StoreOpenDialogs();
-	// Inline ("!DialogWindow->HasContentWindow(TRADE_WINDOW)", MainWindow.cpp).
 	bool HasContentWindow(int Identifier) { return GetContentWindow(Identifier) != nullptr; }
 	void PositionChildren(bool SkipDragged);
 	void FitChildren();

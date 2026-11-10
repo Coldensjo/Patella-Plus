@@ -285,7 +285,6 @@ uint32 patella::TCreatures::GetHighlightID() const
 	return HighlightID;
 }
 
-// Inlined into SetBuddyState and RemoveBuddy.
 int patella::TCreatures::GetBuddyPosition(uint32 CharacterID) const
 {
 	for (int i = 0; i < NumberOfBuddies; i++) {
@@ -376,8 +375,8 @@ void TCreature::StartMovement(int dx, int dy, int Waypoints)
 		Duration = Waypoints * 1000 / Speed;
 	else
 		Duration = 1000;
-	// Beat is the game login's word (Communication.cpp ReceiveGameLogin): 0 from the server trapped here in the
-	// original, whose catch wrapper made it a TMyException.
+	// Beat is the game login's word (Communication.cpp ReceiveGameLogin): a 0 from the server throws a TMyException
+	// here (PATELLA_DIVISOR).
 	const int Beat = patella::bridge::Creatures().Beat;
 	Duration = (Beat - 1 + Duration) / PATELLA_DIVISOR(Beat) * Beat;
 	DeltaX = -dx * 32;
@@ -1166,8 +1165,7 @@ bool patella::TPlayerState::ContinuePlayerWalk()
 	return FindPlayerPath() == 1;
 }
 
-// Empty. ExitControl calls it where Creatures.cpp's exit belongs in the reverse
-// order of InitControl (name ours, low confidence).
+// Empty. ExitControl calls it where Creatures.cpp's exit belongs in the reverse order of InitControl.
 void patella::TCreatures::ExitCreatures()
 {
 }

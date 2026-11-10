@@ -6,9 +6,8 @@
 #pragma once
 
 #include "common.h"
-// Nothing of Talk.h is used here, but without it the objects that include this header declare its names later, and
-// MSVC, which orders an object's globals by the names its translation unit declares, emits Communication.obj's .bss in
-// another order (OutfitRequested after the ATL statics): the images' .data moves (measured on x64).
+// Nothing of Talk.h is used here: it is included to keep the order in which the files that include this header declare
+// its names.
 #include "Talk.h" // IWYU pragma: keep
 #include "Status.h"
 #include "Protocol.h" // the packet types of the Send functions and of ReceivePackets (Control.cpp), named
@@ -186,8 +185,8 @@ public:
 	void ReceiveBuddyLogin();
 	void ReceiveBuddyLogout();
 
-	// Data, in the original's .data/.bss order. Public: Control.cpp writes OutfitRequested and the packet types
-	// (ReceivePackets, InitWindow); Status.cpp's functions reach Session through bridge::Session().
+	// Data. Public: Control.cpp writes OutfitRequested and the packet types (ReceivePackets, InitWindow); Status.cpp's
+	// functions reach Session through bridge::Session().
 	bool OutfitRequested{};                  // also reset by Control.cpp
 	int LastPacketIndex{};                   // Control.cpp's: next slot in LastPacketTypes
 	std::array<uint8, 10> LastPacketTypes{}; // Control.cpp's: the last ten packet types, a ring

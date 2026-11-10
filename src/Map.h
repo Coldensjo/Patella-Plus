@@ -31,9 +31,9 @@ inline constexpr int MAPSIZE_Z = 8;
 inline constexpr int EFFECTS = 200;
 
 // An effect. Status 0 is a free entry, 1 a graphical effect, 2 an animated text, 3 a missile. The three kinds share the
-// space after Type. Its anonymous structs are a Microsoft extension (GCC and Clang have it too), which MFC's headers
-// switched on for their includers (C4201) and -Wpedantic names: allowed for TEffect alone since patella_core compiles
-// Map.h without MFC (their members are TEffect's own names, Text, Direction..., throughout Map.cpp and the windows).
+// space after Type. Its anonymous structs are a Microsoft extension (GCC and Clang have it too), which MSVC's C4201 and
+// -Wpedantic name: allowed for TEffect alone (their members are TEffect's own names, Text, Direction..., throughout
+// Map.cpp and the windows).
 PATELLA_MSVC_WARNING(push)
 PATELLA_MSVC_WARNING(disable : 4201)
 #if defined(__GNUC__)
@@ -111,9 +111,8 @@ struct TAutomapBlock {
 	TAutomapLayer Color; // [x, y], palette colour
 	TAutomapLayer Speed; // [x, y], ground speed, 250 unknown, 255 blocked
 	bool Changed;
-	// The marks from 0 to MarkCount - 1. A TIndexedVector: MarkCount comes from the block's file (LoadAutomapBlock) and
-	// may be negative, and AddAutomapMark then indexes below 0, which grows the vector downwards; the reload clears min
-	// to max.
+	// The marks from 0 to MarkCount - 1. A TIndexedVector: LoadAutomapBlock and AddAutomapMark write at an index, and
+	// the vector grows to hold it; the reload clears min to max.
 	TIndexedVector<TMark> Marks;
 	int MarkCount;
 };
@@ -170,9 +169,8 @@ class TObjectTypes;
 
 // The default console, where TMap reports an automap file it could not read or save: Talk.cpp's, TGUI's, a later
 // subsystem than TMapState, so TMap reaches it only through this interface; Client.cpp implements it with Talk.cpp's
-// free functions (the golden tests fake them by their symbols). HasDefaultConsole is the original's check of
-// DefaultTextBuffer before the message is made, AddDefaultConsoleLine its AddTextBufferLine(DefaultTextBuffer, 0,
-// Message, 20, NULL, 0) and SetConsoleChanged.
+// free functions. HasDefaultConsole is the original's check of DefaultTextBuffer before the message is made,
+// AddDefaultConsoleLine its AddTextBufferLine(DefaultTextBuffer, 0, Message, 20, NULL, 0) and SetConsoleChanged.
 class TMapConsole {
 public:
 	TMapConsole() = default;
@@ -188,9 +186,9 @@ protected:
 };
 
 // Map.cpp's data and functions: the map points and their position, the effect table and the two iterators, the automap
-// blocks and their cache list, the ambient light, private as the file-local statics were, with the same initial values
-// (Fields and FieldNumber as their initialisers made them, the others 0). The functions are the members of the same
-// names, the file-local ones private. TMapState owns it (MapState.h), after TObjectTypes, which it reads.
+// blocks and their cache list, the ambient light, all private (Fields and FieldNumber start as their initialisers make
+// them, the others 0). The functions are the members of the same names, the file-local ones private. TMapState owns it
+// (MapState.h), after TObjectTypes, which it reads.
 class TMap {
 public:
 	TMap(TObjectTypes &ObjectTypes, TMapConsole &Console);
@@ -200,7 +198,7 @@ public:
 	TMap &operator=(TMap &&) = delete;
 	~TMap() = default;
 
-	// Position and coordinates (the gap before Map.cpp's first assertion).
+	// Position and coordinates.
 	void SetMapPosition(int x, int y, int z);
 	void GetMapPosition(int *x, int *y, int *z) const;
 	[[nodiscard]] int GetMapLevel() const;
@@ -294,7 +292,6 @@ private:
 	TObjectTypes &ObjectTypes;
 	TMapConsole &Console;
 
-	// Data, in the original's .data/.bss order.
 	void (*CreatureCallback)(int CreatureID){}; // called for every creature ClearField removes
 	int AmbienteActualBrightness{};             // follows AmbienteBrightness step by step
 	int AmbienteBrightness{};                   // -1: take the next value at once

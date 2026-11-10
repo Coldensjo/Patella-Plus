@@ -4,8 +4,6 @@
 
 #pragma once
 
-// Only <io.h> on Windows: the files that include this header included it at the same place before (MFC's
-// headers come after it there).
 #if defined(_WIN32)
 #include <io.h>
 #else
@@ -16,7 +14,7 @@
 
 #if defined(_WIN32)
 
-// On Windows the Microsoft functions' own names (compat/msvc.h says why).
+// On Windows the Microsoft function's own name, as compat/msvc.h's.
 #define MsvcEof _eof
 
 #else

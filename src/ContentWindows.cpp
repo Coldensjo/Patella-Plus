@@ -850,11 +850,7 @@ int TPlayerStates::GetIconAt(int x, int y) const
 }
 
 // The skin of the Position'th state that is on; 0 when fewer states are on.
-// State 9 has no icon. The original's default, never reached (i is 0-9), was
-// TERROR1(1063, "index out of range", i); it does nothing here: MSVC x86
-// removed its code but kept the function's exception frame, without the
-// frame's handler in the SafeSEH table, so an exception of a callee ended the
-// program.
+// State 9 has no icon.
 int TPlayerStates::GetIcon(int Position)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,SkinProperties().PlayerStates.NumberOfIcons-1), Position,
@@ -937,7 +933,7 @@ int TPlayerStates::GetIcon(int Position)
 		case 9:
 			Skin = SKIN_NONE;
 			break;
-		default: // never reached (i is 0-9): the original's TERROR1, see above
+		default: // never reached (i is 0-9)
 			break;
 		}
 	}
@@ -1658,8 +1654,6 @@ void TContainerWindowBody::Update()
 // none, or, with Occupied, for an empty one.
 int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 {
-	// x and y become positions in the slot grid in their own variables: the
-	// original's catch wrapper printed them.
 	x -= SkinProperties().ContainerFirstSlot.x;
 	y += ScrollBar->Range->Value - SkinProperties().ContainerFirstSlot.y;
 	const int Column = x / SkinProperties().ContainerColumnWidth;
@@ -1896,7 +1890,7 @@ int TSkillsWindowBody::GetMinimumHeight()
 	return (std::max)(ScrollBar->GetMinimumHeight(), LineHeight);
 }
 
-// The stored height ("ContentWindow" 6 in Tibia.cfg) or the full height,
+// The stored height ("ContentWindow" 6 in Patella.ini) or the full height,
 // at least the minimum.
 int TSkillsWindowBody::GetInitialHeight()
 {
@@ -2660,10 +2654,9 @@ int TTradeWindowBody::GetContentHeight()
 }
 
 // The height is limited to the range between the minimum and the maximum
-// height (both read twice, in either order). The calls go in the binary's
-// order (maximum, minimum, for the lower bound, then again for the upper
-// one) in their own variables: in one expression our compiler called them
-// in another order.
+// height (both read twice, in either order). The calls go in the original's
+// order (maximum, minimum, for the lower bound, then again for the upper one)
+// in their own variables: in one expression their order is the compiler's.
 void TTradeWindowBody::SetSize(int Width, int Height)
 {
 	int Maximum = GetMaximumHeight();

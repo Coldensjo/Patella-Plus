@@ -138,7 +138,6 @@ int vlong_value::cf(vlong_value &x) const
 	return 0;
 }
 
-// Inlined into divide.
 void vlong_value::shl()
 {
 	unsigned carry = 0;
@@ -150,7 +149,6 @@ void vlong_value::shl()
 	}
 }
 
-// Inlined into divide.
 void vlong_value::shr()
 {
 	unsigned carry = 0;

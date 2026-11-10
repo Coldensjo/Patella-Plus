@@ -211,7 +211,6 @@ TSurfaceVulkan::~TSurfaceVulkan()
 	PresentWindows.Retire();
 }
 
-// The same code in all engines.
 bool TSurfaceVulkan::ClipRect(TRect Clip, patella::platform::TEdgeRect *Area, patella::platform::TEdgeRect *Source)
 {
 	const int ClipRight = Clip.x + Clip.width;
@@ -316,7 +315,6 @@ void TSurfaceVulkan::FillRectangle(int Surface, TRect Area, TRGBColor Color)
 	}
 }
 
-// FillRectangleClipped: the pixel count uses the size before clipping.
 void TSurfaceVulkan::FillRectangleClipped(int Surface, TRect Area, TRGBColor Color, TRect Clip)
 {
 	patella::platform::TEdgeRect R = {Area.x, Area.y, Area.x + Area.width, Area.y + Area.height};
@@ -532,13 +530,12 @@ bool TSurfaceVulkan::Init(patella::platform::TWindowHandle *Window, int VMode, T
 	return true;
 }
 
-// The display modes as surfaceDX9.cpp's DirectDraw 4 EnumDisplayModes(0) and its callback (SurfaceDX.obj's
-// copy) gave them: the display's modes in the order EnumDisplaySettings lists them, each size and depth
-// once (without DDEDM_REFRESHRATES DirectDraw folds the refresh rates), at least 640x480 and 16 bits.
-// Frequency is 0: DirectDraw then reports none, and the callback tested the refresh rate's flag in the
-// pixel format's flags, where it is never set. The test build can fix the list. The modes are the
-// platform's IWindow::DisplayMode (platform/Window.h; SDL3's list on every system, with the deliberate
-// differences of platform/DisplayModeList.h).
+// The display modes as surfaceDX9.cpp's DirectDraw 4 EnumDisplayModes(0) and its callback gave them: the
+// display's modes in the order EnumDisplaySettings lists them, each size and depth once (without
+// DDEDM_REFRESHRATES DirectDraw folds the refresh rates), at least 640x480 and 16 bits. Frequency is 0:
+// DirectDraw then reports none, and the callback tested the refresh rate's flag in the pixel format's
+// flags, where it is never set. The modes are the platform's IWindow::DisplayMode (platform/Window.h;
+// SDL3's list on every system, with the deliberate differences of platform/DisplayModeList.h).
 int TSurfaceVulkan::GetFullscreenModes(TFullscreenMode **Modes)
 {
 	*Modes = nullptr;
@@ -648,7 +645,7 @@ void TSurfaceVulkan::BlitRectClipped(int ToSurface, int x, int y, int FromSurfac
 }
 
 // InitSurfaces: the start state. surfaceDX9.cpp creates DirectDraw 4 here for the modes and the stretch
-// capabilities; the modes come from EnumDisplaySettings now (GetFullscreenModes), and Vulkan stretches on
+// capabilities; the modes come from the platform's list now (GetFullscreenModes), and Vulkan stretches on
 // every device, so CanStretch is set (surfaceDX9.cpp: DirectDraw's four stretch and shrink flags).
 void TSurfaceVulkan::InitSurfaces()
 {
@@ -827,7 +824,7 @@ void TSurfaceVulkan::CreateSurfaces()
 		throw TProgramError{PROGRAM_ERROR::COLOR_DEPTH};
 	if (ViewMode == FULLSCREEN_MODE) {
 		// Direct3D 9's fullscreen device sets the display mode; the window is already a popup over the
-		// whole screen (MainFrm.cpp SetDisplayMode; SdlFrame.cpp's: SDL's fullscreen window). Here the platform's
+		// whole screen (SdlFrame.cpp's SetDisplayMode: SDL's fullscreen window). Here the platform's
 		// IWindow::SetFullscreenMode does (the width, height and bits per pixel; SDL3's SDL_SetWindowFullscreenMode
 		// on every system).
 		patella::platform::TDisplayMode Mode;

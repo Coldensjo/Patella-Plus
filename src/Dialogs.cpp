@@ -523,9 +523,8 @@ TDialog *CreateHotkeyDialog()
 
 // --- TDialog ----------------------------------------------------------------------
 
-// The assertions come after the base class and the two callbacks, before the original's try
-// block. The frame has nine skins (43-51, Arrange); the caption is copied, the buttons are
-// OK and Cancel until the creator changes them.
+// The frame has nine skins (43-51, Arrange); the caption is copied, the buttons are OK and
+// Cancel until the creator changes them.
 TDialog::TDialog(const char *_Caption, TComponent *_Dialog)
 {
 	PATELLA_ASSERT(_Caption!=nullptr);
@@ -659,8 +658,7 @@ void TDialog::KeyPress(int Key)
 	Dialog->KeyPress(Key);
 }
 
-// A drag keeps the dialog inside the game window. The new position is a value
-// of its own: the original's catch wrapper prints the mouse position.
+// A drag keeps the dialog inside the game window.
 bool TDialog::MouseMove(int x, int y)
 {
 	if (!Dragging)
@@ -1076,9 +1074,7 @@ void TMoveObjectsDialog::HandleEvent(int Event)
 
 namespace {
 
-// The colour of an outfit colour button: GetOutfitColor runs inside the
-// new-expression (after the allocation), so the binary has it in the
-// argument list (inlined; the name is ours).
+// The colour of an outfit colour button.
 inline TRGBColor OutfitColor(int Color)
 {
 	int R, G, B;
@@ -2442,8 +2438,8 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 	SetChildArea(AdvancedLabel, SkinProperties().GraphicsOptionsDialogAdvancedLabel);
 	SetChildPosition(AdvancedButton, SkinProperties().GraphicsOptionsDialogAdvancedButton.x, SkinProperties().GraphicsOptionsDialogAdvancedButton.y);
 	Fullscreen->SetChecked(GetViewMode() == 2);
-	// GetFullscreenModes stores its new[] list (or NULL) through the pointer it is given; Modes takes it over. Every
-	// engine writes the pointer before anything else.
+	// GetFullscreenModes stores its new[] list (or NULL) through the pointer it is given; Modes takes it over. The
+	// surface writes the pointer before anything else.
 	TFullscreenMode *List = nullptr;
 	NumberOfModes = GetSurface()->GetFullscreenModes(&List);
 	Modes.reset(List);

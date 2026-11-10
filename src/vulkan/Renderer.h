@@ -45,7 +45,7 @@ struct TDeviceRequest {
 	// about it through its driver setting VK_DRIVER_FILES in this process only, and only when the CPU
 	// driver is wanted; empty: no CPU driver.
 	std::string CpuDriverManifest;
-	// The window system's instance extension (VK_KHR_win32_surface; empty: headless).
+	// The window system's instance extension (VK_KHR_win32_surface on Windows; empty: headless).
 	std::string SurfaceExtension;
 	// Creates the window's surface on the instance (empty function: headless).
 	std::function<VkSurfaceKHR(VkInstance)> CreateSurface;

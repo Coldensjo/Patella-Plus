@@ -229,7 +229,7 @@ uint32 TReadBuffer::GetQuad()
 }
 
 // Reads at most MaxLength-1 characters; skips the rest. Text is the original's (Buffer, MaxLength): its size as an int
-// is MaxLength, so a size above INT_MAX is the original's negative MaxLength, no limit (only the tests pass one).
+// is MaxLength, so a size above INT_MAX is the original's negative MaxLength, no limit.
 void TReadBuffer::GetString(patella::TSpan<char> Text)
 {
 	char *const Buffer = Text.data();

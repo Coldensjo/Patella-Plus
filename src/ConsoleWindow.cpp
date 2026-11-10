@@ -64,7 +64,7 @@ const char *TextReportRuleViolation = "Report Rule Violation"; // 146
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
 // ParseInput's error names its value "(Word) MessageSeparator": the char
-// converted to an unsigned 16-bit value (movsx, movzx).
+// converted to an unsigned 16-bit value.
 using Word = uint16;
 
 // --- TTextWindow -----------------------------------------------------------------------------
@@ -571,8 +571,6 @@ bool TTextWindow::GetPosition(int x, int y, int *Line, int *Offset, int *Length)
 					return false;
 				x = 0;
 			}
-			// The position in the text is a value of its own: in a register): the original's catch
-			// wrapper prints x without the indent.
 			int TextX;
 			if (x < Format->Indent)
 				TextX = 0;
@@ -717,8 +715,7 @@ static_assert(std::is_nothrow_destructible_v<TTab> && std::is_nothrow_destructib
 // gamemaster's open request closed, a public channel left; the player's own
 // private channel only when it was closed by the server (Locked) and private
 // channels only when the player may write. Then the buffer is deleted
-// (Talk.cpp). The original's handlers rethrow out of the destructor; an
-// exception of the calls passes out of the close.
+// (Talk.cpp). An exception of the calls passes out of the close.
 void TTab::OnClose()
 {
 	if (TextBuffer->IsRuleViolation() && TextBuffer->GetReceiveTalkMode() == TALK_GAMEMASTER_ANSWER) {
@@ -1052,8 +1049,8 @@ void TTabBar::OnClose()
 	TWindow::OnClose();
 }
 
-// The public channels of all tabs go to the preferences
-// (Tibia.cfg's open channels).
+// The public channels of all tabs go to the preferences (Patella.ini's
+// OpenChannel).
 void TTabBar::StoreOpenChannels()
 {
 	ClearOpenChannels();
@@ -1216,7 +1213,7 @@ TConsoleWindow::~TConsoleWindow()
 // Stores the open channels and the console height, closes the buttons that
 // are not children, removes the hotkeys; then the children (the tab bar with
 // its tabs). An exception of the calls passes out of the close after the
-// children's closes, as the original's ~TWindow ran while it passed.
+// children's closes.
 void TConsoleWindow::OnClose()
 {
 	try {

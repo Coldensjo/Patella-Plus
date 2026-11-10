@@ -259,8 +259,7 @@ void patella::TInventory::ResetInventory()
 	InitInventory();
 }
 
-// Empty. ExitControl calls it where Inventory.cpp's exit belongs in the reverse
-// order of InitControl (name ours, low confidence).
+// Empty. ExitControl calls it where Inventory.cpp's exit belongs in the reverse order of InitControl.
 void patella::TInventory::ExitInventory()
 {
 }

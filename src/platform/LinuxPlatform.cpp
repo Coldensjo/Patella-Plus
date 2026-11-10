@@ -40,8 +40,8 @@ public:
 constinit TLinuxClock LinuxClockInstance;
 constinit TSdlLoopInput SdlLoopInputInstance;
 
-// The program's arguments, read once (the test mode's start reads them before main, as Windows' GetCommandLine answers
-// at any time): /proc/self/cmdline, NUL-separated, without the program's name.
+// The program's arguments, read once, at any time (also before main, as Windows' GetCommandLine answers):
+// /proc/self/cmdline, NUL-separated, without the program's name.
 std::vector<std::string> &ArgumentList()
 {
 	static std::vector<std::string> &List = *[] {

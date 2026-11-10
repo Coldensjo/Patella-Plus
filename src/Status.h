@@ -50,10 +50,9 @@ struct TCharacter {
 
 namespace patella {
 
-// Status.cpp's session: the globals of the original are the members, in its order with the same initial values (0, as
-// the original's .bss), and the functions that read and write only them the members of the same names. InitSession and
-// ExitSession are InitStatus's and ExitStatus's part of them (not functions of the original: InitStatus inlined
-// ClearRights).
+// Status.cpp's session: the globals of the original are the members, with the same initial values (0), and the
+// functions that read and write only them the members of the same names. InitSession and ExitSession are InitStatus's
+// and ExitStatus's part of them (not functions of the original).
 class TSession {
 public:
 	TSession() = default;
@@ -89,7 +88,6 @@ public:
 	void ExitSession();
 
 private:
-	// Data, in the original's .bss order.
 	std::array<int, RIGHT_ANY> Rights{};
 	bool Gamemaster{}; // sent in the game login packet
 	int PremiumDays{};
@@ -105,9 +103,9 @@ private:
 	static_assert(sizeof(AccountPassword) == 30 && sizeof(AccountNumberString) == 12, "SetAccount's buffers");
 };
 
-// Status.cpp's user interaction: the globals that are not the session's are the members, in the original's .bss order
-// with the same initial values (0, as its .bss), and the functions that read and write them the members of the same
-// names. TGUI owns it (GUI.h). GetRightName and GetActionName read no data and stay free functions.
+// Status.cpp's user interaction: the globals that are not the session's are the members, with the same initial values
+// (0), and the functions that read and write them the members of the same names. TGUI owns it (GUI.h). GetRightName and
+// GetActionName read no data and stay free functions.
 class TInteraction {
 public:
 	TInteraction() = default;
@@ -162,7 +160,6 @@ public:
 	void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
 
 private:
-	// Data, in the original's .bss order.
 	TRegexp LinkRegexp;                  // LinkPattern compiled (owned)
 	char *TaintedClipboardText{};        // name from an assertion
 	void (*LinkWarningEventHandler)(){}; // from "linkwarningeventhandler!=NULL"
@@ -312,5 +309,5 @@ void CopyTaintedClipboardText();
 void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
 
 // Events.h, the message and event numbers, comes last on purpose: included at the top of this file, its enumerators
-// moved data in the executable (measured; the Release build is compared byte for byte).
+// moved data in the executable (measured when the build was compared with the original byte for byte).
 #include "Events.h"

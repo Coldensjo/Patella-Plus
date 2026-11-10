@@ -42,7 +42,7 @@
 #define PATELLA_HAS_CONTRACTS 0
 #endif
 
-// Not Clang with libstdc++ (linux-x64-clang: Clang 23 with GCC 16's library, which says 202603): libstdc++ 16's
+// Not Clang with libstdc++ (Clang 23 with GCC 16's library, which says 202603): libstdc++ 16's
 // inplace_vector is GCC's. Under Clang 23 its _M_init names is_trivial_v, deprecated in C++26, in a template the code
 // instantiates (-Wdeprecated-declarations, an error under -Werror), and its constexpr copy is not a constant
 // expression ("subobject '_M_elems' is not initialized"). Clang keeps the stand-in.

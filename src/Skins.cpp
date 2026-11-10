@@ -1,9 +1,6 @@
 // Skins.cpp: the table of the skins, the rectangles of the GUI graphics in
 // Tibia.pic; see Skins.h.
 
-// common.h first, where Skins.h included it before: Skins.cpp uses nothing of it, but in the client's builds it
-// brings MFC, whose per-object statics and initialisers Skins.obj has in the image (without it Skins.obj loses
-// its .data, .CRT$XCU and ATL sections, and the images' .data moves).
 #include "common.h" // IWYU pragma: keep
 #include "Skins.h"
 

@@ -13,9 +13,8 @@ namespace patella {
 // which the engine's surface gets at its construction), with the same initial values. A part of TGraphics (graphics.h,
 // its member Engine), declared here and defined in Surface.cpp, as TSession is Status.cpp's inside TCommunication.
 // Surface.cpp's functions are its members of the same names; the free functions forward to them. The data the other
-// files read or write was extern and is public (Control.cpp, Dialogs.cpp, MainFrm.cpp, Player.cpp and the golden tests;
-// the Vulkan engine through its TSurfaceShared); the surface object is private, and the main window is the base's, read
-// by TSurface's TestEngine.
+// files read or write is public (Player.cpp; the Vulkan engine through its TSurfaceShared); the surface object is
+// private, and the main window is the base's, read by TSurface's TestEngine.
 class TGraphicsEngine final : public platform::TSurfaceShared {
 public:
 	TGraphicsEngine() = default;
@@ -25,14 +24,12 @@ public:
 	TGraphicsEngine &operator=(TGraphicsEngine &&) = delete;
 	~TGraphicsEngine() = default;
 
-	TSurface *GetSurface(); // the x64 client's
+	TSurface *GetSurface();
 	void SurfaceExitInstance();
-	void SurfaceInitInstance(platform::TWindowHandle Window); // the x64 client's
+	void SurfaceInitInstance(platform::TWindowHandle Window);
 
-	// .data (the base's after the cache surfaces' size)
 	int CommandLineEngine = -1; // "engine N" on the command line (Player.cpp); -1 = none
-	// .bss (the base's, but for these two)
-	bool Initialised{}; // SurfaceInitInstance has run: only from then on does GetSurface make the surface
+	bool Initialised{};         // SurfaceInitInstance has run: only from then on does GetSurface make the surface
 
 private:
 	TSurface *Surface{}; // the engine's surface; raw, as the original's (deleted by SurfaceExitInstance)

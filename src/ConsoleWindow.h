@@ -3,10 +3,10 @@
 // TConsoleWindow is MainWindow.cpp's Console: a tab bar (TTabBar) with one tab
 // (TTab) per open channel, the view of the current channel (TConsole: a
 // TTextWindow and a scroll bar), the edit line and the buttons. A TTextWindow
-// shows the lines of a Talk.cpp text buffer, broken into TLineFormats (0x28
-// bytes) that fit its width, with a selection. Tabs that do not fit into the bar
-// are moved into two hidden windows of the bar (LeftTabs, RightTabs), whose arrow
-// buttons scroll them back in.
+// shows the lines of a Talk.cpp text buffer, broken into TLineFormats that fit
+// its width, with a selection. Tabs that do not fit into the bar are moved into
+// two hidden windows of the bar (LeftTabs, RightTabs), whose arrow buttons
+// scroll them back in.
 
 #pragma once
 

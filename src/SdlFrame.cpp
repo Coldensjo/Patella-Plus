@@ -132,11 +132,11 @@ TFrame FrameSize()
 	return Frame;
 }
 
-// Win32's: the extended styles of the original's frame window, which SDL3 does not set. MFC's frame windows have
-// a client edge (CFrameWnd::PreCreateWindow's WS_EX_CLIENTEDGE: 2 pixels around the client area), which SetDisplayMode
+// Win32's: the extended styles of the original's frame window, which SDL3 does not set. MFC's frame windows have a
+// client edge (CFrameWnd::PreCreateWindow's WS_EX_CLIENTEDGE: 2 pixels around the client area), which SetDisplayMode
 // takes away with WS_EX_APPWINDOW for fullscreen mode and gives back for windowed mode (ModifyStyleEx). SDL3 reads the
 // window's extended styles when it computes the outer rectangle, so its sizes stay the client area's, and the outer
-// rectangle (Patella.ini's, the comparisons' GetWindowPlacement) is the MFC frame's for the same client area.
+// rectangle (Patella.ini's) is the MFC frame's for the same client area.
 void SetFrameStyle([[maybe_unused]] DWORD Remove, [[maybe_unused]] DWORD Add)
 {
 #if defined(_WIN32)
@@ -582,13 +582,13 @@ void OnText(const char *Text)
 }
 
 #if defined(_WIN32)
-// Win32 until the Linux client: the window's WM_CHAR (a UTF-16 unit: SDL's window is a Unicode window; a surrogate pair
-// comes as two), as CMainFrame::OnChar got it, converted to the client's Windows-1252 and handed to OnChar. SDL's text
-// events would differ from the original's WM_CHAR: SDL delivers text only to the window with the keyboard focus and
-// drops every text that starts with a control character, but the original handled every WM_CHAR its window got, focused
-// or not, posted by another program or made by TranslateMessage (Return, Tab, Ctrl+letter ...). So on Windows SDL never
-// sees WM_CHAR; its text events still bring the IME's results (SDL takes those from WM_IME_COMPOSITION itself) and the
-// test mode's scripted characters (OnText).
+// On Windows: the window's WM_CHAR (a UTF-16 unit: SDL's window is a Unicode window; a surrogate pair comes as two), as
+// CMainFrame::OnChar got it, converted to the client's Windows-1252 and handed to OnChar. SDL's text events would
+// differ from the original's WM_CHAR: SDL delivers text only to the window with the keyboard focus and drops every text
+// that starts with a control character, but the original handled every WM_CHAR its window got, focused or not, posted
+// by another program or made by TranslateMessage (Return, Tab, Ctrl+letter ...). So on Windows SDL never sees WM_CHAR;
+// its text events still bring the IME's results (SDL takes those from WM_IME_COMPOSITION itself) and the test mode's
+// scripted characters (OnText).
 char16_t HighSurrogate = 0;
 
 void OnWindowChar(WPARAM WParam)
@@ -727,14 +727,14 @@ void OnButton(const SDL_MouseButtonEvent &Event)
 #endif
 
 #if defined(_WIN32)
-// Win32 until the Linux client: the button messages, as CMainFrame's handlers got them (OnLButtonDown, OnLButtonDblClk,
-// OnLButtonUp, OnRButtonDown, OnRButtonDblClk, OnRButtonUp), after SDL's window procedure has seen them (their
-// Default()). SDL's button events would differ from the original's messages: their point is SDL's last mouse position,
-// not the message's (a click posted by another program comes without the cursor there: SDL had the real cursor's
-// place, clamped to the window), their double clicks SDL's own count over its clock, not the message Windows made
-// (WM_LBUTTONDBLCLK), and SDL makes or drops presses from the message's MK_ flags against its own button state. So on
-// Windows SDL's button events are not used, and each button message is the press or release it says, at its point
-// (in fullscreen mode a screen point).
+// On Windows: the button messages, as CMainFrame's handlers got them (OnLButtonDown, OnLButtonDblClk, OnLButtonUp,
+// OnRButtonDown, OnRButtonDblClk, OnRButtonUp), after SDL's window procedure has seen them (their Default()). SDL's
+// button events would differ from the original's messages: their point is SDL's last mouse position, not the message's
+// (a click posted by another program comes without the cursor there: SDL had the real cursor's place, clamped to the
+// window), their double clicks SDL's own count over its clock, not the message Windows made (WM_LBUTTONDBLCLK), and SDL
+// makes or drops presses from the message's MK_ flags against its own button state. So on Windows SDL's button events
+// are not used, and each button message is the press or release it says, at its point (in fullscreen mode a screen
+// point).
 void OnButtonMessage(UINT Message, LPARAM LParam)
 {
 	int x = static_cast<short>(LOWORD(LParam));

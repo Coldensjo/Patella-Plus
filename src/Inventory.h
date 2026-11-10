@@ -31,9 +31,9 @@ namespace patella {
 
 class TObjectTypes;
 
-// Inventory.cpp's data and functions: the body slots, the open containers and the two offers, in the original's .bss
-// order, every member 0 at the start; the functions are the members of the same names. TMapState owns it (MapState.h),
-// last; it reads TObjectTypes' NoObject. The data is private, as the file-local statics were.
+// Inventory.cpp's data and functions: the body slots, the open containers and the two offers, every member 0 at the
+// start; the functions are the members of the same names. TMapState owns it (MapState.h), last; it reads TObjectTypes'
+// NoObject. The data is private.
 class TInventory {
 public:
 	explicit TInventory(TObjectTypes &ObjectTypes);
@@ -79,7 +79,6 @@ public:
 private:
 	TObjectTypes &ObjectTypes;
 
-	// Data, in .bss order.
 	std::array<TObject, BODY_POSITIONS> Body{};
 	std::array<TContainer, OPEN_CONTAINERS> Containers{};
 	TOffer OwnOffer{};

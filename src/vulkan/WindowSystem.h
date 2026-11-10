@@ -52,7 +52,7 @@ protected:
 	~IWindowSystem() = default;
 };
 
-// The SDL3 window's (SDL's video subsystem started: SdlFrame.cpp's Create, tests_vulkan's main).
+// The SDL3 window's (SDL's video subsystem started: SdlFrame.cpp's Create).
 [[nodiscard]] IWindowSystem &SdlWindowSystem();
 
 } // namespace patella::vulkan

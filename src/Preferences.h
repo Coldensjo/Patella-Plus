@@ -93,9 +93,9 @@ protected:
 };
 
 // Preferences.cpp's data and functions: the globals of the original are the members, with the same initial values (the
-// others 0, as the original's .bss), and the functions the members of the same names. The ones that reach Talk's lists
-// take them as Lists. The files are the platform's (IFileSystem, platform/FileSystem.h; Tibia.cfg's existence;
-// Script.cpp opens the file itself).
+// others 0), and the functions the members of the same names. The ones that reach Talk's lists take them as Lists. The
+// files are the platform's (IFileSystem, platform/FileSystem.h; Tibia.cfg's existence; Script.cpp opens the file
+// itself).
 class TPreferences {
 public:
 	explicit TPreferences(patella::platform::IFileSystem &FileSystemRef) : FileSystem(FileSystemRef) {}
@@ -197,7 +197,6 @@ public:
 	void ExitPreferences(TTalkLists &Lists);
 
 private:
-	// Data, in the original's .data/.bss order.
 	int WindowedWidth = 600; // "WindowedMode = (x,y,Width,Height,Maximized)"
 	int WindowedHeight = 400;
 	std::array<bool, SKILLS> SkillBars{}; // "SkillBars = {...}"
@@ -236,9 +235,9 @@ private:
 	bool LightEffects{};
 	bool WindowsMousepointer{};
 	TFullscreenMode FullscreenMode{}; // Width 0 = not set
-	int ViewMode{};                   // "ViewMode" in a MainFrm.cpp catch block
-	bool TestServerLogin{};           // "TestServer = yes"
-	bool PreferencesLoaded{};         // set by InitPreferences; SavePreferences writes only then
+	int ViewMode{};
+	bool TestServerLogin{};   // "TestServer = yes"
+	bool PreferencesLoaded{}; // set by InitPreferences; SavePreferences writes only then
 	int WindowedX{};
 	int WindowedY{};
 	// The original's vector<T>(0, 9, 10) each, with the counts above: the lists that append at their count and read

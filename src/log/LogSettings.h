@@ -26,8 +26,8 @@ inline constexpr const char *FileKey = "LogFile";
 // through Files.
 void Configure(TLog &Target, const patella::settings::TSettingsFile &Settings, patella::platform::IFileSystem &Files);
 
-// Reads Patella.ini (settings::FileName) through Files (the platform's IFileSystem: the working folder's) and
-// configures Log() with it; nothing without the file.
+// Reads Patella.ini (settings::FileName) through Files (the platform's IFileSystem) and configures Log() with it;
+// nothing without the file.
 void LoadSettings(patella::platform::IFileSystem &Files);
 
 } // namespace patella::log

@@ -79,12 +79,7 @@
 #if defined(_WIN32)
 
 // On Windows each name is the Microsoft function's own (a macro, not a forwarder), so that every call is the
-// same call as before and the client's translation units declare nothing more: a forwarder template for
-// _snprintf inlines into other code (MSVC x64 copies SetCharacter's four uint8 before their promotion to int:
-// 16 or 32 bytes more code in Status.cpp, by value or by reference), and the inline forwarders, though they
-// inline away, are declarations that move globals (MSVC emits an object's globals in an order that depends on
-// how many names the translation unit declares: with them, Surface.cpp's globals came out rotated, its .bss in
-// the oracle and its .data on x64). Measured on the images.
+// Microsoft function's call and the client's translation units declare nothing more.
 #define MsvcSnprintf _snprintf
 #define MsvcStricmp _stricmp
 #define MsvcStrdup _strdup
@@ -100,8 +95,7 @@
 
 // The Linux client (cmake/LinuxX64.cmake): the original's rand, MSVC's (the state * 214013 + 2531011, bits
 // 16-30), so the client's random numbers (the XTEA keys and the login's filler, Network.cpp's first server, the frames'
-// padding) are the ones a seed gives on Windows; glibc's are another sequence. Not the golden runner's: its rand is its
-// import slot (tests/golden/linux/windows.h).
+// padding) are the ones a seed gives on Windows; glibc's are another sequence.
 #if defined(PATELLA_MSVC_RAND) && !defined(_WIN32)
 inline unsigned int &PatellaRandState() noexcept
 {

@@ -102,8 +102,8 @@ void TWin32Window::VisitWindows(TWindowVisitor Visit)
 	EnumWindows(VisitWindow, reinterpret_cast<LPARAM>(Visit));
 }
 
-// The display's modes are SDL3's on every system (TSdlWindow, platform/SdlPlatform.cpp). TWin32Window is the golden
-// runner's, whose code asks nothing of the display.
+// The display's modes are SDL3's on every system (TSdlWindow, platform/SdlPlatform.cpp), which asks TWin32Window for
+// the desktop's windows only.
 bool TWin32Window::DisplayMode(unsigned int, TDisplayMode &)
 {
 	return false;
@@ -128,9 +128,9 @@ constinit TWin32Window Win32WindowInstance;
 constinit TSdlLoopInput SdlLoopInputInstance;
 } // namespace
 
-// The data folder's files (platform/FileSystem.h), set by ConfigureDataFiles (DataLocationWin32.cpp); until then, and
-// in the golden runner, the working folder's. Its folders are not constant-initialised: made on first use, never
-// destroyed (the files are open to the very end, as the clock is read).
+// The data folder's files (platform/FileSystem.h), set by ConfigureDataFiles (DataLocationWin32.cpp); until then the
+// working folder's. Its folders are not constant-initialised: made on first use, never destroyed (the files are open
+// to the very end, as the clock is read).
 TDataFileSystem &SystemFileSystem()
 {
 	static TDataFileSystem &Instance = *new TDataFileSystem; // NOLINT(cppcoreguidelines-owning-memory): never destroyed
@@ -167,8 +167,7 @@ IWindow &WindowDesktop()
 	return SdlWindow();
 }
 
-// Patella.exe's and the golden runner's platform (Platform.h). The input is the window's (WindowInput), the clipboard
-// and the desktop too.
+// Patella.exe's platform (Platform.h). The input, the clipboard and the desktop are the SDL3 window's.
 TPlatform &Platform()
 {
 	static TPlatform Instance{Win32ClockInstance, SystemFileSystem(), NetworkSocket(), WindowClipboard(),

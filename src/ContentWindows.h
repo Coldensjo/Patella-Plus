@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "common.h" // IWYU pragma: keep (first: it configures the CRT and MFC for the headers after it)
+#include "common.h" // IWYU pragma: keep (first: it configures the CRT for the headers after it)
 #include "GUI.h"
 #include "DialogWindow.h"
 #include "Map.h" // TMark

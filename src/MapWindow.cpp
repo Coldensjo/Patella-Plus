@@ -52,8 +52,7 @@ const char *TextSelectPlayerToTrade = "Select a player to trade with."; // 125
 namespace {
 
 // Limits Value to the range between Bound1 and Bound2, which may come in
-// either order. The binary has no copy: it is inlined everywhere (with
-// constant bounds only the first branch is left).
+// either order.
 inline void Limit(int &Value, int Bound1, int Bound2)
 {
 	if (Bound1 > Bound2) {
@@ -101,8 +100,6 @@ void TMapWindow::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// The area is the TRect SkinProperties.MapHintButton, copied as one 16-byte
-// block (sub esp,0x10 and four stores).
 void TMapWindow::Arrange()
 {
 	if (HintButton != nullptr)
@@ -352,8 +349,6 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		return false;
 	const TCreature *Player = GetCreature(GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
-	// The help position goes into x and y, so the original's catch wrapper
-	// printed it after an error in MoveHelpPosition or SetHelpSize.
 	if (GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
 		y = FieldY * 32 - (352 - Height) / 2 - Player->GetDeltaY() - 32;
@@ -369,8 +364,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	return true;
 }
 
-// The blocks with their own try follow the binary's exception table. MSVC's analysis (C6262): the original's buffers on
-// the stack.
+// MSVC's analysis (C6262): the buffers on the stack.
 PATELLA_MSVC_WARNING(suppress : 6262)
 void TMapWindow::Draw(int Surface, int x, int y)
 {
@@ -779,7 +773,6 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (Elevation > 24)
 			Elevation = 24;
 	}
-	// The catch block prints the object ("Obj" and the type).
 	if (Lying) {
 		if (FieldX > 0) {
 			if (FieldY > 0)
@@ -1252,10 +1245,10 @@ TCacheField *TMapWindow::GetCacheField(int FieldX, int FieldY)
 }
 
 // Lights the fields within Brightness fields of map surface position
-// posx/posy (which are moved to field pixels first; the catch blocks print
-// the moved values): the colour falls off linearly over Brightness*32
-// pixels (scaled by 1/160), by a further 1/5 on fields without a ground,
-// and each field keeps the brightest value of each component.
+// posx/posy (which are moved to field pixels first): the colour falls off
+// linearly over Brightness*32 pixels (scaled by 1/160), by a further 1/5 on
+// fields without a ground, and each field keeps the brightest value of each
+// component.
 void TMapWindow::AddLightSource(int posx, int posy, int z, int Brightness, TRGBColor Color)
 {
 	if (Brightness <= 0)

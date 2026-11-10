@@ -1319,8 +1319,6 @@ void TEditLine::KeyPress(int Key)
 				else
 					HandleEvent(EVENT_DELETE);
 			}
-			// Past the modifier test the binary keeps the code in Key's stack slot:
-			// the original's catch wrapper then prints the code.
 			if ((Key & KEY_CONTROL) == 0 || (Key & KEY_ALT) != 0) {
 				Key = Code;
 				if (Key >= ' ' && Key < KEY_F1 && (int)strlen(Text.get()) < MaxLength) {
@@ -1510,7 +1508,7 @@ void TPasswordEditLine::Draw(int Surface, int x, int y)
 	Text.swap(Stars);
 }
 
-// Only pasting; the catch blocks name Event with the constant 18.
+// Only pasting.
 void TPasswordEditLine::HandleEvent(int Event)
 {
 	if (Event == EVENT_PASTE) {
@@ -1823,7 +1821,6 @@ void TEditText::FormatText()
 
 // --- TFocusGroup ------------------------------------------------------------------
 
-// No EH frame.
 TFocusGroup::TFocusGroup() : MemberList(0, 2, 2, nullptr)
 {
 	Members = 0;
@@ -1920,7 +1917,7 @@ void THorizontalScrollBarRange::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// The slider's share is computed on the x87 stack (double precision here).
+// The slider's share is computed in double precision.
 void THorizontalScrollBarRange::Arrange()
 {
 	DrawingList[0] = TDrawing(SKIN_HSCROLLBAR_TRACK, 0, 0, Width, Height, 0, 0);
@@ -2048,8 +2045,6 @@ void THorizontalScrollBarRange::KeyPress(int Key)
 
 // --- THorizontalScrollBar ---------------------------------------------------------
 
-// The catch block prints the minimum and maximum under the names Min and
-// Max (the binary's message; the range's assertion says _Min and _Max).
 THorizontalScrollBar::THorizontalScrollBar(int Min, int Max, int _Value, int _Visible, int _ButtonRange,
 	TCallback _Callback)
 {
@@ -2064,8 +2059,7 @@ THorizontalScrollBar::THorizontalScrollBar(int Min, int Max, int _Value, int _Vi
 	TWindow::InsertChild(Range);
 }
 
-// The parameters are changed in place (the catch blocks report the
-// changed values).
+// The parameters are changed in place.
 void THorizontalScrollBar::SetSize(int Width, int Height)
 {
 	Height = SkinProperties().HorizontalScrollBarHeight;
@@ -2271,7 +2265,6 @@ void TScrollBarRange::KeyPress(int Key)
 
 // --- TScrollBar -------------------------------------------------------------------
 
-// The catch block prints Min and Max, as THorizontalScrollBar's.
 TScrollBar::TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, int _ButtonRange)
 {
 	PATELLA_ASSERT_VALUES(_ButtonRange>0, _ButtonRange);

@@ -23,9 +23,8 @@
 #include <cstdlib>
 #include <cstring>
 
-// The data is TNetwork's (Network.h), in the original's order with its addresses. The socket is the platform's
-// (ISocket, platform/Socket.h; the original's CAsyncSocket class of this file is Win32's TSocket,
-// platform/Win32Platform.h), and its events come to TNetwork's OnConnect, OnReceive and OnClose.
+// The data is TNetwork's (Network.h). The socket is the platform's (ISocket, platform/Socket.h), and its events come to
+// TNetwork's OnConnect, OnReceive and OnClose.
 
 patella::TNetwork::TNetwork(TPreferences &PreferencesRef, TNetworkSession &SessionRef, platform::ISocket &SocketsRef)
 	: Preferences(PreferencesRef), Session(SessionRef), Sockets(SocketsRef)
@@ -39,8 +38,6 @@ static_assert(sizeof(TServer::Address) == patella::buildconfig::MaxHostName + 1,
 void patella::TNetwork::InitServerList()
 {
 	memset(Servers.data(), 0, sizeof(Servers));
-	// One statement each, with each name a constant here, as the original's: tools/patch_client.py finds this function
-	// by the code's reference to the first name's text.
 	constexpr const char *ServerName0 = patella::buildconfig::LoginServers[0];
 	constexpr const char *ServerName1 = patella::buildconfig::LoginServers[1];
 	constexpr const char *ServerName2 = patella::buildconfig::LoginServers[2];
@@ -348,8 +345,7 @@ uint32 patella::TNetwork::GetQuad()
 	return ReceiveBuffer.GetQuad();
 }
 
-// Buffer and MaxLength are the span's pointer and size, the names of the macros' text (TReadBuffer::GetString);
-// MaxLength only the original's catch wrapper named.
+// Buffer and MaxLength are the span's pointer and size, the names of the macros' text (TReadBuffer::GetString).
 void patella::TNetwork::GetString(patella::TSpan<char> Text)
 {
 	const char *const Buffer = Text.data();
@@ -469,8 +465,7 @@ void patella::TNetwork::GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>
 	Out.Append(".");
 }
 
-// Starts an asynchronous lookup; NetworkWindow gets
-// HOSTNAME_RESOLVED_MESSAGE (WM_USER+1) when it completes.
+// Starts an asynchronous lookup; the platform reports its end to SdlFrame.cpp's HostResolved.
 bool patella::TNetwork::ResolveHostname(const char *Hostname)
 {
 	PATELLA_ASSERT(Hostname!=nullptr);
@@ -607,7 +602,7 @@ void patella::TNetwork::ConnectToGameServer()
 	Session.SetConnectionState(CONNECTION_CONNECTING_GAME_SERVER);
 	const int Character = Session.GetActiveCharacter();
 	const char *IPAddress = Session.GetCharacterIPAddress(Character);
-	Session.GetCharacterPort(Character); // result unused in the binary
+	Session.GetCharacterPort(Character); // result unused, as in the original
 	int Error = CreateSocket();
 	if (Error != 0) {
 		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader

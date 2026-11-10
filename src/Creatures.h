@@ -136,8 +136,8 @@ protected:
 
 // What TCreatures and TPlayerState ask of the GUI: Talk.cpp's status message, Help.cpp's hints, Status.cpp's message
 // queue and action number, all TGUI's, a later subsystem than TMapState, so they reach them only through this
-// interface. Client.cpp implements it with those files' free functions (the golden tests fake them by their symbols).
-// Each member is the original's call of the same name and parameters.
+// interface. Client.cpp implements it with those files' free functions. Each member is the original's call of the same
+// name and parameters.
 class TCreaturesGUI {
 public:
 	TCreaturesGUI() = default;
@@ -156,9 +156,9 @@ protected:
 };
 
 // Creatures.cpp's creature table, battle list and VIP list: Creatures, FirstOpponent, LastOpponent, Beat, the attack,
-// follow and highlight targets and the buddy window's list, in the original's .bss order, every member 0 at the start;
-// the functions that use them are the members of the same names. The data is private, as the file-local statics were;
-// TCreature's StartMovement reads Beat (a friend). TMapState owns it (MapState.h), after TMap.
+// follow and highlight targets and the buddy window's list, every member 0 at the start; the functions that use them
+// are the members of the same names. The data is private; TCreature's StartMovement reads Beat (a friend). TMapState
+// owns it (MapState.h), after TMap.
 class TCreatures {
 public:
 	TCreatures(TCreaturesPlayer &PlayerState, TCreaturesGUI &GUI);
@@ -225,7 +225,6 @@ private:
 	TCreaturesPlayer &PlayerState;
 	TCreaturesGUI &GUI;
 
-	// Data, in .bss order.
 	std::array<int, 3> BuddySortMethods{}; // 0 name, 1 icon, 2 online; most significant first
 	std::array<TBuddyEntry, BUDDIES> Buddies{};
 	int NumberOfOnlineBuddies{};
@@ -243,10 +242,9 @@ private:
 };
 
 // Creatures.cpp's player state: PlayerID, the statistics and skills, the state icons and the walk (the steps, the
-// destination, the step not confirmed yet), in the original's .bss order, every member 0 at the start; the functions
-// that use them are the members of the same names. The data is private; TCreature's members read and write the step not
-// confirmed yet (a friend). TMapState owns it, after TCreatures, whose creature table it reads; it reads the map and
-// the object types too.
+// destination, the step not confirmed yet), every member 0 at the start; the functions that use them are the members of
+// the same names. The data is private; TCreature's members read and write the step not confirmed yet (a friend).
+// TMapState owns it, after TCreatures, whose creature table it reads; it reads the map and the object types too.
 class TPlayerState {
 public:
 	TPlayerState(TObjectTypes &ObjectTypes, TMap &Map, TCreatures &Creatures, TCreaturesGUI &GUI);
@@ -315,7 +313,6 @@ private:
 	TCreatures &Creatures;
 	TCreaturesGUI &GUI;
 
-	// Data, in .bss order.
 	int PlayerState{}; // the state icons, one bit each
 	std::array<int, SKILLS> PlayerSkillProgress{};
 	std::array<int, SKILLS> PlayerSkillValue{};

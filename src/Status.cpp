@@ -53,7 +53,6 @@ bool patella::TSession::CheckAnyRight() const
 	return false;
 }
 
-// Inlined into InitStatus.
 void patella::TSession::ClearRights()
 {
 	for (int i = 0; i < RIGHT_ANY; i++)
@@ -654,8 +653,8 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	PendingActionNumber = 0;
 }
 
-// InitStatus's part: the session's members in the order InitStatus wrote them (Gamemaster and the rights first,
-// ClearRights inlined there; the rest after its other data).
+// InitStatus's part: the session's members in the order InitStatus wrote them (Gamemaster and the rights first, the
+// rest after its other data).
 void patella::TSession::InitSession(bool Value)
 {
 	Gamemaster = Value;

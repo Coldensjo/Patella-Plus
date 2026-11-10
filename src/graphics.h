@@ -213,7 +213,7 @@ public:
 	TSkins Skins;
 
 private:
-	// graphics.cpp's data, in .bss order.
+	// graphics.cpp's data.
 	std::array<int, HASH_TABLE_SIZE> MemoryHashTable{};
 	std::array<int, HASH_TABLE_SIZE> VideoHashTable{};
 	int NumberOfFonts{};

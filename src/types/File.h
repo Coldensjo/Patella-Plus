@@ -116,7 +116,7 @@ public:
 	}
 
 #if defined(_WIN32)
-	// _wfopen_s(&File, Name, Mode): a UTF-16 name, the file not shared while it is open (the test mode's dumps).
+	// _wfopen_s(&File, Name, Mode): a UTF-16 name, the file not shared while it is open.
 	bool Open(const wchar_t *Name, TAccess Access, TContent Content = TContent::Binary) noexcept
 	{
 		if (!Usable(Access, Content))

@@ -7,7 +7,7 @@
 // and the dialog window on the right, SkinProperties.SideBarWidth wide. The
 // heights of the map and the console follow the console height of the
 // preferences and the minimum sizes; the splitter changes the console's
-// height. Leaving a mode (ChangeMode, the destructor) stores the open
+// height. Leaving a mode (ChangeMode, the close) stores the open
 // sub-windows of both columns in the preferences; entering the game opens
 // them again.
 
@@ -729,8 +729,7 @@ void TSplitter::Arrange()
 }
 
 // Mouse cursor 2 is the vertical size arrow. While dragging, the console
-// follows the mouse; the global MainWindow is used, not the parent. x has
-// no name in the catch block.
+// follows the mouse; the global MainWindow is used, not the parent.
 bool TSplitter::MouseMove([[maybe_unused]] int x, int y)
 {
 	const patella::TGUI &GUI = patella::bridge::GUI();
@@ -761,7 +760,7 @@ bool TSplitter::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[m
 
 // --- The main window -------------------------------------------------------
 
-// Called by CMainFrame::OnCreate.
+// Called by SdlFrame.cpp's Create.
 void patella::TGUI::InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
 	void (*OpenURL)(const char *URL))
 {

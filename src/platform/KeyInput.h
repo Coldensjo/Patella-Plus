@@ -24,7 +24,7 @@
 
 namespace patella::platform {
 
-// The client's modifier flags (MainFrm.h's KEY_SHIFT, KEY_CONTROL, KEY_ALT; SdlFrame.cpp checks they are the same).
+// The client's modifier flags: GUI.h's KEY_SHIFT, KEY_CONTROL and KEY_ALT take these values.
 inline constexpr int KeyFlagShift = 0x200;
 inline constexpr int KeyFlagControl = 0x400;
 inline constexpr int KeyFlagAlt = 0x800;

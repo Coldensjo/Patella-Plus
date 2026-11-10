@@ -25,10 +25,9 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 };
 
 // The surfaces of an engine, by index (the int Surface/ToSurface/FromSurface
-// arguments of the drawing slots). SPRITE_SURFACE is the first of the video
-// cache surfaces (graphics.cpp's Item.Surface + 6). The names are from the
-// assertions of SurfaceDX.cpp and surfaceDX9.cpp ("Surface9[SPRITE_SURFACE]").
-// Unscoped int constants, as the view modes'.
+// arguments of the drawing functions). SPRITE_SURFACE is the first of the video
+// cache surfaces (graphics.cpp's Item.Surface + 6). Unscoped int constants, as
+// the view modes'.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	PRIMARY_SURFACE = 0,
 	SCREEN_SURFACE = 1,
@@ -51,8 +50,8 @@ struct TEdgeRect {
 };
 
 // The data the engines share with the client: Surface.cpp's (TGraphicsEngine's, which derives from this). The engine
-// sets the cache surfaces' size. The main window is Surface.cpp's file-local value: TGraphicsEngine sets it
-// (SurfaceInitInstance), TSurface reads it (TestEngine).
+// sets the cache surfaces' size. The main window is set by TGraphicsEngine (SurfaceInitInstance) and read by TSurface
+// (TestEngine).
 class TSurfaceShared {
 public:
 	TSurfaceShared(const TSurfaceShared &) = delete;
@@ -75,12 +74,8 @@ public:
 
 } // namespace patella::platform
 
-// Slots with _purecall in the binary are pure; the others have the default
-// bodies in Surface.cpp. Slot names and parameters come from the calls
-// (graphics.cpp and the window files) and from SurfaceDX.cpp's
-// implementations; ToSurface, FromSurface, VMode, GMode and ViewMode are the
-// binary's (assertions), the other names are ours. Surfaces 6 and up are the
-// video cache surfaces.
+// The functions that are not pure have their bodies in Surface.cpp. Surfaces
+// 6 and up are the video cache surfaces.
 class TSurface {
 public:
 	// Shared: the data the engines share with the client (above), the creator's; it outlives the surface.
@@ -102,9 +97,7 @@ public:
 	virtual void WriteMaskedImage(int ToSurface, int x, int y, int Width, int Height, std::uint8_t *Data,
 		std::uint8_t *Mask, TRGBColor *Colors) = 0;
 	// The blits take the source part as a TRect FromRect (and StretchBlit the
-	// target as ToRect): the assertions name FromRect.width/height and
-	// ToRect.width/height, and every caller builds the 16-byte block on the
-	// stack.
+	// target as ToRect).
 	virtual void BlitRect(int ToSurface, int x, int y, int FromSurface, TRect FromRect) = 0;
 	virtual void Blit(int ToSurface, int x, int y, int FromSurface, TRect FromRect,
 		TRGBColor ColorKey) = 0;
@@ -168,6 +161,6 @@ public:
 	int Framerate;     // the frame limit; 0xffff is none
 
 protected:
-	// The engine's shared data. After the original's members, so their order is the original's.
+	// The engine's shared data.
 	patella::platform::TSurfaceShared &Shared;
 };

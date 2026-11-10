@@ -39,9 +39,8 @@ using TNativeSocket = int;
 inline constexpr TNativeSocket InvalidNativeSocket = -1;
 #endif
 
-// A connection: the original's CAsyncSocket of Network.cpp with its events, which call the ISocketEvents it
-// was made for (the original's OnSend is empty and has no counterpart). TPortableSocket keeps its state here; the replay's
-// TPipeSocketWin32 calls the events itself.
+// A connection: the original's CAsyncSocket of Network.cpp with its events, which call the ISocketEvents it was made
+// for (the original's OnSend is empty and has no counterpart). TPortableSocket keeps its state here.
 class TSocket final {
 public:
 	explicit TSocket(ISocketEvents &Owner) : Events(Owner) {}

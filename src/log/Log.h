@@ -120,8 +120,8 @@ inline std::string FormatLine(TLevel Level, std::string_view Message)
 	return Line;
 }
 
-// Where a log writes its lines besides the file: a function given each whole line (WriteToStderr by default; the
-// unit tests capture them), or nullptr for nowhere.
+// Where a log writes its lines besides the file: a function given each whole line (WriteToStderr by default), or
+// nullptr for nowhere.
 using TConsole = void (*)(std::string_view Line) noexcept;
 
 // The C library's stderr: the line in one write, then flushed.

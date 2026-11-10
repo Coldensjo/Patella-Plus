@@ -8,14 +8,9 @@
 #include <cstddef>
 #include <memory>
 
-// A reference to an object (passed by value). Type is named in
-// MapWindow.cpp's "SrcObj.Type!=CREATURE" (CREATURE is 99), Data in Dialogs.cpp's
-// "In(DraggedObject.Data,1,100)" (the count); Data2 is ours. The default constructor
-// clears the object: Map.cpp's TMapPoint, ten TObjects and plain ints, has a
-// compiler-generated constructor that zeroes exactly the ten objects. Written with
-// default member initializers so that the type stays an aggregate. MapWindow.cpp
-// compares objects with numbers ("SrcObj!=0", "Obj!=CREATURE") and prints one as the
-// int value of Obj in its catch wrapper: the original converts a TObject to its Type.
+// A reference to an object (passed by value); Data is the count where the object has one. The default constructor
+// clears the object, written with default member initializers so that the type stays an aggregate. An object converts
+// to its Type, as the original's does: MapWindow.cpp compares objects with numbers ("SrcObj!=0", "Obj!=CREATURE").
 struct TObject {
 	int Type = 0;
 	int Data = 0;
@@ -126,9 +121,9 @@ inline uint8 FlagByte(const TProperties &Entry, int Flag)
 namespace patella {
 
 // Objects.cpp's data and functions: Tibia.dat's four tables, read once, then read-only, and the functions of the same
-// names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. Of the data (.bss:
-// every member starts empty) DatSignature and NoObject are public: Communication.cpp sends DatSignature and compares
-// with NoObject, Inventory.cpp and Map.cpp return NoObject.
+// names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. Of the data (every
+// member starts empty) DatSignature and NoObject are public: Communication.cpp sends DatSignature and compares with
+// NoObject, Inventory.cpp and Map.cpp return NoObject.
 class TObjectTypes {
 public:
 	TObjectTypes() = default;
@@ -203,16 +198,15 @@ public:
 	void ExitObjects();
 
 private:
-	// Data, in .bss order. The four tables own their arrays (std::unique_ptr; the entries' Sprites stay raw, freed by
-	// ReleaseObjects).
+	// The four tables own their arrays (std::unique_ptr; the entries' Sprites stay raw, freed by ReleaseObjects).
 	std::unique_ptr<array<TProperties>> MissileProperties;
 	std::unique_ptr<array<TProperties>> EffectProperties;
 	std::unique_ptr<array<TProperties>> OutfitProperties;
 	std::unique_ptr<array<TProperties>> ObjectProperties; // from 100
 
 public:
-	uint32 DatSignature{}; // sent at login and when patching
-	TObject NoObject;      // never written; owner inferred from the address
+	uint32 DatSignature{}; // sent at login
+	TObject NoObject;      // never written
 };
 
 // The transition's access path: the object types of the one TClient (Client.cpp). It goes when no free function needs

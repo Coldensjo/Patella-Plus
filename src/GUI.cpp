@@ -26,8 +26,8 @@
 // ~TComponent frees it with reset() where the original had delete[]; TDrawing's destructor is trivial, so the reset
 // cannot throw.
 
-// The data of .bss (NumberOfHotkeys, Timers, Hotkeys, UpdateTimers' static LastTime) is TGUI's (GUI.h); SkinProperties
-// is TGraphics' TSkins' (Skins.h), which InitSkinProperties below fills.
+// The timers, the hotkeys and UpdateTimers' LastTime are TGUI's (GUI.h); SkinProperties is TGraphics' TSkins'
+// (Skins.h), which InitSkinProperties below fills.
 
 int TTimer::GetTime() const
 {
@@ -108,8 +108,6 @@ TComponent *TWindow::GetLastChild()
 
 TElement::TElement() = default;
 
-// Identical code to any two-member constructor, so the linker may have
-// folded others into it.
 TCallback::TCallback(TComponent *Receiver, int Event)
 {
 	this->Receiver = Receiver;
@@ -122,9 +120,6 @@ void patella::TGUI::InitHotkeys()
 	Hotkeys.clear();
 }
 
-// The one copy the linker kept of many identical empty functions (folded).
-// ExitControl calls this one first; TComponent::Arrange and
-// PositionChanged and TElement::StopDragging have the same body.
 void patella::TGUI::ExitHotkeys()
 {
 }
@@ -239,8 +234,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 
 // --- Skin properties ------------------------------------------------------
 
-// Called by InitControl after InitSkins. The binary stores the values in
-// another order; they are written here by offset.
+// Called by InitControl after InitSkins.
 void InitSkinProperties()
 {
 	SkinProperties().CursorHotspot1.x = 0;
@@ -1550,7 +1544,7 @@ void patella::TGUI::RemoveTimer(TTimer *Timer)
 // Called by ProcessEvents. The first call only starts the clock.
 void patella::TGUI::UpdateTimers()
 {
-	if (!LastTimeSet) { // the original's function-local static, initialised on the first call
+	if (!LastTimeSet) {
 		LastTime = GetMilliseconds();
 		LastTimeSet = true;
 	}
@@ -1576,7 +1570,6 @@ TTimer::TTimer(int Time, TCallback Callback)
 	}
 }
 
-// The deleting destructor; this destructor is inlined into it.
 TTimer::~TTimer()
 {
 	RemoveTimer(this);
@@ -1833,9 +1826,7 @@ void TWindow::SetPosition(int _OffsetX, int _OffsetY)
 // Deletes the children. After the window's Close its children are closed and
 // DeleteChild only removes and frees them. A window destroyed without a close
 // is one whose constructor threw (its fully made bases are destroyed): then
-// DeleteChild closes each child, as the original's destructors did their work
-// there, and an exception of it ends the program, as the original's second
-// exception during the unwinding did.
+// DeleteChild closes each child, and an exception of it ends the program.
 TWindow::~TWindow()
 {
 	while (FirstChild != nullptr)
@@ -1995,9 +1986,8 @@ void TWindow::StopDragging()
 	}
 }
 
-// Negative coordinates count from the right and bottom edges, sizes below
-// 1 are relative to the space left. They name the window's Width and
-// Height, not the area (whose name is ours, as FitToChild's).
+// Negative coordinates count from the right and bottom edges, sizes below 1
+// are relative to the space left.
 void TWindow::SetChildArea(TComponent *Child, TRect Area)
 {
 	PATELLA_ASSERT(Child->Parent==this);
@@ -2177,7 +2167,6 @@ void patella::TGUI::AddHotkey(int Key, TCallback Callback)
 	Hotkeys.insert_or_assign(Key, Callback);
 }
 
-// The last entry takes the place of the removed one.
 void patella::TGUI::RemoveHotkey(int Key)
 {
 	Hotkeys.erase(Key);

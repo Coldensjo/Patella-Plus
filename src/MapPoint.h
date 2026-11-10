@@ -92,7 +92,7 @@ inline void ClearPointObjects(TMapPoint &Point) noexcept
 
 // AddObject's position for Obj: ground objects first, then borders, bottom objects, top objects, and new creatures
 // above the creatures, other objects below them. OBJECTS_PER_POINT on a full point when Obj belongs on top: AddObject
-// then drops it. GetFlag is GetObjectFlag (a parameter, so that the tests need no Tibia.dat).
+// then drops it. GetFlag is GetObjectFlag, passed as a parameter.
 template <class FlagFunction>
 [[nodiscard]] int AddPosition(const TMapPoint &Point, const TObject &Obj, FlagFunction GetFlag)
 {

@@ -32,7 +32,7 @@ public:
 	[[nodiscard]] bool IgnoreDesktopInput() override { return false; }
 };
 
-// MessageBoxA, EnumWindows (GetWindowTextA, GetClassNameA). No display modes: the golden runner asks none.
+// MessageBoxA, EnumWindows (GetWindowTextA, GetClassNameA). No display modes: those are SDL3's (TSdlWindow).
 class TWin32Window final : public IWindow {
 public:
 	void ShowMessageBox(TWindowHandle Owner, const char *Text, const char *Caption, TMessageBoxIcon Icon) override;
@@ -44,8 +44,8 @@ public:
 	[[nodiscard]] bool Headless() override { return false; }
 };
 
-// The Win32 implementations, made on first use and never destroyed: Patella.exe's Platform(), and the parts of the
-// test build's (TestModeWin32.cpp) that are not the test mode's.
+// The Win32 implementations, there before any static initialiser and never destroyed: TSdlLoopInput reads the cursor
+// through the one, TSdlWindow visits the desktop's windows through the other.
 TWin32Input &Win32Input();
 TWin32Window &Win32Window();
 } // namespace patella::platform

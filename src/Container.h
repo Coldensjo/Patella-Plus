@@ -14,16 +14,12 @@
 // uninitialised). The element types' destructors cannot throw (scalars, pointers and plain structures), so neither can
 // the reset.
 
-// array<T> is a fixed array indexed from min to min+d-1. The class name is
-// ours; min, d, i, low() and high() are named in the assertions and in the
-// error message of operator().
+// array<T> is a fixed array indexed from min to min+d-1.
 template <class T> class array {
 public:
 	array(const array &) = delete;
 	array &operator=(const array &) = delete;
 	array(int Min, int Max);
-	// Inlined into Objects.cpp's ReleaseObjects (delete[] entry, then
-	// operator delete on the array itself).
 	~array() { entry.reset(); }
 	T &operator()(int i);
 	int low() { return min; }
@@ -55,9 +51,8 @@ template <class T> T &array<T>::operator()(int i)
 	return entry[i];
 }
 
-// matrix<T> is a fixed two-dimensional array indexed from xmin/ymin; matrix3d<T> its three-dimensional counterpart.
-// The class names are ours; xmin, ymin, zmin, dx, dy, dz, x, y and z are named in the assertions and error messages.
-// x is the fastest index. The destructors free the entries.
+// matrix<T> is a fixed two-dimensional array indexed from xmin/ymin; matrix3d<T> its three-dimensional counterpart. x
+// is the fastest index. The destructors free the entries.
 //
 // The entries are indexed through a std::mdspan view over the owned storage (src/compat/mdspan.h): view() makes one
 // from entry and the extents, layout_left, so view()[x, y] is entry[y * dx + x] and view()[x, y, z]

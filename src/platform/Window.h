@@ -49,9 +49,9 @@ public:
 	// Switches the display to Mode (width, height, bits per pixel) for the fullscreen window Window: false where the
 	// display has no such mode or the change failed. With Mode null the display goes back to the desktop's mode.
 	virtual bool SetFullscreenMode(TWindowHandle Window, const TDisplayMode *Mode) = 0;
-	// True when the client runs without a desktop (the test build's --test-headless; Patella.exe's false): its main
-	// window is never shown (it exists, hidden, for its messages), the Vulkan engine renders without a surface and
-	// presents nothing, and fullscreen mode leaves the display's mode alone.
+	// True when the client runs without a desktop (never Patella's own platform): its main window is never shown (it
+	// exists, hidden, for its events), the Vulkan engine renders without a surface and presents nothing, and fullscreen
+	// mode leaves the display's mode alone.
 	[[nodiscard]] virtual bool Headless() = 0;
 
 protected:

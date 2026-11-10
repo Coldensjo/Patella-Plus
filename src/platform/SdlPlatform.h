@@ -32,7 +32,7 @@ public:
 	// Patella.exe always has a desktop.
 	[[nodiscard]] bool Headless() override { return false; }
 #if !defined(_WIN32)
-	// This process's own SDL windows (the test build's count of the Tibia windows).
+	// This process's own SDL windows: what VisitWindows can visit on Linux.
 	void VisitOwnWindows(TWindowVisitor Visit);
 #endif
 };

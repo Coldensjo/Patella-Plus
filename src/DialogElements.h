@@ -268,8 +268,7 @@ public:
 	bool Enabled;
 };
 
-// The buttons of a radio group (the type name is ours). Selected
-// is left uninitialised.
+// The buttons of a radio group. Selected is left uninitialised.
 struct TRadioButtonGroup {
 	TRadioButtonGroup() : Buttons(0, 0, 10, nullptr) { Count = 0; }
 	TSkinButton *Selected;
@@ -749,8 +748,8 @@ public:
 	int EditScroll; // the scroll position when the edit started
 };
 
-// A line of a TFontListBox (the type name is ours). The
-// constructor is implicit (TFont's defaults; Text is left as it is).
+// A line of a TFontListBox. The constructor is implicit (TFont's defaults;
+// Text is left as it is).
 struct TListBoxLine {
 	char *Text;
 	TFont Font;

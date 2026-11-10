@@ -61,9 +61,8 @@ void TReadScriptFile::error(const char *Text)
 // strings need no terminator; Bytes shares its buffer. Identifiers start
 // with a letter; '-' before a number is a SPECIAL token (readNumber handles
 // the sign). IsAlpha compares with signed chars, so umlauts from getc (0xe4
-// and so on) are not letters here: they become SPECIAL tokens. The jump
-// table has the 24 cases below; states 9 and 18-21 do not exist and go to
-// the default.
+// and so on) are not letters here: they become SPECIAL tokens. States 9 and
+// 18-21 do not exist and go to the default.
 void TReadScriptFile::nextToken()
 {
 	if (File == nullptr)
@@ -345,8 +344,6 @@ void TReadScriptFile::nextToken()
 		default:
 			TERROR1("invalid state", State);
 		}
-		// The binary checks this after every state change (the first pass
-		// starts at the switch).
 		if (Size == MAX_STRING_LENGTH - 1)
 			error("string too long");
 	}
@@ -430,7 +427,7 @@ uint8 TReadBinaryFile::readByte()
 	return Byte;
 }
 
-// Little-endian. Returns a 16-bit value: every caller zero-extends AX.
+// Little-endian.
 uint16 TReadBinaryFile::readWord()
 {
 	const uint8 Low = readByte();

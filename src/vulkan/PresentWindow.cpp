@@ -66,7 +66,7 @@ void DestroyChild(HWND &Window)
 }
 
 // A shown device window's rectangle taken out of Context's clipping region (Parent's client coordinates); its
-// own WS_VISIBLE, not IsWindowVisible, which a hidden main window (tests_vulkan's) would make false.
+// own WS_VISIBLE, not IsWindowVisible, which a hidden main window would make false.
 void ExcludeChild(HDC Context, HWND Parent, HWND Window)
 {
 	if (Window == nullptr || !IsWindow(Window) || (GetWindowLongPtrA(Window, GWL_STYLE) & WS_VISIBLE) == 0)

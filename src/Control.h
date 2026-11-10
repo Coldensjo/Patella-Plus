@@ -3,7 +3,7 @@
 // dispatcher, and start-up and shutdown of all modules.
 //
 // The functions are TGUI's members (GUI.h), defined in Control.cpp; these free functions of the same names forward to
-// them for the callers outside TGUI (SdlFrame.cpp, Player.cpp, the test mode) and for InitControl's callbacks.
+// them for the callers outside TGUI (SdlFrame.cpp, Player.cpp) and for InitControl's callbacks.
 
 #pragma once
 

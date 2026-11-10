@@ -19,7 +19,7 @@
 #include "graphics.h"
 #include <array>
 
-// The map surface in fields ("GetWidth()<=MAP_WIDTH*32"): 480x352 pixels.
+// The map surface in fields: 480x352 pixels.
 inline constexpr int MAP_WIDTH = 15;
 inline constexpr int MAP_HEIGHT = 11;
 

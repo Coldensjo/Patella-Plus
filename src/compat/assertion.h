@@ -70,7 +70,6 @@ template <class T> T CheckedDivisor(T Value, const char *Expression, const TSour
 
 // PATELLA_DIVISOR(Value): an integer divisor that input can make zero (a packet's field, a value of Tibia.dat), as the
 // division's (or the remainder's) right operand. It is the value, evaluated once; when it is zero, a TMyException is
-// thrown instead of the division: the original (MSVC 7.1, whose catch-all handlers caught structured exceptions)
-// trapped there and its catch wrapper turned the trap into a TMyException; the x64 client builds with /EHsc, where
-// nothing catches a trap.
+// thrown instead of the division, which would trap: the original caught the trap and reported it as a TMyException,
+// and nothing in this client catches a trap.
 #define PATELLA_DIVISOR(Value) (::patella::CheckedDivisor((Value), #Value, PATELLA_SOURCE_LOCATION()))

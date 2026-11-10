@@ -9,8 +9,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 // PATELLA_CORE: the portable code of the patella_core library (cmake/Core.cmake), built without the Windows headers.
-// The rest of the client's code: the Windows headers (WinSock 2 first, it must come before windows.h); on Linux the
-// golden runner's stand-ins of tests/golden/linux, of the same names.
+// The rest of the client's code: the Windows headers (WinSock 2 first, it must come before windows.h).
 #if !defined(PATELLA_CORE)
 #include <winsock2.h>
 #include <windows.h>
@@ -20,9 +19,8 @@
 #include "compat/win32_types.h" // IWYU pragma: export
 #endif
 // <string>, <cstring>, <cstdio> and <cstdlib>: nothing of them is used here, and every file that uses them includes
-// them itself, but here they come before compat/msvc.h's C headers. Without them every translation unit declares these
-// names in another order, and MSVC, which orders an object's globals by the names its translation unit declares, places
-// the test build's in another order (measured: the test build's .data moves).
+// them itself. Here they come before compat/msvc.h's C headers, which keeps the order in which every translation unit
+// declares their names.
 #include <cstdint>
 #include <string> // IWYU pragma: keep
 #include <type_traits>
@@ -70,11 +68,9 @@ inline void Limit(int *Value, int Min, int Max)
 
 // The client's second exception: an error code, PROGRAM_ERROR, that
 // CPlayerApp::HandleProgramError shows with sysinc.cpp's texts. The original
-// throws the enum by value (".?AW4PROGRAM_ERROR@@"); here it is an enum
-// class carried by its own exception type, TProgramError (golden_eh.h's
-// OurThrow gives it the original's kind: a PROGRAM_ERROR with its value).
-// The enumerator names are ours, after GetErrorText's texts and the sites
-// that throw them.
+// throws the enum by value; here it is an enum class carried by its own
+// exception type, TProgramError. The enumerator names are ours, after
+// GetErrorText's texts and the sites that throw them.
 enum class PROGRAM_ERROR : int {
 	OBJECTS_FILE = 1,  // "Cannot find file "Tibia.dat"." (InitObjects)
 	SPRITES_FILE = 2,  // "Cannot find file "Tibia.spr"." (the sprite offsets)
@@ -127,11 +123,3 @@ struct TProgramError {
 // patella::TExpected<T, TError> (compat/expected.h).
 #define TUNEXPECTED_REASON(Message, Reason) \
 	::patella::TUnexpected<TError>(::patella::MakeFailure(PATELLA_SOURCE_LOCATION(), Message, "", 0, "", 0, Reason))
-
-// The original's catch wrappers: most of the original's functions wrapped
-// their body in a try block with three handlers, visible in the binary as
-// catch blocks after each function: a PROGRAM_ERROR passed through unchanged,
-// a TMyException was wrapped with the wrapper's line and up to two values
-// ("exception occurred"), and anything else became "unknown exception
-// occurred". A hand-written stack trace for error.txt. Here an exception
-// passes unchanged to the first handler that really handles it.

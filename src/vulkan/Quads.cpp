@@ -55,10 +55,10 @@ TAxis MapAxis(int From, int To, float FromCoordinate, float ToCoordinate, int Si
 		// automap's upload: u from 0 to 1 over 106 pixels, SurfaceVulkan.cpp WriteImage), the
 		// interpolated coordinate lands a hair below each edge except at the corner itself, where it
 		// is exact: under Direct3D 9 on the NVIDIA GPU Tibia.exe's frames show texel max(k - 1, 0) at
-		// pixel k (a live comparison; tests_vulkan shows the same on that GPU through Vulkan, while
-		// lavapipe rounds to texel k). Starting at edge 0 that is an Edge copy: texel k - 1, clamped to
-		// the texture (the engine's nearest, clamp-to-edge sampler). An edge start elsewhere goes to the
-		// hardware as Direct3D 9 gives it.
+		// pixel k (a live comparison; Vulkan gives the same on that GPU, while lavapipe rounds to texel
+		// k). Starting at edge 0 that is an Edge copy: texel k - 1, clamped to the texture (the engine's
+		// nearest, clamp-to-edge sampler). An edge start elsewhere goes to the hardware as Direct3D 9
+		// gives it.
 		const bool OnEdge = Snapped == std::floor(Snapped);
 		Axis.Edge = OneToOne && OnEdge && Snapped == 0.0;
 		Axis.Copy = OneToOne && (!OnEdge || Axis.Edge);

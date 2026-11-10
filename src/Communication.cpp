@@ -39,7 +39,7 @@ const char *TextChannelClosed = "The channel has been closed. You need to re-joi
 
 } // namespace
 
-// The data is TCommunication's (Communication.h), in the original's order with its addresses.
+// The data is TCommunication's (Communication.h).
 
 namespace {
 
@@ -104,8 +104,7 @@ void patella::TCommunication::SendLogin(uint32 AccountID, const char *Password)
 			Byte.Format("{:03} ", (unsigned)Data[i]);
 			Text << Byte.View();
 		}
-		// No std::endl after the bytes here, unlike the first catch block (the
-		// binary goes from the loop to str()).
+		// No std::endl after the bytes here, unlike the first catch block.
 		TERROR(Text.str().c_str());
 	}
 	Network.BeginCommand(LOGIN_SEND_LOGIN);
@@ -163,8 +162,7 @@ void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, 
 			Byte.Format("{:03} ", (unsigned)Data[i]);
 			Text << Byte.View();
 		}
-		// No std::endl after the bytes here, unlike the first catch block (the
-		// binary goes from the loop to str()).
+		// No std::endl after the bytes here, unlike the first catch block.
 		TERROR(Text.str().c_str());
 	}
 	Network.BeginCommand(GAME_SEND_LOGIN);
@@ -867,7 +865,7 @@ uint32 patella::TCommunication::ReadCreature(int Type, int x, int y, int z)
 	return CreatureID;
 }
 
-// OldType only the original's catch wrapper read.
+// OldType is only written: the original read it where it reported an error.
 void patella::TCommunication::ReadField(int rx, int ry, int rz)
 {
 	uint16 Type = 0;
@@ -1873,7 +1871,6 @@ void patella::TCommunication::ReceiveCancelWalk()
 
 void patella::TCommunication::ReadFloor(int rz)
 {
-	// Interior loop, not a separately callable function.
 	for (int rx = 0; rx < 18; rx++) {
 		for (int ry = 0; ry < 14; ry++)
 			ReadField(rx, ry, rz);
@@ -1984,8 +1981,7 @@ void patella::TCommunication::ReceiveBuddyLogout()
 	Creatures.SetBuddyState(CharacterID, false);
 }
 
-// Empty. ExitControl calls it where Communication.cpp's exit belongs in the reverse
-// order of InitControl (name ours, low confidence).
+// Empty. ExitControl calls it where Communication.cpp's exit belongs in the reverse order of InitControl.
 void patella::TCommunication::ExitCommunication()
 {
 }

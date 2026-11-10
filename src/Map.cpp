@@ -26,7 +26,7 @@
 // The initialisers of Fields, FieldNumber and AutomapBlocks are the members'.
 patella::TMap::TMap(TObjectTypes &ObjectTypesRef, TMapConsole &ConsoleRef) : ObjectTypes(ObjectTypesRef), Console(ConsoleRef) {}
 
-// --- Position (the MainWindow/Map gap) ------------------------------------
+// --- Position --------------------------------------------------------------
 
 void patella::TMap::SetMapPosition(int x, int y, int z)
 {
@@ -657,9 +657,7 @@ void patella::TMap::ProcessMissileEffects()
 
 // --- Map points ----------------------------------------------------------------
 
-// Empties a point; its creatures go to the callback. The binary sets i to -1
-// after the object loop, so an error while deleting the effects reports i =
-// -1.
+// Empties a point; its creatures go to the callback.
 void patella::TMap::ClearField(int rx, int ry, int rz, bool DeleteEffects)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -1069,10 +1067,7 @@ void patella::TMap::SaveAutomapBlock(int Position)
 	Block.Changed = false;
 }
 
-// The cached block, loaded into the least recently used entry if necessary,
-// becomes the most recently used one. (The binary keeps Position in bx's
-// stack slot while the entry is replaced, the only part that can fail; the
-// catch block reads it from there.)
+// The cached block, loaded into the least recently used entry if necessary, becomes the most recently used one.
 TAutomapBlock *patella::TMap::GetAutomapBlock(int bx, int by, int bz)
 {
 	PATELLA_ASSERT_VALUES(bx>=0, bx);
@@ -1219,7 +1214,7 @@ void patella::TMap::DeleteAutomapMark(TMark &Deleted, int z)
 // 110 fields away, -4 without a path, 0 for no step, 1 for a complete path
 // and 2 for one cut off after ten steps or at the edge of the visible map.
 // Without MustReach a blocked destination ends the path before it. Errors
-// get the parameters added; there is only this one handler.
+// get the parameters added.
 int patella::TMap::FindPath(int StartX, int StartY, int StartZ, int DestX, int DestY, int DestZ, bool MustReach,
 	int *Steps, int *Directions, bool ForceDiagonal)
 {

@@ -21,24 +21,20 @@
 // message queue its blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-// Data: TGraphics' members (graphics.h), in the original's .bss order.
+// The data is TGraphics' (graphics.h).
 
 // The six tables are std::unique_ptrs. Their elements have no destructors that act (a picture's Offsets stays raw:
 // ExitGraphics frees them first), so a table still set when FatalError calls exit(1) is only memory freed during static
 // destruction. Where the original stored a new table over one it may still have held (InitMemoryCache, InitFonts,
 // LoadSprites, LoadPictures, InitVideoCache), release() drops the old one unfreed first: the leak is the original's.
 
-// Passed to the eh vector constructor iterator by InitVideoCache. It clears
-// the four colours, then the font colour, which overlaps them (the binary
-// stores both).
+// Clears the four colours, then the font colour, which overlaps them.
 TVideoCacheItem::TVideoCacheItem()
 {
 	for (int i = 0; i < 4; i++)
 		Colors[i] = TRGBColor(0, 0, 0);
 	Tile.Color = TRGBColor(0, 0, 0);
 }
-
-// --- The DialogWindow/graphics gap -------------------------------------------
 
 // The line distance of a font. Numbers below 0 or above NumberOfFonts
 // give font 3's; 0 is not caught and reads before the table (sic).
@@ -811,7 +807,7 @@ void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int Out
 		}
 		return;
 	}
-	std::array<TRGBColor, 4> OutfitColors; // zeroed by the constructor (the binary's array loop)
+	std::array<TRGBColor, 4> OutfitColors; // zeroed by the constructor
 	int R, G, B;
 	GetOutfitColor(Colors[0], &R, &G, &B);
 	OutfitColors[0] = TRGBColor(R, G, B);

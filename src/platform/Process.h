@@ -51,10 +51,9 @@ inline void ReadCursorPosition(IInput &Input, POINT &Point)
 TDataFileSystem &SystemFileSystem();
 void ConfigureDataFiles();
 void LogDataFiles();
-// The process's network: TPortableSocket, the golden runner's on its side.
+// The process's network: TPortableSocket.
 ISocket &NetworkSocket();
-// The SDL3 window's input, and the input of the process's window (WindowInput: SdlLoopInput() where the client has its
-// SDL3 window). Patella.exe's Platform() gives it; the test build's TTestInput passes its timer on to it without a script.
+// The SDL3 window's input, and the input of the process's window (WindowInput: SdlLoopInput()), which Platform() gives.
 TSdlLoopInput &SdlLoopInput();
 IInput &WindowInput();
 // The clipboard and the desktop of the process's window: SDL3's (platform/SdlPlatform.h).
@@ -62,8 +61,8 @@ IClipboard &WindowClipboard();
 IWindow &WindowDesktop();
 
 #if !defined(_WIN32)
-// The command line of the Linux client, without the program's name: --data and the test mode's words (LinuxPlatform.cpp:
-// /proc/self/cmdline, at any time, also before main, as Windows' GetCommandLine).
+// The command line of the Linux client, without the program's name (LinuxPlatform.cpp: /proc/self/cmdline, at any
+// time, also before main, as Windows' GetCommandLine).
 [[nodiscard]] const std::vector<std::string> &Arguments();
 #endif
 

@@ -17,15 +17,13 @@
 // blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
-// The other half of Player.cpp's XOR-encoded window title ("Tibia   ") and
-// class name ("TibiaClient"); the keys are Player.cpp's. First in this
-// object's .rdata, before the PROGRAM_ERROR texts.
+// The other half of Player.cpp's XOR-encoded window title ("Tibia   ") and class name ("TibiaClient"); the keys are
+// Player.cpp's.
 const std::array<int, 8> TitleCode = {68, 75, 129, 81, 98, 78, 96, 141};
 const std::array<int, 11> ClassNameCode = {57, 193, 225, 58, 140, 118, 195, 214, 239, 244, 137};
 
 namespace {
 
-// Data, in .bss order.
 char *ClipboardBuffer;
 unsigned int ClipboardBufferSize;
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's initialiser reads the clock before main; the platform's clock does not throw

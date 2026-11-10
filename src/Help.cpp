@@ -223,11 +223,9 @@ void patella::THelp::CheckEventHelpName(const char *Name)
 }
 
 // Event helps for places: the Rookgaard crossroad (3), the Rookgaard
-// underground (6), the arrival on the mainland (11) and the depots
-// (12). Written as independent tests in an order that gives the
-// binary's results (the compiler merged the tests that share an x and
-// returned early where no later test can match); the bounds are the
-// binary's, exclusive where written with < and >.
+// underground (6), the arrival on the mainland (11) and the depots (12). The
+// tests are independent of each other, in the original's order; a bound is
+// exclusive where it is written with < or >.
 void patella::THelp::CheckEventHelpPosition(int x, int y, int z)
 {
 	if (x > 0x7d5d && x < 0x7d65 && y == 0x7dd5 && z == 7)
@@ -391,7 +389,7 @@ const char *patella::THelp::GetCurrentHelpText()
 }
 
 // Empty. ExitControl calls it where Help.cpp's exit belongs in the reverse
-// order of InitControl (name ours, low confidence).
+// order of InitControl.
 void patella::THelp::ExitHelp()
 {
 }

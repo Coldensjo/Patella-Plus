@@ -122,7 +122,7 @@ bool Save(patella::platform::IFileSystem &Files, const std::string &Path, const 
 //
 // The data folder (Tibia.dat, Tibia.spr, Tibia.pic, Tibia.cfg, the automap and the saved channels), the first of:
 //	1. Option      --data <folder> of the command line (relative to the working folder);
-//	2. Working     the working folder, where it has Tibia.dat (the original's place, and the tools' run folders);
+//	2. Working     the working folder, where it has Tibia.dat (the original's place);
 //	3. Executable  the executable's folder, where it has Tibia.dat;
 //	4. Settings    DataFolder of a Patella.ini (relative to that file's folder), where the folder it names has
 //	               Tibia.dat: the XDG folder's with the XDG option, else the working folder's, then the executable's;
@@ -160,7 +160,7 @@ struct TLocationChoice {
 
 // The XDG option's folder: $XDG_CONFIG_HOME/patella, else $HOME/.config/patella (an XDG_CONFIG_HOME that is empty or
 // not absolute is not used, as the XDG Base Directory Specification says); empty where neither is set. The variables'
-// values are passed (null: not set), so the rule is tested on every platform.
+// values are passed (null: not set).
 [[nodiscard]] std::filesystem::path XdgSettingsFolder(const char *XdgConfigHome, const char *Home);
 
 // The folder of the last "--data <folder>" of the arguments (without the program's name); nothing without one.

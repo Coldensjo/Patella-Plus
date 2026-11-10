@@ -62,7 +62,6 @@ struct TTalkLine {
 	TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, const char *_Line, int DiffTime);
 	TTalkLine(const TTalkLine &) = delete;
 	TTalkLine &operator=(const TTalkLine &) = delete;
-	// Talk.h inline.
 	[[nodiscard]] const char *GetText() const { return GetTimeStamps() ? Line : WithoutTime; }
 };
 class TTalkBuffer;
@@ -70,7 +69,7 @@ class TTalkBuffer {
 public:
 	TTalkBuffer(const TTalkBuffer &) = delete;
 	TTalkBuffer &operator=(const TTalkBuffer &) = delete;
-	// Talk.h inline; Closed is deliberately not initialized.
+	// Closed is deliberately not initialized.
 	TTalkBuffer(int TalkMode) : ReceiveTalkMode(TalkMode), SendTalkMode(TalkMode),
 								Changed(true), first(nullptr), last(nullptr), cursor(nullptr), lines(0), limit(1000),
 								ShowMessages(false), Enabled(true), Complete(true), LinesChanged(true), Locked(false), Selected(false) {}
@@ -83,9 +82,8 @@ public:
 	}
 	virtual bool TakeClosed()
 	{
-		// Closed is never set by the constructor (the original's; the golden corpus records the bytes it leaves
-		// untouched), so it holds whatever the heap had: read as the byte the original tested (a load of a bool that
-		// holds another value is undefined, UBSan's report on Linux).
+		// Closed is never set by the constructor (as in the original), so it holds whatever the heap had: read as the
+		// byte the original tested (a load of a bool that holds another value is undefined, UBSan's report on Linux).
 		unsigned char Byte = 0;
 		std::memcpy(&Byte, &Closed, sizeof(Byte));
 		const bool Result = Byte != 0;
@@ -116,7 +114,7 @@ public:
 	virtual int GetChannelID() { return -1; }
 	TTalkLine *GetLine(int lineNumber);
 	TTalkLine *GetNext();
-	// Inline (ConsoleWindow.cpp): the cursor moves to the first or the last line.
+	// The cursor moves to the first or the last line.
 	TTalkLine *GetFirst()
 	{
 		cursor = first;
@@ -137,14 +135,12 @@ public:
 class TPrivateTalkBuffer final : public TTalkBuffer {
 public:
 	TPrivateTalkBuffer(int TalkMode, const char *_Addressee);
-	// Talk.h inline.
 	const char *GetAddressee() override { return Addressee; }
 	TFixedString<30> Addressee;
 };
 class TChannelTalkBuffer : public TTalkBuffer {
 public:
 	TChannelTalkBuffer(int TalkMode, int _ChannelID);
-	// Talk.h inline.
 	int GetChannelID() override { return ChannelID; }
 	int ChannelID;
 };
@@ -188,7 +184,6 @@ public:
 		return Value;
 	}
 	bool CanWrite() override { return WriteEnabled; }
-	// Talk.h inline.
 	bool IsPrivateChannel() override { return GetChannelID() >= 8; }
 	bool WriteEnabled;
 };
@@ -201,9 +196,9 @@ struct TTalkFilter {
 };
 namespace patella {
 
-// Talk.cpp's state: the globals of the original are the members, in its .bss order with the same initial values, and
-// the file's functions the members of the same names. TGUI owns it (GUI.h). It is TPreferences' TTalkLists: the White
-// and Ignore lists that the options read and write.
+// Talk.cpp's state: the globals of the original are the members, with the same initial values, and the file's functions
+// the members of the same names. TGUI owns it (GUI.h). It is TPreferences' TTalkLists: the White and Ignore lists that
+// the options read and write.
 class TTalk final : public TTalkLists {
 public:
 	TTalk() = default;
@@ -284,7 +279,6 @@ public:
 
 
 private:
-	// Data, in the original's .bss order.
 	bool IgnoreListEnabled{};
 	bool BuddyIgnore{};
 	bool IgnoreEnabled{};
@@ -316,7 +310,7 @@ TTalk &Talk();
 
 } // namespace patella
 
-// Talk.h inline in the original (it read the global): whether this is the console's default buffer.
+// Whether this is the console's default buffer.
 inline bool TTalkBuffer::IsDefault()
 {
 	return this == patella::bridge::Talk().DefaultTextBuffer;

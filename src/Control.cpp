@@ -75,7 +75,7 @@ const char *TextRuleViolations = "Rule Violations"; // 145
 // (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
-// The client area changed size (MainFrm.cpp); in fullscreen mode (view
+// The client area changed size (SdlFrame.cpp); in fullscreen mode (view
 // mode 2) the screen size counts. An open context menu (action state 11)
 // is closed, a dialog (10) is centred again and a help bubble (9)
 // follows the main window.
@@ -493,7 +493,7 @@ void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 	SetMouseOverText(nullptr);
 }
 
-// Direction 1 up, 2 down (MainFrm's OnMouseWheel).
+// Direction 1 up, 2 down (SdlFrame.cpp's OnWheel).
 void patella::TGUI::MouseWheel(int x, int y, int Direction)
 {
 	switch (GetActionState()) {
@@ -1145,16 +1145,10 @@ void patella::TGUI::InitControl(bool Gamemaster)
 	}
 }
 
-// Called from the main frame's destructor, and from InitControl after a
-// failed step. GetSurface creates a surface first if there is none, so one
-// may be created only to be deleted. GetSurface makes one only once
-// SurfaceInitInstance has run (after InitControl), so after a failed
-// InitControl there is none and the surface step is skipped. Tibia.exe's
-// GetSurface made a DirectX 5 surface there whose ExitSurfaces faulted on its
-// uninitialised members (seen under cdb); its catch wrapper and InitControl's
-// catch (...) (MSVC 7.1: an access violation as well) swallowed that, and the
-// PROGRAM_ERROR went on to the box.
-// Which module each of the five empty Exit functions belongs to follows InitControl's order in reverse (names ours).
+// Called when the main frame is destroyed, and from InitControl after a
+// failed step. GetSurface has a surface only once SurfaceInitInstance has run
+// (after InitControl), so after a failed InitControl there is none and the
+// surface step is skipped.
 void patella::TGUI::ExitControl()
 {
 	::ExitMainWindow();

@@ -49,7 +49,6 @@ namespace {
 const std::array<int, 8> TitleKey = {16, 34, 227, 56, 3, 110, 64, 173};
 const std::array<int, 11> ClassNameKey = {109, 168, 131, 83, 237, 53, 175, 191, 138, 154, 253};
 
-// Data, in .data/.bss order.
 int LastMouseCursor = CURSOR_ARROW;
 int NumberOfTibiaWindows; // counted by CountTibiaWindows
 POINT LastMousePosition;
@@ -125,11 +124,11 @@ CPlayerApp::CPlayerApp()
 	Terminating = false;
 }
 
-// Every step is guarded on its own; the program ends here. this is passed
-// but not used. The box's caption and text go to the developer log first, at
-// the error level: the record of a fatal error. Debug builds then write the
-// stack (std::stacktrace, where the standard library has it) and stop in an
-// attached debugger; without a debugger they go on as Release builds do.
+// Every step is guarded on its own; the program ends here. The box's caption
+// and text go to the developer log first, at the error level: the record of
+// a fatal error. Debug builds then write the stack (std::stacktrace, where
+// the standard library has it) and stop in an attached debugger; without a
+// debugger they go on as Release builds do.
 void CPlayerApp::FatalError(const char *Text, const char *Caption)
 {
 	patella::log::Error("{}: {}", Caption != nullptr ? Caption : "", Text != nullptr ? Text : "");
@@ -142,19 +141,14 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 	} catch (...) { // NOLINT(bugprone-empty-catch): every step of the fatal path is guarded on its own, and the box still comes
 	}
 	try {
-		// After a failed InitControl (CMainFrame's constructor) there is no main window and, on x64, no surface
-		// (GetSurface makes one only once SurfaceInitInstance has run), and MainFrame points to the freed frame:
-		// SetDisplayMode's calls would fault. Tibia.exe makes them (under cdb its CWnd::ModifyStyle faults on the freed
-		// frame, 0xfeeefeee), and its catch (...) (MSVC 7.1: an access violation as well) goes on to the box; under
-		// /EHsc it does not, so the step is skipped.
+		// After a failed InitControl there is no main window and no surface (GetSurface makes one only once
+		// SurfaceInitInstance has run): SetDisplayMode's calls would fault, so the step is skipped. The original made
+		// them and left the fault to its catch (...).
 		if (GetViewMode() != 1 && patella::bridge::GUI().MainWindow != nullptr && GetSurface() != nullptr)
 			patella::sdlframe::SetDisplayMode(1); // the SDL3 window's
 	} catch (...) {                               // NOLINT(bugprone-empty-catch): as above
 	}
 	try {
-		// Before InitInstance sets m_pMainWnd (a fatal error in its first Redraw: a failing first present) there is no
-		// main window. Tibia.exe calls CWnd::ShowWindow on null there too, and its catch (...) (MSVC 7.1: an access
-		// violation as well) goes on to the box; under /EHsc it does not.
 		patella::sdlframe::Hide(); // the SDL3 window's ShowWindow(SW_HIDE)
 	} catch (...) {                // NOLINT(bugprone-empty-catch): as above
 	}
@@ -388,7 +382,7 @@ void CPlayerApp::OnIdle()
 {
 	// The socket's events and lookups, where the message loop had just dispatched WinSock's messages.
 	patella::platform::Platform().Socket.Poll();
-	patella::platform::Platform().Input.BeginIdle();                                                // the test mode's driver step
+	patella::platform::Platform().Input.BeginIdle();
 	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastCursorPosition); // GetCursorPos
 	POINT Point = LastCursorPosition;
 	if (GetViewMode() == 1)

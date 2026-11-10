@@ -5,7 +5,7 @@
 #include "types/FixedString.h"
 #include <vector>
 
-inline constexpr int EVENTHELPS = 14; // "In(Number,1,EVENTHELPS)", "In(Hint,1,EVENTHELPS)" (MapWindow.cpp)
+inline constexpr int EVENTHELPS = 14;
 
 // The help numbers, named. Enumerators for the reason GUI.h gives at the modifier flags. No names of the original are
 // known; each is taken from the title of the text Help.cpp returns for the number, or from the code that passes it.
@@ -78,8 +78,7 @@ enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 
 namespace patella {
 
-// Help.cpp's state: the globals of the original are the members, in its .bss order with the same initial values, and
-// the file's functions the members of the same names. TGUI owns it (GUI.h).
+// Help.cpp's state, with the file's functions as its members. TGUI owns it (GUI.h).
 class THelp {
 public:
 	THelp() = default;
@@ -110,7 +109,6 @@ public:
 	const char *GetCurrentHelpText();
 
 private:
-	// Data, in the original's .bss order.
 	bool HelpHandleChanged{};
 	int HelpHandle{}; // what the help bubble explains
 	int HelpHeight{};

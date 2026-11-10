@@ -320,8 +320,7 @@ public:
 
 // --- Ignore list --------------------------------------------------------------
 
-// A name of the ignore or white list with its permanent flag (31 bytes; the
-// type name is ours).
+// A name of the ignore or white list with its permanent flag (31 bytes).
 struct TIgnoreEntry {
 	// Inline: the vector's constructor and operator() clear every new entry
 	// (and init) this way.
@@ -479,7 +478,7 @@ public:
 	std::array<TIconButton *, 11> IconButtons;
 };
 
-// --- Updates, help and hints ----------------------------------------------------
+// --- Help and hints -------------------------------------------------------------
 
 // "Help": six buttons with their texts.
 class THelpDialog final : public TWindow {

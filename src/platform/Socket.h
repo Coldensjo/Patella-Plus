@@ -105,9 +105,9 @@ public:
 	// CAsyncSocket::Close: no event of the connection after it.
 	virtual void Close(TSocket *Connection) = 0;
 
-	// WSAAsyncGetHostByName: the request (nullptr where it could not start, LastError says why); Window gets Message
-	// (HOSTNAME_RESOLVED_MESSAGE, WM_USER + 1: the frames' OnHostResolved) when it is done, with the host's entry in
-	// Buffer. TPortableSocket's lookup is done at a later Poll.
+	// WSAAsyncGetHostByName: the request (nullptr where it could not start, LastError says why). The lookup is done at
+	// a later Poll, with the host's entry in Buffer: the frame's OnHostResolved is then called, where the original's
+	// Window got Message (HOSTNAME_RESOLVED_MESSAGE, WM_USER + 1).
 	[[nodiscard]] virtual void *ResolveHostname(void *Window, unsigned int Message, const char *Hostname, char *Buffer,
 		int Length) = 0;
 	// WSACancelAsyncRequest: no message for the request (nullptr, or one that is done: nothing).
@@ -117,9 +117,8 @@ public:
 	[[nodiscard]] virtual const char *ResolvedAddress(const char *Buffer) = 0;
 
 	// The loop's turn: the connections' events (OnConnect, OnReceive, OnClose) and the finished name lookups, on the
-	// calling thread (the client's), where the message loop dispatched WinSock's messages. The client calls it at the
-	// start of every idle step (Player.cpp's OnIdle, on both window paths). Nothing where the events come otherwise
-	// (the golden runner's fakes, the replay's window messages).
+	// calling thread (the client's), where the original's message loop dispatched WinSock's messages. The client calls
+	// it at the start of every idle step (Player.cpp's OnIdle).
 	virtual void Poll() = 0;
 
 protected:

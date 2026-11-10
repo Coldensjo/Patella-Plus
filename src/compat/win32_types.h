@@ -12,7 +12,7 @@
 
 #include <cstdint>
 
-// The compiler's spelling of the Windows headers (the stand-in windows.h of the golden runner defines it too).
+// The compiler's spelling of the Windows headers.
 #ifndef CALLBACK
 #define CALLBACK
 #endif

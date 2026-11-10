@@ -34,10 +34,10 @@ class TComponent;
 
 // TCallback: types/Callback.h, exported above.
 
-// One entry of a component's drawing list: a skin drawn at an
-// offset in the component, tiled to width x height when they are not 0. The
-// constructors are inlined: new TDrawing[8] zeroes the entries
-// (MapWindow.cpp), and the subclasses assign whole entries.
+// One entry of a component's drawing list: a skin drawn at an offset in the
+// component, tiled to width x height when they are not 0. new TDrawing[8]
+// zeroes the entries (MapWindow.cpp), and the subclasses assign whole
+// entries.
 struct TDrawing {
 	TDrawing() : skin(0), x(0), y(0), width(0), height(0), srcx(0), srcy(0) {}
 	TDrawing(int _skin, int _x, int _y, int _width, int _height, int _srcx, int _srcy)
@@ -51,14 +51,12 @@ struct TDrawing {
 	int srcy;
 };
 
-// The abstract base class of every window element. Slots with _purecall in
-// the binary are pure; the child functions throw "not possible" (only
-// TWindow has children).
+// The abstract base class of every window element. The child functions throw
+// "not possible" (only TWindow has children).
 class TComponent {
 public:
 	TComponent(const TComponent &) = delete;
 	TComponent &operator=(const TComponent &) = delete;
-	// Inlined into the constructors of TWindow and TElement.
 	TComponent() : DrawingList(nullptr), DrawingListLength(0), Parent(nullptr), Next(nullptr), OffsetX(0),
 				   OffsetY(0), Width(0), Height(0) {}
 	virtual ~TComponent();
@@ -104,8 +102,8 @@ public:
 	// and marked closed (the original had freed it).
 	void Close();
 
-	[[nodiscard]] int GetWidth() const { return Width; }   // "Child->GetWidth()"
-	[[nodiscard]] int GetHeight() const { return Height; } // "Child->GetHeight()"
+	[[nodiscard]] int GetWidth() const { return Width; }
+	[[nodiscard]] int GetHeight() const { return Height; }
 
 	std::unique_ptr<TDrawing[]> DrawingList; // allocated by the subclasses (the list's only owner)
 	int DrawingListLength;
@@ -123,12 +121,11 @@ public:
 	int Height;
 
 protected:
-	// A class's own part of the close, overridden by the classes whose destructors did such work; each override ends
-	// with its base's, as a destructor ends with its base's. Not one of the original's virtual functions.
+	// A class's own part of the close, overridden by the classes that have such work; each override ends with its
+	// base's, as a destructor ends with its base's.
 	virtual void OnClose() {}
-	// The rest of a close after an exception of a class's own part: the original's destructor went on with its bases'
-	// destructors while the exception passed, and a second exception there ended the program (std::terminate), which
-	// noexcept keeps.
+	// The rest of a close after an exception of a class's own part: the bases' parts still run while the exception
+	// passes, and a second exception there ends the program (std::terminate), as noexcept makes it.
 	template <class F> static void CloseWhileUnwinding(F &&Rest) noexcept { Rest(); }
 	// A component of a class with a close of its own that is destroyed without it (a delete without Close: a missed
 	// close, its work not done) writes a line to the developer log (error level).
@@ -139,9 +136,8 @@ protected:
 // exception passes on.
 void DeleteComponent(TComponent *Component);
 
-// A component without children. It takes every mouse event; a double
-// click is a second button press. The inline slots are kept in earlier
-// objects (ConsoleWindow.obj and the Communication/ConsoleWindow gap).
+// A component without children. It takes every mouse event; a double click is
+// a second button press.
 class TElement : public TComponent {
 public:
 	TElement();
@@ -193,15 +189,10 @@ public:
 	void StopDragging() override;
 	virtual TComponent *GetCapture() { return Capture; }
 	virtual void SetChildPosition(TComponent *Child, int x, int y);
-	// The area is a 16-byte block passed by value (every caller builds it
-	// with sub esp,0x10 and four stores).
 	virtual void SetChildArea(TComponent *Child, TRect Area);
 	virtual void Fit(bool Notify) { FitToChildren(TRect(0, 0, 0, 0), Notify); }
-	// The margins are one 16-byte block passed by value (the callers, Fit and
-	// ContextMenus.cpp, build it with sub esp,0x10): a TRect whose x, y,
-	// Width and Height are the left, top, right and bottom margins.
+	// The margins are a TRect whose x, y, Width and Height are the left, top, right and bottom margins.
 	virtual void FitToChildren(TRect Margin, bool Notify);
-	// The area is a 16-byte block passed by value as well.
 	virtual void FitToChild(TComponent *Child, TRect Area, bool Notify);
 	virtual void ClipChildren(bool Strict);
 
@@ -229,12 +220,12 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, as Obje
 	SHIFT_OR_BOTH_BUTTONS = KEY_SHIFT | BOTH_BUTTONS_RELEASED,
 
 	// The key codes. Below the modifier flags a Key holds a character of the client's code page (written as the
-	// character: Control with I is KEY_CONTROL | 'I') or one of these codes. The values are platform/KeyInput.h's, whose
-	// TranslateKey and KeyCharacter make them; the original's names of them are not known, these are the keys' names. A
-	// hotkey's letter is upper case (CheckHotkey makes it so before it looks), a letter compared with KeyPress's Key is
-	// the case the key gave: with Control and without Alt lower case (CMainFrame::OnChar). In the flags' enumeration,
-	// because C++26 does not allow a bitwise operation between the enumerators of two (GCC refuses KEY_SHIFT | KEY_TAB).
-	// The control characters of their keys:
+	// character: Control with I is KEY_CONTROL | 'I') or one of these codes. The values are platform/KeyInput.h's,
+	// whose TranslateKey and KeyCharacter make them; the original's names of them are not known, these are the keys'
+	// names. A hotkey's letter is upper case (CheckHotkey makes it so before it looks), a letter compared with
+	// KeyPress's Key is the case the key gave: with Control and without Alt lower case (TKeyFlags::Character). In the
+	// flags' enumeration, because C++26 does not allow a bitwise operation between the enumerators of two (GCC refuses
+	// KEY_SHIFT | KEY_TAB). The control characters of their keys:
 	KEY_BACKSPACE = patella::platform::KeyCodeBackspace,
 	KEY_TAB = patella::platform::KeyCodeTab,
 	KEY_RETURN = patella::platform::KeyCodeReturn, // also the keypad's Enter
@@ -317,9 +308,9 @@ class TCommunication; // Communication.h
 // The GUI's state, the sixth of TClient's subsystems: Talk.cpp's TTalk, Help.cpp's THelp and Status.cpp's TInteraction,
 // and the data of GUI.cpp (the timers and hotkeys), ContentWindows.cpp (the two mouse-over texts), Control.cpp (the
 // window, the callbacks, the mouse's last move, the frame counter's switch) and MainWindow.cpp (ModalWindow, MainWindow
-// and the callbacks), in the original's address order with the same initial values. GUI.cpp's timer and hotkey
-// functions, Control.cpp's and MainWindow.cpp's functions are its members of the same names; the free functions forward
-// to them. SkinProperties is TGraphics' (with Skins.cpp's table, TSkins: Skins.h).
+// and the callbacks). GUI.cpp's timer and hotkey functions, Control.cpp's and MainWindow.cpp's functions are its
+// members of the same names; the free functions forward to them. SkinProperties is TGraphics' (with Skins.cpp's table,
+// TSkins: Skins.h).
 //
 // Control.cpp, the controller above the windows, is TGUI's: the windows' calls into it (the device buttons of the main
 // window's options, MainWindow.cpp, and the graphics options' fullscreen switch, Dialogs.cpp) are calls of TGUI's
@@ -349,8 +340,8 @@ public:
 	bool CheckHotkey(int Key);
 
 	// Control.cpp's (Control.h has the free functions of the same names, which forward here). Their calls into the
-	// other files (GUI.cpp's and MainWindow.cpp's included) are those files' free functions, which the golden Control
-	// and Communication tests fake (commworld.cpp's WorldFakes); their calls of each other are member calls.
+	// other files (GUI.cpp's and MainWindow.cpp's included) are those files' free functions; their calls of each other
+	// are member calls.
 	void Resize(int Width, int Height);
 	void CheckSurface(bool Force);
 	static void ChangeDevice(vulkan::TDeviceButton Button);
@@ -391,7 +382,7 @@ public:
 	THelp Help;               // Help.cpp
 	TInteraction Interaction; // Status.cpp's user interaction
 
-	// Data, in the original's address order; public where another file reads it (named).
+	// Data; public where another file reads it (named).
 	TFixedString<100> AutomapMouseOverText{}; // ContentWindows.cpp: a mark's text (TAutomapWindow::MouseHover)
 	TFixedString<256> SkillMouseOverText{};   // ContentWindows.cpp: "You have %d percent to go"
 
@@ -410,8 +401,8 @@ private:
 	std::vector<TTimer *> Timers;
 	// A lookup by key, each key at most once (AddHotkey replaces its callback); the order is never read.
 	std::flat_map<int, TCallback> Hotkeys;
-	int LastTime{};     // UpdateTimers' static
-	bool LastTimeSet{}; // its guard
+	int LastTime{};     // when UpdateTimers last ran
+	bool LastTimeSet{}; // it has run
 
 public:
 	// MainWindow.cpp's: the callbacks InitMainWindow stores, the modal window and the main window.

@@ -29,7 +29,6 @@ int TDialogWindow::GetMinimumWidth()
 	return SkinProperties().SideBarWidth;
 }
 
-// Also inlined into TSubWindow's constructor.
 TContentWindow::TContentWindow(int _Identifier, bool _Background)
 {
 	Identifier = _Identifier;
@@ -124,8 +123,6 @@ TDialogWindow::TDialogWindow()
 
 // --- TDialogWindow ---------------------------------------------------------
 
-// The catch blocks name no parameter.
-//
 // A sub-window's SetSize ends with the column's Rearrange(8) (FitChildren),
 // which can delete the child being sized. The original then read the deleted
 // child's Next (a use after free); RemoveChild had set it to NULL before the
@@ -501,7 +498,6 @@ void TContentWindow::Arrange()
 	BackgroundY = OffsetY % Skins()[SKIN_BACKGROUND].height;
 }
 
-// The catch blocks name no parameter.
 void TContentWindow::ReleaseCapture(TComponent *Component)
 {
 	Dragging = false;

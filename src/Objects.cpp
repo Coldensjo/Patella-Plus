@@ -11,8 +11,6 @@
 
 namespace {
 
-// Inlined everywhere: "GetEntryFlag(Entry,BANK)". Flag%8 and Flag/8 are
-// signed divisions in the binary.
 inline bool GetEntryFlag(TProperties &Entry, int Flag)
 {
 	return (FlagByte(Entry, Flag) & (1 << (Flag % 8))) != 0;
@@ -450,8 +448,7 @@ namespace {
 // Reads one entry: flags with their values up to 0xff, then the sizes and
 // the sprite numbers. Unknown flags are only recorded; a flag above 31 (not
 // in Tibia.dat) sets a bit in the fields after Flags, up to offset 0x43, as
-// in the binary. The binary stores Waypoints when the BANK case jumps back
-// into the zeroing code, which ends with that store.
+// in the original.
 void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 {
 	for (int i = 0; i < 4; i++)
@@ -565,13 +562,10 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 	File.close();
 }
 
-// An exception while loading becomes PROGRAM_ERROR 1 (name of the value
-// unknown); InitControl then shuts down. The original catches a
-// TMyException; its LoadObjects' catch wrapper made every other exception
-// one (LoadProperties' new[] of a size from Tibia.dat can throw
-// std::bad_array_new_length or std::bad_alloc). That wrapper is gone, so
-// the boundary catches everything (LoadObjects throws no PROGRAM_ERROR):
-// the outcome is the original's.
+// An exception while loading becomes PROGRAM_ERROR 1; InitControl then shuts
+// down. Every exception is caught, not only a TMyException: LoadProperties'
+// new[] of a size from Tibia.dat can throw std::bad_array_new_length or
+// std::bad_alloc (LoadObjects throws no PROGRAM_ERROR).
 void patella::TObjectTypes::InitObjects()
 {
 	// Cleared, not freed, as the original does (release, not reset).

@@ -23,8 +23,9 @@ inline constexpr int NUMBEROFSERVER = 4;
 inline constexpr int ERROR_LOGINSERVER_OVERLOADED = 200001;
 inline constexpr int ERROR_DISCONNECTED = 200002;
 
-// The message NetworkWindow gets when ResolveHostname's lookup is done (WM_USER + 1; MainFrm.cpp's OnHostResolved,
-// which asserts it): a number, so that Network.cpp needs no Windows header.
+// The message the original's NetworkWindow got when ResolveHostname's lookup was done (WM_USER + 1): a number, so that
+// Network.cpp needs no Windows header. The platform's lookup reports to SdlFrame.cpp's HostResolved instead of sending
+// it.
 inline constexpr unsigned int HOSTNAME_RESOLVED_MESSAGE = 0x0400 + 1;
 
 // The size of the buffer GetErrorMessage writes into: every caller passes new char[1024].
@@ -44,8 +45,8 @@ class TPreferences;
 
 // What Network.cpp calls in the files above it: Status.cpp's connection state and the active character's address
 // (TCommunication's session), and the message queue (TGUI's). TNetwork reaches them only through this, so that it does
-// not depend on those files; the functions are Status.h's of the same names. Until their objects implement it,
-// Client.cpp's adapter calls Status.cpp's functions.
+// not depend on those files; the functions are Status.h's of the same names. Client.cpp's adapter implements it with
+// Status.cpp's functions.
 class TNetworkSession {
 public:
 	TNetworkSession() = default;
@@ -65,9 +66,9 @@ protected:
 };
 
 // Network.cpp's data and functions: the globals of the original, with Control.cpp's ReconnectTimeout and Reconnect and
-// MainFrm.cpp's PacketHeader, are the members, with the same initial values (the others 0, as the original's .bss), and
-// the functions the members of the same names. Of the data three members are public: Control.cpp reads and writes
-// Reconnect and ReconnectTimeout, SdlFrame.cpp and Player.cpp PacketHeader.
+// MainFrm.cpp's PacketHeader, are the members, with the same initial values (the others 0), and the functions the
+// members of the same names. Of the data three members are public: Control.cpp reads and writes Reconnect and
+// ReconnectTimeout, SdlFrame.cpp and Player.cpp PacketHeader.
 //
 // The socket and the name resolution are the platform's ISocket (platform/Socket.h), which TNetwork takes in its
 // constructor; the connection's events come to it as ISocketEvents (OnConnect, OnReceive, OnClose).
@@ -127,20 +128,19 @@ public:
 	void OnClose() override;
 
 private:
-	// Data, in the original's .data/.bss order.
 	int HostnameResolveBufferSize = platform::HostEntrySize; // initialised to 0x400 (MAXGETHOSTSTRUCT)
 
 public:
 	int ReconnectTimeout{};               // Control.cpp's: GetMilliseconds time
 	bool Reconnect{};                     // Control.cpp's: set by event 0x3f
-	std::array<uint8, 16> PacketHeader{}; // MainFrm.cpp's: the first bytes of the last packet
+	std::array<uint8, 16> PacketHeader{}; // the first bytes of the last packet
 
 private:
 	int CurrentServer{};
 	TServer TestServer{};
 	std::array<TServer, NUMBEROFSERVER> Servers{};
 	void *HostnameRequest{};       // ResolveHostname's request (a HANDLE)
-	char *HostnameResolveBuffer{}; // a HOSTENT filled by WSAAsyncGetHostByName
+	char *HostnameResolveBuffer{}; // the host's entry, filled by the lookup
 	int ReceiveDataSize{};         // bytes in ReceiveData
 	int ReceivePacketEnd{};        // end of the complete packets
 	int ReceiveRead{};             // start of the next unread packet
@@ -148,7 +148,7 @@ private:
 	// frame: Tibia.exe read on past ReceiveData, into SendData.
 	std::array<uint8, 0x4000> ReceiveData{};
 	std::array<uint8, 0x800> SendData{};
-	platform::TWindowHandle NetworkWindow{}; // receives WM_USER+1 when a name is resolved
+	platform::TWindowHandle NetworkWindow{}; // the window the lookup is started for
 	void (*CloseCallback)(){};
 	void (*ReceiveCallback)(){};
 	void (*ConnectCallback)(){};

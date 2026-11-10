@@ -38,8 +38,8 @@ public:
 	// True where the window's loss of the mouse capture (WM_CAPTURECHANGED) is not the client's input, so that it
 	// does not release the held buttons.
 	[[nodiscard]] virtual bool IgnoreCaptureChange() = 0;
-	// True where the desktop's keyboard and mouse events (SDL3's) are not the client's input: the SDL3
-	// window then hands them to nobody, as the test build's message filter (DropInput) drops Windows' input messages.
+	// True where the desktop's keyboard and mouse events (SDL3's) are not the client's input: the SDL3 window then
+	// hands them to nobody.
 	[[nodiscard]] virtual bool IgnoreDesktopInput() = 0;
 
 protected:

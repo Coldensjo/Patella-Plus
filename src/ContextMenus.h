@@ -157,10 +157,10 @@ public:
 	TEditLine *Edit;
 };
 
-// The point of the automap a mark menu is opened for. The
-// automap view (ContentWindows.cpp, TAutomapView::RightButtonUp) makes it with new and the
-// menu's constructor deletes it; its constructor (inlined there and in the
-// menu's) clears the coordinate and the mark.
+// The point of the automap a mark menu is opened for. The automap view
+// (ContentWindows.cpp, TAutomapView::RightButtonUp) makes it with new and the
+// menu's constructor deletes it; its constructor clears the coordinate and the
+// mark.
 struct TMarkMenuData {
 	TMarkMenuData()
 	{

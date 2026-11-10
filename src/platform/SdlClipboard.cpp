@@ -43,8 +43,8 @@ bool TSdlClipboard::HasText()
 	return VideoStarted() && SDL_HasClipboardText();
 }
 
-// The clipboard's text up to its first NUL (SDL's is a C string), converted to the client's. SDL gives an
-// empty text where the clipboard cannot be opened (Win32's nullopt): the paste then has nothing, as with no text.
+// The clipboard's text up to its first NUL (SDL's is a C string), converted to the client's. SDL gives an empty text
+// where the clipboard cannot be opened: the paste then has nothing, as with no text.
 std::optional<std::string> TSdlClipboard::Text()
 {
 	if (!VideoStarted())

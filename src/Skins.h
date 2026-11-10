@@ -14,8 +14,7 @@
 // Number of skin entries; the terminator of the table in InitSkins.
 inline constexpr int LASTSKIN = 262;
 
-// One rectangle in the GUI picture. width and height are named in GUI.cpp's
-// assertions; x and y are ours.
+// One rectangle in the GUI picture.
 struct TSkin {
 	int x;
 	int y;
@@ -342,17 +341,10 @@ struct TGUIPoint {
 	int x, y;
 };
 
-// SkinProperties: positions, sizes, colours and fonts of the window graphics,
-// filled in by InitSkinProperties. Its constructor and those of the blocks below are
-// compiler-generated: they construct the members that have constructors (TGUIPoint,
-// TRGBColor, TRect, TFont) and leave the ints alone. Names from the assertions where there
-// are any. The other names are ours, after the window or element that reads the member and
-// what it does with the value. Some TRects hold two positions (x, y and width,
-// height): their comments say which. The block boundaries are those of the out-of-line block
-// constructors; blocks whose constructor was inlined are not visible and their members are
-// direct members here (for example those of the inventory, which ContentWindows.cpp reads as
-// arrays). The member types of the zero-initialised members (TGUIPoint, TRGBColor or TRect)
-// are guesses from the values InitSkinProperties stores.
+// SkinProperties: positions, sizes, colours and fonts of the window graphics, filled in by
+// InitSkinProperties. The members are named after the window or element that reads them and
+// what it does with the value. Some TRects hold two positions (x, y and width, height):
+// their comments say which.
 
 // The start window's buttons (MainWindow.cpp): the size of
 // their panel, its position and the positions of "Enter Game", "Options",
@@ -669,11 +661,9 @@ struct TAdvancedGraphicsDialogProperties {
 	TGUIPoint CurrentFramerateText;
 };
 
-// PlayerStates in ContentWindows.cpp's assertion
-// ("SkinProperties.PlayerStates.NumberOfIcons"); its constructor is inlined
-// into SkinProperties' (the extent of the block is a guess: the members
-// TPlayerStates reads). LargeRow and SmallRow hold the first icon's position
-// in the large and the small row, IconDistance the distance between the icons.
+// The player's states (TPlayerStates, ContentWindows.cpp): LargeRow and
+// SmallRow hold the first icon's position in the large and the small row,
+// IconDistance the distance between the icons.
 struct TPlayerStatesProperties {
 	TRect LargeRow;
 	TRect SmallRow;
@@ -681,11 +671,10 @@ struct TPlayerStatesProperties {
 	int IconDistance;
 };
 
-// The layout of the large and the small combat
-// controls (ContentWindows.cpp copies a whole block by value): their height
-// and width and the positions of the offensive, balanced, defensive, stand,
-// chase, secure, stop, options and help buttons. The type and member names
-// are ours.
+// The layout of the large and the small combat controls (ContentWindows.cpp
+// copies a whole block by value): their height and width and the positions of
+// the offensive, balanced, defensive, stand, chase, secure, stop, options and
+// help buttons.
 struct TCombatControlsProperties {
 	int Height;
 	int Width;
@@ -723,7 +712,7 @@ struct TSkinProperties {
 	int HelpBubbleMinimumHeight;
 	int HelpBubbleMaximumWidth; // its maximum width and height
 	int HelpBubbleMaximumHeight;
-	TRect HelpBubbleTextMargins; // the margins around its text (one 16-byte block passed by value)
+	TRect HelpBubbleTextMargins; // the margins around its text
 	int HelpBubbleSizeStep;      // its sizes are HelpBubbleSizeRemainder modulo HelpBubbleSizeStep
 	int HelpBubbleSizeRemainder;
 	int HelpBubbleMargin;      // its distance to the help area and the window edges
@@ -919,7 +908,7 @@ public:
 	void InitSkins();
 	void ExitSkins();
 
-	// Data, in .bss order (Skins.cpp's), then GUI.cpp's.
+	// Skins.cpp's data, then GUI.cpp's.
 	int NumberOfSkins{};
 	std::unique_ptr<TSkin[]> Skins;   // the table's only owner
 	TSkinProperties SkinProperties{}; // GUI.cpp's; filled by InitSkinProperties

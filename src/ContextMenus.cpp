@@ -434,8 +434,6 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 					AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
 				Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 				AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
-				// The binary passes the name to "Invite to Party" as well
-				// (unused; left out here, the compiler warns about it).
 				switch (GetPlayerPartyFlag()) {
 				case PARTY_NONE:
 				case PARTY_INVITEE:

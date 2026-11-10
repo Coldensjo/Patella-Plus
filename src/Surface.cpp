@@ -13,7 +13,7 @@
 bool IsVulkanInstalled();
 TSurface *CreateSurfaceVulkan(patella::platform::TSurfaceShared &Shared);
 
-// Data: TGraphicsEngine's members (Surface.h), in the original's .data and .bss order.
+// The data is TGraphicsEngine's (Surface.h).
 
 // The surface is made on the first call after SurfaceInitInstance, which names its window and loads the device
 // choice. Before that there is none: Control.cpp's ExitControl relies on it after a failed InitControl.

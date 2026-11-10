@@ -180,7 +180,6 @@ void patella::TTalk::RemoveTalkbox(int Position)
 	Box.State = 0;
 	TalkChanged = true;
 }
-// Returns the free slot in EAX.
 int patella::TTalk::FindFreeTalkbox()
 {
 	int i;
@@ -326,9 +325,8 @@ void patella::TTalk::SetTalkboxRectangle(int Number, int x, int y, int Width, in
 	Box->Width = Width;
 	Box->Height = Height;
 }
-// When GetMilliseconds throws before the loop, the original reports i uninitialised: MSVC's
-// unoptimised build warns (C4701, a code generation warning, which a pragma turns off only
-// outside the function); initialising i would change the oracle's code.
+// i is declared without a value, as in the original: MSVC's unoptimised build warns (C4701, a code generation warning,
+// which a pragma turns off only outside the function).
 PATELLA_MSVC_WARNING(push)
 PATELLA_MSVC_WARNING(disable : 4701)
 void patella::TTalk::UpdateTalkboxes()
@@ -820,7 +818,6 @@ void TTalkBuffer::Remove(TTalkLine *line)
 void TTalkBuffer::Remove(int lineNumber)
 {
 	PATELLA_ASSERT(first!=nullptr);
-	// Not const: as a constant the compiler folds i away; the binary keeps it in a stack slot.
 	int i = 0; // NOLINT(misc-const-correctness)
 	TTalkLine *Search = first;
 	while (i != lineNumber) {
@@ -854,9 +851,7 @@ TTalkLine *TTalkBuffer::GetNext()
 	cursor = cursor->Next;
 	return cursor;
 }
-// Bytes is the original catch name for F's slot (the FILE's address; only its
-// catch wrapper named it). One line each, in the file's mode: SaveChannel's
-// text file ends them in CR LF.
+// One line each, in the file's mode: SaveChannel's text file ends them in CR LF.
 int TTalkBuffer::Write(TFile &F) const
 {
 	PATELLA_ASSERT(F!=nullptr);
