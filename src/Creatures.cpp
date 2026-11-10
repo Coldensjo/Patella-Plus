@@ -19,7 +19,6 @@
 #include "common.h"
 #include "platform/Platform.h"
 #include "types/FixedString.h"
-#include "types/Time32.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -27,8 +26,6 @@
 #include <cstring>
 
 // The data is TCreatures' and TPlayerState's (Creatures.h, issue #106).
-
-static_assert(sizeof(TCreature::SkullTime) == 4, "TCreature's 4-byte skull time (Time32, issue #62)");
 
 patella::TCreatures::TCreatures(TCreaturesPlayer &PlayerStateRef, TCreaturesGUI &GUIRef)
 	: PlayerState(PlayerStateRef), GUI(GUIRef)
@@ -83,7 +80,7 @@ bool TCreature::IsMarked() const
 void TCreature::SetSkull(int Skull, bool Delay)
 {
 	if (Delay && this->PKFlag != PK_NONE && Skull == PK_NONE) {
-		SkullTime = StoreTime32(patella::platform::Platform().Clock.WallSeconds());
+		SkullTime = patella::platform::Platform().Clock.WallSeconds();
 		return;
 	}
 	SkullTime = 0;

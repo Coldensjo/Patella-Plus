@@ -10,7 +10,6 @@
 #include "platform/Platform.h"
 #include "types/File.h"
 #include "types/FixedString.h"
-#include "types/Time32.h"
 #include "compat/crt71.h"
 #include <ctime>
 #include <array>
@@ -35,8 +34,6 @@ const char *TextPermanentlyIgnoring = "You are permanently ignoring players."; /
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
 // The data is TTalk's (Talk.h, issue #107).
-
-static_assert(sizeof(TTalkLine::Time) == 4, "statement time: the original's 4 bytes (Time32, issue #62)");
 
 bool patella::TTalk::TakeTalkChanged()
 {
@@ -958,7 +955,7 @@ TTalkLine::TTalkLine(uint32 _StatementID, int _Mode, const char *_Line, int Diff
 	Mode = _Mode;
 	StatementID = _StatementID;
 	const std::int64_t LineTime = patella::platform::Platform().Clock.WallSeconds() + DiffTime;
-	Time = StoreTime32(LineTime);
+	Time = LineTime;
 	const std::tm LocalTime = LineLocalTime(LineTime);
 	TFixedString<8> Stamp;
 	Stamp.Format("{:02}:{:02} ", LocalTime.tm_hour, LocalTime.tm_min);
@@ -977,7 +974,7 @@ TTalkLine::TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, con
 	Mode = _Mode;
 	StatementID = _StatementID;
 	const std::int64_t LineTime = patella::platform::Platform().Clock.WallSeconds() + DiffTime;
-	Time = StoreTime32(LineTime);
+	Time = LineTime;
 	const std::tm LocalTime = LineLocalTime(LineTime);
 	TFixedString<8> Stamp;
 	Stamp.Format("{:02}:{:02} ", LocalTime.tm_hour, LocalTime.tm_min);

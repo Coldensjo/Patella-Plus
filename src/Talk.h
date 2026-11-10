@@ -2,7 +2,6 @@
 #include "common.h"
 #include "types/File.h"
 #include "types/FixedString.h"
-#include "types/Time32.h"
 #include "types/IndexedVector.h"
 #include "Preferences.h"
 #include <array>
@@ -60,7 +59,7 @@ struct TTalkLine {
 	TTalkLine *Previous, *Next;
 	TFixedString<30> Addressee;
 	char *WithoutTime, *Text;
-	Time32 Time; // the line's time (StoreTime32, types/Time32.h: the original's 32 bits of it; issue #62)
+	std::int64_t Time; // the line's time, the wall clock's
 	TTalkLine(uint32 _StatementID, int _Mode, const char *_Line, int DiffTime);
 	TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, const char *_Line, int DiffTime);
 	TTalkLine(const TTalkLine &) = delete;

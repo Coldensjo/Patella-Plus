@@ -96,8 +96,7 @@
 
 // --- the CRT's semantics, portable ---
 
-// No 32-bit time here since issue #62: the client's time is time()'s 64 bits, and the original's 4-byte time
-// fields convert at their boundary, types/Time32.h.
+// No 32-bit time here since issue #62: the client's time is time()'s 64 bits.
 
 #if defined(_WIN32)
 
