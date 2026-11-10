@@ -145,8 +145,8 @@ bool TMapWindow::LeftButtonDown(int x, int y, int Flags)
 // 0x4c2710, lines 219-272. Action state 7: use the object chosen before
 // with the top multi-use object of the field (or the creature on it);
 // 8: offer the trade object to the player under the mouse; 6: drop the
-// dragged object here (a cumulative pile asks for the count unless Shift
-// (0x400) is held or both buttons are released, 0x200); otherwise a click
+// dragged object here (a cumulative pile asks for the count unless Ctrl
+// (0x400) moves it whole or 0x200, Shift or both buttons released, moves one); otherwise a click
 // without both buttons walks to the field, Flags != 0 is handled as a
 // right-button release.
 bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
@@ -192,10 +192,10 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
 		RelativeToAbsolute(&DestX, &DestY, &DestZ);
 		if (DragX != DestX || DragY != DestY || DragZ != DestZ) {
-			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & 0x200) == 0) {
+			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
 				// Patella-Plus, the option Drag Full Stacks: with it a pile moves whole without Ctrl and asks for the
 				// count with it, as on a slot (AsksForCount in ContentWindows.cpp).
-				if (((Flags & 0x400) != 0) != GetDragFullStacks()) {
+				if (((Flags & KEY_CONTROL) != 0) != GetDragFullStacks()) {
 					SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, Count);
 					return true;
 				}
@@ -229,7 +229,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 // see anything." (fields next to him always count as visible). Otherwise the
 // look and use objects of the field and the creature under the mouse
 // become the trade object, use object and trade info (Status.cpp). With the
-// classic control, Ctrl+Shift (0x200) looks, Shift (0x400) on an object
+// classic control, Shift or both buttons (0x200) looks, Ctrl (0x400) on an object
 // opens the context menu (message 0x34), and a plain click attacks the
 // creature (unless the use object has FORCEUSE) or uses the object
 // (message 0x2c for a multi-use one). Otherwise 0x800 attacks, 0x200
@@ -263,13 +263,13 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		SetTradeInfo(CreatureID);
 	int Index, ox, oy, oz;
 	if (GetClassicControl()) {
-		if (Flags & 0x200) {
+		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
 			const TObject *LookObj = GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
 				SendLook(ox, oy, oz, LookObj->Type, Index);
 			return true;
 		}
-		if ((Flags & 0x400) && GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
+		if ((Flags & KEY_CONTROL) && GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
 			AddMessage(0x34, 0, 0);
 			return true;
 		}
@@ -290,7 +290,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
 		return true;
 	} else {
-		if (Flags & 0x800) {
+		if (Flags & KEY_ALT) {
 			const uint32 Target = GetTradeInfo();
 			if (Target == 0 || Target == GetPlayerID())
 				return true;
@@ -298,13 +298,13 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			SendAttack(GetAttackID());
 			return true;
 		}
-		if (Flags & 0x200) {
+		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
 			const TObject *LookObj = GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
 				SendLook(ox, oy, oz, LookObj->Type, Index);
 			return true;
 		}
-		if (Flags & 0x400) {
+		if (Flags & KEY_CONTROL) {
 			TObject &UseObj = *GetUseObject(&Index, &ox, &oy, &oz);
 			if (UseObj.Type == 0)
 				return true;

@@ -400,7 +400,7 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 		SetActionState(5);
 		break;
 	case 4:
-		MainWindow->LeftButtonUp(x, y, 0x200);
+		MainWindow->LeftButtonUp(x, y, BOTH_BUTTONS_RELEASED);
 		SetActionState(0);
 		break;
 	case 1:
@@ -500,7 +500,7 @@ void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 		SetActionState(4);
 		break;
 	case 5:
-		MainWindow->LeftButtonUp(x, y, 0x200);
+		MainWindow->LeftButtonUp(x, y, BOTH_BUTTONS_RELEASED);
 		SetActionState(0);
 		break;
 	case 10:

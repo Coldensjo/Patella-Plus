@@ -13,7 +13,7 @@
 #pragma once
 
 #include "common.h"
-
+#include "platform/KeyInput.h"
 // The graphics types TRect, TRGBColor and TFont are graphics.h's; the window
 // classes and SkinProperties need them complete.
 #include "graphics.h"
@@ -222,6 +222,23 @@ public:
 
 protected:
 	void OnClose() override; // the children, first to last (~TWindow's order; issue #108)
+};
+
+// --- Modifier flags -------------------------------------------------------
+
+// The flags of a Key (KeyPress, the hotkeys) and of the mouse functions' Flags: the original's names (MainFrm.h), the
+// values of platform/KeyInput.h. Enumerators on purpose: naming an inline constexpr int in a source changed the code
+// generated elsewhere in its object file (measured in Release; these constants must leave the executable as it was).
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, as Objects.h's
+	KEY_SHIFT = patella::platform::KeyFlagShift,
+	KEY_CONTROL = patella::platform::KeyFlagControl,
+	KEY_ALT = patella::platform::KeyFlagAlt,
+	// Not a key: the Flags of the left button release that TGUI sends when the second of both mouse buttons goes up
+	// (Control.cpp's LeftButtonUp and RightButtonUp). The bit is KEY_SHIFT's, shared by the two meanings.
+	BOTH_BUTTONS_RELEASED = KEY_SHIFT,
+	// The shared bit where a test cannot tell the two meanings apart: a window's LeftButtonUp, and the RightButtonUp such
+	// a LeftButtonUp passes a release with flags on to, act alike for Shift held and for both buttons released.
+	SHIFT_OR_BOTH_BUTTONS = KEY_SHIFT | BOTH_BUTTONS_RELEASED,
 };
 
 // --- Timers ---------------------------------------------------------------

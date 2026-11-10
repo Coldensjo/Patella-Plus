@@ -2340,8 +2340,8 @@ void patella::TGUI::RemoveHotkey(int Key)
 // is open. Flag 0x200 is ignored and lower-case letters count as upper case.
 bool patella::TGUI::CheckHotkey(int Key)
 {
-	if ((Key & 0x200) != 0)
-		Key -= 0x200;
+	if ((Key & KEY_SHIFT) != 0)
+		Key -= KEY_SHIFT;
 	if ((Key & 0x1ff) > 0x60 && (Key & 0x1ff) < 0x7b)
 		Key -= 0x20;
 	const auto Hotkey = Hotkeys.find(Key);

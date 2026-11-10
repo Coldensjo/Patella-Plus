@@ -970,7 +970,7 @@ namespace {
 // the same rule for the floor.
 bool AsksForCount(int Flags)
 {
-	const bool Ctrl = (Flags & 0x400) != 0;
+	const bool Ctrl = (Flags & KEY_CONTROL) != 0;
 	return GetDragFullStacks() ? Ctrl : !Ctrl;
 }
 
@@ -986,7 +986,7 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 		&& In(y - SkinProperties().Data590.y, 0, SkinProperties().Data590.height - 1) && GetActionState() == 6) {
 		int Index, SrcX, SrcY, SrcZ;
 		const TObject *Obj = GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
-		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & 0x200) != 0) {
+		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, 0xffff, 0, 0, 1);
 		} else if (AsksForCount(Flags)) {
 			SetDragTarget(0xffff, 0, 0);
@@ -1109,7 +1109,7 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 			int DragIndex, DragX, DragY, DragZ;
 			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != 0xffff || DragY != Slot) {
-				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & 0x200) != 0) {
+				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, 0xffff, Slot, 0, 1);
 				} else if (AsksForCount(Flags)) {
 					SetDragTarget(0xffff, Slot, 0);
@@ -1145,18 +1145,18 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 		SetUseObject(*Obj, 0, 0xffff, Slot, 0);
 		if (Obj->Type != 0) {
 			if (GetClassicControl()) {
-				if ((Flags & 0x200) != 0)
+				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 					SendLook(0xffff, Slot, 0, Obj->Type, 0);
-				else if ((Flags & 0x400) != 0)
+				else if ((Flags & KEY_CONTROL) != 0)
 					AddMessage(52, 0, 0);
 				else if (GetObjectFlag(Obj->Type, MULTIUSE))
 					AddMessage(44, 0, 0);
 				else
 					SendUseObject(0xffff, Slot, 0, Obj->Type, 0, GetFreeContainer());
 			} else {
-				if ((Flags & 0x200) != 0)
+				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 					SendLook(0xffff, Slot, 0, Obj->Type, 0);
-				else if ((Flags & 0x400) == 0)
+				else if ((Flags & KEY_CONTROL) == 0)
 					AddMessage(52, 0, 0);
 				else if (GetObjectFlag(Obj->Type, MULTIUSE))
 					AddMessage(44, 0, 0);
@@ -1568,7 +1568,7 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 			int DragIndex, DragX, DragY, DragZ;
 			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != 0xffff || DragY != Container + 0x40 || DragZ != Position) {
-				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & 0x200) != 0) {
+				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, 0xffff, Container + 0x40, Position,
 						1);
 				} else if (AsksForCount(Flags)) {
@@ -1604,18 +1604,18 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 		if (Obj.Type == 0)
 			return true;
 		if (GetClassicControl()) {
-			if ((Flags & 0x200) != 0)
+			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 				SendLook(0xffff, Container + 0x40, Position, Obj.Type, Position);
-			else if ((Flags & 0x400) != 0)
+			else if ((Flags & KEY_CONTROL) != 0)
 				AddMessage(52, 0, 0);
 			else if (GetObjectFlag(Obj.Type, MULTIUSE))
 				AddMessage(44, 0, 0);
 			else
 				SendUseObject(0xffff, Container + 0x40, Position, Obj.Type, Position, Container);
 		} else {
-			if ((Flags & 0x200) != 0)
+			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
 				SendLook(0xffff, Container + 0x40, Position, Obj.Type, Position);
-			else if ((Flags & 0x400) == 0)
+			else if ((Flags & KEY_CONTROL) == 0)
 				AddMessage(52, 0, 0);
 			else if (GetObjectFlag(Obj.Type, MULTIUSE))
 				AddMessage(44, 0, 0);
@@ -2270,7 +2270,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 					if (Flags != 0)
 						RightButtonUp(x, y, Flags);
 					else
-						RightButtonUp(x, y, 0x800);
+						RightButtonUp(x, y, KEY_ALT);
 				}
 			}
 		}
@@ -2287,11 +2287,11 @@ bool TBattleWindowBody::RightButtonUp(int x, int y, int Flags)
 		if (Position != -1) {
 			const TCreature *Creature = GetOpponent(Position);
 			if (Creature != nullptr) {
-				if ((Flags & 0x800) != 0) {
+				if ((Flags & KEY_ALT) != 0) {
 					const uint32 AttackID = GetAttackID();
 					SetAttackID(Creature->CreatureID == AttackID ? 0 : Creature->CreatureID);
 					SendAttack(GetAttackID());
-				} else if ((Flags & 0x200) != 0) {
+				} else if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendLook(Creature->RealX, Creature->RealY, Creature->RealZ, CREATURE, 0);
 				} else {
 					AddMessage(53, Creature->CreatureID, 0);

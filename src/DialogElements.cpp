@@ -1400,7 +1400,7 @@ void TEditLine::KeyPress(int Key)
 			}
 			// Past the modifier test the binary keeps the code in Key's stack slot
 			// (0x4682b2-0x4682b8): the original's catch wrapper then prints the code.
-			if ((Key & 0x400) == 0 || (Key & 0x800) != 0) {
+			if ((Key & KEY_CONTROL) == 0 || (Key & KEY_ALT) != 0) {
 				Key = Code;
 				if (Key > 0x1f && Key < 0x100 && (int)strlen(Text.get()) < MaxLength) {
 					if (HasSelection())

@@ -1480,9 +1480,9 @@ void TConsoleWindow::KeyPress(int Key)
 		return;
 	}
 	}
-	if ((Key & 0x200) != 0)
+	if ((Key & KEY_SHIFT) != 0)
 		Number += 12;
-	else if ((Key & 0x400) != 0)
+	else if ((Key & KEY_CONTROL) != 0)
 		Number += 24;
 	bool AutoSend;
 	const char *Text = GetHotkey(Number, &AutoSend);
