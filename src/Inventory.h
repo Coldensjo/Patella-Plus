@@ -72,9 +72,9 @@ public:
 	char *GetCounterOfferName();
 	[[nodiscard]] TObject GetOwnOfferObject(int Position) const;
 	[[nodiscard]] TObject GetCounterOfferObject(int Position) const;
-	void InitInventory();
-	void ResetInventory();
-	static void ExitInventory();
+	void Init();
+	void Reset();
+	static void Exit();
 
 private:
 	TObjectTypes &ObjectTypes;
@@ -85,31 +85,7 @@ private:
 	TOffer CounterOffer{};
 };
 
-// The transition's access path: the inventory of the one TClient (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TInventory &Inventory();
-} // namespace bridge
-
 } // namespace patella
 
-// The original's functions (the callers' names, and the golden tests'): each calls TInventory's member of the same
-// name on bridge::Inventory().
-void ClearOffers();
-int GetOwnOfferCount();
-int GetCounterOfferCount();
-TObject *GetBodyObject(int Position);
-bool IsContainerOpen(int Container);
-int GetContainerObjectCount(int Container);
-TObject GetContainerObject(int Container);
-TObject GetContainerContent(int Container, int Position);
-char *GetContainerName(int Container);
-int GetContainerCapacity(int Container);
-bool HasContainerParent(int Container);
-int GetFreeContainer();
-char *GetOwnOfferName();
-char *GetCounterOfferName();
-TObject GetOwnOfferObject(int Position);
-TObject GetCounterOfferObject(int Position);
-void InitInventory();
-void ResetInventory();
-void ExitInventory();
+// The one client's inventory (Client.cpp).
+patella::TInventory &Inventory();

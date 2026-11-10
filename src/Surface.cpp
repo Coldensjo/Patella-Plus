@@ -71,10 +71,10 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	Initialised = true;
 	LoadDeviceChoice();
 	if (CommandLineEngine >= 0 && CommandLineEngine < 3) {
-		SetEngine(CommandLineEngine);
+		Preferences().SetEngine(CommandLineEngine);
 		return;
 	}
-	int Engine = GetEngine();
+	int Engine = Preferences().GetEngine();
 	if (Engine < 0 || Engine >= 3)
 		Engine = ENGINE_GPU;
 	try {
@@ -91,22 +91,5 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
-	SetEngine(Engine);
-}
-
-// The original's free functions: each calls its member on the one TClient's TGraphicsEngine. The other files call them,
-// and the golden tests fake GetSurface and SurfaceExitInstance by these symbols.
-TSurface *GetSurface()
-{
-	return patella::bridge::GraphicsEngine().GetSurface();
-}
-
-void SurfaceExitInstance()
-{
-	patella::bridge::GraphicsEngine().SurfaceExitInstance();
-}
-
-void SurfaceInitInstance(patella::platform::TWindowHandle Window)
-{
-	patella::bridge::GraphicsEngine().SurfaceInitInstance(Window);
+	Preferences().SetEngine(Engine);
 }

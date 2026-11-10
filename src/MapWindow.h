@@ -101,7 +101,7 @@ public:
 			Brightness = 0;
 		else if (Brightness > 255)
 			Brightness = 255;
-		const TRGBColor Color = GetAmbientColor();
+		const TRGBColor Color = Map().GetAmbientColor();
 		Light[FieldX][FieldY].R = Color.R * Brightness / 255;
 		Light[FieldX][FieldY].G = Color.G * Brightness / 255;
 		Light[FieldX][FieldY].B = Color.B * Brightness / 255;
@@ -112,7 +112,7 @@ public:
 	int NumberOfTextualEffects;
 	std::array<TTextualEffectPosition, EFFECTS> TextualEffects;
 	std::array<std::array<TRGBColor, MAPSIZE_Y>, MAPSIZE_X> Light; // the light on each field
-	int PositionX;                                                 // GetMapPosition
+	int PositionX;                                                 // TMap::GetPosition
 	int PositionY;
 	int PositionZ;
 	int MaxLevel;                                                 // the highest level drawn
@@ -127,8 +127,8 @@ protected:
 	void OnClose() override
 	{
 		try {
-			RemoveHotkey(KEY_CONTROL | 'N');
-			RemoveHotkey(KEY_CONTROL | 'W');
+			GUI().RemoveHotkey(KEY_CONTROL | 'N');
+			GUI().RemoveHotkey(KEY_CONTROL | 'W');
 		} catch (...) {
 			CloseWhileUnwinding([this] { TWindow::OnClose(); });
 			throw;

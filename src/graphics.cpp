@@ -24,7 +24,7 @@
 // The data is TGraphics' (graphics.h).
 
 // The six tables are std::unique_ptrs. Their elements have no destructors that act (a picture's Offsets stays raw:
-// ExitGraphics frees them first), so a table still set when FatalError calls exit(1) is only memory freed during static
+// Exit frees them first), so a table still set when FatalError calls exit(1) is only memory freed during static
 // destruction. Where the original stored a new table over one it may still have held (InitMemoryCache, InitFonts,
 // LoadSprites, LoadPictures, InitVideoCache), release() drops the old one unfreed first: the leak is the original's.
 
@@ -46,7 +46,7 @@ int patella::TGraphics::GetFontLineHeight(int FontNumber) const
 }
 
 // Called by ExitControl.
-void patella::TGraphics::ExitGraphics()
+void patella::TGraphics::Exit()
 {
 	VideoCache.reset();
 	VideoCache = nullptr;
@@ -160,7 +160,7 @@ void patella::TGraphics::LoadPictures(const char *FileName)
 		NumberOfPictures = File.readWord();
 		static_cast<void>(Pictures.release()); // NOLINT(bugprone-unused-return-value): a table still held leaks, as in the original
 		Pictures.reset(new TPicture[NumberOfPictures]);
-		// A deliberate difference from the original: every picture's offsets start empty, so ExitGraphics, after a file
+		// A deliberate difference from the original: every picture's offsets start empty, so Exit, after a file
 		// that ends before the last picture, deletes only the tables allocated here. The original left the later
 		// pictures' Offsets indeterminate.
 		for (int i = 0; i < NumberOfPictures; i++)
@@ -436,13 +436,13 @@ TMemoryCacheItem *patella::TGraphics::GetMemoryPicture(int PictureNumber, int Ti
 // its old value.
 void patella::TGraphics::InitVideoCache()
 {
-	const int Surfaces = GetSurface()->GetCacheSurfaces();
+	const int Surfaces = Engine.GetSurface()->GetCacheSurfaces();
 	if (Surfaces == 0) {
 		static_cast<void>(VideoCache.release()); // NOLINT(bugprone-unused-return-value): a table still held leaks, as in the original
 		return;
 	}
 	TRect Rect = {0, 0, 0, 0};
-	GetSurface()->GetSurfaceRect(6, &Rect);
+	Engine.GetSurface()->GetSurfaceRect(6, &Rect);
 	const int PerSurface = (Rect.height / 32) * (Rect.width / 32);
 	VideoCacheSize = PerSurface * Surfaces;
 	static_cast<void>(VideoCache.release()); // NOLINT(bugprone-unused-return-value): a table still held leaks, as in the original
@@ -598,8 +598,8 @@ TVideoCacheItem *patella::TGraphics::GetVideoSprite(int SpriteNumber)
 		Position = LeastRecentVideoItem;
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemorySprite(SpriteNumber);
-		GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
-		GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
+		Engine.GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
+		Engine.GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
 		Item.Type = SPRITE_ITEM;
 		Item.Number = SpriteNumber;
 		Item.MaskNumber = 0;
@@ -621,8 +621,8 @@ TVideoCacheItem *patella::TGraphics::GetVideoMaskedSprite(int SpriteNumber, int 
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemorySprite(SpriteNumber);
 		const TMemoryCacheItem *Mask = GetMemorySprite(MaskNumber);
-		GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
-		GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, Mask->Data,
+		Engine.GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
+		Engine.GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, Mask->Data,
 			Colors);
 		Item.MaskNumber = MaskNumber;
 		Item.Type = SPRITE_ITEM;
@@ -650,10 +650,10 @@ TVideoCacheItem *patella::TGraphics::GetVideoPicture(int PictureNumber, int Tile
 		const TMemoryCacheItem *Tile = GetMemoryPicture(PictureNumber, TileX, TileY);
 		// NOLINTNEXTLINE(bugprone-branch-clone): the original's two identical branches (both the previous picture's key)
 		if (Pictures[PictureNumber].ColorKey != TRGBColor(1, 1, 1))
-			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
+			Engine.GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
 		else
-			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
-		GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
+			Engine.GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
+		Engine.GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
 		Item.Tile.TileY = TileY;
 		Item.TileX = TileX;
 		Item.Number = PictureNumber;
@@ -680,8 +680,8 @@ TVideoCacheItem *patella::TGraphics::GetVideoFontChar(int FontNumber, int TileX,
 		const TMemoryCacheItem *Tile = GetMemoryPicture(PictureNumber, TileX, TileY);
 		std::array<TRGBColor, 4> Colors = {Color, Pictures[PictureNumber - 1].ColorKey, TRGBColor(0, 0, 0),
 			TRGBColor(0, 0, 0)};
-		GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
-		GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, nullptr,
+		Engine.GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
+		Engine.GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, nullptr,
 			Colors.data());
 		Item.TileX = TileX;
 		Item.Tile.TileY = TileY;
@@ -702,7 +702,7 @@ void patella::TGraphics::DrawSprite(int Surface, int x, int y, int SpriteNumber)
 		return;
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
 	const TVideoCacheItem *Item = GetVideoSprite(SpriteNumber);
-	GetSurface()->Blit(Surface, x, y, Item->Surface + 6, TRect(Item->x, Item->y, 32, 32),
+	Engine.GetSurface()->Blit(Surface, x, y, Item->Surface + 6, TRect(Item->x, Item->y, 32, 32),
 		Sprites[SpriteNumber - 1].ColorKey);
 }
 
@@ -713,7 +713,7 @@ void patella::TGraphics::DrawSpriteClipped(int Surface, int x, int y, int Sprite
 		return;
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
 	const TVideoCacheItem *Item = GetVideoSprite(SpriteNumber);
-	GetSurface()->BlitClipped(Surface, x, y, Item->Surface + 6, TRect(Item->x, Item->y, 32, 32),
+	Engine.GetSurface()->BlitClipped(Surface, x, y, Item->Surface + 6, TRect(Item->x, Item->y, 32, 32),
 		Sprites[SpriteNumber - 1].ColorKey, Clip);
 }
 
@@ -724,7 +724,7 @@ void patella::TGraphics::DrawSpriteScaled(int Surface, int x, int y, int Width, 
 		return;
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
 	const TVideoCacheItem *Item = GetVideoSprite(SpriteNumber);
-	GetSurface()->StretchBlit(Surface, TRect(x, y, Width, Height), Item->Surface + 6,
+	Engine.GetSurface()->StretchBlit(Surface, TRect(x, y, Width, Height), Item->Surface + 6,
 		TRect(Item->x, Item->y, 32, 32), Sprites[SpriteNumber - 1].ColorKey, Highlight, Clip);
 }
 
@@ -737,7 +737,7 @@ void patella::TGraphics::DrawMaskedSprite(int Surface, int x, int y, int SpriteN
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
 	PATELLA_ASSERT_VALUES(In(MaskNumber,1,NumberOfSprites), MaskNumber, NumberOfSprites);
 	const TVideoCacheItem *Item = GetVideoMaskedSprite(SpriteNumber, MaskNumber, Colors);
-	GetSurface()->Blit(Surface, x, y, Item->Surface + 6, TRect(Item->x, Item->y, 32, 32),
+	Engine.GetSurface()->Blit(Surface, x, y, Item->Surface + 6, TRect(Item->x, Item->y, 32, 32),
 		Sprites[SpriteNumber - 1].ColorKey);
 }
 
@@ -751,7 +751,7 @@ void patella::TGraphics::DrawMaskedSpriteScaled(int Surface, int x, int y, int W
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
 	PATELLA_ASSERT_VALUES(In(MaskNumber,1,NumberOfSprites), MaskNumber, NumberOfSprites);
 	const TVideoCacheItem *Item = GetVideoMaskedSprite(SpriteNumber, MaskNumber, Colors);
-	GetSurface()->StretchBlit(Surface, TRect(x, y, Width, Height), Item->Surface + 6,
+	Engine.GetSurface()->StretchBlit(Surface, TRect(x, y, Width, Height), Item->Surface + 6,
 		TRect(Item->x, Item->y, 32, 32), Sprites[SpriteNumber - 1].ColorKey, Highlight, Clip);
 }
 
@@ -768,24 +768,25 @@ void patella::TGraphics::DrawObject(int Surface, int x, int y, int Size, TObject
 		return;
 	int PatternX = 1;
 	int PatternY = 1;
-	if (GetObjectFlag(Obj.Type, CUMULATIVE))
-		GetCumulativePattern(Obj, &PatternX, &PatternY);
-	if (GetObjectFlag(Obj.Type, LIQUIDPOOL) || GetObjectFlag(Obj.Type, LIQUIDCONTAINER))
-		GetLiquidPattern(Obj, &PatternX, &PatternY);
-	const int Action = GetActionNumber();
-	const int Phase = Action / 5 % PATELLA_DIVISOR(GetObjectPhases(Obj.Type)) + 1;
-	const int Scale = Size * 32 / PATELLA_DIVISOR(GetObjectExactSize(Obj.Type));
-	for (int Layer = 1; Layer <= GetObjectLayers(Obj.Type); Layer++) {
-		for (int px = 1; px <= GetObjectWidth(Obj.Type); px++) {
-			for (int py = 1; py <= GetObjectHeight(Obj.Type); py++) {
-				const int SpriteNumber = GetObjectSpriteNumber(Obj.Type, px, py, Layer, PatternX, PatternY, 1,
+	if (ObjectTypes().GetObjectFlag(Obj.Type, CUMULATIVE))
+		ObjectTypes().GetCumulativePattern(Obj, &PatternX, &PatternY);
+	if (ObjectTypes().GetObjectFlag(Obj.Type, LIQUIDPOOL) || ObjectTypes().GetObjectFlag(Obj.Type, LIQUIDCONTAINER))
+		ObjectTypes().GetLiquidPattern(Obj, &PatternX, &PatternY);
+	const int Action = Interaction().GetActionNumber();
+	const int Phase = Action / 5 % PATELLA_DIVISOR(ObjectTypes().GetObjectPhases(Obj.Type)) + 1;
+	const int Scale = Size * 32 / PATELLA_DIVISOR(ObjectTypes().GetObjectExactSize(Obj.Type));
+	for (int Layer = 1; Layer <= ObjectTypes().GetObjectLayers(Obj.Type); Layer++) {
+		for (int px = 1; px <= ObjectTypes().GetObjectWidth(Obj.Type); px++) {
+			for (int py = 1; py <= ObjectTypes().GetObjectHeight(Obj.Type); py++) {
+				const int SpriteNumber = ObjectTypes().GetObjectSpriteNumber(Obj.Type, px, py, Layer, PatternX,
+					PatternY, 1,
 					Phase);
 				DrawSpriteScaled(Surface, x - px * Scale + Size, y - py * Scale + Size, Scale, Scale,
 					SpriteNumber, Highlight, Clip);
 			}
 		}
 	}
-	if (GetObjectFlag(Obj.Type, CUMULATIVE) && (Obj.Data > 1 || ShowCount)) {
+	if (ObjectTypes().GetObjectFlag(Obj.Type, CUMULATIVE) && (Obj.Data > 1 || ShowCount)) {
 		TFixedString<4> Count; // the count, a byte of the server (three digits)
 		Count.Format("{}", Obj.Data);
 		const int Height = GetTextHeight(Font.FontNumber, Count);
@@ -817,13 +818,13 @@ void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int Out
 	OutfitColors[2] = TRGBColor(R, G, B);
 	GetOutfitColor(Colors[3], &R, &G, &B);
 	OutfitColors[3] = TRGBColor(R, G, B);
-	const int Scale = Size * 32 / PATELLA_DIVISOR(GetOutfitExactSize(OutfitNumber));
-	for (int px = 1; px <= GetOutfitWidth(OutfitNumber); px++) {
-		for (int py = 1; py <= GetOutfitHeight(OutfitNumber); py++) {
-			const int SpriteNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 1, DIRECTION_SOUTH, 1);
+	const int Scale = Size * 32 / PATELLA_DIVISOR(ObjectTypes().GetOutfitExactSize(OutfitNumber));
+	for (int px = 1; px <= ObjectTypes().GetOutfitWidth(OutfitNumber); px++) {
+		for (int py = 1; py <= ObjectTypes().GetOutfitHeight(OutfitNumber); py++) {
+			const int SpriteNumber = ObjectTypes().GetOutfitSpriteNumber(OutfitNumber, px, py, 1, DIRECTION_SOUTH, 1);
 			int MaskNumber;
-			if (GetOutfitLayers(OutfitNumber) == 2)
-				MaskNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 2, DIRECTION_SOUTH, 1);
+			if (ObjectTypes().GetOutfitLayers(OutfitNumber) == 2)
+				MaskNumber = ObjectTypes().GetOutfitSpriteNumber(OutfitNumber, px, py, 2, DIRECTION_SOUTH, 1);
 			else
 				MaskNumber = 0;
 			DrawMaskedSpriteScaled(Surface, x - px * Scale + Size, y - py * Scale + Size, Scale, Scale,
@@ -841,7 +842,7 @@ void patella::TGraphics::DrawPicture(int Surface, int x, int y, int PictureNumbe
 	for (int TileY = 0; TileY < Picture.TilesY; TileY++) {
 		for (int TileX = 0; TileX < Picture.TilesX; TileX++) {
 			const TVideoCacheItem *Item = GetVideoPicture(PictureNumber, TileX, TileY);
-			GetSurface()->Blit(Surface, TileX * 32 + x, TileY * 32 + y, Item->Surface + 6,
+			Engine.GetSurface()->Blit(Surface, TileX * 32 + x, TileY * 32 + y, Item->Surface + 6,
 				TRect(Item->x, Item->y, 32, 32), Picture.ColorKey);
 		}
 	}
@@ -872,7 +873,7 @@ void patella::TGraphics::DrawPicturePart(int Surface, int x, int y, int PictureN
 			const int TopY = (OffsetY < 0 ? 0 : OffsetY);
 			const int DestX = (TileX * 32 - SourceX < 0 ? 0 : TileX * 32 - SourceX);
 			const int DestY = (TileY * 32 - SourceY < 0 ? 0 : TileY * 32 - SourceY);
-			GetSurface()->Blit(Surface, DestX + x, DestY + y, Item->Surface + 6,
+			Engine.GetSurface()->Blit(Surface, DestX + x, DestY + y, Item->Surface + 6,
 				TRect(Item->x + LeftX, Item->y + TopY, PartWidth - LeftX, PartHeight - TopY), Picture.ColorKey);
 		}
 	}
@@ -902,7 +903,7 @@ void patella::TGraphics::DrawPicturePartClipped(int Surface, int x, int y, int P
 			const int TopY = (OffsetY < 0 ? 0 : OffsetY);
 			const int DestX = (TileX * 32 - SourceX < 0 ? 0 : TileX * 32 - SourceX);
 			const int DestY = (TileY * 32 - SourceY < 0 ? 0 : TileY * 32 - SourceY);
-			GetSurface()->BlitClipped(Surface, DestX + x, DestY + y, Item->Surface + 6,
+			Engine.GetSurface()->BlitClipped(Surface, DestX + x, DestY + y, Item->Surface + 6,
 				TRect(Item->x + LeftX, Item->y + TopY, PartWidth - LeftX, PartHeight - TopY), Picture.ColorKey,
 				Clip);
 		}
@@ -948,7 +949,7 @@ void patella::TGraphics::PrintTextPart(int Surface, int x, int y, int FontNumber
 		const int SourceY = Font.CharHeight * (Index / Font.CharsPerLine);
 		const int SourceX = Font.CharWidth * (Index % Font.CharsPerLine);
 		const TVideoCacheItem *Item = GetVideoFontChar(FontNumber, SourceX / 32, SourceY / 32, Color);
-		GetSurface()->Blit(Surface, x, y, Item->Surface + 6,
+		Engine.GetSurface()->Blit(Surface, x, y, Item->Surface + 6,
 			TRect(Item->x + SourceX % 32, Item->y + SourceY % 32, Font.CharWidth, Font.CharHeight),
 			Pictures[Font.PictureNumber - 1].ColorKey);
 		x += Font.Widths[Index] + Font.Spacing;
@@ -989,7 +990,7 @@ void patella::TGraphics::PrintTextClipped(int Surface, int x, int y, int FontNum
 		const int SourceY = Font.CharHeight * (Index / Font.CharsPerLine);
 		const int SourceX = Font.CharWidth * (Index % Font.CharsPerLine);
 		const TVideoCacheItem *Item = GetVideoFontChar(FontNumber, SourceX / 32, SourceY / 32, Color);
-		GetSurface()->BlitClipped(Surface, x, y, Item->Surface + 6,
+		Engine.GetSurface()->BlitClipped(Surface, x, y, Item->Surface + 6,
 			TRect(Item->x + SourceX % 32, Item->y + SourceY % 32, Font.CharWidth, Font.CharHeight),
 			Pictures[Font.PictureNumber - 1].ColorKey, Clip);
 		x += Font.Widths[Index] + Font.Spacing;
@@ -1156,7 +1157,7 @@ void patella::TGraphics::ResetVideoCache()
 
 // Called by InitControl with 10 MB. The video cache comes later
 // (InitVideoCache), when the surfaces exist.
-void patella::TGraphics::InitGraphics(int MemoryCacheBytes)
+void patella::TGraphics::Init(int MemoryCacheBytes)
 {
 	LoadSprites("Tibia.spr");
 	LoadPictures("Tibia.pic");
@@ -1164,143 +1165,4 @@ void patella::TGraphics::InitGraphics(int MemoryCacheBytes)
 	InitFonts();
 }
 
-// The original's free functions: each calls its member on the one TClient's TGraphics. The other files call them, and
-// the golden tests fake them by these symbols (the window tests' drawing and text functions).
-
-void InitGraphics(int MemoryCacheBytes)
-{
-	patella::bridge::Graphics().InitGraphics(MemoryCacheBytes);
-}
-
-void InitVideoCache()
-{
-	patella::bridge::Graphics().InitVideoCache();
-}
-
-void ResetVideoCache()
-{
-	patella::bridge::Graphics().ResetVideoCache();
-}
-
-void ExitGraphics()
-{
-	patella::bridge::Graphics().ExitGraphics();
-}
-
-void DrawSprite(int Surface, int x, int y, int SpriteNumber)
-{
-	patella::bridge::Graphics().DrawSprite(Surface, x, y, SpriteNumber);
-}
-
-void DrawSpriteClipped(int Surface, int x, int y, int SpriteNumber, TRect Clip)
-{
-	patella::bridge::Graphics().DrawSpriteClipped(Surface, x, y, SpriteNumber, Clip);
-}
-
-void DrawMaskedSprite(int Surface, int x, int y, int SpriteNumber, int MaskNumber, TRGBColor *Colors)
-{
-	patella::bridge::Graphics().DrawMaskedSprite(Surface, x, y, SpriteNumber, MaskNumber, Colors);
-}
-
-void DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip, TFont Font, bool ShowCount)
-{
-	patella::bridge::Graphics().DrawObject(Surface, x, y, Size, Obj, Highlight, Clip, Font, ShowCount);
-}
-
-void DrawOutfit(int Surface, int x, int y, int Size, int OutfitNumber, patella::TSpan<const int, 4> Colors, TRGBColor Highlight, TRect Clip, TFont Font)
-{
-	patella::bridge::Graphics().DrawOutfit(Surface, x, y, Size, OutfitNumber, Colors, Highlight, Clip, Font);
-}
-
-void DrawPicture(int Surface, int x, int y, int PictureNumber)
-{
-	patella::bridge::Graphics().DrawPicture(Surface, x, y, PictureNumber);
-}
-
-void DrawPicturePart(int Surface, int x, int y, int PictureNumber, int SourceX, int SourceY, int Width, int Height)
-{
-	patella::bridge::Graphics().DrawPicturePart(Surface, x, y, PictureNumber, SourceX, SourceY, Width, Height);
-}
-
-void DrawPicturePartClipped(int Surface, int x, int y, int PictureNumber, int SourceX, int SourceY, int Width, int Height, TRect Clip)
-{
-	patella::bridge::Graphics().DrawPicturePartClipped(Surface, x, y, PictureNumber, SourceX, SourceY, Width, Height, Clip);
-}
-
-void PrintTextPart(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text, int Length, int Alignment)
-{
-	patella::bridge::Graphics().PrintTextPart(Surface, x, y, FontNumber, Color, Text, Length, Alignment);
-}
-
-void PrintTextClipped(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text, int Alignment, TRect Clip)
-{
-	patella::bridge::Graphics().PrintTextClipped(Surface, x, y, FontNumber, Color, Text, Alignment, Clip);
-}
-
-void PrintText(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text, int Alignment)
-{
-	patella::bridge::Graphics().PrintText(Surface, x, y, FontNumber, Color, Text, Alignment);
-}
-
-void PrintFormattedText(int Surface, int x, int y, TFont Format, const char *Text)
-{
-	patella::bridge::Graphics().PrintFormattedText(Surface, x, y, Format, Text);
-}
-
-void PrintFormattedTextClipped(int Surface, int x, int y, TFont Format, const char *Text, TRect Clip)
-{
-	patella::bridge::Graphics().PrintFormattedTextClipped(Surface, x, y, Format, Text, Clip);
-}
-
-void PrintFormattedTextPart(int Surface, int x, int y, TFont Format, const char *Text, int Length)
-{
-	patella::bridge::Graphics().PrintFormattedTextPart(Surface, x, y, Format, Text, Length);
-}
-
-int GetFontLineHeight(int FontNumber)
-{
-	return patella::bridge::Graphics().GetFontLineHeight(FontNumber);
-}
-
-int GetFontHeight(int FontNumber)
-{
-	return patella::bridge::Graphics().GetFontHeight(FontNumber);
-}
-
-int GetTextHeight(int FontNumber, const char *Text)
-{
-	return patella::bridge::Graphics().GetTextHeight(FontNumber, Text);
-}
-
-int GetTextWidth(int FontNumber, const char *Text)
-{
-	return patella::bridge::Graphics().GetTextWidth(FontNumber, Text);
-}
-
-int GetTextPartWidth(int FontNumber, const char *Text, int Length)
-{
-	return patella::bridge::Graphics().GetTextPartWidth(FontNumber, Text, Length);
-}
-
-int GetFittingTextLength(int FontNumber, const char *Text, int Width)
-{
-	return patella::bridge::Graphics().GetFittingTextLength(FontNumber, Text, Width);
-}
-
-void GetTextPosition(int *TextX, int *TextY, int x, int y, int Width, int Height, TFont *Format)
-{
-	patella::bridge::Graphics().GetTextPosition(TextX, TextY, x, y, Width, Height, Format);
-}
-
-// Skins.cpp's free functions (Skins.h), here because Skins.cpp is patella_core's, which has no TClient: each calls its
-// member on the one TClient's TSkins. Control.cpp calls them, the golden tests call and fake them.
-void InitSkins()
-{
-	patella::bridge::Skins().InitSkins();
-}
-
-void ExitSkins()
-{
-	patella::bridge::Skins().ExitSkins();
-}
 // NOLINTEND(cppcoreguidelines-owning-memory)

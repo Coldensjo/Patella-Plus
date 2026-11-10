@@ -280,18 +280,6 @@ public:
 	TCallback Callback;
 };
 
-void AddTimer(TTimer *Timer);
-void RemoveTimer(TTimer *Timer);
-void UpdateTimers();
-
-// --- Hotkeys --------------------------------------------------------------
-
-void InitHotkeys();
-void ExitHotkeys();
-void AddHotkey(int Key, TCallback Callback);
-void RemoveHotkey(int Key);
-bool CheckHotkey(int Key);
-
 // --- Skin properties ------------------------------------------------------
 
 // SkinProperties and its types are Skins.h's (TGraphics' TSkins); InitSkinProperties, which fills it, is GUI.cpp's.
@@ -309,8 +297,7 @@ class TCommunication; // Communication.h
 // and the data of GUI.cpp (the timers and hotkeys), ContentWindows.cpp (the two mouse-over texts), Control.cpp (the
 // window, the callbacks, the mouse's last move, the frame counter's switch) and MainWindow.cpp (ModalWindow, MainWindow
 // and the callbacks). GUI.cpp's timer and hotkey functions, Control.cpp's and MainWindow.cpp's functions are its
-// members of the same names; the free functions forward to them. SkinProperties is TGraphics' (with Skins.cpp's table,
-// TSkins: Skins.h).
+// members of the same names. SkinProperties is TGraphics' (with Skins.cpp's table, TSkins: Skins.h).
 //
 // Control.cpp, the controller above the windows, is TGUI's: the windows' calls into it (the device buttons of the main
 // window's options, MainWindow.cpp, and the graphics options' fullscreen switch, Dialogs.cpp) are calls of TGUI's
@@ -334,19 +321,17 @@ public:
 	void RemoveTimer(TTimer *Timer);
 	void UpdateTimers();
 	void InitHotkeys();
-	static void ExitHotkeys(); // empty (as TCommunication::ExitCommunication)
+	static void ExitHotkeys(); // empty (as TCommunication::Exit)
 	void AddHotkey(int Key, TCallback Callback);
 	void RemoveHotkey(int Key);
 	bool CheckHotkey(int Key);
 
-	// Control.cpp's (Control.h has the free functions of the same names, which forward here). Their calls into the
-	// other files (GUI.cpp's and MainWindow.cpp's included) are those files' free functions; their calls of each other
-	// are member calls.
+	// Control.cpp's.
 	void Resize(int Width, int Height);
 	void CheckSurface(bool Force);
 	static void ChangeDevice(vulkan::TDeviceButton Button);
 	void Redraw(bool Force);
-	void EnterGame() const;
+	void EnterGame();
 	void LeaveGame();
 	void MouseMove(int x, int y);
 	void LeftButtonDown(int x, int y, int Flags);
@@ -356,19 +341,21 @@ public:
 	void RightButtonUp(int x, int y, int Flags);
 	void MouseWheel(int x, int y, int Direction);
 	void KeyPress(int Key);
-	[[nodiscard]] bool CloseRequest() const;
+	[[nodiscard]] bool CloseRequest();
 	static void LinkCopyWarning();
 	void ConnectionEstablished();
 	void ReceivePackets();
 	void ConnectionClosed();
-	void TimerEvent() const;
+	void TimerEvent();
 	void ProcessEvents();
 	void InitWindow(platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL));
 	static void InitControl(bool Gamemaster);
 	static void ExitControl();
+	// The last ten packet types received, the newest first (0 for none), for the developer log's diagnostics
+	// (Player.cpp's HandleException).
 	[[nodiscard]] std::array<uint8, 10> GetLastPacketTypes() const;
 
-	// MainWindow.cpp's (MainWindow.h has the free functions).
+	// MainWindow.cpp's.
 	void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
 		void (*OpenURL)(const char *URL));
 	void ExitMainWindow();
@@ -422,16 +409,14 @@ public:
 	void AbandonWindows() noexcept;
 };
 
-// The transition's access path: the one TClient's TGUI (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TGUI &GUI();
-} // namespace bridge
-
 } // namespace patella
+
+// The one client's GUI (Client.cpp).
+patella::TGUI &GUI();
 
 
 inline bool TElement::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_NONE);
+	Help().SetHandle(HELP_NONE);
 	return false;
 }

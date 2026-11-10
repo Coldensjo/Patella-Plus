@@ -1,7 +1,7 @@
 // Network.h: the login server list, connecting, and the packets' framing and XTEA encryption (Network.cpp).
 //
-// The data is TNetwork's, which TClient owns (Client.h); the free functions of the original's names are the bridge that
-// the callers use until they hold the object (bridge::Network(), defined in Client.cpp).
+// The data is TNetwork's, which TClient owns (Client.h); a caller that holds no reference to it calls Network()
+// (Client.cpp).
 
 #pragma once
 
@@ -45,8 +45,8 @@ class TPreferences;
 
 // What Network.cpp calls in the files above it: Status.cpp's connection state and the active character's address
 // (TCommunication's session), and the message queue (TGUI's). TNetwork reaches them only through this, so that it does
-// not depend on those files; the functions are Status.h's of the same names. Client.cpp's adapter implements it with
-// Status.cpp's functions.
+// not depend on those files; the functions are TSession's and TInteraction's of the same names (Status.h), which
+// Client.cpp's adapter calls.
 class TNetworkSession {
 public:
 	TNetworkSession() = default;
@@ -85,7 +85,7 @@ public:
 	void SetTestServerPort(int Port);
 	void ResetServerAvailability();
 	void SetConnectionTimeout(int Timeout);
-	void SetNetworkWindow(platform::TWindowHandle Window);
+	void SetWindow(platform::TWindowHandle Window);
 	void SetTestServerAddress(const char *Address);
 	void SetServerError(int errorcode);
 	void SetServerIPAddress(const char *ipaddress);
@@ -119,8 +119,8 @@ public:
 	void ConnectToLoginServer();
 	void ConnectToGameServer();
 	void ShutdownConnection() const;
-	void InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)());
-	void ExitNetwork();
+	void Init(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)());
+	void Exit();
 
 	// The socket's events: TSocket's OnConnect, OnReceive and OnClose call these.
 	void OnConnect(int ErrorCode) override;
@@ -179,31 +179,7 @@ private:
 		"Network.cpp's arrays");
 };
 
-// The transition's access path: the network of the one TClient (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TNetwork &Network();
-} // namespace bridge
-
 } // namespace patella
 
-// The original's functions (the callers' names, and the golden tests'): each calls TNetwork's member of the same
-// name on bridge::Network().
-void SetTestServerPort(int Port);
-void SetConnectionTimeout(int Timeout);
-void SetNetworkWindow(patella::platform::TWindowHandle Window);
-void SetTestServerAddress(const char *Address);
-void SetServerError(int errorcode);
-void SetServerIPAddress(const char *ipaddress);
-
-int GetNextCommand();
-
-void CheckConnectionTimeout();
-// Message is the caller's new char[ERROR_MESSAGE_SIZE]: a fixed extent, passed as the pointer was.
-void GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int ErrorCode, int ErrorType);
-const char *GetResolvedIPAddress();
-void Disconnect(bool force);
-void ConnectToLoginServer();
-void ConnectToGameServer();
-void ShutdownConnection();
-void InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)());
-void ExitNetwork();
+// The one client's network (Client.cpp).
+patella::TNetwork &Network();

@@ -82,8 +82,8 @@ TMapWindow::TMapWindow()
 {
 	HintButton = nullptr;
 	MaxLevel = 0;
-	AddHotkey(KEY_CONTROL | 'N', TCallback(this, EVENT_CREATURE_INFO));
-	AddHotkey(KEY_CONTROL | 'W', TCallback(this, EVENT_REMOVE_TALKBOX));
+	GUI().AddHotkey(KEY_CONTROL | 'N', TCallback(this, EVENT_CREATURE_INFO));
+	GUI().AddHotkey(KEY_CONTROL | 'W', TCallback(this, EVENT_REMOVE_TALKBOX));
 	for (int i = 0; i < 16; i++) {
 		for (int j = 0; j < 12; j++) {
 			Cache[i][j].x = i << 5;
@@ -95,7 +95,7 @@ TMapWindow::TMapWindow()
 
 void TMapWindow::SetSize(int Width, int Height)
 {
-	SetTalkChanged();
+	Talk().SetTalkChanged();
 	TWindow::SetSize(Width, Height);
 	Arrange();
 }
@@ -114,11 +114,11 @@ bool TMapWindow::LeftButtonDown(int x, int y, int Flags)
 		int FieldX, FieldY, FieldZ;
 		GetField(x, y, &FieldX, &FieldY, &FieldZ);
 		int Position;
-		const TObject Obj = GetTopMoveObject(FieldX, FieldY, FieldZ, Position);
+		const TObject Obj = Map().GetTopMoveObject(FieldX, FieldY, FieldZ, Position);
 		if (Obj.Type != 0) {
 			int ax = FieldX, ay = FieldY, az = FieldZ;
-			MapToWorld(&ax, &ay, &az);
-			SetDragObject(Obj, Position, ax, ay, az);
+			Map().MapToWorld(&ax, &ay, &az);
+			Interaction().SetDragObject(Obj, Position, ax, ay, az);
 		}
 	}
 	return true;
@@ -135,68 +135,68 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		return true;
 	int FieldX, FieldY, FieldZ;
 	GetField(x, y, &FieldX, &FieldY, &FieldZ);
-	if (GetActionState() == ACTIONSTATE_USE_WITH) {
+	if (Interaction().GetActionState() == ACTIONSTATE_USE_WITH) {
 		int Position;
-		const TObject Obj = GetTopMultiUseObject(FieldX, FieldY, FieldZ, Position);
+		const TObject Obj = Map().GetTopMultiUseObject(FieldX, FieldY, FieldZ, Position);
 		if (Obj.Type != 0) {
 			int SrcIndex, SrcX, SrcY, SrcZ;
-			const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
+			const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 			PATELLA_ASSERT(SrcObj!=0);
 			PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-			if (Obj.Type == CREATURE && !IsPlayer(Obj.Data)) {
-				SendUseObjectOnCreature(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, Obj.Data);
+			if (Obj.Type == CREATURE && !Creatures().IsPlayer(Obj.Data)) {
+				Communication().SendUseObjectOnCreature(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, Obj.Data);
 				return true;
 			}
 			int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
-			MapToWorld(&DestX, &DestY, &DestZ);
-			SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, DestX, DestY, DestZ, Obj.Type,
+			Map().MapToWorld(&DestX, &DestY, &DestZ);
+			Communication().SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, DestX, DestY, DestZ, Obj.Type,
 				Position);
 			return true;
 		}
-	} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
+	} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
 		int TradeIndex, TradeX, TradeY, TradeZ;
-		const TObject &TradeObject = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
+		const TObject &TradeObject = *Interaction().GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 		PATELLA_ASSERT(TradeObject!=0);
 		const uint32 CreatureID = GetCreatureAt(x, y);
-		if (CreatureID != 0 && CreatureID != GetPlayerID() && IsPlayer(CreatureID)) {
-			SendRequestTrade(TradeX, TradeY, TradeZ, TradeObject.Type, TradeIndex, CreatureID);
+		if (CreatureID != 0 && CreatureID != PlayerState().GetID() && Creatures().IsPlayer(CreatureID)) {
+			Communication().SendRequestTrade(TradeX, TradeY, TradeZ, TradeObject.Type, TradeIndex, CreatureID);
 			return true;
 		}
-		SetStatusMessage(TextSelectPlayerToTrade, false);
+		Talk().SetStatusMessage(TextSelectPlayerToTrade, false);
 		return true;
-	} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
+	} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 		int DragIndex, DragX, DragY, DragZ;
-		const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
+		const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 		const int Type = DragObject->Type;
 		const int Count = DragObject->Data;
 		int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
-		MapToWorld(&DestX, &DestY, &DestZ);
+		Map().MapToWorld(&DestX, &DestY, &DestZ);
 		if (DragX != DestX || DragY != DestY || DragZ != DestZ) {
-			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
+			if (ObjectTypes().GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
 				// Patella-Plus, the option Drag Full Stacks: with it a pile moves whole without Ctrl and asks for the
 				// count with it, as on a slot (AsksForCount in ContentWindows.cpp).
-				if (((Flags & KEY_CONTROL) != 0) != GetDragFullStacks()) {
-					SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, Count);
+				if (((Flags & KEY_CONTROL) != 0) != Preferences().GetDragFullStacks()) {
+					Communication().SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, Count);
 					return true;
 				}
-				SetDragTarget(DestX, DestY, DestZ);
-				AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
+				Interaction().SetDragTarget(DestX, DestY, DestZ);
+				Interaction().AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 				return true;
 			}
-			SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, 1);
+			Communication().SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, 1);
 			return true;
 		}
 	} else {
 		if (Flags != 0)
 			return RightButtonUp(x, y, Flags);
-		int DestX = FieldX, DestY = FieldY, DestZ = GetMapLevel();
-		MapToWorld(&DestX, &DestY, &DestZ);
-		switch (SetPlayerDestination(DestX, DestY, DestZ, true, false)) {
+		int DestX = FieldX, DestY = FieldY, DestZ = Map().GetLevel();
+		Map().MapToWorld(&DestX, &DestY, &DestZ);
+		switch (PlayerState().SetDestination(DestX, DestY, DestZ, true, false)) {
 		case 1:
-			SendWalk();
+			Communication().SendWalk();
 			break;
 		case 2:
-			SendStopWalk();
+			Communication().SendStopWalk();
 			return true;
 		default:
 			break;
@@ -218,85 +218,86 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	int FieldX, FieldY, FieldZ;
 	GetField(x, y, &FieldX, &FieldY, &FieldZ);
 	if ((!In(FieldX - 8, -1, 1) || !In(FieldY - 6, -1, 1)) && Light[FieldX][FieldY].R == 0) {
-		AddMessageTalkbox(TALK_INFO_MESSAGE, "You can't see anything.");
+		Talk().AddMessageTalkbox(TALK_INFO_MESSAGE, "You can't see anything.");
 		return true;
 	}
-	SetTradeObject(TObject(), 0, 0, 0, 0);
-	SetUseObject(TObject(), 0, 0, 0, 0);
-	SetTradeInfo(0);
+	Interaction().SetTradeObject(TObject(), 0, 0, 0, 0);
+	Interaction().SetUseObject(TObject(), 0, 0, 0, 0);
+	Interaction().SetTradeInfo(0);
 	int Position;
-	TObject Obj = GetTopLookObject(FieldX, FieldY, FieldZ, Position);
+	TObject Obj = Map().GetTopLookObject(FieldX, FieldY, FieldZ, Position);
 	if (Obj.Type != 0) {
 		int ax = FieldX, ay = FieldY, az = FieldZ;
-		MapToWorld(&ax, &ay, &az);
-		SetTradeObject(Obj, Position, ax, ay, az);
+		Map().MapToWorld(&ax, &ay, &az);
+		Interaction().SetTradeObject(Obj, Position, ax, ay, az);
 	}
-	Obj = GetTopUseObject(FieldX, FieldY, FieldZ, Position);
+	Obj = Map().GetTopUseObject(FieldX, FieldY, FieldZ, Position);
 	if (Obj.Type != 0) {
 		int ax = FieldX, ay = FieldY, az = FieldZ;
-		MapToWorld(&ax, &ay, &az);
-		SetUseObject(Obj, Position, ax, ay, az);
+		Map().MapToWorld(&ax, &ay, &az);
+		Interaction().SetUseObject(Obj, Position, ax, ay, az);
 	}
 	const uint32 CreatureID = GetCreatureAt(x, y);
 	if (CreatureID != 0)
-		SetTradeInfo(CreatureID);
+		Interaction().SetTradeInfo(CreatureID);
 	int Index, ox, oy, oz;
-	if (GetClassicControl()) {
+	if (Preferences().GetClassicControl()) {
 		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
-			const TObject *LookObj = GetTradeObject(&Index, &ox, &oy, &oz);
+			const TObject *LookObj = Interaction().GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
-				SendLook(ox, oy, oz, LookObj->Type, Index);
+				Communication().SendLook(ox, oy, oz, LookObj->Type, Index);
 			return true;
 		}
-		if ((Flags & KEY_CONTROL) && GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
-			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+		if ((Flags & KEY_CONTROL) && Interaction().GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
+			Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			return true;
 		}
-		const uint32 Target = GetTradeInfo();
-		TObject &UseObj = *GetUseObject(&Index, &ox, &oy, &oz);
-		if (Target != 0 && Target != GetPlayerID() && UseObj.Type != 0 && !GetObjectFlag(UseObj, FORCEUSE)) {
-			SetAttackID(Target != GetAttackID() ? Target : 0);
-			SendAttack(GetAttackID());
+		const uint32 Target = Interaction().GetTradeInfo();
+		TObject &UseObj = *Interaction().GetUseObject(&Index, &ox, &oy, &oz);
+		if (Target != 0 && Target != PlayerState().GetID() && UseObj.Type != 0
+			&& !ObjectTypes().GetObjectFlag(UseObj, FORCEUSE)) {
+			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
+			Communication().SendAttack(Creatures().GetAttackID());
 			return true;
 		}
 		if (UseObj.Type == 0)
 			return true;
 		PATELLA_ASSERT(UseObj!=CREATURE);
-		if (GetObjectFlag(UseObj, MULTIUSE)) {
-			AddMessage(MESSAGE_USE_WITH, 0, 0);
+		if (ObjectTypes().GetObjectFlag(UseObj, MULTIUSE)) {
+			Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 			return true;
 		}
-		SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
+		Communication().SendUseObject(ox, oy, oz, UseObj.Type, Index, Inventory().GetFreeContainer());
 		return true;
 	} else {
 		if (Flags & KEY_ALT) {
-			const uint32 Target = GetTradeInfo();
-			if (Target == 0 || Target == GetPlayerID())
+			const uint32 Target = Interaction().GetTradeInfo();
+			if (Target == 0 || Target == PlayerState().GetID())
 				return true;
-			SetAttackID(Target != GetAttackID() ? Target : 0);
-			SendAttack(GetAttackID());
+			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
+			Communication().SendAttack(Creatures().GetAttackID());
 			return true;
 		}
 		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
-			const TObject *LookObj = GetTradeObject(&Index, &ox, &oy, &oz);
+			const TObject *LookObj = Interaction().GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
-				SendLook(ox, oy, oz, LookObj->Type, Index);
+				Communication().SendLook(ox, oy, oz, LookObj->Type, Index);
 			return true;
 		}
 		if (Flags & KEY_CONTROL) {
-			TObject &UseObj = *GetUseObject(&Index, &ox, &oy, &oz);
+			TObject &UseObj = *Interaction().GetUseObject(&Index, &ox, &oy, &oz);
 			if (UseObj.Type == 0)
 				return true;
 			PATELLA_ASSERT(UseObj!=CREATURE);
-			if (GetObjectFlag(UseObj, MULTIUSE)) {
-				AddMessage(MESSAGE_USE_WITH, 0, 0);
+			if (ObjectTypes().GetObjectFlag(UseObj, MULTIUSE)) {
+				Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 				return true;
 			}
-			SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
+			Communication().SendUseObject(ox, oy, oz, UseObj.Type, Index, Inventory().GetFreeContainer());
 			return true;
 		}
-		if (GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0)
-			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+		if (Interaction().GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0)
+			Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 		return true;
 	}
 }
@@ -309,18 +310,18 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMapWindow::HandleEvent(int Event)
 {
 	if (Event == EVENT_CREATURE_INFO)
-		SetCreatureInfo((GetCreatureInfo() + 1) % 3);
+		Preferences().SetCreatureInfo((Preferences().GetCreatureInfo() + 1) % 3);
 	if (Event == EVENT_REMOVE_TALKBOX)
-		RemoveOldestTalkbox();
+		Talk().RemoveOldestTalkbox();
 	if (Event == EVENT_MAP_HINT) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;
-		const int Hint = PopEventHelp();
+		const int Hint = Help().PopEventHelp();
 		PATELLA_ASSERT_VALUES(In(Hint,1,EVENTHELPS), Hint);
-		const std::size_t Size = strlen(GetEventHelpText(Hint)) + 1;
+		const std::size_t Size = strlen(Help().GetEventHelpText(Hint)) + 1;
 		char *Text = new char[Size];
-		TStringBuffer(Text, Size).Assign(GetEventHelpText(Hint));
-		AddMessage(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
+		TStringBuffer(Text, Size).Assign(Help().GetEventHelpText(Hint));
+		Interaction().AddMessage(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(Help().GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
 	}
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
@@ -335,32 +336,32 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	if ((!In(FieldX - 8, -1, 1) || !In(FieldY - 6, -1, 1)) && Light[FieldX][FieldY].R == 0)
 		return false;
 	int Position = 0;
-	TObject Obj = GetTopLookObject(FieldX, FieldY, FieldZ, Position);
+	TObject Obj = Map().GetTopLookObject(FieldX, FieldY, FieldZ, Position);
 	int Handle = HELP_NONE;
-	if (Obj.Type == CREATURE && Obj.Data == (int)GetPlayerID())
+	if (Obj.Type == CREATURE && Obj.Data == (int)PlayerState().GetID())
 		Handle = HELP_YOUR_CHARACTER;
 	else if (Obj.Type == CREATURE)
 		Handle = HELP_CREATURES;
-	else if (GetObjectFlag(Obj, LENSHELP))
-		Handle = GetObjectLensHelp(Obj.Type);
-	else if (GetObjectFlag(Obj, CONTAINER))
+	else if (ObjectTypes().GetObjectFlag(Obj, LENSHELP))
+		Handle = ObjectTypes().GetObjectLensHelp(Obj.Type);
+	else if (ObjectTypes().GetObjectFlag(Obj, CONTAINER))
 		Handle = HELP_CONTAINERS;
 	if (Handle == HELP_NONE)
 		return false;
-	const TCreature *Player = GetCreature(GetPlayerID());
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetID());
 	PATELLA_ASSERT(Player!=nullptr);
-	if (GetNoStretching()) {
+	if (Preferences().GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
 		y = FieldY * 32 - (352 - Height) / 2 - Player->GetDeltaY() - 32;
-		MoveHelpPosition(x, y);
-		SetHelpSize(32, 32);
+		Help().MovePosition(x, y);
+		Help().SetSize(32, 32);
 	} else {
 		x = (FieldX * 32 - Player->GetDeltaX() - 32) * Width / 480;
 		y = (FieldY * 32 - Player->GetDeltaY() - 32) * Height / 352;
-		MoveHelpPosition(x, y);
-		SetHelpSize(Width * 32 / 480, Height * 32 / 352);
+		Help().MovePosition(x, y);
+		Help().SetSize(Width * 32 / 480, Height * 32 / 352);
 	}
-	SetHelpHandle(Handle);
+	Help().SetHandle(Handle);
 	return true;
 }
 
@@ -368,15 +369,15 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 PATELLA_MSVC_WARNING(suppress : 6262)
 void TMapWindow::Draw(int Surface, int x, int y)
 {
-	const bool LightEffects = GetLightEffects() && GetSurface()->CanShadeRectangles();
-	const bool ShowTexts = GetTextualEffects();
-	const int CreatureInfo = GetCreatureInfo();
-	ProcessMissileEffects();
-	const TCreature *Player = GetCreature(GetPlayerID());
+	const bool LightEffects = Preferences().GetLightEffects() && GraphicsEngine().GetSurface()->CanShadeRectangles();
+	const bool ShowTexts = Preferences().GetTextualEffects();
+	const int CreatureInfo = Preferences().GetCreatureInfo();
+	Map().ProcessMissileEffects();
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetID());
 	PATELLA_ASSERT(Player!=nullptr);
 	ScrollX = Player->GetDeltaX() + 32;
 	ScrollY = Player->GetDeltaY() + 32;
-	const int Level = GetMapLevel();
+	const int Level = Map().GetLevel();
 	MaxLevel = 7;
 
 	// The levels drawn end below the first ground above the player's cross
@@ -386,16 +387,17 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		TObject Obj;
 		for (int FieldX = 7; FieldX < 10; FieldX++) {
 			for (int FieldY = 5; FieldY < 8; FieldY++) {
-				if ((FieldX == 8 || FieldY == 6) && IsFieldThrowable(FieldX, FieldY, Level)) {
+				if ((FieldX == 8 || FieldY == 6) && Map().IsFieldThrowable(FieldX, FieldY, Level)) {
 					for (int z = Level + 1; z < 8 && FieldX - z + Level >= 0 && FieldY - z + Level >= 0; z++) {
 						if (z - 1 < MaxLevel) {
-							Obj = GetFirstObject(FieldX - z + Level, FieldY - z + Level, z);
-							if (Obj.Type != 0 && GetObjectFlag(Obj, BANK) && !GetObjectFlag(Obj, DONTHIDE))
+							Obj = Map().GetFirstObject(FieldX - z + Level, FieldY - z + Level, z);
+							if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK)
+								&& !ObjectTypes().GetObjectFlag(Obj, DONTHIDE))
 								MaxLevel = z - 1;
-							Obj = GetFirstObject(FieldX, FieldY, z);
+							Obj = Map().GetFirstObject(FieldX, FieldY, z);
 							if (Obj.Type != 0 && z - 1 < MaxLevel
-								&& (GetObjectFlag(Obj, BANK) || GetObjectFlag(Obj, BOTTOM))
-								&& !GetObjectFlag(Obj, DONTHIDE))
+								&& (ObjectTypes().GetObjectFlag(Obj, BANK) || ObjectTypes().GetObjectFlag(Obj, BOTTOM))
+								&& !ObjectTypes().GetObjectFlag(Obj, DONTHIDE))
 								MaxLevel = z - 1;
 						}
 					}
@@ -410,8 +412,8 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			for (int FieldY = 0; FieldY < MAPSIZE_Y; FieldY++) {
 				CoverLevel[FieldX][FieldY] = 0;
 				for (int z = MaxLevel; z > 0; z--) {
-					Obj = GetFirstObject(FieldX, FieldY, z);
-					if (Obj.Type != 0 && GetObjectFlag(Obj, FULLBANK)) {
+					Obj = Map().GetFirstObject(FieldX, FieldY, z);
+					if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, FULLBANK)) {
 						CoverLevel[FieldX][FieldY] = z;
 						break;
 					}
@@ -427,8 +429,8 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		TObject Obj;
 		NumberOfNames = 0;
 		NumberOfTextualEffects = 0;
-		GetMapPosition(&PositionX, &PositionY, &PositionZ);
-		if (GetSurface()->SurfaceRecreated(2)) {
+		Map().GetPosition(&PositionX, &PositionY, &PositionZ);
+		if (GraphicsEngine().GetSurface()->SurfaceRecreated(2)) {
 			for (int i = 0; i < 16; i++) {
 				for (int j = 0; j < 12; j++)
 					Cache[i][j].CachedSprites = 0;
@@ -453,11 +455,11 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			}
 			for (int FieldX = 0; FieldX < MAPSIZE_X; FieldX++) {
 				for (int FieldY = 0; FieldY < MAPSIZE_Y; FieldY++) {
-					Obj = GetFirstObject(FieldX, FieldY, z);
-					if (z == 0 || (Obj.Type != 0 && GetObjectFlag(Obj, BANK))) {
+					Obj = Map().GetFirstObject(FieldX, FieldY, z);
+					if (z == 0 || (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK))) {
 						const TRGBColor Old = Light[FieldX][FieldY];
-						SetLightColor(FieldX, FieldY, PositionZ <= 7 ? GetAmbientBrightness() : 0);
-						if (z > 0 && IsFieldTranslucent(FieldX, FieldY, z)) {
+						SetLightColor(FieldX, FieldY, PositionZ <= 7 ? Map().GetAmbientBrightness() : 0);
+						if (z > 0 && Map().IsFieldTranslucent(FieldX, FieldY, z)) {
 							const int B = Old.B * 4 / 5;
 							const int G = Old.G * 4 / 5;
 							const int R = Old.R * 4 / 5;
@@ -468,8 +470,8 @@ void TMapWindow::Draw(int Surface, int x, int y)
 						}
 					}
 					if (z == PositionZ + Level - 8 && z < 7 && FieldX > 0 && FieldY > 0
-						&& IsFieldTranslucent(FieldX - 1, FieldY - 1, z + 1))
-						SetLightColor(FieldX, FieldY, GetAmbientBrightness() - 1);
+						&& Map().IsFieldTranslucent(FieldX - 1, FieldY - 1, z + 1))
+						SetLightColor(FieldX, FieldY, Map().GetAmbientBrightness() - 1);
 				}
 			}
 			for (int FieldX = 0; FieldX < MAPSIZE_X; FieldX++) {
@@ -503,7 +505,8 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				Colors[i * 4 + 3] = Light[Right][Bottom];
 			}
 		}
-		GetSurface()->ShadeRectangles(2, (MAPSIZE_X + 1) * (MAPSIZE_Y + 1), Rects.data(), Colors.data());
+		GraphicsEngine().GetSurface()->ShadeRectangles(2, (MAPSIZE_X + 1) * (MAPSIZE_Y + 1), Rects.data(),
+			Colors.data());
 	} else {
 		for (int FieldX = 0; FieldX < MAPSIZE_X; FieldX++) {
 			for (int FieldY = 0; FieldY < MAPSIZE_Y; FieldY++)
@@ -519,40 +522,40 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	const int ScreenWidth = Width;
 	const int ScreenHeight = Height;
 	int BorderX = 0, BorderY = 0;
-	if (GetNoStretching()) {
+	if (Preferences().GetNoStretching()) {
 		PATELLA_ASSERT_VALUES(GetWidth()<=MAP_WIDTH*32, GetWidth());
 		PATELLA_ASSERT_VALUES(GetHeight()<=MAP_HEIGHT*32, GetHeight());
 		if (Width >= 480 && Height >= 352) {
-			GetSurface()->BlitRect(Surface, x, y, 2, TRect(0, 0, 480, 352));
+			GraphicsEngine().GetSurface()->BlitRect(Surface, x, y, 2, TRect(0, 0, 480, 352));
 		} else {
 			BorderX = (480 - Width) / 2;
 			BorderY = (352 - Height) / 2;
-			GetSurface()->BlitRect(Surface, x, y, 2, TRect(BorderX, BorderY, Width, Height));
+			GraphicsEngine().GetSurface()->BlitRect(Surface, x, y, 2, TRect(BorderX, BorderY, Width, Height));
 		}
 	} else {
-		GetSurface()->StretchBlitRect(Surface, TRect(x, y, ScreenWidth, ScreenHeight), 2,
+		GraphicsEngine().GetSurface()->StretchBlitRect(Surface, TRect(x, y, ScreenWidth, ScreenHeight), 2,
 			TRect(0, 0, 480, 352));
 	}
 	if (CreatureInfo != 0) {
 		for (int i = 0; i < NumberOfNames; i++) {
-			TCreature *Creature = GetCreature(Names[i].CreatureID);
+			TCreature *Creature = Creatures().GetCreature(Names[i].CreatureID);
 			if (Creature == nullptr)
 				continue;
 			int cx = Creature->RealX, cy = Creature->RealY, cz = Creature->RealZ;
-			WorldToMap(&cx, &cy, &cz);
+			Map().WorldToMap(&cx, &cy, &cz);
 			bool Visible = false;
 			if (In(cx, 0, MAPSIZE_X - 1) && In(cy, 0, MAPSIZE_Y - 1)) {
 				Visible = true;
 				while (++cz <= MaxLevel) {
 					TObject Obj;
-					Obj = GetFirstObject(cx, cy, cz);
-					if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
+					Obj = Map().GetFirstObject(cx, cy, cz);
+					if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK))
 						Visible = false;
 				}
 			}
 			const TRGBColor Color = Visible ? Creature->GetHealthColor() : TRGBColor(192, 192, 192);
 			int Brightness = Light[cx][cy].R;
-			if (Creature->CreatureID == GetPlayerID()) {
+			if (Creature->CreatureID == PlayerState().GetID()) {
 				int Strength = Creature->LightStrength;
 				Limit(Strength, 2, 5);
 				if (Brightness <= Strength * 51)
@@ -561,7 +564,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			Brightness = Brightness / 5;
 			const TRGBColor NameColor(Color.R * Brightness / 51, Color.G * Brightness / 51, Color.B * Brightness / 51);
 			int nx = Names[i].x, ny = Names[i].y;
-			if (GetNoStretching()) {
+			if (Preferences().GetNoStretching()) {
 				nx -= BorderX;
 				ny -= BorderY;
 			} else {
@@ -571,22 +574,27 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			int BarY = ny - 4;
 			if (CreatureInfo == 2) {
 				int BarX = nx - 14;
-				const int TextWidth = GetTextWidth(FONT_BORDERED, Creature->Name);
+				const int TextWidth = Graphics().GetTextWidth(FONT_BORDERED, Creature->Name);
 				Limit(BarX, 1, Width - 28);
-				Limit(BarY, GetFontHeight(FONT_BORDERED) + 1, Height - GetFontHeight(FONT_BORDERED) - 5);
+				Limit(BarY, Graphics().GetFontHeight(FONT_BORDERED) + 1,
+					Height - Graphics().GetFontHeight(FONT_BORDERED) - 5);
 				int TextX = BarX - TextWidth / 2 + 14;
-				const int TextY = BarY - GetFontHeight(FONT_BORDERED);
+				const int TextY = BarY - Graphics().GetFontHeight(FONT_BORDERED);
 				Limit(TextX, 1, Width - TextWidth - 1);
-				GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4), TRGBColor(0, 0, 0));
-				GetSurface()->FillRectangle(Surface, TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
+				GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4),
+					TRGBColor(0, 0, 0));
+				GraphicsEngine().GetSurface()->FillRectangle(Surface,
+					TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
 					NameColor);
-				PrintText(Surface, TextX + x, TextY + y, FONT_BORDERED, NameColor, Creature->Name, 0);
+				Graphics().PrintText(Surface, TextX + x, TextY + y, FONT_BORDERED, NameColor, Creature->Name, 0);
 			} else {
 				int BarX = nx - 14;
 				Limit(BarX, 1, Width - 28);
 				Limit(BarY, 1, Height - 5);
-				GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4), TRGBColor(0, 0, 0));
-				GetSurface()->FillRectangle(Surface, TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
+				GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4),
+					TRGBColor(0, 0, 0));
+				GraphicsEngine().GetSurface()->FillRectangle(Surface,
+					TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
 					NameColor);
 			}
 			// The party shield, then the skull (both blink when the skull is
@@ -597,7 +605,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			if (Creature->PARTYFlag > PARTY_NONE) {
 				switch (Creature->PARTYFlag) {
 				case PARTY_INVITER:
-					if (!IsPlayerInParty())
+					if (!PlayerState().IsInParty())
 						Icon1 = SKIN_MAP_SHIELD_1;
 					break;
 				case PARTY_INVITEE:
@@ -637,7 +645,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 					Icon2 = SKIN_NONE;
 				}
 				if (Creature->SkullTime != 0) // a kept skull
-					Blink = GetBlinkState();
+					Blink = Interaction().GetBlinkState();
 			}
 			if (Icon1 != SKIN_NONE) {
 				const TSkin *Skin = &Skins()[Icon1];
@@ -662,28 +670,30 @@ void TMapWindow::Draw(int Surface, int x, int y)
 
 	// The talkboxes (their positions follow the walk unless they stick to
 	// an edge) and the status message.
-	if (TakeTalkChanged())
+	if (Talk().TakeTalkChanged())
 		ArrangeTalkboxes();
-	const int Talkboxes = GetNumberOfTalkboxes();
+	const int Talkboxes = Talk().GetNumberOfTalkboxes();
 	for (int Talkbox = 1; Talkbox <= Talkboxes; Talkbox++) {
 		int tx, ty, Alignment, Fixed;
-		GetTalkboxRectangle(Talkbox, &tx, &ty, &Alignment, &Fixed);
+		Talk().GetTalkboxRectangle(Talkbox, &tx, &ty, &Alignment, &Fixed);
 		if ((Fixed & 1) == 0)
-			tx -= GetNoStretching() ? Player->GetDeltaX() : Player->GetDeltaX() * Width / 480;
+			tx -= Preferences().GetNoStretching() ? Player->GetDeltaX() : Player->GetDeltaX() * Width / 480;
 		if ((Fixed & 2) == 0)
-			ty -= GetNoStretching() ? Player->GetDeltaY() : Player->GetDeltaY() * Height / 352;
-		const int Lines = GetTalkboxLines(Talkbox);
+			ty -= Preferences().GetNoStretching() ? Player->GetDeltaY() : Player->GetDeltaY() * Height / 352;
+		const int Lines = Talk().GetTalkboxLines(Talkbox);
 		TRGBColor Color;
-		GetTalkboxColor(&Color, Talkbox);
+		Talk().GetTalkboxColor(&Color, Talkbox);
 		for (int Line = 0; Line < Lines; Line++)
-			PrintTextClipped(Surface, tx + x, Line * GetFontLineHeight(FONT_BORDERED) + ty + y, FONT_BORDERED, Color,
-				GetTalkboxLine(Talkbox, Line), Alignment, TRect(x, y, ScreenWidth, ScreenHeight));
+			Graphics().PrintTextClipped(Surface, tx + x, Line * Graphics().GetFontLineHeight(FONT_BORDERED) + ty + y,
+				FONT_BORDERED, Color, Talk().GetTalkboxLine(Talkbox, Line), Alignment,
+				TRect(x, y, ScreenWidth, ScreenHeight));
 	}
-	if (GetStatusMessage() != nullptr) {
+	if (Talk().GetStatusMessage() != nullptr) {
 		const int MessageWidth = Width, MessageHeight = Height;
-		const int Length = GetFittingTextLength(FONT_BORDERED, GetStatusMessage(), MessageWidth);
-		PrintTextPart(Surface, MessageWidth / 2 + x, MessageHeight - GetFontHeight(FONT_BORDERED) + y, FONT_BORDERED,
-			TRGBColor(255, 255, 255), GetStatusMessage(), Length, 1);
+		const int Length = Graphics().GetFittingTextLength(FONT_BORDERED, Talk().GetStatusMessage(), MessageWidth);
+		Graphics().PrintTextPart(Surface, MessageWidth / 2 + x,
+			MessageHeight - Graphics().GetFontHeight(FONT_BORDERED) + y, FONT_BORDERED,
+			TRGBColor(255, 255, 255), Talk().GetStatusMessage(), Length, 1);
 	}
 
 	// The animated texts of visible fields and of the player's level.
@@ -697,38 +707,39 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				if (In(FieldX, 0, MAPSIZE_X - 1) && In(FieldY, 0, MAPSIZE_Y - 1)) {
 					Visible = true;
 					while (++z <= MaxLevel) {
-						Obj = GetFirstObject(FieldX, FieldY, z);
-						if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
+						Obj = Map().GetFirstObject(FieldX, FieldY, z);
+						if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK))
 							Visible = false;
 					}
 				}
-				if (!Visible && TextualEffects[i].FieldZ != GetMapLevel())
+				if (!Visible && TextualEffects[i].FieldZ != Map().GetLevel())
 					continue;
-				const int Color = GetTextualEffectColor(TextualEffects[i].EffectNumber);
-				const char *Text = GetTextualEffectText(TextualEffects[i].EffectNumber);
+				const int Color = Map().GetTextualEffectColor(EffectIdOf(TextualEffects[i].EffectNumber));
+				const char *Text = Map().GetTextualEffectText(EffectIdOf(TextualEffects[i].EffectNumber));
 				int tx = TextualEffects[i].x, ty = TextualEffects[i].y;
-				if (GetNoStretching()) {
+				if (Preferences().GetNoStretching()) {
 					tx -= BorderX;
 					ty -= BorderY;
 				} else {
 					tx = tx * Width / 480;
 					ty = ty * Height / 352;
 				}
-				Limit(tx, GetTextWidth(FONT_BORDERED, Text) / 2, Width - GetTextWidth(FONT_BORDERED, Text) / 2);
-				Limit(ty, 0, Height - GetFontHeight(FONT_BORDERED));
-				PrintText(Surface, tx + x, ty + y, FONT_BORDERED, TRGBColor(Color), Text, 1);
+				Limit(tx, Graphics().GetTextWidth(FONT_BORDERED, Text) / 2,
+					Width - Graphics().GetTextWidth(FONT_BORDERED, Text) / 2);
+				Limit(ty, 0, Height - Graphics().GetFontHeight(FONT_BORDERED));
+				Graphics().PrintText(Surface, tx + x, ty + y, FONT_BORDERED, TRGBColor(Color), Text, 1);
 			}
 		}
 	}
 
 	// The hint button while there is an event help to show.
-	if (GetShowNewHints() && GetEventHelp() != HINT_NONE && HintButton == nullptr) {
+	if (Preferences().GetShowNewHints() && Help().GetEventHelp() != HINT_NONE && HintButton == nullptr) {
 		HintButton = new TBlinkingButton(0, 0, SKIN_HINT_BUTTON_UP1, SKIN_HINT_BUTTON_DOWN1, SKIN_HINT_BUTTON_UP2, SKIN_HINT_BUTTON_DOWN2, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
 		InsertChild(HintButton);
 		Arrange();
-		if (GetEventHelp() == HINT_FIRST_LOGIN)
+		if (Help().GetEventHelp() == HINT_FIRST_LOGIN)
 			HandleEvent(EVENT_MAP_HINT);
-	} else if (!GetShowNewHints() && HintButton != nullptr) {
+	} else if (!Preferences().GetShowNewHints() && HintButton != nullptr) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;
 	}
@@ -745,31 +756,31 @@ void TMapWindow::Draw(int Surface, int x, int y)
 void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int FieldZ, int Mode)
 {
 	int x = FieldX, y = FieldY, z = FieldZ;
-	MapToWorld(&x, &y, &z);
-	TObject Obj = GetFirstObject(FieldX, FieldY, FieldZ);
+	Map().MapToWorld(&x, &y, &z);
+	TObject Obj = Map().GetFirstObject(FieldX, FieldY, FieldZ);
 	if (Obj.Type == 0 && FieldZ == 0 && Mode == 0 && IsFieldVisible(FieldX, FieldY, 0))
 		DrawFieldSprite(posx, posy, 0, false, 0, 0, nullptr);
 	bool Lying = false;
 	int Elevation = 0;
 	TObject TopObject;
-	for (Obj = GetFirstObject(FieldX, FieldY, FieldZ); Obj.Type != 0; Obj = GetNextObject()) {
-		if (Mode == 0 && Obj.Type != CREATURE && GetObjectFlag(Obj, LIGHT)) {
+	for (Obj = Map().GetFirstObject(FieldX, FieldY, FieldZ); Obj.Type != 0; Obj = Map().GetNextObject()) {
+		if (Mode == 0 && Obj.Type != CREATURE && ObjectTypes().GetObjectFlag(Obj, LIGHT)) {
 			int ShiftX = 0, ShiftY = 0;
-			if (GetObjectFlag(Obj, SHIFT)) {
-				ShiftX = GetObjectShiftX(Obj.Type);
-				ShiftY = GetObjectShiftY(Obj.Type);
+			if (ObjectTypes().GetObjectFlag(Obj, SHIFT)) {
+				ShiftX = ObjectTypes().GetObjectShiftX(Obj.Type);
+				ShiftY = ObjectTypes().GetObjectShiftY(Obj.Type);
 			}
 			AddLightSource(posx - ShiftX - Elevation + 16, posy - ShiftY - Elevation + 16, FieldZ,
-				GetObjectBrightness(Obj.Type), TRGBColor(GetObjectLightColor(Obj.Type)));
+				ObjectTypes().GetObjectBrightness(Obj.Type), TRGBColor(ObjectTypes().GetObjectLightColor(Obj.Type)));
 		}
-		if (GetObjectFlag(Obj, TOP)) {
+		if (ObjectTypes().GetObjectFlag(Obj, TOP)) {
 			TopObject = Obj;
 		} else if (Obj.Type != CREATURE && Mode != 1) {
 			DrawObject(posx - Elevation, posy - Elevation, FieldZ, Obj, x, y, z);
-			if (GetObjectFlag(Obj, LYINGOBJECT))
+			if (ObjectTypes().GetObjectFlag(Obj, LYINGOBJECT))
 				Lying = true;
 		}
-		Elevation += GetObjectFlag(Obj, HEIGHT) ? GetObjectElevation(Obj.Type) : 0;
+		Elevation += ObjectTypes().GetObjectFlag(Obj, HEIGHT) ? ObjectTypes().GetObjectElevation(Obj.Type) : 0;
 		if (Elevation > 24)
 			Elevation = 24;
 	}
@@ -792,24 +803,24 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		for (int j = FieldY - 1; j <= FieldY + 1; j++) {
 			if (i < 0 || j < 0 || i >= MAPSIZE_X || j >= MAPSIZE_Y)
 				continue;
-			for (Obj = GetFirstObject(i, j, FieldZ); Obj.Type != 0; Obj = GetNextObject()) {
+			for (Obj = Map().GetFirstObject(i, j, FieldZ); Obj.Type != 0; Obj = Map().GetNextObject()) {
 				if (Obj.Type != CREATURE || NumberOfCreatures == 10)
 					continue;
-				TCreature *Creature = GetCreature(Obj.Data);
+				TCreature *Creature = ::Creatures().GetCreature(Obj.Data);
 				if (Creature == nullptr)
 					continue;
 				int sx = 0, sy = 0;
 				if (Creature->OutfitType != 0) {
-					if (GetOutfitFlag(Creature->OutfitType, SHIFT)) {
-						sx = GetOutfitShiftX(Creature->OutfitType);
-						sy = GetOutfitShiftY(Creature->OutfitType);
+					if (ObjectTypes().GetOutfitFlag(Creature->OutfitType, SHIFT)) {
+						sx = ObjectTypes().GetOutfitShiftX(Creature->OutfitType);
+						sy = ObjectTypes().GetOutfitShiftY(Creature->OutfitType);
 					}
 				} else if (Creature->Colors[0] != 0) {
-					if (GetObjectFlag(Creature->Colors[0], SHIFT)) {
-						sx = GetObjectShiftX(Creature->Colors[0]);
-						sy = GetObjectShiftY(Creature->Colors[0]);
+					if (ObjectTypes().GetObjectFlag(Creature->Colors[0], SHIFT)) {
+						sx = ObjectTypes().GetObjectShiftX(Creature->Colors[0]);
+						sy = ObjectTypes().GetObjectShiftY(Creature->Colors[0]);
 					}
-				} else if (IsPlayer(Creature->CreatureID)) {
+				} else if (::Creatures().IsPlayer(Creature->CreatureID)) {
 					sx = 8;
 					sy = 8;
 				} else {
@@ -852,14 +863,14 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 	int i;
 	for (i = 0; i < NumberOfCreatures; i++) {
 		TRGBColor Color;
-		if (Creatures[i]->CreatureID == GetHighlightID())
+		if (Creatures[i]->CreatureID == ::Creatures().GetHighlightID())
 			Color = SkinProperties().HighlightColor;
-		if (Creatures[i]->CreatureID == GetAttackID())
-			Color = Creatures[i]->CreatureID == GetHighlightID() ? SkinProperties().HighlightedAttackColor
-																 : SkinProperties().AttackColor;
-		if (Creatures[i]->CreatureID == GetFollowID())
-			Color = Creatures[i]->CreatureID == GetHighlightID() ? SkinProperties().HighlightedFollowColor
-																 : SkinProperties().FollowColor;
+		if (Creatures[i]->CreatureID == ::Creatures().GetAttackID())
+			Color = Creatures[i]->CreatureID == ::Creatures().GetHighlightID() ? SkinProperties().HighlightedAttackColor
+																			   : SkinProperties().AttackColor;
+		if (Creatures[i]->CreatureID == ::Creatures().GetFollowID())
+			Color = Creatures[i]->CreatureID == ::Creatures().GetHighlightID() ? SkinProperties().HighlightedFollowColor
+																			   : SkinProperties().FollowColor;
 		const int ox = OffsetX[i], oy = OffsetY[i];
 		if (Color != TRGBColor(0, 0, 0)) {
 			const int cx = (ScrollX - Elevation + ox + posx) / 32, cy = (ScrollY - Elevation + oy + posy) / 32;
@@ -867,7 +878,8 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			FlushField(cx + 1, cy);
 			FlushField(cx, cy + 1);
 			FlushField(cx + 1, cy + 1);
-			GetSurface()->DrawFrameClipped(2, TRect(ox - Elevation + posx, oy - Elevation + posy, 32, 32), 2,
+			GraphicsEngine().GetSurface()->DrawFrameClipped(2,
+				TRect(ox - Elevation + posx, oy - Elevation + posy, 32, 32), 2,
 				Color, TRect(0, 0, 480, 352));
 		}
 		if (Creatures[i]->IsMarked()) {
@@ -877,7 +889,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			FlushField(cx, cy + 1);
 			FlushField(cx + 1, cy + 1);
 			const int Margin = Color == TRGBColor(0, 0, 0) ? 0 : 2;
-			GetSurface()->DrawFrameClipped(2,
+			GraphicsEngine().GetSurface()->DrawFrameClipped(2,
 				TRect(Margin + ox - Elevation + posx, Margin - Elevation + oy + posy,
 					(16 - Margin) * 2, (16 - Margin) * 2),
 				2, TRGBColor(Creatures[i]->Mark), TRect(0, 0, 480, 352));
@@ -886,14 +898,15 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (OutfitType == 0) {
 			if (Creatures[i]->Colors[0] == 0) {
 				// An invisible creature: the sparkles of effect 13.
-				const int SpriteNumber = GetEffectSpriteNumber(13, 1, 1, 1, GetActionNumber() / 3 % 3 + 2);
+				const int SpriteNumber = ObjectTypes().GetEffectSpriteNumber(13, 1, 1, 1,
+					Interaction().GetActionNumber() / 3 % 3 + 2);
 				const int sx = ox + ShiftX[i], sy = oy + ShiftY[i];
 				const int cx = (ScrollX - Elevation + sx + posx - 8) / 32, cy = (ScrollY - Elevation + sy + posy - 8) / 32;
 				FlushField(cx, cy);
 				FlushField(cx + 1, cy);
 				FlushField(cx, cy + 1);
 				FlushField(cx + 1, cy + 1);
-				DrawSprite(2, sx - Elevation + posx - 8, sy - Elevation + posy - 8, SpriteNumber);
+				Graphics().DrawSprite(2, sx - Elevation + posx - 8, sy - Elevation + posy - 8, SpriteNumber);
 			} else {
 				// A creature shown as an object.
 				const TObject Shape = {Creatures[i]->Colors[0], 0, 0};
@@ -903,7 +916,8 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			DrawCreature(ShiftX[i] - Elevation + ox + posx, ShiftY[i] - Elevation + oy + posy, FieldZ, Creatures[i]);
 		}
 		if (Mode == 0) {
-			if ((IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == GetPlayerID()) && FieldZ == GetMapLevel()) {
+			if ((::Creatures().IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == PlayerState().GetID())
+				&& FieldZ == Map().GetLevel()) {
 				Names[NumberOfNames].CreatureID = Creatures[i]->CreatureID;
 				Names[NumberOfNames].x = ox - Elevation + posx + 16;
 				Names[NumberOfNames].y = oy - Elevation + posy;
@@ -911,9 +925,9 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			}
 			const int lx = ox - Elevation + posx + 16, ly = oy - Elevation + posy + 16;
 			AddLightSource(lx, ly, FieldZ, Creatures[i]->LightStrength, TRGBColor(Creatures[i]->LightColor));
-			if (OutfitType != 0 && GetOutfitFlag(OutfitType, LIGHT))
-				AddLightSource(lx, ly, FieldZ, GetOutfitBrightness(OutfitType), TRGBColor(GetOutfitLightColor(OutfitType)));
-			if (Creatures[i]->CreatureID == GetPlayerID() && Creatures[i]->LightStrength < 2)
+			if (OutfitType != 0 && ObjectTypes().GetOutfitFlag(OutfitType, LIGHT))
+				AddLightSource(lx, ly, FieldZ, ObjectTypes().GetOutfitBrightness(OutfitType), TRGBColor(ObjectTypes().GetOutfitLightColor(OutfitType)));
+			if (Creatures[i]->CreatureID == PlayerState().GetID() && Creatures[i]->LightStrength < 2)
 				AddLightSource(lx, ly, FieldZ, 2, TRGBColor(255, 255, 255));
 		}
 	}
@@ -921,19 +935,19 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (EffectNumber < 0 || EffectNumber >= EFFECTS) {
 			std::stringstream s;
 			s << "EffectNumber: " << EffectNumber << " X: " << FieldX << " Y: " << FieldY << " Z: " << FieldZ;
-			const TCreature *Player = GetCreature(GetPlayerID());
+			const TCreature *Player = ::Creatures().GetCreature(PlayerState().GetID());
 			if (Player != nullptr)
 				s << " PlayerX: " << Player->RealX << " PlayerY: " << Player->RealY << " PlayerZ: " << Player->RealZ;
 			throw TMYEXCEPTION("effect number out of range [bug0000913]", "", 0, "", 0, s.str());
 		}
-		if (GetEffectStatus(EffectNumber) == 1) {
-			const int Type = GetGraphicalEffectType(EffectNumber);
+		if (Map().GetEffectStatus(EffectIdOf(EffectNumber)) == 1) {
+			const int Type = Map().GetGraphicalEffectType(EffectIdOf(EffectNumber));
 			if (Type != -1) {
-				const int Phase = GetGraphicalEffectPhase(EffectNumber);
-				for (int X = 1; X <= GetEffectWidth(Type); X++) {
-					for (int Y = 1; Y <= GetEffectHeight(Type); Y++) {
-						for (int Layer = 1; Layer <= GetEffectLayers(Type); Layer++) {
-							const int SpriteNumber = GetEffectSpriteNumber(Type, X, Y, Layer, Phase);
+				const int Phase = Map().GetGraphicalEffectPhase(EffectIdOf(EffectNumber));
+				for (int X = 1; X <= ObjectTypes().GetEffectWidth(Type); X++) {
+					for (int Y = 1; Y <= ObjectTypes().GetEffectHeight(Type); Y++) {
+						for (int Layer = 1; Layer <= ObjectTypes().GetEffectLayers(Type); Layer++) {
+							const int SpriteNumber = ObjectTypes().GetEffectSpriteNumber(Type, X, Y, Layer, Phase);
 							if (SpriteNumber > 0)
 								DrawFieldSprite(posx - X * 32 - Elevation + 32, posy - Y * 32 - Elevation + 32, FieldZ,
 									false, SpriteNumber, 0, nullptr);
@@ -944,48 +958,49 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 				// effect's brightness. The binary passes the level and the
 				// brightness the wrong way round (the missile light below
 				// has them right): the level becomes the radius.
-				if (Mode == 0 && GetEffectFlag(Type, LIGHT)) {
-					const int Rest = GetEffectPhases(Type) - Phase + 1;
+				if (Mode == 0 && ObjectTypes().GetEffectFlag(Type, LIGHT)) {
+					const int Rest = ObjectTypes().GetEffectPhases(Type) - Phase + 1;
 					int Brightness = Phase < Rest ? Phase : Rest;
-					const int Maximum = GetEffectBrightness(Type);
+					const int Maximum = ObjectTypes().GetEffectBrightness(Type);
 					if (Brightness >= Maximum)
 						Brightness = Maximum;
 					AddLightSource(posx - Elevation + 16, posy - Elevation + 16, Brightness, FieldZ,
-						TRGBColor(GetEffectLightColor(Type)));
+						TRGBColor(ObjectTypes().GetEffectLightColor(Type)));
 				}
 			}
 		}
-		if (GetEffectStatus(EffectNumber) == 2) {
+		if (Map().GetEffectStatus(EffectIdOf(EffectNumber)) == 2) {
 			if (Mode != 0)
 				continue;
 			TTextualEffectPosition &Text = TextualEffects[NumberOfTextualEffects];
 			Text.EffectNumber = EffectNumber;
 			Text.x = posx - Elevation + 16;
-			Text.y = posy - GetTextualEffectPhase(EffectNumber) * 2 - Elevation;
+			Text.y = posy - Map().GetTextualEffectPhase(EffectIdOf(EffectNumber)) * 2 - Elevation;
 			Text.FieldX = FieldX;
 			Text.FieldY = FieldY;
 			Text.FieldZ = FieldZ;
 			NumberOfTextualEffects++;
 		}
-		if (GetEffectStatus(EffectNumber) == 3) {
-			const int Type = GetMissileEffectType(EffectNumber);
+		if (Map().GetEffectStatus(EffectIdOf(EffectNumber)) == 3) {
+			const int Type = Map().GetMissileEffectType(EffectIdOf(EffectNumber));
 			if (Type != -1) {
-				for (int X = 1; X <= GetMissileWidth(Type); X++) {
-					for (int Y = 1; Y <= GetMissileHeight(Type); Y++) {
-						for (int Layer = 1; Layer <= GetMissileLayers(Type); Layer++) {
-							const int SpriteNumber = GetMissileSpriteNumber(Type, X, Y, Layer,
-								GetMissileEffectDirection(EffectNumber));
+				for (int X = 1; X <= ObjectTypes().GetMissileWidth(Type); X++) {
+					for (int Y = 1; Y <= ObjectTypes().GetMissileHeight(Type); Y++) {
+						for (int Layer = 1; Layer <= ObjectTypes().GetMissileLayers(Type); Layer++) {
+							const int SpriteNumber = ObjectTypes().GetMissileSpriteNumber(Type, X, Y, Layer,
+								Map().GetMissileEffectDirection(EffectIdOf(EffectNumber)));
 							if (SpriteNumber > 0)
-								DrawFieldSprite(GetMissileEffectX(EffectNumber) - X * 32 - Elevation + posx + 32,
-									GetMissileEffectY(EffectNumber) - Y * 32 - Elevation + posy + 32, FieldZ, true,
-									SpriteNumber, 0, nullptr);
+								DrawFieldSprite(
+									Map().GetMissileEffectX(EffectIdOf(EffectNumber)) - X * 32 - Elevation + posx + 32,
+									Map().GetMissileEffectY(EffectIdOf(EffectNumber)) - Y * 32 - Elevation + posy + 32,
+									FieldZ, true, SpriteNumber, 0, nullptr);
 						}
 					}
 				}
-				if (Mode == 0 && GetMissileFlag(Type, LIGHT))
-					AddLightSource(GetMissileEffectX(EffectNumber) - Elevation + posx + 16,
-						GetMissileEffectY(EffectNumber) - Elevation + posy + 16, FieldZ,
-						GetMissileBrightness(Type), TRGBColor(GetMissileLightColor(Type)));
+				if (Mode == 0 && ObjectTypes().GetMissileFlag(Type, LIGHT))
+					AddLightSource(Map().GetMissileEffectX(EffectIdOf(EffectNumber)) - Elevation + posx + 16,
+						Map().GetMissileEffectY(EffectIdOf(EffectNumber)) - Elevation + posy + 16, FieldZ,
+						ObjectTypes().GetMissileBrightness(Type), TRGBColor(ObjectTypes().GetMissileLightColor(Type)));
 			}
 		}
 	}
@@ -1000,28 +1015,28 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, int y, int z)
 {
 	PATELLA_ASSERT(Obj.Type!=0);
-	int PatternX = x % PATELLA_DIVISOR(GetObjectPatternWidth(Obj.Type)) + 1;
-	int PatternY = y % PATELLA_DIVISOR(GetObjectPatternHeight(Obj.Type)) + 1;
-	const int PatternZ = z % PATELLA_DIVISOR(GetObjectPatternDepth(Obj.Type)) + 1;
-	const int Phase = GetActionNumber() / 5 % PATELLA_DIVISOR(GetObjectPhases(Obj.Type)) + 1;
-	if (GetObjectFlag(Obj, CUMULATIVE))
-		GetCumulativePattern(Obj, &PatternX, &PatternY);
-	if (GetObjectFlag(Obj, LIQUIDPOOL) || GetObjectFlag(Obj, LIQUIDCONTAINER))
-		GetLiquidPattern(Obj, &PatternX, &PatternY);
-	if (GetObjectFlag(Obj, HANG))
-		GetHangPattern(Obj, &PatternX, &PatternY);
+	int PatternX = x % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternWidth(Obj.Type)) + 1;
+	int PatternY = y % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternHeight(Obj.Type)) + 1;
+	const int PatternZ = z % PATELLA_DIVISOR(ObjectTypes().GetObjectPatternDepth(Obj.Type)) + 1;
+	const int Phase = Interaction().GetActionNumber() / 5 % PATELLA_DIVISOR(ObjectTypes().GetObjectPhases(Obj.Type)) + 1;
+	if (ObjectTypes().GetObjectFlag(Obj, CUMULATIVE))
+		ObjectTypes().GetCumulativePattern(Obj, &PatternX, &PatternY);
+	if (ObjectTypes().GetObjectFlag(Obj, LIQUIDPOOL) || ObjectTypes().GetObjectFlag(Obj, LIQUIDCONTAINER))
+		ObjectTypes().GetLiquidPattern(Obj, &PatternX, &PatternY);
+	if (ObjectTypes().GetObjectFlag(Obj, HANG))
+		ObjectTypes().GetHangPattern(Obj, &PatternX, &PatternY);
 	int ShiftX = 0, ShiftY = 0;
-	if (GetObjectFlag(Obj, SHIFT)) {
-		ShiftX = GetObjectShiftX(Obj.Type);
-		ShiftY = GetObjectShiftY(Obj.Type);
+	if (ObjectTypes().GetObjectFlag(Obj, SHIFT)) {
+		ShiftX = ObjectTypes().GetObjectShiftX(Obj.Type);
+		ShiftY = ObjectTypes().GetObjectShiftY(Obj.Type);
 	}
-	for (int X = 1; X <= GetObjectWidth(Obj.Type); X++) {
-		for (int Y = 1; Y <= GetObjectHeight(Obj.Type); Y++) {
-			for (int Layer = 1; Layer <= GetObjectLayers(Obj.Type); Layer++) {
-				const int SpriteNumber = GetObjectSpriteNumber(Obj.Type, X, Y, Layer, PatternX, PatternY, PatternZ, Phase);
+	for (int X = 1; X <= ObjectTypes().GetObjectWidth(Obj.Type); X++) {
+		for (int Y = 1; Y <= ObjectTypes().GetObjectHeight(Obj.Type); Y++) {
+			for (int Layer = 1; Layer <= ObjectTypes().GetObjectLayers(Obj.Type); Layer++) {
+				const int SpriteNumber = ObjectTypes().GetObjectSpriteNumber(Obj.Type, X, Y, Layer, PatternX, PatternY, PatternZ, Phase);
 				if (SpriteNumber > 0)
 					DrawFieldSprite(posx - X * 32 - ShiftX + 32, posy - Y * 32 - ShiftY + 32, Level,
-						GetObjectPhases(Obj.Type) > 1, SpriteNumber, 0, nullptr);
+						ObjectTypes().GetObjectPhases(Obj.Type) > 1, SpriteNumber, 0, nullptr);
 			}
 		}
 	}
@@ -1046,20 +1061,21 @@ void TMapWindow::DrawCreature(int posx, int posy, int Level, TCreature *Creature
 	GetOutfitColor(Creature->Colors[3], &R, &G, &B);
 	Colors[3] = TRGBColor(R, G, B);
 	int ShiftX = 0, ShiftY = 0;
-	if (GetOutfitFlag(OutfitType, SHIFT)) {
-		ShiftX = GetOutfitShiftX(OutfitType);
-		ShiftY = GetOutfitShiftY(OutfitType);
+	if (ObjectTypes().GetOutfitFlag(OutfitType, SHIFT)) {
+		ShiftX = ObjectTypes().GetOutfitShiftX(OutfitType);
+		ShiftY = ObjectTypes().GetOutfitShiftY(OutfitType);
 	}
 	int Phase;
-	if (GetOutfitFlag(OutfitType, ANIMATEALWAYS))
-		Phase = GetActionNumber() / 3 % PATELLA_DIVISOR(GetOutfitPhases(OutfitType)) + 1;
+	if (ObjectTypes().GetOutfitFlag(OutfitType, ANIMATEALWAYS))
+		Phase = Interaction().GetActionNumber() / 3 % PATELLA_DIVISOR(ObjectTypes().GetOutfitPhases(OutfitType)) + 1;
 	else
-		Phase = Creature->GetAnimationPhase(GetOutfitPhases(OutfitType));
-	for (int X = 1; X <= GetOutfitWidth(OutfitType); X++) {
-		for (int Y = 1; Y <= GetOutfitHeight(OutfitType); Y++) {
-			const int SpriteNumber = GetOutfitSpriteNumber(OutfitType, X, Y, 1, Creature->GetDrawDirection(), Phase);
-			const int MaskNumber = GetOutfitLayers(OutfitType) == 2
-				? GetOutfitSpriteNumber(OutfitType, X, Y, 2, Creature->GetDrawDirection(), Phase)
+		Phase = Creature->GetAnimationPhase(ObjectTypes().GetOutfitPhases(OutfitType));
+	for (int X = 1; X <= ObjectTypes().GetOutfitWidth(OutfitType); X++) {
+		for (int Y = 1; Y <= ObjectTypes().GetOutfitHeight(OutfitType); Y++) {
+			const int SpriteNumber = ObjectTypes().GetOutfitSpriteNumber(OutfitType, X, Y, 1,
+				Creature->GetDrawDirection(), Phase);
+			const int MaskNumber = ObjectTypes().GetOutfitLayers(OutfitType) == 2
+				? ObjectTypes().GetOutfitSpriteNumber(OutfitType, X, Y, 2, Creature->GetDrawDirection(), Phase)
 				: 0;
 			if (SpriteNumber > 0)
 				DrawFieldSprite(posx - X * 32 - ShiftX + 32, posy - Y * 32 - ShiftY + 32, Level, true, SpriteNumber,
@@ -1079,7 +1095,7 @@ void TMapWindow::DrawLightMask(int posx, int posy, int Brightness)
 	else
 		Tile = Brightness / 28;
 	if (Tile <= 7)
-		DrawPicturePart(2, posx, posy, 7, Tile << 5, 0, 32, 32);
+		Graphics().DrawPicturePart(2, posx, posy, 7, Tile << 5, 0, 32, 32);
 }
 
 // A sprite at map surface position x/y on the fields it covers that Level
@@ -1124,9 +1140,9 @@ void TMapWindow::DrawFieldSprite(int x, int y, int Level, bool Animated, int Spr
 	}
 	if (Flushed) {
 		if (MaskNumber == 0)
-			DrawSprite(2, x, y, SpriteNumber);
+			Graphics().DrawSprite(2, x, y, SpriteNumber);
 		else
-			DrawMaskedSprite(2, x, y, SpriteNumber, MaskNumber, Colors);
+			Graphics().DrawMaskedSprite(2, x, y, SpriteNumber, MaskNumber, Colors);
 	}
 }
 
@@ -1164,16 +1180,19 @@ void TMapWindow::CacheSprite(int FieldX, int FieldY, int SpriteNumber, int dx, i
 		if (ClipY + ClipHeight >= 352)
 			ClipHeight = 352 - ClipY;
 		if (SpriteNumber != 0)
-			DrawSpriteClipped(2, x + dx, y + dy, SpriteNumber, TRect(ClipX, ClipY, ClipWidth, ClipHeight));
+			Graphics().DrawSpriteClipped(2, x + dx, y + dy, SpriteNumber, TRect(ClipX, ClipY, ClipWidth, ClipHeight));
 		else
-			DrawPicturePartClipped(2, x + dx, y + dy, 7, 0, 0, 32, 32, TRect(ClipX, ClipY, ClipWidth, ClipHeight));
+			Graphics().DrawPicturePartClipped(2, x + dx, y + dy, 7, 0, 0, 32, 32,
+				TRect(ClipX, ClipY, ClipWidth, ClipHeight));
 		return;
 	}
 	if (Field->Sprites == Field->CachedSprites) {
 		if (SpriteNumber == 0)
-			DrawPicturePartClipped(4, Field->x + dx, Field->y + dy, 7, 0, 0, 32, 32, TRect(Field->x, Field->y, 32, 32));
+			Graphics().DrawPicturePartClipped(4, Field->x + dx, Field->y + dy, 7, 0, 0, 32, 32,
+				TRect(Field->x, Field->y, 32, 32));
 		else
-			DrawSpriteClipped(4, Field->x + dx, Field->y + dy, SpriteNumber, TRect(Field->x, Field->y, 32, 32));
+			Graphics().DrawSpriteClipped(4, Field->x + dx, Field->y + dy, SpriteNumber,
+				TRect(Field->x, Field->y, 32, 32));
 		Field->Sprite[Field->CachedSprites] = SpriteNumber;
 		Field->SpriteX[Field->CachedSprites] = dx;
 		Field->SpriteY[Field->CachedSprites] = dy;
@@ -1185,16 +1204,18 @@ void TMapWindow::CacheSprite(int FieldX, int FieldY, int SpriteNumber, int dx, i
 		|| Field->SpriteY[Field->Sprites] != dy) {
 		for (int i = 0; i < Field->Sprites; i++) {
 			if (Field->Sprite[i] == 0)
-				DrawPicturePartClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], 7, 0, 0, 32, 32,
-					TRect(Field->x, Field->y, 32, 32));
+				Graphics().DrawPicturePartClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], 7, 0,
+					0, 32, 32, TRect(Field->x, Field->y, 32, 32));
 			else
-				DrawSpriteClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], Field->Sprite[i],
-					TRect(Field->x, Field->y, 32, 32));
+				Graphics().DrawSpriteClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i],
+					Field->Sprite[i], TRect(Field->x, Field->y, 32, 32));
 		}
 		if (SpriteNumber == 0)
-			DrawPicturePartClipped(4, Field->x + dx, Field->y + dy, 7, 0, 0, 32, 32, TRect(Field->x, Field->y, 32, 32));
+			Graphics().DrawPicturePartClipped(4, Field->x + dx, Field->y + dy, 7, 0, 0, 32, 32,
+				TRect(Field->x, Field->y, 32, 32));
 		else
-			DrawSpriteClipped(4, Field->x + dx, Field->y + dy, SpriteNumber, TRect(Field->x, Field->y, 32, 32));
+			Graphics().DrawSpriteClipped(4, Field->x + dx, Field->y + dy, SpriteNumber,
+				TRect(Field->x, Field->y, 32, 32));
 		Field->Sprite[Field->Sprites] = SpriteNumber;
 		Field->SpriteX[Field->Sprites] = dx;
 		Field->SpriteY[Field->Sprites] = dy;
@@ -1218,16 +1239,16 @@ void TMapWindow::FlushField(int FieldX, int FieldY)
 					if (Field->Sprites < Field->CachedSprites) {
 						for (int i = 0; i < Field->Sprites; i++) {
 							if (Field->Sprite[i] == 0)
-								DrawPicturePartClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], 7, 0,
+								Graphics().DrawPicturePartClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], 7, 0,
 									0, 32, 32, TRect(Field->x, Field->y, 32, 32));
 							else
-								DrawSpriteClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i],
-									Field->Sprite[i], TRect(Field->x, Field->y, 32, 32));
+								Graphics().DrawSpriteClipped(4, Field->x + Field->SpriteX[i],
+									Field->y + Field->SpriteY[i], Field->Sprite[i], TRect(Field->x, Field->y, 32, 32));
 						}
 						Field->CachedSprites = Field->Sprites;
 					}
 					Field->Copied = true;
-					GetSurface()->BlitRect(2, FieldX * 32 - ScrollX, FieldY * 32 - ScrollY, 4,
+					GraphicsEngine().GetSurface()->BlitRect(2, FieldX * 32 - ScrollX, FieldY * 32 - ScrollY, 4,
 						TRect(Field->x, Field->y, 32, 32));
 				}
 			}
@@ -1268,9 +1289,9 @@ void TMapWindow::AddLightSource(int posx, int posy, int z, int Brightness, TRGBC
 			int B = Color.B * Intensity / 160;
 			int G = Color.G * Intensity / 160;
 			int R = Color.R * Intensity / 160;
-			TObject Obj = GetMapObject(x, y, z, 0);
+			TObject Obj = Map().GetMapObject(x, y, z, 0);
 			try {
-				if (Obj.Type == 0 || !GetObjectFlag(Obj, BANK)) {
+				if (Obj.Type == 0 || !ObjectTypes().GetObjectFlag(Obj, BANK)) {
 					B = B * 4 / 5;
 					G = G * 4 / 5;
 					R = R * 4 / 5;
@@ -1311,22 +1332,22 @@ void TMapWindow::ArrangeTalkboxes()
 {
 	std::array<int, TALKBOXES> BoxWidth;
 	std::array<int, TALKBOXES> BoxHeight;
-	const int Talkboxes = GetNumberOfTalkboxes();
+	const int Talkboxes = Talk().GetNumberOfTalkboxes();
 	for (int Talkbox = 1; Talkbox <= Talkboxes; Talkbox++) {
 		BoxWidth[Talkbox - 1] = 0;
-		const int Lines = GetTalkboxLines(Talkbox);
+		const int Lines = Talk().GetTalkboxLines(Talkbox);
 		for (int Line = 0; Line < Lines; Line++) {
-			const int LineWidth = GetTextWidth(FONT_BORDERED, GetTalkboxLine(Talkbox, Line));
+			const int LineWidth = Graphics().GetTextWidth(FONT_BORDERED, Talk().GetTalkboxLine(Talkbox, Line));
 			BoxWidth[Talkbox - 1] = BoxWidth[Talkbox - 1] > LineWidth ? BoxWidth[Talkbox - 1] : LineWidth;
 		}
-		BoxHeight[Talkbox - 1] = GetFontLineHeight(FONT_BORDERED) * Lines;
+		BoxHeight[Talkbox - 1] = Graphics().GetFontLineHeight(FONT_BORDERED) * Lines;
 	}
 	int StatusHeight;
-	if (GetStatusMessage() == nullptr)
+	if (Talk().GetStatusMessage() == nullptr)
 		StatusHeight = 0;
 	else
-		StatusHeight = GetFontHeight(FONT_BORDERED) + 10;
-	const bool NoStretching = GetNoStretching();
+		StatusHeight = Graphics().GetFontHeight(FONT_BORDERED) + 10;
+	const bool NoStretching = Preferences().GetNoStretching();
 	const int BorderX = (480 - Width) / 2;
 	const int BorderY = (352 - Height) / 2;
 	std::array<int, TALKBOXES> CentreX;
@@ -1340,10 +1361,10 @@ void TMapWindow::ArrangeTalkboxes()
 	for (int Talkbox = 1; Talkbox <= Talkboxes; Talkbox++) {
 		const int i = Talkbox - 1;
 		int x, y, z;
-		GetTalkboxPosition(Talkbox, &x, &y, &z);
+		Talk().GetTalkboxPosition(Talkbox, &x, &y, &z);
 		int CentreY;
 		if (x != 0) {
-			WorldToMap(&x, &y, &z);
+			Map().WorldToMap(&x, &y, &z);
 			int cx;
 			if (NoStretching)
 				cx = x * 32 - BorderX - 16;
@@ -1355,7 +1376,7 @@ void TMapWindow::ArrangeTalkboxes()
 				cy = y * 32 - BorderY - 32;
 			else
 				cy = (y - 1) * Height / 11;
-			cy -= GetTalkboxLines(Talkbox) * GetFontLineHeight(FONT_BORDERED) / 2;
+			cy -= Talk().GetTalkboxLines(Talkbox) * Graphics().GetFontLineHeight(FONT_BORDERED) / 2;
 			CentreY = cy;
 			const int HalfWidth = BoxWidth[i] / 2;
 			MinX[i] = HalfWidth + 1 > cx - HalfWidth ? HalfWidth + 1 : cx - HalfWidth;
@@ -1370,7 +1391,7 @@ void TMapWindow::ArrangeTalkboxes()
 			const int cx = Width / 2;
 			CentreX[i] = cx;
 			int cy;
-			switch (GetTalkboxMode(Talkbox)) {
+			switch (Talk().GetTalkboxMode(Talkbox)) {
 			case TALK_INFO_MESSAGE:
 				cy = Height / 2 - BoxHeight[i] / 2 - 5;
 				break;
@@ -1384,7 +1405,7 @@ void TMapWindow::ArrangeTalkboxes()
 				cy = Height / 4;
 				break;
 			default:
-				TERROR1("unknown talk box mode", GetTalkboxMode(Talkbox));
+				TERROR1("unknown talk box mode", Talk().GetTalkboxMode(Talkbox));
 			}
 			CentreY = cy;
 			const int HalfWidth = BoxWidth[i] / 2;
@@ -1475,11 +1496,11 @@ void TMapWindow::ArrangeTalkboxes()
 		const int Quarter = BoxWidth[i] / 4;
 		const int Top = PosY[i] - HalfHeight;
 		if (PosX[i] < CentreX[i] - Quarter)
-			SetTalkboxRectangle(Talkbox, PosX[i] + HalfWidth, Top, 2, Fixed[i]);
+			Talk().SetTalkboxRectangle(Talkbox, PosX[i] + HalfWidth, Top, 2, Fixed[i]);
 		else if (PosX[i] > CentreX[i] + Quarter)
-			SetTalkboxRectangle(Talkbox, PosX[i] - HalfWidth, Top, 0, Fixed[i]);
+			Talk().SetTalkboxRectangle(Talkbox, PosX[i] - HalfWidth, Top, 0, Fixed[i]);
 		else
-			SetTalkboxRectangle(Talkbox, PosX[i], Top, 1, Fixed[i]);
+			Talk().SetTalkboxRectangle(Talkbox, PosX[i], Top, 1, Fixed[i]);
 	}
 }
 
@@ -1488,9 +1509,9 @@ void TMapWindow::ArrangeTalkboxes()
 // on the field; 0 if there is none.
 void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 {
-	const TCreature *Player = GetCreature(GetPlayerID());
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetID());
 	PATELLA_ASSERT(Player!=nullptr);
-	if (GetNoStretching()) {
+	if (Preferences().GetNoStretching()) {
 		*FieldX = ((480 - Width) / 2 + Player->GetDeltaX() + x) / 32 + 1;
 		*FieldY = ((352 - Height) / 2 + Player->GetDeltaY() + y) / 32 + 1;
 	} else {
@@ -1498,12 +1519,12 @@ void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 		*FieldY = (y * 352 / Height + Player->GetDeltaY()) / 32 + 1;
 	}
 	for (*FieldZ = MaxLevel; *FieldZ > 0; (*FieldZ)--) {
-		TObject Obj = GetFirstObject(*FieldX, *FieldY, *FieldZ);
+		TObject Obj = Map().GetFirstObject(*FieldX, *FieldY, *FieldZ);
 		if (Obj.Type != 0) {
-			if (GetObjectFlag(Obj, BANK) || GetObjectFlag(Obj, BOTTOM))
+			if (ObjectTypes().GetObjectFlag(Obj, BANK) || ObjectTypes().GetObjectFlag(Obj, BOTTOM))
 				return;
-			Obj = GetNextObject();
-			if (Obj.Type != 0 && GetObjectFlag(Obj, BOTTOM))
+			Obj = Map().GetNextObject();
+			if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BOTTOM))
 				return;
 		}
 	}
@@ -1517,22 +1538,22 @@ uint32 TMapWindow::GetCreatureAt(int x, int y)
 	const int FieldWidth = Width / 15;
 	const int FieldHeight = Height / 11;
 	for (int i = 0; i < NumberOfNames; i++) {
-		const TCreature *Creature = GetCreature(Names[i].CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(Names[i].CreatureID);
 		if (Creature == nullptr)
 			continue;
 		int cx = Creature->RealX, cy = Creature->RealY, cz = Creature->RealZ;
-		WorldToMap(&cx, &cy, &cz);
+		Map().WorldToMap(&cx, &cy, &cz);
 		if (!In(cx, 0, MAPSIZE_X - 1) || !In(cy, 0, MAPSIZE_Y - 1))
 			continue;
 		bool Visible = true;
 		while (++cz <= MaxLevel) {
-			TObject Obj = GetFirstObject(cx, cy, cz);
-			if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
+			TObject Obj = Map().GetFirstObject(cx, cy, cz);
+			if (Obj.Type != 0 && ObjectTypes().GetObjectFlag(Obj, BANK))
 				Visible = false;
 		}
 		if (!Visible)
 			continue;
-		if (GetNoStretching()) {
+		if (Preferences().GetNoStretching()) {
 			const int dx = (480 - Width) / 2 - Names[i].x + x;
 			const int dy = y - (Names[i].y - (352 - Height) / 2);
 			if (In(dx, -16, 16) && In(dy, 0, 32))
@@ -1566,7 +1587,7 @@ void TMapFrame::SetSize(int Width, int Height)
 	const int Border = SkinProperties().MapFrameBorder;
 	const int MaxWidth = (Height - Border * 2) * 15 / 11 + 2;
 	ViewWidth = Width - Border * 2 < MaxWidth ? Width - Border * 2 : MaxWidth;
-	if (GetNoStretching())
+	if (Preferences().GetNoStretching())
 		ViewWidth = ViewWidth < 480 ? ViewWidth : 480;
 	ViewHeight = (int)floor(ViewWidth * (11.0f / 15.0f));
 	ViewX = (Width - SkinProperties().MapFrameBorder * 2 - ViewWidth) / 2 + SkinProperties().MapFrameBorder;

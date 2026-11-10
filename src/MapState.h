@@ -42,9 +42,9 @@ public:
 
 private:
 	// TCreaturesPlayer: TCreatures' calls of the player's state.
-	uint32 GetPlayerID() override { return PlayerState.GetPlayerID(); }
-	bool ContinuePlayerWalk() override { return PlayerState.ContinuePlayerWalk(); }
-	void ResetPlayer() override { PlayerState.ResetPlayer(); }
+	uint32 GetPlayerID() override { return PlayerState.GetID(); }
+	bool ContinuePlayerWalk() override { return PlayerState.ContinueWalk(); }
+	void ResetPlayer() override { PlayerState.Reset(); }
 };
 
 } // namespace patella

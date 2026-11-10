@@ -99,7 +99,7 @@ TSurface *CreateSurfaceVulkan(patella::platform::TSurfaceShared &Shared)
 // The name of the device the engine runs on (DeviceSettings.h; the advanced options show it).
 const char *GetDeviceName()
 {
-	const TSurfaceVulkan *Engine = static_cast<TSurfaceVulkan *>(GetSurface());
+	const TSurfaceVulkan *Engine = static_cast<TSurfaceVulkan *>(GraphicsEngine().GetSurface());
 	return Engine != nullptr ? Engine->DeviceName() : "";
 }
 
@@ -673,9 +673,9 @@ void TSurfaceVulkan::InitSurfaces()
 	}
 	Initialized = true;
 	CanStretch = true;
-	SetDefaultNoStretching(CanStretch == false);
+	Preferences().SetDefaultNoStretching(CanStretch == false);
 	ResetFrameTimer();
-	SetFramerateLimit(GetConfineFramerate());
+	SetFramerateLimit(Preferences().GetConfineFramerate());
 }
 
 void TSurfaceVulkan::SetSourceColorKey(int ToSurface, TRGBColor Key)

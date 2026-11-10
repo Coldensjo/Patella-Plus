@@ -103,7 +103,7 @@ void patella::TNetwork::SetConnectionTimeout(int Timeout)
 		TimeoutLimit = Timeout;
 }
 
-void patella::TNetwork::SetNetworkWindow(platform::TWindowHandle Window)
+void patella::TNetwork::SetWindow(platform::TWindowHandle Window)
 {
 	NetworkWindow = Window;
 }
@@ -707,7 +707,7 @@ void patella::TNetwork::ShutdownConnection() const
 		Sockets.Shutdown(Socket, platform::TShutdown::Both);
 }
 
-void patella::TNetwork::InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)())
+void patella::TNetwork::Init(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)())
 {
 	if (!Sockets.Startup())
 		throw TProgramError{PROGRAM_ERROR::SOCKET_INIT};
@@ -723,99 +723,17 @@ void patella::TNetwork::InitNetwork(void (*ConnectHandler)(), void (*ReceiveHand
 	ReceiveSkip = 0;
 	Socket = nullptr;
 	HostnameResolveBuffer = nullptr;
-	// NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): the original's malloc, freed in ExitNetwork
+	// NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): the original's malloc, freed in Exit
 	HostnameResolveBuffer = static_cast<char *>(malloc(HostnameResolveBufferSize));
 	InitServerList();
 }
 
-void patella::TNetwork::ExitNetwork()
+void patella::TNetwork::Exit()
 {
 	Sockets.Delete(Socket);
 	Socket = nullptr;
 	if (HostnameResolveBuffer != nullptr)
-		// NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): InitNetwork's malloc
+		// NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): Init's malloc
 		free(HostnameResolveBuffer);
 	HostnameResolveBuffer = nullptr;
-}
-
-// The original's functions: each calls its member on the one TClient's TNetwork.
-
-void SetTestServerPort(int Port)
-{
-	patella::bridge::Network().SetTestServerPort(Port);
-}
-
-void SetConnectionTimeout(int Timeout)
-{
-	patella::bridge::Network().SetConnectionTimeout(Timeout);
-}
-
-void SetNetworkWindow(patella::platform::TWindowHandle Window)
-{
-	patella::bridge::Network().SetNetworkWindow(Window);
-}
-
-void SetTestServerAddress(const char *Address)
-{
-	patella::bridge::Network().SetTestServerAddress(Address);
-}
-
-void SetServerError(int errorcode)
-{
-	patella::bridge::Network().SetServerError(errorcode);
-}
-
-void SetServerIPAddress(const char *ipaddress)
-{
-	patella::bridge::Network().SetServerIPAddress(ipaddress);
-}
-
-int GetNextCommand()
-{
-	return patella::bridge::Network().GetNextCommand();
-}
-
-void CheckConnectionTimeout()
-{
-	patella::bridge::Network().CheckConnectionTimeout();
-}
-
-void GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int ErrorCode, int ErrorType)
-{
-	patella::bridge::Network().GetErrorMessage(MessageBuffer, ErrorCode, ErrorType);
-}
-
-const char *GetResolvedIPAddress()
-{
-	return patella::bridge::Network().GetResolvedIPAddress();
-}
-
-void Disconnect(bool force)
-{
-	patella::bridge::Network().Disconnect(force);
-}
-
-void ConnectToLoginServer()
-{
-	patella::bridge::Network().ConnectToLoginServer();
-}
-
-void ConnectToGameServer()
-{
-	patella::bridge::Network().ConnectToGameServer();
-}
-
-void ShutdownConnection()
-{
-	patella::bridge::Network().ShutdownConnection();
-}
-
-void InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)())
-{
-	patella::bridge::Network().InitNetwork(ConnectHandler, ReceiveHandler, CloseHandler);
-}
-
-void ExitNetwork()
-{
-	patella::bridge::Network().ExitNetwork();
 }

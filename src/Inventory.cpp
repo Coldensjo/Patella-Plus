@@ -245,7 +245,7 @@ TObject patella::TInventory::GetCounterOfferObject(int Position) const
 	return CounterOffer.Objects[Position];
 }
 
-void patella::TInventory::InitInventory()
+void patella::TInventory::Init()
 {
 	ClearBody();
 	for (int i = 0; i < OPEN_CONTAINERS; i++)
@@ -254,109 +254,12 @@ void patella::TInventory::InitInventory()
 	CounterOffer.Count = 0;
 }
 
-void patella::TInventory::ResetInventory()
+void patella::TInventory::Reset()
 {
-	InitInventory();
+	Init();
 }
 
 // Empty. ExitControl calls it where Inventory.cpp's exit belongs in the reverse order of InitControl.
-void patella::TInventory::ExitInventory()
+void patella::TInventory::Exit()
 {
-}
-
-// The original's functions: each calls its member on the one TClient's TInventory.
-
-void ClearOffers()
-{
-	patella::bridge::Inventory().ClearOffers();
-}
-
-int GetOwnOfferCount()
-{
-	return patella::bridge::Inventory().GetOwnOfferCount();
-}
-
-int GetCounterOfferCount()
-{
-	return patella::bridge::Inventory().GetCounterOfferCount();
-}
-
-TObject *GetBodyObject(int Position)
-{
-	return patella::bridge::Inventory().GetBodyObject(Position);
-}
-
-bool IsContainerOpen(int Container)
-{
-	return patella::bridge::Inventory().IsContainerOpen(Container);
-}
-
-int GetContainerObjectCount(int Container)
-{
-	return patella::bridge::Inventory().GetContainerObjectCount(Container);
-}
-
-TObject GetContainerObject(int Container)
-{
-	return patella::bridge::Inventory().GetContainerObject(Container);
-}
-
-TObject GetContainerContent(int Container, int Position)
-{
-	return patella::bridge::Inventory().GetContainerContent(Container, Position);
-}
-
-char *GetContainerName(int Container)
-{
-	return patella::bridge::Inventory().GetContainerName(Container);
-}
-
-int GetContainerCapacity(int Container)
-{
-	return patella::bridge::Inventory().GetContainerCapacity(Container);
-}
-
-bool HasContainerParent(int Container)
-{
-	return patella::bridge::Inventory().HasContainerParent(Container);
-}
-
-int GetFreeContainer()
-{
-	return patella::bridge::Inventory().GetFreeContainer();
-}
-
-char *GetOwnOfferName()
-{
-	return patella::bridge::Inventory().GetOwnOfferName();
-}
-
-char *GetCounterOfferName()
-{
-	return patella::bridge::Inventory().GetCounterOfferName();
-}
-
-TObject GetOwnOfferObject(int Position)
-{
-	return patella::bridge::Inventory().GetOwnOfferObject(Position);
-}
-
-TObject GetCounterOfferObject(int Position)
-{
-	return patella::bridge::Inventory().GetCounterOfferObject(Position);
-}
-
-void InitInventory()
-{
-	patella::bridge::Inventory().InitInventory();
-}
-
-void ResetInventory()
-{
-	patella::bridge::Inventory().ResetInventory();
-}
-
-void ExitInventory()
-{
-	patella::bridge::Inventory().ExitInventory();
 }

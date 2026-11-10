@@ -4,7 +4,6 @@
 // wrote a report to error.txt instead and showed it at the next start.
 
 #include "Player.h"
-#include "Control.h"
 #include "Creatures.h"
 #include "GUI.h"
 #include "graphics.h"
@@ -79,16 +78,16 @@ void LogDiagnostics() noexcept
 		return;
 	try {
 		// The number the original's report gave: 2 (its DirectX 9) once the engine is set up, 0 before.
-		patella::log::Debug("Graphic engine: {}", patella::bridge::GraphicsEngine().Initialised ? 2 : 0);
+		patella::log::Debug("Graphic engine: {}", GraphicsEngine().Initialised ? 2 : 0);
 	} catch (...) { // NOLINT(bugprone-empty-catch): this part left out
 	}
 	try {
-		patella::log::Debug("Last packet types:{}", ByteList(GetLastPacketTypes()));
+		patella::log::Debug("Last packet types:{}", ByteList(GUI().GetLastPacketTypes()));
 	} catch (...) { // NOLINT(bugprone-empty-catch): this part left out
 	}
 	try {
 		bool Any = false;
-		const auto &PacketHeader = patella::bridge::Network().PacketHeader;
+		const auto &PacketHeader = Network().PacketHeader;
 		for (const uint8 Byte : PacketHeader)
 			Any = Any || Byte != 0;
 		if (Any)
@@ -96,8 +95,8 @@ void LogDiagnostics() noexcept
 	} catch (...) { // NOLINT(bugprone-empty-catch): this part left out
 	}
 	try {
-		if (GetPlayerID() != 0) {
-			const TCreature *Player = GetCreature(GetPlayerID());
+		if (PlayerState().GetID() != 0) {
+			const TCreature *Player = Creatures().GetCreature(PlayerState().GetID());
 			if (Player != nullptr)
 				patella::log::Debug("Player position: [{},{},{}]", Player->RealX, Player->RealY, Player->RealZ);
 		}
@@ -137,14 +136,14 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 	patella::log::BreakIfDebugged();
 #endif
 	try {
-		ShutdownConnection();
+		Network().ShutdownConnection();
 	} catch (...) { // NOLINT(bugprone-empty-catch): every step of the fatal path is guarded on its own, and the box still comes
 	}
 	try {
 		// After a failed InitControl there is no main window and no surface (GetSurface makes one only once
 		// SurfaceInitInstance has run): SetDisplayMode's calls would fault, so the step is skipped. The original made
 		// them and left the fault to its catch (...).
-		if (GetViewMode() != 1 && patella::bridge::GUI().MainWindow != nullptr && GetSurface() != nullptr)
+		if (Preferences().GetViewMode() != 1 && GUI().MainWindow != nullptr && GraphicsEngine().GetSurface() != nullptr)
 			patella::sdlframe::SetDisplayMode(1); // the SDL3 window's
 	} catch (...) {                               // NOLINT(bugprone-empty-catch): as above
 	}
@@ -156,7 +155,7 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 	patella::platform::Platform().Window.ShowMessageBox(nullptr, Text, Caption, patella::platform::TMessageBoxIcon::Error);
 	// The main window stays as the original's global did, allocated and not closed. TGUI owns it, and TClient's static
 	// destruction after exit(1) would destroy it and close its children (packets, preferences).
-	patella::bridge::GUI().AbandonWindows();
+	GUI().AbandonWindows();
 	exit(1);
 }
 
@@ -249,9 +248,9 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 	if (!patella::sdlframe::Create(Gamemaster, Title, ClassName))
 		return FALSE;
 	try {
-		SurfaceInitInstance(patella::sdlframe::Handle());
-		GetSurface()->InitSurfaces();
-		InitVideoCache();
+		GraphicsEngine().SurfaceInitInstance(patella::sdlframe::Handle());
+		GraphicsEngine().GetSurface()->InitSurfaces();
+		Graphics().InitVideoCache();
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::SURFACE}; // "Video surface allocation failed."
 	}
@@ -271,15 +270,15 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 			return FALSE;
 		}
 	}
-	Redraw(false);
+	GUI().Redraw(false);
 	int x, y, Width, Height;
 	bool Maximized;
-	GetWindowedMode(&x, &y, &Width, &Height, &Maximized);
+	Preferences().GetWindowedMode(&x, &y, &Width, &Height, &Maximized);
 	patella::sdlframe::Show(Maximized);
 	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastMousePosition); // GetCursorPos
-	if (GetViewMode() == 1)
+	if (Preferences().GetViewMode() == 1)
 		SdlScreenToClient(LastMousePosition); // the SDL window's coordinates
-	MouseMove(LastMousePosition.x, LastMousePosition.y);
+	GUI().MouseMove(LastMousePosition.x, LastMousePosition.y);
 	return TRUE;
 }
 
@@ -316,8 +315,8 @@ BOOL CPlayerApp::InitInstance()
 			const char *Token = strtok(Arguments, " \t\n");
 			int Expected = 0;
 			bool Gamemaster = false;
-			SetTestServerAddress(patella::buildconfig::TestServerHost);
-			SetTestServerPort(patella::buildconfig::TestServerPort);
+			Network().SetTestServerAddress(patella::buildconfig::TestServerHost);
+			Network().SetTestServerPort(patella::buildconfig::TestServerPort);
 			while (Token != nullptr) {
 				if (MsvcStricmp(Token, "gamemaster") == 0) {
 					Gamemaster = true;
@@ -334,7 +333,7 @@ BOOL CPlayerApp::InitInstance()
 						Expected = 0;
 						break;
 					case 3:
-						patella::bridge::GraphicsEngine().CommandLineEngine = atoi(Token); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; a bad number counts as 0
+						GraphicsEngine().CommandLineEngine = atoi(Token); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; a bad number counts as 0
 						Expected = 0;
 						break;
 					default:
@@ -385,17 +384,17 @@ void CPlayerApp::OnIdle()
 	patella::platform::Platform().Input.BeginIdle();
 	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastCursorPosition); // GetCursorPos
 	POINT Point = LastCursorPosition;
-	if (GetViewMode() == 1)
+	if (Preferences().GetViewMode() == 1)
 		SdlScreenToClient(Point); // the SDL window's coordinates
 	if (LastMousePosition.x != Point.x || LastMousePosition.y != Point.y) {
 		LastMousePosition.x = Point.x;
 		LastMousePosition.y = Point.y;
-		MouseMove(Point.x, Point.y);
+		GUI().MouseMove(Point.x, Point.y);
 	}
-	const int Cursor = GetMouseCursor();
+	const int Cursor = Interaction().GetMouseCursor();
 	if (Cursor != LastMouseCursor) {
 		patella::sdlframe::UpdateMouseCursor(); // the SDL3 window's
 		LastMouseCursor = Cursor;
 	}
-	ProcessEvents();
+	GUI().ProcessEvents();
 }

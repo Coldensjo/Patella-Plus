@@ -13,25 +13,25 @@
 
 // The data is THelp's (Help.h).
 
-void patella::THelp::SetHelpPosition(int x, int y)
+void patella::THelp::SetPosition(int x, int y)
 {
 	HelpX = x;
 	HelpY = y;
 }
 
-void patella::THelp::MoveHelpPosition(int dx, int dy)
+void patella::THelp::MovePosition(int dx, int dy)
 {
 	HelpX += dx;
 	HelpY += dy;
 }
 
-void patella::THelp::SetHelpSize(int Width, int Height)
+void patella::THelp::SetSize(int Width, int Height)
 {
 	HelpWidth = Width;
 	HelpHeight = Height;
 }
 
-void patella::THelp::SetHelpHandle(int Handle)
+void patella::THelp::SetHandle(int Handle)
 {
 	const bool Changed = HelpHandle != Handle;
 	HelpHandle = Handle;
@@ -39,7 +39,7 @@ void patella::THelp::SetHelpHandle(int Handle)
 		HelpHandleChanged = true;
 }
 
-void patella::THelp::GetHelpArea(int *x, int *y, int *Width, int *Height) const
+void patella::THelp::GetArea(int *x, int *y, int *Width, int *Height) const
 {
 	*x = HelpX;
 	*y = HelpY;
@@ -47,20 +47,20 @@ void patella::THelp::GetHelpArea(int *x, int *y, int *Width, int *Height) const
 	*Height = HelpHeight;
 }
 
-int patella::THelp::GetHelpHandle() const
+int patella::THelp::GetHandle() const
 {
 	return HelpHandle;
 }
 
 // Reports a change of the handle once.
-bool patella::THelp::TakeHelpHandleChanged()
+bool patella::THelp::TakeHandleChanged()
 {
 	const bool Changed = HelpHandleChanged;
 	HelpHandleChanged = false;
 	return Changed;
 }
 
-void patella::THelp::InitHelp()
+void patella::THelp::Init()
 {
 	HelpHandle = HELP_UNSET;
 	HelpHandleChanged = false;
@@ -90,7 +90,7 @@ int patella::THelp::PopEventHelp()
 // inside the text. Texts without arguments are also passed as the format, in
 // std::format's language: no text has a brace, and the longest (1297
 // characters) fits HelpText.
-const char *patella::THelp::GetHelpText(int Handle)
+const char *patella::THelp::GetText(int Handle)
 {
 	switch (Handle) {
 	case HELP_AUTOMAP:
@@ -193,8 +193,8 @@ const char *patella::THelp::GetHelpText(int Handle)
 void patella::THelp::AddEventHelp(int Number)
 {
 	PATELLA_ASSERT_VALUES(In(Number,1,EVENTHELPS), Number);
-	if (!IsKnownHint(Number)) {
-		AddKnownHint(Number);
+	if (!Preferences().IsKnownHint(Number)) {
+		Preferences().AddKnownHint(Number);
 		EventHelps.push_back(Number);
 	}
 }
@@ -383,100 +383,13 @@ const char *patella::THelp::GetEventHelpText(int Number)
 }
 
 // The text for the current help handle.
-const char *patella::THelp::GetCurrentHelpText()
+const char *patella::THelp::GetCurrentText()
 {
-	return GetHelpText(HelpHandle);
+	return GetText(HelpHandle);
 }
 
 // Empty. ExitControl calls it where Help.cpp's exit belongs in the reverse
 // order of InitControl.
-void patella::THelp::ExitHelp()
+void patella::THelp::Exit()
 {
-}
-
-// The functions of the original: each calls its member on the one TClient's THelp.
-
-void SetHelpPosition(int x, int y)
-{
-	patella::bridge::Help().SetHelpPosition(x, y);
-}
-
-void MoveHelpPosition(int dx, int dy)
-{
-	patella::bridge::Help().MoveHelpPosition(dx, dy);
-}
-
-void SetHelpSize(int Width, int Height)
-{
-	patella::bridge::Help().SetHelpSize(Width, Height);
-}
-
-void SetHelpHandle(int Handle)
-{
-	patella::bridge::Help().SetHelpHandle(Handle);
-}
-
-void GetHelpArea(int *x, int *y, int *Width, int *Height)
-{
-	patella::bridge::Help().GetHelpArea(x, y, Width, Height);
-}
-
-int GetHelpHandle()
-{
-	return patella::bridge::Help().GetHelpHandle();
-}
-
-bool TakeHelpHandleChanged()
-{
-	return patella::bridge::Help().TakeHelpHandleChanged();
-}
-
-void InitHelp()
-{
-	patella::bridge::Help().InitHelp();
-}
-
-void ExitHelp()
-{
-	patella::THelp::ExitHelp();
-}
-
-int GetEventHelp()
-{
-	return patella::bridge::Help().GetEventHelp();
-}
-
-int PopEventHelp()
-{
-	return patella::bridge::Help().PopEventHelp();
-}
-
-void AddEventHelp(int Number)
-{
-	patella::bridge::Help().AddEventHelp(Number);
-}
-
-void CheckEventHelpName(const char *Name)
-{
-	patella::bridge::Help().CheckEventHelpName(Name);
-}
-
-void CheckEventHelpPosition(int x, int y, int z)
-{
-	patella::bridge::Help().CheckEventHelpPosition(x, y, z);
-}
-
-const char *GetEventHelpTitle(int Number)
-{
-	return patella::bridge::Help().GetEventHelpTitle(Number);
-}
-
-const char *GetEventHelpText(int Number)
-{
-	return patella::bridge::Help().GetEventHelpText(Number);
-}
-
-const char *GetCurrentHelpText()
-{
-	return patella::bridge::Help().GetCurrentHelpText();
 }

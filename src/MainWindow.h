@@ -91,8 +91,4 @@ public:
 };
 
 // ModalWindow and MainWindow are TGUI's members (GUI.h):
-// patella::bridge::GUI().ModalWindow and .MainWindow.
-
-void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
-	void (*OpenURL)(const char *URL));
-void ExitMainWindow();
+// GUI().ModalWindow and .MainWindow.

@@ -4,10 +4,9 @@
 // the clipboard link check.
 //
 // The session (the connection state, the account, the character list, the rights) is TSession's, which TCommunication
-// owns (Communication.h); the free functions of the original's names are the bridge that the callers use until they
-// hold the object (bridge::Session(), defined in Client.cpp). The rest of the file's data, the user interaction (the
-// action, drag, trade and use state, the mouse, the message queue, the blink, the mouse-over text, the clipboard's link
-// check), is TInteraction's, which TGUI owns (GUI.h); bridge::Interaction() the same way.
+// owns (Communication.h). The rest of the file's data, the user interaction (the action, drag, trade and use state,
+// the mouse, the message queue, the blink, the mouse-over text, the clipboard's link check), is TInteraction's, which
+// TGUI owns (GUI.h). A caller that holds neither calls Session() or Interaction() (Client.cpp).
 
 #pragma once
 
@@ -51,7 +50,7 @@ struct TCharacter {
 namespace patella {
 
 // Status.cpp's session: the globals of the original are the members, with the same initial values (0), and the
-// functions that read and write only them the members of the same names. InitSession and ExitSession are InitStatus's
+// functions that read and write only them the members of the same names. Init and Exit are InitStatus's
 // and ExitStatus's part of them (not functions of the original).
 class TSession {
 public:
@@ -84,8 +83,8 @@ public:
 	[[nodiscard]] const char *GetCharacterWorld(int Number) const;
 	[[nodiscard]] const char *GetCharacterIPAddress(int Number) const;
 	[[nodiscard]] int GetCharacterPort(int Number) const;
-	void InitSession(bool Value);
-	void ExitSession();
+	void Init(bool Value);
+	void Exit();
 
 private:
 	std::array<int, RIGHT_ANY> Rights{};
@@ -154,7 +153,7 @@ public:
 	void ExitStatus();
 	void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2);
 	void AddMessageFirst(int Type, std::intptr_t Param1, std::intptr_t Param2);
-	void CheckClipboardText(TSpan<const char> Characters);
+	void CheckClipboardText(TSpan<const char> Characters); // the copied characters, no NUL needed
 	void CopyToClipboard(const char *text);
 	void CopyTaintedClipboardText();
 	void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
@@ -203,20 +202,12 @@ private:
 	TObject UseObject{};   // "SrcObj" in MapWindow.cpp
 };
 
-// The transition's access path: the session of the one TClient's TCommunication (Client.cpp). It goes when no free
-// function needs it.
-namespace bridge {
-TSession &Session();
-TInteraction &Interaction(); // the one TClient's TGUI's
-} // namespace bridge
-
 } // namespace patella
 
-// The session's functions: each calls TSession's member of the same name on bridge::Session(); the others are
-// Status.cpp's own.
-bool CheckAnyRight();
-int GetActionNumber();
-void IncrementActionNumber();
+// The one client's session, which is its communication's, and user interaction, which is its GUI's (Client.cpp).
+patella::TSession &Session();
+patella::TInteraction &Interaction();
+
 // The action states. ACTIONSTATE_NONE, no action, is the original's name
 // (MainWindow.cpp's "GetActionState()==ACTIONSTATE_NONE"); the other states
 // are named from what the code does with them. 4 and 5: both buttons were
@@ -236,11 +227,6 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumera
 	ACTIONSTATE_DIALOG = 10,       // a centred dialog is the modal window
 	ACTIONSTATE_CONTEXT_MENU = 11, // a context menu is the modal window
 };
-void SetActionState(int State);
-int GetActionState();
-void SetMousePosition(int x, int y);
-int GetMouseX();
-int GetMouseY();
 // The mouse cursors of SetMouseCursor and GetMouseCursor. The number is also the skin the client draws as its own
 // cursor (Control.cpp) and chooses the Windows cursor otherwise (SdlFrame.cpp's UpdateMouseCursor), whose resource
 // identifiers the names follow: IDC_ARROW, IDC_SIZENS, IDC_WAIT, and res/resource.h's IDC_CROSSHAIR and IDC_MAGNIFIER.
@@ -253,60 +239,9 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	CURSOR_DRAG = 5,      // dragging: the crosshair's picture, as skin and as Windows cursor
 	CURSOR_MAGNIFIER = 6, // help mode
 };
-void SetMouseCursor(int Cursor);
-int GetMouseCursor();
-void SetPendingAction(int State, int Number);
-int GetPendingActionState();
-int GetPendingActionNumber();
-void SetWindowSize(int Width, int Height);
-int GetWindowWidth();
-int GetWindowHeight();
-void SetDragStart(int x, int y);
-void SetDragObject(TObject Obj, int Index, int x, int y, int z);
-void SetDragTarget(int x, int y, int z);
-void CheckDragStart(int x, int y);
-TObject *GetDragObject(int *Index, int *x, int *y, int *z);
-void GetDragTarget(int *x, int *y, int *z);
-void SetTradeObject(TObject Obj, int Index, int x, int y, int z);
-void SetUseObject(TObject Obj, int Index, int x, int y, int z);
-void SetTradeInfo(int Info);
-TObject *GetTradeObject(int *Index, int *x, int *y, int *z);
-TObject *GetUseObject(int *Index, int *x, int *y, int *z);
-int GetTradeInfo();
-void SetConnectionState(int State);
-int GetConnectionState();
-int GetAccountNumber();
-const char *GetAccountNumberString();
-const char *GetAccountPassword();
-int GetAccountCharacters();
-int GetPremiumDays();
-int GetActiveCharacter();
-void SetMouseOverText(const char *Text);
-void SetMouseOverTextPosition(int x, int y);
-const char *GetMouseOverText();
-void GetMouseOverTextPosition(int *x, int *y);
-void UpdateBlinkState();
-bool GetBlinkState();
-int PeekMessageType();
-void FetchMessage(int *Type, std::intptr_t *Param1, std::intptr_t *Param2);
-void ClearMessages();
-void ExitStatus();
-bool CheckRight(int rightid, int Bit);
 const char *GetRightName(int rightid);
 const char *GetActionName(int actionid);
-void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2);
-void AddMessageFirst(int Type, std::intptr_t Param1, std::intptr_t Param2);
-void SetAccount(int Number, const char *Password);
-void SetActiveCharacter(int Number);
-const char *GetCharacterName(int Number);
-const char *GetCharacterWorld(int Number);
-const char *GetCharacterIPAddress(int Number);
-int GetCharacterPort(int Number);
 
-void CheckClipboardText(patella::TSpan<const char> Characters); // the copied characters, no NUL needed
-void CopyToClipboard(const char *text);
-void CopyTaintedClipboardText();
-void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
 
 // Events.h, the message and event numbers, comes last on purpose: included at the top of this file, its enumerators
 // moved data in the executable (measured when the build was compared with the original byte for byte).

@@ -33,8 +33,8 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 };
 
 // The way a creature faces: TCreature::Direction and MoveDirection, the player's PlayerStepDirection (Creatures.h),
-// the direction the server sends with a creature and with a refused step (CancelPlayerWalk's NewDirection), and the
-// Direction of GetOutfitSpriteNumber, which is the outfit's pattern column less one. Clockwise from north; the names
+// the direction the server sends with a creature and with a refused step (TPlayerState::CancelWalk's NewDirection), and
+// the Direction of GetOutfitSpriteNumber, which is the outfit's pattern column less one. Clockwise from north; the names
 // are ours, from StartMovement, which turns a step's dx and dy into them (east or west for a diagonal step). The steps
 // of a path have their own numbers, STEP_* in Map.h. Enumerators for the reason in GUI.h.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
@@ -192,13 +192,13 @@ public:
 	void GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY) const;
 	void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY) const;
 
-	void ReleaseObjects();
-	void LoadObjects(const char *FileName);
-	void InitObjects();
-	void ExitObjects();
+	void Release();
+	void Load(const char *FileName);
+	void Init();
+	void Exit();
 
 private:
-	// The four tables own their arrays (std::unique_ptr; the entries' Sprites stay raw, freed by ReleaseObjects).
+	// The four tables own their arrays (std::unique_ptr; the entries' Sprites stay raw, freed by Release).
 	std::unique_ptr<array<TProperties>> MissileProperties;
 	std::unique_ptr<array<TProperties>> EffectProperties;
 	std::unique_ptr<array<TProperties>> OutfitProperties;
@@ -209,72 +209,7 @@ public:
 	TObject NoObject;      // never written
 };
 
-// The transition's access path: the object types of the one TClient (Client.cpp). It goes when no free function needs
-// it.
-namespace bridge {
-TObjectTypes &ObjectTypes();
-} // namespace bridge
-
 } // namespace patella
 
-// The original's functions (the callers' names, and the golden tests'): each calls TObjectTypes' member of the same
-// name on bridge::ObjectTypes().
-// Object types. Type CREATURE has only UNPASS.
-bool GetObjectFlag(int Type, int Flag);
-inline bool GetObjectFlag(TObject &Obj, int Flag) { return GetObjectFlag(Obj.Type, Flag); }
-int GetObjectBrightness(int Type);
-int GetObjectLightColor(int Type);
-int GetObjectShiftX(int Type);
-int GetObjectShiftY(int Type);
-int GetObjectElevation(int Type);
-int GetObjectLensHelp(int Type);
-int GetObjectWidth(int Type);
-int GetObjectHeight(int Type);
-int GetObjectExactSize(int Type);
-int GetObjectLayers(int Type);
-int GetObjectPatternWidth(int Type);
-int GetObjectPatternHeight(int Type);
-int GetObjectPatternDepth(int Type);
-int GetObjectPhases(int Type);
-int GetObjectSpriteNumber(int Type, int X, int Y, int Layer, int PatternX, int PatternY, int PatternZ,
-	int Phase);
-
-// Outfits; Direction 0-3 selects the pattern column.
-bool GetOutfitFlag(int Number, int Flag);
-int GetOutfitBrightness(int Number);
-int GetOutfitLightColor(int Number);
-int GetOutfitShiftX(int Number);
-int GetOutfitShiftY(int Number);
-int GetOutfitWidth(int Number);
-int GetOutfitExactSize(int Number);
-int GetOutfitHeight(int Number);
-int GetOutfitLayers(int Number);
-int GetOutfitPhases(int Number);
-int GetOutfitSpriteNumber(int Number, int X, int Y, int Layer, int Direction, int Phase);
-
-// Effects.
-bool GetEffectFlag(int Number, int Flag);
-int GetEffectBrightness(int Number);
-int GetEffectLightColor(int Number);
-int GetEffectWidth(int Number);
-int GetEffectHeight(int Number);
-int GetEffectLayers(int Number);
-int GetEffectPhases(int Number);
-int GetEffectSpriteNumber(int Number, int X, int Y, int Layer, int Phase);
-
-// Missiles; Direction 0-7 clockwise from north.
-bool GetMissileFlag(int Number, int Flag);
-int GetMissileBrightness(int Number);
-int GetMissileLightColor(int Number);
-int GetMissileWidth(int Number);
-int GetMissileHeight(int Number);
-int GetMissileLayers(int Number);
-int GetMissileSpriteNumber(int Number, int X, int Y, int Layer, int Direction);
-
-// The pattern (1-based) that shows an object's count, liquid or wall side.
-void GetCumulativePattern(TObject &Obj, int *PatternX, int *PatternY);
-void GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY);
-void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY);
-
-void InitObjects();
-void ExitObjects();
+// The one client's object types (Client.cpp).
+patella::TObjectTypes &ObjectTypes();

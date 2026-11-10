@@ -100,7 +100,7 @@ TCallback NoCallback(nullptr, 0);
 } // namespace
 
 // TSkillsWindowBody::MouseHover formats the skill's text with this size.
-static_assert(sizeof(patella::bridge::GUI().SkillMouseOverText) == 256, "the skill's mouse-over text");
+static_assert(sizeof(GUI().SkillMouseOverText) == 256, "the skill's mouse-over text");
 
 // --- The creators -----------------------------------------------------------------
 
@@ -155,8 +155,8 @@ TSubWindow *CreateContainerWindow(int Container)
 	TSkinButton *CloseButton = new TSkinButton(0, 0, SKIN_CLOSE_BUTTON_UP, SKIN_CLOSE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
 	TSkinButton *MinimizeButton = new TSkinButton(0, 0, SKIN_MINIMISE_BUTTON_UP, SKIN_MINIMISE_BUTTON_DOWN, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TSkinButton *UpButton = new TSkinButton(0, 0, SKIN_HIGHER_CONTAINER_BUTTON_UP, SKIN_HIGHER_CONTAINER_BUTTON_DOWN, TCallback(Body, EVENT_CONTAINER_UP), TextShowHigherContainer, false);
-	TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
-	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container));
+	TObjectIcon *Icon = new TObjectIcon(Inventory().GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
+	TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, Inventory().GetContainerName(Container));
 	Window->SetSize(SkinProperties().SideBarWidth, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
 	Window->SetCloseButton(CloseButton);
 	Window->SetMinimizeButton(MinimizeButton);
@@ -271,8 +271,8 @@ void TButtonsWindow::Draw(int Surface, int x, int y)
 
 bool TButtonsWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_CONTROL_BUTTONS);
-	SetHelpSize(Width, Height);
+	Help().SetHandle(HELP_CONTROL_BUTTONS);
+	Help().SetSize(Width, Height);
 	return true;
 }
 
@@ -289,7 +289,7 @@ TAutomapWindow::TAutomapWindow()
 	SetSize(SkinProperties().SideBarWidth, SkinProperties().AutomapWindowHeight);
 	Changed = true;
 	Centred = true;
-	Zoom = GetAutomapZoom();
+	Zoom = Preferences().GetAutomapZoom();
 	if (Zoom != 1 && Zoom != 2 && Zoom != 4 && Zoom != 8)
 		Zoom = 2;
 	View = new TAutomapView;
@@ -315,14 +315,14 @@ TAutomapWindow::TAutomapWindow()
 	SetChildPosition(CompassRose, SkinProperties().AutomapCentreButtonAndCompassRose.width, SkinProperties().AutomapCentreButtonAndCompassRose.height);
 	CompassRose->SetSize(Skins()[SKIN_COMPASS_ROSE].width, Skins()[SKIN_COMPASS_ROSE].height);
 	Arrange();
-	AddHotkey(KEY_ALT | KEY_HOME, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
-	AddHotkey(KEY_ALT | KEY_END, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
-	AddHotkey(KEY_ALT | KEY_PAGE_UP, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
-	AddHotkey(KEY_ALT | KEY_PAGE_DOWN, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
-	AddHotkey(KEY_ALT | KEY_UP, TCallback(this, EVENT_AUTOMAP_NORTH));
-	AddHotkey(KEY_ALT | KEY_LEFT, TCallback(this, EVENT_AUTOMAP_WEST));
-	AddHotkey(KEY_ALT | KEY_RIGHT, TCallback(this, EVENT_AUTOMAP_EAST));
-	AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
+	GUI().AddHotkey(KEY_ALT | KEY_HOME, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
+	GUI().AddHotkey(KEY_ALT | KEY_END, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
+	GUI().AddHotkey(KEY_ALT | KEY_PAGE_UP, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
+	GUI().AddHotkey(KEY_ALT | KEY_PAGE_DOWN, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
+	GUI().AddHotkey(KEY_ALT | KEY_UP, TCallback(this, EVENT_AUTOMAP_NORTH));
+	GUI().AddHotkey(KEY_ALT | KEY_LEFT, TCallback(this, EVENT_AUTOMAP_WEST));
+	GUI().AddHotkey(KEY_ALT | KEY_RIGHT, TCallback(this, EVENT_AUTOMAP_EAST));
+	GUI().AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
 }
 
 // Its work is the close's (OnClose).
@@ -336,15 +336,15 @@ TAutomapWindow::~TAutomapWindow()
 void TAutomapWindow::OnClose()
 {
 	try {
-		SetAutomapZoom(Zoom);
-		RemoveHotkey(KEY_ALT | KEY_HOME);
-		RemoveHotkey(KEY_ALT | KEY_END);
-		RemoveHotkey(KEY_ALT | KEY_PAGE_UP);
-		RemoveHotkey(KEY_ALT | KEY_PAGE_DOWN);
-		RemoveHotkey(KEY_ALT | KEY_UP);
-		RemoveHotkey(KEY_ALT | KEY_LEFT);
-		RemoveHotkey(KEY_ALT | KEY_RIGHT);
-		RemoveHotkey(KEY_ALT | KEY_DOWN);
+		Preferences().SetAutomapZoom(Zoom);
+		GUI().RemoveHotkey(KEY_ALT | KEY_HOME);
+		GUI().RemoveHotkey(KEY_ALT | KEY_END);
+		GUI().RemoveHotkey(KEY_ALT | KEY_PAGE_UP);
+		GUI().RemoveHotkey(KEY_ALT | KEY_PAGE_DOWN);
+		GUI().RemoveHotkey(KEY_ALT | KEY_UP);
+		GUI().RemoveHotkey(KEY_ALT | KEY_LEFT);
+		GUI().RemoveHotkey(KEY_ALT | KEY_RIGHT);
+		GUI().RemoveHotkey(KEY_ALT | KEY_DOWN);
 	} catch (...) {
 		CloseWhileUnwinding([this] { TContentWindow::OnClose(); });
 		throw;
@@ -354,8 +354,8 @@ void TAutomapWindow::OnClose()
 
 bool TAutomapWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_AUTOMAP);
-	SetHelpSize(Width, Height);
+	Help().SetHandle(HELP_AUTOMAP);
+	Help().SetSize(Width, Height);
 	return true;
 }
 
@@ -365,13 +365,13 @@ bool TAutomapWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int 
 // PrintLine, the same bytes).
 void TAutomapWindow::MouseHover(int x, int y)
 {
-	patella::TGUI &GUI = patella::bridge::GUI();
+	patella::TGUI &GUI = ::GUI();
 	TMark Mark = View->GetMark(x - View->OffsetX, y - View->OffsetY);
 	if (Mark.x != 0 && Mark.y != 0) {
 		const int Length = (int)strlen(Mark.Text);
 		if (Length != 0) {
 			CopyString(GUI.AutomapMouseOverText.Chars, Mark.Text);
-			SetMouseOverText(GUI.AutomapMouseOverText);
+			Interaction().SetMouseOverText(GUI.AutomapMouseOverText);
 		}
 	}
 	patella::compat::PrintLine("{}", static_cast<const char *>(GUI.AutomapMouseOverText));
@@ -404,8 +404,8 @@ void TAutomapWindow::HandleEvent(int Event)
 		break;
 	case EVENT_AUTOMAP_FLOOR_UP:
 		if (Centred) {
-			GetMapPosition(&ViewX, &ViewY, &ViewZ);
-			GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
+			Map().GetPosition(&ViewX, &ViewY, &ViewZ);
+			Map().GetPosition(&PlayerX, &PlayerY, &PlayerZ);
 			Centred = false;
 		}
 		if (ViewZ > 0)
@@ -414,8 +414,8 @@ void TAutomapWindow::HandleEvent(int Event)
 		break;
 	case EVENT_AUTOMAP_FLOOR_DOWN:
 		if (Centred) {
-			GetMapPosition(&ViewX, &ViewY, &ViewZ);
-			GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
+			Map().GetPosition(&ViewX, &ViewY, &ViewZ);
+			Map().GetPosition(&PlayerX, &PlayerY, &PlayerZ);
 			Centred = false;
 		}
 		if (ViewZ < 15)
@@ -461,8 +461,8 @@ void TAutomapWindow::Scroll(int Direction)
 		return;
 	}
 	if (Centred) {
-		GetMapPosition(&ViewX, &ViewY, &ViewZ);
-		GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
+		Map().GetPosition(&ViewX, &ViewY, &ViewZ);
+		Map().GetPosition(&PlayerX, &PlayerY, &PlayerZ);
 		Centred = false;
 	}
 	switch (Direction) {
@@ -496,7 +496,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 {
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
 	int PosX, PosY, PosZ;
-	GetMapPosition(&PosX, &PosY, &PosZ);
+	Map().GetPosition(&PosX, &PosY, &PosZ);
 	if (!Window->Centred) {
 		if (PosX == Window->PlayerX && PosY == Window->PlayerY && PosZ == Window->PlayerZ) {
 			PosX = Window->ViewX;
@@ -507,7 +507,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 			Window->Changed = true;
 		}
 	}
-	if (TakeAutomapChanged() || Window->Changed || GetSurface()->SurfaceRecreated(0)) {
+	if (Map().TakeAutomapChanged() || Window->Changed || GraphicsEngine().GetSurface()->SurfaceRecreated(0)) {
 		std::array<uint8, 106 * 106 * 3> Pixels;
 		for (int i = 0; i < 106; i++) {
 			for (int j = 0; j < 106; j++) {
@@ -516,20 +516,20 @@ void TAutomapView::Draw(int Surface, int x, int y)
 					PosY = PosY / 2 * 2;
 				}
 				const int Zoom = Window->Zoom;
-				const TRGBColor Color = GetAutomapColor((Zoom * PosX + Zoom / 2 - 106 + i * 2) / Zoom,
+				const TRGBColor Color = Map().GetAutomapColor((Zoom * PosX + Zoom / 2 - 106 + i * 2) / Zoom,
 					(Zoom * PosY + Zoom / 2 - 106 + j * 2) / Zoom, PosZ);
 				Pixels[(j * 106 + i) * 3] = (uint8)Color.R;
 				Pixels[(j * 106 + i) * 3 + 1] = (uint8)Color.G;
 				Pixels[(j * 106 + i) * 3 + 2] = (uint8)Color.B;
 			}
 		}
-		GetSurface()->WriteImage(5, 0, 0, 106, 106, Pixels.data());
+		GraphicsEngine().GetSurface()->WriteImage(5, 0, 0, 106, 106, Pixels.data());
 		int CrossX = 53;
 		int CrossY = 53;
 		bool SameLevel = true;
 		bool Visible = true;
 		if (!Window->Centred) {
-			GetMapPosition(&PosX, &PosY, &PosZ);
+			Map().GetPosition(&PosX, &PosY, &PosZ);
 			CrossX = (PosX - Window->ViewX) * Window->Zoom / 2 + 53;
 			CrossY = (PosY - Window->ViewY) * Window->Zoom / 2 + 53;
 			if (PosZ != Window->ViewZ)
@@ -538,17 +538,17 @@ void TAutomapView::Draw(int Surface, int x, int y)
 		}
 		if (Visible) {
 			if (Window->Zoom <= 2) {
-				GetSurface()->SetPixel(5, CrossX, CrossY, TRGBColor(255, 255, 255));
-				GetSurface()->SetPixel(5, CrossX + 1, CrossY, TRGBColor(255, 255, 255));
-				GetSurface()->SetPixel(5, CrossX - 1, CrossY, TRGBColor(255, 255, 255));
-				GetSurface()->SetPixel(5, CrossX, CrossY + 1, TRGBColor(255, 255, 255));
-				GetSurface()->SetPixel(5, CrossX, CrossY - 1, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX, CrossY, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX + 1, CrossY, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX - 1, CrossY, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX, CrossY + 1, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX, CrossY - 1, TRGBColor(255, 255, 255));
 			} else {
 				for (int i = -3; i < 3; i++) {
-					GetSurface()->SetPixel(5, CrossX + i, CrossY, TRGBColor(255, 255, 255));
-					GetSurface()->SetPixel(5, CrossX + i, CrossY - 1, TRGBColor(255, 255, 255));
-					GetSurface()->SetPixel(5, CrossX, CrossY + i, TRGBColor(255, 255, 255));
-					GetSurface()->SetPixel(5, CrossX - 1, CrossY + i, TRGBColor(255, 255, 255));
+					GraphicsEngine().GetSurface()->SetPixel(5, CrossX + i, CrossY, TRGBColor(255, 255, 255));
+					GraphicsEngine().GetSurface()->SetPixel(5, CrossX + i, CrossY - 1, TRGBColor(255, 255, 255));
+					GraphicsEngine().GetSurface()->SetPixel(5, CrossX, CrossY + i, TRGBColor(255, 255, 255));
+					GraphicsEngine().GetSurface()->SetPixel(5, CrossX - 1, CrossY + i, TRGBColor(255, 255, 255));
 				}
 			}
 		}
@@ -565,7 +565,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 			for (int BlockY = Top / 256; BlockY < Top / 256 + 2; BlockY++) {
 				std::vector<TMark> Marks;
 				int Count;
-				GetAutomapMarks(BlockX, BlockY, PosZ, &Marks, &Count);
+				Map().GetAutomapMarks(BlockX, BlockY, PosZ, &Marks, &Count);
 				for (int i = 0; i < Count; i++) {
 					const TMark Mark = Marks[static_cast<std::size_t>(i)];
 					if (Mark.x != 0 || Mark.y != 0) {
@@ -579,7 +579,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 		}
 		Window->Changed = false;
 	}
-	GetSurface()->BlitRect(Surface, x, y, 5, TRect(0, 0, 106, 106));
+	GraphicsEngine().GetSurface()->BlitRect(Surface, x, y, 5, TRect(0, 0, 106, 106));
 }
 
 // A click walks to the mark under the mouse, else to the point clicked.
@@ -588,16 +588,16 @@ bool TAutomapView::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
 	TMark Mark = GetMark(x, y);
 	if (Window->Centred)
-		GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
+		Map().GetPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
 	if (Mark.x == 0 || Mark.y == 0) {
 		Mark.x = (x - Width / 2) * 2 / Window->Zoom + Window->ViewX;
 		Mark.y = (y - Height / 2) * 2 / Window->Zoom + Window->ViewY;
 	}
-	const int Result = SetPlayerDestination(Mark.x, Mark.y, Window->ViewZ, false, false);
+	const int Result = PlayerState().SetDestination(Mark.x, Mark.y, Window->ViewZ, false, false);
 	if (Result == 1)
-		SendWalk();
+		Communication().SendWalk();
 	else if (Result == 2)
-		SendStopWalk();
+		Communication().SendStopWalk();
 	return true;
 }
 
@@ -608,12 +608,12 @@ bool TAutomapView::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	TMarkMenuData *Data = new TMarkMenuData;
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
 	if (Window->Centred)
-		GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
+		Map().GetPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
 	Data->Coordinate.x = (x - Width / 2) * 2 / Window->Zoom + Window->ViewX;
 	Data->Coordinate.y = (y - Height / 2) * 2 / Window->Zoom + Window->ViewY;
 	Data->Coordinate.z = Window->ViewZ;
 	Data->Mark = GetMark(x, y);
-	AddMessage(MESSAGE_MARK_MENU, reinterpret_cast<std::intptr_t>(Data), 0);
+	Interaction().AddMessage(MESSAGE_MARK_MENU, reinterpret_cast<std::intptr_t>(Data), 0);
 	return true;
 }
 
@@ -623,14 +623,14 @@ TMark TAutomapView::GetMark(int x, int y)
 {
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
 	if (Window->Centred)
-		GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
+		Map().GetPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
 	const int Left = Window->ViewX - 106 / Window->Zoom;
 	const int Top = Window->ViewY - 106 / Window->Zoom;
 	for (int BlockX = Left / 256; BlockX < Left / 256 + 2; BlockX++) {
 		for (int BlockY = Top / 256; BlockY < Top / 256 + 2; BlockY++) {
 			std::vector<TMark> Marks;
 			int Count;
-			GetAutomapMarks(BlockX, BlockY, Window->ViewZ, &Marks, &Count);
+			Map().GetAutomapMarks(BlockX, BlockY, Window->ViewZ, &Marks, &Count);
 			for (int i = Count - 1; i >= 0; i--) {
 				TMark Mark = Marks[static_cast<std::size_t>(i)];
 				if (Mark.x != 0 || Mark.y != 0) {
@@ -650,13 +650,13 @@ TMark TAutomapView::GetMark(int x, int y)
 
 TCompassRose::TCompassRose(int _RoseSkin)
 {
-	PATELLA_ASSERT_VALUES(_RoseSkin<patella::bridge::Skins().NumberOfSkins, _RoseSkin, patella::bridge::Skins().NumberOfSkins);
+	PATELLA_ASSERT_VALUES(_RoseSkin<SkinData().NumberOfSkins, _RoseSkin, SkinData().NumberOfSkins);
 	RoseSkin = _RoseSkin;
 }
 
 void TCompassRose::Draw(int Surface, int x, int y)
 {
-	DrawPicturePart(Surface, x, y, 4, Skins()[RoseSkin].x, Skins()[RoseSkin].y, Skins()[RoseSkin].width,
+	Graphics().DrawPicturePart(Surface, x, y, 4, Skins()[RoseSkin].x, Skins()[RoseSkin].y, Skins()[RoseSkin].width,
 		Skins()[RoseSkin].height);
 }
 
@@ -682,7 +682,7 @@ bool TCompassRose::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 
 void TCompassRose::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetMouseOverText(TextScrollAutomap);
+	Interaction().SetMouseOverText(TextScrollAutomap);
 }
 
 // --- TCapacityLabel, TSoulLabel ---------------------------------------------------
@@ -690,21 +690,21 @@ void TCompassRose::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 void TCapacityLabel::Draw(int Surface, int x, int y)
 {
 	TFixedString<20> Text;
-	PrintFormattedText(Surface, SkinProperties().CapacityLabel.Caption.x + x, SkinProperties().CapacityLabel.Caption.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().CapacityLabel.Caption.x + x, SkinProperties().CapacityLabel.Caption.y + y,
 		SkinProperties().CapacityLabel.CaptionFont, "Cap:");
-	Text.Format("{}", GetPlayerCapacity());
-	PrintFormattedText(Surface, SkinProperties().CapacityLabel.Value.x + x, SkinProperties().CapacityLabel.Value.y + y,
-		SkinProperties().CapacityLabel.ValueFont, Text);
+	Text.Format("{}", PlayerState().GetCapacity());
+	Graphics().PrintFormattedText(Surface, SkinProperties().CapacityLabel.Value.x + x,
+		SkinProperties().CapacityLabel.Value.y + y, SkinProperties().CapacityLabel.ValueFont, Text);
 }
 
 void TSoulLabel::Draw(int Surface, int x, int y)
 {
 	TFixedString<20> Text;
-	PrintFormattedText(Surface, SkinProperties().SoulLabel.Caption.x + x, SkinProperties().SoulLabel.Caption.y + y,
-		SkinProperties().SoulLabel.CaptionFont, "Soul:");
-	Text.Format("{}", GetPlayerSoul());
-	PrintFormattedText(Surface, SkinProperties().SoulLabel.Value.x + x, SkinProperties().SoulLabel.Value.y + y,
-		SkinProperties().SoulLabel.ValueFont, Text);
+	Graphics().PrintFormattedText(Surface, SkinProperties().SoulLabel.Caption.x + x,
+		SkinProperties().SoulLabel.Caption.y + y, SkinProperties().SoulLabel.CaptionFont, "Soul:");
+	Text.Format("{}", PlayerState().GetSoul());
+	Graphics().PrintFormattedText(Surface, SkinProperties().SoulLabel.Value.x + x,
+		SkinProperties().SoulLabel.Value.y + y, SkinProperties().SoulLabel.ValueFont, Text);
 }
 
 // --- TPlayerStates ----------------------------------------------------------------
@@ -755,22 +755,22 @@ void TPlayerStates::Draw(int Surface, int x, int y)
 
 int TPlayerStates::GetNumberOfIcons() const
 {
-	int Count = IsPlayerPoisoned() ? 1 : 0;
-	if (IsPlayerBurning())
+	int Count = PlayerState().IsPoisoned() ? 1 : 0;
+	if (PlayerState().IsBurning())
 		Count++;
-	if (IsPlayerManaShielded())
+	if (PlayerState().IsManaShielded())
 		Count++;
-	if (IsPlayerParalyzed())
+	if (PlayerState().IsParalyzed())
 		Count++;
-	if (HasPlayerSkull())
+	if (PlayerState().HasSkull())
 		Count++;
-	if (IsPlayerInFight())
+	if (PlayerState().IsInFight())
 		Count++;
-	if (IsPlayerDrunk())
+	if (PlayerState().IsDrunk())
 		Count++;
-	if (IsPlayerElectrified())
+	if (PlayerState().IsElectrified())
 		Count++;
-	if (IsPlayerHasted())
+	if (PlayerState().IsHasted())
 		Count++;
 	if (Count > MaxIcons)
 		Count = MaxIcons;
@@ -824,7 +824,7 @@ void TPlayerStates::MouseHover(int x, int y)
 			default:
 				TERROR1("unknown skin", skin);
 			}
-			SetMouseOverText(Text);
+			Interaction().SetMouseOverText(Text);
 		}
 	}
 }
@@ -861,31 +861,31 @@ int TPlayerStates::GetIcon(int Position)
 		Skin = SKIN_NONE;
 		switch (i) {
 		case 0:
-			if (IsPlayerPoisoned()) {
+			if (PlayerState().IsPoisoned()) {
 				Found++;
 				Skin = SKIN_STATE_POISONED;
 			}
 			break;
 		case 1:
-			if (IsPlayerBurning()) {
+			if (PlayerState().IsBurning()) {
 				Found++;
 				Skin = SKIN_STATE_BURNING;
 			}
 			break;
 		case 2:
-			if (IsPlayerManaShielded()) {
+			if (PlayerState().IsManaShielded()) {
 				Found++;
 				Skin = SKIN_STATE_MANA_SHIELD;
 			}
 			break;
 		case 3:
-			if (IsPlayerParalyzed()) {
+			if (PlayerState().IsParalyzed()) {
 				Found++;
 				Skin = SKIN_STATE_PARALYZED;
 			}
 			break;
 		case 4:
-			switch (GetCreature(GetPlayerID())->PKFlag) {
+			switch (Creatures().GetCreature(PlayerState().GetID())->PKFlag) {
 			case PK_YELLOW:
 				Found++;
 				Skin = SKIN_STATE_SKULL_1;
@@ -907,25 +907,25 @@ int TPlayerStates::GetIcon(int Position)
 			}
 			break;
 		case 5:
-			if (IsPlayerInFight()) {
+			if (PlayerState().IsInFight()) {
 				Found++;
 				Skin = SKIN_STATE_IN_FIGHT;
 			}
 			break;
 		case 6:
-			if (IsPlayerDrunk()) {
+			if (PlayerState().IsDrunk()) {
 				Found++;
 				Skin = SKIN_STATE_DRUNK;
 			}
 			break;
 		case 7:
-			if (IsPlayerElectrified()) {
+			if (PlayerState().IsElectrified()) {
 				Found++;
 				Skin = SKIN_STATE_ELECTRIFIED;
 			}
 			break;
 		case 8:
-			if (IsPlayerHasted()) {
+			if (PlayerState().IsHasted()) {
 				Found++;
 				Skin = SKIN_STATE_HASTED;
 			}
@@ -955,10 +955,10 @@ TSmallInventoryWindow::TSmallInventoryWindow()
 void TSmallInventoryWindow::Draw(int Surface, int x, int y)
 {
 	TContentWindow::Draw(Surface, x, y);
-	if (In(GetMouseX() - SkinProperties().SmallInventoryDropArea.x - x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
-		&& In(GetMouseY() - SkinProperties().SmallInventoryDropArea.y - y, 0, SkinProperties().SmallInventoryDropArea.height - 1)
-		&& GetActionState() == ACTIONSTATE_DRAGGING)
-		GetSurface()->DrawFrame(Surface,
+	if (In(Interaction().GetMouseX() - SkinProperties().SmallInventoryDropArea.x - x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
+		&& In(Interaction().GetMouseY() - SkinProperties().SmallInventoryDropArea.y - y, 0, SkinProperties().SmallInventoryDropArea.height - 1)
+		&& Interaction().GetActionState() == ACTIONSTATE_DRAGGING)
+		GraphicsEngine().GetSurface()->DrawFrame(Surface,
 			TRect(SkinProperties().SmallInventoryDropArea.x + x, SkinProperties().SmallInventoryDropArea.y + y,
 				SkinProperties().SmallInventoryDropArea.width, SkinProperties().SmallInventoryDropArea.height),
 			1, TRGBColor(255, 255, 255));
@@ -974,7 +974,7 @@ namespace {
 bool AsksForCount(int Flags)
 {
 	const bool Ctrl = (Flags & KEY_CONTROL) != 0;
-	return GetDragFullStacks() ? Ctrl : !Ctrl;
+	return Preferences().GetDragFullStacks() ? Ctrl : !Ctrl;
 }
 
 } // namespace
@@ -986,16 +986,17 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TContentWindow::LeftButtonUp(x, y, Flags);
 	if (In(x - SkinProperties().SmallInventoryDropArea.x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
-		&& In(y - SkinProperties().SmallInventoryDropArea.y, 0, SkinProperties().SmallInventoryDropArea.height - 1) && GetActionState() == ACTIONSTATE_DRAGGING) {
+		&& In(y - SkinProperties().SmallInventoryDropArea.y, 0, SkinProperties().SmallInventoryDropArea.height - 1) && Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 		int Index, SrcX, SrcY, SrcZ;
-		const TObject *Obj = GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
-		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
-			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, 1);
+		const TObject *Obj = Interaction().GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
+		if (!ObjectTypes().GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2
+			|| (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+			Communication().SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, 1);
 		} else if (AsksForCount(Flags)) {
-			SetDragTarget(POSITION_NOT_ON_MAP, 0, 0);
-			AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
+			Interaction().SetDragTarget(POSITION_NOT_ON_MAP, 0, 0);
+			Interaction().AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 		} else {
-			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, Obj->Data);
+			Communication().SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, Obj->Data);
 		}
 	}
 	return Result;
@@ -1004,8 +1005,8 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 bool TSmallInventoryWindow::HelpMouseMove(int x, int y)
 {
 	if (!TWindow::HelpMouseMove(x, y)) {
-		SetHelpHandle(HELP_MINIMISED_INVENTORY);
-		SetHelpSize(Width, Height);
+		Help().SetHandle(HELP_MINIMISED_INVENTORY);
+		Help().SetSize(Width, Height);
 	}
 	return true;
 }
@@ -1051,21 +1052,22 @@ void TInventoryView::Draw(int Surface, int x, int y)
 		0, 0);
 	TWindow::Draw(Surface, x, y);
 	for (int i = 0; i < 10; i++) {
-		const TObject Obj = *GetBodyObject(i + 1);
-		DrawPicturePart(Surface, SkinProperties().InventoryView.Slots[i].x + x, SkinProperties().InventoryView.Slots[i].y + y, 4,
+		const TObject Obj = *Inventory().GetBodyObject(i + 1);
+		Graphics().DrawPicturePart(Surface, SkinProperties().InventoryView.Slots[i].x + x, SkinProperties().InventoryView.Slots[i].y + y, 4,
 			Skins()[SKIN_SLOT_FRAME].x, Skins()[SKIN_SLOT_FRAME].y, Skins()[SKIN_SLOT_FRAME].width, Skins()[SKIN_SLOT_FRAME].height);
 		const int ObjX = SkinProperties().InventoryView.Objects[i].x + x;
 		const int ObjY = SkinProperties().InventoryView.Objects[i].y + y;
 		if (Obj.Type == 0) {
 			const int Empty = SkinProperties().InventoryView.EmptySlotSkins[i];
-			DrawPicturePart(Surface, ObjX, ObjY, 4, Skins()[Empty].x, Skins()[Empty].y, Skins()[Empty].width,
+			Graphics().DrawPicturePart(Surface, ObjX, ObjY, 4, Skins()[Empty].x, Skins()[Empty].y, Skins()[Empty].width,
 				Skins()[Empty].height);
 		} else {
-			DrawObject(Surface, ObjX, ObjY, 32, Obj, TRGBColor(0, 0, 0), TRect(ObjX, ObjY, 32, 32),
+			Graphics().DrawObject(Surface, ObjX, ObjY, 32, Obj, TRGBColor(0, 0, 0), TRect(ObjX, ObjY, 32, 32),
 				SkinProperties().ObjectCountFont, false);
 		}
-		if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ObjX, ObjX + 31) && In(GetMouseY(), ObjY, ObjY + 31))
-			GetSurface()->DrawFrame(Surface, TRect(ObjX - 1, ObjY - 1, 34, 34), 1, TRGBColor(255, 255, 255));
+		if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING && In(Interaction().GetMouseX(), ObjX, ObjX + 31) && In(Interaction().GetMouseY(), ObjY, ObjY + 31))
+			GraphicsEngine().GetSurface()->DrawFrame(Surface, TRect(ObjX - 1, ObjY - 1, 34, 34), 1,
+				TRGBColor(255, 255, 255));
 	}
 }
 
@@ -1076,9 +1078,9 @@ bool TInventoryView::LeftButtonDown(int x, int y, int Flags)
 		const int Slot = GetSlotAt(x, y);
 		if (Slot == 0)
 			return false;
-		const TObject *Obj = GetBodyObject(Slot);
+		const TObject *Obj = Inventory().GetBodyObject(Slot);
 		if (Obj->Type != 0)
-			SetDragObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
+			Interaction().SetDragObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 	}
 	return true;
 }
@@ -1093,32 +1095,34 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 		const int Slot = GetSlotAt(x, y);
 		if (Slot == 0)
 			return false;
-		if (GetActionState() == ACTIONSTATE_USE_WITH) {
-			const TObject *Obj = GetBodyObject(Slot);
+		if (Interaction().GetActionState() == ACTIONSTATE_USE_WITH) {
+			const TObject *Obj = Inventory().GetBodyObject(Slot);
 			if (Obj->Type != 0) {
 				int SrcIndex, SrcX, SrcY, SrcZ;
-				const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
+				const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 				PATELLA_ASSERT(SrcObj!=0);
 				PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-				SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
+				Communication().SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Slot, 0,
+					Obj->Type, 0);
 				return true;
 			}
-		} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
-			SetStatusMessage("Select a player to trade with.", false);
+		} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
+			Talk().SetStatusMessage("Select a player to trade with.", false);
 			return true;
-		} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
+		} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 			int DragIndex, DragX, DragY, DragZ;
-			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
+			const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != POSITION_NOT_ON_MAP || DragY != Slot) {
-				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Slot, 0, 1);
+				if (!ObjectTypes().GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex,
+						POSITION_NOT_ON_MAP, Slot, 0, 1);
 				} else if (AsksForCount(Flags)) {
-					SetDragTarget(POSITION_NOT_ON_MAP, Slot, 0);
-					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
+					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Slot, 0);
+					Interaction().AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Slot, 0,
-						DragObject->Data);
+					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex,
+						POSITION_NOT_ON_MAP, Slot, 0, DragObject->Data);
 				}
 			}
 		} else if (Flags != 0) {
@@ -1138,31 +1142,33 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 		const int Slot = GetSlotAt(x, y);
 		if (Slot == 0)
 			return false;
-		SetTradeObject(TObject(), 0, 0, 0, 0);
-		SetUseObject(TObject(), 0, 0, 0, 0);
-		SetTradeInfo(0);
-		const TObject *Obj = GetBodyObject(Slot);
-		SetTradeObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
-		SetUseObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
+		Interaction().SetTradeObject(TObject(), 0, 0, 0, 0);
+		Interaction().SetUseObject(TObject(), 0, 0, 0, 0);
+		Interaction().SetTradeInfo(0);
+		const TObject *Obj = Inventory().GetBodyObject(Slot);
+		Interaction().SetTradeObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
+		Interaction().SetUseObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 		if (Obj->Type != 0) {
-			if (GetClassicControl()) {
+			if (Preferences().GetClassicControl()) {
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
-					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
+					Communication().SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) != 0)
-					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
-				else if (GetObjectFlag(Obj->Type, MULTIUSE))
-					AddMessage(MESSAGE_USE_WITH, 0, 0);
+					Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+				else if (ObjectTypes().GetObjectFlag(Obj->Type, MULTIUSE))
+					Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
-					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, GetFreeContainer());
+					Communication().SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0,
+						Inventory().GetFreeContainer());
 			} else {
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
-					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
+					Communication().SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) == 0)
-					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
-				else if (GetObjectFlag(Obj->Type, MULTIUSE))
-					AddMessage(MESSAGE_USE_WITH, 0, 0);
+					Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+				else if (ObjectTypes().GetObjectFlag(Obj->Type, MULTIUSE))
+					Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
-					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, GetFreeContainer());
+					Communication().SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0,
+						Inventory().GetFreeContainer());
 			}
 		}
 	}
@@ -1171,11 +1177,11 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 
 bool TInventoryView::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_INVENTORY);
+	Help().SetHandle(HELP_INVENTORY);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	SetHelpSize(Parent->Width, Parent->Height);
-	MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
@@ -1239,7 +1245,7 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 		InsertChild(new TTextButton(Layout.Buttons[8].x, Layout.Buttons[8].y, "Help", TCallback(Receiver, EVENT_HELP),
 			TextOpenHelpMenu));
 	}
-	switch (GetAttackMode()) {
+	switch (Preferences().GetAttackMode()) {
 	case ATTACK_OFFENSIVE:
 		AttackModes->Selected = Offensive;
 		break;
@@ -1252,7 +1258,7 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 	default:
 		break;
 	}
-	switch (GetChaseMode()) {
+	switch (Preferences().GetChaseMode()) {
 	case CHASE_STAND:
 		ChaseModes->Selected = StandButton;
 		break;
@@ -1262,7 +1268,7 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 	default:
 		break;
 	}
-	SecureButton->State = !GetSecureMode();
+	SecureButton->State = !Preferences().GetSecureMode();
 	Arrange();
 }
 
@@ -1270,7 +1276,7 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 // follows it.
 void TCombatControls::Draw(int Surface, int x, int y)
 {
-	switch (GetChaseMode()) {
+	switch (Preferences().GetChaseMode()) {
 	case CHASE_STAND:
 		if (ChaseModes->Selected != StandButton)
 			ChaseModes->Selected = StandButton;
@@ -1288,13 +1294,13 @@ void TCombatControls::Draw(int Surface, int x, int y)
 bool TCombatControls::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	if (!IsLarge)
-		SetHelpHandle(HELP_COMBAT_CONTROLS_SMALL);
+		Help().SetHandle(HELP_COMBAT_CONTROLS_SMALL);
 	else
-		SetHelpHandle(HELP_COMBAT_CONTROLS_LARGE);
+		Help().SetHandle(HELP_COMBAT_CONTROLS_LARGE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	SetHelpSize(Parent->Width, Parent->Height);
-	MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
@@ -1303,27 +1309,27 @@ void TCombatControls::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_ATTACK_DEFENSIVE:
-		SetAttackMode(ATTACK_DEFENSIVE);
+		Preferences().SetAttackMode(ATTACK_DEFENSIVE);
 		break;
 	case EVENT_ATTACK_BALANCED:
-		SetAttackMode(ATTACK_BALANCED);
+		Preferences().SetAttackMode(ATTACK_BALANCED);
 		break;
 	case EVENT_ATTACK_OFFENSIVE:
-		SetAttackMode(ATTACK_OFFENSIVE);
+		Preferences().SetAttackMode(ATTACK_OFFENSIVE);
 		break;
 	case EVENT_CHASE_STAND:
-		SetChaseMode(CHASE_STAND);
+		Preferences().SetChaseMode(CHASE_STAND);
 		break;
 	case EVENT_CHASE_ON:
-		SetChaseMode(CHASE_ON);
+		Preferences().SetChaseMode(CHASE_ON);
 		break;
 	case EVENT_SECURE_MODE:
-		SetSecureMode(!SecureButton->State);
+		Preferences().SetSecureMode(!SecureButton->State);
 		break;
 	default:
 		return;
 	}
-	SendFightModes();
+	Communication().SendFightModes();
 }
 
 // --- TStatusWindow ----------------------------------------------------------------
@@ -1342,16 +1348,16 @@ TStatusWindow::TStatusWindow()
 void TStatusWindow::Draw(int Surface, int x, int y)
 {
 	TContentWindow::Draw(Surface, x, y);
-	const int Health = GetPlayerHealth();
-	const int MaxHealth = GetPlayerMaxHealth();
-	const int Mana = GetPlayerMana();
-	const int MaxMana = GetPlayerMaxMana();
+	const int Health = PlayerState().GetHealth();
+	const int MaxHealth = PlayerState().GetMaxHealth();
+	const int Mana = PlayerState().GetMana();
+	const int MaxMana = PlayerState().GetMaxMana();
 	TFixedString<16> Text;
 	Text.Format("{}", Health);
-	PrintFormattedText(Surface, SkinProperties().StatusWindow.HitpointsValue.x + x, SkinProperties().StatusWindow.HitpointsValue.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().StatusWindow.HitpointsValue.x + x, SkinProperties().StatusWindow.HitpointsValue.y + y,
 		SkinProperties().StatusWindow.ValueFont, Text);
 	Text.Format("{}", Mana);
-	PrintFormattedText(Surface, SkinProperties().StatusWindow.ManaValue.x + x, SkinProperties().StatusWindow.ManaValue.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().StatusWindow.ManaValue.x + x, SkinProperties().StatusWindow.ManaValue.y + y,
 		SkinProperties().StatusWindow.ValueFont, Text);
 	int BarWidth = SkinProperties().StatusWindow.HitpointsBar.width;
 	if (Health < MaxHealth)
@@ -1371,8 +1377,8 @@ void TStatusWindow::Draw(int Surface, int x, int y)
 
 bool TStatusWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_STATUS_BARS);
-	SetHelpSize(Width, Height);
+	Help().SetHandle(HELP_STATUS_BARS);
+	Help().SetSize(Width, Height);
 	return true;
 }
 
@@ -1411,7 +1417,7 @@ TContainerWindowBody::~TContainerWindowBody()
 void TContainerWindowBody::OnClose()
 {
 	try {
-		SendCloseContainer(Container);
+		Communication().SendCloseContainer(Container);
 	} catch (...) {
 		CloseWhileUnwinding([this] { TSubWindowBody::OnClose(); });
 		throw;
@@ -1426,7 +1432,7 @@ void TContainerWindowBody::OnClose()
 // part below the edge.
 void TContainerWindowBody::Draw(int Surface, int x, int y)
 {
-	if (ObjectCount != GetContainerObjectCount(Container))
+	if (ObjectCount != Inventory().GetContainerObjectCount(Container))
 		Arrange();
 	if (!IsMinimized()) {
 		if (!Minimized)
@@ -1436,7 +1442,7 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 		PATELLA_ASSERT_VALUES(x>=0, x);
 		PATELLA_ASSERT_VALUES(y>=0, y);
 		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
-		if (IsContainerOpen(Container)) {
+		if (Inventory().IsContainerOpen(Container)) {
 			for (int i = 0; i < Capacity; i++) {
 				const int SlotX = i % SkinProperties().ContainerSlotsPerRow * SkinProperties().ContainerColumnWidth;
 				const int SlotY = i / SkinProperties().ContainerSlotsPerRow * SkinProperties().ContainerRowHeight - ScrollY;
@@ -1452,15 +1458,16 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 					const int ScreenX = SkinProperties().ContainerFirstSlot.x + SlotX + x;
 					const int ScreenY = Top + y;
 					const int SlotWidth = SkinProperties().ContainerSlotSizeAndObject.x;
-					DrawPicturePart(Surface, ScreenX, ScreenY, 4, Skins()[SKIN_CONTAINER_SLOT].x, Skins()[SKIN_CONTAINER_SLOT].y, SlotWidth, ClipHeight);
+					Graphics().DrawPicturePart(Surface, ScreenX, ScreenY, 4, Skins()[SKIN_CONTAINER_SLOT].x, Skins()[SKIN_CONTAINER_SLOT].y, SlotWidth, ClipHeight);
 					if (i < ObjectCount)
-						DrawObject(Surface, SkinProperties().ContainerSlotSizeAndObject.width + SlotX + x,
-							SkinProperties().ContainerSlotSizeAndObject.height + SlotY + y, 32, GetContainerContent(Container, i),
+						Graphics().DrawObject(Surface, SkinProperties().ContainerSlotSizeAndObject.width + SlotX + x,
+							SkinProperties().ContainerSlotSizeAndObject.height + SlotY + y, 32, Inventory().GetContainerContent(Container, i),
 							TRGBColor(0, 0, 0), TRect(ScreenX, ScreenY, SlotWidth, ClipHeight), SkinProperties().ObjectCountFont,
 							false);
-					if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
-						&& In(GetMouseY(), ScreenY, ScreenY + ClipHeight - 1))
-						GetSurface()->DrawFrameClipped(Surface,
+					if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING
+						&& In(Interaction().GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
+						&& In(Interaction().GetMouseY(), ScreenY, ScreenY + ClipHeight - 1))
+						GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 							TRect(SkinProperties().ContainerFirstSlot.x + SlotX + x,
 								SlotY + SkinProperties().ContainerFirstSlot.y + y, 34, 34),
 							1, TRGBColor(255, 255, 255),
@@ -1500,16 +1507,16 @@ int TContainerWindowBody::GetMaximumHeight()
 // icon and title again.
 void TContainerWindowBody::Arrange()
 {
-	ObjectCount = GetContainerObjectCount(Container);
-	Capacity = GetContainerCapacity(Container);
+	ObjectCount = Inventory().GetContainerObjectCount(Container);
+	Capacity = Inventory().GetContainerCapacity(Container);
 	int ContentHeight = GetContentHeight();
 	if (ContentHeight <= Height)
 		ContentHeight = Height;
 	ScrollBar->Range->SetRange(0, ContentHeight - Height, ScrollBar->Range->Value, Height);
 	TSubWindow *Window = static_cast<TSubWindow *>(GetParent());
 	if (Window != nullptr) {
-		TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
-		TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container));
+		TObjectIcon *Icon = new TObjectIcon(Inventory().GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false);
+		TLabel *Title = new TLabel(SkinProperties().SubWindow.TitleFont, Inventory().GetContainerName(Container));
 		Window->SetIcon(Icon);
 		Window->SetTitle(Title);
 	}
@@ -1522,9 +1529,10 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 	if (!TWindow::LeftButtonDown(x, y, Flags)) {
 		const int Position = GetSlotAt(x, y, true);
 		if (Position != -1) {
-			const TObject Obj = GetContainerContent(Container, Position);
+			const TObject Obj = Inventory().GetContainerContent(Container, Position);
 			if (Obj.Type != 0)
-				SetDragObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+				Interaction().SetDragObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE,
+					Position);
 		}
 	}
 	return true;
@@ -1535,35 +1543,35 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
-		if (GetActionState() == ACTIONSTATE_USE_WITH) {
+		if (Interaction().GetActionState() == ACTIONSTATE_USE_WITH) {
 			const int Position = GetSlotAt(x, y, true);
 			if (Position != -1) {
-				const TObject Obj = GetContainerContent(Container, Position);
+				const TObject Obj = Inventory().GetContainerContent(Container, Position);
 				if (Obj.Type != 0) {
 					int SrcIndex, SrcX, SrcY, SrcZ;
-					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
+					const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
 					PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-					SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
+					Communication().SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						Obj.Type, Position);
 				}
 			}
-		} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
-			SetStatusMessage("Select a player to trade with.", false);
-		} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
+		} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
+			Talk().SetStatusMessage("Select a player to trade with.", false);
+		} else if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING) {
 			const int Position = GetSlotAt(x, y, false);
 			int DragIndex, DragX, DragY, DragZ;
-			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
+			const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != POSITION_NOT_ON_MAP || DragY != Container + POSITION_CONTAINER_BASE || DragZ != Position) {
-				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
+				if (!ObjectTypes().GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						1);
 				} else if (AsksForCount(Flags)) {
-					SetDragTarget(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
-					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
+					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+					Interaction().AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
+					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						DragObject->Data);
 				}
 			}
@@ -1582,32 +1590,34 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 		const int Position = GetSlotAt(x, y, true);
 		if (Position == -1)
 			return true;
-		SetTradeObject(TObject(), 0, 0, 0, 0);
-		SetUseObject(TObject(), 0, 0, 0, 0);
-		SetTradeInfo(0);
-		const TObject Obj = GetContainerContent(Container, Position);
-		SetTradeObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
-		SetUseObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+		Interaction().SetTradeObject(TObject(), 0, 0, 0, 0);
+		Interaction().SetUseObject(TObject(), 0, 0, 0, 0);
+		Interaction().SetTradeInfo(0);
+		const TObject Obj = Inventory().GetContainerContent(Container, Position);
+		Interaction().SetTradeObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+		Interaction().SetUseObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 		if (Obj.Type == 0)
 			return true;
-		if (GetClassicControl()) {
+		if (Preferences().GetClassicControl()) {
 			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
-				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
+				Communication().SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type,
+					Position);
 			else if ((Flags & KEY_CONTROL) != 0)
-				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
-			else if (GetObjectFlag(Obj.Type, MULTIUSE))
-				AddMessage(MESSAGE_USE_WITH, 0, 0);
+				Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+			else if (ObjectTypes().GetObjectFlag(Obj.Type, MULTIUSE))
+				Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
-				SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
+				Communication().SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
 		} else {
 			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
-				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
+				Communication().SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type,
+					Position);
 			else if ((Flags & KEY_CONTROL) == 0)
-				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
-			else if (GetObjectFlag(Obj.Type, MULTIUSE))
-				AddMessage(MESSAGE_USE_WITH, 0, 0);
+				Interaction().AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
+			else if (ObjectTypes().GetObjectFlag(Obj.Type, MULTIUSE))
+				Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
-				SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
+				Communication().SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
 		}
 	}
 	return true;
@@ -1623,11 +1633,11 @@ bool TContainerWindowBody::MouseWheel(int x, int y, int Code)
 
 bool TContainerWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_OPEN_CONTAINERS);
+	Help().SetHandle(HELP_OPEN_CONTAINERS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	SetHelpSize(Parent->Width, Parent->Height);
-	MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
@@ -1637,7 +1647,7 @@ void TContainerWindowBody::HandleEvent(int Event)
 {
 	if (Event == EVENT_CONTAINER_UP && HasParent) {
 		HasParent = false;
-		SendContainerUp(Container);
+		Communication().SendContainerUp(Container);
 	}
 }
 
@@ -1660,7 +1670,7 @@ int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 	if (Column < SkinProperties().ContainerSlotsPerRow && x % SkinProperties().ContainerColumnWidth <= SkinProperties().ContainerSlotSizeAndObject.x
 		&& y % SkinProperties().ContainerRowHeight <= SkinProperties().ContainerSlotSizeAndObject.y) {
 		const int Position = SkinProperties().ContainerSlotsPerRow * (y / SkinProperties().ContainerRowHeight) + Column;
-		if (Occupied && GetContainerObjectCount(Container) <= Position)
+		if (Occupied && Inventory().GetContainerObjectCount(Container) <= Position)
 			return -1;
 		return Position;
 	}
@@ -1671,7 +1681,7 @@ int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 void TContainerWindowBody::UpdateUpButton()
 {
 	TSubWindow *Window = static_cast<TSubWindow *>(GetParent());
-	if (HasContainerParent(Container)) {
+	if (Inventory().HasContainerParent(Container)) {
 		HasParent = true;
 		if (Window != nullptr)
 			Window->ShowUpButton();
@@ -1689,7 +1699,7 @@ TSkillsWindowBody::TSkillsWindowBody()
 {
 	ContextMenu = nullptr;
 	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0,
-		GetFontLineHeight(SkinProperties().SkillsFont.FontNumber) / 2);
+		Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber) / 2);
 	InsertChild(ScrollBar);
 	Lines = 15;
 	Arrange();
@@ -1734,7 +1744,7 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 		if (!Minimized)
 			TWindow::Draw(Surface, x, y);
-		const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+		const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 		int LineY = -ScrollY;
 		const int TextWidth = Width - SkinProperties().SkillsHorizontalMargin * 2 - ScrollBar->Width;
 		int Progress = -1;
@@ -1759,27 +1769,27 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 					ClipHeight = Bottom - Top + 1;
 				const int ClipX = SkinProperties().SkillsHorizontalMargin + x;
 				const int ClipY = Top + y;
-				const int LineMiddle = GetFontHeight(SkinProperties().SkillsFont.FontNumber) / 2 + SkinProperties().SkillsVerticalMargin - 1 + LineY;
+				const int LineMiddle = Graphics().GetFontHeight(SkinProperties().SkillsFont.FontNumber) / 2 + SkinProperties().SkillsVerticalMargin - 1 + LineY;
 				if (!HasValue) {
 					if (LineMiddle >= 0 && LineMiddle <= Bottom)
-						GetSurface()->DrawHorizontalLine(Surface, ClipX, LineMiddle + y, TextWidth,
+						GraphicsEngine().GetSurface()->DrawHorizontalLine(Surface, ClipX, LineMiddle + y, TextWidth,
 							SkinProperties().SkillsFont.Color);
 				} else {
 					TFixedString<20> Number;
 					FormatNumber(Value, Number.Chars);
-					PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + x, SkinProperties().SkillsVerticalMargin + LineY + y,
+					Graphics().PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + x, SkinProperties().SkillsVerticalMargin + LineY + y,
 						SkinProperties().SkillsFont.FontNumber, SkinProperties().SkillsFont.Color, Text, 0,
 						TRect(ClipX, ClipY, TextWidth, ClipHeight));
-					PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + TextWidth - 1 + x, SkinProperties().SkillsVerticalMargin + LineY + y,
+					Graphics().PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + TextWidth - 1 + x, SkinProperties().SkillsVerticalMargin + LineY + y,
 						SkinProperties().SkillsFont.FontNumber, SkinProperties().SkillsFont.Color, Number, 2,
 						TRect(ClipX, ClipY, TextWidth, ClipHeight));
 					if (Progress != -1) {
 						const int BarHeight = 5;
-						GetSurface()->DrawFrameClipped(Surface,
+						GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 							TRect(Margin + x, LineHeight + 8 + LineY + y, TextWidth,
 								BarHeight),
 							1, TRGBColor(0), TRect(ClipX, ClipY, TextWidth, ClipHeight));
-						GetSurface()->FillRectangleClipped(Surface,
+						GraphicsEngine().GetSurface()->FillRectangleClipped(Surface,
 							TRect(Margin + x + 1, LineHeight + 8 + LineY + y + 1,
 								(TextWidth - 2) * Progress / 100, BarHeight - 2),
 							i < 7 ? SkinProperties().SkillsFirstBarsColor
@@ -1802,22 +1812,22 @@ bool TSkillsWindowBody::MouseWheel(int x, int y, int Code)
 
 bool TSkillsWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_SKILLS);
+	Help().SetHandle(HELP_SKILLS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	SetHelpSize(Parent->Width, Parent->Height);
-	MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
 // Over a line with a bar: the percent still to go.
 void TSkillsWindowBody::MouseHover(int x, int y)
 {
-	patella::TGUI &GUI = patella::bridge::GUI();
+	patella::TGUI &GUI = ::GUI();
 	if (!IsMinimized()) {
 		const int ScrollY = ScrollBar->Range->Value;
 		const int Bottom = Height - 1;
-		const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+		const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 		const int TextWidth = Width - SkinProperties().SkillsHorizontalMargin * 2 - ScrollBar->Width;
 		int LineY = -ScrollY;
 		int Progress = -1;
@@ -1843,7 +1853,7 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 				if (Top <= y && y <= ClipHeight + Top && SkinProperties().SkillsHorizontalMargin <= x
 					&& x <= SkinProperties().SkillsHorizontalMargin + TextWidth && Progress != -1) {
 					MsvcSnprintf(GUI.SkillMouseOverText, 256, TextPercentToGo, 100 - Progress);
-					SetMouseOverText(GUI.SkillMouseOverText);
+					Interaction().SetMouseOverText(GUI.SkillMouseOverText);
 				}
 			}
 			LineY += ItemHeight;
@@ -1854,7 +1864,7 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 // Opens the skill menu (Control.cpp's message 60).
 bool TSkillsWindowBody::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
-	AddMessage(MESSAGE_SKILL_MENU, reinterpret_cast<std::intptr_t>(this), 0);
+	Interaction().AddMessage(MESSAGE_SKILL_MENU, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }
 
@@ -1886,7 +1896,7 @@ void TSkillsWindowBody::Arrange()
 int TSkillsWindowBody::GetMinimumHeight()
 {
 	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
-	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 	return (std::max)(ScrollBar->GetMinimumHeight(), LineHeight);
 }
 
@@ -1894,7 +1904,7 @@ int TSkillsWindowBody::GetMinimumHeight()
 // at least the minimum.
 int TSkillsWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(SKILLS_WINDOW);
+	int Height = Preferences().GetContentWindowSize(SKILLS_WINDOW);
 	if (Height == 0)
 		Height = GetMaximumHeight();
 	if (Height < GetMinimumHeight())
@@ -1909,7 +1919,7 @@ int TSkillsWindowBody::GetMaximumHeight()
 
 int TSkillsWindowBody::GetContentHeight()
 {
-	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 	int Result = 0;
 	for (int i = 0; i < Lines;) {
 		i++;
@@ -1935,37 +1945,37 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 	switch (NumberOfLine) {
 	case 1:
 		Name.Assign("Experience");
-		Value = GetPlayerExperience();
+		Value = PlayerState().GetExperience();
 		break;
 	case 2:
 		Name.Assign("Level");
-		Value = GetPlayerLevel();
-		if (GetLevelBar())
-			Progress = GetPlayerLevelProgress();
+		Value = PlayerState().GetLevel();
+		if (Preferences().GetLevelBar())
+			Progress = PlayerState().GetLevelProgress();
 		else
 			Progress = -1;
 		break;
 	case 3:
 		Name.Assign("Hit Points");
-		Value = GetPlayerHealth();
+		Value = PlayerState().GetHealth();
 		break;
 	case 4:
 		Name.Assign("Mana");
-		Value = GetPlayerMana();
+		Value = PlayerState().GetMana();
 		break;
 	case 5:
 		Name.Assign("Soul Points");
-		Value = GetPlayerSoul();
+		Value = PlayerState().GetSoul();
 		break;
 	case 6:
 		Name.Assign("Capacity");
-		Value = GetPlayerCapacity();
+		Value = PlayerState().GetCapacity();
 		break;
 	case 7:
 		Name.Assign("Magic Level");
-		Value = GetPlayerMagicLevel();
-		if (GetMagLevelBar())
-			Progress = GetPlayerMagicLevelProgress();
+		Value = PlayerState().GetMagicLevel();
+		if (Preferences().GetMagLevelBar())
+			Progress = PlayerState().GetMagicLevelProgress();
 		else
 			Progress = -1;
 		break;
@@ -1979,10 +1989,10 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 	case 14:
 	case 15: {
 		const int SkillNumber = NumberOfLine - 9;
-		Name.Assign(GetSkillName(SkillNumber));
-		Value = GetPlayerSkillValue(SkillNumber);
-		if (GetSkillBar(SkillNumber))
-			Progress = GetPlayerSkillProgress(SkillNumber);
+		Name.Assign(PlayerState().GetSkillName(SkillNumber));
+		Value = PlayerState().GetSkillValue(SkillNumber);
+		if (Preferences().GetSkillBar(SkillNumber))
+			Progress = PlayerState().GetSkillProgress(SkillNumber);
 		else
 			Progress = -1;
 		break;
@@ -2012,7 +2022,7 @@ TBattleWindowBody::TBattleWindowBody()
 void TBattleWindowBody::OnClose()
 {
 	try {
-		SetHighlightID(0);
+		Creatures().SetHighlightID(0);
 	} catch (...) {
 		CloseWhileUnwinding([this] { TSubWindowBody::OnClose(); });
 		throw;
@@ -2028,8 +2038,8 @@ void TBattleWindowBody::OnClose()
 // children are drawn before the background.
 void TBattleWindowBody::Draw(int Surface, int x, int y)
 {
-	SetHighlightID(0);
-	const int Opponents = GetNumberOfOpponents();
+	Creatures().SetHighlightID(0);
+	const int Opponents = Creatures().GetNumberOfOpponents();
 	if (NumberOfOpponents != Opponents) {
 		NumberOfOpponents = Opponents;
 		Arrange();
@@ -2044,7 +2054,7 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 		const int ClipWidth = Width - ScrollBar->Width;
 		for (int i = 0; i < Opponents; i++) {
-			TCreature *Creature = GetOpponent(i);
+			TCreature *Creature = Creatures().GetOpponent(i);
 			const int RowY = SkinProperties().BattleWindow.RowHeight * i - ScrollY;
 			int Offset = 0;
 			if (SkinProperties().BattleWindow.RowHeight + RowY <= 0)
@@ -2064,21 +2074,21 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 			TRGBColor Color = SkinProperties().BattleWindow.NameFont.Color;
 			// GetOpponentAt's arguments in the original's order, right to left (MSVC; GCC and Clang may differ).
 			const auto OpponentAtMouse = [&] {
-				const int MouseY = GetMouseY();
-				return GetOpponentAt(GetMouseX() - x, MouseY - y);
+				const int MouseY = Interaction().GetMouseY();
+				return GetOpponentAt(Interaction().GetMouseX() - x, MouseY - y);
 			};
-			if (In(GetMouseY(), ClipY, ClipY + ClipHeight) && In(GetMouseX(), x, ClipWidth + x) && i == OpponentAtMouse()) {
-				SetHighlightID(Creature->CreatureID);
+			if (In(Interaction().GetMouseY(), ClipY, ClipY + ClipHeight) && In(Interaction().GetMouseX(), x, ClipWidth + x) && i == OpponentAtMouse()) {
+				Creatures().SetHighlightID(Creature->CreatureID);
 				Color = SkinProperties().HighlightColor;
 				Framed = true;
 			}
-			if (Creature->CreatureID == GetAttackID()) {
+			if (Creature->CreatureID == Creatures().GetAttackID()) {
 				if (Framed)
 					Color = SkinProperties().HighlightedAttackColor;
 				else
 					Color = SkinProperties().AttackColor;
 				Framed = true;
-			} else if (Creature->CreatureID == GetFollowID()) {
+			} else if (Creature->CreatureID == Creatures().GetFollowID()) {
 				if (Framed)
 					Color = SkinProperties().HighlightedFollowColor;
 				else
@@ -2086,21 +2096,21 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				Framed = true;
 			}
 			if (Framed)
-				GetSurface()->DrawFrameClipped(Surface,
+				GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 					TRect(SkinProperties().BattleWindow.Frame.x + x,
 						SkinProperties().BattleWindow.Frame.y + RowY + y, SkinProperties().BattleWindow.Frame.width,
 						SkinProperties().BattleWindow.Frame.height),
 					1, Color, TRect(x, ClipY, ClipWidth, ClipHeight));
-			GetSurface()->Flag26 = true;
-			DrawOutfit(Surface, SkinProperties().BattleWindow.Outfit.x + x, SkinProperties().BattleWindow.Outfit.y + RowY + y,
+			GraphicsEngine().GetSurface()->Flag26 = true;
+			Graphics().DrawOutfit(Surface, SkinProperties().BattleWindow.Outfit.x + x, SkinProperties().BattleWindow.Outfit.y + RowY + y,
 				SkinProperties().BattleWindow.Outfit.width, Creature->OutfitType, Creature->Colors,
 				SkinProperties().BattleWindow.OutfitHighlight, TRect(x, ClipY, ClipWidth, ClipHeight), SkinProperties().ObjectCountFont);
-			GetSurface()->Flag26 = false;
+			GraphicsEngine().GetSurface()->Flag26 = false;
 			if (Creature->PARTYFlag > PARTY_NONE) {
 				int Skin = SKIN_NONE; // none: no shield in the party (flag 1) or an unknown flag
 				switch (Creature->PARTYFlag) {
 				case PARTY_INVITER:
-					if (!IsPlayerInParty())
+					if (!PlayerState().IsInParty())
 						Skin = SKIN_BATTLE_SHIELD_1;
 					break;
 				case PARTY_INVITEE:
@@ -2140,7 +2150,7 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 					break;
 				}
 				if (Skin != SKIN_NONE) {
-					if (Creature->SkullTime == 0 || !Creature->SkullKept(patella::platform::Platform().Clock.WallSeconds()) || GetBlinkState())
+					if (Creature->SkullTime == 0 || !Creature->SkullKept(patella::platform::Platform().Clock.WallSeconds()) || Interaction().GetBlinkState())
 						DrawSkinClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
 							SkinProperties().BattleWindow.Name.y + RowY + y, Skins()[Skin].width, Skins()[Skin].height, Skin, x,
 							ClipY, ClipWidth, ClipHeight, 0, 0);
@@ -2148,8 +2158,8 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				}
 			}
 			const char *Name = Creature->Name;
-			const int MaxLength = GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Name,
-				SkinProperties().BattleWindow.Name.width);
+			const int MaxLength = Graphics().GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber,
+				Name, SkinProperties().BattleWindow.Name.width);
 			TFixedString<32> Shortened;
 			if (MaxLength < (int)strlen(Name)) {
 				Shortened.Assign(Name);
@@ -2157,20 +2167,20 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				Name = Shortened;
 			}
 			if (Framed)
-				PrintTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
+				Graphics().PrintTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
 					SkinProperties().BattleWindow.Name.y + RowY + y, SkinProperties().BattleWindow.NameFont.FontNumber, Color, Name,
 					SkinProperties().BattleWindow.NameFont.Alignment, TRect(x, ClipY, ClipWidth, ClipHeight));
 			else
-				PrintFormattedTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
+				Graphics().PrintFormattedTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
 					SkinProperties().BattleWindow.Name.y + RowY + y, SkinProperties().BattleWindow.NameFont, Name,
 					TRect(x, ClipY, ClipWidth, ClipHeight));
-			GetSurface()->DrawFrameClipped(Surface,
+			GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 				TRect(SkinProperties().BattleWindow.HealthBar.x + x,
 					SkinProperties().BattleWindow.HealthBar.y + RowY + y, SkinProperties().BattleWindow.HealthBar.width,
 					SkinProperties().BattleWindow.HealthBar.height),
 				1, SkinProperties().BattleWindow.HealthBarFrameColor,
 				TRect(x, ClipY, ClipWidth, ClipHeight));
-			GetSurface()->FillRectangleClipped(Surface,
+			GraphicsEngine().GetSurface()->FillRectangleClipped(Surface,
 				TRect(SkinProperties().BattleWindow.HealthBar.x + x + 1,
 					SkinProperties().BattleWindow.HealthBar.y + RowY + y + 1,
 					Creature->Health * (SkinProperties().BattleWindow.HealthBar.width - 2) / 100,
@@ -2214,28 +2224,30 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
 		const int Position = GetOpponentAt(x, y);
 		if (Position != -1) {
-			const TCreature *Creature = GetOpponent(Position);
+			const TCreature *Creature = Creatures().GetOpponent(Position);
 			if (Creature != nullptr) {
-				if (GetActionState() == ACTIONSTATE_USE_WITH) {
+				if (Interaction().GetActionState() == ACTIONSTATE_USE_WITH) {
 					int SrcIndex, SrcX, SrcY, SrcZ;
-					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
+					const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
 					PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-					if (!IsPlayer(Creature->CreatureID)) {
-						SendUseObjectOnCreature(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, Creature->CreatureID);
+					if (!Creatures().IsPlayer(Creature->CreatureID)) {
+						Communication().SendUseObjectOnCreature(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex,
+							Creature->CreatureID);
 						return true;
 					}
-					SetStatusMessage("You are not allowed to shoot directly on players.", false);
-				} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
+					Talk().SetStatusMessage("You are not allowed to shoot directly on players.", false);
+				} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
 					int TradeIndex, TradeX, TradeY, TradeZ;
-					const TObject &Obj = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
+					const TObject &Obj = *Interaction().GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 					PATELLA_ASSERT(Obj!=0);
-					if (IsPlayer(Creature->CreatureID)) {
-						SendRequestTrade(TradeX, TradeY, TradeZ, Obj.Type, TradeIndex, Creature->CreatureID);
+					if (Creatures().IsPlayer(Creature->CreatureID)) {
+						Communication().SendRequestTrade(TradeX, TradeY, TradeZ, Obj.Type, TradeIndex,
+							Creature->CreatureID);
 						return true;
 					}
-					SetStatusMessage("Select a player to trade with.", false);
-				} else if (GetActionState() != ACTIONSTATE_DRAGGING) {
+					Talk().SetStatusMessage("Select a player to trade with.", false);
+				} else if (Interaction().GetActionState() != ACTIONSTATE_DRAGGING) {
 					if (Flags != 0)
 						RightButtonUp(x, y, Flags);
 					else
@@ -2254,16 +2266,16 @@ bool TBattleWindowBody::RightButtonUp(int x, int y, int Flags)
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
 		const int Position = GetOpponentAt(x, y);
 		if (Position != -1) {
-			const TCreature *Creature = GetOpponent(Position);
+			const TCreature *Creature = Creatures().GetOpponent(Position);
 			if (Creature != nullptr) {
 				if ((Flags & KEY_ALT) != 0) {
-					const uint32 AttackID = GetAttackID();
-					SetAttackID(Creature->CreatureID == AttackID ? 0 : Creature->CreatureID);
-					SendAttack(GetAttackID());
+					const uint32 AttackID = Creatures().GetAttackID();
+					Creatures().SetAttackID(Creature->CreatureID == AttackID ? 0 : Creature->CreatureID);
+					Communication().SendAttack(Creatures().GetAttackID());
 				} else if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
-					SendLook(Creature->RealX, Creature->RealY, Creature->RealZ, CREATURE, 0);
+					Communication().SendLook(Creature->RealX, Creature->RealY, Creature->RealZ, CREATURE, 0);
 				} else {
-					AddMessage(MESSAGE_CREATURE_MENU, Creature->CreatureID, 0);
+					Interaction().AddMessage(MESSAGE_CREATURE_MENU, Creature->CreatureID, 0);
 				}
 			}
 		}
@@ -2276,13 +2288,13 @@ void TBattleWindowBody::MouseHover(int x, int y)
 {
 	const int Position = GetOpponentAt(x, y);
 	if (Position != -1) {
-		TCreature *Creature = GetOpponent(Position);
+		TCreature *Creature = Creatures().GetOpponent(Position);
 		if (Creature != nullptr) {
-			const int MaxLength = GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Creature->Name,
+			const int MaxLength = Graphics().GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Creature->Name,
 				SkinProperties().BattleWindow.Name.width);
 			if (MaxLength < (int)strlen(Creature->Name)) {
 				MouseOverText.Assign(Creature->Name);
-				SetMouseOverText(MouseOverText);
+				Interaction().SetMouseOverText(MouseOverText);
 			}
 		}
 	}
@@ -2297,11 +2309,11 @@ bool TBattleWindowBody::MouseWheel(int x, int y, int Code)
 
 bool TBattleWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_BATTLE);
+	Help().SetHandle(HELP_BATTLE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	SetHelpSize(Parent->Width, Parent->Height);
-	MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
@@ -2314,7 +2326,7 @@ int TBattleWindowBody::GetMinimumHeight()
 // The stored height ("ContentWindow" 7) or the content.
 int TBattleWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(BATTLE_WINDOW);
+	int Height = Preferences().GetContentWindowSize(BATTLE_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
 	if (Height < GetMinimumHeight())
@@ -2324,7 +2336,7 @@ int TBattleWindowBody::GetInitialHeight()
 
 int TBattleWindowBody::GetContentHeight()
 {
-	return GetNumberOfOpponents() * SkinProperties().BattleWindow.RowHeight + 1;
+	return Creatures().GetNumberOfOpponents() * SkinProperties().BattleWindow.RowHeight + 1;
 }
 
 // The row under x, y; -1 for none.
@@ -2332,7 +2344,7 @@ int TBattleWindowBody::GetOpponentAt(int x, int y)
 {
 	y += ScrollBar->Range->Value;
 	const int Position = y / SkinProperties().BattleWindow.RowHeight;
-	if (y >= 0 && x >= 0 && x <= Width - ScrollBar->Width && Position < GetNumberOfOpponents())
+	if (y >= 0 && x >= 0 && x <= Width - ScrollBar->Width && Position < Creatures().GetNumberOfOpponents())
 		return Position;
 	return -1;
 }
@@ -2370,9 +2382,9 @@ void TTradeOffers::Draw(int Surface, int x, int y)
 		const int *ObjectOffset = Side == 0 ? &SkinProperties().TradeWindow.ObjectOffsets.x : &SkinProperties().TradeWindow.ObjectOffsets.width;
 		const int OffsetX = ObjectOffset[0];
 		const int OffsetY = ObjectOffset[1];
-		const int Count = Side == 0 ? GetOwnOfferCount() : GetCounterOfferCount();
+		const int Count = Side == 0 ? Inventory().GetOwnOfferCount() : Inventory().GetCounterOfferCount();
 		for (int i = 0; i < Count; i++) {
-			const TObject Obj = Side == 0 ? GetOwnOfferObject(i) : GetCounterOfferObject(i);
+			const TObject Obj = Side == 0 ? Inventory().GetOwnOfferObject(i) : Inventory().GetCounterOfferObject(i);
 			const int SlotX = i % SkinProperties().TradeWindow.SlotsPerRow * SkinProperties().TradeWindow.ColumnWidth;
 			const int RowY = i / SkinProperties().TradeWindow.SlotsPerRow * SkinProperties().TradeWindow.RowHeight - ScrollY;
 			if (AreaHeight + AreaY + RowY > 0 && AreaY + RowY <= Bottom) {
@@ -2388,7 +2400,7 @@ void TTradeOffers::Draw(int Surface, int x, int y)
 				PATELLA_ASSERT_VALUES(x+DestX>=0, x+DestX);
 				PATELLA_ASSERT_VALUES(y+DestY>=0, y+DestY);
 				DrawSkin(Surface, x + DestX, y + DestY, AreaWidth, SlotHeight, SKIN_CONTAINER_SLOT, 0, 0);
-				DrawObject(Surface, OffsetX + SlotX + x, OffsetY + RowY + y, SkinProperties().TradeWindow.ObjectSize, Obj,
+				Graphics().DrawObject(Surface, OffsetX + SlotX + x, OffsetY + RowY + y, SkinProperties().TradeWindow.ObjectSize, Obj,
 					TRGBColor(0, 0, 0), TRect(x, y, ClipWidth, ClipHeight), SkinProperties().ObjectCountFont, false);
 			}
 		}
@@ -2414,8 +2426,8 @@ int TTradeOffers::GetMinimumHeight()
 // OwnOffer.x, the left edge of the own offer.
 int TTradeOffers::GetContentHeight()
 {
-	const int CounterCount = GetCounterOfferCount();
-	const int OwnCount = GetOwnOfferCount();
+	const int CounterCount = Inventory().GetCounterOfferCount();
+	const int OwnCount = Inventory().GetOwnOfferCount();
 	const int Count = (std::max)(OwnCount, CounterCount);
 	const int Result = SkinProperties().TradeWindow.RowHeight
 			* (Count / SkinProperties().TradeWindow.SlotsPerRow + (Count % SkinProperties().TradeWindow.SlotsPerRow > 0))
@@ -2434,12 +2446,12 @@ void TTradeOffers::Arrange()
 // A click on an object of either offer inspects it.
 bool TTradeOffers::LeftButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::LeftButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
-		&& GetActionState() != ACTIONSTATE_TRADE_WITH) {
+	if (!TWindow::LeftButtonUp(x, y, Flags) && Interaction().GetActionState() != ACTIONSTATE_DRAGGING && Interaction().GetActionState() != ACTIONSTATE_USE_WITH
+		&& Interaction().GetActionState() != ACTIONSTATE_TRADE_WITH) {
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
-			SendInspectTrade(Side, Position);
+			Communication().SendInspectTrade(Side, Position);
 	}
 	return true;
 }
@@ -2452,12 +2464,12 @@ bool TTradeOffers::LeftButtonDown(int x, int y, int Flags)
 
 bool TTradeOffers::RightButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::RightButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
-		&& GetActionState() != ACTIONSTATE_TRADE_WITH) {
+	if (!TWindow::RightButtonUp(x, y, Flags) && Interaction().GetActionState() != ACTIONSTATE_DRAGGING && Interaction().GetActionState() != ACTIONSTATE_USE_WITH
+		&& Interaction().GetActionState() != ACTIONSTATE_TRADE_WITH) {
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
-			SendInspectTrade(Side, Position);
+			Communication().SendInspectTrade(Side, Position);
 	}
 	return true;
 }
@@ -2481,7 +2493,7 @@ void TTradeOffers::GetOfferAt(int x, int y, int *Side, int *Position) const
 		const int AreaX = Area.x;
 		const int AreaY = Area.y;
 		const int AreaHeight = Area.height;
-		const int Count = i == 0 ? GetOwnOfferCount() : GetCounterOfferCount();
+		const int Count = i == 0 ? Inventory().GetOwnOfferCount() : Inventory().GetCounterOfferCount();
 		const int RelativeY = ScrollBar->Range->Value - AreaY + y;
 		const int Column = (x - AreaX) / SkinProperties().TradeWindow.ColumnWidth;
 		if (Column < SkinProperties().TradeWindow.SlotsPerRow && (x - AreaX) % SkinProperties().TradeWindow.ColumnWidth <= AreaWidth
@@ -2502,12 +2514,12 @@ TTradeNames::TTradeNames()
 {
 	Separator = new TSeparator(true);
 	InsertChild(Separator);
-	const char *Name = GetOwnOfferCount() < 1 ? "" : GetOwnOfferName();
+	const char *Name = Inventory().GetOwnOfferCount() < 1 ? "" : Inventory().GetOwnOfferName();
 	OwnName = new TLabel(SkinProperties().TradeWindow.OwnName.x, SkinProperties().TradeWindow.OwnName.y,
 		SkinProperties().TradeWindow.OwnName.width, SkinProperties().TradeWindow.OwnName.height, SkinProperties().TradeWindow.NameFont, Name,
 		true);
 	InsertChild(OwnName);
-	Name = GetCounterOfferCount() < 1 ? "" : GetCounterOfferName();
+	Name = Inventory().GetCounterOfferCount() < 1 ? "" : Inventory().GetCounterOfferName();
 	CounterName = new TLabel(SkinProperties().TradeWindow.CounterName.x, SkinProperties().TradeWindow.CounterName.y,
 		SkinProperties().TradeWindow.CounterName.width, SkinProperties().TradeWindow.CounterName.height, SkinProperties().TradeWindow.NameFont, Name,
 		true);
@@ -2533,10 +2545,10 @@ void TTradeNames::SetSize(int Width, int Height)
 // The names once the offers came.
 void TTradeNames::Arrange()
 {
-	if (GetOwnOfferCount() > 0)
-		OwnName->SetText(GetOwnOfferName(), true);
-	if (GetCounterOfferCount() > 0)
-		CounterName->SetText(GetCounterOfferName(), true);
+	if (Inventory().GetOwnOfferCount() > 0)
+		OwnName->SetText(Inventory().GetOwnOfferName(), true);
+	if (Inventory().GetCounterOfferCount() > 0)
+		CounterName->SetText(Inventory().GetCounterOfferName(), true);
 }
 
 // --- TTradeButtons ----------------------------------------------------------------
@@ -2638,9 +2650,9 @@ TTradeWindowBody::~TTradeWindowBody()
 void TTradeWindowBody::OnClose()
 {
 	try {
-		if (GetOwnOfferCount() > 0)
-			SendRejectTrade();
-		ClearOffers();
+		if (Inventory().GetOwnOfferCount() > 0)
+			Communication().SendRejectTrade();
+		Inventory().ClearOffers();
 	} catch (...) {
 		CloseWhileUnwinding([this] { TSubWindowBody::OnClose(); });
 		throw;
@@ -2674,11 +2686,11 @@ void TTradeWindowBody::SetSize(int Width, int Height)
 
 bool TTradeWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_TRADE);
+	Help().SetHandle(HELP_TRADE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	SetHelpSize(Parent->Width, Parent->Height);
-	MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
@@ -2707,7 +2719,7 @@ void TTradeWindowBody::HandleEvent(int Event)
 		Buttons->ShowAcceptButton(this);
 		Arrange();
 	} else if (Event == 1) {
-		SendAcceptTrade();
+		Communication().SendAcceptTrade();
 		Buttons->Wait();
 		Arrange();
 	}
@@ -2731,8 +2743,8 @@ TBuddylistWindowBody::TBuddylistWindowBody()
 // whole window.
 void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 {
-	if (NumberOfBuddies != GetNumberOfBuddies()) {
-		NumberOfBuddies = GetNumberOfBuddies();
+	if (NumberOfBuddies != Creatures().GetNumberOfBuddies()) {
+		NumberOfBuddies = Creatures().GetNumberOfBuddies();
 		Arrange();
 	}
 	if (!IsMinimized()) {
@@ -2745,35 +2757,35 @@ void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 			TWindow::Draw(Surface, x, y);
 		const int ClipHeight = Height;
 		const int ClipWidth = Width - ScrollBar->Width;
-		for (int i = 0; i < GetNumberOfBuddies(); i++) {
+		for (int i = 0; i < Creatures().GetNumberOfBuddies(); i++) {
 			const int ItemX = 0;
 			const int ItemY = SkinProperties().BuddylistWindow.RowHeight * i - ScrollY;
 			if (SkinProperties().BuddylistWindow.RowHeight + ItemY <= 0)
 				continue;
 			if (ItemY > Bottom)
 				return;
-			if (GetBuddyListIcon(i) > 0) {
-				const int Icon = GetBuddyListIcon(i);
+			if (Creatures().GetBuddyListIcon(i) > 0) {
+				const int Icon = Creatures().GetBuddyListIcon(i);
 				PATELLA_ASSERT_VALUES(x+ItemX+SkinProperties().BuddylistWindow.Logo.x>=0, x);
 				PATELLA_ASSERT_VALUES(y+ItemY+SkinProperties().BuddylistWindow.Logo.y>=0, y);
 				DrawSkinClipped(Surface, SkinProperties().BuddylistWindow.Logo.x + x,
 					SkinProperties().BuddylistWindow.Logo.y + ItemY + y, SkinProperties().BuddylistWindow.Logo.width,
 					SkinProperties().BuddylistWindow.Logo.height, Icon + SKIN_BUDDY_ICON_BASE, x, y, ClipWidth, ClipHeight, 0, 0);
 			}
-			TRGBColor Color = IsBuddyOnline(i) ? SkinProperties().BuddylistWindow.OnlineColor
-											   : SkinProperties().BuddylistWindow.OfflineColor;
-			if (IsBuddyNewlyOnline(i))
+			TRGBColor Color = Creatures().IsBuddyOnline(i) ? SkinProperties().BuddylistWindow.OnlineColor
+														   : SkinProperties().BuddylistWindow.OfflineColor;
+			if (Creatures().IsBuddyNewlyOnline(i))
 				Color = SkinProperties().BuddylistWindow.NewColor;
-			const char *Name = GetBuddyListName(i);
-			const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,
-				SkinProperties().BuddylistWindow.Name.width);
+			const char *Name = Creatures().GetBuddyListName(i);
+			const int MaxLength = Graphics().GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber,
+				Name, SkinProperties().BuddylistWindow.Name.width);
 			TFixedString<40> Shortened;
 			if (MaxLength < (int)strlen(Name)) {
 				Shortened.Assign(Name);
 				ShortenString(Shortened, MaxLength);
 				Name = Shortened;
 			}
-			PrintTextClipped(Surface, SkinProperties().BuddylistWindow.Name.x + x,
+			Graphics().PrintTextClipped(Surface, SkinProperties().BuddylistWindow.Name.x + x,
 				SkinProperties().BuddylistWindow.Name.y + ItemY + y, SkinProperties().BuddylistWindow.NameFont.FontNumber,
 				Color, Name, SkinProperties().BuddylistWindow.NameFont.Alignment, TRect(x, y, ClipWidth, ClipHeight));
 		}
@@ -2795,7 +2807,7 @@ bool TBuddylistWindowBody::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
 		const int Position = GetBuddyAt(x, y);
-		AddMessage(MESSAGE_BUDDY_MENU, Position == -1 ? 0 : GetBuddyListID(Position), 0);
+		Interaction().AddMessage(MESSAGE_BUDDY_MENU, Position == -1 ? 0 : Creatures().GetBuddyListID(Position), 0);
 	}
 	return true;
 }
@@ -2807,7 +2819,7 @@ bool TBuddylistWindowBody::LeftButtonDoubleClick(int x, int y, int Flags)
 	if (!TWindow::LeftButtonDoubleClick(x, y, Flags)) {
 		const int Position = GetBuddyAt(x, y);
 		if (Position != -1)
-			SendOpenPrivateConversation(GetBuddyListName(Position));
+			Communication().SendOpenPrivateConversation(Creatures().GetBuddyListName(Position));
 	}
 	return true;
 }
@@ -2824,9 +2836,9 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 {
 	const int Position = GetBuddyAt(x, y);
 	if (Position != -1) {
-		const char *Name = GetBuddyListName(Position);
-		const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,
-			SkinProperties().BuddylistWindow.Name.width);
+		const char *Name = Creatures().GetBuddyListName(Position);
+		const int MaxLength = Graphics().GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber,
+			Name, SkinProperties().BuddylistWindow.Name.width);
 		if (MaxLength < (int)strlen(Name)) {
 			if (MouseOverText != nullptr)
 				MouseOverText.reset();
@@ -2834,18 +2846,18 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 			MouseOverText.reset(new char[36]);
 			MouseOverText[0] = 0;
 			TStringBuffer(MouseOverText.get(), 36).Append(Name);
-			SetMouseOverText(MouseOverText.get());
+			Interaction().SetMouseOverText(MouseOverText.get());
 		}
 	}
 }
 
 bool TBuddylistWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_VIP);
+	Help().SetHandle(HELP_VIP);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	SetHelpSize(Parent->Width, Parent->Height);
-	MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
@@ -2866,7 +2878,7 @@ int TBuddylistWindowBody::GetMinimumHeight()
 // The stored height ("ContentWindow" 9) or the content.
 int TBuddylistWindowBody::GetInitialHeight()
 {
-	int Height = GetContentWindowSize(BUDDYLIST_WINDOW);
+	int Height = Preferences().GetContentWindowSize(BUDDYLIST_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
 	if (Height < GetMinimumHeight())
@@ -2876,7 +2888,7 @@ int TBuddylistWindowBody::GetInitialHeight()
 
 int TBuddylistWindowBody::GetContentHeight()
 {
-	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().BuddylistWindowExtraHeight;
+	return Creatures().GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().BuddylistWindowExtraHeight;
 }
 
 // The row under x, y; -1 for none. Odd, kept: y is not tested against the top. y
@@ -2887,7 +2899,7 @@ int TBuddylistWindowBody::GetBuddyAt(int x, int y)
 	if (!IsMinimized()) {
 		y += ScrollBar->Range->Value;
 		const int Position = y / SkinProperties().BuddylistWindow.RowHeight;
-		if (x >= 0 && x <= Width - ScrollBar->Width && Position < GetNumberOfBuddies())
+		if (x >= 0 && x <= Width - ScrollBar->Width && Position < Creatures().GetNumberOfBuddies())
 			return Position;
 	}
 	return -1;

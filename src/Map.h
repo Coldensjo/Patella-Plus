@@ -7,7 +7,7 @@
 //
 // Coordinates: rx, ry, rz are map (relative) coordinates, x, y, z world
 // (absolute) ones. rz grows upwards; the player's floor is rz 7-z above
-// ground and rz 2 below it (GetMapLevel).
+// ground and rz 2 below it (TMap::GetLevel).
 
 #pragma once
 
@@ -138,8 +138,8 @@ struct TPathNode {
 };
 
 // The steps of a path: FindPath's Directions, the player's PlayerSteps (Creatures.h) and the bytes of SendWalk's
-// path. Counter-clockwise from east, with the diagonals, from 1; the names are ours, from FindPath and StartPlayerStep,
-// which turn the differences of x and y into them and back. They are not a creature's DIRECTION_* (Objects.h),
+// path. Counter-clockwise from east, with the diagonals, from 1; the names are ours, from FindPath and
+// TPlayerState::StartStep, which turn the differences of x and y into them and back. They are not a creature's DIRECTION_* (Objects.h),
 // four values clockwise from north: a step becomes one in StartMovement, by its dx and dy. Enumerators for the
 // reason in GUI.h.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
@@ -168,8 +168,8 @@ namespace patella {
 class TObjectTypes;
 
 // The default console, where TMap reports an automap file it could not read or save: Talk.cpp's, TGUI's, a later
-// subsystem than TMapState, so TMap reaches it only through this interface; Client.cpp implements it with Talk.cpp's
-// free functions. HasDefaultConsole is the original's check of DefaultTextBuffer before the message is made,
+// subsystem than TMapState, so TMap reaches it only through this interface; Client.cpp's adapter implements it with
+// TTalk's members. HasDefaultConsole is the original's check of DefaultTextBuffer before the message is made,
 // AddDefaultConsoleLine its AddTextBufferLine(DefaultTextBuffer, 0, Message, 20, NULL, 0) and SetConsoleChanged.
 class TMapConsole {
 public:
@@ -199,9 +199,9 @@ public:
 	~TMap() = default;
 
 	// Position and coordinates.
-	void SetMapPosition(int x, int y, int z);
-	void GetMapPosition(int *x, int *y, int *z) const;
-	[[nodiscard]] int GetMapLevel() const;
+	void SetPosition(int x, int y, int z);
+	void GetPosition(int *x, int *y, int *z) const;
+	[[nodiscard]] int GetLevel() const;
 	void MapToWorld(int *x, int *y, int *z) const;
 	void WorldToMap(int *x, int *y, int *z) const;
 
@@ -245,9 +245,9 @@ public:
 
 	// Map points and scrolling.
 	void ClearField(int rx, int ry, int rz, bool DeleteEffects);
-	void ClearMap();
-	void ShiftMap(int dx, int dy);
-	void ShiftMapLevel(int dz);
+	void Clear();
+	void Shift(int dx, int dy);
+	void ShiftLevel(int dz);
 	void RequestFieldRefresh(int rx, int ry, int rz);
 	int GetFieldHeight(int rx, int ry, int rz);
 	bool IsFieldPassable(int rx, int ry, int rz, bool CheckHeight);
@@ -266,8 +266,8 @@ public:
 	// Paths, initialisation.
 	int FindPath(int StartX, int StartY, int StartZ, int DestX, int DestY, int DestZ, bool MustReach, int *Steps,
 		int *Directions, bool ForceDiagonal);
-	void InitMap(void (*Callback)(int CreatureID));
-	void ExitMap();
+	void Init(void (*Callback)(int CreatureID));
+	void Exit();
 
 private:
 	void SortObjects(int rx, int ry, int rz);
@@ -276,12 +276,12 @@ private:
 	TEffectId GetEffectIteratorNumber(int n);
 	TEffectId NewEffect(int Status, int rx, int ry, int rz);
 	void DeleteEffect(TEffectId Number);
-	void ShiftMapWest();
-	void ShiftMapEast();
-	void ShiftMapNorth();
-	void ShiftMapSouth();
-	void ShiftMapUp();
-	void ShiftMapDown();
+	void ShiftWest();
+	void ShiftEast();
+	void ShiftNorth();
+	void ShiftSouth();
+	void ShiftUp();
+	void ShiftDown();
 	void GetFieldAutomapInfo(int rx, int ry, int rz, uint8 *Color, uint8 *Speed);
 	void LoadAutomapBlock(int Position, int bx, int by, int bz);
 	void SaveAutomapBlock(int Position);
@@ -313,53 +313,12 @@ private:
 	TRGBColor AmbienteActualColor;
 };
 
-// The transition's access path: the map of the one TClient (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TMap &Map();
-} // namespace bridge
-
 } // namespace patella
 
-// The original's functions (the callers' names, and the golden tests'): each calls TMap's member of the same name on
-// bridge::Map().
-// Position and coordinates (the gap before Map.cpp's first assertion).
-void GetMapPosition(int *x, int *y, int *z);
-int GetMapLevel();
-void MapToWorld(int *x, int *y, int *z);
-void WorldToMap(int *x, int *y, int *z);
+// The one client's map (Client.cpp).
+patella::TMap &Map();
 
-// Ambient light.
-void SetAmbientLight(int Brightness, int Color);
-void UpdateAmbientLight();
-TRGBColor GetAmbientColor();
-int GetAmbientBrightness();
-
-// Objects.
-TObject GetFirstObject(int rx, int ry, int rz);
-TObject GetNextObject();
-TObject GetMapObject(int rx, int ry, int rz, int Position);
-TObject GetTopMoveObject(int rx, int ry, int rz, int &Position);
-TObject GetTopLookObject(int rx, int ry, int rz, int &Position);
-TObject GetTopUseObject(int rx, int ry, int rz, int &Position);
-TObject GetTopMultiUseObject(int rx, int ry, int rz, int &Position);
-
-// Effects.
-int GetFirstEffect(int rx, int ry, int rz);
-int GetNextEffect();
-int GetEffectStatus(int EffectNumber);
-int GetGraphicalEffectType(int EffectNumber);
-int GetGraphicalEffectPhase(int EffectNumber);
-int GetTextualEffectColor(int EffectNumber);
-char *GetTextualEffectText(int EffectNumber);
-int GetTextualEffectPhase(int EffectNumber);
-int GetMissileEffectType(int EffectNumber);
-int GetMissileEffectDirection(int EffectNumber);
-int GetMissileEffectX(int EffectNumber);
-int GetMissileEffectY(int EffectNumber);
-void ProcessEffects();
-void ProcessMissileEffects();
-
-// The effects of map point rx, ry, rz by GetFirstEffect and GetNextEffect, as the original's numbers:
+// The effects of map point rx, ry, rz by the map's GetFirstEffect and GetNextEffect, as the original's numbers:
 // TMapWindow::DrawField's effect loop. begin() calls GetFirstEffect, each step GetNextEffect, in the original loop's
 // order; the range ends at the first -1, and gives any other number as it comes (the loop checks the range itself).
 class TMapEffects {
@@ -375,7 +334,7 @@ public:
 		[[nodiscard]] int operator*() const noexcept { return Number; }
 		TIterator &operator++()
 		{
-			Number = GetNextEffect();
+			Number = EffectNumberOf(Map().GetNextEffect());
 			return *this;
 		}
 		TIterator operator++(int)
@@ -392,7 +351,10 @@ public:
 
 	TMapEffects(int rx, int ry, int rz) noexcept : FieldX(rx), FieldY(ry), FieldZ(rz) {}
 
-	[[nodiscard]] TIterator begin() const { return TIterator{GetFirstEffect(FieldX, FieldY, FieldZ)}; }
+	[[nodiscard]] TIterator begin() const
+	{
+		return TIterator{EffectNumberOf(Map().GetFirstEffect(FieldX, FieldY, FieldZ))};
+	}
 	[[nodiscard]] static std::default_sentinel_t end() noexcept { return std::default_sentinel; }
 
 private:
@@ -400,19 +362,3 @@ private:
 	int FieldY;
 	int FieldZ;
 };
-
-// Map points and scrolling.
-void ClearMap();
-bool IsFieldThrowable(int rx, int ry, int rz);
-bool IsFieldTranslucent(int rx, int ry, int rz);
-
-// The automap. The block cache and the file functions are static.
-bool TakeAutomapChanged();
-TRGBColor GetAutomapColor(int x, int y, int z);
-void GetAutomapMarks(int x, int y, int z, std::vector<TMark> *Marks, int *Count);
-void AddAutomapMark(TCoordinate &Coordinate, const char *Text, int Type);
-void DeleteAutomapMark(TMark &Deleted, int z);
-
-// Paths, initialisation.
-void InitMap(void (*Callback)(int CreatureID));
-void ExitMap();

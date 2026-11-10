@@ -57,8 +57,8 @@ void patella::TTalk::SetBuddyIgnore(bool Value) { BuddyIgnore = Value; }
 bool patella::TTalk::GetBuddyIgnore() const { return BuddyIgnore; }
 void patella::TTalk::SetIgnoreListEnabled(bool Value) { IgnoreListEnabled = Value; }
 bool patella::TTalk::GetIgnoreListEnabled() const { return IgnoreListEnabled; }
-void patella::TTalk::StartTalkThrottle() { TalkThrottle = GetMilliseconds() + 1000; }
-bool patella::TTalk::IsTalkThrottled()
+void patella::TTalk::StartThrottle() { TalkThrottle = GetMilliseconds() + 1000; }
+bool patella::TTalk::IsThrottled()
 {
 	if (TalkThrottle != 0) {
 		if (GetMilliseconds() < TalkThrottle)
@@ -75,7 +75,7 @@ bool patella::TTalk::TakeConsoleChanged()
 }
 void patella::TTalk::SetConsoleChanged() { ConsoleChanged = true; }
 
-TRGBColor *patella::TTalk::GetTalkColor(TRGBColor *Color, int TalkMode)
+TRGBColor *patella::TTalk::GetColor(TRGBColor *Color, int TalkMode)
 {
 	switch (TalkMode) {
 		// clang-format off
@@ -138,7 +138,7 @@ void patella::TTalk::GetTalkboxRectangle(int Number, int *x, int *y, int *Width,
 }
 TRGBColor *patella::TTalk::GetTalkboxColor(TRGBColor *Color, int Number)
 {
-	GetTalkColor(Color, GetTalkbox(Number)->Mode);
+	GetColor(Color, GetTalkbox(Number)->Mode);
 	return Color;
 }
 int patella::TTalk::GetTalkboxLines(int Number)
@@ -221,7 +221,7 @@ void patella::TTalk::AddTalkbox(int Mode, const char *Speaker, int x, int y, int
 	PATELLA_ASSERT_VALUES(Mode==TALK_SAY || Mode==TALK_WHISPER || Mode==TALK_YELL || Mode==TALK_PRIVATE_MESSAGE || Mode==TALK_GAMEMASTER_BROADCAST || Mode==TALK_GAMEMASTER_MESSAGE || Mode==TALK_ANIMAL_LOW || Mode==TALK_ANIMAL_LOUD, Mode);
 	PATELLA_ASSERT(Speaker!=nullptr);
 	PATELLA_ASSERT(Text!=nullptr);
-	if (Mode == TALK_PRIVATE_MESSAGE && !GetPrivateMessages())
+	if (Mode == TALK_PRIVATE_MESSAGE && !Preferences().GetPrivateMessages())
 		return;
 	const int Position = FindFreeTalkbox();
 	TTalkbox &Box = Talkboxes[Position];
@@ -420,7 +420,7 @@ void patella::TTalk::AddTalkFilter(int Mode, const char *Addressee, int Channel,
 	List(i) = Filter;
 }
 // Buddy/temporary exceptions suppress the ignore list.
-bool patella::TTalk::IsTalkIgnored(int Mode, const char *Name, int Channel)
+bool patella::TTalk::IsIgnored(int Mode, const char *Name, int Channel)
 {
 	if (IgnoreEnabled) {
 		if (BuddyIgnore)
@@ -611,9 +611,9 @@ void patella::TTalk::AddConsoleText(uint32 StatementID, const char *Text, int Ta
 	switch (TalkMode) {
 	case TALK_ADMIN_MESSAGE: Broadcast = true; break;
 	case TALK_EVENT_MESSAGE:
-	case TALK_EVENT_STATUS_MESSAGE: Broadcast = GetEventMessages(); break;
-	case TALK_STATUS_MESSAGE: Broadcast = GetStatusMessages(); break;
-	case TALK_INFO_MESSAGE: Broadcast = GetInfoMessages(); break;
+	case TALK_EVENT_STATUS_MESSAGE: Broadcast = Preferences().GetEventMessages(); break;
+	case TALK_STATUS_MESSAGE: Broadcast = Preferences().GetStatusMessages(); break;
+	case TALK_INFO_MESSAGE: Broadcast = Preferences().GetInfoMessages(); break;
 	case TALK_STATUS_ONLY_MESSAGE: return;
 	default: {
 		TTalkBuffer *TargetBuffer = DefaultTextBuffer;
@@ -979,7 +979,7 @@ TTalkLine::TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, con
 	Text = WithoutTime + strlen(Addressee) + 2;
 	TrimString(Text, _Line);
 }
-void patella::TTalk::ResetTalk()
+void patella::TTalk::Reset()
 {
 	for (int Position = 0; Position < TALKBOXES; Position++)
 		Talkboxes[Position].State = 0;
@@ -988,19 +988,19 @@ void patella::TTalk::ResetTalk()
 	SetStatusMessage(nullptr, false);
 	ClearDefaultTextBuffer();
 }
-void patella::TTalk::InitTalk()
+void patella::TTalk::Init()
 {
 	IgnoreEnabled = true;
 	BuddyIgnore = false;
 	IgnoreListEnabled = true;
-	ResetTalk();
+	Reset();
 	DefaultTextBuffer = new (std::nothrow) TTalkBuffer(TALK_SAY);
 }
 TPrivateChannel::TPrivateChannel(int TalkMode, int _ChannelID) : TChannelTalkBuffer(TalkMode, _ChannelID)
 {
 	WriteEnabled = true;
 }
-void patella::TTalk::ExitTalk()
+void patella::TTalk::Exit()
 {
 	ClearBuddyIgnore();
 	ClearTemporaryIgnore();
@@ -1012,281 +1012,4 @@ void patella::TTalk::ExitTalk()
 	DefaultTextBuffer = nullptr;
 }
 
-// The functions of the original: each calls its member on the one TClient's TTalk.
-
-bool TakeTalkChanged()
-{
-	return patella::bridge::Talk().TakeTalkChanged();
-}
-
-int GetNumberOfTalkboxes()
-{
-	return patella::bridge::Talk().GetNumberOfTalkboxes();
-}
-
-const char *GetStatusMessage()
-{
-	return patella::bridge::Talk().GetStatusMessage();
-}
-
-void SetIgnoreEnabled(bool Value)
-{
-	patella::bridge::Talk().SetIgnoreEnabled(Value);
-}
-
-bool GetIgnoreEnabled()
-{
-	return patella::bridge::Talk().GetIgnoreEnabled();
-}
-
-void SetBuddyIgnore(bool Value)
-{
-	patella::bridge::Talk().SetBuddyIgnore(Value);
-}
-
-bool GetBuddyIgnore()
-{
-	return patella::bridge::Talk().GetBuddyIgnore();
-}
-
-void SetIgnoreListEnabled(bool Value)
-{
-	patella::bridge::Talk().SetIgnoreListEnabled(Value);
-}
-
-bool GetIgnoreListEnabled()
-{
-	return patella::bridge::Talk().GetIgnoreListEnabled();
-}
-
-bool IsTalkThrottled()
-{
-	return patella::bridge::Talk().IsTalkThrottled();
-}
-
-bool TakeConsoleChanged()
-{
-	return patella::bridge::Talk().TakeConsoleChanged();
-}
-
-TRGBColor *GetTalkColor(TRGBColor *Color, int TalkMode)
-{
-	return patella::bridge::Talk().GetTalkColor(Color, TalkMode);
-}
-
-int GetTalkboxMode(int Number)
-{
-	return patella::bridge::Talk().GetTalkboxMode(Number);
-}
-
-void GetTalkboxPosition(int Number, int *x, int *y, int *z)
-{
-	patella::bridge::Talk().GetTalkboxPosition(Number, x, y, z);
-}
-
-void GetTalkboxRectangle(int Number, int *x, int *y, int *Width, int *Height)
-{
-	patella::bridge::Talk().GetTalkboxRectangle(Number, x, y, Width, Height);
-}
-
-TRGBColor *GetTalkboxColor(TRGBColor *Color, int Number)
-{
-	return patella::bridge::Talk().GetTalkboxColor(Color, Number);
-}
-
-int GetTalkboxLines(int Number)
-{
-	return patella::bridge::Talk().GetTalkboxLines(Number);
-}
-
-const char *GetTalkboxLine(int Number, int Line)
-{
-	return patella::bridge::Talk().GetTalkboxLine(Number, Line);
-}
-
-void SetTalkboxRectangle(int Number, int x, int y, int Width, int Height)
-{
-	patella::bridge::Talk().SetTalkboxRectangle(Number, x, y, Width, Height);
-}
-
-void RemoveOldestTalkbox()
-{
-	patella::bridge::Talk().RemoveOldestTalkbox();
-}
-
-char *GetBuddyIgnoreText()
-{
-	return patella::bridge::Talk().GetBuddyIgnoreText();
-}
-
-void ClearBuddyIgnore()
-{
-	patella::bridge::Talk().ClearBuddyIgnore();
-}
-
-void AddBuddyIgnore(const char *Addressee, bool Permanent)
-{
-	patella::bridge::Talk().AddBuddyIgnore(Addressee, Permanent);
-}
-
-bool IsPermanentBuddyIgnore(const char *Addressee)
-{
-	return patella::bridge::Talk().IsPermanentBuddyIgnore(Addressee);
-}
-
-char *GetIgnoreListText()
-{
-	return patella::bridge::Talk().GetIgnoreListText();
-}
-
-bool IsModeIgnored(int Mode)
-{
-	return patella::bridge::Talk().IsModeIgnored(Mode);
-}
-
-void IgnoreMode(int Mode)
-{
-	patella::bridge::Talk().IgnoreMode(Mode);
-}
-
-void IgnoreName(const char *Addressee, bool Permanent)
-{
-	patella::bridge::Talk().IgnoreName(Addressee, Permanent);
-}
-
-bool IsPermanentIgnore(const char *Addressee)
-{
-	return patella::bridge::Talk().IsPermanentIgnore(Addressee);
-}
-
-void UnignoreMode(int Mode)
-{
-	patella::bridge::Talk().UnignoreMode(Mode);
-}
-
-void UnignoreName(const char *Addressee)
-{
-	patella::bridge::Talk().UnignoreName(Addressee);
-}
-
-void ClearTextBuffer(TTalkBuffer *TextBuffer)
-{
-	patella::bridge::Talk().ClearTextBuffer(TextBuffer);
-}
-
-bool HasOwnPrivateChannel()
-{
-	return patella::bridge::Talk().HasOwnPrivateChannel();
-}
-
-void AddChannelNotice(const char *Addressee, const char *Text, int Mode, const char *Name, int Channel)
-{
-	patella::bridge::Talk().AddChannelNotice(Addressee, Text, Mode, Name, Channel);
-}
-
-void DeleteTextBuffer(TTalkBuffer *TextBuffer)
-{
-	patella::bridge::Talk().DeleteTextBuffer(TextBuffer);
-}
-
-TTalkBuffer *CreateTextBuffer(int ReceiveTalkMode, int SendTalkMode, const char *Name, int Channel)
-{
-	return patella::bridge::Talk().CreateTextBuffer(ReceiveTalkMode, SendTalkMode, Name, Channel);
-}
-
-void SetTalkChanged()
-{
-	patella::bridge::Talk().SetTalkChanged();
-}
-
-void StartTalkThrottle()
-{
-	patella::bridge::Talk().StartTalkThrottle();
-}
-
-void SetConsoleChanged()
-{
-	patella::bridge::Talk().SetConsoleChanged();
-}
-
-void AddTalkbox(int Mode, const char *Speaker, int x, int y, int z, const char *Text)
-{
-	patella::bridge::Talk().AddTalkbox(Mode, Speaker, x, y, z, Text);
-}
-
-void AddMessageTalkbox(int Mode, const char *Text)
-{
-	patella::bridge::Talk().AddMessageTalkbox(Mode, Text);
-}
-
-void UpdateTalkboxes()
-{
-	patella::bridge::Talk().UpdateTalkboxes();
-}
-
-void SetStatusMessage(const char *Message, bool Permanent)
-{
-	patella::bridge::Talk().SetStatusMessage(Message, Permanent);
-}
-
-void UpdateStatusMessage()
-{
-	patella::bridge::Talk().UpdateStatusMessage();
-}
-
-bool IsTalkIgnored(int Mode, const char *Name, int Channel)
-{
-	return patella::bridge::Talk().IsTalkIgnored(Mode, Name, Channel);
-}
-
-void AddTemporaryIgnore(const char *Addressee)
-{
-	patella::bridge::Talk().AddTemporaryIgnore(Addressee);
-}
-
-void RemoveTemporaryIgnore(const char *Addressee)
-{
-	patella::bridge::Talk().RemoveTemporaryIgnore(Addressee);
-}
-
-void ClearIgnoreList()
-{
-	patella::bridge::Talk().ClearIgnoreList();
-}
-
-void ShowPermanentIgnoreWarning()
-{
-	patella::bridge::Talk().ShowPermanentIgnoreWarning();
-}
-
-void AddTextBufferLine(TTalkBuffer *TargetBuffer, uint32 StatementID, const char *Text,
-	int TalkMode, const char *Name, int Time)
-{
-	patella::bridge::Talk().AddTextBufferLine(TargetBuffer, StatementID, Text, TalkMode, Name, Time);
-}
-
-void AddConsoleText(uint32 StatementID, const char *Text, int TalkMode, const char *Name, int Channel, int Time)
-{
-	patella::bridge::Talk().AddConsoleText(StatementID, Text, TalkMode, Name, Channel, Time);
-}
-
-TTalkBuffer *GetTextBuffer(int Mode, const char *Name, int Channel)
-{
-	return patella::bridge::Talk().GetTextBuffer(Mode, Name, Channel);
-}
-
-void ResetTalk()
-{
-	patella::bridge::Talk().ResetTalk();
-}
-
-void InitTalk()
-{
-	patella::bridge::Talk().InitTalk();
-}
-
-void ExitTalk()
-{
-	patella::bridge::Talk().ExitTalk();
-}
 // NOLINTEND(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)

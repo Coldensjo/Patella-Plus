@@ -67,7 +67,7 @@ public:
 	void KeyPress(int Key) override;
 	// The subclasses override it; an entry of the base class only closes the
 	// menu.
-	void HandleEvent([[maybe_unused]] int Event) override { SetActionState(ACTIONSTATE_NONE); }
+	void HandleEvent([[maybe_unused]] int Event) override { Interaction().SetActionState(ACTIONSTATE_NONE); }
 	void Show(int x, int y, int ParentWidth, int ParentHeight);
 	void AddEntry(int Event, const char *Text, const char *Shortcut);
 	void AddSeparator();

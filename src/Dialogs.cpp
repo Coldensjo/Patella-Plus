@@ -246,7 +246,7 @@ TDialog *CreateInfoDialog(void (*OpenURL)(const char *URL))
 TDialog *CreateMoveObjectsDialog()
 {
 	int Unused;
-	const TObject *Obj = GetDragObject(&Unused, &Unused, &Unused, &Unused);
+	const TObject *Obj = Interaction().GetDragObject(&Unused, &Unused, &Unused, &Unused);
 	if (*Obj != 0 && Obj->Data >= 1 && Obj->Data <= 100) {
 		TMoveObjectsDialog *Body = new TMoveObjectsDialog();
 		TDialog *Dialog = new TDialog("Move Objects", Body);
@@ -254,7 +254,7 @@ TDialog *CreateMoveObjectsDialog()
 		Dialog->SetCancelButton("Cancel", TCallback(Body, EVENT_CANCEL));
 		return Dialog;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 	return nullptr;
 }
 
@@ -291,7 +291,8 @@ TDialog *CreateTextDialog(const int *ObjectData, const char *Author, const char 
 	Description[0] = 0;
 	TTextDialog *Body;
 	TDialog *Dialog;
-	if (GetObjectFlag(Type, WRITE) || (GetObjectFlag(Type, WRITEONCE) && strlen(Text) == 0)) {
+	if (ObjectTypes().GetObjectFlag(Type, WRITE)
+		|| (ObjectTypes().GetObjectFlag(Type, WRITEONCE) && strlen(Text) == 0)) {
 		if (strlen(Text) == 0)
 			TStringBuffer(Description, 255).Format("{}\n{}", TextItIsCurrentlyEmpty, TextYouCanEnterNewText);
 		else if (strlen(Author) != 0)
@@ -388,8 +389,8 @@ TDialog *CreateIgnoreListDialog()
 // exists while one is open).
 TDialog *CreateReportDialog()
 {
-	if (GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1) != nullptr) {
-		SetStatusMessage(TextRequestAlreadySubmitted, false);
+	if (Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1) != nullptr) {
+		Talk().SetStatusMessage(TextRequestAlreadySubmitted, false);
 		return nullptr;
 	}
 	TReportDialog *Body = new TReportDialog();
@@ -665,8 +666,8 @@ bool TDialog::MouseMove(int x, int y)
 		return TWindow::MouseMove(x, y);
 	int NewX = OffsetX - DragX + x;
 	int NewY = OffsetY - DragY + y;
-	Limit(&NewX, 0, GetWindowWidth() - Width);
-	Limit(&NewY, 0, GetWindowHeight() - Height);
+	Limit(&NewX, 0, Interaction().GetWindowWidth() - Width);
+	Limit(&NewY, 0, Interaction().GetWindowHeight() - Height);
 	SetPosition(NewX, NewY);
 	return true;
 }
@@ -694,7 +695,7 @@ bool TDialog::LeftButtonUp(int x, int y, int Flags)
 // every other.
 void TDialog::HandleEvent([[maybe_unused]] int Event)
 {
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TQuestionLabel, TLogoutLabel ----------------------------------------------
@@ -711,12 +712,12 @@ void TLogoutLabel::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN || Key == 'l' || Key == 'L') {
 		LogoutCallback.Send();
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
 	if (Key == 'e' || Key == 'E')
 		ExitCallback.Send();
 	if (Key == KEY_ESCAPE || Key == 'c' || Key == 'C')
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TWaitLabel ---------------------------------------------------------------------
@@ -734,15 +735,15 @@ void TWaitLabel::HandleEvent(int Event)
 		if (!Timer->IsExpired())
 			return;
 	} else if (Event == EVENT_ABORT && ClearOnAbort) {
-		ClearMessages();
+		Interaction().ClearMessages();
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 void TWaitLabel::Draw(int Surface, int x, int y)
 {
 	TLabel::Draw(Surface, x, y);
-	if (CloseOnMessage && PeekMessageType() != 0)
+	if (CloseOnMessage && Interaction().PeekMessageType() != 0)
 		HandleEvent(EVENT_ABORT);
 }
 
@@ -760,9 +761,9 @@ TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 	TimeLabel = new TLabel(SkinProperties().Dialog.TextFont, this->Text);
 	int FullWidth = TextLabel->Width > ProgressBar->GetMinimumWidth() ? TextLabel->Width
 																	  : ProgressBar->GetMinimumWidth();
-	FullWidth = FullWidth > TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888")
+	FullWidth = FullWidth > TimeLabel->Width + Graphics().GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888")
 		? FullWidth
-		: TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888");
+		: TimeLabel->Width + Graphics().GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888");
 	const int TextHeight = TextLabel->Height;
 	InsertChild(TextLabel);
 	const int BarY = TextHeight + SkinProperties().ReconnectWindowSpacing;
@@ -793,8 +794,8 @@ void TReconnectWindow::SetTime(int Time)
 void TReconnectWindow::Draw(int Surface, int x, int y)
 {
 	TWindow::Draw(Surface, x, y);
-	if (PeekMessageType() != 0)
-		SetActionState(ACTIONSTATE_NONE);
+	if (Interaction().PeekMessageType() != 0)
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // When the time is up it logs out of a running game (states 7 and 8) or
@@ -808,19 +809,19 @@ void TReconnectWindow::HandleEvent(int Event)
 			ProgressBar->SetCurrent(Timeout - Time);
 			SetTime(Time + 10);
 			TimeLabel->SetText(Text, false);
-		} else if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
-			AddMessage(MESSAGE_RECONNECT, 0, 0);
-			SendLogout();
+		} else if (Session().GetConnectionState() == CONNECTION_IN_GAME || Session().GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
+			Interaction().AddMessage(MESSAGE_RECONNECT, 0, 0);
+			Communication().SendLogout();
 		} else {
-			AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
-			AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
+			Interaction().AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
+			Interaction().AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
 		}
 	} else {
 		if (Event == EVENT_ABORT) {
-			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
-			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
+			Interaction().AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
+			Interaction().AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -868,11 +869,11 @@ void TLoginDialog::KeyPress(int Key)
 void TLoginDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		SetAccount(atoi(Account->Text.get()), Password->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
-		AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
-		AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
+		Session().SetAccount(atoi(Account->Text.get()), Password->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
+		Interaction().AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
+		Interaction().AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TCharacterListDialog ------------------------------------------------------
@@ -889,19 +890,19 @@ TCharacterListDialog::TCharacterListDialog()
 	ListBox = new TListBox(NoCallback, TCallback(this, 1));
 	InsertChild(ListBox);
 	SetChildArea(ListBox, SkinProperties().CharacterListDialogList);
-	const int Characters = GetAccountCharacters();
+	const int Characters = Session().GetAccountCharacters();
 	for (int i = 0; i < Characters; i++) {
 		TFixedString<372> Line;
 		Line[0] = 0;
-		Line.Format("{} ({})", GetCharacterName(i), GetCharacterWorld(i));
+		Line.Format("{} ({})", Session().GetCharacterName(i), Session().GetCharacterWorld(i));
 		ListBox->AddLine(Line);
 	}
-	if (GetConnectionState() == CONNECTION_IN_GAME && GetActiveCharacter() < Characters)
-		ListBox->SetSelection(GetActiveCharacter());
+	if (Session().GetConnectionState() == CONNECTION_IN_GAME && Session().GetActiveCharacter() < Characters)
+		ListBox->SetSelection(Session().GetActiveCharacter());
 	else
 		ListBox->SetSelection(0);
 	TFixedString<256> Status;
-	const int PremiumDays = GetPremiumDays();
+	const int PremiumDays = Session().GetPremiumDays();
 	if (PremiumDays == 0) {
 		Status.Format("<font=4><red={}><green={}><blue={}>Account Status:\nFree Account",
 			SkinProperties().Dialog.TextFont.Color.R, SkinProperties().Dialog.TextFont.Color.G,
@@ -975,19 +976,20 @@ void TCharacterListDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const int Selection = ListBox->GetSelection();
 		if (Selection >= 0) {
-			SetActiveCharacter(Selection);
-			if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
-				AddMessage(MESSAGE_RECONNECT, 0, 0);
-				SendLogout();
+			Session().SetActiveCharacter(Selection);
+			if (Session().GetConnectionState() == CONNECTION_IN_GAME
+				|| Session().GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
+				Interaction().AddMessage(MESSAGE_RECONNECT, 0, 0);
+				Communication().SendLogout();
 			} else {
-				AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
-				AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
+				Interaction().AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
+				Interaction().AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
 			}
 		}
 	} else if (Event == EVENT_TIMER && !Timer->IsExpired()) {
 		return;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 void TCharacterListDialog::SetTimeout(int seconds)
@@ -1002,8 +1004,8 @@ void TCharacterListDialog::SetTimeout(int seconds)
 TMoveObjectsDialog::TMoveObjectsDialog()
 {
 	LastDigit = 0;
-	DraggedObject = *GetDragObject(&SourceIndex, &SourceX, &SourceY, &SourceZ);
-	GetDragTarget(&DestinationX, &DestinationY, &DestinationZ);
+	DraggedObject = *Interaction().GetDragObject(&SourceIndex, &SourceX, &SourceY, &SourceZ);
+	Interaction().GetDragTarget(&DestinationX, &DestinationY, &DestinationZ);
 	PATELLA_ASSERT(DraggedObject!=0);
 	PATELLA_ASSERT_VALUES(In(DraggedObject.Data,1,100), DraggedObject.Data, DraggedObject);
 	TComponent::SetSize(SkinProperties().MoveObjectsDialogWidth, SkinProperties().MoveObjectsDialogHeight);
@@ -1023,9 +1025,9 @@ void TMoveObjectsDialog::Draw(int Surface, int x, int y)
 	DraggedObject.Data = ScrollBar->Range->Value;
 	int PatternX = 1;
 	int PatternY = 1;
-	if (GetObjectFlag(DraggedObject, CUMULATIVE))
-		GetCumulativePattern(DraggedObject, &PatternX, &PatternY);
-	DrawObject(Surface, SkinProperties().MoveObjectsDialogObject.x + x, SkinProperties().MoveObjectsDialogObject.y + y, 32, DraggedObject,
+	if (ObjectTypes().GetObjectFlag(DraggedObject, CUMULATIVE))
+		ObjectTypes().GetCumulativePattern(DraggedObject, &PatternX, &PatternY);
+	Graphics().DrawObject(Surface, SkinProperties().MoveObjectsDialogObject.x + x, SkinProperties().MoveObjectsDialogObject.y + y, 32, DraggedObject,
 		TRGBColor(0, 0, 0), TRect(SkinProperties().MoveObjectsDialogObject.x + x, SkinProperties().MoveObjectsDialogObject.y + y, 32, 32),
 		SkinProperties().ObjectCountFont, true);
 	TWindow::Draw(Surface, x, y);
@@ -1064,10 +1066,10 @@ void TMoveObjectsDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const int Count = ScrollBar->Range->Value;
 		if (Count > 0)
-			SendMoveObject(SourceX, SourceY, SourceZ, DraggedObject.Type, SourceIndex, DestinationX, DestinationY,
-				DestinationZ, Count);
+			Communication().SendMoveObject(SourceX, SourceY, SourceZ, DraggedObject.Type, SourceIndex, DestinationX,
+				DestinationY, DestinationZ, Count);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TOutfitDialog ------------------------------------------------------------------
@@ -1167,10 +1169,10 @@ void TOutfitDialog::HandleEvent(int Event)
 		OutfitIcon->SetOutfit(Outfit);
 		OutfitIcon->Arrange();
 	} else if (Event == 1) {
-		SendOutfit(Outfit, Colors.data());
-		SetActionState(ACTIONSTATE_NONE);
+		Communication().SendOutfit(Outfit, Colors.data());
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	} else if (Event == EVENT_CANCEL) {
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -1185,7 +1187,8 @@ TTextDialog::TTextDialog(int MaximumLength, const char *Text, uint32 _ObjectNumb
 	ObjectNumber = _ObjectNumber;
 	Obj = _Obj;
 	TComponent::SetSize(SkinProperties().TextDialogWidth, SkinProperties().TextDialogHeight);
-	const bool ReadOnly = !GetObjectFlag(Obj, WRITE) && !(GetObjectFlag(Obj, WRITEONCE) && strlen(Text) == 0);
+	const bool ReadOnly = !ObjectTypes().GetObjectFlag(Obj, WRITE)
+		&& !(ObjectTypes().GetObjectFlag(Obj, WRITEONCE) && strlen(Text) == 0);
 	EditText = new TEditText(MaximumLength, ReadOnly);
 	InsertChild(EditText);
 	SetChildArea(EditText, SkinProperties().TextDialogText);
@@ -1205,8 +1208,8 @@ TTextDialog::TTextDialog(int MaximumLength, const char *Text, uint32 _ObjectNumb
 void TTextDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
-		SendEditText(ObjectNumber, EditText->Text.get());
-	SetActionState(ACTIONSTATE_NONE);
+		Communication().SendEditText(ObjectNumber, EditText->Text.get());
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TEditListDialog ----------------------------------------------------------
@@ -1244,8 +1247,8 @@ void TEditListDialog::Arrange()
 void TEditListDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
-		SendEditHouseText(Type, Identifier, EditText->Text.get());
-	SetActionState(ACTIONSTATE_NONE);
+		Communication().SendEditHouseText(Type, Identifier, EditText->Text.get());
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TIgnoreListDialog --------------------------------------------------------
@@ -1284,10 +1287,10 @@ TIgnoreListDialog::TIgnoreListDialog()
 	IgnorePrivate = new TCheckBox("Ignore Private Messages");
 	InsertChild(IgnorePrivate);
 	SetChildArea(IgnorePrivate, SkinProperties().IgnoreListDialog.IgnorePrivate);
-	IgnoreListCheckBox->SetChecked(GetIgnoreListEnabled());
-	IgnoreYelling->SetChecked(IsModeIgnored(TALK_YELL));
-	IgnorePrivate->SetChecked(IsModeIgnored(TALK_PRIVATE_MESSAGE));
-	char *Text = GetIgnoreListText();
+	IgnoreListCheckBox->SetChecked(Talk().GetIgnoreListEnabled());
+	IgnoreYelling->SetChecked(Talk().IsModeIgnored(TALK_YELL));
+	IgnorePrivate->SetChecked(Talk().IsModeIgnored(TALK_PRIVATE_MESSAGE));
+	char *Text = Talk().GetIgnoreListText();
 	if (Text != nullptr) {
 		const int Length = (int)strlen(Text);
 		int AllocationNumber = 0;
@@ -1313,7 +1316,7 @@ TIgnoreListDialog::TIgnoreListDialog()
 		qsort(static_cast<void *>(Names), Number, sizeof(char *), CompareNames);
 		for (int i = 0; i < Number; i++) {
 			CopyString(patella::TSpan<char>(IgnoreEntries(i).Name.Chars).first(29), Names[i]);
-			IgnoreEntries(i).Permanent = IsPermanentIgnore(Names[i]);
+			IgnoreEntries(i).Permanent = Talk().IsPermanentIgnore(Names[i]);
 			TFont Font;
 			if (IgnoreEntries(i).Permanent)
 				Font.Color = SkinProperties().IgnoreListDialog.PermanentColor;
@@ -1350,9 +1353,9 @@ TIgnoreListDialog::TIgnoreListDialog()
 	AllowBuddies = new TCheckBox("Allow VIPs to message you");
 	InsertChild(AllowBuddies);
 	SetChildArea(AllowBuddies, SkinProperties().IgnoreListDialog.AllowBuddies);
-	WhiteListCheckBox->SetChecked(GetIgnoreEnabled());
-	AllowBuddies->SetChecked(GetBuddyIgnore());
-	Text = GetBuddyIgnoreText();
+	WhiteListCheckBox->SetChecked(Talk().GetIgnoreEnabled());
+	AllowBuddies->SetChecked(Talk().GetBuddyIgnore());
+	Text = Talk().GetBuddyIgnoreText();
 	if (Text != nullptr) {
 		const int Length = (int)strlen(Text);
 		int AllocationNumber = 0;
@@ -1378,7 +1381,7 @@ TIgnoreListDialog::TIgnoreListDialog()
 		qsort(static_cast<void *>(Names), Number, sizeof(char *), CompareNames);
 		for (int i = 0; i < Number; i++) {
 			CopyString(patella::TSpan<char>(WhiteEntries(i).Name.Chars).first(29), Names[i]);
-			WhiteEntries(i).Permanent = IsPermanentBuddyIgnore(Names[i]);
+			WhiteEntries(i).Permanent = Talk().IsPermanentBuddyIgnore(Names[i]);
 			TFont Font;
 			if (WhiteEntries(i).Permanent)
 				Font.Color = SkinProperties().IgnoreListDialog.PermanentColor;
@@ -1412,32 +1415,32 @@ void TIgnoreListDialog::HandleEvent(int Event)
 {
 	if (Event == EVENT_IGNORE_LIST_OK) {
 		IgnoreList->StopEdit();
-		ClearIgnoreList();
+		Talk().ClearIgnoreList();
 		for (int i = 0; i < IgnoreList->GetNumberOfLines(); i++) {
 			TFont Font;
 			const char *Name = IgnoreList->GetLine(i, &Font);
 			if (strlen(Name) != 0 && strcmp(Name, "new entry") != 0)
-				IgnoreName(Name, IgnoreEntries(i).Permanent);
+				Talk().IgnoreName(Name, IgnoreEntries(i).Permanent);
 		}
-		SetIgnoreListEnabled(IgnoreListCheckBox->IsChecked());
+		Talk().SetIgnoreListEnabled(IgnoreListCheckBox->IsChecked());
 		if (IgnoreYelling->IsChecked())
-			IgnoreMode(TALK_YELL);
+			Talk().IgnoreMode(TALK_YELL);
 		else
-			UnignoreMode(TALK_YELL);
+			Talk().UnignoreMode(TALK_YELL);
 		if (IgnorePrivate->IsChecked())
-			IgnoreMode(TALK_PRIVATE_MESSAGE);
+			Talk().IgnoreMode(TALK_PRIVATE_MESSAGE);
 		else
-			UnignoreMode(TALK_PRIVATE_MESSAGE);
+			Talk().UnignoreMode(TALK_PRIVATE_MESSAGE);
 		WhiteList->StopEdit();
-		ClearBuddyIgnore();
+		Talk().ClearBuddyIgnore();
 		for (int i = 0; i < WhiteList->GetNumberOfLines(); i++) {
 			TFont Font;
 			const char *Name = WhiteList->GetLine(i, &Font);
 			if (strlen(Name) != 0 && strcmp(Name, "new entry") != 0)
-				AddBuddyIgnore(Name, WhiteEntries(i).Permanent);
+				Talk().AddBuddyIgnore(Name, WhiteEntries(i).Permanent);
 		}
-		SetIgnoreEnabled(WhiteListCheckBox->IsChecked());
-		SetBuddyIgnore(AllowBuddies->IsChecked());
+		Talk().SetIgnoreEnabled(WhiteListCheckBox->IsChecked());
+		Talk().SetBuddyIgnore(AllowBuddies->IsChecked());
 	}
 	if (Event == EVENT_IGNORE_ADD) {
 		WhiteList->StopEdit();
@@ -1537,7 +1540,7 @@ void TIgnoreListDialog::HandleEvent(int Event)
 			AllowPermanently->SetChecked(WhiteEntries(Selection).Permanent);
 		}
 	} else {
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 	}
 }
 
@@ -1605,9 +1608,9 @@ void TBugReportDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const char *Text = EditText->Text.get();
 		if (strlen(Text) != 0)
-			SendBugReport(Text);
+			Communication().SendBugReport(Text);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TNewChannelDialog -----------------------------------------------------------
@@ -1664,12 +1667,12 @@ void TNewChannelDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const char *Name = NameEdit->Text.get();
 		if (strlen(Name) != 0) {
-			TCreature *Creature = GetCreature(GetPlayerID());
+			TCreature *Creature = Creatures().GetCreature(PlayerState().GetID());
 			PATELLA_ASSERT(Creature!=nullptr);
 			if (CompareStrings(Creature->Name, Name, -1) == 0)
-				SetStatusMessage(TextNoPrivateChannelWithYourself, false);
+				Talk().SetStatusMessage(TextNoPrivateChannelWithYourself, false);
 			else
-				SendOpenPrivateConversation(Name);
+				Communication().SendOpenPrivateConversation(Name);
 		} else {
 			Event = EVENT_NEW_CHANNEL_JOIN;
 		}
@@ -1679,12 +1682,12 @@ void TNewChannelDialog::HandleEvent(int Event)
 		if (Selection != -1) {
 			const int ChannelID = ChannelIDs[Selection];
 			if (ChannelID == CHANNEL_NEW_PRIVATE)
-				SendOpenPrivateChannel();
+				Communication().SendOpenPrivateChannel();
 			else
-				SendJoinChannel(ChannelID);
+				Communication().SendJoinChannel(ChannelID);
 		}
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TPrivateChannelDialog -------------------------------------------------------
@@ -1719,12 +1722,12 @@ void TPrivateChannelDialog::HandleEvent(int Event)
 		const char *Name = NameEdit->Text.get();
 		if (strlen(Name) != 0) {
 			if (!Exclude)
-				SendInviteToPrivateChannel(Name);
+				Communication().SendInviteToPrivateChannel(Name);
 			else
-				SendExcludeFromPrivateChannel(Name);
+				Communication().SendExcludeFromPrivateChannel(Name);
 		}
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TReportDialog ----------------------------------------------------------------
@@ -1759,9 +1762,9 @@ void TReportDialog::HandleEvent(int Event)
 		const std::size_t Size = strlen(TextEdit->Text.get()) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(TextEdit->Text.get());
-		AddMessage(MESSAGE_REPORT_RULE_VIOLATION, reinterpret_cast<std::intptr_t>(Text), 0);
+		Interaction().AddMessage(MESSAGE_REPORT_RULE_VIOLATION, reinterpret_cast<std::intptr_t>(Text), 0);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TAddBuddyDialog ------------------------------------------------------------
@@ -1794,9 +1797,9 @@ void TAddBuddyDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const char *Name = NameEdit->Text.get();
 		if (strlen(Name) != 0)
-			SendAddBuddy(Name);
+			Communication().SendAddBuddy(Name);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TEditBuddyDialog -----------------------------------------------------------
@@ -1805,10 +1808,10 @@ void TAddBuddyDialog::HandleEvent(int Event)
 TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 {
 	CharacterID = _CharacterID;
-	const int Position = GetBuddyPosition(_CharacterID);
+	const int Position = Creatures().GetBuddyPosition(_CharacterID);
 	PATELLA_ASSERT_VALUES(Position >= 0, Position, CharacterID);
 	TComponent::SetSize(SkinProperties().EditBuddyDialog.Width, SkinProperties().EditBuddyDialog.Height);
-	TLabel *Label = new TLabel(SkinProperties().Dialog.TextFont, GetBuddyListName(Position));
+	TLabel *Label = new TLabel(SkinProperties().Dialog.TextFont, Creatures().GetBuddyListName(Position));
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().EditBuddyDialog.Name);
 	TSeparator *Separator = new TSeparator(true);
@@ -1827,7 +1830,7 @@ TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 		IconButtons[i] = new TIconButton(0, 0, Icon, SKIN_ICON_BUTTON_UP, SKIN_ICON_BUTTON_DOWN, NoCallback, nullptr);
 		InsertChild(IconButtons[i]);
 		IconButtons[i]->SetRadioButtonGroup(IconGroup.get());
-		if (GetBuddyListIcon(Position) == i)
+		if (Creatures().GetBuddyListIcon(Position) == i)
 			IconGroup->Selected = IconButtons[i];
 		SetChildPosition(IconButtons[i], SkinProperties().EditBuddyDialog.IconButtons[i].x, SkinProperties().EditBuddyDialog.IconButtons[i].y);
 	}
@@ -1837,12 +1840,12 @@ TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 	Description = new TEditText(127, false);
 	InsertChild(Description);
 	SetChildArea(Description, SkinProperties().EditBuddyDialog.Description);
-	if (GetBuddyListDescription(Position) != nullptr)
-		Description->SetText(GetBuddyListDescription(Position), false);
+	if (Creatures().GetBuddyListDescription(Position) != nullptr)
+		Description->SetText(Creatures().GetBuddyListDescription(Position), false);
 	Notify = new TCheckBox("Notify at login");
 	InsertChild(Notify);
 	SetChildArea(Notify, SkinProperties().EditBuddyDialog.Notify);
-	Notify->SetChecked(GetBuddyListNotify(Position));
+	Notify->SetChecked(Creatures().GetBuddyListNotify(Position));
 	Description->SetActive(true);
 	Arrange();
 }
@@ -1858,9 +1861,9 @@ void TEditBuddyDialog::HandleEvent(int Event)
 				break;
 			}
 		}
-		EditBuddy(CharacterID, Icon, Description->Text.get(), Notify->IsChecked());
+		Creatures().EditBuddy(CharacterID, Icon, Description->Text.get(), Notify->IsChecked());
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- THelpDialog -------------------------------------------------------------------
@@ -1923,32 +1926,32 @@ void THelpDialog::HandleEvent(int Event)
 	switch (Event) {
 	case 1:
 	case EVENT_CANCEL:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_HELP_MODE:
-		SetActionState(ACTIONSTATE_NONE);
-		AddMessage(MESSAGE_HELP_MODE, 0, 0);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
+		Interaction().AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_HINTS:
-		AddMessage(MESSAGE_HINTS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().AddMessage(MESSAGE_HINTS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_TUTOR_HELP:
-		SendJoinChannel(7);
-		SetActionState(ACTIONSTATE_NONE);
+		Communication().SendJoinChannel(7);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_REPORT:
-		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_MANUAL:
 		OpenURL(TextManualURL);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_FAQ:
 		OpenURL(TextFAQURL);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -1968,8 +1971,8 @@ THintsDialog::THintsDialog()
 	InsertChild(ListBox);
 	SetChildArea(ListBox, SkinProperties().HintsDialogList);
 	for (int i = HINT_FIRST; i <= HINT_LAST; i++) {
-		if (IsKnownHint(i))
-			ListBox->AddLine(GetEventHelpTitle(i));
+		if (Preferences().IsKnownHint(i))
+			ListBox->AddLine(Help().GetEventHelpTitle(i));
 	}
 }
 
@@ -1991,20 +1994,20 @@ void THintsDialog::HandleEvent(int Event)
 		const char *Title = ListBox->GetLine(ListBox->GetSelection());
 		int Number = -1;
 		for (int i = HINT_FIRST; i <= HINT_LAST; i++) {
-			if (CompareStrings(Title, GetEventHelpTitle(i), -1) == 0) {
+			if (CompareStrings(Title, Help().GetEventHelpTitle(i), -1) == 0) {
 				Number = i;
 				break;
 			}
 		}
 		PATELLA_ASSERT(Number!=-1);
-		const char *HelpText = GetEventHelpText(Number);
+		const char *HelpText = Help().GetEventHelpText(Number);
 		const std::size_t Size = strlen(HelpText) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(HelpText);
-		AddMessageFirst(MESSAGE_HINTS_DIALOG, 0, 0);
-		AddMessageFirst(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
+		Interaction().AddMessageFirst(MESSAGE_HINTS_DIALOG, 0, 0);
+		Interaction().AddMessageFirst(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(Help().GetEventHelpTitle(Number)), reinterpret_cast<std::intptr_t>(Text));
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TRuleViolationDialog --------------------------------------------------------
@@ -2064,7 +2067,7 @@ TRuleViolationDialog::TRuleViolationDialog(const char *Name, TTalkLine *Statemen
 	SetChildArea(IPBanishment, SkinProperties().RuleViolationDialog.IPBanishment);
 	int Number = 0;
 	for (int i = 0; i < 32; i++) {
-		if (CheckRight(i, -1)) {
+		if (Session().CheckRight(i, -1)) {
 			ReasonList->AddLine(GetRightName(i));
 			Reasons[Number] = i;
 			Number++;
@@ -2096,33 +2099,33 @@ void TRuleViolationDialog::HandleEvent(int Event)
 		const int Reason = GetReason();
 		const int Action = GetAction();
 		if (strlen(NameEdit->Text.get()) == 0) {
-			SetStatusMessage(TextNoPlayerName, false);
+			Talk().SetStatusMessage(TextNoPlayerName, false);
 			Valid = false;
 		}
 		if (Reason == -1) {
-			SetStatusMessage(TextNoReason, false);
+			Talk().SetStatusMessage(TextNoReason, false);
 			Valid = false;
 		}
 		if (Action == -1) {
-			SetStatusMessage(TextNoAction, false);
+			Talk().SetStatusMessage(TextNoAction, false);
 			Valid = false;
 		}
 		if (strlen(CommentEdit->Text.get()) == 0) {
-			SetStatusMessage(TextNoComment, false);
+			Talk().SetStatusMessage(TextNoComment, false);
 			Valid = false;
 		}
 		if (Action == 6) {
 			if (strlen(StatementEdit->Text.get()) == 0) {
-				SetStatusMessage(TextNoStatement, false);
+				Talk().SetStatusMessage(TextNoStatement, false);
 				Valid = false;
 			} else if (StatementID == 0) {
-				SetStatusMessage(TextCannotReportStatement, false);
+				Talk().SetStatusMessage(TextCannotReportStatement, false);
 				Valid = false;
 			}
 		}
 		if (Valid) {
 			const uint32 ID = StatementEdit->IsDisabled() ? 0 : StatementID;
-			SendRuleViolationReport(NameEdit->Text.get(), Reason, Action, CommentEdit->Text.get(), ID,
+			Communication().SendRuleViolationReport(NameEdit->Text.get(), Reason, Action, CommentEdit->Text.get(), ID,
 				IPBanishment->IsChecked());
 		}
 		break;
@@ -2135,7 +2138,7 @@ void TRuleViolationDialog::HandleEvent(int Event)
 	default:
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // The actions the reason allows; the statement line is enabled for reasons
@@ -2146,13 +2149,14 @@ void TRuleViolationDialog::UpdateActions()
 	if (Reason != -1) {
 		ActionList->Clear();
 		for (int i = 0; i < 7; i++) {
-			if (CheckRight(Reason, i))
+			if (Session().CheckRight(Reason, i))
 				ActionList->AddLine(GetActionName(i));
 		}
-		const bool IPBanishmentAllowed = CheckRight(Reason, 7);
+		const bool IPBanishmentAllowed = Session().CheckRight(Reason, 7);
 		IPBanishment->SetChecked(false);
 		IPBanishment->SetEnabled(IPBanishmentAllowed);
-		StatementEdit->SetDisabled(!(CheckRight(Reason, 0) || CheckRight(Reason, 2) || CheckRight(Reason, 6))
+		StatementEdit->SetDisabled(!(Session().CheckRight(Reason, 0) || Session().CheckRight(Reason, 2)
+									   || Session().CheckRight(Reason, 6))
 			|| ((Reason < 9 || Reason > 27) && Reason != 29));
 	}
 }
@@ -2241,15 +2245,15 @@ void TEditMarkDialog::HandleEvent(int Event)
 			}
 		}
 		if (Mark.x != 0 && Mark.y != 0) {
-			DeleteAutomapMark(Mark, Coordinate.z);
+			Map().DeleteAutomapMark(Mark, Coordinate.z);
 			Coordinate.x = Mark.x;
 			Coordinate.y = Mark.y;
 		}
-		AddAutomapMark(Coordinate, Mark.Text, Type);
+		Map().AddAutomapMark(Coordinate, Mark.Text, Type);
 	} else if (Event != EVENT_CANCEL) {
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TOptionsDialog -----------------------------------------------------------------
@@ -2316,36 +2320,36 @@ void TOptionsDialog::HandleEvent(int Event)
 	switch (Event) {
 	case 1:
 	case EVENT_CANCEL:
-		SavePreferences();
+		Preferences().SavePreferences(Talk());
 		break;
 	case EVENT_OPTIONS_NETWORK:
-		AddMessage(MESSAGE_NETWORK_OPTIONS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_NETWORK_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_GRAPHICS:
-		AddMessage(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_CONSOLE:
-		AddMessage(MESSAGE_CONSOLE_OPTIONS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_CONSOLE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_HOTKEYS:
-		AddMessage(MESSAGE_HOTKEY_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_HOTKEY_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_GENERAL:
-		AddMessage(MESSAGE_GENERAL_OPTIONS_DIALOG, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_GENERAL_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_OPTIONS_MOTD:
-		AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	default:
 		TERROR1("unknown event", Event);
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TGeneralOptionsDialog ------------------------------------------------------
@@ -2377,12 +2381,12 @@ TGeneralOptionsDialog::TGeneralOptionsDialog(void (*_OpenURL)(const char *URL))
 	SetChildArea(CreatureNames, SkinProperties().GeneralOptionsDialogCreatureNames);
 	SetChildArea(TextualEffects, SkinProperties().GeneralOptionsDialogTextualEffects);
 	SetChildArea(DragFullStacks, DragFullStacksArea);
-	ClassicControl->SetChecked(GetClassicControl());
-	AutoChaseOff->SetChecked(GetAutoChaseOff());
-	ShowHints->SetChecked(GetShowNewHints());
-	CreatureNames->SetChecked(GetCreatureInfo() != 0);
-	TextualEffects->SetChecked(GetTextualEffects());
-	DragFullStacks->SetChecked(GetDragFullStacks());
+	ClassicControl->SetChecked(Preferences().GetClassicControl());
+	AutoChaseOff->SetChecked(Preferences().GetAutoChaseOff());
+	ShowHints->SetChecked(Preferences().GetShowNewHints());
+	CreatureNames->SetChecked(Preferences().GetCreatureInfo() != 0);
+	TextualEffects->SetChecked(Preferences().GetTextualEffects());
+	DragFullStacks->SetChecked(Preferences().GetDragFullStacks());
 	Arrange();
 }
 
@@ -2392,16 +2396,16 @@ void TGeneralOptionsDialog::HandleEvent(int Event)
 {
 	switch (Event) {
 	case 1:
-		SetClassicControl(ClassicControl->IsChecked());
-		SetAutoChaseOff(AutoChaseOff->IsChecked());
-		SetShowNewHints(ShowHints->IsChecked());
-		SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
-		SetTextualEffects(TextualEffects->IsChecked());
-		SetDragFullStacks(DragFullStacks->IsChecked());
-		SetActionState(ACTIONSTATE_NONE);
+		Preferences().SetClassicControl(ClassicControl->IsChecked());
+		Preferences().SetAutoChaseOff(AutoChaseOff->IsChecked());
+		Preferences().SetShowNewHints(ShowHints->IsChecked());
+		Preferences().SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
+		Preferences().SetTextualEffects(TextualEffects->IsChecked());
+		Preferences().SetDragFullStacks(DragFullStacks->IsChecked());
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_CANCEL:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_HELP:
 		OpenURL(TextOptionsURL);
@@ -2437,13 +2441,13 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 	SetChildArea(ResolutionLabel, SkinProperties().GraphicsOptionsDialogResolutionLabel);
 	SetChildArea(AdvancedLabel, SkinProperties().GraphicsOptionsDialogAdvancedLabel);
 	SetChildPosition(AdvancedButton, SkinProperties().GraphicsOptionsDialogAdvancedButton.x, SkinProperties().GraphicsOptionsDialogAdvancedButton.y);
-	Fullscreen->SetChecked(GetViewMode() == 2);
+	Fullscreen->SetChecked(Preferences().GetViewMode() == 2);
 	// GetFullscreenModes stores its new[] list (or NULL) through the pointer it is given; Modes takes it over. The
 	// surface writes the pointer before anything else.
 	TFullscreenMode *List = nullptr;
-	NumberOfModes = GetSurface()->GetFullscreenModes(&List);
+	NumberOfModes = GraphicsEngine().GetSurface()->GetFullscreenModes(&List);
 	Modes.reset(List);
-	const TFullscreenMode *Current = GetFullscreenMode();
+	const TFullscreenMode *Current = Preferences().GetFullscreenMode();
 	for (int i = 0; i < NumberOfModes; i++) {
 		TFixedString<16> Frequency;
 		Frequency.Format(", {} Hz", Modes[i].Frequency);
@@ -2488,23 +2492,23 @@ void TGraphicsOptionsDialog::KeyPress(int Key)
 void TGraphicsOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		const int ViewMode = GetViewMode();
+		const int ViewMode = Preferences().GetViewMode();
 		const bool FullscreenChecked = Fullscreen->IsChecked();
 		if (ResolutionList->GetSelection() != -1)
-			SetFullscreenMode(&Modes[ResolutionList->GetSelection()]);
+			Preferences().SetFullscreenMode(&Modes[ResolutionList->GetSelection()]);
 		if ((ViewMode == 2) != FullscreenChecked
 			&& (!Fullscreen->IsChecked() || ResolutionList->GetSelection() != -1))
 			SetDisplayMode(Fullscreen->IsChecked() + 1);
 		if (Fullscreen->IsChecked())
-			patella::bridge::GUI().Resize(0, 0); // Control.cpp's
+			GUI().Resize(0, 0); // Control.cpp's
 	} else if (Event == EVENT_OPTIONS_ADVANCED) {
-		AddMessageFirst(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
-		AddMessageFirst(MESSAGE_ADVANCED_GRAPHICS_DIALOG, reinterpret_cast<std::intptr_t>(Parent), 0);
+		Interaction().AddMessageFirst(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessageFirst(MESSAGE_ADVANCED_GRAPHICS_DIALOG, reinterpret_cast<std::intptr_t>(Parent), 0);
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextGraphicsOptionsURL);
 		return;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TAdvancedGraphicsDialog ------------------------------------------------------
@@ -2528,7 +2532,7 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	DeviceLabelName[0] = 0;
 	DeviceLabel = new TLabel(SkinProperties().AdvancedGraphicsDialog.DeviceLabel.x, SkinProperties().AdvancedGraphicsDialog.DeviceLabel.y,
 		SkinProperties().AdvancedGraphicsDialog.Width - SkinProperties().AdvancedGraphicsDialog.DeviceLabel.x,
-		GetFontLineHeight(SkinProperties().Dialog.TextFont.FontNumber), SkinProperties().Dialog.TextFont,
+		Graphics().GetFontLineHeight(SkinProperties().Dialog.TextFont.FontNumber), SkinProperties().Dialog.TextFont,
 		TextSelectDevice, true);
 	TLabel *Label = DeviceLabel;
 	AutomaticButton = new TTextButton(SkinProperties().AdvancedGraphicsDialog.DirectX5Button.x, SkinProperties().AdvancedGraphicsDialog.DirectX5Button.y,
@@ -2553,16 +2557,16 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	SetChildArea(NoStretching, SkinProperties().AdvancedGraphicsDialog.NoStretching);
 	SetChildArea(WindowsMousepointer, SkinProperties().AdvancedGraphicsDialog.WindowsMousepointer);
 	SetChildArea(Framerate, SkinProperties().AdvancedGraphicsDialog.Framerate);
-	LightEffects->SetChecked(GetLightEffects());
-	if (!GetSurface()->CanShadeRectangles())
+	LightEffects->SetChecked(Preferences().GetLightEffects());
+	if (!GraphicsEngine().GetSurface()->CanShadeRectangles())
 		LightEffects->SetEnabled(false);
-	NoStretching->SetChecked(GetNoStretching());
-	WindowsMousepointer->SetChecked(GetWindowsMousepointer());
-	int FramerateLimit = GetConfineFramerate();
+	NoStretching->SetChecked(Preferences().GetNoStretching());
+	WindowsMousepointer->SetChecked(Preferences().GetWindowsMousepointer());
+	int FramerateLimit = Preferences().GetConfineFramerate();
 	if (FramerateLimit < 10)
 		FramerateLimit = 201;
 	Framerate->Range->SetValue(FramerateLimit);
-	if (GetViewMode() == 2) {
+	if (Preferences().GetViewMode() == 2) {
 		AutomaticButton->SetEnabled(false);
 		GpuButton->SetEnabled(false);
 		CpuButton->SetEnabled(false);
@@ -2614,11 +2618,11 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 		Text.Format("Adjust framerate limit: {}", Framerate->Range->Value);
 	else
 		Text.Assign("Adjust framerate limit: max");
-	PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.x + x, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.x + x, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.y + y,
 		SkinProperties().Dialog.TextFont, Text);
-	const double FPS = GetSurface()->GetFPS();
+	const double FPS = GraphicsEngine().GetSurface()->GetFPS();
 	Text.Format("Current framerate: {:2.2f}", FPS);
-	PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.x + x, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.x + x, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.y + y,
 		SkinProperties().Dialog.TextFont, Text);
 	ShowDevice();
 }
@@ -2629,24 +2633,24 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 void TAdvancedGraphicsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		const bool Rearrange = !GetNoStretching() && NoStretching->IsChecked();
-		SetNoStretching(NoStretching->IsChecked());
-		SetWindowsMousepointer(WindowsMousepointer->IsChecked());
-		SetLightEffects(LightEffects->IsChecked());
-		SetConfineFramerate(Framerate->Range->Value);
-		GetSurface()->SetFramerateLimit(GetConfineFramerate());
+		const bool Rearrange = !Preferences().GetNoStretching() && NoStretching->IsChecked();
+		Preferences().SetNoStretching(NoStretching->IsChecked());
+		Preferences().SetWindowsMousepointer(WindowsMousepointer->IsChecked());
+		Preferences().SetLightEffects(LightEffects->IsChecked());
+		Preferences().SetConfineFramerate(Framerate->Range->Value);
+		GraphicsEngine().GetSurface()->SetFramerateLimit(Preferences().GetConfineFramerate());
 		if (Rearrange)
 			Receiver->HandleEvent(EVENT_REARRANGE);
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextAdvancedGraphicsURL);
 		return;
 	} else if (Event == EVENT_FRAMERATE) {
-		GetSurface()->SetFramerateLimit(Framerate->Range->Value);
+		GraphicsEngine().GetSurface()->SetFramerateLimit(Framerate->Range->Value);
 		return;
 	} else if (Event == EVENT_CANCEL) {
-		GetSurface()->SetFramerateLimit(GetConfineFramerate());
+		GraphicsEngine().GetSurface()->SetFramerateLimit(Preferences().GetConfineFramerate());
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TConsoleOptionsDialog --------------------------------------------------------
@@ -2670,28 +2674,28 @@ TConsoleOptionsDialog::TConsoleOptionsDialog(void (*_OpenURL)(const char *URL))
 	SetChildArea(StatusMessages, SkinProperties().ConsoleOptionsDialogStatusMessages);
 	SetChildArea(TimeStamps, SkinProperties().ConsoleOptionsDialogTimeStamps);
 	SetChildArea(PrivateMessages, SkinProperties().ConsoleOptionsDialogPrivateMessages);
-	InfoMessages->SetChecked(GetInfoMessages());
-	EventMessages->SetChecked(GetEventMessages());
-	StatusMessages->SetChecked(GetStatusMessages());
-	TimeStamps->SetChecked(GetTimeStamps());
-	PrivateMessages->SetChecked(GetPrivateMessages());
+	InfoMessages->SetChecked(Preferences().GetInfoMessages());
+	EventMessages->SetChecked(Preferences().GetEventMessages());
+	StatusMessages->SetChecked(Preferences().GetStatusMessages());
+	TimeStamps->SetChecked(Preferences().GetTimeStamps());
+	PrivateMessages->SetChecked(Preferences().GetPrivateMessages());
 	Arrange();
 }
 
 void TConsoleOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		SetInfoMessages(InfoMessages->IsChecked());
-		SetEventMessages(EventMessages->IsChecked());
-		SetStatusMessages(StatusMessages->IsChecked());
-		SetTimeStamps(TimeStamps->IsChecked());
-		SetPrivateMessages(PrivateMessages->IsChecked());
-		SetConsoleChanged();
+		Preferences().SetInfoMessages(InfoMessages->IsChecked());
+		Preferences().SetEventMessages(EventMessages->IsChecked());
+		Preferences().SetStatusMessages(StatusMessages->IsChecked());
+		Preferences().SetTimeStamps(TimeStamps->IsChecked());
+		Preferences().SetPrivateMessages(PrivateMessages->IsChecked());
+		Talk().SetConsoleChanged();
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextConsoleOptionsURL);
 		return;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- TNetworkOptionsDialog ---------------------------------------------------------
@@ -2703,19 +2707,19 @@ TNetworkOptionsDialog::TNetworkOptionsDialog(void (*_OpenURL)(const char *URL))
 	TestServerLogin = new TCheckBox("Test Server Login");
 	InsertChild(TestServerLogin);
 	SetChildArea(TestServerLogin, SkinProperties().NetworkOptionsDialogTestServerLogin);
-	TestServerLogin->SetChecked(GetTestServerLogin());
+	TestServerLogin->SetChecked(Preferences().GetTestServerLogin());
 	Arrange();
 }
 
 void TNetworkOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		SetTestServerLogin(TestServerLogin->IsChecked());
+		Preferences().SetTestServerLogin(TestServerLogin->IsChecked());
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextNetworkOptionsURL);
 		return;
 	}
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // --- THotkeyDialog -------------------------------------------------------------------
@@ -2735,7 +2739,7 @@ THotkeyDialog::THotkeyDialog()
 	InsertChild(ListBox);
 	SetChildArea(ListBox, SkinProperties().HotkeyDialogList);
 	for (int i = 0; i < HOTKEYS; i++) {
-		Texts[i].Assign(GetHotkey(i, &AutoSend[i]));
+		Texts[i].Assign(Preferences().GetHotkey(i, &AutoSend[i]));
 		ListBox->AddLine(271);
 		UpdateLine(i);
 	}
@@ -2809,13 +2813,13 @@ void THotkeyDialog::HandleEvent(int Event)
 		if (Selected != -1)
 			AutoSend[Selected] = AutoSendCheckBox->IsChecked();
 		for (int i = 0; i < HOTKEYS; i++)
-			SetHotkey(i, Texts[i], AutoSend[i]);
-		SetActionState(ACTIONSTATE_NONE);
-		if (PeekMessageType() != MESSAGE_OPTIONS_DIALOG)
-			SavePreferences();
+			Preferences().SetHotkey(i, Texts[i], AutoSend[i]);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
+		if (Interaction().PeekMessageType() != MESSAGE_OPTIONS_DIALOG)
+			Preferences().SavePreferences(Talk());
 		break;
 	case EVENT_CANCEL:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_LIST_SELECTED:
 		if (Selected != -1)

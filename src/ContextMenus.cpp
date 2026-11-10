@@ -127,7 +127,7 @@ void THelpBubble::Place(TWindow *Window)
 {
 	const int Margin = SkinProperties().HelpBubbleMargin;
 	int HelpX, HelpY, HelpWidth, HelpHeight;
-	GetHelpArea(&HelpX, &HelpY, &HelpWidth, &HelpHeight);
+	Help().GetArea(&HelpX, &HelpY, &HelpWidth, &HelpHeight);
 	int w = Width;
 	int h = Height;
 	int newX = HelpX - w - Margin;
@@ -177,7 +177,7 @@ void THelpBubble::Place(TWindow *Window)
 		Found = FitsIn(newX, newY, w, h, Window);
 	}
 	if (!Found) {
-		if (GetMouseX() < Window->Width / 2) {
+		if (Interaction().GetMouseX() < Window->Width / 2) {
 			newX = Window->Width - w - Margin;
 			newY = Margin;
 			PATELLA_ASSERT_VALUES(newX>=0, newX);
@@ -226,11 +226,12 @@ TContextMenuEntry::TContextMenuEntry(const char *_Text, const char *_Shortcut, T
 	else
 		CopyString(Shortcut.Chars, _Shortcut);
 	Callback = _Callback;
-	const int h = GetFontLineHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2;
-	int w = GetTextWidth(SkinProperties().MenuFont.FontNumber, Text) + SkinProperties().MenuTextMargin * 2
+	const int h = Graphics().GetFontLineHeight(SkinProperties().MenuFont.FontNumber)
+		+ SkinProperties().MenuTextMargin * 2;
+	int w = Graphics().GetTextWidth(SkinProperties().MenuFont.FontNumber, Text) + SkinProperties().MenuTextMargin * 2
 		+ SkinProperties().MenuShortcutGap;
 	if (Shortcut[0] != 0)
-		w += GetTextWidth(SkinProperties().MenuFont.FontNumber, Shortcut);
+		w += Graphics().GetTextWidth(SkinProperties().MenuFont.FontNumber, Shortcut);
 	SetSize(w, h);
 }
 
@@ -238,18 +239,18 @@ TContextMenuEntry::TContextMenuEntry(const char *_Text, const char *_Shortcut, T
 // the line); the shortcut is right-aligned.
 void TContextMenuEntry::Draw(int Surface, int x, int y)
 {
-	if (In(GetMouseX() - x, 0, Width - 1) && In(GetMouseY() - y, 0, Height - 1)) {
-		GetSurface()->FillRectangle(Surface,
+	if (In(Interaction().GetMouseX() - x, 0, Width - 1) && In(Interaction().GetMouseY() - y, 0, Height - 1)) {
+		GraphicsEngine().GetSurface()->FillRectangle(Surface,
 			TRect(x, y, Width,
-				GetFontHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2),
+				Graphics().GetFontHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2),
 			SkinProperties().MenuHighlightBackground);
 	}
 	y += SkinProperties().MenuTextMargin;
-	PrintText(Surface, x + SkinProperties().MenuTextMargin, y, SkinProperties().MenuFont.FontNumber, SkinProperties().MenuFont.Color,
+	Graphics().PrintText(Surface, x + SkinProperties().MenuTextMargin, y, SkinProperties().MenuFont.FontNumber, SkinProperties().MenuFont.Color,
 		Text, LEFT_ALIGN);
 	if (Shortcut[0] != 0) {
-		PrintText(Surface, x + Width - SkinProperties().MenuTextMargin - 1, y, SkinProperties().MenuFont.FontNumber,
-			SkinProperties().MenuFont.Color, Shortcut, RIGHT_ALIGN);
+		Graphics().PrintText(Surface, x + Width - SkinProperties().MenuTextMargin - 1, y,
+			SkinProperties().MenuFont.FontNumber, SkinProperties().MenuFont.Color, Shortcut, RIGHT_ALIGN);
 	}
 }
 
@@ -263,8 +264,8 @@ bool TContextMenuEntry::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] in
 void TContextMenuEntry::SetLast()
 {
 	// The original's order: the left operand first (MSVC; GCC and Clang may differ).
-	const int LineHeight = GetFontLineHeight(SkinProperties().MenuFont.FontNumber);
-	SetSize(Width, Height - (LineHeight - GetFontHeight(SkinProperties().MenuFont.FontNumber)));
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().MenuFont.FontNumber);
+	SetSize(Width, Height - (LineHeight - Graphics().GetFontHeight(SkinProperties().MenuFont.FontNumber)));
 }
 
 // --- TContextMenu --------------------------------------------------------------
@@ -302,13 +303,13 @@ void TContextMenu::Arrange()
 bool TContextMenu::LeftButtonUp(int x, int y, int Flags)
 {
 	TWindow::LeftButtonUp(x, y, Flags);
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 	return true;
 }
 
 bool TContextMenu::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
-	SetActionState(ACTIONSTATE_NONE);
+	Interaction().SetActionState(ACTIONSTATE_NONE);
 	return true;
 }
 
@@ -316,7 +317,7 @@ bool TContextMenu::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y,
 void TContextMenu::KeyPress(int Key)
 {
 	if (Key == KEY_ESCAPE)
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
 // Opens the menu at x, y, or left of and above it where it would reach the
@@ -381,60 +382,61 @@ void TContextMenu::AddSeparator()
 // reads the flags of the used object even when there is none (type 0).
 TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int ParentHeight)
 {
-	LookedObject = *GetTradeObject(&LookedObjectIndex, &LookedObjectX, &LookedObjectY, &LookedObjectZ);
-	UsedObject = *GetUseObject(&UsedObjectIndex, &UsedObjectX, &UsedObjectY, &UsedObjectZ);
-	CreatureID = GetTradeInfo();
+	LookedObject = *Interaction().GetTradeObject(&LookedObjectIndex, &LookedObjectX, &LookedObjectY, &LookedObjectZ);
+	UsedObject = *Interaction().GetUseObject(&UsedObjectIndex, &UsedObjectX, &UsedObjectY, &UsedObjectZ);
+	CreatureID = Interaction().GetTradeInfo();
 	PATELLA_ASSERT(LookedObject!=0);
-	const bool ClassicControl = GetClassicControl();
+	const bool ClassicControl = Preferences().GetClassicControl();
 	AddEntry(EVENT_MENU_LOOK, "Look", ClassicControl ? nullptr : "(Shift)");
 	if (UsedObject != 0) {
-		if (GetObjectFlag(UsedObject, CONTAINER)) {
+		if (ObjectTypes().GetObjectFlag(UsedObject, CONTAINER)) {
 			if (UsedObjectX == POSITION_NOT_ON_MAP && UsedObjectY >= POSITION_CONTAINER_BASE) {
 				AddEntry(EVENT_MENU_OPEN, "Open", ClassicControl ? nullptr : "(Ctrl)");
 				AddEntry(EVENT_MENU_OPEN_NEW_WINDOW, "Open in new window", nullptr);
 			} else {
 				AddEntry(EVENT_MENU_OPEN_NEW_WINDOW, "Open", ClassicControl ? nullptr : "(Ctrl)");
 			}
-		} else if (GetObjectFlag(UsedObject, MULTIUSE)) {
+		} else if (ObjectTypes().GetObjectFlag(UsedObject, MULTIUSE)) {
 			AddEntry(EVENT_MENU_USE_WITH, "Use with ...", ClassicControl ? nullptr : "(Ctrl)");
 		} else {
 			AddEntry(EVENT_MENU_USE, "Use", ClassicControl ? nullptr : "(Ctrl)");
 		}
 	}
-	if (GetObjectFlag(UsedObject, ROTATE))
+	if (ObjectTypes().GetObjectFlag(UsedObject, ROTATE))
 		AddEntry(EVENT_MENU_ROTATE, "Rotate", nullptr);
 	Separator = true;
-	if (LookedObject != CREATURE && !GetObjectFlag(LookedObject, UNMOVE) && GetObjectFlag(LookedObject, TAKE))
+	if (LookedObject != CREATURE && !ObjectTypes().GetObjectFlag(LookedObject, UNMOVE)
+		&& ObjectTypes().GetObjectFlag(LookedObject, TAKE))
 		AddEntry(EVENT_MENU_TRADE_WITH, "Trade with ...", nullptr);
-	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && HasContainerParent(LookedObjectY - POSITION_CONTAINER_BASE))
+	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && Inventory().HasContainerParent(LookedObjectY - POSITION_CONTAINER_BASE))
 		AddEntry(EVENT_MENU_MOVE_UP, "Move up", nullptr);
 	if (CreatureID != 0) {
-		if (CreatureID == GetPlayerID()) {
+		if (CreatureID == PlayerState().GetID()) {
 			AddEntry(EVENT_MENU_SET_OUTFIT, "Set Outfit", nullptr);
-			if (IsPlayerInParty() && !IsPlayerInFight())
+			if (PlayerState().IsInParty() && !PlayerState().IsInFight())
 				AddEntry(EVENT_MENU_LEAVE_PARTY, "Leave Party", nullptr);
 		} else {
-			if (CreatureID == GetAttackID())
+			if (CreatureID == Creatures().GetAttackID())
 				AddEntry(EVENT_MENU_STOP_ATTACK, "Stop Attack", ClassicControl ? nullptr : "(Alt)");
 			else
 				AddEntry(EVENT_MENU_ATTACK, "Attack", ClassicControl ? nullptr : "(Alt)");
-			if (CreatureID == GetFollowID())
+			if (CreatureID == Creatures().GetFollowID())
 				AddEntry(EVENT_MENU_STOP_FOLLOW, "Stop Follow", nullptr);
 			else
 				AddEntry(EVENT_MENU_FOLLOW, "Follow", nullptr);
 			Separator = true;
-			TCreature *Creature = GetCreature(CreatureID);
-			if (Creature != nullptr && IsPlayer(CreatureID)) {
+			TCreature *Creature = Creatures().GetCreature(CreatureID);
+			if (Creature != nullptr && Creatures().IsPlayer(CreatureID)) {
 				TFixedString<50> Text;
 				Text.Format("Message to {}", Creature->Name);
 				AddEntry(EVENT_MENU_PRIVATE_MESSAGE, Text, nullptr);
-				if (HasOwnPrivateChannel())
+				if (Talk().HasOwnPrivateChannel())
 					AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
-				if (!IsBuddy(Creature->Name))
+				if (!Creatures().IsBuddy(Creature->Name))
 					AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-				Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
+				Text.Format("{} {}", Talk().IsIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 				AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
-				switch (GetPlayerPartyFlag()) {
+				switch (PlayerState().GetPartyFlag()) {
 				case PARTY_NONE:
 				case PARTY_INVITEE:
 					if (Creature->PARTYFlag == PARTY_INVITER) {
@@ -466,13 +468,14 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 					}
 					break;
 				default:
-					TERROR1("unknown player party flag", GetPlayerPartyFlag());
+					TERROR1("unknown player party flag", PlayerState().GetPartyFlag());
 				}
 			}
 		}
 		Separator = true;
 		AddEntry(EVENT_MENU_COPY, "Copy Name", nullptr);
-		if (IsPlayer(CreatureID) && CreatureID != GetPlayerID() && CheckAnyRight()) {
+		if (Creatures().IsPlayer(CreatureID) && CreatureID != PlayerState().GetID()
+			&& Session().CheckAnyRight()) {
 			Separator = true;
 			AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 			Separator = true;
@@ -488,122 +491,124 @@ void TObjectContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_MENU_LOOK:
-		SendLook(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type, LookedObjectIndex);
+		Communication().SendLook(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type, LookedObjectIndex);
 		break;
 	case EVENT_MENU_USE:
-		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, 0);
+		Communication().SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, 0);
 		break;
 	case EVENT_MENU_USE_WITH:
-		AddMessage(MESSAGE_USE_WITH, 0, 0);
+		Interaction().AddMessage(MESSAGE_USE_WITH, 0, 0);
 		break;
 	case EVENT_MENU_ROTATE:
-		SendRotateObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex);
+		Communication().SendRotateObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex);
 		break;
 	case EVENT_MENU_ATTACK:
-		SetAttackID(CreatureID);
-		SendAttack(CreatureID);
+		Creatures().SetAttackID(CreatureID);
+		Communication().SendAttack(CreatureID);
 		break;
 	case EVENT_MENU_STOP_ATTACK:
-		SetAttackID(0);
-		SendAttack(0);
+		Creatures().SetAttackID(0);
+		Communication().SendAttack(0);
 		break;
 	case EVENT_MENU_FOLLOW:
-		SetFollowID(CreatureID);
-		SendFollow(CreatureID);
+		Creatures().SetFollowID(CreatureID);
+		Communication().SendFollow(CreatureID);
 		break;
 	case EVENT_MENU_STOP_FOLLOW:
-		SetFollowID(0);
-		SendFollow(0);
+		Creatures().SetFollowID(0);
+		Communication().SendFollow(0);
 		break;
 	case EVENT_MENU_SET_OUTFIT:
-		SendRequestOutfit();
+		Communication().SendRequestOutfit();
 		break;
 	case EVENT_MENU_MOVE_UP:
 		PATELLA_ASSERT_VALUES(LookedObjectX==0xFFFF, LookedObjectX);
 		PATELLA_ASSERT(LookedObject.Type!=CREATURE);
-		SendMoveObject(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type, LookedObjectIndex,
-			LookedObjectX, LookedObjectY, POSITION_PARENT_CONTAINER, GetObjectFlag(LookedObject, CUMULATIVE) ? LookedObject.Data : 1);
+		Communication().SendMoveObject(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type,
+			LookedObjectIndex,
+			LookedObjectX, LookedObjectY, POSITION_PARENT_CONTAINER, ObjectTypes().GetObjectFlag(LookedObject, CUMULATIVE) ? LookedObject.Data : 1);
 		break;
 	case EVENT_MENU_OPEN:
 		PATELLA_ASSERT_VALUES(UsedObjectX==0xFFFF, UsedObjectX);
 		PATELLA_ASSERT_VALUES(UsedObjectY>=64, UsedObjectY);
-		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, UsedObjectY - POSITION_CONTAINER_BASE);
+		Communication().SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, UsedObjectY - POSITION_CONTAINER_BASE);
 		break;
 	case EVENT_MENU_OPEN_NEW_WINDOW:
-		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, GetFreeContainer());
+		Communication().SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex,
+			Inventory().GetFreeContainer());
 		break;
 	case EVENT_MENU_TRADE_WITH:
-		AddMessage(MESSAGE_TRADE_WITH, 0, 0);
+		Interaction().AddMessage(MESSAGE_TRADE_WITH, 0, 0);
 		break;
 	case EVENT_MENU_ADD_VIP: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendAddBuddy(Creature->Name);
+			Communication().SendAddBuddy(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_INVITE_PRIVATE: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendInviteToPrivateChannel(Creature->Name);
+			Communication().SendInviteToPrivateChannel(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_PRIVATE_MESSAGE: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendOpenPrivateConversation(Creature->Name);
+			Communication().SendOpenPrivateConversation(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_IGNORE: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr) {
-			if (IsTalkIgnored(TALK_NONE, Creature->Name, -1))
-				UnignoreName(Creature->Name);
+			if (Talk().IsIgnored(TALK_NONE, Creature->Name, -1))
+				Talk().UnignoreName(Creature->Name);
 			else
-				IgnoreName(Creature->Name, false);
+				Talk().IgnoreName(Creature->Name, false);
 		}
 		break;
 	}
 	case EVENT_MENU_COPY: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			CopyToClipboard(Creature->Name);
+			Interaction().CopyToClipboard(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_INVITE_PARTY: {
-		const TCreature *Creature = GetCreature(CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendInviteToParty(Creature->CreatureID);
+			Communication().SendInviteToParty(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_JOIN_PARTY: {
-		const TCreature *Creature = GetCreature(CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendJoinParty(Creature->CreatureID);
+			Communication().SendJoinParty(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_REVOKE_PARTY_INVITE: {
-		const TCreature *Creature = GetCreature(CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendRevokePartyInvitation(Creature->CreatureID);
+			Communication().SendRevokePartyInvitation(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_PASS_PARTY_LEADER: {
-		const TCreature *Creature = GetCreature(CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendPassPartyLeadership(Creature->CreatureID);
+			Communication().SendPassPartyLeadership(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_LEAVE_PARTY:
-		SendLeaveParty();
+		Communication().SendLeaveParty();
 		break;
 	case EVENT_MENU_RULE_VIOLATION: {
 		// The rule violation dialog gets a copy of the name (Control.cpp
 		// deletes it).
-		TCreature *Creature = GetCreature(CreatureID);
-		if (Creature != nullptr && CheckAnyRight()) {
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
+		if (Creature != nullptr && Session().CheckAnyRight()) {
 			char *Name = new char[30];
 			TStringBuffer(Name, 30).Assign(Creature->Name);
-			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
+			Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
 		}
 		break;
 	}
@@ -619,27 +624,28 @@ void TObjectContextMenu::HandleEvent(int Event)
 TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int ParentWidth, int ParentHeight)
 {
 	this->CreatureID = CreatureID;
-	if (this->CreatureID == GetAttackID())
+	if (this->CreatureID == Creatures().GetAttackID())
 		AddEntry(EVENT_MENU_STOP_ATTACK, "Stop Attack", nullptr);
 	else
 		AddEntry(EVENT_MENU_ATTACK, "Attack", nullptr);
-	if (this->CreatureID == GetFollowID())
+	if (this->CreatureID == Creatures().GetFollowID())
 		AddEntry(EVENT_MENU_STOP_FOLLOW, "Stop Follow", nullptr);
 	else
 		AddEntry(EVENT_MENU_FOLLOW, "Follow", nullptr);
 	Separator = true;
-	TCreature *Creature = GetCreature(this->CreatureID);
-	if (Creature != nullptr && IsPlayer(this->CreatureID)) {
+	TCreature *Creature = Creatures().GetCreature(this->CreatureID);
+	if (Creature != nullptr && Creatures().IsPlayer(this->CreatureID)) {
 		TFixedString<50> Text;
 		Text.Format("Message to {}", Creature->Name);
 		AddEntry(EVENT_MENU_PRIVATE_MESSAGE, Text, nullptr);
-		if (HasOwnPrivateChannel())
+		if (Talk().HasOwnPrivateChannel())
 			AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
-		if (!IsBuddy(Creature->Name))
+		if (!Creatures().IsBuddy(Creature->Name))
 			AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-		Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
+		Text.Format("{} {}", Talk().IsIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore",
+			Creature->Name);
 		AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
-		switch (GetPlayerPartyFlag()) {
+		switch (PlayerState().GetPartyFlag()) {
 		case PARTY_NONE:
 		case PARTY_INVITEE:
 			if (Creature->PARTYFlag == PARTY_INVITER) {
@@ -671,12 +677,12 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 			}
 			break;
 		default:
-			TERROR1("unknown player party flag", GetPlayerPartyFlag());
+			TERROR1("unknown player party flag", PlayerState().GetPartyFlag());
 		}
 		Separator = true;
 	}
 	AddEntry(EVENT_MENU_COPY, "Copy Name", nullptr);
-	if (Creature != nullptr && IsPlayer(this->CreatureID) && CheckAnyRight()) {
+	if (Creature != nullptr && Creatures().IsPlayer(this->CreatureID) && Session().CheckAnyRight()) {
 		Separator = true;
 		AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 		Separator = true;
@@ -688,85 +694,85 @@ void TCreatureContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_MENU_ATTACK:
-		SetAttackID(CreatureID);
-		SendAttack(CreatureID);
+		Creatures().SetAttackID(CreatureID);
+		Communication().SendAttack(CreatureID);
 		break;
 	case EVENT_MENU_STOP_ATTACK:
-		SetAttackID(0);
-		SendAttack(0);
+		Creatures().SetAttackID(0);
+		Communication().SendAttack(0);
 		break;
 	case EVENT_MENU_FOLLOW:
-		SetFollowID(CreatureID);
-		SendFollow(CreatureID);
+		Creatures().SetFollowID(CreatureID);
+		Communication().SendFollow(CreatureID);
 		break;
 	case EVENT_MENU_STOP_FOLLOW:
-		SetFollowID(0);
-		SendFollow(0);
+		Creatures().SetFollowID(0);
+		Communication().SendFollow(0);
 		break;
 	case EVENT_MENU_ADD_VIP: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendAddBuddy(Creature->Name);
+			Communication().SendAddBuddy(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_INVITE_PRIVATE: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendInviteToPrivateChannel(Creature->Name);
+			Communication().SendInviteToPrivateChannel(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_PRIVATE_MESSAGE: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendOpenPrivateConversation(Creature->Name);
+			Communication().SendOpenPrivateConversation(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_IGNORE: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr) {
-			if (!IsTalkIgnored(TALK_NONE, Creature->Name, -1))
-				IgnoreName(Creature->Name, false);
+			if (!Talk().IsIgnored(TALK_NONE, Creature->Name, -1))
+				Talk().IgnoreName(Creature->Name, false);
 			else
-				UnignoreName(Creature->Name);
+				Talk().UnignoreName(Creature->Name);
 		}
 		break;
 	}
 	case EVENT_MENU_COPY: {
-		TCreature *Creature = GetCreature(CreatureID);
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			CopyToClipboard(Creature->Name);
+			Interaction().CopyToClipboard(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_INVITE_PARTY: {
-		const TCreature *Creature = GetCreature(CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendInviteToParty(Creature->CreatureID);
+			Communication().SendInviteToParty(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_JOIN_PARTY: {
-		const TCreature *Creature = GetCreature(CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendJoinParty(Creature->CreatureID);
+			Communication().SendJoinParty(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_REVOKE_PARTY_INVITE: {
-		const TCreature *Creature = GetCreature(CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendRevokePartyInvitation(Creature->CreatureID);
+			Communication().SendRevokePartyInvitation(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_PASS_PARTY_LEADER: {
-		const TCreature *Creature = GetCreature(CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendPassPartyLeadership(Creature->CreatureID);
+			Communication().SendPassPartyLeadership(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_RULE_VIOLATION: {
-		TCreature *Creature = GetCreature(CreatureID);
-		if (Creature != nullptr && CheckAnyRight()) {
+		TCreature *Creature = Creatures().GetCreature(CreatureID);
+		if (Creature != nullptr && Session().CheckAnyRight()) {
 			char *Name = new char[30];
 			TStringBuffer(Name, 30).Assign(Creature->Name);
-			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
+			Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
 		}
 		break;
 	}
@@ -783,31 +789,32 @@ void TCreatureContextMenu::HandleEvent(int Event)
 TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int ParentWidth, int ParentHeight)
 {
 	CharacterID = _CharacterID;
-	const int Position = GetBuddyPosition(_CharacterID);
+	const int Position = Creatures().GetBuddyPosition(_CharacterID);
 	if (Position != -1) {
 		TFixedString<50> Text;
-		Text.Format("Edit {}", GetBuddyListName(Position));
+		Text.Format("Edit {}", Creatures().GetBuddyListName(Position));
 		AddEntry(EVENT_MENU_EDIT_VIP, Text, nullptr);
-		Text.Format("Remove {}", GetBuddyListName(Position));
+		Text.Format("Remove {}", Creatures().GetBuddyListName(Position));
 		AddEntry(EVENT_MENU_REMOVE_VIP, Text, nullptr);
-		if (CharacterID != GetPlayerID() && IsBuddyOnline(Position)) {
-			Text.Format("Message to {}", GetBuddyListName(Position));
+		if (CharacterID != PlayerState().GetID() && Creatures().IsBuddyOnline(Position)) {
+			Text.Format("Message to {}", Creatures().GetBuddyListName(Position));
 			AddEntry(EVENT_MENU_MESSAGE_VIP, Text, nullptr);
 		}
-		if (HasOwnPrivateChannel())
+		if (Talk().HasOwnPrivateChannel())
 			AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
 		Separator = true;
 	}
 	AddEntry(EVENT_MENU_NEW_VIP, "Add new VIP", nullptr);
 	AddEntry(EVENT_MENU_SORT_BY_NAME, "Sort by name", nullptr);
 	AddEntry(EVENT_MENU_SORT_BY_TYPE, "Sort by type", nullptr);
-	if (!GetBuddyHideOffline())
+	if (!Preferences().GetBuddyHideOffline())
 		AddEntry(EVENT_MENU_SORT_BY_STATUS, "Sort by status", nullptr);
-	AddEntry(EVENT_MENU_HIDE_OFFLINE, GetBuddyHideOffline() ? "Show offline VIPs" : "Hide offline VIPs", nullptr);
+	AddEntry(EVENT_MENU_HIDE_OFFLINE, Preferences().GetBuddyHideOffline() ? "Show offline VIPs" : "Hide offline VIPs",
+		nullptr);
 	Separator = true;
 	if (Position != -1) {
 		AddEntry(EVENT_MENU_COPY_NAME, "Copy Name", nullptr);
-		if (CheckAnyRight()) {
+		if (Session().CheckAnyRight()) {
 			Separator = true;
 			AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 			Separator = true;
@@ -820,53 +827,53 @@ void TBuddyContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_MENU_RULE_VIOLATION: {
-		const int Position = GetBuddyPosition(CharacterID);
-		if (Position != -1 && CheckAnyRight()) {
+		const int Position = Creatures().GetBuddyPosition(CharacterID);
+		if (Position != -1 && Session().CheckAnyRight()) {
 			char *Name = new char[30];
-			TStringBuffer(Name, 30).Assign(GetBuddyListName(Position));
-			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
+			TStringBuffer(Name, 30).Assign(Creatures().GetBuddyListName(Position));
+			Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
 		}
 		break;
 	}
 	case EVENT_MENU_INVITE_PRIVATE: {
-		const int Position = GetBuddyPosition(CharacterID);
+		const int Position = Creatures().GetBuddyPosition(CharacterID);
 		if (Position != -1)
-			SendInviteToPrivateChannel(GetBuddyListName(Position));
+			Communication().SendInviteToPrivateChannel(Creatures().GetBuddyListName(Position));
 		break;
 	}
 	case EVENT_MENU_COPY_NAME: {
-		const int Position = GetBuddyPosition(CharacterID);
+		const int Position = Creatures().GetBuddyPosition(CharacterID);
 		if (Position != -1)
-			CopyToClipboard(GetBuddyListName(Position));
+			Interaction().CopyToClipboard(Creatures().GetBuddyListName(Position));
 		break;
 	}
 	case EVENT_MENU_REMOVE_VIP:
-		RemoveBuddy(CharacterID);
-		SendRemoveBuddy(CharacterID);
+		Creatures().RemoveBuddy(CharacterID);
+		Communication().SendRemoveBuddy(CharacterID);
 		break;
 	case EVENT_MENU_NEW_VIP:
-		AddMessage(MESSAGE_ADD_BUDDY_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_ADD_BUDDY_DIALOG, 0, 0);
 		break;
 	case EVENT_MENU_EDIT_VIP:
-		AddMessage(MESSAGE_EDIT_BUDDY_DIALOG, CharacterID, 0);
+		Interaction().AddMessage(MESSAGE_EDIT_BUDDY_DIALOG, CharacterID, 0);
 		break;
 	case EVENT_MENU_MESSAGE_VIP: {
-		const int Position = GetBuddyPosition(CharacterID);
+		const int Position = Creatures().GetBuddyPosition(CharacterID);
 		if (Position != -1)
-			SendOpenPrivateConversation(GetBuddyListName(Position));
+			Communication().SendOpenPrivateConversation(Creatures().GetBuddyListName(Position));
 		break;
 	}
 	case EVENT_MENU_SORT_BY_NAME:
-		SetBuddySortMethod(0);
+		Creatures().SetBuddySortMethod(0);
 		break;
 	case EVENT_MENU_SORT_BY_TYPE:
-		SetBuddySortMethod(1);
+		Creatures().SetBuddySortMethod(1);
 		break;
 	case EVENT_MENU_SORT_BY_STATUS:
-		SetBuddySortMethod(2);
+		Creatures().SetBuddySortMethod(2);
 		break;
 	case EVENT_MENU_HIDE_OFFLINE:
-		HideOfflineBuddies(!GetBuddyHideOffline());
+		Creatures().HideOfflineBuddies(!Preferences().GetBuddyHideOffline());
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -882,7 +889,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 	int ParentHeight)
 {
 	PATELLA_ASSERT(_TextWindow!=nullptr);
-	PATELLA_ASSERT_VALUES(GetCreature(GetPlayerID()), GetPlayerID());
+	PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
 	TextWindow = _TextWindow;
 	LineNumber = _LineNumber;
 	TTalkLine *Line = TextWindow->GetTalkLine(_LineNumber);
@@ -892,7 +899,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 		const char *Speaker = Line->Addressee;
 		if (Speaker != nullptr && strlen(Speaker) != 0) {
 			HasSpeaker = true;
-			if (strcmp(GetCreature(GetPlayerID())->Name, Speaker) != 0)
+			if (strcmp(Creatures().GetCreature(PlayerState().GetID())->Name, Speaker) != 0)
 				OtherSpeaker = true;
 		}
 		if (TextWindow->TextBuffer->IsRuleViolation() && Line->Mode == TALK_GAMEMASTER_ANSWER) {
@@ -902,14 +909,14 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 			Text.Format("Message to {}", Speaker);
 			AddEntry(EVENT_MENU_PRIVATE_MESSAGE, Text, nullptr);
 			if (TextWindow->TextBuffer->IsSelected() && TextWindow->TextBuffer->IsPrivateChannel()) {
-				if (HasOwnPrivateChannel())
+				if (Talk().HasOwnPrivateChannel())
 					AddEntry(EVENT_MENU_EXCLUDE_PRIVATE, "Exclude from private chat", nullptr);
-			} else if (HasOwnPrivateChannel()) {
+			} else if (Talk().HasOwnPrivateChannel()) {
 				AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
 			}
-			if (!IsBuddy(Speaker))
+			if (!Creatures().IsBuddy(Speaker))
 				AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-			Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Speaker, -1) ? "Unignore" : "Ignore", Speaker);
+			Text.Format("{} {}", Talk().IsIgnored(TALK_NONE, Speaker, -1) ? "Unignore" : "Ignore", Speaker);
 			AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
 			Separator = true;
 		}
@@ -922,7 +929,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 		AddEntry(EVENT_MENU_COPY_MESSAGE, "Copy Message", nullptr);
 	Separator = true;
 	AddEntry(EVENT_MENU_SELECT_ALL, "Select all", nullptr);
-	if (HasSpeaker && CheckAnyRight()) {
+	if (HasSpeaker && Session().CheckAnyRight()) {
 		Separator = true;
 		AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 		Separator = true;
@@ -941,58 +948,58 @@ void TTextContextMenu::HandleEvent(int Event)
 	switch (Event) {
 	case EVENT_MENU_PRIVATE_MESSAGE:
 		if (Speaker != nullptr)
-			SendOpenPrivateConversation(Speaker);
+			Communication().SendOpenPrivateConversation(Speaker);
 		break;
 	case EVENT_MENU_IGNORE:
 		if (Speaker != nullptr) {
 			TFixedString<200> Text;
 			const char *Format;
-			if (!IsTalkIgnored(TALK_NONE, Speaker, -1)) {
-				IgnoreName(Speaker, false);
+			if (!Talk().IsIgnored(TALK_NONE, Speaker, -1)) {
+				Talk().IgnoreName(Speaker, false);
 				Format = "You are now ignoring player %s.";
 			} else {
-				UnignoreName(Speaker);
+				Talk().UnignoreName(Speaker);
 				Format = "You are no longer ignoring player %s.";
 			}
 			MsvcSnprintf(Text, 200, Format, Speaker);
-			AddConsoleText(0, Text, TALK_STATUS_MESSAGE, nullptr, 0, 0);
+			Talk().AddConsoleText(0, Text, TALK_STATUS_MESSAGE, nullptr, 0, 0);
 		}
 		break;
 	case EVENT_MENU_INVITE_PRIVATE:
 		if (Speaker != nullptr)
-			SendInviteToPrivateChannel(Speaker);
+			Communication().SendInviteToPrivateChannel(Speaker);
 		break;
 	case EVENT_MENU_EXCLUDE_PRIVATE:
 		if (Speaker != nullptr)
-			SendExcludeFromPrivateChannel(Speaker);
+			Communication().SendExcludeFromPrivateChannel(Speaker);
 		break;
 	case EVENT_MENU_ADD_VIP:
 		if (Speaker != nullptr)
-			SendAddBuddy(Speaker);
+			Communication().SendAddBuddy(Speaker);
 		break;
 	case EVENT_MENU_COPY_NAME:
 		if (Speaker != nullptr)
-			CopyToClipboard(Speaker);
+			Interaction().CopyToClipboard(Speaker);
 		break;
 	case EVENT_MENU_COPY_MESSAGE:
 		if (Line != nullptr)
-			CopyToClipboard(Line->GetText());
+			Interaction().CopyToClipboard(Line->GetText());
 		break;
 	case EVENT_MENU_COPY: {
 		const char *Selection = TextWindow->GetSelectedText();
 		if (Selection != nullptr)
-			CopyToClipboard(Selection);
+			Interaction().CopyToClipboard(Selection);
 		break;
 	}
 	case EVENT_MENU_SELECT_ALL:
 		TextWindow->SelectAll();
 		break;
 	case EVENT_MENU_RULE_VIOLATION:
-		if (CheckAnyRight()) {
+		if (Session().CheckAnyRight()) {
 			if (Line == nullptr) {
-				AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
+				Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 			} else {
-				AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0,
+				Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0,
 					reinterpret_cast<std::intptr_t>(new TTalkLine(Line->StatementID, Line->Mode, Line->Addressee,
 						Line->Text, 0)));
 			}
@@ -1037,26 +1044,26 @@ void TRequestContextMenu::HandleEvent(int Event)
 			TFixedString<220> Title;
 			Title.Format("{}'s Report", Name);
 			ConsoleWindow->OpenChannel(TALK_PLAYER_ANSWER, TALK_GAMEMASTER_ANSWER, Name, -1, Title);
-			TTalkBuffer *TextBuffer = GetTextBuffer(TALK_PLAYER_ANSWER, Name, -1);
+			TTalkBuffer *TextBuffer = Talk().GetTextBuffer(TALK_PLAYER_ANSWER, Name, -1);
 			PATELLA_ASSERT(TextBuffer!=nullptr);
 			TextBuffer->Clear();
-			AddTextBufferLine(TextBuffer, Line->StatementID, Line->Text, TALK_PLAYER_ANSWER, Name, 0);
+			Talk().AddTextBufferLine(TextBuffer, Line->StatementID, Line->Text, TALK_PLAYER_ANSWER, Name, 0);
 			TextBuffer->SetWriteEnabled(true);
-			SendProcessRuleViolation(Name);
+			Communication().SendProcessRuleViolation(Name);
 			break;
 		}
 		case EVENT_MENU_REMOVE_REPORT:
-			SendCloseRuleViolation(Name);
+			Communication().SendCloseRuleViolation(Name);
 			break;
 		case EVENT_MENU_COPY_NAME:
-			CopyToClipboard(Name);
+			Interaction().CopyToClipboard(Name);
 			break;
 		case EVENT_MENU_COPY_MESSAGE:
-			CopyToClipboard(Line->GetText());
+			Interaction().CopyToClipboard(Line->GetText());
 			break;
 		case EVENT_MENU_RULE_VIOLATION:
-			if (CheckAnyRight()) {
-				AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, reinterpret_cast<std::intptr_t>(new TTalkLine(Line->StatementID, Line->Mode, Name, Line->Text, 0)));
+			if (Session().CheckAnyRight()) {
+				Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, reinterpret_cast<std::intptr_t>(new TTalkLine(Line->StatementID, Line->Mode, Name, Line->Text, 0)));
 			}
 			break;
 		default:
@@ -1103,10 +1110,10 @@ void TChannelContextMenu::HandleEvent(int Event)
 		ConsoleWindow->CloseChannel();
 		break;
 	case EVENT_MENU_INVITE_PRIVATE:
-		AddMessage(MESSAGE_INVITE_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_INVITE_DIALOG, 0, 0);
 		break;
 	case EVENT_MENU_EXCLUDE_PRIVATE:
-		AddMessage(MESSAGE_EXCLUDE_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_EXCLUDE_DIALOG, 0, 0);
 		break;
 	case EVENT_MENU_SERVER_MESSAGES:
 		ConsoleWindow->SetServerMessages(ShowServerMessages);
@@ -1117,7 +1124,7 @@ void TChannelContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_CLEAR_WINDOW: {
 		TTalkBuffer *TextBuffer = ConsoleWindow->GetTextBuffer();
 		PATELLA_ASSERT(TextBuffer!=nullptr);
-		ClearTextBuffer(TextBuffer);
+		Talk().ClearTextBuffer(TextBuffer);
 		break;
 	}
 	default:
@@ -1195,19 +1202,20 @@ void TMarkContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_MENU_SET_MARK:
-		AddMessage(MESSAGE_SET_MARK_DIALOG, reinterpret_cast<std::intptr_t>(new TCoordinate(Data.Coordinate)), 0);
+		Interaction().AddMessage(MESSAGE_SET_MARK_DIALOG,
+			reinterpret_cast<std::intptr_t>(new TCoordinate(Data.Coordinate)), 0);
 		break;
 	case EVENT_MENU_EDIT_MARK:
-		AddMessage(MESSAGE_EDIT_MARK_DIALOG, reinterpret_cast<std::intptr_t>(new TCoordinate(Data.Coordinate)), reinterpret_cast<std::intptr_t>(new TMark(Data.Mark)));
+		Interaction().AddMessage(MESSAGE_EDIT_MARK_DIALOG, reinterpret_cast<std::intptr_t>(new TCoordinate(Data.Coordinate)), reinterpret_cast<std::intptr_t>(new TMark(Data.Mark)));
 		break;
 	case EVENT_MENU_GO_TO_MARK:
 		if (Data.Mark.x != 0 && Data.Mark.y != 0) {
-			switch (SetPlayerDestination(Data.Mark.x, Data.Mark.y, Data.Coordinate.z, false, false)) {
+			switch (PlayerState().SetDestination(Data.Mark.x, Data.Mark.y, Data.Coordinate.z, false, false)) {
 			case 1:
-				SendWalk();
+				Communication().SendWalk();
 				break;
 			case 2:
-				SendStopWalk();
+				Communication().SendStopWalk();
 				break;
 			default:
 				break;
@@ -1215,7 +1223,7 @@ void TMarkContextMenu::HandleEvent(int Event)
 		}
 		break;
 	case EVENT_MENU_DELETE_MARK:
-		DeleteAutomapMark(Data.Mark, Data.Coordinate.z);
+		Map().DeleteAutomapMark(Data.Mark, Data.Coordinate.z);
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -1231,15 +1239,18 @@ TSkillContextMenu::TSkillContextMenu(TSkillsWindowBody *_SkillsWindow, int x, in
 	PATELLA_ASSERT(_SkillsWindow);
 	SkillsWindow = _SkillsWindow;
 	SetSkillsWindowMenu(_SkillsWindow, this);
-	AddEntry(EVENT_MENU_LEVEL_BAR, GetLevelBar() ? "Hide Level" : "Show Level", nullptr);
-	AddEntry(EVENT_MENU_MAGIC_LEVEL_BAR, GetMagLevelBar() ? "Hide Magic Level" : "Show Magic Level", nullptr);
-	AddEntry(EVENT_MENU_FIST_BAR, GetSkillBar(0) ? "Hide Fist Fighting" : "Show Fist Fighting", nullptr);
-	AddEntry(EVENT_MENU_CLUB_BAR, GetSkillBar(1) ? "Hide Club Fighting" : "Show Club Fighting", nullptr);
-	AddEntry(EVENT_MENU_SWORD_BAR, GetSkillBar(2) ? "Hide Sword Fighting" : "Show Sword Fighting", nullptr);
-	AddEntry(EVENT_MENU_AXE_BAR, GetSkillBar(3) ? "Hide Axe Fighting" : "Show Axe Fighting", nullptr);
-	AddEntry(EVENT_MENU_DISTANCE_BAR, GetSkillBar(4) ? "Hide Distance Fighting" : "Show Distance Fighting", nullptr);
-	AddEntry(EVENT_MENU_SHIELDING_BAR, GetSkillBar(5) ? "Hide Shielding" : "Show Shielding", nullptr);
-	AddEntry(EVENT_MENU_FISHING_BAR, GetSkillBar(6) ? "Hide Fishing" : "Show Fishing", nullptr);
+	AddEntry(EVENT_MENU_LEVEL_BAR, Preferences().GetLevelBar() ? "Hide Level" : "Show Level", nullptr);
+	AddEntry(EVENT_MENU_MAGIC_LEVEL_BAR, Preferences().GetMagLevelBar() ? "Hide Magic Level" : "Show Magic Level",
+		nullptr);
+	AddEntry(EVENT_MENU_FIST_BAR, Preferences().GetSkillBar(0) ? "Hide Fist Fighting" : "Show Fist Fighting", nullptr);
+	AddEntry(EVENT_MENU_CLUB_BAR, Preferences().GetSkillBar(1) ? "Hide Club Fighting" : "Show Club Fighting", nullptr);
+	AddEntry(EVENT_MENU_SWORD_BAR, Preferences().GetSkillBar(2) ? "Hide Sword Fighting" : "Show Sword Fighting",
+		nullptr);
+	AddEntry(EVENT_MENU_AXE_BAR, Preferences().GetSkillBar(3) ? "Hide Axe Fighting" : "Show Axe Fighting", nullptr);
+	AddEntry(EVENT_MENU_DISTANCE_BAR,
+		Preferences().GetSkillBar(4) ? "Hide Distance Fighting" : "Show Distance Fighting", nullptr);
+	AddEntry(EVENT_MENU_SHIELDING_BAR, Preferences().GetSkillBar(5) ? "Hide Shielding" : "Show Shielding", nullptr);
+	AddEntry(EVENT_MENU_FISHING_BAR, Preferences().GetSkillBar(6) ? "Hide Fishing" : "Show Fishing", nullptr);
 	AddSeparator();
 	AddEntry(EVENT_MENU_SHOW_ALL_BARS, "Show all Skill Bars", nullptr);
 	AddEntry(EVENT_MENU_HIDE_ALL_BARS, "Hide all Skill Bars", nullptr);
@@ -1251,10 +1262,10 @@ void TSkillContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_MENU_LEVEL_BAR:
-		SetLevelBar(!GetLevelBar());
+		Preferences().SetLevelBar(!Preferences().GetLevelBar());
 		break;
 	case EVENT_MENU_MAGIC_LEVEL_BAR:
-		SetMagLevelBar(!GetMagLevelBar());
+		Preferences().SetMagLevelBar(!Preferences().GetMagLevelBar());
 		break;
 	case EVENT_MENU_FIST_BAR:
 	case EVENT_MENU_CLUB_BAR:
@@ -1263,19 +1274,19 @@ void TSkillContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_DISTANCE_BAR:
 	case EVENT_MENU_SHIELDING_BAR:
 	case EVENT_MENU_FISHING_BAR:
-		SetSkillBar(Event - EVENT_MENU_FIST_BAR, !GetSkillBar(Event - EVENT_MENU_FIST_BAR));
+		Preferences().SetSkillBar(Event - EVENT_MENU_FIST_BAR, !Preferences().GetSkillBar(Event - EVENT_MENU_FIST_BAR));
 		break;
 	case EVENT_MENU_SHOW_ALL_BARS:
-		SetLevelBar(true);
-		SetMagLevelBar(true);
+		Preferences().SetLevelBar(true);
+		Preferences().SetMagLevelBar(true);
 		for (int i = 0; i < 7; i++)
-			SetSkillBar(i, true);
+			Preferences().SetSkillBar(i, true);
 		break;
 	case EVENT_MENU_HIDE_ALL_BARS:
-		SetLevelBar(false);
-		SetMagLevelBar(false);
+		Preferences().SetLevelBar(false);
+		Preferences().SetMagLevelBar(false);
 		for (int i = 0; i < 7; i++)
-			SetSkillBar(i, false);
+			Preferences().SetSkillBar(i, false);
 		break;
 	default:
 		TERROR1("unknown event", Event);

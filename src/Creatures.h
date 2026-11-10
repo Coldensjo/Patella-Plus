@@ -34,11 +34,12 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumera
 
 // The values of TCreature::PARTYFlag, the party shield beside the name: the creature's part in a party as the player
 // sees it. The prefix is the member's; the names are ours, from what the context menus offer for each
-// (ContextMenus.cpp) and from IsPlayerInParty.
+// (ContextMenus.cpp) and from TPlayerState::IsInParty.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
 	PARTY_NONE = 0,
 	// Has invited. Another creature: it invited the player ("Join <name>'s Party"), and its shield is drawn only while
-	// the player is in no party. The player: in a party (IsPlayerInParty) with invitations to revoke, nothing else.
+	// the player is in no party. The player: in a party (TPlayerState::IsInParty) with invitations to revoke, nothing
+	// else.
 	PARTY_INVITER = 1,
 	// Invited by the player ("Revoke <name>'s Invitation"). The player's own counts as no party.
 	PARTY_INVITEE = 2,
@@ -117,8 +118,8 @@ class TObjectTypes;
 // What TCreatures asks of the player's state: TPlayerState is made after TCreatures (it reads the creature table), so
 // TCreatures reaches it only through this interface, which TMapState implements (MapState.h). GetPlayerID is the
 // original's (IsOpponent, CheckMonsterHint and MoveCreatures call it); ContinuePlayerWalk is MoveCreatures' step of the
-// walk once the player's step animation is over, ResetPlayer ResetCreatures' writes of the player's state (both ours:
-// the original's code of those two functions, moved into TPlayerState).
+// walk once the player's step animation is over, ResetPlayer TCreatures::Reset's writes of the player's state (both
+// ours: the original's code of those two functions, moved into TPlayerState).
 class TCreaturesPlayer {
 public:
 	TCreaturesPlayer() = default;
@@ -136,8 +137,8 @@ protected:
 
 // What TCreatures and TPlayerState ask of the GUI: Talk.cpp's status message, Help.cpp's hints, Status.cpp's message
 // queue and action number, all TGUI's, a later subsystem than TMapState, so they reach them only through this
-// interface. Client.cpp implements it with those files' free functions. Each member is the original's call of the same
-// name and parameters.
+// interface. Client.cpp's adapter implements it: each member calls TTalk's, THelp's or TInteraction's member of the
+// same name and parameters.
 class TCreaturesGUI {
 public:
 	TCreaturesGUI() = default;
@@ -169,7 +170,7 @@ public:
 	~TCreatures() = default;
 
 	// The beat, the battle and follow targets and the buddy list's lookups.
-	void HideAllCreatures();
+	void HideAll();
 	void SetBeat(int Value);
 	static bool IsPlayer(uint32 CreatureID);
 	void SetAttackID(uint32 CreatureID);    // clears the follow target
@@ -215,9 +216,9 @@ public:
 	[[nodiscard]] const char *GetBuddyListDescription(int Position) const;
 	[[nodiscard]] bool GetBuddyListNotify(int Position) const;
 
-	void InitCreatures();
-	static void ExitCreatures();
-	void ResetCreatures();
+	void Init();
+	static void Exit();
+	void Reset();
 
 private:
 	friend class ::TCreature;
@@ -237,7 +238,7 @@ private:
 	int FirstOpponent{};
 	std::array<TCreature, CREATURES> Creatures{};
 
-	// ResetCreatures clears the table with a memset over its size.
+	// Reset clears the table with a memset over its size.
 	static_assert(sizeof(Creatures) == CREATURES * sizeof(TCreature), "Creatures");
 };
 
@@ -255,55 +256,55 @@ public:
 	~TPlayerState() = default;
 
 	// The player's creature, steps and statistics.
-	[[nodiscard]] int GetNumberOfPlayerSteps() const;
-	void GetPlayerPosition(int *x, int *y, int *z) const; // including the step not confirmed yet
-	void ClearPlayerSteps();
-	void SetPlayerID(uint32 CreatureID);
-	void SetPlayerHealth(int Health, int MaxHealth);
-	void SetPlayerMagicLevel(int Level, int Progress);
-	void SetPlayerMana(int Mana, int MaxMana);
-	void SetPlayerSoul(int Soul);
-	void SetPlayerCapacity(int Capacity);
-	void SetPlayerState(int State);
-	[[nodiscard]] uint32 GetPlayerID() const;
-	[[nodiscard]] int GetPlayerHealth() const;
-	[[nodiscard]] int GetPlayerMaxHealth() const;
-	[[nodiscard]] int GetPlayerExperience() const;
-	[[nodiscard]] int GetPlayerLevel() const;
-	[[nodiscard]] int GetPlayerLevelProgress() const;
-	[[nodiscard]] int GetPlayerMana() const;
-	[[nodiscard]] int GetPlayerMaxMana() const;
-	[[nodiscard]] int GetPlayerSoul() const;
-	[[nodiscard]] int GetPlayerMagicLevel() const;
-	[[nodiscard]] int GetPlayerMagicLevelProgress() const;
-	[[nodiscard]] int GetPlayerCapacity() const;
-	[[nodiscard]] bool IsPlayerPoisoned() const;     // state bit 0
-	[[nodiscard]] bool IsPlayerBurning() const;      // bit 1
-	[[nodiscard]] bool IsPlayerElectrified() const;  // bit 2
-	[[nodiscard]] bool IsPlayerDrunk() const;        // bit 3
-	[[nodiscard]] bool IsPlayerManaShielded() const; // bit 4
-	[[nodiscard]] bool IsPlayerParalyzed() const;    // bit 5
-	[[nodiscard]] bool IsPlayerHasted() const;       // bit 6
-	[[nodiscard]] bool IsPlayerInFight() const;      // bit 7
-	[[nodiscard]] int GetPlayerStep(int Step) const;
-	void StartPlayerStep();
-	int FindPlayerPath();
-	int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
-	void StopPlayer();
-	bool CancelPlayerWalk(int NewDirection);
-	void SetPlayerExperience(int Experience, int Level, int Progress);
-	void SetPlayerSkill(int SkillNumber, int Value, int Progress);
-	[[nodiscard]] int GetPlayerSkillValue(int SkillNumber) const;
-	[[nodiscard]] int GetPlayerSkillProgress(int SkillNumber) const;
+	[[nodiscard]] int GetNumberOfSteps() const;
+	void GetPosition(int *x, int *y, int *z) const; // including the step not confirmed yet
+	void ClearSteps();
+	void SetID(uint32 CreatureID);
+	void SetHealth(int Health, int MaxHealth);
+	void SetMagicLevel(int Level, int Progress);
+	void SetMana(int Mana, int MaxMana);
+	void SetSoul(int Soul);
+	void SetCapacity(int Capacity);
+	void SetState(int State);
+	[[nodiscard]] uint32 GetID() const;
+	[[nodiscard]] int GetHealth() const;
+	[[nodiscard]] int GetMaxHealth() const;
+	[[nodiscard]] int GetExperience() const;
+	[[nodiscard]] int GetLevel() const;
+	[[nodiscard]] int GetLevelProgress() const;
+	[[nodiscard]] int GetMana() const;
+	[[nodiscard]] int GetMaxMana() const;
+	[[nodiscard]] int GetSoul() const;
+	[[nodiscard]] int GetMagicLevel() const;
+	[[nodiscard]] int GetMagicLevelProgress() const;
+	[[nodiscard]] int GetCapacity() const;
+	[[nodiscard]] bool IsPoisoned() const;     // state bit 0
+	[[nodiscard]] bool IsBurning() const;      // bit 1
+	[[nodiscard]] bool IsElectrified() const;  // bit 2
+	[[nodiscard]] bool IsDrunk() const;        // bit 3
+	[[nodiscard]] bool IsManaShielded() const; // bit 4
+	[[nodiscard]] bool IsParalyzed() const;    // bit 5
+	[[nodiscard]] bool IsHasted() const;       // bit 6
+	[[nodiscard]] bool IsInFight() const;      // bit 7
+	[[nodiscard]] int GetStep(int Step) const;
+	void StartStep();
+	int FindPath();
+	int SetDestination(int x, int y, int z, bool Exact, bool Diagonal);
+	void Stop();
+	bool CancelWalk(int NewDirection);
+	void SetExperience(int Experience, int Level, int Progress);
+	void SetSkill(int SkillNumber, int Value, int Progress);
+	[[nodiscard]] int GetSkillValue(int SkillNumber) const;
+	[[nodiscard]] int GetSkillProgress(int SkillNumber) const;
 	static const char *GetSkillName(int SkillNumber);
-	[[nodiscard]] bool HasPlayerSkull() const;
-	[[nodiscard]] bool IsPlayerInParty() const;
-	[[nodiscard]] int GetPlayerPartyFlag() const;
+	[[nodiscard]] bool HasSkull() const;
+	[[nodiscard]] bool IsInParty() const;
+	[[nodiscard]] int GetPartyFlag() const;
 
 	// Ours (TCreaturesPlayer): MoveCreatures' continuation of the walk (true if a new walk is to be sent) and
-	// ResetCreatures' writes of the player's state, the original's code of those two functions.
-	bool ContinuePlayerWalk();
-	void ResetPlayer();
+	// TCreatures::Reset's writes of the player's state, the original's code of those two functions.
+	bool ContinueWalk();
+	void Reset();
 
 private:
 	friend class ::TCreature;
@@ -345,85 +346,8 @@ private:
 	static_assert(sizeof(PlayerSteps) == 10 * sizeof(int), "PlayerSteps");
 };
 
-// The transition's access path: the creatures and the player's state of the one TClient (Client.cpp). They go when no
-// free function needs them.
-namespace bridge {
-TCreatures &Creatures();
-TPlayerState &PlayerState();
-} // namespace bridge
-
 } // namespace patella
 
-// The original's functions (the callers' names, and the golden tests'): each calls the member of the same name of
-// TCreatures on bridge::Creatures() or of TPlayerState on bridge::PlayerState().
-// The player's creature, steps and statistics.
-void GetPlayerPosition(int *x, int *y, int *z); // including the step not confirmed yet
-void ClearPlayerSteps();
-bool IsPlayer(uint32 CreatureID);
-uint32 GetPlayerID();
-int GetPlayerHealth();
-int GetPlayerMaxHealth();
-int GetPlayerExperience();
-int GetPlayerLevel();
-int GetPlayerLevelProgress();
-int GetPlayerMana();
-int GetPlayerMaxMana();
-int GetPlayerSoul();
-int GetPlayerMagicLevel();
-int GetPlayerMagicLevelProgress();
-int GetPlayerCapacity();
-bool IsPlayerPoisoned();                // state bit 0
-bool IsPlayerBurning();                 // bit 1
-bool IsPlayerElectrified();             // bit 2
-bool IsPlayerDrunk();                   // bit 3
-bool IsPlayerManaShielded();            // bit 4
-bool IsPlayerParalyzed();               // bit 5
-bool IsPlayerHasted();                  // bit 6
-bool IsPlayerInFight();                 // bit 7
-void SetAttackID(uint32 CreatureID);    // clears the follow target
-void SetFollowID(uint32 CreatureID);    // clears the attack target
-void SetHighlightID(uint32 CreatureID); // battle list entry under the mouse
-uint32 GetAttackID();
-uint32 GetFollowID();
-uint32 GetHighlightID();
-int GetBuddyPosition(uint32 CharacterID); // position or -1
-bool IsBuddy(const char *Name);
-int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
-
-// The creature table.
-TCreature *GetCreature(uint32 CreatureID);
-void UpdateSkulls();
-void HideCreature(int CreatureID); // a callback for Map.cpp
-bool MoveCreatures();
-void CheckMonsterHint(TCreature *Creature);
-
-// Experience and skills.
-int GetPlayerSkillValue(int SkillNumber);
-int GetPlayerSkillProgress(int SkillNumber);
-const char *GetSkillName(int SkillNumber);
-bool HasPlayerSkull();
-bool IsPlayerInParty();
-int GetPlayerPartyFlag();
-
-// The battle list.
-bool IsOpponent(TCreature *Creature);
-int GetNumberOfOpponents(); // also updates the list
-TCreature *GetOpponent(int Number);
-
-// The VIP list.
-void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
-void RemoveBuddy(uint32 CharacterID);
-void SetBuddySortMethod(int Method);
-void HideOfflineBuddies(bool Hide);
-int GetNumberOfBuddies(); // only the online ones when they are hidden
-uint32 GetBuddyListID(int Position);
-const char *GetBuddyListName(int Position);
-bool IsBuddyOnline(int Position);
-bool IsBuddyNewlyOnline(int Position);
-int GetBuddyListIcon(int Position);
-const char *GetBuddyListDescription(int Position);
-bool GetBuddyListNotify(int Position);
-
-void InitCreatures();
-void ExitCreatures();
-void ResetCreatures();
+// The one client's creatures and player state (Client.cpp).
+patella::TCreatures &Creatures();
+patella::TPlayerState &PlayerState();

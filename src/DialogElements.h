@@ -246,7 +246,8 @@ public:
 	bool LeftButtonDown(int x, int y, int Flags) override;
 	bool LeftButtonUp(int x, int y, int Flags) override;
 	bool MouseWheel(int x, int y, int Code) override;
-	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(Tooltip); }
+	void MouseHover([[maybe_unused]] int x,
+		[[maybe_unused]] int y) override { Interaction().SetMouseOverText(Tooltip); }
 	void ReleaseCapture(TComponent *Component) override
 	{
 		Pressed = false;
@@ -347,7 +348,7 @@ public:
 	TToggleButton(int x, int y, int _ButtonUp, int _ButtonDown, TCallback _Callback, const char *_Tooltip1,
 		const char *_Tooltip2, bool _State);
 	bool LeftButtonUp(int x, int y, int Flags) override;
-	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(State ? Tooltip2 : Tooltip1); }
+	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { Interaction().SetMouseOverText(State ? Tooltip2 : Tooltip1); }
 	bool IsPressed() override;
 
 	bool State;
@@ -362,7 +363,7 @@ public:
 	TTextToggleButton(int x, int y, const char *_Text, int _ButtonUp, int _ButtonDown, TCallback _Callback,
 		const char *_Tooltip1, const char *_Tooltip2, bool _State);
 	bool LeftButtonUp(int x, int y, int Flags) override;
-	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(State ? Tooltip2 : Tooltip1); }
+	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { Interaction().SetMouseOverText(State ? Tooltip2 : Tooltip1); }
 	bool IsPressed() override;
 
 	bool State;
@@ -505,7 +506,7 @@ inline int TEditLine::GetPosition(int x, int y)
 		return FirstVisible;
 	if (x > Width - 2 * SkinProperties().EditLineTextMargin || y > Height - 2 * SkinProperties().EditLineTextMargin)
 		return (int)strlen(Text.get());
-	const int Position = GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, x) + FirstVisible;
+	const int Position = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, x) + FirstVisible;
 	if (Position > (int)strlen(Text.get()))
 		return (int)strlen(Text.get());
 	return Position;

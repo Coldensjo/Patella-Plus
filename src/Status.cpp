@@ -429,7 +429,7 @@ void patella::TInteraction::ClearMessages()
 // dangling until InitStatus.
 void patella::TInteraction::ExitStatus()
 {
-	patella::bridge::Session().ExitSession(); // the character list
+	Session().Exit(); // the character list
 	if (TaintedClipboardText != nullptr)
 		delete[] TaintedClipboardText;
 	LinkRegexp.Reset();
@@ -634,8 +634,8 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	// The original set LinkRegexp to NULL first, so a second InitStatus without ExitStatus leaked the program;
 	// TRegexp's assignment frees it.
 	LinkRegexp = patella::TRegexp(LinkPattern);
-	patella::bridge::Session().InitSession(Gamemaster); // the session's part, in its order below
-	Messages.clear();                                   // the parameters not freed, as the original
+	Session().Init(Gamemaster); // the session's part, in its order below
+	Messages.clear();           // the parameters not freed, as the original
 	ActionNumber = 0;
 	DraggedObject.Type = 0;
 	DraggedObject.Data = 0;
@@ -655,7 +655,7 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 
 // InitStatus's part: the session's members in the order InitStatus wrote them (Gamemaster and the rights first, the
 // rest after its other data).
-void patella::TSession::InitSession(bool Value)
+void patella::TSession::Init(bool Value)
 {
 	Gamemaster = Value;
 	ClearRights();
@@ -669,309 +669,11 @@ void patella::TSession::InitSession(bool Value)
 }
 
 // ExitStatus's part: the character list, freed first.
-void patella::TSession::ExitSession()
+void patella::TSession::Exit()
 {
 	if (Characters != nullptr)
 		Characters.reset();
 	Characters = nullptr;
 }
 
-// The session's functions of the original: each calls its member on the one TClient's TSession.
-
-bool CheckAnyRight()
-{
-	return patella::bridge::Session().CheckAnyRight();
-}
-
-void SetConnectionState(int State)
-{
-	patella::bridge::Session().SetConnectionState(State);
-}
-
-int GetConnectionState()
-{
-	return patella::bridge::Session().GetConnectionState();
-}
-
-int GetAccountNumber()
-{
-	return patella::bridge::Session().GetAccountNumber();
-}
-
-const char *GetAccountNumberString()
-{
-	return patella::bridge::Session().GetAccountNumberString();
-}
-
-const char *GetAccountPassword()
-{
-	return patella::bridge::Session().GetAccountPassword();
-}
-
-int GetAccountCharacters()
-{
-	return patella::bridge::Session().GetAccountCharacters();
-}
-
-int GetPremiumDays()
-{
-	return patella::bridge::Session().GetPremiumDays();
-}
-
-int GetActiveCharacter()
-{
-	return patella::bridge::Session().GetActiveCharacter();
-}
-
-bool CheckRight(int rightid, int Bit)
-{
-	return patella::bridge::Session().CheckRight(rightid, Bit);
-}
-
-void SetAccount(int Number, const char *Password)
-{
-	patella::bridge::Session().SetAccount(Number, Password);
-}
-
-void SetActiveCharacter(int Number)
-{
-	patella::bridge::Session().SetActiveCharacter(Number);
-}
-
-const char *GetCharacterName(int Number)
-{
-	return patella::bridge::Session().GetCharacterName(Number);
-}
-
-const char *GetCharacterWorld(int Number)
-{
-	return patella::bridge::Session().GetCharacterWorld(Number);
-}
-
-const char *GetCharacterIPAddress(int Number)
-{
-	return patella::bridge::Session().GetCharacterIPAddress(Number);
-}
-
-int GetCharacterPort(int Number)
-{
-	return patella::bridge::Session().GetCharacterPort(Number);
-}
-
-// The functions of the original: each calls its member on the one TClient's TInteraction.
-
-int GetActionNumber()
-{
-	return patella::bridge::Interaction().GetActionNumber();
-}
-
-void IncrementActionNumber()
-{
-	patella::bridge::Interaction().IncrementActionNumber();
-}
-
-void SetActionState(int State)
-{
-	patella::bridge::Interaction().SetActionState(State);
-}
-
-int GetActionState()
-{
-	return patella::bridge::Interaction().GetActionState();
-}
-
-void SetMousePosition(int x, int y)
-{
-	patella::bridge::Interaction().SetMousePosition(x, y);
-}
-
-int GetMouseX()
-{
-	return patella::bridge::Interaction().GetMouseX();
-}
-
-int GetMouseY()
-{
-	return patella::bridge::Interaction().GetMouseY();
-}
-
-void SetMouseCursor(int Cursor)
-{
-	patella::bridge::Interaction().SetMouseCursor(Cursor);
-}
-
-int GetMouseCursor()
-{
-	return patella::bridge::Interaction().GetMouseCursor();
-}
-
-void SetPendingAction(int State, int Number)
-{
-	patella::bridge::Interaction().SetPendingAction(State, Number);
-}
-
-int GetPendingActionState()
-{
-	return patella::bridge::Interaction().GetPendingActionState();
-}
-
-int GetPendingActionNumber()
-{
-	return patella::bridge::Interaction().GetPendingActionNumber();
-}
-
-void SetWindowSize(int Width, int Height)
-{
-	patella::bridge::Interaction().SetWindowSize(Width, Height);
-}
-
-int GetWindowWidth()
-{
-	return patella::bridge::Interaction().GetWindowWidth();
-}
-
-int GetWindowHeight()
-{
-	return patella::bridge::Interaction().GetWindowHeight();
-}
-
-void SetDragStart(int x, int y)
-{
-	patella::bridge::Interaction().SetDragStart(x, y);
-}
-
-void SetDragObject(TObject Obj, int Index, int x, int y, int z)
-{
-	patella::bridge::Interaction().SetDragObject(Obj, Index, x, y, z);
-}
-
-void SetDragTarget(int x, int y, int z)
-{
-	patella::bridge::Interaction().SetDragTarget(x, y, z);
-}
-
-void CheckDragStart(int x, int y)
-{
-	patella::bridge::Interaction().CheckDragStart(x, y);
-}
-
-TObject *GetDragObject(int *Index, int *x, int *y, int *z)
-{
-	return patella::bridge::Interaction().GetDragObject(Index, x, y, z);
-}
-
-void GetDragTarget(int *x, int *y, int *z)
-{
-	patella::bridge::Interaction().GetDragTarget(x, y, z);
-}
-
-void SetTradeObject(TObject Obj, int Index, int x, int y, int z)
-{
-	patella::bridge::Interaction().SetTradeObject(Obj, Index, x, y, z);
-}
-
-void SetUseObject(TObject Obj, int Index, int x, int y, int z)
-{
-	patella::bridge::Interaction().SetUseObject(Obj, Index, x, y, z);
-}
-
-void SetTradeInfo(int Info)
-{
-	patella::bridge::Interaction().SetTradeInfo(Info);
-}
-
-TObject *GetTradeObject(int *Index, int *x, int *y, int *z)
-{
-	return patella::bridge::Interaction().GetTradeObject(Index, x, y, z);
-}
-
-TObject *GetUseObject(int *Index, int *x, int *y, int *z)
-{
-	return patella::bridge::Interaction().GetUseObject(Index, x, y, z);
-}
-
-int GetTradeInfo()
-{
-	return patella::bridge::Interaction().GetTradeInfo();
-}
-
-void SetMouseOverText(const char *Text)
-{
-	patella::bridge::Interaction().SetMouseOverText(Text);
-}
-
-void SetMouseOverTextPosition(int x, int y)
-{
-	patella::bridge::Interaction().SetMouseOverTextPosition(x, y);
-}
-
-const char *GetMouseOverText()
-{
-	return patella::bridge::Interaction().GetMouseOverText();
-}
-
-void GetMouseOverTextPosition(int *x, int *y)
-{
-	patella::bridge::Interaction().GetMouseOverTextPosition(x, y);
-}
-
-void UpdateBlinkState()
-{
-	patella::bridge::Interaction().UpdateBlinkState();
-}
-
-bool GetBlinkState()
-{
-	return patella::bridge::Interaction().GetBlinkState();
-}
-
-int PeekMessageType()
-{
-	return patella::bridge::Interaction().PeekMessageType();
-}
-
-void FetchMessage(int *Type, std::intptr_t *Param1, std::intptr_t *Param2)
-{
-	patella::bridge::Interaction().FetchMessage(Type, Param1, Param2);
-}
-
-void ClearMessages()
-{
-	patella::bridge::Interaction().ClearMessages();
-}
-
-void ExitStatus()
-{
-	patella::bridge::Interaction().ExitStatus();
-}
-
-void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2)
-{
-	patella::bridge::Interaction().AddMessage(Type, Param1, Param2);
-}
-
-void AddMessageFirst(int Type, std::intptr_t Param1, std::intptr_t Param2)
-{
-	patella::bridge::Interaction().AddMessageFirst(Type, Param1, Param2);
-}
-
-void CheckClipboardText(patella::TSpan<const char> Characters)
-{
-	patella::bridge::Interaction().CheckClipboardText(Characters);
-}
-
-void CopyToClipboard(const char *text)
-{
-	patella::bridge::Interaction().CopyToClipboard(text);
-}
-
-void CopyTaintedClipboardText()
-{
-	patella::bridge::Interaction().CopyTaintedClipboardText();
-}
-
-void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)())
-{
-	patella::bridge::Interaction().InitStatus(Gamemaster, linkwarningeventhandler);
-}
 // NOLINTEND(cppcoreguidelines-owning-memory)

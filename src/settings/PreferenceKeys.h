@@ -102,8 +102,8 @@ struct TBuddyValue {
 	bool operator==(const TBuddyValue &) const = default;
 };
 
-// The options as Tibia.cfg's writer writes them (Preferences.cpp GetPreferenceValues fills it, after which
-// SetPreferenceValues gives the client the options the original's reader would give it).
+// The options as Tibia.cfg's writer writes them (Preferences.cpp TPreferences::GetValues fills it, after which
+// TPreferences::SetValues gives the client the options the original's reader would give it).
 struct TPreferenceValues {
 	bool TestServer = false;
 	std::optional<std::array<int, 3>> FullscreenMode; // width, height, depth

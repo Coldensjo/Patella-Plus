@@ -70,7 +70,7 @@ void TSubWindow::OnClose()
 {
 	try {
 		if (Identifier == SKILLS_WINDOW || Identifier == BATTLE_WINDOW || Identifier == BUDDYLIST_WINDOW)
-			SetContentWindowSize(Identifier, Body->Height);
+			Preferences().SetContentWindowSize(Identifier, Body->Height);
 		if (UpButton != nullptr && !IsChild(UpButton))
 			UpButton->Close();
 		if (CloseButton != nullptr && !IsChild(CloseButton))
@@ -159,7 +159,7 @@ void TDialogWindow::Draw(int Surface, int x, int y)
 	int Position = 0;
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext()) {
 		if (Child == Dragged) {
-			GetSurface()->FillRectangle(Surface, TRect(x, Position + y, Width, Dragged->Height),
+			GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(x, Position + y, Width, Dragged->Height),
 				SkinProperties().DraggedWindowPlaceColor);
 		} else {
 			Child->Draw(Surface, Child->OffsetX + x, Child->OffsetY + y);
@@ -264,7 +264,7 @@ void TDialogWindow::StoreOpenDialogs()
 {
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext()) {
 		if ((static_cast<TContentWindow *>(Child))->Identifier < CONTAINER_WINDOW)
-			AddOpenDialog((static_cast<TContentWindow *>(Child))->Identifier);
+			Preferences().AddOpenDialog((static_cast<TContentWindow *>(Child))->Identifier);
 	}
 }
 

@@ -140,7 +140,8 @@ void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int sr
 	PATELLA_ASSERT_VALUES(width>0, width);
 	PATELLA_ASSERT_VALUES(height>0, height);
 	if (Skins()[skin].width == width && Skins()[skin].height == height) {
-		DrawPicturePart(Surface, x, y, 4, Skins()[skin].x, Skins()[skin].y, Skins()[skin].width, Skins()[skin].height);
+		Graphics().DrawPicturePart(Surface, x, y, 4, Skins()[skin].x, Skins()[skin].y, Skins()[skin].width,
+			Skins()[skin].height);
 	} else {
 		int PieceHeight = 0;
 		int dy = 0;
@@ -167,7 +168,7 @@ void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int sr
 				}
 				if (PieceHeight > h)
 					PieceHeight = h;
-				DrawPicturePart(Surface, dx + x, dy + y, 4, SourceX, SourceY, PieceWidth, PieceHeight);
+				Graphics().DrawPicturePart(Surface, dx + x, dy + y, 4, SourceX, SourceY, PieceWidth, PieceHeight);
 				dx += PieceWidth;
 			}
 			dy += PieceHeight;
@@ -195,7 +196,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 		TERROR(s.str().c_str());
 	}
 	if (Skins()[skin].width == width && Skins()[skin].height == height) {
-		DrawPicturePartClipped(Surface, x, y, 4, Skins()[skin].x, Skins()[skin].y, Skins()[skin].width,
+		Graphics().DrawPicturePartClipped(Surface, x, y, 4, Skins()[skin].x, Skins()[skin].y, Skins()[skin].width,
 			Skins()[skin].height, TRect(ClipX, ClipY, ClipWidth, ClipHeight));
 	} else {
 		int PieceHeight = 0;
@@ -223,7 +224,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 				}
 				if (PieceHeight > h)
 					PieceHeight = h;
-				DrawPicturePartClipped(Surface, dx + x, dy + y, 4, SourceX, SourceY, PieceWidth, PieceHeight,
+				Graphics().DrawPicturePartClipped(Surface, dx + x, dy + y, 4, SourceX, SourceY, PieceWidth, PieceHeight,
 					TRect(ClipX, ClipY, ClipWidth, ClipHeight));
 				dx += PieceWidth;
 			}
@@ -234,7 +235,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 
 // --- Skin properties ------------------------------------------------------
 
-// Called by InitControl after InitSkins.
+// Called by InitControl after TSkins::Init.
 void InitSkinProperties()
 {
 	SkinProperties().CursorHotspot1.x = 0;
@@ -1565,14 +1566,14 @@ TTimer::TTimer(int Time, TCallback Callback)
 	if (Remaining == 0) {
 		Active = false;
 	} else {
-		AddTimer(this);
+		GUI().AddTimer(this);
 		Active = true;
 	}
 }
 
 TTimer::~TTimer()
 {
-	RemoveTimer(this);
+	GUI().RemoveTimer(this);
 	Active = false;
 }
 
@@ -1587,7 +1588,7 @@ void TTimer::Update(int elapsed)
 		}
 		Callback.Send();
 		if (Remaining == 0) {
-			RemoveTimer(this);
+			GUI().RemoveTimer(this);
 			Active = false;
 		}
 	}
@@ -1658,11 +1659,11 @@ void TComponent::Draw(int Surface, int x, int y)
 	for (; i < DrawingListLength; i++) {
 		if (DrawingList[i].skin == SKIN_NONE)
 			continue;
-		PATELLA_ASSERT_VALUES(DrawingList[i].skin<patella::bridge::Skins().NumberOfSkins, DrawingList[i].skin);
+		PATELLA_ASSERT_VALUES(DrawingList[i].skin<SkinData().NumberOfSkins, DrawingList[i].skin);
 		if (DrawingList[i].width == 0 && DrawingList[i].height == 0) {
 			const TSkin *Skin = &Skins()[DrawingList[i].skin];
-			DrawPicturePart(Surface, DrawingList[i].x + x, DrawingList[i].y + y, 4, Skin->x, Skin->y, Skin->width,
-				Skin->height);
+			Graphics().DrawPicturePart(Surface, DrawingList[i].x + x, DrawingList[i].y + y, 4, Skin->x, Skin->y,
+				Skin->width, Skin->height);
 			continue;
 		}
 		if (DrawingList[i].x + x < 0 || DrawingList[i].y + y < 0) {
@@ -1952,11 +1953,11 @@ bool TWindow::HelpMouseMove(int x, int y)
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->Next) {
 		if (In(x - Child->OffsetX, 0, Child->Width - 1) && In(y - Child->OffsetY, 0, Child->Height - 1)
 			&& Child->HelpMouseMove(x - Child->OffsetX, y - Child->OffsetY)) {
-			MoveHelpPosition(Child->OffsetX, Child->OffsetY);
+			Help().MovePosition(Child->OffsetX, Child->OffsetY);
 			return true;
 		}
 	}
-	SetHelpHandle(HELP_NONE);
+	Help().SetHandle(HELP_NONE);
 	return false;
 }
 
@@ -2189,45 +2190,4 @@ bool patella::TGUI::CheckHotkey(int Key)
 	return true;
 }
 
-// The functions of the original: each calls its member on the one TClient's TGUI.
-
-void AddTimer(TTimer *Timer)
-{
-	patella::bridge::GUI().AddTimer(Timer);
-}
-
-void RemoveTimer(TTimer *Timer)
-{
-	patella::bridge::GUI().RemoveTimer(Timer);
-}
-
-void UpdateTimers()
-{
-	patella::bridge::GUI().UpdateTimers();
-}
-
-void InitHotkeys()
-{
-	patella::bridge::GUI().InitHotkeys();
-}
-
-void ExitHotkeys()
-{
-	patella::TGUI::ExitHotkeys();
-}
-
-void AddHotkey(int Key, TCallback Callback)
-{
-	patella::bridge::GUI().AddHotkey(Key, Callback);
-}
-
-void RemoveHotkey(int Key)
-{
-	patella::bridge::GUI().RemoveHotkey(Key);
-}
-
-bool CheckHotkey(int Key)
-{
-	return patella::bridge::GUI().CheckHotkey(Key);
-}
 // NOLINTEND(cppcoreguidelines-owning-memory)

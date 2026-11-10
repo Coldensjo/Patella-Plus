@@ -115,10 +115,10 @@ void TTextWindow::Draw(int Surface, int x, int y)
 		PATELLA_ASSERT_VALUES(Format->LineText!=nullptr, CurrentLine, GetFirstLineNumber());
 		int LineHeight;
 		if (First) {
-			LineHeight = GetFontHeight(Format->FontNumber);
+			LineHeight = Graphics().GetFontHeight(Format->FontNumber);
 			First = false;
 		} else {
-			LineHeight = GetFontLineHeight(Format->FontNumber);
+			LineHeight = Graphics().GetFontLineHeight(Format->FontNumber);
 		}
 		Bottom -= LineHeight;
 		if (Bottom < 0)
@@ -128,31 +128,32 @@ void TTextWindow::Draw(int Surface, int x, int y)
 		int EndLine, EndOffset, StartLine, StartOffset;
 		if (HasSelection() && GetSelectionEnd(&EndLine, &EndOffset) && GetSelectionStart(&StartLine, &StartOffset)
 			&& StartLine <= CurrentLine && CurrentLine <= EndLine) {
-			int SelectionHeight = GetFontLineHeight(Format->FontNumber);
+			int SelectionHeight = Graphics().GetFontLineHeight(Format->FontNumber);
 			int SelectionWidth = 0;
 			int SelectionX = LineX;
 			if (CurrentLine == EndLine) {
 				if (CurrentLine == StartLine) {
-					SelectionX = GetTextPartWidth(Format->FontNumber, Format->LineText, StartOffset);
-					SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText + StartOffset,
+					SelectionX = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText, StartOffset);
+					SelectionWidth = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText + StartOffset,
 						EndOffset - StartOffset);
-					SelectionHeight = GetFontHeight(Format->FontNumber);
+					SelectionHeight = Graphics().GetFontHeight(Format->FontNumber);
 					SelectionX += LineX;
 				} else {
-					SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText, EndOffset);
-					SelectionHeight = GetFontHeight(Format->FontNumber);
+					SelectionWidth = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText, EndOffset);
+					SelectionHeight = Graphics().GetFontHeight(Format->FontNumber);
 				}
 			} else if (CurrentLine == StartLine) {
-				SelectionX = GetTextPartWidth(Format->FontNumber, Format->LineText, StartOffset) + LineX;
-				SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText + StartOffset,
+				SelectionX = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText, StartOffset) + LineX;
+				SelectionWidth = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText + StartOffset,
 					Format->LineLength - StartOffset);
 			} else {
-				SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText, Format->LineLength);
+				SelectionWidth = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText, Format->LineLength);
 			}
-			GetSurface()->FillRectangle(Surface, TRect(SelectionX, LineY, SelectionWidth, SelectionHeight),
+			GraphicsEngine().GetSurface()->FillRectangle(Surface,
+				TRect(SelectionX, LineY, SelectionWidth, SelectionHeight),
 				SkinProperties().ConsoleWindow.SelectionColor);
 		}
-		PrintTextPart(Surface, LineX, LineY, Format->FontNumber, Format->Color, Format->LineText,
+		Graphics().PrintTextPart(Surface, LineX, LineY, Format->FontNumber, Format->Color, Format->LineText,
 			Format->LineLength, 0);
 	}
 }
@@ -174,10 +175,10 @@ void TTextWindow::Arrange()
 		if (Format != nullptr) {
 			CurrentLine--;
 			if (First) {
-				Rest -= GetFontHeight(Format->FontNumber);
+				Rest -= Graphics().GetFontHeight(Format->FontNumber);
 				First = false;
 			} else {
-				Rest -= GetFontLineHeight(Format->FontNumber);
+				Rest -= Graphics().GetFontLineHeight(Format->FontNumber);
 			}
 			if (Rest < 0)
 				InvisibleLines++;
@@ -265,7 +266,7 @@ bool TTextWindow::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 			return true;
 		Message = MESSAGE_REQUEST_MENU;
 	}
-	AddMessage(Message, Line, 0);
+	Interaction().AddMessage(Message, Line, 0);
 	return true;
 }
 
@@ -277,7 +278,7 @@ void TTextWindow::HandleEvent(int Event)
 	case EVENT_COPY: {
 		const char *Text = GetSelectedText();
 		if (Text != nullptr)
-			CopyToClipboard(Text);
+			Interaction().CopyToClipboard(Text);
 		break;
 	}
 	case EVENT_CUT:
@@ -312,7 +313,7 @@ void TTextWindow::FormatLines()
 		TTalkLine *TextLine = TextBuffer->GetFirst();
 		while (TextLine != nullptr) {
 			TRGBColor Color;
-			GetTalkColor(&Color, TextLine->Mode);
+			Talk().GetColor(&Color, TextLine->Mode);
 			int NextIndent = 10;
 			if (TextLine->Mode >= TALK_ADMIN_MESSAGE && TextLine->Mode <= TALK_INFO_MESSAGE)
 				NextIndent = 0;
@@ -323,7 +324,7 @@ void TTextWindow::FormatLines()
 			int Start = 0;
 			while (!Last) {
 				int Blank = -1;
-				const int End = GetFittingTextLength(FONT_SMOOTH, Text + Start, TextWidth - Indent) + Start;
+				const int End = Graphics().GetFittingTextLength(FONT_SMOOTH, Text + Start, TextWidth - Indent) + Start;
 				int i;
 				for (i = Start; i < End; i++) {
 					const char c = Text[i];
@@ -551,9 +552,9 @@ bool TTextWindow::GetPosition(int x, int y, int *Line, int *Offset, int *Length)
 				CurrentLine = LineNumber - 1;
 				if (Format == nullptr || Format->LineText == nullptr)
 					continue;
-				int LineHeight = GetFontLineHeight(Format->FontNumber);
+				int LineHeight = Graphics().GetFontLineHeight(Format->FontNumber);
 				if (First) {
-					LineHeight = GetFontHeight(Format->FontNumber);
+					LineHeight = Graphics().GetFontHeight(Format->FontNumber);
 					First = false;
 				}
 				if (In(y, Bottom - LineHeight, Bottom)) {
@@ -577,7 +578,7 @@ bool TTextWindow::GetPosition(int x, int y, int *Line, int *Offset, int *Length)
 			else
 				TextX = x - Format->Indent;
 			*Line = LineNumber;
-			int Characters = GetFittingTextLength(Format->FontNumber, Format->LineText, TextX);
+			int Characters = Graphics().GetFittingTextLength(Format->FontNumber, Format->LineText, TextX);
 			if (Characters > Format->LineLength)
 				Characters = Format->LineLength;
 			*Offset = Characters;
@@ -692,7 +693,7 @@ TTab::TTab(const char *_Caption, TTalkBuffer *_TextBuffer, TCallback _Callback)
 	TStringBuffer(FullCaption.get(), Size).Assign(Caption.get());
 	Callback = _Callback;
 	Shortened = false;
-	const int Length = GetFittingTextLength(SkinProperties().Tab.ActiveFont.FontNumber, Caption.get(),
+	const int Length = Graphics().GetFittingTextLength(SkinProperties().Tab.ActiveFont.FontNumber, Caption.get(),
 		SkinProperties().Tab.Width - SkinProperties().Tab.CaptionMargin * 2);
 	if (ShortenString(Caption.get(), Length))
 		Shortened = true;
@@ -719,20 +720,20 @@ static_assert(std::is_nothrow_destructible_v<TTab> && std::is_nothrow_destructib
 void TTab::OnClose()
 {
 	if (TextBuffer->IsRuleViolation() && TextBuffer->GetReceiveTalkMode() == TALK_GAMEMASTER_ANSWER) {
-		SendCancelRuleViolation();
+		Communication().SendCancelRuleViolation();
 	} else if (TextBuffer->IsRuleViolation() && TextBuffer->GetReceiveTalkMode() == TALK_PLAYER_ANSWER
 		&& TextBuffer->CanWrite()) {
 		const char *PlayerName = TextBuffer->GetAddressee();
 		PATELLA_ASSERT(PlayerName!=nullptr);
-		SendCloseRuleViolation(PlayerName);
+		Communication().SendCloseRuleViolation(PlayerName);
 	} else if (!TextBuffer->IsPrivateChannel()) {
 		if (TextBuffer->GetChannelID() != -1)
-			SendLeaveChannel(TextBuffer->GetChannelID());
+			Communication().SendLeaveChannel(TextBuffer->GetChannelID());
 	} else if (!TextBuffer->IsSelected() || TextBuffer->IsLocked()) {
 		if (TextBuffer->CanWrite())
-			SendLeaveChannel(TextBuffer->GetChannelID());
+			Communication().SendLeaveChannel(TextBuffer->GetChannelID());
 	}
-	DeleteTextBuffer(TextBuffer);
+	Talk().DeleteTextBuffer(TextBuffer);
 	TextBuffer = nullptr;
 	TElement::OnClose();
 }
@@ -787,7 +788,7 @@ bool TTab::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe
 {
 	static_cast<TTabBar *>(GetParent())->SetCurrentTab(this);
 	Callback.Send();
-	AddMessage(MESSAGE_CHANNEL_MENU, 0, 0);
+	Interaction().AddMessage(MESSAGE_CHANNEL_MENU, 0, 0);
 	return true;
 }
 
@@ -795,7 +796,7 @@ bool TTab::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe
 void TTab::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	if (Shortened)
-		SetMouseOverText(FullCaption.get());
+		Interaction().SetMouseOverText(FullCaption.get());
 }
 
 // New lines light the tab up (blinking when the number of lines changed);
@@ -804,7 +805,7 @@ void TTab::Arrange()
 {
 	if (TextBuffer->TakeChanged()) {
 		if (TextBuffer->lines != LineCount)
-			BlinkEnd = GetActionNumber() + 10;
+			BlinkEnd = Interaction().GetActionNumber() + 10;
 		LineCount = TextBuffer->lines;
 		Unread = true;
 	}
@@ -829,9 +830,9 @@ void TTab::Draw(int Surface, int x, int y)
 		Font = &SkinProperties().Tab.BlinkingFont;
 	else
 		Font = &SkinProperties().Tab.InactiveFont;
-	PrintFormattedText(Surface, SkinProperties().Tab.Caption.x + x, SkinProperties().Tab.Caption.y + y, *Font,
-		Caption.get());
-	if (BlinkEnd != 0 && BlinkEnd < GetActionNumber())
+	Graphics().PrintFormattedText(Surface, SkinProperties().Tab.Caption.x + x, SkinProperties().Tab.Caption.y + y,
+		*Font, Caption.get());
+	if (BlinkEnd != 0 && BlinkEnd < Interaction().GetActionNumber())
 		BlinkEnd = 0;
 }
 
@@ -962,11 +963,11 @@ TWindow *TTabBar::GetContainer(TComponent *Child)
 // The help of the console (handle 23) for the whole parent.
 bool TTabBar::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(HELP_CONSOLE_CHANNELS);
+	Help().SetHandle(HELP_CONSOLE_CHANNELS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	SetHelpSize(Parent->Width, Parent->Height);
-	MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
@@ -1053,7 +1054,7 @@ void TTabBar::OnClose()
 // OpenChannel).
 void TTabBar::StoreOpenChannels()
 {
-	ClearOpenChannels();
+	Preferences().ClearOpenChannels();
 	for (int i = 0; i < 3; i++) {
 		TWindow *Container;
 		if (i == 0)
@@ -1068,7 +1069,7 @@ void TTabBar::StoreOpenChannels()
 			TTalkBuffer *TextBuffer = (static_cast<TTab *>(Child))->TextBuffer;
 			Child = Next;
 			if (TextBuffer != nullptr && TextBuffer->GetChannelID() != -1 && !TextBuffer->IsPrivateChannel())
-				AddOpenChannel(TextBuffer->GetChannelID());
+				Preferences().AddOpenChannel(TextBuffer->GetChannelID());
 		}
 	}
 }
@@ -1177,17 +1178,17 @@ TConsoleWindow::TConsoleWindow()
 	InsertChild(MoveRightButton);
 	MoveLeftButton = new TSkinButton(0, 0, SKIN_TABS_LEFT_BUTTON_UP, SKIN_TABS_LEFT_BUTTON_DOWN, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
 	InsertChild(MoveLeftButton);
-	AddHotkey(KEY_CONTROL | 'I', TCallback(this, EVENT_IGNORE_LIST));
-	AddHotkey(KEY_CONTROL | 'O', TCallback(this, EVENT_REQUEST_CHANNELS));
-	AddHotkey(KEY_CONTROL | 'E', TCallback(this, EVENT_CLOSE_CHANNEL));
-	AddHotkey(KEY_CONTROL | 'M', TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
-	AddHotkey(KEY_CONTROL | 'K', TCallback(this, EVENT_OPTIONS_HOTKEYS));
-	AddHotkey(KEY_CONTROL | 'D', TCallback(this, EVENT_DEFAULT_CHANNEL));
-	SwitchTime = GetActionNumber() + 50;
+	GUI().AddHotkey(KEY_CONTROL | 'I', TCallback(this, EVENT_IGNORE_LIST));
+	GUI().AddHotkey(KEY_CONTROL | 'O', TCallback(this, EVENT_REQUEST_CHANNELS));
+	GUI().AddHotkey(KEY_CONTROL | 'E', TCallback(this, EVENT_CLOSE_CHANNEL));
+	GUI().AddHotkey(KEY_CONTROL | 'M', TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
+	GUI().AddHotkey(KEY_CONTROL | 'K', TCallback(this, EVENT_OPTIONS_HOTKEYS));
+	GUI().AddHotkey(KEY_CONTROL | 'D', TCallback(this, EVENT_DEFAULT_CHANNEL));
+	SwitchTime = Interaction().GetActionNumber() + 50;
 	int *Channels;
-	const int Count = GetOpenChannels(&Channels);
+	const int Count = Preferences().GetOpenChannels(&Channels);
 	for (int i = 0; i < Count; i++)
-		SendJoinChannel(Channels[i]);
+		Communication().SendJoinChannel(Channels[i]);
 	if (Count > 0)
 		delete[] Channels;
 }
@@ -1218,7 +1219,7 @@ void TConsoleWindow::OnClose()
 {
 	try {
 		TabBar->StoreOpenChannels();
-		SetConsoleHeight(Height);
+		Preferences().SetConsoleHeight(Height);
 		if (!IsChild(VolumeButton) && VolumeButton != nullptr)
 			VolumeButton->Close();
 		if (!IsChild(CloseButton) && CloseButton != nullptr)
@@ -1229,12 +1230,12 @@ void TConsoleWindow::OnClose()
 			MoveRightButton->Close();
 		if (!IsChild(MoveLeftButton) && MoveLeftButton != nullptr)
 			MoveLeftButton->Close();
-		RemoveHotkey(KEY_CONTROL | 'I');
-		RemoveHotkey(KEY_CONTROL | 'O');
-		RemoveHotkey(KEY_CONTROL | 'E');
-		RemoveHotkey(KEY_CONTROL | 'M');
-		RemoveHotkey(KEY_CONTROL | 'K');
-		RemoveHotkey(KEY_CONTROL | 'D');
+		GUI().RemoveHotkey(KEY_CONTROL | 'I');
+		GUI().RemoveHotkey(KEY_CONTROL | 'O');
+		GUI().RemoveHotkey(KEY_CONTROL | 'E');
+		GUI().RemoveHotkey(KEY_CONTROL | 'M');
+		GUI().RemoveHotkey(KEY_CONTROL | 'K');
+		GUI().RemoveHotkey(KEY_CONTROL | 'D');
 	} catch (...) {
 		CloseWhileUnwinding([this] { TWindow::OnClose(); });
 		throw;
@@ -1267,7 +1268,7 @@ void TConsoleWindow::SetSize(int Width, int Height)
 // skin shows the talk throttle; the buttons follow the tab bar's changes.
 void TConsoleWindow::Draw(int Surface, int x, int y)
 {
-	if (TakeConsoleChanged()) {
+	if (Talk().TakeConsoleChanged()) {
 		TabBar->Arrange();
 		PATELLA_ASSERT(CurrentConsole!=nullptr);
 		TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
@@ -1276,7 +1277,7 @@ void TConsoleWindow::Draw(int Surface, int x, int y)
 		SetActive(TextBuffer->CanWrite());
 		Input->SetDisabled(!TextBuffer->CanWrite());
 	}
-	IgnoreButton->SetSkins(IsTalkThrottled() ? SKIN_IGNORE_BUTTON_UP_THROTTLED : SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN);
+	IgnoreButton->SetSkins(Talk().IsThrottled() ? SKIN_IGNORE_BUTTON_UP_THROTTLED : SKIN_IGNORE_BUTTON_UP, SKIN_IGNORE_BUTTON_DOWN);
 	const bool Changed = TabBar->Changed;
 	TabBar->Changed = false;
 	if (Changed)
@@ -1321,8 +1322,8 @@ bool TConsoleWindow::LeftButtonDown(int x, int y, int Flags)
 bool TConsoleWindow::HelpMouseMove(int x, int y)
 {
 	if (!TWindow::HelpMouseMove(x, y)) {
-		SetHelpHandle(HELP_CONSOLE);
-		SetHelpSize(Width, Height);
+		Help().SetHandle(HELP_CONSOLE);
+		Help().SetSize(Width, Height);
 	}
 	return true;
 }
@@ -1428,7 +1429,7 @@ void TConsoleWindow::KeyPress(int Key)
 	else if ((Key & KEY_CONTROL) != 0)
 		Number += 24;
 	bool AutoSend;
-	const char *Text = GetHotkey(Number, &AutoSend);
+	const char *Text = Preferences().GetHotkey(Number, &AutoSend);
 	if (Text != nullptr) {
 		Input->SetText(Text);
 		if (AutoSend)
@@ -1464,10 +1465,10 @@ void TConsoleWindow::HandleEvent(int Event)
 		CurrentConsole->GetTextBuffer()->ShowMessages = ServerMessagesButton->State;
 		break;
 	case EVENT_IGNORE_LIST:
-		AddMessage(MESSAGE_IGNORE_LIST_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_IGNORE_LIST_DIALOG, 0, 0);
 		break;
 	case EVENT_REQUEST_CHANNELS:
-		SendRequestChannels();
+		Communication().SendRequestChannels();
 		break;
 	case EVENT_VOLUME_SAY:
 		TalkMode = TALK_SAY;
@@ -1509,7 +1510,7 @@ void TConsoleWindow::HandleEvent(int Event)
 		break;
 	}
 	case EVENT_OPTIONS_HOTKEYS:
-		AddMessage(MESSAGE_HOTKEY_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_HOTKEY_DIALOG, 0, 0);
 		break;
 	default:
 		TERROR1("unknown event", Event);
@@ -1525,7 +1526,7 @@ void TConsoleWindow::SetActive(bool Active) const
 	if (!TextBuffer->CanWrite())
 		Active = false;
 	PATELLA_ASSERT(Input!=nullptr);
-	if (!Active && GetActionState() == ACTIONSTATE_CONTEXT_MENU)
+	if (!Active && Interaction().GetActionState() == ACTIONSTATE_CONTEXT_MENU)
 		return;
 	Input->SetActive(Active);
 }
@@ -1588,9 +1589,9 @@ void TConsoleWindow::OpenDefaultChannel(TTalkBuffer *TextBuffer, const char *Cap
 TTalkBuffer *TConsoleWindow::OpenChannel(int RecvMode, int SendMode, const char *Name, int Channel,
 	const char *Caption)
 {
-	TTalkBuffer *TextBuffer = CreateTextBuffer(RecvMode, SendMode, Name, Channel);
+	TTalkBuffer *TextBuffer = Talk().CreateTextBuffer(RecvMode, SendMode, Name, Channel);
 	if (TextBuffer == nullptr) {
-		TextBuffer = ::GetTextBuffer(RecvMode, Name, Channel);
+		TextBuffer = Talk().GetTextBuffer(RecvMode, Name, Channel);
 		PATELLA_ASSERT(TextBuffer!=nullptr);
 	}
 	AddChannel(TextBuffer, Caption);
@@ -1609,14 +1610,14 @@ void TConsoleWindow::AddChannel(TTalkBuffer *TextBuffer, const char *Caption)
 		NewTab = new TTab(Caption, TextBuffer, TCallback(this, EVENT_SHOW_CHANNEL));
 		TabBar->AppendChild(NewTab);
 		if (TextBuffer->GetChannelID() == 7) {
-			AddTextBufferLine(TextBuffer, 0, TextHelpChannelWelcome, TALK_ADMIN_MESSAGE, nullptr, 0);
+			Talk().AddTextBufferLine(TextBuffer, 0, TextHelpChannelWelcome, TALK_ADMIN_MESSAGE, nullptr, 0);
 			TextBuffer->Close();
 		}
 		PATELLA_ASSERT(NewTab!=nullptr);
 	}
 	const TTab *CurrentTab = TabBar->CurrentTab;
 	TextBuffer->SetWriteEnabled(true);
-	if (GetActionNumber() >= SwitchTime) {
+	if (Interaction().GetActionNumber() >= SwitchTime) {
 		TabBar->SetCurrentTab(NewTab);
 		HandleEvent(EVENT_SHOW_CHANNEL);
 	} else if (CurrentTab != nullptr) {
@@ -1652,23 +1653,24 @@ void TConsoleWindow::CloseChannel()
 // the player is told to wait.
 void TConsoleWindow::ReportRuleViolation(const char *Question)
 {
-	TTalkBuffer *TextBuffer = ::GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
+	TTalkBuffer *TextBuffer = Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
 	if (TextBuffer != nullptr) {
 		TTab *NewTab = TabBar->FindTab(TextBuffer);
 		PATELLA_ASSERT(NewTab!=nullptr);
 		TabBar->SetCurrentTab(NewTab);
-		SetStatusMessage(TextRequestSubmitted, false);
+		Talk().SetStatusMessage(TextRequestSubmitted, false);
 		return;
 	}
 	PATELLA_ASSERT(Question!=nullptr);
 	PATELLA_ASSERT(strlen(Question)>0);
 	OpenChannel(TALK_GAMEMASTER_ANSWER, TALK_PLAYER_ANSWER, nullptr, -1, TextReportRuleViolation);
-	TextBuffer = ::GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
+	TextBuffer = Talk().GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1);
 	PATELLA_ASSERT(TextBuffer!=nullptr);
-	PATELLA_ASSERT_VALUES(GetCreature(GetPlayerID()), GetPlayerID());
-	AddTextBufferLine(TextBuffer, 0, Question, TALK_PLAYER_ANSWER, GetCreature(GetPlayerID())->Name, 0);
-	AddTextBufferLine(TextBuffer, 0, TextWaitForGamemaster, TALK_ADMIN_MESSAGE, nullptr, 0);
-	SendTalk(TALK_GAMEMASTER_REQUEST, Question);
+	PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
+	Talk().AddTextBufferLine(TextBuffer, 0, Question, TALK_PLAYER_ANSWER,
+		Creatures().GetCreature(PlayerState().GetID())->Name, 0);
+	Talk().AddTextBufferLine(TextBuffer, 0, TextWaitForGamemaster, TALK_ADMIN_MESSAGE, nullptr, 0);
+	Communication().SendTalk(TALK_GAMEMASTER_REQUEST, Question);
 	TextBuffer->SetWriteEnabled(false);
 }
 
@@ -1724,14 +1726,14 @@ void TConsoleWindow::SendInput()
 	char MessageSeparator;
 	ParseInput(&Text, &Addressee, &TalkMode, &MessageSeparator);
 	if (ChannelID == -1 && (TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL)) {
-		SetStatusMessage("This is not a chat channel.", false);
+		Talk().SetStatusMessage("This is not a chat channel.", false);
 		Text = nullptr;
 	}
-	if (HasOwnPrivateChannel() && Text != nullptr && strlen(Text) != 0) {
+	if (Talk().HasOwnPrivateChannel() && Text != nullptr && strlen(Text) != 0) {
 		if (MessageSeparator == 'I')
-			SendInviteToPrivateChannel(Text);
+			Communication().SendInviteToPrivateChannel(Text);
 		if (MessageSeparator == 'X')
-			SendExcludeFromPrivateChannel(Text);
+			Communication().SendExcludeFromPrivateChannel(Text);
 	}
 	if (Text != nullptr) {
 		switch (TalkMode) {
@@ -1742,33 +1744,36 @@ void TConsoleWindow::SendInput()
 		case TALK_YELL:
 		case TALK_GAMEMASTER_BROADCAST:
 		case TALK_ANONYMOUS_BROADCAST:
-			SendTalk(TalkMode, Text);
+			Communication().SendTalk(TalkMode, Text);
 			break;
 		case TALK_PRIVATE_MESSAGE:
 		case TALK_GAMEMASTER_MESSAGE:
 		case TALK_ANONYMOUS_MESSAGE:
 			PATELLA_ASSERT(Addressee!=nullptr);
-			PATELLA_ASSERT_VALUES(GetCreature(GetPlayerID()), GetPlayerID());
-			AddChannelNotice(GetCreature(GetPlayerID())->Name, Text, TalkMode, Addressee, ChannelID);
-			if (CompareStrings(Addressee, GetCreature(GetPlayerID())->Name, -1) != 0)
-				SendTalk(TalkMode, Addressee, Text);
+			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetID())->Name, Text, TalkMode,
+				Addressee, ChannelID);
+			if (CompareStrings(Addressee, Creatures().GetCreature(PlayerState().GetID())->Name, -1) != 0)
+				Communication().SendTalk(TalkMode, Addressee, Text);
 			break;
 		case TALK_CHANNEL_CALL:
 		case TALK_GAMEMASTER_CHANNELCALL:
 		case TALK_ANONYMOUS_CHANNELCALL:
 			PATELLA_ASSERT(ChannelID!=-1);
-			SendTalk(TalkMode, ChannelID, Text);
+			Communication().SendTalk(TalkMode, ChannelID, Text);
 			break;
 		case TALK_GAMEMASTER_ANSWER:
 			PATELLA_ASSERT(Addressee!=nullptr);
-			PATELLA_ASSERT_VALUES(GetCreature(GetPlayerID()), GetPlayerID());
-			SendTalk(TALK_GAMEMASTER_ANSWER, Addressee, Text);
-			AddChannelNotice(GetCreature(GetPlayerID())->Name, Text, TALK_PLAYER_ANSWER, Addressee, -1);
+			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
+			Communication().SendTalk(TALK_GAMEMASTER_ANSWER, Addressee, Text);
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetID())->Name, Text,
+				TALK_PLAYER_ANSWER, Addressee, -1);
 			break;
 		case TALK_PLAYER_ANSWER:
-			PATELLA_ASSERT_VALUES(GetCreature(GetPlayerID()), GetPlayerID());
-			SendTalk(TALK_PLAYER_ANSWER, Text);
-			AddChannelNotice(GetCreature(GetPlayerID())->Name, Text, TALK_GAMEMASTER_ANSWER, "", -1);
+			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetID()), PlayerState().GetID());
+			Communication().SendTalk(TALK_PLAYER_ANSWER, Text);
+			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetID())->Name, Text,
+				TALK_GAMEMASTER_ANSWER, "", -1);
 			break;
 		default:
 			TERROR1("unknown talk mode", TalkMode);
@@ -1865,13 +1870,15 @@ void TConsoleWindow::ParseInput(char **Text, char **Addressee, int *TalkMode, ch
 			*TalkMode = TALK_GAMEMASTER_MESSAGE;
 		}
 	}
-	if (strstr(Line + i, GetAccountNumberString()) != nullptr
-		|| (strstr(Line + i, GetAccountPassword()) != nullptr && strlen(GetAccountPassword()) != 0)) {
+	if (strstr(Line + i, Session().GetAccountNumberString()) != nullptr
+		|| (strstr(Line + i, Session().GetAccountPassword()) != nullptr
+			&& strlen(Session().GetAccountPassword()) != 0)) {
 		*Text = nullptr;
 		*Addressee = nullptr;
 		*TalkMode = TALK_NONE;
 		*Separator = 0;
-		AddMessage(MESSAGE_ACCOUNT_DATA_WARNING, reinterpret_cast<std::intptr_t>("Account Data Warning"), 0);
+		Interaction().AddMessage(MESSAGE_ACCOUNT_DATA_WARNING, reinterpret_cast<std::intptr_t>("Account Data Warning"),
+			0);
 		return;
 	}
 	while (IsSpace(Line[i]))
@@ -1904,7 +1911,7 @@ bool TConsoleWindow::SaveChannel() const
 	File.Close();
 	TFixedString<100> Message;
 	Message.Format("Channel appended to {}", FileName);
-	SetStatusMessage(Message, false);
+	Talk().SetStatusMessage(Message, false);
 	return true;
 }
 // NOLINTEND(cppcoreguidelines-owning-memory)

@@ -62,8 +62,8 @@ TMainWindow::TMainWindow(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
 	ChangeMode(false);
-	AddHotkey(KEY_CONTROL | 'F', TCallback(this, EVENT_TOGGLE_FULLSCREEN));
-	AddHotkey(KEY_ALT | KEY_RETURN, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	GUI().AddHotkey(KEY_CONTROL | 'F', TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	GUI().AddHotkey(KEY_ALT | KEY_RETURN, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
 }
 
 // Its work is the close's (OnClose).
@@ -78,7 +78,7 @@ void TMainWindow::OnClose()
 {
 	try {
 		if (FirstChild != nullptr && InGame) {
-			ClearOpenDialogs();
+			Preferences().ClearOpenDialogs();
 			if (SidePanel != nullptr)
 				SidePanel->StoreOpenDialogs();
 			if (DialogWindow != nullptr)
@@ -113,16 +113,9 @@ void patella::TGUI::ExitMainWindow()
 	MainWindow.reset();
 	if (ModalWindow != nullptr) {
 		DeleteComponent(ModalWindow);
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction.SetActionState(ACTIONSTATE_NONE);
 	}
 	ModalWindow = nullptr;
-}
-
-// The free function of the original's name: Control.cpp's ExitControl and the golden MainWindow test call it, the
-// golden Control and Communication tests fake it (commworld.cpp).
-void ExitMainWindow()
-{
-	patella::bridge::GUI().ExitMainWindow();
 }
 
 // Out of the game an error while drawing the start window becomes
@@ -151,7 +144,7 @@ void TMainWindow::Draw(int Surface, int x, int y)
 void TMainWindow::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
-	SetWindowSize(Width, Height);
+	Interaction().SetWindowSize(Width, Height);
 	if (InGame) {
 		const int SplitterHeight = Splitter->Height;
 		int MaxMapHeight = MapFrame->GetMinimumHeight();
@@ -189,7 +182,7 @@ void TMainWindow::SetSize(int Width, int Height)
 // every other key goes to the console.
 void TMainWindow::KeyPress(int Key)
 {
-	if (GetConnectionState() != CONNECTION_IN_GAME)
+	if (Session().GetConnectionState() != CONNECTION_IN_GAME)
 		return;
 	switch (Key) {
 	case KEY_UP: Walk(0, -1, false); break;
@@ -200,10 +193,10 @@ void TMainWindow::KeyPress(int Key)
 	case KEY_PAD_PAGE_DOWN: Walk(1, 1, true); break;
 	case KEY_PAD_HOME: Walk(-1, -1, true); break;
 	case KEY_PAD_PAGE_UP: Walk(1, -1, true); break;
-	case KEY_CONTROL | KEY_UP: SendTurnNorth(); break;
-	case KEY_CONTROL | KEY_LEFT: SendTurnWest(); break;
-	case KEY_CONTROL | KEY_RIGHT: SendTurnEast(); break;
-	case KEY_CONTROL | KEY_DOWN: SendTurnSouth(); break;
+	case KEY_CONTROL | KEY_UP: Communication().SendTurnNorth(); break;
+	case KEY_CONTROL | KEY_LEFT: Communication().SendTurnWest(); break;
+	case KEY_CONTROL | KEY_RIGHT: Communication().SendTurnEast(); break;
+	case KEY_CONTROL | KEY_DOWN: Communication().SendTurnSouth(); break;
 	default:
 		Console->KeyPress(Key);
 		break;
@@ -218,19 +211,19 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMainWindow::HandleEvent(int Event)
 {
-	const patella::TGUI &GUI = patella::bridge::GUI();
+	const patella::TGUI &GUI = ::GUI();
 	switch (Event) {
 	case EVENT_COPY_LINK:
-		CopyTaintedClipboardText();
+		Interaction().CopyTaintedClipboardText();
 		[[fallthrough]];
 	case EVENT_CANCEL:
-		SetActionState(ACTIONSTATE_NONE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_EXIT_PROGRAM:
 		GUI.ExitProgramCallback();
 		break;
 	case EVENT_OPTIONS:
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_REARRANGE:
 		SetSize(Width, Height);
@@ -274,41 +267,41 @@ void TMainWindow::HandleEvent(int Event)
 		break;
 	}
 	case EVENT_ABORT:
-		Disconnect(false);
-		if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER || GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
-			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
-			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
+		Network().Disconnect(false);
+		if (Session().GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER || Session().GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
+			Interaction().AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
+			Interaction().AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
-		SetConnectionState(CONNECTION_OFFLINE);
-		SetActionState(ACTIONSTATE_NONE);
+		Session().SetConnectionState(CONNECTION_OFFLINE);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_STOP:
-		ClearPlayerSteps();
-		SetAttackID(0);
-		SendStopAttackAndWalk();
+		PlayerState().ClearSteps();
+		Creatures().SetAttackID(0);
+		Communication().SendStopAttackAndWalk();
 		break;
 	case EVENT_TOGGLE_FULLSCREEN:
-		if (GetFullscreenMode()->Width != 0) {
-			TFullscreenMode Mode = *GetFullscreenMode();
+		if (Preferences().GetFullscreenMode()->Width != 0) {
+			TFullscreenMode Mode = *Preferences().GetFullscreenMode();
 			if (Mode.Width < 640 || Mode.Height < 480) {
 				Mode.Width = 640;
 				Mode.Height = 480;
-				SetFullscreenMode(&Mode);
+				Preferences().SetFullscreenMode(&Mode);
 				SetSize(640, 480);
 			}
-			GUI.SetDisplayModeCallback(GetViewMode() == 1 ? 2 : 1);
+			GUI.SetDisplayModeCallback(Preferences().GetViewMode() == 1 ? 2 : 1);
 		}
 		break;
 	case EVENT_BUG_REPORT:
-		if (!CheckRight(40, -1)) {
-			SetStatusMessage(TextNoBugReportRight, false);
-		} else if (GetConnectionState() == CONNECTION_IN_GAME && GUI.ModalWindow == nullptr) {
-			AddMessage(MESSAGE_BUG_REPORT_DIALOG, 0, 0);
+		if (!Session().CheckRight(40, -1)) {
+			Talk().SetStatusMessage(TextNoBugReportRight, false);
+		} else if (Session().GetConnectionState() == CONNECTION_IN_GAME && GUI.ModalWindow == nullptr) {
+			Interaction().AddMessage(MESSAGE_BUG_REPORT_DIALOG, 0, 0);
 		}
 		break;
 	case EVENT_LOGOUT:
-		SetActionState(ACTIONSTATE_NONE);
-		SendLogout();
+		Interaction().SetActionState(ACTIONSTATE_NONE);
+		Communication().SendLogout();
 		break;
 	case EVENT_LEAVE_QUESTION: {
 		// A question with an answer event; message 6 deletes the block.
@@ -317,28 +310,28 @@ void TMainWindow::HandleEvent(int Event)
 		Data[1] = reinterpret_cast<std::intptr_t>("Are you sure you want to leave Tibia?");
 		Data[2] = reinterpret_cast<std::intptr_t>(this);
 		Data[3] = EVENT_LOGOUT;
-		AddMessage(MESSAGE_QUESTION_DIALOG, reinterpret_cast<std::intptr_t>(Data), 0);
+		Interaction().AddMessage(MESSAGE_QUESTION_DIALOG, reinterpret_cast<std::intptr_t>(Data), 0);
 		break;
 	}
 	case EVENT_CHARACTER_LIST:
-		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
+		Interaction().AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		break;
 	case EVENT_HELP:
-		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
 		break;
 	case EVENT_HELP_MODE:
-		SetActionState(ACTIONSTATE_NONE);
-		AddMessage(MESSAGE_HELP_MODE, 0, 0);
+		Interaction().SetActionState(ACTIONSTATE_NONE);
+		Interaction().AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_TUTOR_HELP:
-		SendJoinChannel(7);
+		Communication().SendJoinChannel(7);
 		break;
 	case EVENT_REPORT:
-		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
 		break;
 	case EVENT_RULE_VIOLATION:
-		if (CheckAnyRight())
-			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
+		if (Session().CheckAnyRight())
+			Interaction().AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 		break;
 	case EVENT_DEVICE_AUTOMATIC:
 		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Automatic); // Control.cpp's
@@ -366,7 +359,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 void TMainWindow::ChangeMode(bool InGame)
 {
 	if (FirstChild != nullptr && this->InGame) {
-		ClearOpenDialogs();
+		Preferences().ClearOpenDialogs();
 		if (SidePanel != nullptr)
 			SidePanel->StoreOpenDialogs();
 		if (DialogWindow != nullptr)
@@ -388,7 +381,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		SidePanel = new TDialogWindow;
 		DialogWindow = new TDialogWindow;
 		int *Dialogs;
-		const int Count = GetOpenDialogs(&Dialogs);
+		const int Count = Preferences().GetOpenDialogs(&Dialogs);
 		bool HaveAutomap = false;
 		bool HaveStatus = false;
 		bool HaveInventory = false;
@@ -436,7 +429,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		// The console keeps its stored height unless the map would get
 		// smaller than its minimum height; then it gets its own minimum.
 		int ConsoleHeight = Console->GetMinimumHeight();
-		const int StoredHeight = GetConsoleHeight();
+		const int StoredHeight = Preferences().GetConsoleHeight();
 		if (StoredHeight > ConsoleHeight)
 			ConsoleHeight = StoredHeight;
 		int MapWidth = Width - SkinProperties().SideBarWidth;
@@ -453,7 +446,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		Splitter->Arrange();
 		Console->SetSize(MapWidth, ConsoleHeight);
 		Console->SetPosition(0, MapHeight + SkinProperties().SplitterHeight);
-		Console->OpenDefaultChannel(patella::bridge::Talk().DefaultTextBuffer, "Default");
+		Console->OpenDefaultChannel(Talk().DefaultTextBuffer, "Default");
 		Console->Arrange();
 		SideBar->SetPosition(MapWidth, 0);
 		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->GetMinimumHeight() + SideBar->GetMinimumHeight());
@@ -473,36 +466,36 @@ void TMainWindow::ChangeMode(bool InGame)
 		// Ctrl+Z reports a bug, Ctrl+R a rule violation, Ctrl+Y opens the
 		// gamemaster dialog, Ctrl+H the hints, Ctrl+T the channel 7 and
 		// Escape cancels the attack and the walk.
-		AddHotkey(KEY_CONTROL | 'L', TCallback(this, EVENT_LOGOUT));
-		AddHotkey(KEY_CONTROL | 'Q', TCallback(this, EVENT_LOGOUT));
-		AddHotkey(KEY_CONTROL | 'G', TCallback(this, EVENT_CHARACTER_LIST));
-		AddHotkey(KEY_CONTROL | 'S', TCallback(this, EVENT_TOGGLE_SKILLS));
-		AddHotkey(KEY_CONTROL | 'B', TCallback(this, EVENT_TOGGLE_BATTLE));
-		AddHotkey(KEY_CONTROL | 'P', TCallback(this, EVENT_TOGGLE_VIP));
-		AddHotkey(KEY_CONTROL | 'Z', TCallback(this, EVENT_BUG_REPORT));
-		AddHotkey(KEY_CONTROL | 'R', TCallback(this, EVENT_REPORT));
-		AddHotkey(KEY_CONTROL | 'Y', TCallback(this, EVENT_RULE_VIOLATION));
-		AddHotkey(KEY_CONTROL | 'H', TCallback(this, EVENT_HELP_MODE));
-		AddHotkey(KEY_CONTROL | 'T', TCallback(this, EVENT_TUTOR_HELP));
-		AddHotkey(KEY_ESCAPE, TCallback(this, EVENT_STOP));
+		GUI().AddHotkey(KEY_CONTROL | 'L', TCallback(this, EVENT_LOGOUT));
+		GUI().AddHotkey(KEY_CONTROL | 'Q', TCallback(this, EVENT_LOGOUT));
+		GUI().AddHotkey(KEY_CONTROL | 'G', TCallback(this, EVENT_CHARACTER_LIST));
+		GUI().AddHotkey(KEY_CONTROL | 'S', TCallback(this, EVENT_TOGGLE_SKILLS));
+		GUI().AddHotkey(KEY_CONTROL | 'B', TCallback(this, EVENT_TOGGLE_BATTLE));
+		GUI().AddHotkey(KEY_CONTROL | 'P', TCallback(this, EVENT_TOGGLE_VIP));
+		GUI().AddHotkey(KEY_CONTROL | 'Z', TCallback(this, EVENT_BUG_REPORT));
+		GUI().AddHotkey(KEY_CONTROL | 'R', TCallback(this, EVENT_REPORT));
+		GUI().AddHotkey(KEY_CONTROL | 'Y', TCallback(this, EVENT_RULE_VIOLATION));
+		GUI().AddHotkey(KEY_CONTROL | 'H', TCallback(this, EVENT_HELP_MODE));
+		GUI().AddHotkey(KEY_CONTROL | 'T', TCallback(this, EVENT_TUTOR_HELP));
+		GUI().AddHotkey(KEY_ESCAPE, TCallback(this, EVENT_STOP));
 	} else {
 		StartWindow = new TStartWindow;
 		InsertChild(StartWindow);
-		RemoveHotkey(KEY_CONTROL | 'L');
-		RemoveHotkey(KEY_CONTROL | 'Q');
-		RemoveHotkey(KEY_CONTROL | 'G');
-		RemoveHotkey(KEY_CONTROL | 'S');
-		RemoveHotkey(KEY_CONTROL | 'B');
-		RemoveHotkey(KEY_CONTROL | 'P');
-		RemoveHotkey(KEY_CONTROL | 'Z');
-		RemoveHotkey(KEY_CONTROL | 'R');
-		RemoveHotkey(KEY_CONTROL | 'Y');
-		RemoveHotkey(KEY_CONTROL | 'H');
-		RemoveHotkey(KEY_CONTROL | 'T');
-		RemoveHotkey(KEY_ESCAPE);
+		GUI().RemoveHotkey(KEY_CONTROL | 'L');
+		GUI().RemoveHotkey(KEY_CONTROL | 'Q');
+		GUI().RemoveHotkey(KEY_CONTROL | 'G');
+		GUI().RemoveHotkey(KEY_CONTROL | 'S');
+		GUI().RemoveHotkey(KEY_CONTROL | 'B');
+		GUI().RemoveHotkey(KEY_CONTROL | 'P');
+		GUI().RemoveHotkey(KEY_CONTROL | 'Z');
+		GUI().RemoveHotkey(KEY_CONTROL | 'R');
+		GUI().RemoveHotkey(KEY_CONTROL | 'Y');
+		GUI().RemoveHotkey(KEY_CONTROL | 'H');
+		GUI().RemoveHotkey(KEY_CONTROL | 'T');
+		GUI().RemoveHotkey(KEY_ESCAPE);
 	}
 	SetSize(Width, Height);
-	SetConsoleActive(patella::bridge::GUI().ModalWindow == nullptr);
+	SetConsoleActive(GUI().ModalWindow == nullptr);
 }
 
 // The console's new height, at least its minimum; the caller lays out the
@@ -521,18 +514,18 @@ int TMainWindow::GetConsoleWindowHeight() const
 	return Console->Height;
 }
 
-// SetPlayerDestination returns 1 when the step can be walked and 2 when
+// TPlayerState::SetDestination returns 1 when the step can be walked and 2 when
 // the player has to stop.
 void TMainWindow::Walk(int dx, int dy, bool Diagonal)
 {
 	int x, y, z;
-	GetPlayerPosition(&x, &y, &z);
-	switch (SetPlayerDestination(x + dx, y + dy, z, true, Diagonal)) {
+	PlayerState().GetPosition(&x, &y, &z);
+	switch (PlayerState().SetDestination(x + dx, y + dy, z, true, Diagonal)) {
 	case 1:
-		SendWalk();
+		Communication().SendWalk();
 		break;
 	case 2:
-		SendStopWalk();
+		Communication().SendStopWalk();
 		break;
 	default:
 		break;
@@ -559,9 +552,9 @@ void TMainWindow::OpenContainer(int Container) const
 	TContainerWindowBody *Body = static_cast<TContainerWindowBody *>(Window->Body);
 	Body->Update();
 	if (Body->IsMinimized()) {
-		Window->SetTitle(new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container)));
-		Window->SetIcon(new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false));
-		if (HasContainerParent(Container))
+		Window->SetTitle(new TLabel(SkinProperties().SubWindow.TitleFont, Inventory().GetContainerName(Container)));
+		Window->SetIcon(new TObjectIcon(Inventory().GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false));
+		if (Inventory().HasContainerParent(Container))
 			Window->ShowUpButton();
 		else
 			Window->HideUpButton();
@@ -671,8 +664,8 @@ TStartWindow::TStartWindow()
 // stretched over the window.
 void TStartWindow::Draw(int Surface, int x, int y)
 {
-	DrawPicture(2, 0, 0, 1);
-	GetSurface()->StretchBlitRect(Surface, TRect(x, y, Width, Height), 2, TRect(0, 0, 640, 480));
+	Graphics().DrawPicture(2, 0, 0, 1);
+	GraphicsEngine().GetSurface()->StretchBlitRect(Surface, TRect(x, y, Width, Height), 2, TRect(0, 0, 640, 480));
 	TWindow::Draw(Surface, x, y);
 }
 
@@ -685,18 +678,18 @@ void TStartWindow::SetSize(int Width, int Height)
 // The buttons work only while there is no connection.
 void TStartWindow::HandleEvent(int Event)
 {
-	const patella::TGUI &GUI = patella::bridge::GUI();
-	if (GetConnectionState() != CONNECTION_OFFLINE)
+	const patella::TGUI &GUI = ::GUI();
+	if (Session().GetConnectionState() != CONNECTION_OFFLINE)
 		return;
 	switch (Event) {
 	case EVENT_ENTER_GAME:
-		AddMessage(MESSAGE_LOGIN_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_LOGIN_DIALOG, 0, 0);
 		break;
 	case EVENT_INFO:
-		AddMessage(MESSAGE_INFO_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_INFO_DIALOG, 0, 0);
 		break;
 	case EVENT_START_OPTIONS:
-		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
+		Interaction().AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
 	case EVENT_EXIT_PROGRAM:
 		GUI.ExitProgramCallback();
@@ -732,8 +725,8 @@ void TSplitter::Arrange()
 // follows the mouse; the global MainWindow is used, not the parent.
 bool TSplitter::MouseMove([[maybe_unused]] int x, int y)
 {
-	const patella::TGUI &GUI = patella::bridge::GUI();
-	SetMouseCursor(CURSOR_SIZENS);
+	const patella::TGUI &GUI = ::GUI();
+	Interaction().SetMouseCursor(CURSOR_SIZENS);
 	if (Dragging) {
 		GUI.MainWindow->ResizeConsole(DragY - y + GUI.MainWindow->GetConsoleWindowHeight());
 		GUI.MainWindow->SetSize(GUI.MainWindow->Width, GUI.MainWindow->Height);
@@ -767,17 +760,10 @@ void patella::TGUI::InitMainWindow(int Width, int Height, void (*ExitProgram)(),
 	std::unique_ptr<TMainWindow> Made(new TMainWindow(Width, Height));
 	(void)MainWindow.release(); // NOLINT(bugprone-unused-return-value): the original stored over it (set only once)
 	MainWindow = std::move(Made);
-	PATELLA_ASSERT_VALUES(GetActionState()==ACTIONSTATE_NONE, GetActionState());
+	PATELLA_ASSERT_VALUES(Interaction.GetActionState()==ACTIONSTATE_NONE, Interaction.GetActionState());
 	ExitProgramCallback = ExitProgram;
 	ModalWindow = nullptr;
 	SetDisplayModeCallback = SetDisplayMode;
 	OpenURLCallback = OpenURL;
-}
-
-// The free function of the original's name: src/SdlFrame.cpp and the golden MainWindow test call it.
-void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
-	void (*OpenURL)(const char *URL))
-{
-	patella::bridge::GUI().InitMainWindow(Width, Height, ExitProgram, SetDisplayMode, OpenURL);
 }
 // NOLINTEND(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)

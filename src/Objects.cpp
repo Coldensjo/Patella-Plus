@@ -411,7 +411,7 @@ void patella::TObjectTypes::GetHangPattern(TObject &Obj, int *PatternX, int *Pat
 // --- Loading -------------------------------------------------------------------
 
 // Frees the four arrays and their sprite tables.
-void patella::TObjectTypes::ReleaseObjects()
+void patella::TObjectTypes::Release()
 {
 	if (ObjectProperties != nullptr) {
 		for (int i = ObjectProperties->low(); i <= ObjectProperties->high(); i++)
@@ -509,7 +509,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 	Entry->Phases = File->readByte();
 	const int Count = Entry->Width * Entry->Height * Entry->Layers * Entry->PatternWidth * Entry->PatternHeight
 		* Entry->PatternDepth * Entry->Phases;
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the entry's sprite table, deleted by ReleaseObjects
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the entry's sprite table, deleted by TObjectTypes::Release
 	Entry->Sprites = new uint16[Count];
 	for (int i = 0; i < Count; i++)
 		Entry->Sprites[i] = File->readWord();
@@ -520,10 +520,10 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 // Header: signature, then the highest object type (types start at 100)
 // and the numbers of outfits, effects and missiles. The file is closed
 // twice: by close() and by the destructor.
-void patella::TObjectTypes::LoadObjects(const char *FileName)
+void patella::TObjectTypes::Load(const char *FileName)
 {
 	PATELLA_ASSERT(FileName!=nullptr);
-	ReleaseObjects();
+	Release();
 	TReadBinaryFile File;
 	File.open(FileName);
 	DatSignature = File.readQuad();
@@ -532,7 +532,7 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 	const int Effects = File.readWord();
 	const int Missiles = File.readWord();
 	// A deliberate difference from the original: every entry's sprite table starts empty, each table's as soon as it is
-	// allocated, so ReleaseObjects, after a file that ends before the last entry (or a count of 0, which the next
+	// allocated, so Release, after a file that ends before the last entry (or a count of 0, which the next
 	// table's constructor refuses), deletes only the tables LoadProperties allocated. The original left the entries'
 	// Sprites indeterminate and deleted them.
 	const auto ClearSprites = [](array<TProperties> &Table) {
@@ -565,8 +565,8 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 // An exception while loading becomes PROGRAM_ERROR 1; InitControl then shuts
 // down. Every exception is caught, not only a TMyException: LoadProperties'
 // new[] of a size from Tibia.dat can throw std::bad_array_new_length or
-// std::bad_alloc (LoadObjects throws no PROGRAM_ERROR).
-void patella::TObjectTypes::InitObjects()
+// std::bad_alloc (TObjectTypes::Load throws no PROGRAM_ERROR).
+void patella::TObjectTypes::Init()
 {
 	// Cleared, not freed, as the original does (release, not reset).
 	static_cast<void>(ObjectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
@@ -574,250 +574,13 @@ void patella::TObjectTypes::InitObjects()
 	static_cast<void>(EffectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
 	static_cast<void>(MissileProperties.release()); // NOLINT(bugprone-unused-return-value): the leak is the original's
 	try {
-		LoadObjects("Tibia.dat");
+		Load("Tibia.dat");
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::OBJECTS_FILE};
 	}
 }
 
-void patella::TObjectTypes::ExitObjects()
+void patella::TObjectTypes::Exit()
 {
-	ReleaseObjects();
-}
-
-// The original's functions: each calls its member on the one TClient's TObjectTypes.
-
-bool GetObjectFlag(int Type, int Flag)
-{
-	return patella::bridge::ObjectTypes().GetObjectFlag(Type, Flag);
-}
-
-int GetObjectBrightness(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectBrightness(Type);
-}
-
-int GetObjectLightColor(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectLightColor(Type);
-}
-
-int GetObjectShiftX(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectShiftX(Type);
-}
-
-int GetObjectShiftY(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectShiftY(Type);
-}
-
-int GetObjectElevation(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectElevation(Type);
-}
-
-int GetObjectLensHelp(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectLensHelp(Type);
-}
-
-int GetObjectWidth(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectWidth(Type);
-}
-
-int GetObjectHeight(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectHeight(Type);
-}
-
-int GetObjectExactSize(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectExactSize(Type);
-}
-
-int GetObjectLayers(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectLayers(Type);
-}
-
-int GetObjectPatternWidth(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectPatternWidth(Type);
-}
-
-int GetObjectPatternHeight(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectPatternHeight(Type);
-}
-
-int GetObjectPatternDepth(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectPatternDepth(Type);
-}
-
-int GetObjectPhases(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectPhases(Type);
-}
-
-int GetObjectSpriteNumber(int Type, int X, int Y, int Layer, int PatternX, int PatternY, int PatternZ, int Phase)
-{
-	return patella::bridge::ObjectTypes().GetObjectSpriteNumber(Type, X, Y, Layer, PatternX, PatternY, PatternZ, Phase);
-}
-
-bool GetOutfitFlag(int Number, int Flag)
-{
-	return patella::bridge::ObjectTypes().GetOutfitFlag(Number, Flag);
-}
-
-int GetOutfitBrightness(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitBrightness(Number);
-}
-
-int GetOutfitLightColor(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitLightColor(Number);
-}
-
-int GetOutfitShiftX(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitShiftX(Number);
-}
-
-int GetOutfitShiftY(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitShiftY(Number);
-}
-
-int GetOutfitWidth(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitWidth(Number);
-}
-
-int GetOutfitExactSize(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitExactSize(Number);
-}
-
-int GetOutfitHeight(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitHeight(Number);
-}
-
-int GetOutfitLayers(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitLayers(Number);
-}
-
-int GetOutfitPhases(int Number)
-{
-	return patella::bridge::ObjectTypes().GetOutfitPhases(Number);
-}
-
-int GetOutfitSpriteNumber(int Number, int X, int Y, int Layer, int Direction, int Phase)
-{
-	return patella::bridge::ObjectTypes().GetOutfitSpriteNumber(Number, X, Y, Layer, Direction, Phase);
-}
-
-bool GetEffectFlag(int Number, int Flag)
-{
-	return patella::bridge::ObjectTypes().GetEffectFlag(Number, Flag);
-}
-
-int GetEffectBrightness(int Number)
-{
-	return patella::bridge::ObjectTypes().GetEffectBrightness(Number);
-}
-
-int GetEffectLightColor(int Number)
-{
-	return patella::bridge::ObjectTypes().GetEffectLightColor(Number);
-}
-
-int GetEffectWidth(int Number)
-{
-	return patella::bridge::ObjectTypes().GetEffectWidth(Number);
-}
-
-int GetEffectHeight(int Number)
-{
-	return patella::bridge::ObjectTypes().GetEffectHeight(Number);
-}
-
-int GetEffectLayers(int Number)
-{
-	return patella::bridge::ObjectTypes().GetEffectLayers(Number);
-}
-
-int GetEffectPhases(int Number)
-{
-	return patella::bridge::ObjectTypes().GetEffectPhases(Number);
-}
-
-int GetEffectSpriteNumber(int Number, int X, int Y, int Layer, int Phase)
-{
-	return patella::bridge::ObjectTypes().GetEffectSpriteNumber(Number, X, Y, Layer, Phase);
-}
-
-bool GetMissileFlag(int Number, int Flag)
-{
-	return patella::bridge::ObjectTypes().GetMissileFlag(Number, Flag);
-}
-
-int GetMissileBrightness(int Number)
-{
-	return patella::bridge::ObjectTypes().GetMissileBrightness(Number);
-}
-
-int GetMissileLightColor(int Number)
-{
-	return patella::bridge::ObjectTypes().GetMissileLightColor(Number);
-}
-
-int GetMissileWidth(int Number)
-{
-	return patella::bridge::ObjectTypes().GetMissileWidth(Number);
-}
-
-int GetMissileHeight(int Number)
-{
-	return patella::bridge::ObjectTypes().GetMissileHeight(Number);
-}
-
-int GetMissileLayers(int Number)
-{
-	return patella::bridge::ObjectTypes().GetMissileLayers(Number);
-}
-
-int GetMissileSpriteNumber(int Number, int X, int Y, int Layer, int Direction)
-{
-	return patella::bridge::ObjectTypes().GetMissileSpriteNumber(Number, X, Y, Layer, Direction);
-}
-
-void GetCumulativePattern(TObject &Obj, int *PatternX, int *PatternY)
-{
-	patella::bridge::ObjectTypes().GetCumulativePattern(Obj, PatternX, PatternY);
-}
-
-void GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY)
-{
-	patella::bridge::ObjectTypes().GetLiquidPattern(Obj, PatternX, PatternY);
-}
-
-void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY)
-{
-	patella::bridge::ObjectTypes().GetHangPattern(Obj, PatternX, PatternY);
-}
-
-void InitObjects()
-{
-	patella::bridge::ObjectTypes().InitObjects();
-}
-
-void ExitObjects()
-{
-	patella::bridge::ObjectTypes().ExitObjects();
+	Release();
 }
