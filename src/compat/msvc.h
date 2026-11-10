@@ -18,7 +18,7 @@
 // with _wfopen_s; issue #64) and
 // sysinc.cpp's #pragma comment(lib, "winmm.lib") (Windows-only code: timeGetTime, the clipboard).
 //
-// The descriptor functions of <io.h> (_access, _eof) are in compat/msvc_io.h, which only the files that use
+// The descriptor function of <io.h> (_eof) is in compat/msvc_io.h, which only the files that use
 // them include, where they included <io.h> before: <io.h> included through common.h makes MSVC x64 emit the
 // <charconv> digit table std::_Digit_pairs<char> first among an object's constants, which moves it in the x64
 // images (measured, issue #43).
@@ -36,15 +36,6 @@
 
 
 // --- the compiler's spellings ---
-
-// __cdecl, the calling convention of a function whose address goes to a caller that expects it (the Vulkan
-// engine's frame observers, the CRT): on 32-bit x86 Windows the convention is part of the function's type and of how
-// it is called; on x64 and on Linux there is only one convention, and the keyword means nothing.
-#if defined(_MSC_VER) && defined(_M_IX86)
-#define PATELLA_CDECL __cdecl
-#else
-#define PATELLA_CDECL
-#endif
 
 // #pragma warning(...) of MSVC as a macro (__pragma), for a statement or a declaration: nothing for the
 // other compilers, which do not know MSVC's warning numbers (GCC and Clang warn about an unknown pragma).

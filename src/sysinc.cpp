@@ -9,7 +9,6 @@
 #include "sysinc.h"
 #include "BuildConfig.h"
 #include "common.h"
-#include "compat/msvc_io.h"
 #include "platform/Platform.h"
 #include <cstdio>
 #include <array>

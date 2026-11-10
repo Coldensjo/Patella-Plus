@@ -129,8 +129,6 @@ static_assert(sizeof(TProgramError) == sizeof(PROGRAM_ERROR) && std::is_triviall
 	throw TMYEXCEPTION(Message, "", 0, "", 0, "")
 #define TERROR1(Message, V1) \
 	throw TMYEXCEPTION(Message, #V1, V1, "", 0, "")
-#define TERROR2(Message, V1, V2) \
-	throw TMYEXCEPTION(Message, #V1, V1, #V2, V2, "")
 // An error with a text as its reason (Script.cpp: the file name), in the
 // place of an assertion's expression: "<Message>, reason:\n<Reason>".
 #define TERROR_REASON(Message, Reason) \

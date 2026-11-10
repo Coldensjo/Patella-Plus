@@ -304,11 +304,6 @@ void UpdateTimers();
 
 // --- Hotkeys --------------------------------------------------------------
 
-struct THotkey {        // 12 bytes
-	int Key;            // +0x00, with the modifier flags (0x200 is dropped by CheckHotkey)
-	TCallback Callback; // +0x04
-};
-
 void InitHotkeys();
 void ExitHotkeys();
 void AddHotkey(int Key, TCallback Callback);
