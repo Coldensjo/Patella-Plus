@@ -18,6 +18,10 @@ python -I tools/build.py package-linux-x64     # the tarball and AppImage, only 
 python -I tools/build.py --env <preset> <command>   # any other command in that preset's environment
 ```
 
+`python -I tools/repro_check.py [<commit>]` proves this checkout's Release client is that commit's, byte for byte.
+`python -I tools/source_check.py comments|names|rename|format` proves a change is only comments or only renames, renames,
+and checks the style of `.clang-format`. A worktree has no `Tibia.exe`: configure it with `-DPATELLA_TIBIA_EXE=<path>`.
+
 The normal builds read the local `Tibia.exe` for the pictures. `-DPATELLA_PLACEHOLDER_RESOURCES=ON` builds neutral ones and
 is refused where a `Tibia.exe` exists. `python -I tools/package_check.py <package>` proves a package holds no CipSoft file.
 
