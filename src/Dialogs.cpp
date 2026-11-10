@@ -338,7 +338,7 @@ TDialog *CreateIgnoreListDialog()
 // channel buffer exists while one is open).
 TDialog *CreateReportDialog()
 {
-	if (GetTextBuffer(7, nullptr, -1) != nullptr) {
+	if (GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1) != nullptr) {
 		SetStatusMessage(TextRequestAlreadySubmitted, false);
 		return nullptr;
 	}
@@ -1266,8 +1266,8 @@ TIgnoreListDialog::TIgnoreListDialog()
 	InsertChild(IgnorePrivate);
 	SetChildArea(IgnorePrivate, SkinProperties().StyleD3C.Data78);
 	IgnoreListCheckBox->SetChecked(GetIgnoreListEnabled());
-	IgnoreYelling->SetChecked(IsModeIgnored(3));
-	IgnorePrivate->SetChecked(IsModeIgnored(4));
+	IgnoreYelling->SetChecked(IsModeIgnored(TALK_YELL));
+	IgnorePrivate->SetChecked(IsModeIgnored(TALK_PRIVATE_MESSAGE));
 	char *Text = GetIgnoreListText();
 	if (Text != nullptr) {
 		const int Length = (int)strlen(Text);
@@ -1403,13 +1403,13 @@ void TIgnoreListDialog::HandleEvent(int Event)
 		}
 		SetIgnoreListEnabled(IgnoreListCheckBox->IsChecked());
 		if (IgnoreYelling->IsChecked())
-			IgnoreMode(3);
+			IgnoreMode(TALK_YELL);
 		else
-			UnignoreMode(3);
+			UnignoreMode(TALK_YELL);
 		if (IgnorePrivate->IsChecked())
-			IgnoreMode(4);
+			IgnoreMode(TALK_PRIVATE_MESSAGE);
 		else
-			UnignoreMode(4);
+			UnignoreMode(TALK_PRIVATE_MESSAGE);
 		WhiteList->StopEdit();
 		ClearBuddyIgnore();
 		for (int i = 0; i < WhiteList->GetNumberOfLines(); i++) {

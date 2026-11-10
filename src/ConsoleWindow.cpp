@@ -331,7 +331,7 @@ void TTextWindow::FormatLines()
 			TRGBColor Color;
 			GetTalkColor(&Color, TextLine->Mode);
 			int NextIndent = 10;
-			if (TextLine->Mode > 17 && TextLine->Mode < 23)
+			if (TextLine->Mode > TALK_ANIMAL_LOUD && TextLine->Mode < 23)
 				NextIndent = 0;
 			const char *Text = TextLine->GetText();
 			int Indent = 0;
@@ -1204,7 +1204,7 @@ TConsoleWindow::TConsoleWindow()
 {
 	DrawingListLength = 9;
 	DrawingList.reset(new TDrawing[9]);
-	TalkMode = 1;
+	TalkMode = TALK_SAY;
 	DefaultTab = nullptr;
 	HistoryPosition = -1;
 	History.reset(new TTalkBuffer(0));
@@ -1527,13 +1527,13 @@ void TConsoleWindow::HandleEvent(int Event)
 		SendRequestChannels();
 		break;
 	case EVENT_VOLUME_SAY:
-		TalkMode = 1;
+		TalkMode = TALK_SAY;
 		break;
 	case EVENT_VOLUME_WHISPER:
-		TalkMode = 2;
+		TalkMode = TALK_WHISPER;
 		break;
 	case EVENT_VOLUME_YELL:
-		TalkMode = 3;
+		TalkMode = TALK_YELL;
 		break;
 	case EVENT_DEFAULT_CHANNEL:
 		TabBar->SetCurrentTab(DefaultTab);
@@ -1779,7 +1779,7 @@ void TConsoleWindow::SendInput()
 		TalkMode = this->TalkMode;
 		Addressee = nullptr;
 		VolumeButton->Reset();
-		this->TalkMode = 1;
+		this->TalkMode = TALK_SAY;
 	}
 	if (strlen(Input->Text.get()) != 0)
 		AddToHistory();

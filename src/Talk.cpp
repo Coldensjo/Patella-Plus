@@ -100,19 +100,19 @@ TRGBColor *patella::TTalk::GetTalkColor(TRGBColor *Color, int TalkMode)
 	switch (TalkMode) {
 		// clang-format off
 	case 0: TERROR("none is talking");
-	case 1: case 2: case 3: case 5: case 7: case 8:
+	case TALK_SAY: case TALK_WHISPER: case TALK_YELL: case TALK_CHANNEL_CALL: case TALK_GAMEMASTER_ANSWER: case TALK_PLAYER_ANSWER:
 		Color->R = 240; Color->G = 240; Color->B = 0; break;
-	case 4:
+	case TALK_PRIVATE_MESSAGE:
 		Color->R = 96; Color->G = 248; Color->B = 248; break;
-	case 6: case 19: case 20: case 21: case 23:
+	case TALK_GAMEMASTER_REQUEST: case TALK_EVENT_MESSAGE: case 20: case TALK_STATUS_MESSAGE: case 23:
 		Color->R = 240; Color->G = 240; Color->B = 240; break;
-	case 9: case 10: case 11: case 13: case 14: case 15: case 18: case 25:
+	case TALK_GAMEMASTER_BROADCAST: case TALK_GAMEMASTER_CHANNELCALL: case TALK_GAMEMASTER_MESSAGE: case TALK_ANONYMOUS_BROADCAST: case TALK_ANONYMOUS_CHANNELCALL: case TALK_ANONYMOUS_MESSAGE: case TALK_ADMIN_MESSAGE: case 25:
 		Color->R = 248; Color->G = 96; Color->B = 96; break;
 	case 12:
 		Color->R = 240; Color->G = 180; Color->B = 0; break;
-	case 16: case 17:
+	case TALK_ANIMAL_LOW: case TALK_ANIMAL_LOUD:
 		Color->R = 255; Color->G = 102; Color->B = 0; break;
-	case 22:
+	case TALK_INFO_MESSAGE:
 		Color->R = 0; Color->G = 240; Color->B = 0; break;
 	case 24:
 		Color->R = 160; Color->G = 160; Color->B = 255; break;
@@ -143,7 +143,7 @@ void patella::TTalk::GetTalkboxPosition(int Number, int *x, int *y, int *z)
 {
 	const TTalkbox *Box = GetTalkbox(Number);
 	const int Mode = Box->Mode;
-	if (Mode == 22 || Mode == 19 || Mode == 18 || Mode == 4 || Mode == 9 || Mode == 11)
+	if (Mode == TALK_INFO_MESSAGE || Mode == TALK_EVENT_MESSAGE || Mode == TALK_ADMIN_MESSAGE || Mode == TALK_PRIVATE_MESSAGE || Mode == TALK_GAMEMASTER_BROADCAST || Mode == TALK_GAMEMASTER_MESSAGE)
 		*x = *y = *z = 0;
 	else {
 		*x = Box->x;
@@ -188,16 +188,16 @@ void patella::TTalk::RemoveTalkbox(int Position)
 		if (Search == Position || Other.State != 2)
 			continue;
 		bool Match = false;
-		if (Box.Mode == 1 || Box.Mode == 2 || Box.Mode == 3)
+		if (Box.Mode == TALK_SAY || Box.Mode == TALK_WHISPER || Box.Mode == TALK_YELL)
 			Match = Other.Mode == Box.Mode && strcmp(Other.Text[0], Box.Text[0]) == 0
 				&& Other.x == Box.x && Other.y == Box.y && Other.z == Box.z;
-		if (Box.Mode == 16 || Box.Mode == 17)
-			Match = (Other.Mode == 16 || Other.Mode == 17)
+		if (Box.Mode == TALK_ANIMAL_LOW || Box.Mode == TALK_ANIMAL_LOUD)
+			Match = (Other.Mode == TALK_ANIMAL_LOW || Other.Mode == TALK_ANIMAL_LOUD)
 				&& Other.x == Box.x && Other.y == Box.y && Other.z == Box.z;
-		if (Box.Mode == 19 || Box.Mode == 18 || Box.Mode == 9 || Box.Mode == 11)
-			Match = Other.Mode == 19 || Other.Mode == 18 || Other.Mode == 9 || Other.Mode == 11;
-		if (Box.Mode == 4)
-			Match = Other.Mode == 4;
+		if (Box.Mode == TALK_EVENT_MESSAGE || Box.Mode == TALK_ADMIN_MESSAGE || Box.Mode == TALK_GAMEMASTER_BROADCAST || Box.Mode == TALK_GAMEMASTER_MESSAGE)
+			Match = Other.Mode == TALK_EVENT_MESSAGE || Other.Mode == TALK_ADMIN_MESSAGE || Other.Mode == TALK_GAMEMASTER_BROADCAST || Other.Mode == TALK_GAMEMASTER_MESSAGE;
+		if (Box.Mode == TALK_PRIVATE_MESSAGE)
+			Match = Other.Mode == TALK_PRIVATE_MESSAGE;
 		if (Match && Other.Order < Oldest) {
 			Oldest = Other.Order;
 			Replacement = Search;
@@ -252,7 +252,7 @@ void patella::TTalk::AddTalkbox(int Mode, const char *Speaker, int x, int y, int
 	PATELLA_ASSERT_VALUES(Mode==TALK_SAY || Mode==TALK_WHISPER || Mode==TALK_YELL || Mode==TALK_PRIVATE_MESSAGE || Mode==TALK_GAMEMASTER_BROADCAST || Mode==TALK_GAMEMASTER_MESSAGE || Mode==TALK_ANIMAL_LOW || Mode==TALK_ANIMAL_LOUD, Mode);
 	PATELLA_ASSERT(Speaker!=nullptr);
 	PATELLA_ASSERT(Text!=nullptr);
-	if (Mode == 4 && !GetPrivateMessages())
+	if (Mode == TALK_PRIVATE_MESSAGE && !GetPrivateMessages())
 		return;
 	const int Position = FindFreeTalkbox();
 	TTalkbox &Box = Talkboxes[Position];
@@ -266,12 +266,12 @@ void patella::TTalk::AddTalkbox(int Mode, const char *Speaker, int x, int y, int
 	// The first line names the speaker: sprintf with "%s says:", "%s whispers:", "%s yells:" or "%s:".
 	const char *Verb = nullptr;
 	switch (Mode) {
-	case 1: Verb = " says:"; break;
-	case 2: Verb = " whispers:"; break;
-	case 3: Verb = " yells:"; break;
-	case 4:
-	case 9:
-	case 11: Verb = ":"; break;
+	case TALK_SAY: Verb = " says:"; break;
+	case TALK_WHISPER: Verb = " whispers:"; break;
+	case TALK_YELL: Verb = " yells:"; break;
+	case TALK_PRIVATE_MESSAGE:
+	case TALK_GAMEMASTER_BROADCAST:
+	case TALK_GAMEMASTER_MESSAGE: Verb = ":"; break;
 	default:
 		break;
 	}
@@ -286,23 +286,23 @@ void patella::TTalk::AddTalkbox(int Mode, const char *Speaker, int x, int y, int
 		TTalkbox &Other = Talkboxes[Search];
 		if (Search == Position || Other.State == 0)
 			continue;
-		if ((Mode == 1 || Mode == 2 || Mode == 3) && Other.Mode == Mode
+		if ((Mode == TALK_SAY || Mode == TALK_WHISPER || Mode == TALK_YELL) && Other.Mode == Mode
 			&& strcmp(Other.Text[0], Box.Text[0]) == 0 && Other.x == x && Other.y == y && Other.z == z) {
 			for (int Line = 1; Line < Box.Lines; Line++)
 				if (Other.Lines < 10)
 					Other.Text[Other.Lines++].Assign(Box.Text[Line]);
 			Box.State = 2;
 		}
-		if ((Mode == 16 || Mode == 17) && (Other.Mode == 16 || Other.Mode == 17)
+		if ((Mode == TALK_ANIMAL_LOW || Mode == TALK_ANIMAL_LOUD) && (Other.Mode == TALK_ANIMAL_LOW || Other.Mode == TALK_ANIMAL_LOUD)
 			&& Other.x == x && Other.y == y && Other.z == z) {
 			for (int Line = 0; Line < Box.Lines; Line++)
 				if (Other.Lines < 10)
 					Other.Text[Other.Lines++].Assign(Box.Text[Line]);
 			Box.State = 2;
 		}
-		bool Match = (Mode == 9 || Mode == 11)
-			&& (Other.Mode == 19 || Other.Mode == 18 || Other.Mode == 9 || Other.Mode == 11);
-		if (Mode == 4 && Other.Mode == 4)
+		bool Match = (Mode == TALK_GAMEMASTER_BROADCAST || Mode == TALK_GAMEMASTER_MESSAGE)
+			&& (Other.Mode == TALK_EVENT_MESSAGE || Other.Mode == TALK_ADMIN_MESSAGE || Other.Mode == TALK_GAMEMASTER_BROADCAST || Other.Mode == TALK_GAMEMASTER_MESSAGE);
+		if (Mode == TALK_PRIVATE_MESSAGE && Other.Mode == TALK_PRIVATE_MESSAGE)
 			Match = true;
 		if (Match) {
 			if (Box.State == 1)
@@ -320,24 +320,24 @@ void patella::TTalk::AddMessageTalkbox(int Mode, const char *Text)
 {
 	PATELLA_ASSERT_VALUES(Mode==TALK_INFO_MESSAGE || Mode==TALK_EVENT_MESSAGE || Mode==TALK_ADMIN_MESSAGE, Mode);
 	PATELLA_ASSERT(Text!=nullptr);
-	if (Mode == 22)
+	if (Mode == TALK_INFO_MESSAGE)
 		for (int Position = 0; Position < TALKBOXES; Position++)
-			if (Talkboxes[Position].State != 0 && Talkboxes[Position].Mode == 22)
+			if (Talkboxes[Position].State != 0 && Talkboxes[Position].Mode == TALK_INFO_MESSAGE)
 				RemoveTalkbox(Position);
 	const int Position = FindFreeTalkbox();
 	TTalkbox &Box = Talkboxes[Position];
 	Box.Order = TalkOrder++;
 	Box.Mode = Mode;
 	Box.Lines = 0;
-	Box.RemainingTime = ((int)(strlen(Text) >> 1) + 30) * (Mode == 19 || Mode == 18 ? 200 : 100);
+	Box.RemainingTime = ((int)(strlen(Text) >> 1) + 30) * (Mode == TALK_EVENT_MESSAGE || Mode == TALK_ADMIN_MESSAGE ? 200 : 100);
 	WrapTalkbox(&Box, Text);
 	Box.State = 1;
 	int Delay = 0;
-	if (Mode != 22) {
+	if (Mode != TALK_INFO_MESSAGE) {
 		for (int Search = 0; Search < TALKBOXES; Search++) {
 			const TTalkbox &Other = Talkboxes[Search];
 			if (Search != Position && Other.State != 0
-				&& (Other.Mode == 19 || Other.Mode == 18 || Other.Mode == 9 || Other.Mode == 11)) {
+				&& (Other.Mode == TALK_EVENT_MESSAGE || Other.Mode == TALK_ADMIN_MESSAGE || Other.Mode == TALK_GAMEMASTER_BROADCAST || Other.Mode == TALK_GAMEMASTER_MESSAGE)) {
 				if (Box.State == 1)
 					Box.RemainingTime /= 2;
 				Box.State = 2;
@@ -411,7 +411,7 @@ void patella::TTalk::UpdateStatusMessage()
 // 0x4ff810, line 629
 bool TTalkFilter::Matches(int _Mode, const char *_Addressee, int _Channel)
 {
-	if (_Mode == 11 || _Mode == 9 || _Mode == 10 || _Mode == 12)
+	if (_Mode == TALK_GAMEMASTER_MESSAGE || _Mode == TALK_GAMEMASTER_BROADCAST || _Mode == TALK_GAMEMASTER_CHANNELCALL || _Mode == 12)
 		return false;
 	if ((Mode != _Mode && Mode != 0) || (Channel != _Channel && Channel != -1))
 		return false;
@@ -670,22 +670,22 @@ void patella::TTalk::AddConsoleText(uint32 StatementID, const char *Text, int Ta
 	PATELLA_ASSERT(Text!=nullptr);
 	bool Broadcast;
 	switch (TalkMode) {
-	case 18: Broadcast = true; break;
-	case 19:
+	case TALK_ADMIN_MESSAGE: Broadcast = true; break;
+	case TALK_EVENT_MESSAGE:
 	case 20: Broadcast = GetEventMessages(); break;
-	case 21: Broadcast = GetStatusMessages(); break;
-	case 22: Broadcast = GetInfoMessages(); break;
+	case TALK_STATUS_MESSAGE: Broadcast = GetStatusMessages(); break;
+	case TALK_INFO_MESSAGE: Broadcast = GetInfoMessages(); break;
 	case 23: return;
 	default: {
 		TTalkBuffer *TargetBuffer = DefaultTextBuffer;
-		if (TalkMode == 5 || TalkMode == 6 || TalkMode == 7 || TalkMode == 8
-			|| TalkMode == 10 || TalkMode == 14 || TalkMode == 12)
+		if (TalkMode == TALK_CHANNEL_CALL || TalkMode == TALK_GAMEMASTER_REQUEST || TalkMode == TALK_GAMEMASTER_ANSWER || TalkMode == TALK_PLAYER_ANSWER
+			|| TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == 12)
 			TargetBuffer = nullptr;
-		if (TalkMode == 14)
+		if (TalkMode == TALK_ANONYMOUS_CHANNELCALL)
 			Name = nullptr;
 		for (int i = ConsoleFilterList.min; i <= ConsoleFilterList.max; i++) {
 			TTalkFilter *Filter = ConsoleFilterList(i);
-			const int Mode = TalkMode == 10 || TalkMode == 14 || TalkMode == 12 ? 5 : TalkMode;
+			const int Mode = TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == 12 ? TALK_CHANNEL_CALL : TalkMode;
 			if (Filter != nullptr && Filter->Matches(Mode, Name, Channel))
 				TargetBuffer = Filter->TextBuffer;
 		}
@@ -712,7 +712,7 @@ void patella::TTalk::AddConsoleText(uint32 StatementID, const char *Text, int Ta
 // 0x506720, line 1279
 void patella::TTalk::AddChannelNotice(const char *Addressee, const char *Text, int Mode, const char *Name, int Channel)
 {
-	TTalkBuffer *TargetBuffer = Mode == 5 ? nullptr : DefaultTextBuffer;
+	TTalkBuffer *TargetBuffer = Mode == TALK_CHANNEL_CALL ? nullptr : DefaultTextBuffer;
 	for (int i = ConsoleFilterList.min; i <= ConsoleFilterList.max; i++) {
 		TTalkFilter *Filter = ConsoleFilterList(i);
 		if (Filter != nullptr && Filter->Matches(Mode, Name, Channel))
@@ -759,14 +759,14 @@ TTalkBuffer *patella::TTalk::CreateTextBuffer(int ReceiveTalkMode, int SendTalkM
 			TextBuffer = new (std::nothrow) TPrivateChannel(ReceiveTalkMode, Channel);
 	} else if (Name != nullptr && Channel == -1 && ReceiveTalkMode == SendTalkMode)
 		TextBuffer = new (std::nothrow) TPrivateTalkBuffer(ReceiveTalkMode, Name);
-	else if (ReceiveTalkMode == 7 || ReceiveTalkMode == 8)
+	else if (ReceiveTalkMode == TALK_GAMEMASTER_ANSWER || ReceiveTalkMode == TALK_PLAYER_ANSWER)
 		TextBuffer = new (std::nothrow) TRuleViolationTalkBuffer(ReceiveTalkMode, SendTalkMode, Name);
 	else {
-		if (Name != nullptr || Channel == -1 || ReceiveTalkMode != 6)
+		if (Name != nullptr || Channel == -1 || ReceiveTalkMode != TALK_GAMEMASTER_REQUEST)
 			TERROR("can't create text buffer");
-		if (FindTalkFilter(6, nullptr, -1, ConsoleFilterList) != -1)
+		if (FindTalkFilter(TALK_GAMEMASTER_REQUEST, nullptr, -1, ConsoleFilterList) != -1)
 			return nullptr;
-		TextBuffer = new (std::nothrow) TRuleViolationChannel(6, Channel);
+		TextBuffer = new (std::nothrow) TRuleViolationChannel(TALK_GAMEMASTER_REQUEST, Channel);
 		Channel = -1;
 	}
 	AddTalkFilter(ReceiveTalkMode, Name, Channel, TextBuffer, ConsoleFilterList, false);
@@ -1087,7 +1087,7 @@ void patella::TTalk::InitTalk()
 	BuddyIgnore = false;
 	IgnoreListEnabled = true;
 	ResetTalk();
-	DefaultTextBuffer = new (std::nothrow) TTalkBuffer(1);
+	DefaultTextBuffer = new (std::nothrow) TTalkBuffer(TALK_SAY);
 }
 // 0x5079c0, no line evidence; binary places it before ExitTalk.
 TPrivateChannel::TPrivateChannel(int TalkMode, int _ChannelID) : TChannelTalkBuffer(TalkMode, _ChannelID)

@@ -401,3 +401,13 @@ TTalkBuffer *GetTextBuffer(int Mode, const char *Name, int Channel);
 void ResetTalk();
 void InitTalk();
 void ExitTalk();
+
+// A talk mode that no assertion of the original names, so TALK_MODE above lacks it; the name is ours. A text message
+// (ReceiveTextMessage) of this mode goes to the status line, and to the console where GetStatusMessages allows it, as
+// GetEventMessages decides for TALK_EVENT_MESSAGE and GetInfoMessages for TALK_INFO_MESSAGE. Down here because
+// TRuleViolationChannel::AddText's error stores its line; an enumerator of an unnamed enum for the reason in GUI.h.
+// The modes 12, 20 and 23 to 25 stay numbers: the code does not show what the original called them. So does 0, no
+// mode: a filter's 0 matches every mode, and a buffer whose send mode is 0 sends nothing.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	TALK_STATUS_MESSAGE = 21,
+};

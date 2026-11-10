@@ -1000,7 +1000,7 @@ void TTextContextMenu::HandleEvent(int Event)
 				Format = "You are no longer ignoring player %s.";
 			}
 			MsvcSnprintf(Text, 200, Format, Speaker);
-			AddConsoleText(0, Text, 21, nullptr, 0, 0);
+			AddConsoleText(0, Text, TALK_STATUS_MESSAGE, nullptr, 0, 0);
 		}
 		break;
 	case EVENT_MENU_INVITE_PRIVATE:

@@ -1040,15 +1040,15 @@ void patella::TGUI::ProcessEvents()
 			SetHelpHandle(HELP_NONE);
 			break;
 		case MESSAGE_OPEN_PRIVATE_CONVERSATION:
-			MainWindow->Console->OpenChannel(4, 4, reinterpret_cast<const char *>(Param2), -1, reinterpret_cast<const char *>(Param2));
+			MainWindow->Console->OpenChannel(TALK_PRIVATE_MESSAGE, TALK_PRIVATE_MESSAGE, reinterpret_cast<const char *>(Param2), -1, reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
 		case MESSAGE_OPEN_CHANNEL:
-			MainWindow->Console->OpenChannel(5, 5, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2));
+			MainWindow->Console->OpenChannel(TALK_CHANNEL_CALL, TALK_CHANNEL_CALL, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2));
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
 		case MESSAGE_OPEN_OWN_CHANNEL:
-			MainWindow->Console->OpenChannel(5, 5, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2))->SetSelected(true);
+			MainWindow->Console->OpenChannel(TALK_CHANNEL_CALL, TALK_CHANNEL_CALL, nullptr, (int)Param1, reinterpret_cast<const char *>(Param2))->SetSelected(true);
 			delete[] reinterpret_cast<char *>(Param2);
 			break;
 		case MESSAGE_RULE_VIOLATION_CHANNEL:
