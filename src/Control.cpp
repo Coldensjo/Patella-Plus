@@ -1116,6 +1116,32 @@ void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgra
 	Network.Reconnect = false;
 }
 
+namespace {
+
+// The callbacks the map and the network are given at start-up. Functions and not lambdas: GCC's analyzer reports the
+// function a lambda without captures converts to as a call on a null object.
+void CallHideCreature(int CreatureID)
+{
+	Creatures().HideCreature(CreatureID);
+}
+
+void CallConnectionEstablished()
+{
+	GUI().ConnectionEstablished();
+}
+
+void CallReceivePackets()
+{
+	GUI().ReceivePackets();
+}
+
+void CallConnectionClosed()
+{
+	GUI().ConnectionClosed();
+}
+
+} // namespace
+
 // Initialises the modules; on a PROGRAM_ERROR it shuts them down again
 // (ignoring any error from that) and passes the error on.
 void patella::TGUI::InitControl(bool Gamemaster)
@@ -1123,7 +1149,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 	try {
 		InitSysinc();
 		ObjectTypes().Init();
-		Map().Init([](int CreatureID) { Creatures().HideCreature(CreatureID); });
+		Map().Init(CallHideCreature);
 		Inventory().Reset();
 		Creatures().Init();
 		::Interaction().InitStatus(Gamemaster, LinkCopyWarning);
@@ -1133,8 +1159,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		Graphics().Init(0xa00000);
 		SkinData().Init();
 		InitSkinProperties();
-		::Network().Init([] { GUI().ConnectionEstablished(); }, [] { GUI().ReceivePackets(); },
-			[] { GUI().ConnectionClosed(); });
+		::Network().Init(CallConnectionEstablished, CallReceivePackets, CallConnectionClosed);
 		::Communication().Init();
 		GUI().InitHotkeys();
 	} catch (const TProgramError &Error) {
