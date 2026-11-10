@@ -4,12 +4,13 @@
 //
 // To build for your own server, copy this file somewhere outside the repository, change the values in the copy and
 // configure with -DPATELLA_BUILD_CONFIG=<your copy>: your file replaces this one, so pulling updates never conflicts with
-// your values, and it goes through the same checks. These are today's values, byte for byte: a build that doesn't change
-// them behaves exactly as the original. README.md, "Building for your own server".
+// your values, and it goes through the same checks. The login servers and the test server are 127.0.0.1, port 7171
+// (Patella-Plus); the other values are the original's, byte for byte. README.md, "Building for your own server".
 //
 // Every value must be ASCII. A bad value fails the compile with a message that says what is wrong. Nothing here is read
 // from Patella.ini or the environment (the test build's PATELLA_LOGIN_SERVER and PATELLA_RSA_MODULUS are the test build's,
-// issue #158). The values end up as plain text in the program: they are not a secret.
+// issue #158), but Patella.ini's ServerAddress, ServerPort and RsaModulus replace those values unless the overrides below are set.
+// The values end up as plain text in the program: they are not a secret.
 
 #pragma once
 
@@ -18,8 +19,7 @@
 namespace patella::buildconfig {
 
 // The login servers: always four entries (if you have fewer, repeat one), each at most 99 characters without spaces.
-inline constexpr std::array<const char *, 4> LoginServers = {"server.tibia.com", "server2.tibia.com", "tibia1.cipsoft.com",
-	"tibia2.cipsoft.com"};
+inline constexpr std::array<const char *, 4> LoginServers = {"127.0.0.1", "127.0.0.1", "127.0.0.1", "127.0.0.1"};
 
 // Their port, 1 to 65535.
 inline constexpr int LoginPort = 7171;
@@ -28,8 +28,17 @@ inline constexpr int LoginPort = 7171;
 inline constexpr const char *RsaModulus = "124710459426827943004376449897985582167801707960697037164044904862948569380850421396904597686953877022394604239428185498284169068581802277612081027966724336319448537811441719076484340922854929273517308661370727105382899118999403808045846444647284499123164879035103627004668521005328367415259939915284902061793";
 
 // The test server (Network Options' "Test Server Login"): its name and port.
-inline constexpr const char *TestServerHost = "test.cipsoft.com";
-inline constexpr int TestServerPort = 7172;
+inline constexpr const char *TestServerHost = "127.0.0.1";
+inline constexpr int TestServerPort = 7171;
+
+// Patella-Plus: the one server every login goes to, the test server's included, whatever Patella.ini's ServerAddress and
+// ServerPort say. An empty address or a port of 0 leaves that value to Patella.ini, and without its key to the values above.
+inline constexpr const char *ServerAddressOverride = "";
+inline constexpr int ServerPortOverride = 0;
+
+// Patella-Plus: the RSA modulus every login uses, whatever Patella.ini's RsaModulus says. Empty leaves it to Patella.ini,
+// and without its key to RsaModulus above.
+inline constexpr const char *RsaModulusOverride = "";
 
 // Where the buttons that open a web page go. Each must start with http:// or https:// (ASCII case-insensitive), have
 // something after that, and hold no space or control character: a program path or a file: address would be started by a

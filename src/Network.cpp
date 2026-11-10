@@ -64,6 +64,33 @@ void patella::TNetwork::InitServerList()
 		Servers[i].Available = true;
 	}
 	CurrentServer = rand() % NUMBEROFSERVER;
+	ApplyServerOverride();
+}
+
+// Patella-Plus, not in the original: BuildConfig.h's overrides, else Patella.ini's ServerAddress and ServerPort, replace
+// the address and the port of every login server and of the test server. The four entries repeat the one server, as a
+// build with fewer than four does. An IP address goes through the name lookup as a name does: getaddrinfo returns it.
+void patella::TNetwork::ApplyServerOverride()
+{
+	const settings::TServerValues &Values = Preferences.GetServerValues();
+	const char *Address = Values.Address.c_str();
+	int Port = Values.Port;
+	if constexpr (patella::buildconfig::ServerAddressOverride[0] != '\0')
+		Address = patella::buildconfig::ServerAddressOverride;
+	if constexpr (patella::buildconfig::ServerPortOverride != 0)
+		Port = patella::buildconfig::ServerPortOverride;
+	if (Address[0] != '\0') {
+		for (TServer &Server : Servers)
+			Server.Address.Assign(Address);
+		TestServer.Address.Assign(Address);
+		patella::log::Info("login server address: {}", Address);
+	}
+	if (Port != 0) {
+		for (TServer &Server : Servers)
+			Server.Port = Port;
+		TestServer.Port = Port;
+		patella::log::Info("login server port: {}", Port);
+	}
 }
 
 // 0x4ca260

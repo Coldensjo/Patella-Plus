@@ -157,6 +157,8 @@ public:
 	[[nodiscard]] bool GetAutoChaseOff() const;
 	void SetDragFullStacks(bool Value);
 	[[nodiscard]] bool GetDragFullStacks() const;
+	[[nodiscard]] const patella::settings::TServerValues &GetServerValues() const;
+	[[nodiscard]] const char *GetRsaModulus() const;
 	void SetAttackMode(int Value);
 	void SetChaseMode(int Value);
 	void SetSecureMode(bool Value);
@@ -253,6 +255,7 @@ private:
 	std::vector<int> KnownHints;                    // 0x71c430, "KnownHints = {...}", initialiser at 0x55a0d0
 
 	patella::platform::IFileSystem &FileSystem;
+	patella::settings::TServerValues ServerValues; // Patella-Plus, not in the original
 	// Not the original's: GetBuddyDescription's text, the entry's description with a NUL (issue #86).
 	TFixedString<BUDDYDESCRIPTION_LENGTH + 1> BuddyDescription{};
 
@@ -323,6 +326,7 @@ bool GetClassicControl();
 bool GetAutoChaseOff();
 void SetDragFullStacks(bool Value);
 bool GetDragFullStacks();
+const char *GetRsaModulus();
 void SetAttackMode(int Value);
 void SetChaseMode(int Value);
 void SetSecureMode(bool Value);

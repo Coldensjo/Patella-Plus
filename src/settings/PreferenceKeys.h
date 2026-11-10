@@ -133,6 +133,24 @@ struct TPreferenceValues {
 	bool operator==(const TPreferenceValues &) const = default;
 };
 
+// Patella-Plus, not in Tibia.cfg: where the client logs in, instead of BuildConfig.h's login servers and test server.
+// Nothing writes the keys: the user adds them, and each works without the other.
+//
+//	ServerAddress=127.0.0.1               an IP address or a host name
+//	ServerPort=7171                       1 to 65535
+//	RsaModulus=1091...1413                the server's RSA modulus, 306 to 309 decimal digits
+//
+// BuildConfig.h's ServerAddressOverride, ServerPortOverride and RsaModulusOverride win over them (Network.cpp
+// ApplyServerOverride, Preferences.cpp GetRsaModulus).
+struct TServerValues {
+	std::string Address;    // empty: no key
+	int Port = 0;           // 0: no key
+	std::string RsaModulus; // empty: no key
+};
+
+// Reads the three keys of File into Values; the problems, one line per value it could not use (that value stays as it was).
+std::vector<std::string> ReadServerValues(const TSettingsFile &File, TServerValues &Values);
+
 // The file has the options (PreferencesVersionKey).
 [[nodiscard]] bool HasPreferences(const TSettingsFile &File);
 

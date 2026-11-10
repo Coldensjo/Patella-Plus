@@ -6,8 +6,8 @@
 // the compile with a message that says what is wrong. The checks are the safety part: SDL_OpenURL is ShellExecute's default
 // verb on Windows, so a link that is a program path or a file: address would be started by a button.
 //
-// These are the only copies of the values in the product (the test build's PATELLA_LOGIN_SERVER has its own default port, issue #158): the login servers and port (Network.cpp), the RSA modulus (Communication.cpp,
-// twice), the test server (Player.cpp), the links (Text.h), Info's caption (Dialogs.cpp), the site named in texts (Network.cpp,
+// These are the only copies of the values in the product (the test build's PATELLA_LOGIN_SERVER has its own default port, issue #158): the login servers and port (Network.cpp), the RSA modulus (Preferences.cpp
+// GetRsaModulus), the test server (Player.cpp), the links (Text.h), Info's caption (Dialogs.cpp), the site named in texts (Network.cpp,
 // Help.cpp), the bug report address (sysinc.cpp). The values are plain text in the program: someone with a hex editor can still
 // change them, and only the server can enforce anything. notes/decisions.md, "#169".
 //
@@ -80,6 +80,11 @@ constexpr bool IsHost(const char *Value) noexcept
 	return !Text.empty() && Text.size() <= MaxHostName && IsAsciiRange(Text, '!');
 }
 
+constexpr bool IsHostOrEmpty(const char *Value) noexcept
+{
+	return Value != nullptr && (Value[0] == '\0' || IsHost(Value));
+}
+
 template <std::size_t Count>
 constexpr bool AreHosts(const std::array<const char *, Count> &Values) noexcept
 {
@@ -109,6 +114,11 @@ constexpr bool IsModulus(const char *Value) noexcept
 	return true;
 }
 
+constexpr bool IsModulusOrEmpty(const char *Value) noexcept
+{
+	return Value != nullptr && (Value[0] == '\0' || IsModulus(Value));
+}
+
 // Printable ASCII (a space is allowed), not empty.
 constexpr bool IsPrintable(const char *Value) noexcept
 {
@@ -128,6 +138,9 @@ static_assert(check::IsPort(LoginPort), "LoginPort must be a port from 1 to 6553
 static_assert(check::IsModulus(RsaModulus), "RsaModulus must be 306 to 309 decimal digits");
 static_assert(check::IsHost(TestServerHost), "TestServerHost must be a non-empty host name of at most 99 ASCII characters without spaces or control characters");
 static_assert(check::IsPort(TestServerPort), "TestServerPort must be a port from 1 to 65535");
+static_assert(check::IsHostOrEmpty(ServerAddressOverride), "ServerAddressOverride must be empty or a host name of at most 99 ASCII characters without spaces or control characters");
+static_assert(ServerPortOverride == 0 || check::IsPort(ServerPortOverride), "ServerPortOverride must be 0 or a port from 1 to 65535");
+static_assert(check::IsModulusOrEmpty(RsaModulusOverride), "RsaModulusOverride must be empty or 306 to 309 decimal digits");
 static_assert(check::IsLink(LinkWebsite), "LinkWebsite must start with http:// or https://, have something after that and hold only ASCII without spaces or control characters");
 static_assert(check::IsLink(LinkManual), "LinkManual must start with http:// or https://, have something after that and hold only ASCII without spaces or control characters");
 static_assert(check::IsLink(LinkFAQ), "LinkFAQ must start with http:// or https://, have something after that and hold only ASCII without spaces or control characters");

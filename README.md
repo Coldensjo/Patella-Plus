@@ -79,8 +79,10 @@ which would otherwise start a program named there. Host names are at most 99 cha
 to 309 decimal digits, the caption at most 49 characters (the button is 86 pixels wide, so keep it to about 17), and every
 value is ASCII. There are always four login servers: if you have fewer, repeat one.
 
-The values are fixed in the program: `Patella.ini` and the environment do not change them. They are plain text in the
-program, so someone with a hex editor could still change them; only your server can enforce anything.
+The values are fixed in the program: `Patella.ini` and the environment do not change them, except that `ServerAddress`,
+`ServerPort` and `RsaModulus` in `Patella.ini` replace the login server and its key unless the header's
+`ServerAddressOverride`, `ServerPortOverride` and `RsaModulusOverride` are set. They are plain text in the program, so
+someone with a hex editor could still change them; only your server can enforce anything.
 
 ## License
 

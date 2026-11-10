@@ -24,6 +24,7 @@
 // are reached through TTalkLists, so this file no longer includes Talk.h.
 
 #include "Preferences.h"
+#include "BuildConfig.h"
 #include "Script.h"
 #include "Utils.h"
 #include "types/IndexedVector.h"
@@ -369,6 +370,22 @@ void TPreferences::SetDragFullStacks(bool Value)
 bool TPreferences::GetDragFullStacks() const
 {
 	return DragFullStacks;
+}
+
+// Patella-Plus, not in the original.
+const patella::settings::TServerValues &TPreferences::GetServerValues() const
+{
+	return ServerValues;
+}
+
+// Patella-Plus, not in the original: the modulus of the login's RSA. BuildConfig.h's override, else Patella.ini's
+// RsaModulus, else BuildConfig.h's RsaModulus.
+const char *TPreferences::GetRsaModulus() const
+{
+	if constexpr (patella::buildconfig::RsaModulusOverride[0] != '\0')
+		return patella::buildconfig::RsaModulusOverride;
+	else
+		return ServerValues.RsaModulus.empty() ? patella::buildconfig::RsaModulus : ServerValues.RsaModulus.c_str();
 }
 
 // 0x4db660
@@ -1324,7 +1341,14 @@ void TPreferences::InitPreferences(TTalkLists &Lists)
 {
 	using namespace patella::settings;
 	SetDefaultPreferences(Lists);
-	if (const std::optional<TSettingsFile> File = Load(FileSystem, FileName, NewFileNewline); File && HasPreferences(*File)) {
+	const std::optional<TSettingsFile> File = Load(FileSystem, FileName, NewFileNewline);
+	// Patella-Plus, not in the original. Before the options: a file written by hand may hold only these keys.
+	if (File) {
+		for (const std::string &Problem : ReadServerValues(*File, ServerValues))
+			patella::log::Warn("{}: {}", FileName, Problem);
+	}
+	patella::log::Info("login RSA modulus starts with {}", std::string_view(GetRsaModulus()).substr(0, 12));
+	if (File && HasPreferences(*File)) {
 		TPreferenceValues Values = GetPreferenceValues(Lists);
 		for (const std::string &Problem : ReadPreferences(*File, Values))
 			patella::log::Warn("{}: {}", FileName, Problem);
@@ -1625,6 +1649,11 @@ void SetDragFullStacks(bool Value)
 bool GetDragFullStacks()
 {
 	return patella::bridge::Preferences().GetDragFullStacks();
+}
+
+const char *GetRsaModulus()
+{
+	return patella::bridge::Preferences().GetRsaModulus();
 }
 
 void SetAttackMode(int Value)

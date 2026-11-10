@@ -11,7 +11,6 @@
 // loop (an error while listing the fields goes into the message).
 
 #include "Communication.h"
-#include "BuildConfig.h"
 #include "Help.h"
 #include "Inventory.h"
 #include "Creatures.h"
@@ -98,7 +97,7 @@ void patella::TCommunication::SendLogin(uint32 AccountID, const char *Password)
 	// rand()'s filler) raised to 65537 modulo the key, as the server expects (notes/decisions.md, "#128").
 	try {
 		TRSA RSA;
-		RSA.SetPublicKey(patella::buildconfig::RsaModulus);
+		RSA.SetPublicKey(GetRsaModulus());
 		RSA.Encrypt(Data);
 	} catch (const char *Error) {
 		std::stringstream Text;
@@ -158,7 +157,7 @@ void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, 
 	// Raw RSA, no padding, as in SendLogin (notes/decisions.md, "#128").
 	try {
 		TRSA RSA;
-		RSA.SetPublicKey(patella::buildconfig::RsaModulus);
+		RSA.SetPublicKey(GetRsaModulus());
 		RSA.Encrypt(Data);
 	} catch (const char *Error) {
 		std::stringstream Text;
