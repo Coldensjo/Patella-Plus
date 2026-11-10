@@ -2,7 +2,7 @@
 // notes/decisions.md, "#124: display modes, clipboard, URLs and message boxes over SDL3"). Not part of the original
 // source.
 //
-// The SDL3 window's (SdlFrame.cpp, issue #122) Platform(): what TWin32Clipboard and TWin32Window (Win32Platform.h) do
+// The SDL3 window's (SdlFrame.cpp, issue #122) Platform(): what the Win32 clipboard calls and TWin32Window (Win32Platform.h) do
 // with Win32's calls, done with SDL3's. The golden runner keeps Win32's. Each needs SDL's video subsystem, which SdlFrame.cpp's Create starts before the client asks them
 // anything (a message box needs none).
 

@@ -47,7 +47,7 @@ int GetMilliseconds()
 
 // True when the clipboard has no text. Since Patella-Modern issue #112 the clipboard's text is its UTF-16 text
 // (CF_UNICODETEXT; Windows makes it from CF_TEXT and CF_TEXT from it, so the one is there when the other is).
-// Since issue #119 the clipboard is the platform's IClipboard (platform/Clipboard.h; Win32's: TWin32Clipboard).
+// Since issue #119 the clipboard is the platform's IClipboard (platform/Clipboard.h; TSdlClipboard).
 bool IsClipboardEmpty()
 {
 	return !patella::platform::Platform().Clipboard.HasText();
@@ -167,7 +167,7 @@ void ResizeClipboardBuffer(unsigned int Size)
 // every system, so the clipboard's UTF-16 text is converted (types/Cp1252.h: '?' for a character the code page
 // does not have). Size is the converted text's with its NUL (the original's was the CF_TEXT memory's, at least
 // that). Since issue #119 the clipboard's calls (OpenClipboard to CloseClipboard, the conversion with them) are
-// the platform's IClipboard::Text (platform/ Clipboard.h; Win32's: TWin32Clipboard, the same calls): the
+// the platform's IClipboard::Text (platform/ Clipboard.h; TSdlClipboard): the
 // clipboard is closed before the buffer is filled, and a clipboard without text gives an empty text, Size 1
 // (the original's Size 0 and a NUL in the buffer: the same buffer). GCC's analyzer (Debug, issue #111): the
 // original's read one byte past the text at a removed CR (above), kept.
@@ -197,7 +197,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 // clipboard as UTF-16 (CF_UNICODETEXT), instead of the original's CF_TEXT, so that
 // another program reads it as the client shows it whatever the system's ANSI code
 // page and the input language. Since issue #119 the platform's IClipboard::SetText
-// (TWin32Clipboard: the same calls).
+// (TSdlClipboard).
 bool SetClipboardText(const char *Text)
 {
 	return patella::platform::Platform().Clipboard.SetText(Text);

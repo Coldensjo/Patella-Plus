@@ -9,22 +9,14 @@
 
 #include "common.h"
 #include "platform/Platform.h"
-#include "types/Cp1252.h"
 #include "types/FixedString.h"
 
 #include <mmsystem.h>
 
-#if defined(PATELLA_SDL3)
 #include "platform/SdlPlatform.h"
-#endif
 
-#include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <ctime>
-#include <optional>
-#include <string>
-#include <string_view>
 
 #if defined(_MSC_VER)
 #pragma comment(lib, "winmm.lib")
@@ -45,56 +37,6 @@ std::int64_t TWin32Clock::WallSeconds()
 void TWin32Clock::FrameWait(std::uint32_t Duration)
 {
 	Sleep(Duration);
-}
-
-bool TWin32Clipboard::HasText()
-{
-	return IsClipboardFormatAvailable(CF_UNICODETEXT) != FALSE;
-}
-
-// sysinc.cpp's GetClipboardText until issue #119 (issue #112: CF_UNICODETEXT, converted to Windows-1252).
-std::optional<std::string> TWin32Clipboard::Text()
-{
-	if (!OpenClipboard(nullptr))
-		return std::nullopt;
-	HANDLE Memory = GetClipboardData(CF_UNICODETEXT);
-	const SIZE_T Units = GlobalSize(Memory) / sizeof(char16_t);
-	const auto *Data = static_cast<const char16_t *>(GlobalLock(Memory));
-	std::string Text;
-	if (Data != nullptr) {
-		std::size_t Length = 0;
-		while (Length < Units && Data[Length] != 0)
-			Length++;
-		Text = patella::text::Utf16ToCp1252(std::u16string_view(Data, Length));
-		const BOOL result = GlobalUnlock(Memory);
-		PATELLA_ASSERT(result!=0 || GetLastError()==NO_ERROR);
-	}
-	CloseClipboard();
-	return Text;
-}
-
-// sysinc.cpp's SetClipboardText until issue #119 (issue #112: the client's text as CF_UNICODETEXT).
-bool TWin32Clipboard::SetText(const char *Text)
-{
-	const std::u16string Wide = patella::text::Cp1252ToUtf16(Text);
-	const size_t Length = Wide.size();
-	if (!OpenClipboard(nullptr))
-		return false;
-	HGLOBAL Memory;
-	if (EmptyClipboard() && (Memory = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, (Length + 1) * sizeof(char16_t))) != nullptr) {
-		auto *textdata = static_cast<char16_t *>(GlobalLock(Memory));
-		PATELLA_ASSERT(textdata!=NULL);
-		memcpy(textdata, Wide.data(), Length * sizeof(char16_t));
-		textdata[Length] = 0;
-		const BOOL result = GlobalUnlock(Memory);
-		PATELLA_ASSERT_VALUES(result==0 || GetLastError()==NO_ERROR, result, GetLastError());
-		if (SetClipboardData(CF_UNICODETEXT, Memory) != nullptr) {
-			CloseClipboard();
-			return true;
-		}
-	}
-	CloseClipboard();
-	return false;
 }
 
 bool TWin32Input::CursorPosition(TPoint &Point)
@@ -183,7 +125,6 @@ bool TWin32Window::SetFullscreenMode(TWindowHandle, const TDisplayMode *)
 // after every static destructor.
 namespace {
 constinit TWin32Clock Win32ClockInstance;
-constinit TWin32Clipboard Win32ClipboardInstance;
 constinit TWin32Input Win32InputInstance;
 constinit TWin32Window Win32WindowInstance;
 constinit TSdlLoopInput SdlLoopInputInstance;
@@ -215,29 +156,17 @@ TSdlLoopInput &SdlLoopInput()
 
 IInput &WindowInput()
 {
-#if defined(PATELLA_SDL3)
 	return SdlLoopInputInstance;
-#else
-	return Win32InputInstance;
-#endif
 }
 
 IClipboard &WindowClipboard()
 {
-#if defined(PATELLA_SDL3)
 	return SdlClipboard();
-#else
-	return Win32ClipboardInstance;
-#endif
 }
 
 IWindow &WindowDesktop()
 {
-#if defined(PATELLA_SDL3)
 	return SdlWindow();
-#else
-	return Win32WindowInstance;
-#endif
 }
 
 // Patella.exe's and the golden runner's platform (Platform.h). Issue #122: the

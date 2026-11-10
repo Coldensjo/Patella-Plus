@@ -57,7 +57,7 @@ ISocket &NetworkSocket();
 // SDL3 window). Patella.exe's Platform() gives it; the test build's TTestInput passes its timer on to it without a script.
 TSdlLoopInput &SdlLoopInput();
 IInput &WindowInput();
-// The clipboard and the desktop of the process's window: SDL3's (platform/SdlPlatform.h) where built with PATELLA_SDL3.
+// The clipboard and the desktop of the process's window: SDL3's (platform/SdlPlatform.h).
 IClipboard &WindowClipboard();
 IWindow &WindowDesktop();
 

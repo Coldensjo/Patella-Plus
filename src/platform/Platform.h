@@ -12,8 +12,8 @@
 // Platform() is defined once per executable, by its entry point's side:
 //
 //	Patella.exe, the golden runner     platform/Win32Platform.cpp: TWin32Clock, TDataFileSystem, NetworkSocket()
-//	                                   (issue #125: TPortableSocket, the golden runner's TMfcSocket), TWin32Clipboard,
-//	                                   TWin32Input, TWin32Window
+//	                                   (issue #125: TPortableSocket, the golden runner's TMfcSocket), and the SDL3
+//	                                   window's input, clipboard and desktop (SdlPlatform.h)
 //
 // Each is made on first use (a static initialiser, sysinc.cpp's StartTime, reads the clock before main) and never
 // destroyed (the client reads the clocks until its very end, static destructors included).

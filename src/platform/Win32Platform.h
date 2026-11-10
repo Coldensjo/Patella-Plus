@@ -15,8 +15,6 @@
 #include "platform/Process.h" // IWYU pragma: export
 
 #include <cstdint>
-#include <optional>
-#include <string>
 
 namespace patella::platform {
 
@@ -26,14 +24,6 @@ public:
 	[[nodiscard]] std::uint32_t Milliseconds() override;
 	[[nodiscard]] std::int64_t WallSeconds() override;
 	void FrameWait(std::uint32_t Duration) override;
-};
-
-// The clipboard's CF_UNICODETEXT, converted to and from the client's Windows-1252 (issue #112).
-class TWin32Clipboard final : public IClipboard {
-public:
-	[[nodiscard]] bool HasText() override;
-	[[nodiscard]] std::optional<std::string> Text() override;
-	bool SetText(const char *Text) override;
 };
 
 // GetCursorPos, SetTimer, KillTimer; nothing at the idle step, every capture change the client's.

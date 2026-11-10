@@ -1,6 +1,6 @@
 // SdlClipboard.cpp: TSdlClipboard, the platform's clipboard over SDL3 (Patella-Modern issue #124, its own file since
 // issue #159: tests_sdl_clipboard compiles it alone; platform/SdlPlatform.h). Not part of the original source: each
-// function does with SDL3 what Win32Platform.cpp's TWin32Clipboard does with Win32's calls.
+// function does with SDL3 what the client did with Win32's clipboard calls.
 
 #include "platform/SdlPlatform.h"
 
@@ -39,13 +39,13 @@ const char *const TextMimeTypes[] = {"text/plain;charset=utf-8", "text/plain", "
 
 } // namespace
 
-// TWin32Clipboard::HasText's IsClipboardFormatAvailable(CF_UNICODETEXT): on Windows SDL asks the same.
+// Win32's IsClipboardFormatAvailable(CF_UNICODETEXT): on Windows SDL asks the same.
 bool TSdlClipboard::HasText()
 {
 	return VideoStarted() && SDL_HasClipboardText();
 }
 
-// TWin32Clipboard::Text: the text up to its first NUL (SDL's is a C string), converted to the client's. SDL gives an
+// The clipboard's text up to its first NUL (SDL's is a C string), converted to the client's. SDL gives an
 // empty text where the clipboard cannot be opened (Win32's nullopt): the paste then has nothing, as with no text.
 std::optional<std::string> TSdlClipboard::Text()
 {
@@ -57,7 +57,7 @@ std::optional<std::string> TSdlClipboard::Text()
 	return patella::text::Utf8ToCp1252(Utf8.get());
 }
 
-// TWin32Clipboard::SetText. One difference of SDL's, kept by the owner's choice (notes/decisions.md, "#124"): on Windows
+// Puts the text on the clipboard. One difference of SDL's, kept by the owner's choice (notes/decisions.md, "#124"): on Windows
 // each line feed without a carriage return before it is written as CR LF (the console's selection of several lines).
 // An empty text is put there as the original did (sysinc.cpp's SetClipboardText, issue #159): SDL_SetClipboardText("")
 // would empty the clipboard.

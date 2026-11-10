@@ -16,9 +16,7 @@
 #include "platform/PortableSocket.h"
 #include "platform/Socket.h"
 
-#if defined(PATELLA_SDL3)
 #include "SdlFrame.h"
-#endif
 
 namespace patella::platform {
 

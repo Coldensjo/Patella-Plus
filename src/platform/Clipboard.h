@@ -5,8 +5,8 @@
 // CheckClipboardText, CopyTaintedClipboardText) ask the process's IClipboard (platform/Platform.h). The text is the
 // client's (Windows-1252, issue #112) on both sides; the implementation converts it to and from the platform's:
 //
-//	TWin32Clipboard   CF_UNICODETEXT (issue #112: '?' for a character Windows-1252 does not have; Win32Platform.h):
-//	                  Patella.exe's, the golden runner's and the test build's without a script
+//	TSdlClipboard     SDL3's clipboard text, UTF-8 (issue #112: '?' for a character Windows-1252 does not have;
+//	                  SdlPlatform.h): the client's on every system
 //
 // sysinc.cpp keeps its buffer and the original's odd CR removal; only the clipboard's own calls are here. M8: SDL3's
 // clipboard (UTF-8, through types/Cp1252.h).
