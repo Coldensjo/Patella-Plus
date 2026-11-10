@@ -115,10 +115,10 @@ void TTextWindow::Draw(int Surface, int x, int y)
 		PATELLA_ASSERT_VALUES(Format->LineText!=nullptr, CurrentLine, GetFirstLineNumber());
 		int LineHeight;
 		if (First) {
-			LineHeight = GetFontHeight(Format->FontNumber);
+			LineHeight = Graphics().GetFontHeight(Format->FontNumber);
 			First = false;
 		} else {
-			LineHeight = GetFontLineHeight(Format->FontNumber);
+			LineHeight = Graphics().GetFontLineHeight(Format->FontNumber);
 		}
 		Bottom -= LineHeight;
 		if (Bottom < 0)
@@ -128,32 +128,32 @@ void TTextWindow::Draw(int Surface, int x, int y)
 		int EndLine, EndOffset, StartLine, StartOffset;
 		if (HasSelection() && GetSelectionEnd(&EndLine, &EndOffset) && GetSelectionStart(&StartLine, &StartOffset)
 			&& StartLine <= CurrentLine && CurrentLine <= EndLine) {
-			int SelectionHeight = GetFontLineHeight(Format->FontNumber);
+			int SelectionHeight = Graphics().GetFontLineHeight(Format->FontNumber);
 			int SelectionWidth = 0;
 			int SelectionX = LineX;
 			if (CurrentLine == EndLine) {
 				if (CurrentLine == StartLine) {
-					SelectionX = GetTextPartWidth(Format->FontNumber, Format->LineText, StartOffset);
-					SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText + StartOffset,
+					SelectionX = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText, StartOffset);
+					SelectionWidth = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText + StartOffset,
 						EndOffset - StartOffset);
-					SelectionHeight = GetFontHeight(Format->FontNumber);
+					SelectionHeight = Graphics().GetFontHeight(Format->FontNumber);
 					SelectionX += LineX;
 				} else {
-					SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText, EndOffset);
-					SelectionHeight = GetFontHeight(Format->FontNumber);
+					SelectionWidth = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText, EndOffset);
+					SelectionHeight = Graphics().GetFontHeight(Format->FontNumber);
 				}
 			} else if (CurrentLine == StartLine) {
-				SelectionX = GetTextPartWidth(Format->FontNumber, Format->LineText, StartOffset) + LineX;
-				SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText + StartOffset,
+				SelectionX = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText, StartOffset) + LineX;
+				SelectionWidth = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText + StartOffset,
 					Format->LineLength - StartOffset);
 			} else {
-				SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText, Format->LineLength);
+				SelectionWidth = Graphics().GetTextPartWidth(Format->FontNumber, Format->LineText, Format->LineLength);
 			}
 			GraphicsEngine().GetSurface()->FillRectangle(Surface,
 				TRect(SelectionX, LineY, SelectionWidth, SelectionHeight),
 				SkinProperties().ConsoleWindow.SelectionColor);
 		}
-		PrintTextPart(Surface, LineX, LineY, Format->FontNumber, Format->Color, Format->LineText,
+		Graphics().PrintTextPart(Surface, LineX, LineY, Format->FontNumber, Format->Color, Format->LineText,
 			Format->LineLength, 0);
 	}
 }
@@ -175,10 +175,10 @@ void TTextWindow::Arrange()
 		if (Format != nullptr) {
 			CurrentLine--;
 			if (First) {
-				Rest -= GetFontHeight(Format->FontNumber);
+				Rest -= Graphics().GetFontHeight(Format->FontNumber);
 				First = false;
 			} else {
-				Rest -= GetFontLineHeight(Format->FontNumber);
+				Rest -= Graphics().GetFontLineHeight(Format->FontNumber);
 			}
 			if (Rest < 0)
 				InvisibleLines++;
@@ -324,7 +324,7 @@ void TTextWindow::FormatLines()
 			int Start = 0;
 			while (!Last) {
 				int Blank = -1;
-				const int End = GetFittingTextLength(FONT_SMOOTH, Text + Start, TextWidth - Indent) + Start;
+				const int End = Graphics().GetFittingTextLength(FONT_SMOOTH, Text + Start, TextWidth - Indent) + Start;
 				int i;
 				for (i = Start; i < End; i++) {
 					const char c = Text[i];
@@ -552,9 +552,9 @@ bool TTextWindow::GetPosition(int x, int y, int *Line, int *Offset, int *Length)
 				CurrentLine = LineNumber - 1;
 				if (Format == nullptr || Format->LineText == nullptr)
 					continue;
-				int LineHeight = GetFontLineHeight(Format->FontNumber);
+				int LineHeight = Graphics().GetFontLineHeight(Format->FontNumber);
 				if (First) {
-					LineHeight = GetFontHeight(Format->FontNumber);
+					LineHeight = Graphics().GetFontHeight(Format->FontNumber);
 					First = false;
 				}
 				if (In(y, Bottom - LineHeight, Bottom)) {
@@ -578,7 +578,7 @@ bool TTextWindow::GetPosition(int x, int y, int *Line, int *Offset, int *Length)
 			else
 				TextX = x - Format->Indent;
 			*Line = LineNumber;
-			int Characters = GetFittingTextLength(Format->FontNumber, Format->LineText, TextX);
+			int Characters = Graphics().GetFittingTextLength(Format->FontNumber, Format->LineText, TextX);
 			if (Characters > Format->LineLength)
 				Characters = Format->LineLength;
 			*Offset = Characters;
@@ -693,7 +693,7 @@ TTab::TTab(const char *_Caption, TTalkBuffer *_TextBuffer, TCallback _Callback)
 	TStringBuffer(FullCaption.get(), Size).Assign(Caption.get());
 	Callback = _Callback;
 	Shortened = false;
-	const int Length = GetFittingTextLength(SkinProperties().Tab.ActiveFont.FontNumber, Caption.get(),
+	const int Length = Graphics().GetFittingTextLength(SkinProperties().Tab.ActiveFont.FontNumber, Caption.get(),
 		SkinProperties().Tab.Width - SkinProperties().Tab.CaptionMargin * 2);
 	if (ShortenString(Caption.get(), Length))
 		Shortened = true;
@@ -830,8 +830,8 @@ void TTab::Draw(int Surface, int x, int y)
 		Font = &SkinProperties().Tab.BlinkingFont;
 	else
 		Font = &SkinProperties().Tab.InactiveFont;
-	PrintFormattedText(Surface, SkinProperties().Tab.Caption.x + x, SkinProperties().Tab.Caption.y + y, *Font,
-		Caption.get());
+	Graphics().PrintFormattedText(Surface, SkinProperties().Tab.Caption.x + x, SkinProperties().Tab.Caption.y + y,
+		*Font, Caption.get());
 	if (BlinkEnd != 0 && BlinkEnd < GetActionNumber())
 		BlinkEnd = 0;
 }

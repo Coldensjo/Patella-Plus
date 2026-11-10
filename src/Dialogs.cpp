@@ -761,9 +761,9 @@ TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 	TimeLabel = new TLabel(SkinProperties().Dialog.TextFont, this->Text);
 	int FullWidth = TextLabel->Width > ProgressBar->GetMinimumWidth() ? TextLabel->Width
 																	  : ProgressBar->GetMinimumWidth();
-	FullWidth = FullWidth > TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888")
+	FullWidth = FullWidth > TimeLabel->Width + Graphics().GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888")
 		? FullWidth
-		: TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888");
+		: TimeLabel->Width + Graphics().GetTextWidth(SkinProperties().Dialog.TextFont.FontNumber, "8888");
 	const int TextHeight = TextLabel->Height;
 	InsertChild(TextLabel);
 	const int BarY = TextHeight + SkinProperties().ReconnectWindowSpacing;
@@ -1026,7 +1026,7 @@ void TMoveObjectsDialog::Draw(int Surface, int x, int y)
 	int PatternY = 1;
 	if (ObjectTypes().GetObjectFlag(DraggedObject, CUMULATIVE))
 		ObjectTypes().GetCumulativePattern(DraggedObject, &PatternX, &PatternY);
-	DrawObject(Surface, SkinProperties().MoveObjectsDialogObject.x + x, SkinProperties().MoveObjectsDialogObject.y + y, 32, DraggedObject,
+	Graphics().DrawObject(Surface, SkinProperties().MoveObjectsDialogObject.x + x, SkinProperties().MoveObjectsDialogObject.y + y, 32, DraggedObject,
 		TRGBColor(0, 0, 0), TRect(SkinProperties().MoveObjectsDialogObject.x + x, SkinProperties().MoveObjectsDialogObject.y + y, 32, 32),
 		SkinProperties().ObjectCountFont, true);
 	TWindow::Draw(Surface, x, y);
@@ -2531,7 +2531,7 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	DeviceLabelName[0] = 0;
 	DeviceLabel = new TLabel(SkinProperties().AdvancedGraphicsDialog.DeviceLabel.x, SkinProperties().AdvancedGraphicsDialog.DeviceLabel.y,
 		SkinProperties().AdvancedGraphicsDialog.Width - SkinProperties().AdvancedGraphicsDialog.DeviceLabel.x,
-		GetFontLineHeight(SkinProperties().Dialog.TextFont.FontNumber), SkinProperties().Dialog.TextFont,
+		Graphics().GetFontLineHeight(SkinProperties().Dialog.TextFont.FontNumber), SkinProperties().Dialog.TextFont,
 		TextSelectDevice, true);
 	TLabel *Label = DeviceLabel;
 	AutomaticButton = new TTextButton(SkinProperties().AdvancedGraphicsDialog.DirectX5Button.x, SkinProperties().AdvancedGraphicsDialog.DirectX5Button.y,
@@ -2617,11 +2617,11 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 		Text.Format("Adjust framerate limit: {}", Framerate->Range->Value);
 	else
 		Text.Assign("Adjust framerate limit: max");
-	PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.x + x, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.x + x, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.y + y,
 		SkinProperties().Dialog.TextFont, Text);
 	const double FPS = GraphicsEngine().GetSurface()->GetFPS();
 	Text.Format("Current framerate: {:2.2f}", FPS);
-	PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.x + x, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.x + x, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.y + y,
 		SkinProperties().Dialog.TextFont, Text);
 	ShowDevice();
 }

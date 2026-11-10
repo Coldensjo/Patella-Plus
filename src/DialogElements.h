@@ -506,7 +506,7 @@ inline int TEditLine::GetPosition(int x, int y)
 		return FirstVisible;
 	if (x > Width - 2 * SkinProperties().EditLineTextMargin || y > Height - 2 * SkinProperties().EditLineTextMargin)
 		return (int)strlen(Text.get());
-	const int Position = GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, x) + FirstVisible;
+	const int Position = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, x) + FirstVisible;
 	if (Position > (int)strlen(Text.get()))
 		return (int)strlen(Text.get());
 	return Position;

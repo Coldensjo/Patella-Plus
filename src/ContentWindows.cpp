@@ -656,7 +656,7 @@ TCompassRose::TCompassRose(int _RoseSkin)
 
 void TCompassRose::Draw(int Surface, int x, int y)
 {
-	DrawPicturePart(Surface, x, y, 4, Skins()[RoseSkin].x, Skins()[RoseSkin].y, Skins()[RoseSkin].width,
+	Graphics().DrawPicturePart(Surface, x, y, 4, Skins()[RoseSkin].x, Skins()[RoseSkin].y, Skins()[RoseSkin].width,
 		Skins()[RoseSkin].height);
 }
 
@@ -690,21 +690,21 @@ void TCompassRose::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 void TCapacityLabel::Draw(int Surface, int x, int y)
 {
 	TFixedString<20> Text;
-	PrintFormattedText(Surface, SkinProperties().CapacityLabel.Caption.x + x, SkinProperties().CapacityLabel.Caption.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().CapacityLabel.Caption.x + x, SkinProperties().CapacityLabel.Caption.y + y,
 		SkinProperties().CapacityLabel.CaptionFont, "Cap:");
 	Text.Format("{}", PlayerState().GetPlayerCapacity());
-	PrintFormattedText(Surface, SkinProperties().CapacityLabel.Value.x + x, SkinProperties().CapacityLabel.Value.y + y,
-		SkinProperties().CapacityLabel.ValueFont, Text);
+	Graphics().PrintFormattedText(Surface, SkinProperties().CapacityLabel.Value.x + x,
+		SkinProperties().CapacityLabel.Value.y + y, SkinProperties().CapacityLabel.ValueFont, Text);
 }
 
 void TSoulLabel::Draw(int Surface, int x, int y)
 {
 	TFixedString<20> Text;
-	PrintFormattedText(Surface, SkinProperties().SoulLabel.Caption.x + x, SkinProperties().SoulLabel.Caption.y + y,
-		SkinProperties().SoulLabel.CaptionFont, "Soul:");
+	Graphics().PrintFormattedText(Surface, SkinProperties().SoulLabel.Caption.x + x,
+		SkinProperties().SoulLabel.Caption.y + y, SkinProperties().SoulLabel.CaptionFont, "Soul:");
 	Text.Format("{}", PlayerState().GetPlayerSoul());
-	PrintFormattedText(Surface, SkinProperties().SoulLabel.Value.x + x, SkinProperties().SoulLabel.Value.y + y,
-		SkinProperties().SoulLabel.ValueFont, Text);
+	Graphics().PrintFormattedText(Surface, SkinProperties().SoulLabel.Value.x + x,
+		SkinProperties().SoulLabel.Value.y + y, SkinProperties().SoulLabel.ValueFont, Text);
 }
 
 // --- TPlayerStates ----------------------------------------------------------------
@@ -1053,16 +1053,16 @@ void TInventoryView::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 	for (int i = 0; i < 10; i++) {
 		const TObject Obj = *Inventory().GetBodyObject(i + 1);
-		DrawPicturePart(Surface, SkinProperties().InventoryView.Slots[i].x + x, SkinProperties().InventoryView.Slots[i].y + y, 4,
+		Graphics().DrawPicturePart(Surface, SkinProperties().InventoryView.Slots[i].x + x, SkinProperties().InventoryView.Slots[i].y + y, 4,
 			Skins()[SKIN_SLOT_FRAME].x, Skins()[SKIN_SLOT_FRAME].y, Skins()[SKIN_SLOT_FRAME].width, Skins()[SKIN_SLOT_FRAME].height);
 		const int ObjX = SkinProperties().InventoryView.Objects[i].x + x;
 		const int ObjY = SkinProperties().InventoryView.Objects[i].y + y;
 		if (Obj.Type == 0) {
 			const int Empty = SkinProperties().InventoryView.EmptySlotSkins[i];
-			DrawPicturePart(Surface, ObjX, ObjY, 4, Skins()[Empty].x, Skins()[Empty].y, Skins()[Empty].width,
+			Graphics().DrawPicturePart(Surface, ObjX, ObjY, 4, Skins()[Empty].x, Skins()[Empty].y, Skins()[Empty].width,
 				Skins()[Empty].height);
 		} else {
-			DrawObject(Surface, ObjX, ObjY, 32, Obj, TRGBColor(0, 0, 0), TRect(ObjX, ObjY, 32, 32),
+			Graphics().DrawObject(Surface, ObjX, ObjY, 32, Obj, TRGBColor(0, 0, 0), TRect(ObjX, ObjY, 32, 32),
 				SkinProperties().ObjectCountFont, false);
 		}
 		if (Interaction().GetActionState() == ACTIONSTATE_DRAGGING && In(Interaction().GetMouseX(), ObjX, ObjX + 31) && In(Interaction().GetMouseY(), ObjY, ObjY + 31))
@@ -1350,10 +1350,10 @@ void TStatusWindow::Draw(int Surface, int x, int y)
 	const int MaxMana = PlayerState().GetPlayerMaxMana();
 	TFixedString<16> Text;
 	Text.Format("{}", Health);
-	PrintFormattedText(Surface, SkinProperties().StatusWindow.HitpointsValue.x + x, SkinProperties().StatusWindow.HitpointsValue.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().StatusWindow.HitpointsValue.x + x, SkinProperties().StatusWindow.HitpointsValue.y + y,
 		SkinProperties().StatusWindow.ValueFont, Text);
 	Text.Format("{}", Mana);
-	PrintFormattedText(Surface, SkinProperties().StatusWindow.ManaValue.x + x, SkinProperties().StatusWindow.ManaValue.y + y,
+	Graphics().PrintFormattedText(Surface, SkinProperties().StatusWindow.ManaValue.x + x, SkinProperties().StatusWindow.ManaValue.y + y,
 		SkinProperties().StatusWindow.ValueFont, Text);
 	int BarWidth = SkinProperties().StatusWindow.HitpointsBar.width;
 	if (Health < MaxHealth)
@@ -1454,9 +1454,9 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 					const int ScreenX = SkinProperties().ContainerFirstSlot.x + SlotX + x;
 					const int ScreenY = Top + y;
 					const int SlotWidth = SkinProperties().ContainerSlotSizeAndObject.x;
-					DrawPicturePart(Surface, ScreenX, ScreenY, 4, Skins()[SKIN_CONTAINER_SLOT].x, Skins()[SKIN_CONTAINER_SLOT].y, SlotWidth, ClipHeight);
+					Graphics().DrawPicturePart(Surface, ScreenX, ScreenY, 4, Skins()[SKIN_CONTAINER_SLOT].x, Skins()[SKIN_CONTAINER_SLOT].y, SlotWidth, ClipHeight);
 					if (i < ObjectCount)
-						DrawObject(Surface, SkinProperties().ContainerSlotSizeAndObject.width + SlotX + x,
+						Graphics().DrawObject(Surface, SkinProperties().ContainerSlotSizeAndObject.width + SlotX + x,
 							SkinProperties().ContainerSlotSizeAndObject.height + SlotY + y, 32, Inventory().GetContainerContent(Container, i),
 							TRGBColor(0, 0, 0), TRect(ScreenX, ScreenY, SlotWidth, ClipHeight), SkinProperties().ObjectCountFont,
 							false);
@@ -1693,7 +1693,7 @@ TSkillsWindowBody::TSkillsWindowBody()
 {
 	ContextMenu = nullptr;
 	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarMinimumWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0,
-		GetFontLineHeight(SkinProperties().SkillsFont.FontNumber) / 2);
+		Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber) / 2);
 	InsertChild(ScrollBar);
 	Lines = 15;
 	Arrange();
@@ -1738,7 +1738,7 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 		if (!Minimized)
 			TWindow::Draw(Surface, x, y);
-		const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+		const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 		int LineY = -ScrollY;
 		const int TextWidth = Width - SkinProperties().SkillsHorizontalMargin * 2 - ScrollBar->Width;
 		int Progress = -1;
@@ -1763,7 +1763,7 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 					ClipHeight = Bottom - Top + 1;
 				const int ClipX = SkinProperties().SkillsHorizontalMargin + x;
 				const int ClipY = Top + y;
-				const int LineMiddle = GetFontHeight(SkinProperties().SkillsFont.FontNumber) / 2 + SkinProperties().SkillsVerticalMargin - 1 + LineY;
+				const int LineMiddle = Graphics().GetFontHeight(SkinProperties().SkillsFont.FontNumber) / 2 + SkinProperties().SkillsVerticalMargin - 1 + LineY;
 				if (!HasValue) {
 					if (LineMiddle >= 0 && LineMiddle <= Bottom)
 						GraphicsEngine().GetSurface()->DrawHorizontalLine(Surface, ClipX, LineMiddle + y, TextWidth,
@@ -1771,10 +1771,10 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 				} else {
 					TFixedString<20> Number;
 					FormatNumber(Value, Number.Chars);
-					PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + x, SkinProperties().SkillsVerticalMargin + LineY + y,
+					Graphics().PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + x, SkinProperties().SkillsVerticalMargin + LineY + y,
 						SkinProperties().SkillsFont.FontNumber, SkinProperties().SkillsFont.Color, Text, 0,
 						TRect(ClipX, ClipY, TextWidth, ClipHeight));
-					PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + TextWidth - 1 + x, SkinProperties().SkillsVerticalMargin + LineY + y,
+					Graphics().PrintTextClipped(Surface, SkinProperties().SkillsHorizontalMargin + TextWidth - 1 + x, SkinProperties().SkillsVerticalMargin + LineY + y,
 						SkinProperties().SkillsFont.FontNumber, SkinProperties().SkillsFont.Color, Number, 2,
 						TRect(ClipX, ClipY, TextWidth, ClipHeight));
 					if (Progress != -1) {
@@ -1821,7 +1821,7 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 	if (!IsMinimized()) {
 		const int ScrollY = ScrollBar->Range->Value;
 		const int Bottom = Height - 1;
-		const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+		const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 		const int TextWidth = Width - SkinProperties().SkillsHorizontalMargin * 2 - ScrollBar->Width;
 		int LineY = -ScrollY;
 		int Progress = -1;
@@ -1890,7 +1890,7 @@ void TSkillsWindowBody::Arrange()
 int TSkillsWindowBody::GetMinimumHeight()
 {
 	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
-	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 	return (std::max)(ScrollBar->GetMinimumHeight(), LineHeight);
 }
 
@@ -1913,7 +1913,7 @@ int TSkillsWindowBody::GetMaximumHeight()
 
 int TSkillsWindowBody::GetContentHeight()
 {
-	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 	int Result = 0;
 	for (int i = 0; i < Lines;) {
 		i++;
@@ -2096,7 +2096,7 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 						SkinProperties().BattleWindow.Frame.height),
 					1, Color, TRect(x, ClipY, ClipWidth, ClipHeight));
 			GraphicsEngine().GetSurface()->Flag26 = true;
-			DrawOutfit(Surface, SkinProperties().BattleWindow.Outfit.x + x, SkinProperties().BattleWindow.Outfit.y + RowY + y,
+			Graphics().DrawOutfit(Surface, SkinProperties().BattleWindow.Outfit.x + x, SkinProperties().BattleWindow.Outfit.y + RowY + y,
 				SkinProperties().BattleWindow.Outfit.width, Creature->OutfitType, Creature->Colors,
 				SkinProperties().BattleWindow.OutfitHighlight, TRect(x, ClipY, ClipWidth, ClipHeight), SkinProperties().ObjectCountFont);
 			GraphicsEngine().GetSurface()->Flag26 = false;
@@ -2152,8 +2152,8 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				}
 			}
 			const char *Name = Creature->Name;
-			const int MaxLength = GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Name,
-				SkinProperties().BattleWindow.Name.width);
+			const int MaxLength = Graphics().GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber,
+				Name, SkinProperties().BattleWindow.Name.width);
 			TFixedString<32> Shortened;
 			if (MaxLength < (int)strlen(Name)) {
 				Shortened.Assign(Name);
@@ -2161,11 +2161,11 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				Name = Shortened;
 			}
 			if (Framed)
-				PrintTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
+				Graphics().PrintTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
 					SkinProperties().BattleWindow.Name.y + RowY + y, SkinProperties().BattleWindow.NameFont.FontNumber, Color, Name,
 					SkinProperties().BattleWindow.NameFont.Alignment, TRect(x, ClipY, ClipWidth, ClipHeight));
 			else
-				PrintFormattedTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
+				Graphics().PrintFormattedTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
 					SkinProperties().BattleWindow.Name.y + RowY + y, SkinProperties().BattleWindow.NameFont, Name,
 					TRect(x, ClipY, ClipWidth, ClipHeight));
 			GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
@@ -2282,7 +2282,7 @@ void TBattleWindowBody::MouseHover(int x, int y)
 	if (Position != -1) {
 		TCreature *Creature = Creatures().GetOpponent(Position);
 		if (Creature != nullptr) {
-			const int MaxLength = GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Creature->Name,
+			const int MaxLength = Graphics().GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Creature->Name,
 				SkinProperties().BattleWindow.Name.width);
 			if (MaxLength < (int)strlen(Creature->Name)) {
 				MouseOverText.Assign(Creature->Name);
@@ -2392,7 +2392,7 @@ void TTradeOffers::Draw(int Surface, int x, int y)
 				PATELLA_ASSERT_VALUES(x+DestX>=0, x+DestX);
 				PATELLA_ASSERT_VALUES(y+DestY>=0, y+DestY);
 				DrawSkin(Surface, x + DestX, y + DestY, AreaWidth, SlotHeight, SKIN_CONTAINER_SLOT, 0, 0);
-				DrawObject(Surface, OffsetX + SlotX + x, OffsetY + RowY + y, SkinProperties().TradeWindow.ObjectSize, Obj,
+				Graphics().DrawObject(Surface, OffsetX + SlotX + x, OffsetY + RowY + y, SkinProperties().TradeWindow.ObjectSize, Obj,
 					TRGBColor(0, 0, 0), TRect(x, y, ClipWidth, ClipHeight), SkinProperties().ObjectCountFont, false);
 			}
 		}
@@ -2769,15 +2769,15 @@ void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 			if (Creatures().IsBuddyNewlyOnline(i))
 				Color = SkinProperties().BuddylistWindow.NewColor;
 			const char *Name = Creatures().GetBuddyListName(i);
-			const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,
-				SkinProperties().BuddylistWindow.Name.width);
+			const int MaxLength = Graphics().GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber,
+				Name, SkinProperties().BuddylistWindow.Name.width);
 			TFixedString<40> Shortened;
 			if (MaxLength < (int)strlen(Name)) {
 				Shortened.Assign(Name);
 				ShortenString(Shortened, MaxLength);
 				Name = Shortened;
 			}
-			PrintTextClipped(Surface, SkinProperties().BuddylistWindow.Name.x + x,
+			Graphics().PrintTextClipped(Surface, SkinProperties().BuddylistWindow.Name.x + x,
 				SkinProperties().BuddylistWindow.Name.y + ItemY + y, SkinProperties().BuddylistWindow.NameFont.FontNumber,
 				Color, Name, SkinProperties().BuddylistWindow.NameFont.Alignment, TRect(x, y, ClipWidth, ClipHeight));
 		}
@@ -2829,8 +2829,8 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 	const int Position = GetBuddyAt(x, y);
 	if (Position != -1) {
 		const char *Name = Creatures().GetBuddyListName(Position);
-		const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,
-			SkinProperties().BuddylistWindow.Name.width);
+		const int MaxLength = Graphics().GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber,
+			Name, SkinProperties().BuddylistWindow.Name.width);
 		if (MaxLength < (int)strlen(Name)) {
 			if (MouseOverText != nullptr)
 				MouseOverText.reset();

@@ -140,7 +140,8 @@ void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int sr
 	PATELLA_ASSERT_VALUES(width>0, width);
 	PATELLA_ASSERT_VALUES(height>0, height);
 	if (Skins()[skin].width == width && Skins()[skin].height == height) {
-		DrawPicturePart(Surface, x, y, 4, Skins()[skin].x, Skins()[skin].y, Skins()[skin].width, Skins()[skin].height);
+		Graphics().DrawPicturePart(Surface, x, y, 4, Skins()[skin].x, Skins()[skin].y, Skins()[skin].width,
+			Skins()[skin].height);
 	} else {
 		int PieceHeight = 0;
 		int dy = 0;
@@ -167,7 +168,7 @@ void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int sr
 				}
 				if (PieceHeight > h)
 					PieceHeight = h;
-				DrawPicturePart(Surface, dx + x, dy + y, 4, SourceX, SourceY, PieceWidth, PieceHeight);
+				Graphics().DrawPicturePart(Surface, dx + x, dy + y, 4, SourceX, SourceY, PieceWidth, PieceHeight);
 				dx += PieceWidth;
 			}
 			dy += PieceHeight;
@@ -195,7 +196,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 		TERROR(s.str().c_str());
 	}
 	if (Skins()[skin].width == width && Skins()[skin].height == height) {
-		DrawPicturePartClipped(Surface, x, y, 4, Skins()[skin].x, Skins()[skin].y, Skins()[skin].width,
+		Graphics().DrawPicturePartClipped(Surface, x, y, 4, Skins()[skin].x, Skins()[skin].y, Skins()[skin].width,
 			Skins()[skin].height, TRect(ClipX, ClipY, ClipWidth, ClipHeight));
 	} else {
 		int PieceHeight = 0;
@@ -223,7 +224,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 				}
 				if (PieceHeight > h)
 					PieceHeight = h;
-				DrawPicturePartClipped(Surface, dx + x, dy + y, 4, SourceX, SourceY, PieceWidth, PieceHeight,
+				Graphics().DrawPicturePartClipped(Surface, dx + x, dy + y, 4, SourceX, SourceY, PieceWidth, PieceHeight,
 					TRect(ClipX, ClipY, ClipWidth, ClipHeight));
 				dx += PieceWidth;
 			}
@@ -1661,8 +1662,8 @@ void TComponent::Draw(int Surface, int x, int y)
 		PATELLA_ASSERT_VALUES(DrawingList[i].skin<SkinData().NumberOfSkins, DrawingList[i].skin);
 		if (DrawingList[i].width == 0 && DrawingList[i].height == 0) {
 			const TSkin *Skin = &Skins()[DrawingList[i].skin];
-			DrawPicturePart(Surface, DrawingList[i].x + x, DrawingList[i].y + y, 4, Skin->x, Skin->y, Skin->width,
-				Skin->height);
+			Graphics().DrawPicturePart(Surface, DrawingList[i].x + x, DrawingList[i].y + y, 4, Skin->x, Skin->y,
+				Skin->width, Skin->height);
 			continue;
 		}
 		if (DrawingList[i].x + x < 0 || DrawingList[i].y + y < 0) {

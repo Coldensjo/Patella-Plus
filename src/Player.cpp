@@ -251,7 +251,7 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 	try {
 		GraphicsEngine().SurfaceInitInstance(patella::sdlframe::Handle());
 		GraphicsEngine().GetSurface()->InitSurfaces();
-		InitVideoCache();
+		Graphics().InitVideoCache();
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::SURFACE}; // "Video surface allocation failed."
 	}

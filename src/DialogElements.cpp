@@ -253,12 +253,12 @@ TLabel::TLabel(int x, int y, TFont _Font, const char *_Text)
 	SetText(_Text, false);
 	int MaxWidth = 0;
 	for (int i = 0; i < Lines; i++) {
-		const int LineWidth = GetTextWidth(Font.FontNumber, Line[i]);
+		const int LineWidth = Graphics().GetTextWidth(Font.FontNumber, Line[i]);
 		if (LineWidth >= MaxWidth)
 			MaxWidth = LineWidth;
 	}
 	TComponent::SetPosition(x, y);
-	TComponent::SetSize(MaxWidth, Lines * GetFontLineHeight(Font.FontNumber));
+	TComponent::SetSize(MaxWidth, Lines * Graphics().GetFontLineHeight(Font.FontNumber));
 }
 
 TLabel::TLabel(TFont _Font, const char *_Text)
@@ -272,23 +272,23 @@ TLabel::TLabel(TFont _Font, const char *_Text)
 	SetText(_Text, false);
 	int MaxWidth = 0;
 	for (int i = 0; i < Lines; i++) {
-		const int LineWidth = GetTextWidth(Font.FontNumber, Line[i]);
+		const int LineWidth = Graphics().GetTextWidth(Font.FontNumber, Line[i]);
 		if (LineWidth >= MaxWidth)
 			MaxWidth = LineWidth;
 	}
-	TComponent::SetSize(MaxWidth, Lines * GetFontLineHeight(Font.FontNumber));
+	TComponent::SetSize(MaxWidth, Lines * Graphics().GetFontLineHeight(Font.FontNumber));
 }
 
 // A text of several lines starts at the top.
 void TLabel::Draw(int Surface, int x, int y)
 {
 	int TextX, TextY;
-	GetTextPosition(&TextX, &TextY, x, y, Width, Height, &Font);
+	Graphics().GetTextPosition(&TextX, &TextY, x, y, Width, Height, &Font);
 	if (Lines > 1)
 		TextY = y;
 	for (int i = 0; i < Lines; i++)
-		PrintTextClipped(Surface, TextX, TextY + GetFontLineHeight(Font.FontNumber) * i, Font.FontNumber, Font.Color,
-			Line[i], Font.Alignment, TRect(x, y, Width, Height));
+		Graphics().PrintTextClipped(Surface, TextX, TextY + Graphics().GetFontLineHeight(Font.FontNumber) * i,
+			Font.FontNumber, Font.Color, Line[i], Font.Alignment, TRect(x, y, Width, Height));
 }
 
 void TLabel::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
@@ -337,7 +337,7 @@ void TLabel::SetText(const char *_Text, bool Shorten)
 	Text[Length + 1] = 0;
 	if (Shorten) {
 		for (int i = 0; i < Lines; i++) {
-			if (ShortenString(Line[i], GetFittingTextLength(Font.FontNumber, Line[i], Width)))
+			if (ShortenString(Line[i], Graphics().GetFittingTextLength(Font.FontNumber, Line[i], Width)))
 				Shortened = true;
 		}
 	}
@@ -516,7 +516,7 @@ void TFormattedText::Arrange()
 				Skip = 1;
 				break;
 			}
-			if (MaxWidth > 0 && GetTextPartWidth(FontNumber, Piece, Position + 1) + X > MaxWidth) {
+			if (MaxWidth > 0 && Graphics().GetTextPartWidth(FontNumber, Piece, Position + 1) + X > MaxWidth) {
 				LineBreak = true;
 				if (LastSpace != -1)
 					Skip = 1;
@@ -585,7 +585,7 @@ void TFormattedText::Arrange()
 			Element->SetPosition(X, Y);
 		}
 		if (LineBreak) {
-			Y += GetFontLineHeight(FontNumber);
+			Y += Graphics().GetFontLineHeight(FontNumber);
 			X = Indent;
 		} else {
 			X += Element != nullptr ? Element->Width : 0;
@@ -674,7 +674,7 @@ void TOutfitIcon::Draw(int Surface, int x, int y)
 {
 	const int Size = Width;
 	PATELLA_ASSERT_VALUES(GetWidth()==GetHeight(), GetWidth()-GetHeight());
-	DrawOutfit(Surface, x, y, Size, Outfit, Colors, Highlight, TRect(x, y, Size, Height), SkinProperties().ObjectCountFont);
+	Graphics().DrawOutfit(Surface, x, y, Size, Outfit, Colors, Highlight, TRect(x, y, Size, Height), SkinProperties().ObjectCountFont);
 }
 
 void TOutfitIcon::SetColor(int Mask, int Color)
@@ -726,7 +726,7 @@ void TObjectIcon::Draw(int Surface, int x, int y)
 		ClipHeight -= 2 * SkinProperties().ObjectIconFrameWidth;
 	}
 	PATELLA_ASSERT_VALUES(GetWidth()==GetHeight(), GetWidth()-GetHeight());
-	DrawObject(Surface, x, y, Width, Obj, Highlight, TRect(ClipX, ClipY, ClipWidth, ClipHeight),
+	Graphics().DrawObject(Surface, x, y, Width, Obj, Highlight, TRect(ClipX, ClipY, ClipWidth, ClipHeight),
 		SkinProperties().ObjectCountFont, false);
 }
 
@@ -899,8 +899,8 @@ void TTextButton::Draw(int Surface, int x, int y)
 	TSkinButton::Draw(Surface, x, y);
 	const int Offset = IsPressed() ? SkinProperties().Buttons.PressedOffset : 0;
 	int TextX, TextY;
-	GetTextPosition(&TextX, &TextY, x, y, Width, Height, &SkinProperties().Buttons.Font);
-	PrintFormattedText(Surface, TextX + Offset, TextY + Offset,
+	Graphics().GetTextPosition(&TextX, &TextY, x, y, Width, Height, &SkinProperties().Buttons.Font);
+	Graphics().PrintFormattedText(Surface, TextX + Offset, TextY + Offset,
 		Enabled ? SkinProperties().Buttons.Font : SkinProperties().Buttons.DisabledFont, Text);
 }
 
@@ -1148,27 +1148,28 @@ void TEditLine::Draw(int Surface, int x, int y)
 		if (Cursor < FirstVisible)
 			FirstVisible = Cursor;
 		while (Cursor > FirstVisible
-				+ GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, Width - 2 * SkinProperties().EditLineTextMargin))
+				+ Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, Width - 2 * SkinProperties().EditLineTextMargin))
 			FirstVisible++;
 		const int TextX = x + SkinProperties().EditLineTextMargin;
 		const int TextY = y + SkinProperties().EditLineTextMargin;
-		const int Visible = GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, Width - 2 * SkinProperties().EditLineTextMargin);
+		const int Visible = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + FirstVisible, Width - 2 * SkinProperties().EditLineTextMargin);
 		if (SelectionStart != -1 && SelectionLength != 0) {
 			const int Low = SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart;
 			const int High = SelectionLength < 0 ? SelectionStart : SelectionStart + SelectionLength;
 			const int Begin = Low < FirstVisible ? FirstVisible : Low;
 			const int End = High < FirstVisible + Visible ? High : FirstVisible + Visible;
-			const int Offset = GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible, Begin - FirstVisible);
-			const int SelectionWidth = GetTextPartWidth(Font.FontNumber, Text.get() + Begin, End - Begin);
+			const int Offset = Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible,
+				Begin - FirstVisible);
+			const int SelectionWidth = Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + Begin, End - Begin);
 			GraphicsEngine().GetSurface()->FillRectangle(Surface,
 				TRect(TextX + Offset, TextY, SelectionWidth,
-					GetFontHeight(Font.FontNumber)),
+					Graphics().GetFontHeight(Font.FontNumber)),
 				SkinProperties().EditLine.SelectionColor);
 		}
-		PrintFormattedTextPart(Surface, TextX, TextY, Font, Text.get() + FirstVisible, Visible);
+		Graphics().PrintFormattedTextPart(Surface, TextX, TextY, Font, Text.get() + FirstVisible, Visible);
 		if (Active && GetActionNumber() / 5 % 2 == 0)
 			GraphicsEngine().GetSurface()->DrawVerticalLine(Surface,
-				TextX + GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible, Cursor - FirstVisible), TextY, GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
+				TextX + Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible, Cursor - FirstVisible), TextY, Graphics().GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
 	}
 }
 
@@ -1537,7 +1538,7 @@ void TEditText::Draw(int Surface, int x, int y)
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
 	TWindow::Draw(Surface, x, y);
 	if (!IsDisabled()) {
-		const int LineHeight = GetFontLineHeight(Font.FontNumber);
+		const int LineHeight = Graphics().GetFontLineHeight(Font.FontNumber);
 		const int TextX = x + SkinProperties().EditLineTextMargin;
 		const int TextY = y + SkinProperties().EditLineTextMargin;
 		const int First = ScrollBar->Range->Value;
@@ -1553,11 +1554,12 @@ void TEditText::Draw(int Surface, int x, int y)
 				const int Begin = Start > Low ? Start : Low;
 				const int Stop = High < End ? High : End;
 				if (Begin < End && Start < Stop) {
-					const int Offset = GetTextPartWidth(Font.FontNumber, Text.get() + Start, Begin - Start);
-					const int SelectionWidth = GetTextPartWidth(Font.FontNumber, Text.get() + Begin, Stop - Begin);
-					int SelectionHeight = GetFontLineHeight(Font.FontNumber);
+					const int Offset = Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + Start, Begin - Start);
+					const int SelectionWidth = Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + Begin,
+						Stop - Begin);
+					int SelectionHeight = Graphics().GetFontLineHeight(Font.FontNumber);
 					if (High < End)
-						SelectionHeight = GetFontHeight(Font.FontNumber);
+						SelectionHeight = Graphics().GetFontHeight(Font.FontNumber);
 					GraphicsEngine().GetSurface()->FillRectangle(Surface,
 						TRect(TextX + Offset, i * LineHeight + TextY, SelectionWidth,
 							SelectionHeight),
@@ -1565,12 +1567,12 @@ void TEditText::Draw(int Surface, int x, int y)
 				}
 			}
 			const int LineY = i * LineHeight + TextY;
-			PrintFormattedTextPart(Surface, TextX, LineY, Font, Text.get() + Start, End - Start);
+			Graphics().PrintFormattedTextPart(Surface, TextX, LineY, Font, Text.get() + Start, End - Start);
 			if (Active && !ReadOnly && GetActionNumber() / 5 % 2 == 0) {
 				if ((Cursor >= Start && Cursor <= End - 1)
 					|| (Line == Lines - 1 && Cursor == (int)strlen(Text.get())))
 					GraphicsEngine().GetSurface()->DrawVerticalLine(Surface,
-						TextX + GetTextPartWidth(Font.FontNumber, Text.get() + Start, Cursor - Start), LineY, GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
+						TextX + Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + Start, Cursor - Start), LineY, Graphics().GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
 			}
 		}
 	}
@@ -1586,7 +1588,7 @@ void TEditText::Arrange()
 			Height - Skins()[SKIN_FRAME_EDGE_LEFT].width - Skins()[SKIN_FRAME_EDGE_RIGHT].width));
 	FieldWidth = Width - 2 * SkinProperties().EditLineTextMargin - ScrollBar->Width;
 	FieldHeight = Height - 2 * SkinProperties().EditLineTextMargin;
-	VisibleLines = FieldHeight / GetFontLineHeight(Font.FontNumber);
+	VisibleLines = FieldHeight / Graphics().GetFontLineHeight(Font.FontNumber);
 	FormatText();
 	if (Lines < VisibleLines)
 		ScrollBar->Range->SetRange(0, 0, 0, 0);
@@ -1658,22 +1660,24 @@ void TEditText::KeyPress(int Key)
 		case KEY_UP:
 			if (Line == 0)
 				break;
-			PixelX = GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line), Cursor - LineStart(Line));
+			PixelX = Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line),
+				Cursor - LineStart(Line));
 			Next = LineStart(Line);
 			Line--;
 			MaxPosition = LineStart(Line) <= Next - 1 ? Next - 1 : LineStart(Line);
-			Fitting = GetFittingTextLength(Font.FontNumber, Text.get() + LineStart(Line), PixelX);
+			Fitting = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + LineStart(Line), PixelX);
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
 		case KEY_DOWN:
 			if (Line == Lines - 1)
 				break;
-			PixelX = GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line), Cursor - LineStart(Line));
+			PixelX = Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line),
+				Cursor - LineStart(Line));
 			Next = LineStart(Line + 2);
 			Line++;
 			MaxPosition = LineStart(Line) <= Next - 1 ? Next - 1 : LineStart(Line);
-			Fitting = GetFittingTextLength(Font.FontNumber, Text.get() + LineStart(Line), PixelX);
+			Fitting = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + LineStart(Line), PixelX);
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
@@ -1694,11 +1698,12 @@ void TEditText::KeyPress(int Key)
 				Line = 0;
 				Cursor = 0;
 			}
-			PixelX = GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line), Cursor - LineStart(Line));
+			PixelX = Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line),
+				Cursor - LineStart(Line));
 			Next = LineStart(Line);
 			Line--;
 			MaxPosition = LineStart(Line) <= Next - 1 ? Next - 1 : LineStart(Line);
-			Fitting = GetFittingTextLength(Font.FontNumber, Text.get() + LineStart(Line), PixelX);
+			Fitting = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + LineStart(Line), PixelX);
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
@@ -1708,11 +1713,12 @@ void TEditText::KeyPress(int Key)
 				Line = Lines - 1;
 				Cursor = LineStart(Line);
 			}
-			PixelX = GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line), Cursor - LineStart(Line));
+			PixelX = Graphics().GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line),
+				Cursor - LineStart(Line));
 			Next = LineStart(Line + 2);
 			Line++;
 			MaxPosition = LineStart(Line) <= Next - 1 ? Next - 1 : LineStart(Line);
-			Fitting = GetFittingTextLength(Font.FontNumber, Text.get() + LineStart(Line), PixelX);
+			Fitting = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + LineStart(Line), PixelX);
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
@@ -1761,7 +1767,7 @@ int TEditText::GetPosition(int x, int y)
 	if (x < 0 || y < 0) {
 		Line = ScrollBar->Range->Value;
 	} else if (x <= Width - 2 * SkinProperties().EditLineTextMargin && y <= Height - 2 * SkinProperties().EditLineTextMargin) {
-		Line = ScrollBar->Range->Value + y / GetFontLineHeight(Font.FontNumber);
+		Line = ScrollBar->Range->Value + y / Graphics().GetFontLineHeight(Font.FontNumber);
 		if (Line > Lines)
 			Line = Lines;
 		const int Start = LineStart(Line);
@@ -1770,7 +1776,7 @@ int TEditText::GetPosition(int x, int y)
 			Length = (int)strlen(Text.get()) - Start;
 		else
 			Length = LineStart(Line + 1) - Start;
-		const int Fitting = GetFittingTextLength(Font.FontNumber, Text.get() + Start, x);
+		const int Fitting = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + Start, x);
 		if (Fitting <= Length)
 			Length = Fitting;
 		int Position = Length + Start;
@@ -1800,7 +1806,7 @@ void TEditText::FormatText()
 	while (Position <= Length) {
 		LineStart(Lines) = Position;
 		Lines++;
-		const int Fitting = GetFittingTextLength(Font.FontNumber, Text.get() + Position, FieldWidth);
+		const int Fitting = Graphics().GetFittingTextLength(Font.FontNumber, Text.get() + Position, FieldWidth);
 		int Break = -1;
 		int i;
 		bool Wrapped = false;
@@ -2348,23 +2354,24 @@ void TListBox::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 	x += SkinProperties().ListBox.TextMargin;
 	y += SkinProperties().ListBox.TextMargin;
-	const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 	for (int i = 0; i < VisibleLines && i < Lines; i++) {
 		const int Line = i + First;
-		const int Fitting = GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, LineText(Line), TextWidth);
+		const int Fitting = Graphics().GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, LineText(Line),
+			TextWidth);
 		if (Line == Selected) {
 			if (!Editing) {
 				const int Margin = SkinProperties().ListBoxSelectionMargin;
 				GraphicsEngine().GetSurface()->FillRectangle(Surface,
 					TRect(x - Margin, i * LineHeight - Margin + y, TextWidth + 2 * Margin,
-						GetFontHeight(SkinProperties().ListBox.Font.FontNumber) + 2 * Margin),
+						Graphics().GetFontHeight(SkinProperties().ListBox.Font.FontNumber) + 2 * Margin),
 					SkinProperties().ListBox.SelectedBackground);
-				PrintFormattedTextPart(Surface, x, i * LineHeight + y, SkinProperties().ListBox.SelectedFont, LineText(Line),
+				Graphics().PrintFormattedTextPart(Surface, x, i * LineHeight + y, SkinProperties().ListBox.SelectedFont, LineText(Line),
 					Fitting);
 			}
 		} else {
-			PrintFormattedTextPart(Surface, x, i * LineHeight + y, SkinProperties().ListBox.Font, LineText(Line),
-				Fitting);
+			Graphics().PrintFormattedTextPart(Surface, x, i * LineHeight + y, SkinProperties().ListBox.Font,
+				LineText(Line), Fitting);
 		}
 	}
 }
@@ -2383,7 +2390,7 @@ void TListBox::Arrange()
 		TRect(-(Skins()[SKIN_FRAME_EDGE_RIGHT].width + ScrollBar->Width), Skins()[SKIN_FRAME_EDGE_TOP].height, ScrollBar->Width,
 			Height - Skins()[SKIN_FRAME_EDGE_LEFT].width - Skins()[SKIN_FRAME_EDGE_RIGHT].width));
 	VisibleLines = (Height - 2 * SkinProperties().ListBox.TextMargin)
-		/ GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
+		/ Graphics().GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 	if (VisibleLines < Lines)
 		ScrollBar->Range->SetRange(0, Lines - VisibleLines, ScrollBar->Range->Value, VisibleLines);
 	else
@@ -2429,7 +2436,8 @@ void TListBox::MouseHover(int x, int y)
 {
 	const int Line = GetLineAt(x, y);
 	if (Line != -1) {
-		const int Fitting = GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, LineText(Line), TextWidth);
+		const int Fitting = Graphics().GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, LineText(Line),
+			TextWidth);
 		if (LineText(Line) != nullptr && Fitting < (int)strlen(LineText(Line)))
 			Interaction().SetMouseOverText(LineText(Line));
 	}
@@ -2542,8 +2550,8 @@ void TListBox::Clear()
 // The visible line at y (-1 for none).
 int TListBox::GetLineAt([[maybe_unused]] int x, int y) const
 {
-	const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
-	const int Offset = (LineHeight - GetFontHeight(SkinProperties().ListBox.Font.FontNumber)) / 2;
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
+	const int Offset = (LineHeight - Graphics().GetFontHeight(SkinProperties().ListBox.Font.FontNumber)) / 2;
 	if (y >= SkinProperties().ListBox.TextMargin - Offset) {
 		const int First = ScrollBar->Range->Value;
 		const int Line = (Offset - SkinProperties().ListBox.TextMargin + y) / LineHeight + First;
@@ -2556,7 +2564,7 @@ int TListBox::GetLineAt([[maybe_unused]] int x, int y) const
 void TListBox::StartEdit()
 {
 	if (!Editing) {
-		const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
+		const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 		const int ScrollBarWidth = ScrollBar->Width;
 		const int ListWidth = Width;
 		Editing = true;
@@ -2597,23 +2605,24 @@ void TFontListBox::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 	x += SkinProperties().ListBox.TextMargin;
 	y += SkinProperties().ListBox.TextMargin;
-	const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 	for (int i = 0; i < VisibleLines && i < Lines; i++) {
 		const int Line = i + First;
-		const int Fitting = GetFittingTextLength(FontLines(Line).Font.FontNumber, FontLines(Line).Text, TextWidth);
+		const int Fitting = Graphics().GetFittingTextLength(FontLines(Line).Font.FontNumber, FontLines(Line).Text,
+			TextWidth);
 		if (Line == Selected) {
 			if (!Editing) {
 				const int Margin = SkinProperties().ListBoxSelectionMargin;
 				GraphicsEngine().GetSurface()->FillRectangle(Surface,
 					TRect(x - Margin, i * LineHeight - Margin + y, TextWidth + 2 * Margin,
-						GetFontHeight(FontLines(Line).Font.FontNumber) + 2 * Margin),
+						Graphics().GetFontHeight(FontLines(Line).Font.FontNumber) + 2 * Margin),
 					SkinProperties().ListBox.SelectedBackground);
-				PrintFormattedTextPart(Surface, x, i * LineHeight + y, FontLines(Line).Font, FontLines(Line).Text,
-					Fitting);
+				Graphics().PrintFormattedTextPart(Surface, x, i * LineHeight + y, FontLines(Line).Font,
+					FontLines(Line).Text, Fitting);
 			}
 		} else {
-			PrintFormattedTextPart(Surface, x, i * LineHeight + y, FontLines(Line).Font, FontLines(Line).Text,
-				Fitting);
+			Graphics().PrintFormattedTextPart(Surface, x, i * LineHeight + y, FontLines(Line).Font,
+				FontLines(Line).Text, Fitting);
 		}
 	}
 }
@@ -2674,7 +2683,7 @@ void TFontListBox::MouseHover(int x, int y)
 {
 	const int Line = GetLineAt(x, y);
 	if (Line != -1) {
-		const int Fitting = GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, FontLines(Line).Text, TextWidth);
+		const int Fitting = Graphics().GetFittingTextLength(SkinProperties().ListBox.Font.FontNumber, FontLines(Line).Text, TextWidth);
 		if (FontLines(Line).Text != nullptr && Fitting < (int)strlen(FontLines(Line).Text))
 			Interaction().SetMouseOverText(FontLines(Line).Text);
 	}
@@ -2684,7 +2693,7 @@ void TFontListBox::MouseHover(int x, int y)
 void TFontListBox::StartEdit()
 {
 	if (!Editing) {
-		const int LineHeight = GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
+		const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().ListBox.Font.FontNumber);
 		const int EditWidth = Width - ScrollBar->Width;
 		TFont Font;
 		const char *Edited = GetLine(Selected, &Font);

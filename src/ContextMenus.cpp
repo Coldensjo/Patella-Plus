@@ -226,11 +226,12 @@ TContextMenuEntry::TContextMenuEntry(const char *_Text, const char *_Shortcut, T
 	else
 		CopyString(Shortcut.Chars, _Shortcut);
 	Callback = _Callback;
-	const int h = GetFontLineHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2;
-	int w = GetTextWidth(SkinProperties().MenuFont.FontNumber, Text) + SkinProperties().MenuTextMargin * 2
+	const int h = Graphics().GetFontLineHeight(SkinProperties().MenuFont.FontNumber)
+		+ SkinProperties().MenuTextMargin * 2;
+	int w = Graphics().GetTextWidth(SkinProperties().MenuFont.FontNumber, Text) + SkinProperties().MenuTextMargin * 2
 		+ SkinProperties().MenuShortcutGap;
 	if (Shortcut[0] != 0)
-		w += GetTextWidth(SkinProperties().MenuFont.FontNumber, Shortcut);
+		w += Graphics().GetTextWidth(SkinProperties().MenuFont.FontNumber, Shortcut);
 	SetSize(w, h);
 }
 
@@ -241,15 +242,15 @@ void TContextMenuEntry::Draw(int Surface, int x, int y)
 	if (In(Interaction().GetMouseX() - x, 0, Width - 1) && In(Interaction().GetMouseY() - y, 0, Height - 1)) {
 		GraphicsEngine().GetSurface()->FillRectangle(Surface,
 			TRect(x, y, Width,
-				GetFontHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2),
+				Graphics().GetFontHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2),
 			SkinProperties().MenuHighlightBackground);
 	}
 	y += SkinProperties().MenuTextMargin;
-	PrintText(Surface, x + SkinProperties().MenuTextMargin, y, SkinProperties().MenuFont.FontNumber, SkinProperties().MenuFont.Color,
+	Graphics().PrintText(Surface, x + SkinProperties().MenuTextMargin, y, SkinProperties().MenuFont.FontNumber, SkinProperties().MenuFont.Color,
 		Text, LEFT_ALIGN);
 	if (Shortcut[0] != 0) {
-		PrintText(Surface, x + Width - SkinProperties().MenuTextMargin - 1, y, SkinProperties().MenuFont.FontNumber,
-			SkinProperties().MenuFont.Color, Shortcut, RIGHT_ALIGN);
+		Graphics().PrintText(Surface, x + Width - SkinProperties().MenuTextMargin - 1, y,
+			SkinProperties().MenuFont.FontNumber, SkinProperties().MenuFont.Color, Shortcut, RIGHT_ALIGN);
 	}
 }
 
@@ -263,8 +264,8 @@ bool TContextMenuEntry::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] in
 void TContextMenuEntry::SetLast()
 {
 	// The original's order: the left operand first (MSVC; GCC and Clang may differ).
-	const int LineHeight = GetFontLineHeight(SkinProperties().MenuFont.FontNumber);
-	SetSize(Width, Height - (LineHeight - GetFontHeight(SkinProperties().MenuFont.FontNumber)));
+	const int LineHeight = Graphics().GetFontLineHeight(SkinProperties().MenuFont.FontNumber);
+	SetSize(Width, Height - (LineHeight - Graphics().GetFontHeight(SkinProperties().MenuFont.FontNumber)));
 }
 
 // --- TContextMenu --------------------------------------------------------------

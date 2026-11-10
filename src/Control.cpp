@@ -117,7 +117,7 @@ void patella::TGUI::CheckSurface(bool Force)
 	if (!Success)
 		ChangeDevice(patella::vulkan::TDeviceButton::Automatic);
 	if (GraphicsEngine().GetSurface()->SurfaceRecreated(1))
-		ResetVideoCache();
+		Graphics().ResetVideoCache();
 }
 
 // A click on one of the advanced graphics options' three device buttons (MainWindow.cpp); CheckSurface
@@ -170,8 +170,8 @@ void patella::TGUI::Redraw(bool Force)
 	if (Tooltip != nullptr) {
 		int x, y;
 		Interaction.GetMouseOverTextPosition(&x, &y);
-		const int Width = GetTextWidth(SkinProperties().TooltipFont.FontNumber, Tooltip) + SkinProperties().TooltipBorder * 2;
-		const int Height = GetTextHeight(SkinProperties().TooltipFont.FontNumber, Tooltip) + SkinProperties().TooltipBorder * 2;
+		const int Width = Graphics().GetTextWidth(SkinProperties().TooltipFont.FontNumber, Tooltip) + SkinProperties().TooltipBorder * 2;
+		const int Height = Graphics().GetTextHeight(SkinProperties().TooltipFont.FontNumber, Tooltip) + SkinProperties().TooltipBorder * 2;
 		y -= Height;
 		const int MaxX = Interaction.GetWindowWidth() - Width - 1;
 		if (MaxX >= 1) {
@@ -200,7 +200,7 @@ void patella::TGUI::Redraw(bool Force)
 		const TRect Rect = {x, y, Width, Height};
 		GraphicsEngine().GetSurface()->FillRectangle(1, Rect, SkinProperties().TooltipBackground);
 		GraphicsEngine().GetSurface()->DrawFrame(1, Rect, 1, SkinProperties().TooltipFrame);
-		PrintFormattedText(1, SkinProperties().TooltipBorder + x, SkinProperties().TooltipBorder + y,
+		Graphics().PrintFormattedText(1, SkinProperties().TooltipBorder + x, SkinProperties().TooltipBorder + y,
 			SkinProperties().TooltipFont, Tooltip);
 	}
 	if (ShowFPS) {
@@ -210,7 +210,7 @@ void patella::TGUI::Redraw(bool Force)
 		// than 10 digits fills the 20 characters (no NUL), which the type would cut.
 		MsvcSnprintf(Text, 20, "DX9 %.02f fps", FPS);
 		const TRGBColor Color = {200, 200, 200};
-		PrintText(1, 4, 4, FONT_BORDERED, Color, Text, 0);
+		Graphics().PrintText(1, 4, 4, FONT_BORDERED, Color, Text, 0);
 	}
 	if (!GetWindowsMousepointer()) {
 		const int Cursor = Interaction.GetMouseCursor();
@@ -246,7 +246,7 @@ void patella::TGUI::Redraw(bool Force)
 				break;
 			}
 			const TSkin *Picture = &Skins()[Cursor];
-			DrawPicturePart(1, x, y, 4, Picture->x, Picture->y, Picture->width, Picture->height);
+			Graphics().DrawPicturePart(1, x, y, 4, Picture->x, Picture->y, Picture->width, Picture->height);
 		}
 	}
 	GraphicsEngine().GetSurface()->FinishFrame();
@@ -1132,7 +1132,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		::Help().InitHelp();
 		InitPreferences();
 		InitTalk();
-		InitGraphics(0xa00000);
+		Graphics().InitGraphics(0xa00000);
 		SkinData().InitSkins();
 		InitSkinProperties();
 		::Network().InitNetwork(::ConnectionEstablished, ::ReceivePackets, ::ConnectionClosed);
@@ -1158,7 +1158,7 @@ void patella::TGUI::ExitControl()
 	ExitCommunication();
 	::Network().ExitNetwork();
 	SkinData().ExitSkins();
-	ExitGraphics();
+	Graphics().ExitGraphics();
 	TSurface *const Current = GraphicsEngine().GetSurface();
 	if (Current != nullptr)
 		Current->ExitSurfaces();

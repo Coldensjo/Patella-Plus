@@ -574,18 +574,19 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			int BarY = ny - 4;
 			if (CreatureInfo == 2) {
 				int BarX = nx - 14;
-				const int TextWidth = GetTextWidth(FONT_BORDERED, Creature->Name);
+				const int TextWidth = Graphics().GetTextWidth(FONT_BORDERED, Creature->Name);
 				Limit(BarX, 1, Width - 28);
-				Limit(BarY, GetFontHeight(FONT_BORDERED) + 1, Height - GetFontHeight(FONT_BORDERED) - 5);
+				Limit(BarY, Graphics().GetFontHeight(FONT_BORDERED) + 1,
+					Height - Graphics().GetFontHeight(FONT_BORDERED) - 5);
 				int TextX = BarX - TextWidth / 2 + 14;
-				const int TextY = BarY - GetFontHeight(FONT_BORDERED);
+				const int TextY = BarY - Graphics().GetFontHeight(FONT_BORDERED);
 				Limit(TextX, 1, Width - TextWidth - 1);
 				GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4),
 					TRGBColor(0, 0, 0));
 				GraphicsEngine().GetSurface()->FillRectangle(Surface,
 					TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
 					NameColor);
-				PrintText(Surface, TextX + x, TextY + y, FONT_BORDERED, NameColor, Creature->Name, 0);
+				Graphics().PrintText(Surface, TextX + x, TextY + y, FONT_BORDERED, NameColor, Creature->Name, 0);
 			} else {
 				int BarX = nx - 14;
 				Limit(BarX, 1, Width - 28);
@@ -683,13 +684,14 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		TRGBColor Color;
 		GetTalkboxColor(&Color, Talkbox);
 		for (int Line = 0; Line < Lines; Line++)
-			PrintTextClipped(Surface, tx + x, Line * GetFontLineHeight(FONT_BORDERED) + ty + y, FONT_BORDERED, Color,
-				GetTalkboxLine(Talkbox, Line), Alignment, TRect(x, y, ScreenWidth, ScreenHeight));
+			Graphics().PrintTextClipped(Surface, tx + x, Line * Graphics().GetFontLineHeight(FONT_BORDERED) + ty + y,
+				FONT_BORDERED, Color, GetTalkboxLine(Talkbox, Line), Alignment, TRect(x, y, ScreenWidth, ScreenHeight));
 	}
 	if (GetStatusMessage() != nullptr) {
 		const int MessageWidth = Width, MessageHeight = Height;
-		const int Length = GetFittingTextLength(FONT_BORDERED, GetStatusMessage(), MessageWidth);
-		PrintTextPart(Surface, MessageWidth / 2 + x, MessageHeight - GetFontHeight(FONT_BORDERED) + y, FONT_BORDERED,
+		const int Length = Graphics().GetFittingTextLength(FONT_BORDERED, GetStatusMessage(), MessageWidth);
+		Graphics().PrintTextPart(Surface, MessageWidth / 2 + x,
+			MessageHeight - Graphics().GetFontHeight(FONT_BORDERED) + y, FONT_BORDERED,
 			TRGBColor(255, 255, 255), GetStatusMessage(), Length, 1);
 	}
 
@@ -721,9 +723,10 @@ void TMapWindow::Draw(int Surface, int x, int y)
 					tx = tx * Width / 480;
 					ty = ty * Height / 352;
 				}
-				Limit(tx, GetTextWidth(FONT_BORDERED, Text) / 2, Width - GetTextWidth(FONT_BORDERED, Text) / 2);
-				Limit(ty, 0, Height - GetFontHeight(FONT_BORDERED));
-				PrintText(Surface, tx + x, ty + y, FONT_BORDERED, TRGBColor(Color), Text, 1);
+				Limit(tx, Graphics().GetTextWidth(FONT_BORDERED, Text) / 2,
+					Width - Graphics().GetTextWidth(FONT_BORDERED, Text) / 2);
+				Limit(ty, 0, Height - Graphics().GetFontHeight(FONT_BORDERED));
+				Graphics().PrintText(Surface, tx + x, ty + y, FONT_BORDERED, TRGBColor(Color), Text, 1);
 			}
 		}
 	}
@@ -902,7 +905,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 				FlushField(cx + 1, cy);
 				FlushField(cx, cy + 1);
 				FlushField(cx + 1, cy + 1);
-				DrawSprite(2, sx - Elevation + posx - 8, sy - Elevation + posy - 8, SpriteNumber);
+				Graphics().DrawSprite(2, sx - Elevation + posx - 8, sy - Elevation + posy - 8, SpriteNumber);
 			} else {
 				// A creature shown as an object.
 				const TObject Shape = {Creatures[i]->Colors[0], 0, 0};
@@ -1091,7 +1094,7 @@ void TMapWindow::DrawLightMask(int posx, int posy, int Brightness)
 	else
 		Tile = Brightness / 28;
 	if (Tile <= 7)
-		DrawPicturePart(2, posx, posy, 7, Tile << 5, 0, 32, 32);
+		Graphics().DrawPicturePart(2, posx, posy, 7, Tile << 5, 0, 32, 32);
 }
 
 // A sprite at map surface position x/y on the fields it covers that Level
@@ -1136,9 +1139,9 @@ void TMapWindow::DrawFieldSprite(int x, int y, int Level, bool Animated, int Spr
 	}
 	if (Flushed) {
 		if (MaskNumber == 0)
-			DrawSprite(2, x, y, SpriteNumber);
+			Graphics().DrawSprite(2, x, y, SpriteNumber);
 		else
-			DrawMaskedSprite(2, x, y, SpriteNumber, MaskNumber, Colors);
+			Graphics().DrawMaskedSprite(2, x, y, SpriteNumber, MaskNumber, Colors);
 	}
 }
 
@@ -1176,16 +1179,19 @@ void TMapWindow::CacheSprite(int FieldX, int FieldY, int SpriteNumber, int dx, i
 		if (ClipY + ClipHeight >= 352)
 			ClipHeight = 352 - ClipY;
 		if (SpriteNumber != 0)
-			DrawSpriteClipped(2, x + dx, y + dy, SpriteNumber, TRect(ClipX, ClipY, ClipWidth, ClipHeight));
+			Graphics().DrawSpriteClipped(2, x + dx, y + dy, SpriteNumber, TRect(ClipX, ClipY, ClipWidth, ClipHeight));
 		else
-			DrawPicturePartClipped(2, x + dx, y + dy, 7, 0, 0, 32, 32, TRect(ClipX, ClipY, ClipWidth, ClipHeight));
+			Graphics().DrawPicturePartClipped(2, x + dx, y + dy, 7, 0, 0, 32, 32,
+				TRect(ClipX, ClipY, ClipWidth, ClipHeight));
 		return;
 	}
 	if (Field->Sprites == Field->CachedSprites) {
 		if (SpriteNumber == 0)
-			DrawPicturePartClipped(4, Field->x + dx, Field->y + dy, 7, 0, 0, 32, 32, TRect(Field->x, Field->y, 32, 32));
+			Graphics().DrawPicturePartClipped(4, Field->x + dx, Field->y + dy, 7, 0, 0, 32, 32,
+				TRect(Field->x, Field->y, 32, 32));
 		else
-			DrawSpriteClipped(4, Field->x + dx, Field->y + dy, SpriteNumber, TRect(Field->x, Field->y, 32, 32));
+			Graphics().DrawSpriteClipped(4, Field->x + dx, Field->y + dy, SpriteNumber,
+				TRect(Field->x, Field->y, 32, 32));
 		Field->Sprite[Field->CachedSprites] = SpriteNumber;
 		Field->SpriteX[Field->CachedSprites] = dx;
 		Field->SpriteY[Field->CachedSprites] = dy;
@@ -1197,16 +1203,18 @@ void TMapWindow::CacheSprite(int FieldX, int FieldY, int SpriteNumber, int dx, i
 		|| Field->SpriteY[Field->Sprites] != dy) {
 		for (int i = 0; i < Field->Sprites; i++) {
 			if (Field->Sprite[i] == 0)
-				DrawPicturePartClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], 7, 0, 0, 32, 32,
-					TRect(Field->x, Field->y, 32, 32));
+				Graphics().DrawPicturePartClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], 7, 0,
+					0, 32, 32, TRect(Field->x, Field->y, 32, 32));
 			else
-				DrawSpriteClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], Field->Sprite[i],
-					TRect(Field->x, Field->y, 32, 32));
+				Graphics().DrawSpriteClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i],
+					Field->Sprite[i], TRect(Field->x, Field->y, 32, 32));
 		}
 		if (SpriteNumber == 0)
-			DrawPicturePartClipped(4, Field->x + dx, Field->y + dy, 7, 0, 0, 32, 32, TRect(Field->x, Field->y, 32, 32));
+			Graphics().DrawPicturePartClipped(4, Field->x + dx, Field->y + dy, 7, 0, 0, 32, 32,
+				TRect(Field->x, Field->y, 32, 32));
 		else
-			DrawSpriteClipped(4, Field->x + dx, Field->y + dy, SpriteNumber, TRect(Field->x, Field->y, 32, 32));
+			Graphics().DrawSpriteClipped(4, Field->x + dx, Field->y + dy, SpriteNumber,
+				TRect(Field->x, Field->y, 32, 32));
 		Field->Sprite[Field->Sprites] = SpriteNumber;
 		Field->SpriteX[Field->Sprites] = dx;
 		Field->SpriteY[Field->Sprites] = dy;
@@ -1230,11 +1238,11 @@ void TMapWindow::FlushField(int FieldX, int FieldY)
 					if (Field->Sprites < Field->CachedSprites) {
 						for (int i = 0; i < Field->Sprites; i++) {
 							if (Field->Sprite[i] == 0)
-								DrawPicturePartClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], 7, 0,
+								Graphics().DrawPicturePartClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i], 7, 0,
 									0, 32, 32, TRect(Field->x, Field->y, 32, 32));
 							else
-								DrawSpriteClipped(4, Field->x + Field->SpriteX[i], Field->y + Field->SpriteY[i],
-									Field->Sprite[i], TRect(Field->x, Field->y, 32, 32));
+								Graphics().DrawSpriteClipped(4, Field->x + Field->SpriteX[i],
+									Field->y + Field->SpriteY[i], Field->Sprite[i], TRect(Field->x, Field->y, 32, 32));
 						}
 						Field->CachedSprites = Field->Sprites;
 					}
@@ -1328,16 +1336,16 @@ void TMapWindow::ArrangeTalkboxes()
 		BoxWidth[Talkbox - 1] = 0;
 		const int Lines = GetTalkboxLines(Talkbox);
 		for (int Line = 0; Line < Lines; Line++) {
-			const int LineWidth = GetTextWidth(FONT_BORDERED, GetTalkboxLine(Talkbox, Line));
+			const int LineWidth = Graphics().GetTextWidth(FONT_BORDERED, GetTalkboxLine(Talkbox, Line));
 			BoxWidth[Talkbox - 1] = BoxWidth[Talkbox - 1] > LineWidth ? BoxWidth[Talkbox - 1] : LineWidth;
 		}
-		BoxHeight[Talkbox - 1] = GetFontLineHeight(FONT_BORDERED) * Lines;
+		BoxHeight[Talkbox - 1] = Graphics().GetFontLineHeight(FONT_BORDERED) * Lines;
 	}
 	int StatusHeight;
 	if (GetStatusMessage() == nullptr)
 		StatusHeight = 0;
 	else
-		StatusHeight = GetFontHeight(FONT_BORDERED) + 10;
+		StatusHeight = Graphics().GetFontHeight(FONT_BORDERED) + 10;
 	const bool NoStretching = GetNoStretching();
 	const int BorderX = (480 - Width) / 2;
 	const int BorderY = (352 - Height) / 2;
@@ -1367,7 +1375,7 @@ void TMapWindow::ArrangeTalkboxes()
 				cy = y * 32 - BorderY - 32;
 			else
 				cy = (y - 1) * Height / 11;
-			cy -= GetTalkboxLines(Talkbox) * GetFontLineHeight(FONT_BORDERED) / 2;
+			cy -= GetTalkboxLines(Talkbox) * Graphics().GetFontLineHeight(FONT_BORDERED) / 2;
 			CentreY = cy;
 			const int HalfWidth = BoxWidth[i] / 2;
 			MinX[i] = HalfWidth + 1 > cx - HalfWidth ? HalfWidth + 1 : cx - HalfWidth;
