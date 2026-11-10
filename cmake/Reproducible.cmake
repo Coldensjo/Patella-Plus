@@ -1,6 +1,6 @@
 # Reproducible builds (Patella-Modern issue #136, plan M9; notes/decisions.md, "#136"): two Release builds of one commit, in
-# different folders, give byte-identical executables. tools/repro_check.py builds twice and compares; this file holds what
-# that took, each item measured against a build without it:
+# different folders, give byte-identical executables. tools/repro_check.py builds a commit in a second folder and compares
+# it with this checkout's build; this file holds what that took, each item measured against a build without it:
 #
 #	include(cmake/Reproducible.cmake)      in the root CMakeLists.txt, before the first target (FetchContent's included)
 #
@@ -11,6 +11,10 @@
 #   absolute path in the PE's debug directory). Not the documented /experimental:deterministic with /pathmap: measured
 #   with MSVC 14.51, /pathmap makes the link lose the objects' debug information without a warning (WinMain 76 bytes with its
 #   line numbers becomes a public symbol with neither).
+# - MSVC, the link: patella_repro_link(<target>) deletes the target's PDB before every Release link. The linker updates a
+#   PDB it finds: its age goes up and its GUID changes, and with them the GUID in the PE's debug directory and every
+#   /Brepro stamp, although the code is the same. Without the old PDB each link is a first link, and the same objects give
+#   the same file in every byte. Release links are not incremental, so nothing is lost but the time to write the PDB anew.
 # - GCC and Clang: -ffile-prefix-map (the same paths, and those of debug information). Their linkers' build ids are hashes of
 #   the output already.
 # - Clang with AddressSanitizer (linux-x64-clang): cmake/RelativeSource.sh as the compiler launcher, every configuration:
@@ -58,3 +62,12 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 		set(CMAKE_CXX_COMPILER_LAUNCHER sh "${PROJECT_SOURCE_DIR}/cmake/RelativeSource.sh")
 	endif()
 endif()
+
+# The Release link of an MSVC executable starts without the PDB of the link before (the comment above).
+function(patella_repro_link target)
+	if(MSVC)
+		add_custom_command(TARGET ${target} PRE_LINK
+			COMMAND "$<$<CONFIG:Release>:${CMAKE_COMMAND};-E;rm;-f;$<TARGET_PDB_FILE:${target}>>"
+			COMMAND_EXPAND_LISTS VERBATIM)
+	endif()
+endfunction()

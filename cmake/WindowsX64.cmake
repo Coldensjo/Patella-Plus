@@ -136,6 +136,8 @@ function(patella_client target)
 	target_link_options(${target} PRIVATE
 		/MANIFEST:NO /DEBUG
 		$<$<CONFIG:Release>:/INCREMENTAL:NO /OPT:REF /OPT:ICF>)
+	# A Release link never updates the PDB of the link before (cmake/Reproducible.cmake).
+	patella_repro_link(${target})
 	patella_vulkan_cpu_driver(${target})
 endfunction()
 
