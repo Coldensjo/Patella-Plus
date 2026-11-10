@@ -100,7 +100,7 @@ public:
 	virtual void Remove(TTalkLine *line);
 	virtual void Remove(int lineNumber);
 	virtual void Clear();
-	// IsDefault: ConsoleWindow.cpp's assertion "getTextBuffer()->IsDefault()==false".
+	// IsDefault: ConsoleWindow.cpp's assertion "GetTextBuffer()->IsDefault()==false".
 	virtual bool IsDefault(); // TTalk's DefaultTextBuffer (below)
 	virtual bool AcceptMessages() { return IsDefault(); }
 	virtual bool IsRuleViolation() { return false; }

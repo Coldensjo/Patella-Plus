@@ -1282,7 +1282,7 @@ void TConsoleWindow::Draw(int Surface, int x, int y)
 	if (TakeConsoleChanged()) {
 		TabBar->Arrange();
 		PATELLA_ASSERT(CurrentConsole!=nullptr);
-		TTalkBuffer *TextBuffer = CurrentConsole->getTextBuffer();
+		TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
 		PATELLA_ASSERT(TextBuffer!=nullptr);
 		CurrentConsole->Arrange();
 		SetActive(TextBuffer->CanWrite());
@@ -1387,7 +1387,7 @@ void TConsoleWindow::KeyPress(int Key)
 		if (Done)
 			return;
 	}
-	TTalkBuffer *TextBuffer = CurrentConsole->getTextBuffer();
+	TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
 	if (!TextBuffer->CanWrite())
 		return;
@@ -1473,7 +1473,7 @@ void TConsoleWindow::HandleEvent(int Event)
 		ServerMessagesButton->State = !ServerMessagesButton->State;
 		[[fallthrough]];
 	case EVENT_SERVER_MESSAGES:
-		CurrentConsole->getTextBuffer()->ShowMessages = ServerMessagesButton->State;
+		CurrentConsole->GetTextBuffer()->ShowMessages = ServerMessagesButton->State;
 		break;
 	case EVENT_IGNORE_LIST:
 		AddMessage(MESSAGE_IGNORE_LIST_DIALOG, 0, 0);
@@ -1532,7 +1532,7 @@ void TConsoleWindow::HandleEvent(int Event)
 // it is not deactivated while a context menu is open (action state 11).
 void TConsoleWindow::SetActive(bool Active) const
 {
-	TTalkBuffer *TextBuffer = CurrentConsole->getTextBuffer();
+	TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
 	if (!TextBuffer->CanWrite())
 		Active = false;
@@ -1548,7 +1548,7 @@ void TConsoleWindow::SetActive(bool Active) const
 // have the default channel's font).
 void TConsoleWindow::UpdateButtons()
 {
-	TTalkBuffer *TextBuffer = CurrentConsole->getTextBuffer();
+	TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
 	if (IsChild(VolumeButton))
 		RemoveChild(VolumeButton);
@@ -1686,23 +1686,23 @@ void TConsoleWindow::ReportRuleViolation(const char *Question)
 
 bool TConsoleWindow::GetServerMessages() const
 {
-	PATELLA_ASSERT(CurrentConsole->getTextBuffer()!=nullptr);
-	PATELLA_ASSERT(CurrentConsole->getTextBuffer()->IsDefault()==false);
+	PATELLA_ASSERT(CurrentConsole->GetTextBuffer()!=nullptr);
+	PATELLA_ASSERT(CurrentConsole->GetTextBuffer()->IsDefault()==false);
 	return ServerMessagesButton->State;
 }
 
 void TConsoleWindow::SetServerMessages(bool Show)
 {
-	PATELLA_ASSERT(CurrentConsole->getTextBuffer()!=nullptr);
-	PATELLA_ASSERT(CurrentConsole->getTextBuffer()->IsDefault()==false);
+	PATELLA_ASSERT(CurrentConsole->GetTextBuffer()!=nullptr);
+	PATELLA_ASSERT(CurrentConsole->GetTextBuffer()->IsDefault()==false);
 	ServerMessagesButton->State = Show;
 	HandleEvent(EVENT_SERVER_MESSAGES);
 }
 
 TTalkBuffer *TConsoleWindow::GetTextBuffer() const
 {
-	PATELLA_ASSERT(CurrentConsole->getTextBuffer()!=nullptr);
-	return CurrentConsole->getTextBuffer();
+	PATELLA_ASSERT(CurrentConsole->GetTextBuffer()!=nullptr);
+	return CurrentConsole->GetTextBuffer();
 }
 
 // Sends the edit line: in the default and the request channels with the
@@ -1717,8 +1717,8 @@ void TConsoleWindow::SendInput()
 	int ChannelID = -1;
 	int TalkMode;
 	char *Addressee;
-	if (!CurrentConsole->getTextBuffer()->AcceptMessages()) {
-		TTalkBuffer *TextBuffer = CurrentConsole->getTextBuffer();
+	if (!CurrentConsole->GetTextBuffer()->AcceptMessages()) {
+		TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
 		TalkMode = TextBuffer->GetSendTalkMode();
 		if (!TextBuffer->CanWrite())
 			TalkMode = 0;
@@ -1788,8 +1788,8 @@ void TConsoleWindow::SendInput()
 	}
 	Input->Clear();
 	if (TalkMode == TALK_PRIVATE_MESSAGE && Addressee != nullptr) {
-		if (CurrentConsole->getTextBuffer()->GetAddressee() != nullptr
-			&& CompareStrings(CurrentConsole->getTextBuffer()->GetAddressee(), Addressee, -1) == 0)
+		if (CurrentConsole->GetTextBuffer()->GetAddressee() != nullptr
+			&& CompareStrings(CurrentConsole->GetTextBuffer()->GetAddressee(), Addressee, -1) == 0)
 			return;
 		if (strlen(Addressee) > 29)
 			Addressee[29] = 0;

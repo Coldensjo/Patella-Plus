@@ -11,7 +11,7 @@
 // Names from the binary: TLineFormat's LineText and its constructor's
 // parameters (_TextLine, _LineText, _LineLength, _OriginalOffset, _Indent),
 // GetFirstLineNumber, GetLastLineNumber, _CurrentLineNumber, InvisibleLines
-// (an error message), getTextBuffer, IsDefault, GetCaption, CurrentConsole,
+// (an error message), GetTextBuffer, IsDefault, GetCaption, CurrentConsole,
 // CurrentTab, DefaultTab, NewTab, Input, TextBuffer, _Caption, _TextBuffer,
 // _Active, Tab, Container ("failed to get composite"), Search, Question,
 // Addressee, ChannelID, TalkMode, MessageSeparator and the catch-block
@@ -152,7 +152,7 @@ public:
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool MouseWheel(int x, int y, int Code) override;
-	[[nodiscard]] TTalkBuffer *getTextBuffer() const { return TextWindow->TextBuffer; }
+	[[nodiscard]] TTalkBuffer *GetTextBuffer() const { return TextWindow->TextBuffer; }
 
 	TTextWindow *TextWindow; // +0x2c
 	TScrollBar *ScrollBar;   // +0x30
