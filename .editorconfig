@@ -11,6 +11,10 @@ tab_width = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
+# Batch files: cmd.exe needs CRLF line ends (as .gitattributes stores them).
+[*.bat]
+end_of_line = crlf
+
 # Formats that require spaces.
 [{*.yml,*.yaml,.clang-format,.clang-tidy}]
 indent_style = space
