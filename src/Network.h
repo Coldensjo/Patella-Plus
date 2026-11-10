@@ -128,7 +128,6 @@ public:
 	uint32 GetQuad();
 	void GetString(TSpan<char> Text);
 	char *GetString();
-	void GetBytes(TSpan<uint8> Bytes);
 
 	void CheckConnectionTimeout();
 	void GetErrorMessage(TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int ErrorCode, int ErrorType);
@@ -213,43 +212,20 @@ TNetwork &Network();
 
 // The original's functions (the callers' names, and the golden tests'): each calls TNetwork's member of the same
 // name on bridge::Network().
-void InitServerList();
 void SetTestServerPort(int Port);
-void ResetServerAvailability();
 void SetConnectionTimeout(int Timeout);
 void SetNetworkWindow(patella::platform::TWindowHandle Window);
 void SetTestServerAddress(const char *Address);
 void SetServerError(int errorcode);
 void SetServerIPAddress(const char *ipaddress);
-bool GetCurrentServer(TServer **Server);
-int GetServerErrorCode();
 
-void BeginCommand(int CommandType);
-void SendByte(uint8 Data);
-void SendWord(uint16 Data);
-void SendQuad(uint32 Data);
-void SendString(const char *Text);
-void SendBytes(patella::TSpan<const uint8> Bytes);
-void SendCommand(bool Encrypt);
-
-void PrepareNextPacket();
 int GetNextCommand();
-uint8 GetByte();
-uint16 GetWord();
-uint32 GetQuad();
-void GetString(patella::TSpan<char> Text); // at most Text.size() - 1 characters and the NUL
-char *GetString();
-void GetBytes(patella::TSpan<uint8> Bytes);
 
 void CheckConnectionTimeout();
 // Message is the caller's new char[ERROR_MESSAGE_SIZE]: a fixed extent, passed as the pointer was (issue #69).
 void GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int ErrorCode, int ErrorType);
 static_assert(patella::IsSpanLayout<char, ERROR_MESSAGE_SIZE>, "a pointer's size: the golden tests' fakes take char *");
-bool ResolveHostname(const char *Hostname);
 const char *GetResolvedIPAddress();
-int CreateSocket();
-int ConnectSocket(const char *IPAddress, int Port, bool SetTimeout);
-void SetSymmetricKey(const uint8 *Key);
 void Disconnect(bool force);
 void ConnectToLoginServer();
 void ConnectToGameServer();

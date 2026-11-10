@@ -353,7 +353,6 @@ bool GetLevelBar();
 bool GetMagLevelBar();
 void SetLevelBar(bool Value);
 void SetMagLevelBar(bool Value);
-void SetDefaultPreferences();
 void SetContentWindowSize(int ID, int Size);
 int GetContentWindowSize(int ID);
 int GetOpenDialogs(int **List);
@@ -365,7 +364,6 @@ const char *GetHotkey(int Number, bool *AutoSend);
 void AddOpenDialog(int Identifier);
 bool SetMessageOfTheDay(const char *Text);
 void AddOpenChannel(int Identifier);
-int FindBuddy(int CharacterID);
 void SetBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
 void DeleteBuddy(int CharacterID);
 int GetBuddyIcon(int CharacterID);
@@ -373,11 +371,8 @@ const char *GetBuddyDescription(int CharacterID);
 bool GetBuddyNotify(int CharacterID);
 bool GetSkillBar(int SkillNumber);
 void SetSkillBar(int SkillNumber, bool Value);
-// The original's Tibia.cfg reader (issue #45): the import. The client calls InitPreferences, SavePreferences and ExitPreferences, which read and
-// write Patella.ini (settings/PreferenceKeys.h); it never writes Tibia.cfg.
-void ReadTibiaCfg();
-patella::settings::TPreferenceValues GetPreferenceValues();
-void SetPreferenceValues(const patella::settings::TPreferenceValues &Values);
+// InitPreferences, SavePreferences and ExitPreferences read and write Patella.ini (settings/PreferenceKeys.h); the
+// client never writes Tibia.cfg.
 void InitPreferences();
 void SavePreferences();
 void ExitPreferences();

@@ -344,7 +344,6 @@ TMap &Map();
 // The original's functions (the callers' names, and the golden tests'): each calls TMap's member of the same name on
 // bridge::Map().
 // Position and coordinates (the gap before Map.cpp's first assertion).
-void SetMapPosition(int x, int y, int z);
 void GetMapPosition(int *x, int *y, int *z);
 int GetMapLevel();
 void MapToWorld(int *x, int *y, int *z);
@@ -364,10 +363,6 @@ TObject GetTopMoveObject(int rx, int ry, int rz, int &Position);
 TObject GetTopLookObject(int rx, int ry, int rz, int &Position);
 TObject GetTopUseObject(int rx, int ry, int rz, int &Position);
 TObject GetTopMultiUseObject(int rx, int ry, int rz, int &Position);
-void AddObject(int rx, int ry, int rz, TObject Obj);
-void AppendObject(int rx, int ry, int rz, TObject Obj);
-bool DeleteObject(int rx, int ry, int rz, int Position);
-void ChangeObject(int rx, int ry, int rz, int Position, TObject Obj);
 
 // Effects.
 int GetFirstEffect(int rx, int ry, int rz);
@@ -382,9 +377,6 @@ int GetMissileEffectType(int EffectNumber);
 int GetMissileEffectDirection(int EffectNumber);
 int GetMissileEffectX(int EffectNumber);
 int GetMissileEffectY(int EffectNumber);
-void AddGraphicalEffect(int rx, int ry, int rz, int Type);
-void AddTextualEffect(int rx, int ry, int rz, int Color, const char *Text);
-void AddMissileEffect(int sx, int sy, int sz, int dx, int dy, int dz, int Type);
 void ProcessEffects();
 void ProcessMissileEffects();
 
@@ -431,27 +423,17 @@ private:
 };
 
 // Map points and scrolling.
-void ClearField(int rx, int ry, int rz, bool DeleteEffects);
 void ClearMap();
-void ShiftMap(int dx, int dy);
-void ShiftMapLevel(int dz);
-void RequestFieldRefresh(int rx, int ry, int rz);
-int GetFieldHeight(int rx, int ry, int rz);
-bool IsFieldPassable(int rx, int ry, int rz, bool CheckHeight);
 bool IsFieldThrowable(int rx, int ry, int rz);
 bool IsFieldTranslucent(int rx, int ry, int rz);
-bool FieldRefreshRequested(int rx, int ry, int rz);
 
 // The automap. The block cache and the file functions are static.
 bool TakeAutomapChanged();
-void UpdateAutomap(int rx, int ry);
 TRGBColor GetAutomapColor(int x, int y, int z);
 void GetAutomapMarks(int x, int y, int z, std::vector<TMark> *Marks, int *Count);
 void AddAutomapMark(TCoordinate &Coordinate, const char *Text, int Type);
 void DeleteAutomapMark(TMark &Deleted, int z);
 
 // Paths, initialisation.
-int FindPath(int StartX, int StartY, int StartZ, int DestX, int DestY, int DestZ, bool MustReach,
-	int *Steps, int *Directions, bool ForceDiagonal);
 void InitMap(void (*Callback)(int CreatureID));
 void ExitMap();

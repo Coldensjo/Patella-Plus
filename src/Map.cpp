@@ -1441,11 +1441,6 @@ void patella::TMap::ExitMap()
 
 // The original's functions (issue #106): each calls its member on the one TClient's TMap.
 
-void SetMapPosition(int x, int y, int z)
-{
-	patella::bridge::Map().SetMapPosition(x, y, z);
-}
-
 void GetMapPosition(int *x, int *y, int *z)
 {
 	patella::bridge::Map().GetMapPosition(x, y, z);
@@ -1521,26 +1516,6 @@ TObject GetTopMultiUseObject(int rx, int ry, int rz, int &Position)
 	return patella::bridge::Map().GetTopMultiUseObject(rx, ry, rz, Position);
 }
 
-void AddObject(int rx, int ry, int rz, TObject Obj)
-{
-	patella::bridge::Map().AddObject(rx, ry, rz, Obj);
-}
-
-void AppendObject(int rx, int ry, int rz, TObject Obj)
-{
-	patella::bridge::Map().AppendObject(rx, ry, rz, Obj);
-}
-
-bool DeleteObject(int rx, int ry, int rz, int Position)
-{
-	return patella::bridge::Map().DeleteObject(rx, ry, rz, Position);
-}
-
-void ChangeObject(int rx, int ry, int rz, int Position, TObject Obj)
-{
-	patella::bridge::Map().ChangeObject(rx, ry, rz, Position, Obj);
-}
-
 int GetFirstEffect(int rx, int ry, int rz)
 {
 	return EffectNumberOf(patella::bridge::Map().GetFirstEffect(rx, ry, rz));
@@ -1601,21 +1576,6 @@ int GetMissileEffectY(int EffectNumber)
 	return patella::bridge::Map().GetMissileEffectY(EffectIdOf(EffectNumber));
 }
 
-void AddGraphicalEffect(int rx, int ry, int rz, int Type)
-{
-	patella::bridge::Map().AddGraphicalEffect(rx, ry, rz, Type);
-}
-
-void AddTextualEffect(int rx, int ry, int rz, int Color, const char *Text)
-{
-	patella::bridge::Map().AddTextualEffect(rx, ry, rz, Color, Text);
-}
-
-void AddMissileEffect(int sx, int sy, int sz, int dx, int dy, int dz, int Type)
-{
-	patella::bridge::Map().AddMissileEffect(sx, sy, sz, dx, dy, dz, Type);
-}
-
 void ProcessEffects()
 {
 	patella::bridge::Map().ProcessEffects();
@@ -1626,39 +1586,9 @@ void ProcessMissileEffects()
 	patella::bridge::Map().ProcessMissileEffects();
 }
 
-void ClearField(int rx, int ry, int rz, bool DeleteEffects)
-{
-	patella::bridge::Map().ClearField(rx, ry, rz, DeleteEffects);
-}
-
 void ClearMap()
 {
 	patella::bridge::Map().ClearMap();
-}
-
-void ShiftMap(int dx, int dy)
-{
-	patella::bridge::Map().ShiftMap(dx, dy);
-}
-
-void ShiftMapLevel(int dz)
-{
-	patella::bridge::Map().ShiftMapLevel(dz);
-}
-
-void RequestFieldRefresh(int rx, int ry, int rz)
-{
-	patella::bridge::Map().RequestFieldRefresh(rx, ry, rz);
-}
-
-int GetFieldHeight(int rx, int ry, int rz)
-{
-	return patella::bridge::Map().GetFieldHeight(rx, ry, rz);
-}
-
-bool IsFieldPassable(int rx, int ry, int rz, bool CheckHeight)
-{
-	return patella::bridge::Map().IsFieldPassable(rx, ry, rz, CheckHeight);
 }
 
 bool IsFieldThrowable(int rx, int ry, int rz)
@@ -1671,19 +1601,9 @@ bool IsFieldTranslucent(int rx, int ry, int rz)
 	return patella::bridge::Map().IsFieldTranslucent(rx, ry, rz);
 }
 
-bool FieldRefreshRequested(int rx, int ry, int rz)
-{
-	return patella::bridge::Map().FieldRefreshRequested(rx, ry, rz);
-}
-
 bool TakeAutomapChanged()
 {
 	return patella::bridge::Map().TakeAutomapChanged();
-}
-
-void UpdateAutomap(int rx, int ry)
-{
-	patella::bridge::Map().UpdateAutomap(rx, ry);
 }
 
 TRGBColor GetAutomapColor(int x, int y, int z)
@@ -1704,11 +1624,6 @@ void AddAutomapMark(TCoordinate &Coordinate, const char *Text, int Type)
 void DeleteAutomapMark(TMark &Deleted, int z)
 {
 	patella::bridge::Map().DeleteAutomapMark(Deleted, z);
-}
-
-int FindPath(int StartX, int StartY, int StartZ, int DestX, int DestY, int DestZ, bool MustReach, int *Steps, int *Directions, bool ForceDiagonal)
-{
-	return patella::bridge::Map().FindPath(StartX, StartY, StartZ, DestX, DestY, DestZ, MustReach, Steps, Directions, ForceDiagonal);
 }
 
 void InitMap(void (*Callback)(int CreatureID))

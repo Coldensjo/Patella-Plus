@@ -18,11 +18,8 @@
 
 void Resize(int Width, int Height);
 
-void CheckSurface(bool Force);
 void ChangeEngine(int engine);
 void Redraw(bool Force);
-void EnterGame();
-void LeaveGame();
 
 void MouseMove(int x, int y);
 void LeftButtonDown(int x, int y, int Flags);

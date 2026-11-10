@@ -612,11 +612,6 @@ bool GetObjectFlag(int Type, int Flag)
 	return patella::bridge::ObjectTypes().GetObjectFlag(Type, Flag);
 }
 
-int GetObjectWaypoints(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectWaypoints(Type);
-}
-
 int GetObjectBrightness(int Type)
 {
 	return patella::bridge::ObjectTypes().GetObjectBrightness(Type);
@@ -640,11 +635,6 @@ int GetObjectShiftY(int Type)
 int GetObjectElevation(int Type)
 {
 	return patella::bridge::ObjectTypes().GetObjectElevation(Type);
-}
-
-int GetObjectAutomapColor(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectAutomapColor(Type);
 }
 
 int GetObjectLensHelp(int Type)
@@ -840,16 +830,6 @@ void GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY)
 void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY)
 {
 	patella::bridge::ObjectTypes().GetHangPattern(Obj, PatternX, PatternY);
-}
-
-void ReleaseObjects()
-{
-	patella::bridge::ObjectTypes().ReleaseObjects();
-}
-
-void LoadObjects(const char *FileName)
-{
-	patella::bridge::ObjectTypes().LoadObjects(FileName);
 }
 
 void InitObjects()

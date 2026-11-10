@@ -2029,16 +2029,6 @@ void SendLogout()
 	patella::bridge::Communication().SendLogout();
 }
 
-void SendPing()
-{
-	patella::bridge::Communication().SendPing();
-}
-
-void PrepareMovement()
-{
-	patella::bridge::Communication().PrepareMovement();
-}
-
 void SendWalk()
 {
 	patella::bridge::Communication().SendWalk();
@@ -2249,16 +2239,6 @@ void SendCancel()
 	patella::bridge::Communication().SendCancel();
 }
 
-void SendRefreshField(int x, int y, int z)
-{
-	patella::bridge::Communication().SendRefreshField(x, y, z);
-}
-
-void SendRefreshContainer(int Container)
-{
-	patella::bridge::Communication().SendRefreshContainer(Container);
-}
-
 void SendRequestOutfit()
 {
 	patella::bridge::Communication().SendRequestOutfit();
@@ -2347,21 +2327,6 @@ void ReceiveLoginWait()
 void ReceivePing()
 {
 	patella::bridge::Communication().ReceivePing();
-}
-
-uint32 ReadCreature(int Type, int x, int y, int z)
-{
-	return patella::bridge::Communication().ReadCreature(Type, x, y, z);
-}
-
-void ReadField(int rx, int ry, int rz)
-{
-	patella::bridge::Communication().ReadField(rx, ry, rz);
-}
-
-void ReadMap(int xmin, int ymin, int xmax, int ymax)
-{
-	patella::bridge::Communication().ReadMap(xmin, ymin, xmax, ymax);
 }
 
 void ReceiveMap()
@@ -2607,11 +2572,6 @@ void ReceiveTextMessage()
 void ReceiveCancelWalk()
 {
 	patella::bridge::Communication().ReceiveCancelWalk();
-}
-
-void ReadFloor(int rz)
-{
-	patella::bridge::Communication().ReadFloor(rz);
 }
 
 void ReceiveFloorUp()

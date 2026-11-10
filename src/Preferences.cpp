@@ -1400,11 +1400,6 @@ void SetMagLevelBar(bool Value)
 	patella::bridge::Preferences().SetMagLevelBar(Value);
 }
 
-void SetDefaultPreferences()
-{
-	patella::bridge::Preferences().SetDefaultPreferences(patella::bridge::TalkLists());
-}
-
 void SetContentWindowSize(int ID, int Size)
 {
 	patella::bridge::Preferences().SetContentWindowSize(ID, Size);
@@ -1460,11 +1455,6 @@ void AddOpenChannel(int Identifier)
 	patella::bridge::Preferences().AddOpenChannel(Identifier);
 }
 
-int FindBuddy(int CharacterID)
-{
-	return patella::bridge::Preferences().FindBuddy(CharacterID);
-}
-
 void SetBuddy(int CharacterID, int Icon, const char *Description, bool Notify)
 {
 	patella::bridge::Preferences().SetBuddy(CharacterID, Icon, Description, Notify);
@@ -1498,21 +1488,6 @@ bool GetSkillBar(int SkillNumber)
 void SetSkillBar(int SkillNumber, bool Value)
 {
 	patella::bridge::Preferences().SetSkillBar(SkillNumber, Value);
-}
-
-void ReadTibiaCfg()
-{
-	patella::bridge::Preferences().ReadTibiaCfg(patella::bridge::TalkLists());
-}
-
-patella::settings::TPreferenceValues GetPreferenceValues()
-{
-	return patella::bridge::Preferences().GetPreferenceValues(patella::bridge::TalkLists());
-}
-
-void SetPreferenceValues(const patella::settings::TPreferenceValues &Values)
-{
-	patella::bridge::Preferences().SetPreferenceValues(Values, patella::bridge::TalkLists());
 }
 
 void InitPreferences()

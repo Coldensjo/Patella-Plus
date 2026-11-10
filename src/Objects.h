@@ -239,13 +239,11 @@ TObjectTypes &ObjectTypes();
 // Object types. Type CREATURE has only UNPASS.
 bool GetObjectFlag(int Type, int Flag);
 inline bool GetObjectFlag(TObject &Obj, int Flag) { return GetObjectFlag(Obj.Type, Flag); }
-int GetObjectWaypoints(int Type);
 int GetObjectBrightness(int Type);
 int GetObjectLightColor(int Type);
 int GetObjectShiftX(int Type);
 int GetObjectShiftY(int Type);
 int GetObjectElevation(int Type);
-int GetObjectAutomapColor(int Type);
 int GetObjectLensHelp(int Type);
 int GetObjectWidth(int Type);
 int GetObjectHeight(int Type);
@@ -295,7 +293,5 @@ void GetCumulativePattern(TObject &Obj, int *PatternX, int *PatternY);
 void GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY);
 void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY);
 
-void ReleaseObjects();
-void LoadObjects(const char *FileName);
 void InitObjects();
 void ExitObjects();

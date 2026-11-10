@@ -113,20 +113,11 @@ TInventory &Inventory();
 
 // The original's functions (the callers' names, and the golden tests'): each calls TInventory's member of the same
 // name on bridge::Inventory().
-void ClearBody();
 void ClearOffers();
 int GetOwnOfferCount();
 int GetCounterOfferCount();
-void SetBodyObject(int Position, TObject Object);
-void DeleteBodyObject(int Position);
 TObject *GetBodyObject(int Position);
-void OpenContainer(int Container, TObject Object, const char *Name, int Capacity, bool HasParent);
-void CloseContainer(int Container);
 bool IsContainerOpen(int Container);
-void InsertContainerObject(int Container, TObject Object);
-void AppendContainerObject(int Container, TObject Object);
-void ChangeContainerObject(int Container, int Position, TObject Object);
-bool DeleteContainerObject(int Container, int Position);
 int GetContainerObjectCount(int Container);
 TObject GetContainerObject(int Container);
 TObject GetContainerContent(int Container, int Position);
@@ -134,10 +125,6 @@ char *GetContainerName(int Container);
 int GetContainerCapacity(int Container);
 bool HasContainerParent(int Container);
 int GetFreeContainer();
-bool SetOwnOffer(const char *Name);
-bool SetCounterOffer(const char *Name);
-void AddOwnOfferObject(TObject Object);
-void AddCounterOfferObject(TObject Object);
 char *GetOwnOfferName();
 char *GetCounterOfferName();
 TObject GetOwnOfferObject(int Position);

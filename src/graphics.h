@@ -267,47 +267,11 @@ void InitVideoCache();
 void ResetVideoCache();
 void ExitGraphics();
 
-// The files and the fonts.
-void LoadSprites(const char *FileName);
-void LoadSprite(int SpriteNumber, uint8 *Buffer);
-void LoadPictures(const char *FileName);
-void LoadPictureTile(int PictureNumber, int TileX, int TileY, uint8 *Buffer);
-void InitFont(int FontName, int PictureNumber, int CharsPerLine, int CharWidth, int CharHeight,
-	int Spacing, int LineHeight);
-void InitFonts();
-
-// The memory cache.
-void InitMemoryCache(int MemoryCacheBytes);
-void TouchMemoryItem(int Position);
-int FindMemorySprite(int SpriteNumber);
-int FindMemoryPicture(int PictureNumber, int TileX, int TileY);
-void RemoveMemoryItem(int Position);
-void InsertMemoryItem(int Position, int HashValue);
-TMemoryCacheItem *GetMemorySprite(int SpriteNumber);
-TMemoryCacheItem *GetMemoryPicture(int PictureNumber, int TileX, int TileY);
-
-// The video cache.
-void TouchVideoItem(int Position);
-int FindVideoSprite(int SpriteNumber);
-int FindVideoMaskedSprite(int SpriteNumber, int MaskNumber, TRGBColor *Colors);
-int FindVideoPicture(int PictureNumber, int TileX, int TileY);
-int FindVideoFontChar(int PictureNumber, int TileX, int TileY, TRGBColor Color);
-void RemoveVideoItem(int Position);
-void InsertVideoItem(int Position, int HashValue);
-TVideoCacheItem *GetVideoSprite(int SpriteNumber);
-TVideoCacheItem *GetVideoMaskedSprite(int SpriteNumber, int MaskNumber, TRGBColor *Colors);
-TVideoCacheItem *GetVideoPicture(int PictureNumber, int TileX, int TileY);
-TVideoCacheItem *GetVideoFontChar(int FontNumber, int TileX, int TileY, TRGBColor Color);
-
 // Sprites, objects and outfits. Sprite number 0 draws nothing (except in the
 // masked forms, where it fails the assertion).
 void DrawSprite(int Surface, int x, int y, int SpriteNumber);
 void DrawSpriteClipped(int Surface, int x, int y, int SpriteNumber, TRect Clip);
-void DrawSpriteScaled(int Surface, int x, int y, int Width, int Height, int SpriteNumber,
-	TRGBColor Highlight, TRect Clip);
 void DrawMaskedSprite(int Surface, int x, int y, int SpriteNumber, int MaskNumber, TRGBColor *Colors);
-void DrawMaskedSpriteScaled(int Surface, int x, int y, int Width, int Height, int SpriteNumber,
-	int MaskNumber, TRGBColor *Colors, TRGBColor Highlight, TRect Clip);
 void DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip,
 	TFont Font, bool ShowCount);
 // Colors: the four outfit colours (TCreature::Colors); a fixed extent, passed as the pointer was (issue #69).

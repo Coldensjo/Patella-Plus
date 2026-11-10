@@ -1199,11 +1199,6 @@ void patella::TCreatures::ExitCreatures()
 
 // The original's functions (issue #106): each calls its member on the one TClient's TPlayerState or TCreatures.
 
-int GetNumberOfPlayerSteps()
-{
-	return patella::bridge::PlayerState().GetNumberOfPlayerSteps();
-}
-
 void GetPlayerPosition(int *x, int *y, int *z)
 {
 	patella::bridge::PlayerState().GetPlayerPosition(x, y, z);
@@ -1212,41 +1207,6 @@ void GetPlayerPosition(int *x, int *y, int *z)
 void ClearPlayerSteps()
 {
 	patella::bridge::PlayerState().ClearPlayerSteps();
-}
-
-void SetPlayerID(uint32 CreatureID)
-{
-	patella::bridge::PlayerState().SetPlayerID(CreatureID);
-}
-
-void SetPlayerHealth(int Health, int MaxHealth)
-{
-	patella::bridge::PlayerState().SetPlayerHealth(Health, MaxHealth);
-}
-
-void SetPlayerMagicLevel(int Level, int Progress)
-{
-	patella::bridge::PlayerState().SetPlayerMagicLevel(Level, Progress);
-}
-
-void SetPlayerMana(int Mana, int MaxMana)
-{
-	patella::bridge::PlayerState().SetPlayerMana(Mana, MaxMana);
-}
-
-void SetPlayerSoul(int Soul)
-{
-	patella::bridge::PlayerState().SetPlayerSoul(Soul);
-}
-
-void SetPlayerCapacity(int Capacity)
-{
-	patella::bridge::PlayerState().SetPlayerCapacity(Capacity);
-}
-
-void SetPlayerState(int State)
-{
-	patella::bridge::PlayerState().SetPlayerState(State);
 }
 
 uint32 GetPlayerID()
@@ -1349,44 +1309,9 @@ bool IsPlayerInFight()
 	return patella::bridge::PlayerState().IsPlayerInFight();
 }
 
-int GetPlayerStep(int Step)
-{
-	return patella::bridge::PlayerState().GetPlayerStep(Step);
-}
-
-void StartPlayerStep()
-{
-	patella::bridge::PlayerState().StartPlayerStep();
-}
-
-int FindPlayerPath()
-{
-	return patella::bridge::PlayerState().FindPlayerPath();
-}
-
 int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal)
 {
 	return patella::bridge::PlayerState().SetPlayerDestination(x, y, z, Exact, Diagonal);
-}
-
-void StopPlayer()
-{
-	patella::bridge::PlayerState().StopPlayer();
-}
-
-bool CancelPlayerWalk(int NewDirection)
-{
-	return patella::bridge::PlayerState().CancelPlayerWalk(NewDirection);
-}
-
-void SetPlayerExperience(int Experience, int Level, int Progress)
-{
-	patella::bridge::PlayerState().SetPlayerExperience(Experience, Level, Progress);
-}
-
-void SetPlayerSkill(int SkillNumber, int Value, int Progress)
-{
-	patella::bridge::PlayerState().SetPlayerSkill(SkillNumber, Value, Progress);
 }
 
 int GetPlayerSkillValue(int SkillNumber)
@@ -1417,16 +1342,6 @@ bool IsPlayerInParty()
 int GetPlayerPartyFlag()
 {
 	return patella::bridge::PlayerState().GetPlayerPartyFlag();
-}
-
-void HideAllCreatures()
-{
-	patella::bridge::Creatures().HideAllCreatures();
-}
-
-void SetBeat(int Beat)
-{
-	patella::bridge::Creatures().SetBeat(Beat);
 }
 
 bool IsPlayer(uint32 CreatureID)
@@ -1474,11 +1389,6 @@ bool IsBuddy(const char *Name)
 	return patella::bridge::Creatures().IsBuddy(Name);
 }
 
-TCreature *AddCreature(uint32 RemoveID, uint32 NewCreatureID)
-{
-	return patella::bridge::Creatures().AddCreature(RemoveID, NewCreatureID);
-}
-
 TCreature *GetCreature(uint32 CreatureID)
 {
 	return patella::bridge::Creatures().GetCreature(CreatureID);
@@ -1504,11 +1414,6 @@ void CheckMonsterHint(TCreature *Creature)
 	patella::bridge::Creatures().CheckMonsterHint(Creature);
 }
 
-void NotifySkull(int Flag)
-{
-	patella::bridge::Creatures().NotifySkull(Flag);
-}
-
 bool IsOpponent(TCreature *Creature)
 {
 	return patella::bridge::Creatures().IsOpponent(Creature);
@@ -1522,36 +1427,6 @@ int GetNumberOfOpponents()
 TCreature *GetOpponent(int Number)
 {
 	return patella::bridge::Creatures().GetOpponent(Number);
-}
-
-bool CompareBuddies(int i, int j)
-{
-	return patella::bridge::Creatures().CompareBuddies(i, j);
-}
-
-void SwapBuddies(int i, int j)
-{
-	patella::bridge::Creatures().SwapBuddies(i, j);
-}
-
-void SortBuddies()
-{
-	patella::bridge::Creatures().SortBuddies();
-}
-
-void MoveBuddyToSortedPlace(int i)
-{
-	patella::bridge::Creatures().MoveBuddyToSortedPlace(i);
-}
-
-void AddBuddy(uint32 CharacterID, const char *Name, bool Online)
-{
-	patella::bridge::Creatures().AddBuddy(CharacterID, Name, Online);
-}
-
-void SetBuddyState(uint32 CharacterID, bool Online)
-{
-	patella::bridge::Creatures().SetBuddyState(CharacterID, Online);
 }
 
 void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify)

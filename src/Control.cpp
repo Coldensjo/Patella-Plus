@@ -1232,11 +1232,6 @@ void Resize(int Width, int Height)
 	patella::bridge::GUI().Resize(Width, Height);
 }
 
-void CheckSurface(bool Force)
-{
-	patella::bridge::GUI().CheckSurface(Force);
-}
-
 void ChangeEngine(int engine)
 {
 	patella::TGUI::ChangeEngine(engine);
@@ -1245,16 +1240,6 @@ void ChangeEngine(int engine)
 void Redraw(bool Force)
 {
 	patella::bridge::GUI().Redraw(Force);
-}
-
-void EnterGame()
-{
-	patella::bridge::GUI().EnterGame();
-}
-
-void LeaveGame()
-{
-	patella::bridge::GUI().LeaveGame();
 }
 
 void MouseMove(int x, int y)

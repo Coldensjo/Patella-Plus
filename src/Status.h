@@ -76,8 +76,6 @@ public:
 	void ClearRights();
 	void SetConnectionState(int State);
 	[[nodiscard]] int GetConnectionState() const;
-	void SetProgress(int Value);
-	[[nodiscard]] int GetProgress() const;
 	[[nodiscard]] int GetAccountNumber() const;
 	[[nodiscard]] const char *GetAccountNumberString() const;
 	[[nodiscard]] const char *GetAccountPassword() const;
@@ -119,7 +117,6 @@ private:
 	TFixedString<30> AccountPassword{};
 	TFixedString<12> AccountNumberString{};
 	int AccountNumber{};
-	int Progress{};        // -1 = none
 	int ConnectionState{}; // see SetConnectionState
 
 	// The arrays std::arrays and TFixedStrings (issue #60).
@@ -243,7 +240,6 @@ TInteraction &Interaction(); // issue #107: the one TClient's TGUI's
 // The session's functions (issue #105): each calls TSession's member of the same name on bridge::Session(); the
 // others are Status.cpp's own.
 bool CheckAnyRight();
-void ClearRights();
 int GetActionNumber();
 void IncrementActionNumber();
 // The action states. ACTIONSTATE_NONE, no action, is the original's name
@@ -304,17 +300,12 @@ TObject *GetUseObject(int *Index, int *x, int *y, int *z);
 int GetTradeInfo();
 void SetConnectionState(int State);
 int GetConnectionState();
-void SetProgress(int Progress);
-int GetProgress();
 int GetAccountNumber();
 const char *GetAccountNumberString();
 const char *GetAccountPassword();
-void SetAccountCharacters(int Number);
-void SetPremiumDays(int Days);
 int GetAccountCharacters();
 int GetPremiumDays();
 int GetActiveCharacter();
-bool IsGamemaster();
 void SetMouseOverText(const char *Text);
 void SetMouseOverTextPosition(int x, int y);
 const char *GetMouseOverText();
@@ -325,14 +316,12 @@ int PeekMessageType();
 void FetchMessage(int *Type, std::intptr_t *Param1, std::intptr_t *Param2);
 void ClearMessages();
 void ExitStatus();
-void SetRight(int rightid, int Value);
 bool CheckRight(int rightid, int Bit);
 const char *GetRightName(int rightid);
 const char *GetActionName(int actionid);
 void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2);
 void AddMessageFirst(int Type, std::intptr_t Param1, std::intptr_t Param2);
 void SetAccount(int Number, const char *Password);
-void SetCharacter(int Number, const char *Name, const char *World, const uint8 *Address, int Port);
 void SetActiveCharacter(int Number);
 const char *GetCharacterName(int Number);
 const char *GetCharacterWorld(int Number);

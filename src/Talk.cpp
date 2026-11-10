@@ -1090,11 +1090,6 @@ TRGBColor *GetTalkColor(TRGBColor *Color, int TalkMode)
 	return patella::bridge::Talk().GetTalkColor(Color, TalkMode);
 }
 
-TTalkbox *GetTalkbox(int Number)
-{
-	return patella::bridge::Talk().GetTalkbox(Number);
-}
-
 int GetTalkboxMode(int Number)
 {
 	return patella::bridge::Talk().GetTalkboxMode(Number);
@@ -1125,21 +1120,6 @@ const char *GetTalkboxLine(int Number, int Line)
 	return patella::bridge::Talk().GetTalkboxLine(Number, Line);
 }
 
-void RemoveTalkbox(int Position)
-{
-	patella::bridge::Talk().RemoveTalkbox(Position);
-}
-
-int FindFreeTalkbox()
-{
-	return patella::bridge::Talk().FindFreeTalkbox();
-}
-
-void WrapTalkbox(TTalkbox *Talkbox, const char *Text)
-{
-	patella::bridge::Talk().WrapTalkbox(Talkbox, Text);
-}
-
 void SetTalkboxRectangle(int Number, int x, int y, int Width, int Height)
 {
 	patella::bridge::Talk().SetTalkboxRectangle(Number, x, y, Width, Height);
@@ -1148,22 +1128,6 @@ void SetTalkboxRectangle(int Number, int x, int y, int Width, int Height)
 void RemoveOldestTalkbox()
 {
 	patella::bridge::Talk().RemoveOldestTalkbox();
-}
-
-int FindTalkFilter(int Mode, const char *Addressee, int Channel, TIndexedVector<TTalkFilter *> &List)
-{
-	return patella::bridge::Talk().FindTalkFilter(Mode, Addressee, Channel, List);
-}
-
-int FindTextBuffer(TTalkBuffer *TextBuffer, TIndexedVector<TTalkFilter *> &List)
-{
-	return patella::bridge::Talk().FindTextBuffer(TextBuffer, List);
-}
-
-void AddTalkFilter(int Mode, const char *Addressee, int Channel, TTalkBuffer *TextBuffer,
-	TIndexedVector<TTalkFilter *> &List, bool Permanent)
-{
-	patella::bridge::Talk().AddTalkFilter(Mode, Addressee, Channel, TextBuffer, List, Permanent);
 }
 
 char *GetBuddyIgnoreText()
@@ -1186,11 +1150,6 @@ bool IsPermanentBuddyIgnore(const char *Addressee)
 	return patella::bridge::Talk().IsPermanentBuddyIgnore(Addressee);
 }
 
-void ClearTemporaryIgnore()
-{
-	patella::bridge::Talk().ClearTemporaryIgnore();
-}
-
 char *GetIgnoreListText()
 {
 	return patella::bridge::Talk().GetIgnoreListText();
@@ -1199,11 +1158,6 @@ char *GetIgnoreListText()
 bool IsModeIgnored(int Mode)
 {
 	return patella::bridge::Talk().IsModeIgnored(Mode);
-}
-
-void AddIgnoreFilter(int Mode, const char *Addressee, bool Permanent)
-{
-	patella::bridge::Talk().AddIgnoreFilter(Mode, Addressee, Permanent);
 }
 
 void IgnoreMode(int Mode)
@@ -1221,11 +1175,6 @@ bool IsPermanentIgnore(const char *Addressee)
 	return patella::bridge::Talk().IsPermanentIgnore(Addressee);
 }
 
-void RemoveIgnoreFilter(int Mode, const char *Addressee)
-{
-	patella::bridge::Talk().RemoveIgnoreFilter(Mode, Addressee);
-}
-
 void UnignoreMode(int Mode)
 {
 	patella::bridge::Talk().UnignoreMode(Mode);
@@ -1234,11 +1183,6 @@ void UnignoreMode(int Mode)
 void UnignoreName(const char *Addressee)
 {
 	patella::bridge::Talk().UnignoreName(Addressee);
-}
-
-void ClearDefaultTextBuffer()
-{
-	patella::bridge::Talk().ClearDefaultTextBuffer();
 }
 
 void ClearTextBuffer(TTalkBuffer *TextBuffer)

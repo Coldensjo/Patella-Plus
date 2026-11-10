@@ -457,11 +457,6 @@ int PopEventHelp()
 	return patella::bridge::Help().PopEventHelp();
 }
 
-const char *GetHelpText(int Handle)
-{
-	return patella::bridge::Help().GetHelpText(Handle);
-}
-
 void AddEventHelp(int Number)
 {
 	patella::bridge::Help().AddEventHelp(Number);

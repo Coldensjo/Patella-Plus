@@ -372,11 +372,6 @@ char *patella::TNetwork::GetString()
 	return ReceiveBuffer.GetString();
 }
 
-void patella::TNetwork::GetBytes(patella::TSpan<uint8> Bytes)
-{
-	ReceiveBuffer.GetBytes(Bytes);
-}
-
 // Called periodically; reconnects when the limit is passed.
 void patella::TNetwork::CheckConnectionTimeout()
 {
@@ -761,19 +756,9 @@ void patella::TNetwork::ExitNetwork()
 
 // The original's functions (issue #105): each calls its member on the one TClient's TNetwork.
 
-void InitServerList()
-{
-	patella::bridge::Network().InitServerList();
-}
-
 void SetTestServerPort(int Port)
 {
 	patella::bridge::Network().SetTestServerPort(Port);
-}
-
-void ResetServerAvailability()
-{
-	patella::bridge::Network().ResetServerAvailability();
 }
 
 void SetConnectionTimeout(int Timeout)
@@ -801,89 +786,9 @@ void SetServerIPAddress(const char *ipaddress)
 	patella::bridge::Network().SetServerIPAddress(ipaddress);
 }
 
-bool GetCurrentServer(TServer **Server)
-{
-	return patella::bridge::Network().GetCurrentServer(Server);
-}
-
-int GetServerErrorCode()
-{
-	return patella::bridge::Network().GetServerErrorCode();
-}
-
-void BeginCommand(int CommandType)
-{
-	patella::bridge::Network().BeginCommand(CommandType);
-}
-
-void SendByte(uint8 Data)
-{
-	patella::bridge::Network().SendByte(Data);
-}
-
-void SendWord(uint16 Data)
-{
-	patella::bridge::Network().SendWord(Data);
-}
-
-void SendQuad(uint32 Data)
-{
-	patella::bridge::Network().SendQuad(Data);
-}
-
-void SendString(const char *Text)
-{
-	patella::bridge::Network().SendString(Text);
-}
-
-void SendBytes(patella::TSpan<const uint8> Bytes)
-{
-	patella::bridge::Network().SendBytes(Bytes);
-}
-
-void SendCommand(bool Encrypt)
-{
-	patella::bridge::Network().SendCommand(Encrypt);
-}
-
-void PrepareNextPacket()
-{
-	patella::bridge::Network().PrepareNextPacket();
-}
-
 int GetNextCommand()
 {
 	return patella::bridge::Network().GetNextCommand();
-}
-
-uint8 GetByte()
-{
-	return patella::bridge::Network().GetByte();
-}
-
-uint16 GetWord()
-{
-	return patella::bridge::Network().GetWord();
-}
-
-uint32 GetQuad()
-{
-	return patella::bridge::Network().GetQuad();
-}
-
-void GetString(patella::TSpan<char> Text)
-{
-	patella::bridge::Network().GetString(Text);
-}
-
-char *GetString()
-{
-	return patella::bridge::Network().GetString();
-}
-
-void GetBytes(patella::TSpan<uint8> Bytes)
-{
-	patella::bridge::Network().GetBytes(Bytes);
 }
 
 void CheckConnectionTimeout()
@@ -896,29 +801,9 @@ void GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int
 	patella::bridge::Network().GetErrorMessage(MessageBuffer, ErrorCode, ErrorType);
 }
 
-bool ResolveHostname(const char *Hostname)
-{
-	return patella::bridge::Network().ResolveHostname(Hostname);
-}
-
 const char *GetResolvedIPAddress()
 {
 	return patella::bridge::Network().GetResolvedIPAddress();
-}
-
-int CreateSocket()
-{
-	return patella::bridge::Network().CreateSocket();
-}
-
-int ConnectSocket(const char *IPAddress, int Port, bool SetTimeout)
-{
-	return patella::bridge::Network().ConnectSocket(IPAddress, Port, SetTimeout);
-}
-
-void SetSymmetricKey(const uint8 *Key)
-{
-	patella::bridge::Network().SetSymmetricKey(Key);
 }
 
 void Disconnect(bool force)

@@ -147,7 +147,6 @@ void InitHelp();
 void ExitHelp();
 int GetEventHelp();
 int PopEventHelp();
-const char *GetHelpText(int Handle);
 void AddEventHelp(int Number);
 void CheckEventHelpName(const char *Name);
 void CheckEventHelpPosition(int x, int y, int z);

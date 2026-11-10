@@ -1226,131 +1226,6 @@ void ExitGraphics()
 	patella::bridge::Graphics().ExitGraphics();
 }
 
-void LoadSprites(const char *FileName)
-{
-	patella::bridge::Graphics().LoadSprites(FileName);
-}
-
-void LoadSprite(int SpriteNumber, uint8 *Buffer)
-{
-	patella::bridge::Graphics().LoadSprite(SpriteNumber, Buffer);
-}
-
-void LoadPictures(const char *FileName)
-{
-	patella::bridge::Graphics().LoadPictures(FileName);
-}
-
-void LoadPictureTile(int PictureNumber, int TileX, int TileY, uint8 *Buffer)
-{
-	patella::bridge::Graphics().LoadPictureTile(PictureNumber, TileX, TileY, Buffer);
-}
-
-void InitFont(int FontName, int PictureNumber, int CharsPerLine, int CharWidth, int CharHeight, int Spacing, int LineHeight)
-{
-	patella::bridge::Graphics().InitFont(FontName, PictureNumber, CharsPerLine, CharWidth, CharHeight, Spacing, LineHeight);
-}
-
-void InitFonts()
-{
-	patella::bridge::Graphics().InitFonts();
-}
-
-void InitMemoryCache(int MemoryCacheBytes)
-{
-	patella::bridge::Graphics().InitMemoryCache(MemoryCacheBytes);
-}
-
-void TouchMemoryItem(int Position)
-{
-	patella::bridge::Graphics().TouchMemoryItem(Position);
-}
-
-int FindMemorySprite(int SpriteNumber)
-{
-	return patella::bridge::Graphics().FindMemorySprite(SpriteNumber);
-}
-
-int FindMemoryPicture(int PictureNumber, int TileX, int TileY)
-{
-	return patella::bridge::Graphics().FindMemoryPicture(PictureNumber, TileX, TileY);
-}
-
-void RemoveMemoryItem(int Position)
-{
-	patella::bridge::Graphics().RemoveMemoryItem(Position);
-}
-
-void InsertMemoryItem(int Position, int HashValue)
-{
-	patella::bridge::Graphics().InsertMemoryItem(Position, HashValue);
-}
-
-TMemoryCacheItem *GetMemorySprite(int SpriteNumber)
-{
-	return patella::bridge::Graphics().GetMemorySprite(SpriteNumber);
-}
-
-TMemoryCacheItem *GetMemoryPicture(int PictureNumber, int TileX, int TileY)
-{
-	return patella::bridge::Graphics().GetMemoryPicture(PictureNumber, TileX, TileY);
-}
-
-void TouchVideoItem(int Position)
-{
-	patella::bridge::Graphics().TouchVideoItem(Position);
-}
-
-int FindVideoSprite(int SpriteNumber)
-{
-	return patella::bridge::Graphics().FindVideoSprite(SpriteNumber);
-}
-
-int FindVideoMaskedSprite(int SpriteNumber, int MaskNumber, TRGBColor *Colors)
-{
-	return patella::bridge::Graphics().FindVideoMaskedSprite(SpriteNumber, MaskNumber, Colors);
-}
-
-int FindVideoPicture(int PictureNumber, int TileX, int TileY)
-{
-	return patella::bridge::Graphics().FindVideoPicture(PictureNumber, TileX, TileY);
-}
-
-int FindVideoFontChar(int PictureNumber, int TileX, int TileY, TRGBColor Color)
-{
-	return patella::bridge::Graphics().FindVideoFontChar(PictureNumber, TileX, TileY, Color);
-}
-
-void RemoveVideoItem(int Position)
-{
-	patella::bridge::Graphics().RemoveVideoItem(Position);
-}
-
-void InsertVideoItem(int Position, int HashValue)
-{
-	patella::bridge::Graphics().InsertVideoItem(Position, HashValue);
-}
-
-TVideoCacheItem *GetVideoSprite(int SpriteNumber)
-{
-	return patella::bridge::Graphics().GetVideoSprite(SpriteNumber);
-}
-
-TVideoCacheItem *GetVideoMaskedSprite(int SpriteNumber, int MaskNumber, TRGBColor *Colors)
-{
-	return patella::bridge::Graphics().GetVideoMaskedSprite(SpriteNumber, MaskNumber, Colors);
-}
-
-TVideoCacheItem *GetVideoPicture(int PictureNumber, int TileX, int TileY)
-{
-	return patella::bridge::Graphics().GetVideoPicture(PictureNumber, TileX, TileY);
-}
-
-TVideoCacheItem *GetVideoFontChar(int FontNumber, int TileX, int TileY, TRGBColor Color)
-{
-	return patella::bridge::Graphics().GetVideoFontChar(FontNumber, TileX, TileY, Color);
-}
-
 void DrawSprite(int Surface, int x, int y, int SpriteNumber)
 {
 	patella::bridge::Graphics().DrawSprite(Surface, x, y, SpriteNumber);
@@ -1361,19 +1236,9 @@ void DrawSpriteClipped(int Surface, int x, int y, int SpriteNumber, TRect Clip)
 	patella::bridge::Graphics().DrawSpriteClipped(Surface, x, y, SpriteNumber, Clip);
 }
 
-void DrawSpriteScaled(int Surface, int x, int y, int Width, int Height, int SpriteNumber, TRGBColor Highlight, TRect Clip)
-{
-	patella::bridge::Graphics().DrawSpriteScaled(Surface, x, y, Width, Height, SpriteNumber, Highlight, Clip);
-}
-
 void DrawMaskedSprite(int Surface, int x, int y, int SpriteNumber, int MaskNumber, TRGBColor *Colors)
 {
 	patella::bridge::Graphics().DrawMaskedSprite(Surface, x, y, SpriteNumber, MaskNumber, Colors);
-}
-
-void DrawMaskedSpriteScaled(int Surface, int x, int y, int Width, int Height, int SpriteNumber, int MaskNumber, TRGBColor *Colors, TRGBColor Highlight, TRect Clip)
-{
-	patella::bridge::Graphics().DrawMaskedSpriteScaled(Surface, x, y, Width, Height, SpriteNumber, MaskNumber, Colors, Highlight, Clip);
 }
 
 void DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip, TFont Font, bool ShowCount)

@@ -390,19 +390,9 @@ TPlayerState &PlayerState();
 // The original's functions (the callers' names, and the golden tests'): each calls the member of the same name of
 // TCreatures on bridge::Creatures() or of TPlayerState on bridge::PlayerState().
 // The player's creature, steps and statistics.
-int GetNumberOfPlayerSteps();
 void GetPlayerPosition(int *x, int *y, int *z); // including the step not confirmed yet
 void ClearPlayerSteps();
-void HideAllCreatures();
-void SetBeat(int Beat);
 bool IsPlayer(uint32 CreatureID);
-void SetPlayerID(uint32 CreatureID);
-void SetPlayerHealth(int Health, int MaxHealth);
-void SetPlayerMagicLevel(int Level, int Progress);
-void SetPlayerMana(int Mana, int MaxMana);
-void SetPlayerSoul(int Soul);
-void SetPlayerCapacity(int Capacity);
-void SetPlayerState(int State);
 uint32 GetPlayerID();
 int GetPlayerHealth();
 int GetPlayerMaxHealth();
@@ -431,25 +421,16 @@ uint32 GetFollowID();
 uint32 GetHighlightID();
 int GetBuddyPosition(uint32 CharacterID); // position or -1
 bool IsBuddy(const char *Name);
-int GetPlayerStep(int Step);
-void StartPlayerStep();
-int FindPlayerPath();
 int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
-void StopPlayer();
-bool CancelPlayerWalk(int NewDirection);
 
 // The creature table.
-TCreature *AddCreature(uint32 RemoveID, uint32 NewCreatureID);
 TCreature *GetCreature(uint32 CreatureID);
 void UpdateSkulls();
 void HideCreature(int CreatureID); // a callback for Map.cpp
 bool MoveCreatures();
 void CheckMonsterHint(TCreature *Creature);
-void NotifySkull(int Flag);
 
 // Experience and skills.
-void SetPlayerExperience(int Experience, int Level, int Progress);
-void SetPlayerSkill(int SkillNumber, int Value, int Progress);
 int GetPlayerSkillValue(int SkillNumber);
 int GetPlayerSkillProgress(int SkillNumber);
 const char *GetSkillName(int SkillNumber);
@@ -463,12 +444,6 @@ int GetNumberOfOpponents(); // also updates the list
 TCreature *GetOpponent(int Number);
 
 // The VIP list.
-bool CompareBuddies(int i, int j);
-void SwapBuddies(int i, int j);
-void SortBuddies();
-void MoveBuddyToSortedPlace(int i);
-void AddBuddy(uint32 CharacterID, const char *Name, bool Online);
-void SetBuddyState(uint32 CharacterID, bool Online);
 void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
 void RemoveBuddy(uint32 CharacterID);
 void SetBuddySortMethod(int Method);

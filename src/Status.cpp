@@ -272,17 +272,6 @@ int patella::TSession::GetConnectionState() const
 	return ConnectionState;
 }
 
-// Download progress in percent, -1 when there is none.
-void patella::TSession::SetProgress(int Value)
-{
-	Progress = Value;
-}
-
-int patella::TSession::GetProgress() const
-{
-	return Progress;
-}
-
 int patella::TSession::GetAccountNumber() const
 {
 	return AccountNumber;
@@ -693,7 +682,6 @@ void patella::TSession::InitSession(bool Value)
 	Characters = nullptr;
 	PremiumDays = 0;
 	ActiveCharacter = 0;
-	Progress = -1;
 }
 
 // ExitStatus's part (issue #105): the character list, freed first.
@@ -711,11 +699,6 @@ bool CheckAnyRight()
 	return patella::bridge::Session().CheckAnyRight();
 }
 
-void ClearRights()
-{
-	patella::bridge::Session().ClearRights();
-}
-
 void SetConnectionState(int State)
 {
 	patella::bridge::Session().SetConnectionState(State);
@@ -724,16 +707,6 @@ void SetConnectionState(int State)
 int GetConnectionState()
 {
 	return patella::bridge::Session().GetConnectionState();
-}
-
-void SetProgress(int Progress)
-{
-	patella::bridge::Session().SetProgress(Progress);
-}
-
-int GetProgress()
-{
-	return patella::bridge::Session().GetProgress();
 }
 
 int GetAccountNumber()
@@ -751,16 +724,6 @@ const char *GetAccountPassword()
 	return patella::bridge::Session().GetAccountPassword();
 }
 
-void SetAccountCharacters(int Number)
-{
-	patella::bridge::Session().SetAccountCharacters(Number);
-}
-
-void SetPremiumDays(int Days)
-{
-	patella::bridge::Session().SetPremiumDays(Days);
-}
-
 int GetAccountCharacters()
 {
 	return patella::bridge::Session().GetAccountCharacters();
@@ -776,16 +739,6 @@ int GetActiveCharacter()
 	return patella::bridge::Session().GetActiveCharacter();
 }
 
-bool IsGamemaster()
-{
-	return patella::bridge::Session().IsGamemaster();
-}
-
-void SetRight(int rightid, int Value)
-{
-	patella::bridge::Session().SetRight(rightid, Value);
-}
-
 bool CheckRight(int rightid, int Bit)
 {
 	return patella::bridge::Session().CheckRight(rightid, Bit);
@@ -794,11 +747,6 @@ bool CheckRight(int rightid, int Bit)
 void SetAccount(int Number, const char *Password)
 {
 	patella::bridge::Session().SetAccount(Number, Password);
-}
-
-void SetCharacter(int Number, const char *Name, const char *World, const uint8 *Address, int Port)
-{
-	patella::bridge::Session().SetCharacter(Number, Name, World, Address, Port);
 }
 
 void SetActiveCharacter(int Number)
