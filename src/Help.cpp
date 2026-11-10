@@ -57,7 +57,7 @@ int patella::THelp::GetHelpHandle() const
 }
 
 // Reports a change of the handle once.
-bool patella::THelp::GetHelpHandleChanged()
+bool patella::THelp::TakeHelpHandleChanged()
 {
 	const bool Changed = HelpHandleChanged;
 	HelpHandleChanged = false;
@@ -433,9 +433,9 @@ int GetHelpHandle()
 	return patella::bridge::Help().GetHelpHandle();
 }
 
-bool GetHelpHandleChanged()
+bool TakeHelpHandleChanged()
 {
-	return patella::bridge::Help().GetHelpHandleChanged();
+	return patella::bridge::Help().TakeHelpHandleChanged();
 }
 
 void InitHelp()

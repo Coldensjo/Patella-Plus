@@ -80,7 +80,7 @@ void patella::TMap::AbsoluteToRelative(int *x, int *y, int *z) const
 	*z = GetMapLevel() + dz;
 }
 
-bool patella::TMap::GetAutomapChanged()
+bool patella::TMap::TakeAutomapChanged()
 {
 	const bool Result = AutomapChanged;
 	AutomapChanged = false;
@@ -1676,9 +1676,9 @@ bool FieldRefreshRequested(int rx, int ry, int rz)
 	return patella::bridge::Map().FieldRefreshRequested(rx, ry, rz);
 }
 
-bool GetAutomapChanged()
+bool TakeAutomapChanged()
 {
-	return patella::bridge::Map().GetAutomapChanged();
+	return patella::bridge::Map().TakeAutomapChanged();
 }
 
 void UpdateAutomap(int rx, int ry)

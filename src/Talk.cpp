@@ -36,7 +36,7 @@ static_assert(sizeof(TTalkbox) == 0x1c0 && offsetof(TTalkbox, Text) == 0x20 && s
 	"TTalkbox's layout");
 static_assert(sizeof(TTalkLine::Time) == 4, "statement time: the original's 4 bytes (Time32, issue #62)");
 
-bool patella::TTalk::GetTalkChanged()
+bool patella::TTalk::TakeTalkChanged()
 {
 	const bool Result = TalkChanged;
 	TalkChanged = false;
@@ -68,7 +68,7 @@ bool patella::TTalk::IsTalkThrottled()
 	}
 	return false;
 }
-bool patella::TTalk::GetConsoleChanged()
+bool patella::TTalk::TakeConsoleChanged()
 {
 	const bool Result = ConsoleChanged;
 	ConsoleChanged = false;
@@ -1023,9 +1023,9 @@ void patella::TTalk::ExitTalk()
 
 // The functions of the original (issue #107): each calls its member on the one TClient's TTalk.
 
-bool GetTalkChanged()
+bool TakeTalkChanged()
 {
-	return patella::bridge::Talk().GetTalkChanged();
+	return patella::bridge::Talk().TakeTalkChanged();
 }
 
 int GetNumberOfTalkboxes()
@@ -1073,9 +1073,9 @@ bool IsTalkThrottled()
 	return patella::bridge::Talk().IsTalkThrottled();
 }
 
-bool GetConsoleChanged()
+bool TakeConsoleChanged()
 {
-	return patella::bridge::Talk().GetConsoleChanged();
+	return patella::bridge::Talk().TakeConsoleChanged();
 }
 
 TRGBColor *GetTalkColor(TRGBColor *Color, int TalkMode)

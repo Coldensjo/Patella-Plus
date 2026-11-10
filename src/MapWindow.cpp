@@ -677,7 +677,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 
 	// The talkboxes (their positions follow the walk unless they stick to
 	// an edge) and the status message.
-	if (GetTalkChanged())
+	if (TakeTalkChanged())
 		ArrangeTalkboxes();
 	const int Talkboxes = GetNumberOfTalkboxes();
 	for (int Talkbox = 1; Talkbox <= Talkboxes; Talkbox++) {

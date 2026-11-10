@@ -72,13 +72,13 @@ public:
 								Changed(true), first(nullptr), last(nullptr), cursor(nullptr), lines(0), limit(1000),
 								ShowMessages(false), Enabled(true), Complete(true), LinesChanged(true), Locked(false), Selected(false) {}
 	~TTalkBuffer(); // noexcept (issue #81)
-	virtual bool GetChanged()
+	virtual bool TakeChanged()
 	{
 		const bool Result = Changed;
 		Changed = false;
 		return Result;
 	}
-	virtual bool GetClosed()
+	virtual bool TakeClosed()
 	{
 		// Issue #131: Closed is never set by the constructor (the original's; the golden corpus records the bytes it leaves
 		// untouched), so it holds whatever the heap had: read as the byte the original tested (a load of a bool that holds
@@ -214,7 +214,7 @@ public:
 	TTalk &operator=(TTalk &&) = delete;
 	~TTalk() = default;
 
-	bool GetTalkChanged();
+	bool TakeTalkChanged();
 	[[nodiscard]] int GetNumberOfTalkboxes() const;
 	[[nodiscard]] const char *GetStatusMessage() const;
 	void SetIgnoreEnabled(bool Value);
@@ -224,7 +224,7 @@ public:
 	void SetIgnoreListEnabled(bool Value);
 	[[nodiscard]] bool GetIgnoreListEnabled() const;
 	bool IsTalkThrottled();
-	bool GetConsoleChanged();
+	bool TakeConsoleChanged();
 	TRGBColor *GetTalkColor(TRGBColor *Color, int TalkMode);
 	TTalkbox *GetTalkbox(int Number);
 	int GetTalkboxMode(int Number);
@@ -328,7 +328,7 @@ inline bool TTalkBuffer::isDefault()
 }
 
 // Talk.cpp's functions (issue #107): each calls TTalk's member of the same name on bridge::Talk().
-bool GetTalkChanged();
+bool TakeTalkChanged();
 int GetNumberOfTalkboxes();
 const char *GetStatusMessage();
 void SetIgnoreEnabled(bool Value);
@@ -338,7 +338,7 @@ bool GetBuddyIgnore();
 void SetIgnoreListEnabled(bool Value);
 bool GetIgnoreListEnabled();
 bool IsTalkThrottled();
-bool GetConsoleChanged();
+bool TakeConsoleChanged();
 TRGBColor *GetTalkColor(TRGBColor *Color, int TalkMode);
 TTalkbox *GetTalkbox(int Number);
 int GetTalkboxMode(int Number);

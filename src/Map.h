@@ -273,7 +273,7 @@ public:
 	bool FieldRefreshRequested(int rx, int ry, int rz);
 
 	// The automap. The block cache and the file functions are static.
-	bool GetAutomapChanged();
+	bool TakeAutomapChanged();
 	void UpdateAutomap(int rx, int ry);
 	TRGBColor GetAutomapColor(int x, int y, int z);
 	void GetAutomapMarks(int x, int y, int z, std::vector<TMark> *Marks, int *Count);
@@ -443,7 +443,7 @@ bool IsFieldTranslucent(int rx, int ry, int rz);
 bool FieldRefreshRequested(int rx, int ry, int rz);
 
 // The automap. The block cache and the file functions are static.
-bool GetAutomapChanged();
+bool TakeAutomapChanged();
 void UpdateAutomap(int rx, int ry);
 TRGBColor GetAutomapColor(int x, int y, int z);
 void GetAutomapMarks(int x, int y, int z, std::vector<TMark> *Marks, int *Count);

@@ -323,7 +323,7 @@ void patella::TGUI::MouseMove(int x, int y)
 		// HelpMouseMove and written only after Place, so an exception before
 		// that leaves it as it was (issue #36).
 		THelpBubble *Bubble = static_cast<THelpBubble *>(ModalWindow);
-		if (GetHelpHandleChanged()) {
+		if (TakeHelpHandleChanged()) {
 			DeleteComponent(Bubble);
 			Bubble = nullptr;
 			if (GetHelpHandle() != HELP_NONE)

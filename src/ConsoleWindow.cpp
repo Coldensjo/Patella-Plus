@@ -796,16 +796,16 @@ void TTab::MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y)
 }
 
 // New lines light the tab up (blinking when the number of lines changed);
-// a buffer that was read (GetClosed) puts it out.
+// a buffer that was read (TakeClosed) puts it out.
 void TTab::Arrange()
 {
-	if (TextBuffer->GetChanged()) {
+	if (TextBuffer->TakeChanged()) {
 		if (TextBuffer->lines != LineCount)
 			BlinkEnd = GetActionNumber() + 10;
 		LineCount = TextBuffer->lines;
 		Unread = true;
 	}
-	if (TextBuffer->GetClosed()) {
+	if (TextBuffer->TakeClosed()) {
 		Unread = false;
 		BlinkEnd = 0;
 	}
@@ -1267,7 +1267,7 @@ void TConsoleWindow::SetSize(int Width, int Height)
 // skin shows the talk throttle; the buttons follow the tab bar's changes.
 void TConsoleWindow::Draw(int Surface, int x, int y)
 {
-	if (GetConsoleChanged()) {
+	if (TakeConsoleChanged()) {
 		TabBar->Arrange();
 		PATELLA_ASSERT(CurrentConsole!=nullptr);
 		TTalkBuffer *TextBuffer = CurrentConsole->getTextBuffer();

@@ -95,7 +95,7 @@ public:
 	void SetHelpHandle(int Handle);
 	void GetHelpArea(int *x, int *y, int *Width, int *Height) const;
 	[[nodiscard]] int GetHelpHandle() const;
-	bool GetHelpHandleChanged();
+	bool TakeHelpHandleChanged();
 	void InitHelp();
 	// Static (issue #107, as TCommunication::ExitCommunication): empty, the golden tests' fake takes its place.
 	static void ExitHelp();
@@ -142,7 +142,7 @@ void SetHelpSize(int Width, int Height);
 void SetHelpHandle(int Handle);
 void GetHelpArea(int *x, int *y, int *Width, int *Height);
 int GetHelpHandle();
-bool GetHelpHandleChanged();
+bool TakeHelpHandleChanged();
 void InitHelp();
 void ExitHelp();
 int GetEventHelp();

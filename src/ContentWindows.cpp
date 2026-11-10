@@ -462,7 +462,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 			Window->Changed = true;
 		}
 	}
-	if (GetAutomapChanged() || Window->Changed || GetSurface()->SurfaceRecreated(0)) {
+	if (TakeAutomapChanged() || Window->Changed || GetSurface()->SurfaceRecreated(0)) {
 		std::array<uint8, 106 * 106 * 3> Pixels;
 		for (int i = 0; i < 106; i++) {
 			for (int j = 0; j < 106; j++) {
