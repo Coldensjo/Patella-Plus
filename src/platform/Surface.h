@@ -16,7 +16,7 @@
 // instead of the client's accessor (bridge::GraphicsEngine(), until issue #138).
 //
 // The names from the binary: hWindow, ViewMode, the surface and mode constants (SurfaceDX.cpp's and surfaceDX9.cpp's
-// assertions), TestEngine, InitSurfaces and ExitSurfaces (ChangeDevice's error messages); the rest are ours.
+// assertions), TestEngine, InitSurfaces and ExitSurfaces (the original ChangeEngine's error messages); the rest are ours.
 
 #pragma once
 

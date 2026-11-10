@@ -37,7 +37,7 @@
 # platform/Win32Platform.cpp, src/vulkan and the test mode's Windows files. Drawing goes through TSurface (platform/
 # Surface.h); the library's objects call the platform through platform::Platform(), GetSurface and
 # SurfaceExitInstance (Surface.h), and the graphics device choice of vulkan/DeviceSettings.h and DeviceChoice.h
-# (Dialogs.cpp's advanced options and Control.cpp's ChangeEngine): what links the library's GUI objects links those.
+# (Dialogs.cpp's advanced options and Control.cpp's ChangeDevice): what links the library's GUI objects links those.
 #
 # PATELLA_CORE (common.h) leaves out the Windows headers, so no core source can use them
 # (plan section 8). The client (cmake/WindowsX64.cmake) still compiles these sources itself; the library is not

@@ -108,8 +108,8 @@ void patella::TGUI::Resize(int Width, int Height)
 	}
 }
 
-// Lets the surface check the window and display mode; falls back to
-// DirectX 5 when that fails.
+// Lets the surface check the window and display mode; chooses the
+// automatic device when that fails.
 void patella::TGUI::CheckSurface(bool Force)
 {
 	TFullscreenMode *Resolution = GetFullscreenMode();
@@ -120,29 +120,25 @@ void patella::TGUI::CheckSurface(bool Force)
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
 	if (!Success)
-		ChangeDevice(ENGINE_AUTOMATIC);
+		ChangeDevice(patella::vulkan::TDeviceButton::Automatic);
 	if (GetSurface()->SurfaceRecreated(1))
 		ResetVideoCache();
 }
 
-// The engine test runs on a new surface; when it fails, the old engine is
-// set again.
-void patella::TGUI::ChangeDevice(int engine)
+// A click on one of the advanced graphics options' three device buttons (MainWindow.cpp); CheckSurface
+// makes the automatic one's when the surface cannot be set up. A new choice is applied at once: the
+// surface is released and the new device tested on a new one (the next CheckSurface creates its
+// surfaces). When the test fails, the old choice stays; when it passes, Patella.ini gets the new choice
+// as its Device. The button's number becomes the preferences' Engine (vulkan/DeviceSettings.h) when the
+// click leaves the choice as it was and when the new device passed its test. In fullscreen mode the
+// dialog disables the buttons.
+void patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton Button)
 {
-	// The x64 client (Patella-Modern issues #20 and #31; Surface.cpp SurfaceInitInstance): one engine, and
-	// the advanced options' three buttons choose its graphics device (plan 6.3; vulkan/DeviceSettings.h).
-	// They are in the original's places and send its numbers: DirectX5's (0) "Automatic", DirectX9's (2)
-	// "GPU", OpenGL's (1) "CPU". Each stores its number in Tibia.cfg for Tibia.exe, as the original's button
-	// there stores it after a switch, so Tibia.cfg stays what Tibia.exe writes after the same clicks. A new
-	// choice is applied at once as the original's switch is: the surface is released and the new device
-	// tested on a new one (the next CheckSurface creates its surfaces); when the test fails, the old
-	// choice and Tibia.cfg's number stay, as the original keeps the old engine. Patella.ini gets the new
-	// choice. In fullscreen mode the dialog disables the buttons, as the original's.
 	const patella::vulkan::TDeviceChoice OldChoice = GetDeviceChoice();
-	const patella::vulkan::TDeviceChoice NewChoice = patella::vulkan::ChoiceAfterButton(OldChoice,
-		DeviceButtonOfEngine(engine), GetNumberOfGpus(), GetBestGpu());
+	const patella::vulkan::TDeviceChoice NewChoice = patella::vulkan::ChoiceAfterButton(OldChoice, Button,
+		GetNumberOfGpus(), GetBestGpu());
 	if (NewChoice == OldChoice) {
-		SetEngine(engine);
+		SetEngine(EngineNumberOfButton(Button));
 		return;
 	}
 	SetDeviceChoice(NewChoice);
@@ -155,7 +151,7 @@ void patella::TGUI::ChangeDevice(int engine)
 	}
 	GetSurface()->InitSurfaces();
 	if (Success) {
-		SetEngine(engine);
+		SetEngine(EngineNumberOfButton(Button));
 		SaveDeviceChoice();
 	}
 }
@@ -1213,11 +1209,6 @@ std::array<uint8, 10> patella::TGUI::GetLastPacketTypes() const
 void Resize(int Width, int Height)
 {
 	patella::bridge::GUI().Resize(Width, Height);
-}
-
-void ChangeDevice(int engine)
-{
-	patella::TGUI::ChangeDevice(engine);
 }
 
 void Redraw(bool Force)

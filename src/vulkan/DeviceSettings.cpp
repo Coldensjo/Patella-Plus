@@ -143,14 +143,15 @@ const std::string &GetCpuDriverManifest()
 	return CpuDriverManifest;
 }
 
-TDeviceButton DeviceButtonOfEngine(int Engine)
+int EngineNumberOfButton(TDeviceButton Button)
 {
-	switch (Engine) {
-	case 1:
-		return TDeviceButton::Cpu;
-	case 2:
-		return TDeviceButton::Gpu;
-	default:
-		return TDeviceButton::Automatic;
+	switch (Button) {
+	case TDeviceButton::Gpu:
+		return ENGINE_GPU;
+	case TDeviceButton::Cpu:
+		return ENGINE_CPU;
+	case TDeviceButton::Automatic:
+		break;
 	}
+	return ENGINE_AUTOMATIC;
 }

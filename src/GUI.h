@@ -26,6 +26,7 @@
 #include "platform/Window.h"
 #include "types/Callback.h" // IWYU pragma: export (TCallback, GUI.h's until issue #110)
 #include "types/FixedString.h"
+#include "vulkan/DeviceChoice.h"
 #include <array>
 #include <flat_map>
 #include <memory>
@@ -330,7 +331,7 @@ class TCommunication; // Communication.h
 // Control.cpp's and MainWindow.cpp's functions (issue #118) are its members of the same names; the free functions
 // forward to them. SkinProperties is TGraphics' since issue #116 (with Skins.cpp's table, TSkins: Skins.h).
 //
-// Control.cpp, the controller above the windows, is TGUI's since issue #118: the windows' calls into it (the engine
+// Control.cpp, the controller above the windows, is TGUI's since issue #118: the windows' calls into it (the device
 // buttons of the main window's options, MainWindow.cpp, and the graphics options' fullscreen switch, Dialogs.cpp) are
 // calls of TGUI's members, and TGUI takes the earlier subsystems Control.cpp reads (TNetwork's reconnect, TCommunication's
 // packet ring and outfit request) by constructor reference.
@@ -363,7 +364,7 @@ public:
 	// Control and Communication tests fake (commworld.cpp's WorldFakes); their calls of each other are member calls.
 	void Resize(int Width, int Height);
 	void CheckSurface(bool Force);
-	static void ChangeDevice(int engine);
+	static void ChangeDevice(vulkan::TDeviceButton Button);
 	void Redraw(bool Force);
 	void EnterGame() const;
 	void LeaveGame();

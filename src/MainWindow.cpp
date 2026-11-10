@@ -41,6 +41,7 @@
 #include "GUI.h"
 #include "BuildConfig.h"
 #include "common.h"
+#include "vulkan/DeviceChoice.h"
 
 #include <cstdint>
 #include <cstdlib>
@@ -352,13 +353,13 @@ void TMainWindow::HandleEvent(int Event)
 			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 		break;
 	case EVENT_DEVICE_AUTOMATIC:
-		patella::TGUI::ChangeDevice(ENGINE_AUTOMATIC); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Automatic); // Control.cpp's (issue #118)
 		break;
 	case EVENT_DEVICE_GPU:
-		patella::TGUI::ChangeDevice(ENGINE_GPU); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Gpu); // Control.cpp's (issue #118)
 		break;
 	case EVENT_DEVICE_CPU:
-		patella::TGUI::ChangeDevice(ENGINE_CPU); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Cpu); // Control.cpp's (issue #118)
 		break;
 	default:
 		break;

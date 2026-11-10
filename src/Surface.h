@@ -13,21 +13,6 @@
 #include "platform/Surface.h" // IWYU pragma: export
 #include "platform/Window.h"
 
-// The numbers of the original's three engines: 0 DirectX 5 (SurfaceDX.cpp), 1 OpenGL (SurfaceGL.cpp), 2 DirectX 9
-// (surfaceDX9.cpp).
-//
-// This client's one engine is the Vulkan engine (vulkan/SurfaceVulkan.h). The numbers are what ChangeDevice's
-// argument, the command line's "engine N" and the preferences' Engine (Patella.ini's, and Tibia.cfg's on its one
-// import) still hold. As ChangeDevice's argument they come from the advanced options' three buttons, which stand in
-// the original's places and choose the Vulkan engine's device (vulkan/DeviceSettings.h's DeviceButtonOfEngine):
-// ENGINE_AUTOMATIC the automatic choice, ENGINE_GPU a GPU, ENGINE_CPU the CPU driver. Enumerators for the
-// reason in GUI.h.
-enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
-	ENGINE_AUTOMATIC = 0,
-	ENGINE_CPU = 1,
-	ENGINE_GPU = 2,
-};
-
 namespace patella {
 
 // Surface.cpp's data (issue #116, M7; notes/decisions.md, "#104: TClient and the subsystem objects", "#116" and
