@@ -158,7 +158,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		const TObject &TradeObject = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 		PATELLA_ASSERT(TradeObject!=0);
 		const uint32 CreatureID = GetCreatureAt(x, y);
-		if (CreatureID != 0 && CreatureID != GetPlayerID() && IsPlayer(CreatureID)) {
+		if (CreatureID != 0 && CreatureID != PlayerState().GetPlayerID() && IsPlayer(CreatureID)) {
 			SendRequestTrade(TradeX, TradeY, TradeZ, TradeObject.Type, TradeIndex, CreatureID);
 			return true;
 		}
@@ -191,7 +191,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 			return RightButtonUp(x, y, Flags);
 		int DestX = FieldX, DestY = FieldY, DestZ = GetMapLevel();
 		MapToWorld(&DestX, &DestY, &DestZ);
-		switch (SetPlayerDestination(DestX, DestY, DestZ, true, false)) {
+		switch (PlayerState().SetPlayerDestination(DestX, DestY, DestZ, true, false)) {
 		case 1:
 			SendWalk();
 			break;
@@ -254,7 +254,8 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		}
 		const uint32 Target = GetTradeInfo();
 		TObject &UseObj = *GetUseObject(&Index, &ox, &oy, &oz);
-		if (Target != 0 && Target != GetPlayerID() && UseObj.Type != 0 && !GetObjectFlag(UseObj, FORCEUSE)) {
+		if (Target != 0 && Target != PlayerState().GetPlayerID() && UseObj.Type != 0
+			&& !GetObjectFlag(UseObj, FORCEUSE)) {
 			SetAttackID(Target != GetAttackID() ? Target : 0);
 			SendAttack(GetAttackID());
 			return true;
@@ -271,7 +272,7 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	} else {
 		if (Flags & KEY_ALT) {
 			const uint32 Target = GetTradeInfo();
-			if (Target == 0 || Target == GetPlayerID())
+			if (Target == 0 || Target == PlayerState().GetPlayerID())
 				return true;
 			SetAttackID(Target != GetAttackID() ? Target : 0);
 			SendAttack(GetAttackID());
@@ -337,7 +338,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	int Position = 0;
 	TObject Obj = GetTopLookObject(FieldX, FieldY, FieldZ, Position);
 	int Handle = HELP_NONE;
-	if (Obj.Type == CREATURE && Obj.Data == (int)GetPlayerID())
+	if (Obj.Type == CREATURE && Obj.Data == (int)PlayerState().GetPlayerID())
 		Handle = HELP_YOUR_CHARACTER;
 	else if (Obj.Type == CREATURE)
 		Handle = HELP_CREATURES;
@@ -347,7 +348,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		Handle = HELP_CONTAINERS;
 	if (Handle == HELP_NONE)
 		return false;
-	const TCreature *Player = GetCreature(GetPlayerID());
+	const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
 	if (GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
@@ -372,7 +373,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	const bool ShowTexts = GetTextualEffects();
 	const int CreatureInfo = GetCreatureInfo();
 	ProcessMissileEffects();
-	const TCreature *Player = GetCreature(GetPlayerID());
+	const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
 	ScrollX = Player->GetDeltaX() + 32;
 	ScrollY = Player->GetDeltaY() + 32;
@@ -553,7 +554,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			}
 			const TRGBColor Color = Visible ? Creature->GetHealthColor() : TRGBColor(192, 192, 192);
 			int Brightness = Light[cx][cy].R;
-			if (Creature->CreatureID == GetPlayerID()) {
+			if (Creature->CreatureID == PlayerState().GetPlayerID()) {
 				int Strength = Creature->LightStrength;
 				Limit(Strength, 2, 5);
 				if (Brightness <= Strength * 51)
@@ -602,7 +603,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			if (Creature->PARTYFlag > PARTY_NONE) {
 				switch (Creature->PARTYFlag) {
 				case PARTY_INVITER:
-					if (!IsPlayerInParty())
+					if (!PlayerState().IsPlayerInParty())
 						Icon1 = SKIN_MAP_SHIELD_1;
 					break;
 				case PARTY_INVITEE:
@@ -909,7 +910,8 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			DrawCreature(ShiftX[i] - Elevation + ox + posx, ShiftY[i] - Elevation + oy + posy, FieldZ, Creatures[i]);
 		}
 		if (Mode == 0) {
-			if ((IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == GetPlayerID()) && FieldZ == GetMapLevel()) {
+			if ((IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == PlayerState().GetPlayerID())
+				&& FieldZ == GetMapLevel()) {
 				Names[NumberOfNames].CreatureID = Creatures[i]->CreatureID;
 				Names[NumberOfNames].x = ox - Elevation + posx + 16;
 				Names[NumberOfNames].y = oy - Elevation + posy;
@@ -919,7 +921,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			AddLightSource(lx, ly, FieldZ, Creatures[i]->LightStrength, TRGBColor(Creatures[i]->LightColor));
 			if (OutfitType != 0 && GetOutfitFlag(OutfitType, LIGHT))
 				AddLightSource(lx, ly, FieldZ, GetOutfitBrightness(OutfitType), TRGBColor(GetOutfitLightColor(OutfitType)));
-			if (Creatures[i]->CreatureID == GetPlayerID() && Creatures[i]->LightStrength < 2)
+			if (Creatures[i]->CreatureID == PlayerState().GetPlayerID() && Creatures[i]->LightStrength < 2)
 				AddLightSource(lx, ly, FieldZ, 2, TRGBColor(255, 255, 255));
 		}
 	}
@@ -927,7 +929,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (EffectNumber < 0 || EffectNumber >= EFFECTS) {
 			std::stringstream s;
 			s << "EffectNumber: " << EffectNumber << " X: " << FieldX << " Y: " << FieldY << " Z: " << FieldZ;
-			const TCreature *Player = GetCreature(GetPlayerID());
+			const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
 			if (Player != nullptr)
 				s << " PlayerX: " << Player->RealX << " PlayerY: " << Player->RealY << " PlayerZ: " << Player->RealZ;
 			throw TMYEXCEPTION("effect number out of range [bug0000913]", "", 0, "", 0, s.str());
@@ -1494,7 +1496,7 @@ void TMapWindow::ArrangeTalkboxes()
 // on the field; 0 if there is none.
 void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 {
-	const TCreature *Player = GetCreature(GetPlayerID());
+	const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
 	if (GetNoStretching()) {
 		*FieldX = ((480 - Width) / 2 + Player->GetDeltaX() + x) / 32 + 1;

@@ -283,7 +283,7 @@ void TMainWindow::HandleEvent(int Event)
 		SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_STOP:
-		ClearPlayerSteps();
+		PlayerState().ClearPlayerSteps();
 		SetAttackID(0);
 		SendStopAttackAndWalk();
 		break;
@@ -526,8 +526,8 @@ int TMainWindow::GetConsoleWindowHeight() const
 void TMainWindow::Walk(int dx, int dy, bool Diagonal)
 {
 	int x, y, z;
-	GetPlayerPosition(&x, &y, &z);
-	switch (SetPlayerDestination(x + dx, y + dy, z, true, Diagonal)) {
+	PlayerState().GetPlayerPosition(&x, &y, &z);
+	switch (PlayerState().SetPlayerDestination(x + dx, y + dy, z, true, Diagonal)) {
 	case 1:
 		SendWalk();
 		break;

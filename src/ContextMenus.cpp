@@ -409,9 +409,9 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && Inventory().HasContainerParent(LookedObjectY - POSITION_CONTAINER_BASE))
 		AddEntry(EVENT_MENU_MOVE_UP, "Move up", nullptr);
 	if (CreatureID != 0) {
-		if (CreatureID == GetPlayerID()) {
+		if (CreatureID == PlayerState().GetPlayerID()) {
 			AddEntry(EVENT_MENU_SET_OUTFIT, "Set Outfit", nullptr);
-			if (IsPlayerInParty() && !IsPlayerInFight())
+			if (PlayerState().IsPlayerInParty() && !PlayerState().IsPlayerInFight())
 				AddEntry(EVENT_MENU_LEAVE_PARTY, "Leave Party", nullptr);
 		} else {
 			if (CreatureID == GetAttackID())
@@ -434,7 +434,7 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 					AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
 				Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 				AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
-				switch (GetPlayerPartyFlag()) {
+				switch (PlayerState().GetPlayerPartyFlag()) {
 				case PARTY_NONE:
 				case PARTY_INVITEE:
 					if (Creature->PARTYFlag == PARTY_INVITER) {
@@ -466,13 +466,13 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 					}
 					break;
 				default:
-					TERROR1("unknown player party flag", GetPlayerPartyFlag());
+					TERROR1("unknown player party flag", PlayerState().GetPlayerPartyFlag());
 				}
 			}
 		}
 		Separator = true;
 		AddEntry(EVENT_MENU_COPY, "Copy Name", nullptr);
-		if (IsPlayer(CreatureID) && CreatureID != GetPlayerID() && CheckAnyRight()) {
+		if (IsPlayer(CreatureID) && CreatureID != PlayerState().GetPlayerID() && CheckAnyRight()) {
 			Separator = true;
 			AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 			Separator = true;
@@ -640,7 +640,7 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 			AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
 		Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 		AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
-		switch (GetPlayerPartyFlag()) {
+		switch (PlayerState().GetPlayerPartyFlag()) {
 		case PARTY_NONE:
 		case PARTY_INVITEE:
 			if (Creature->PARTYFlag == PARTY_INVITER) {
@@ -672,7 +672,7 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 			}
 			break;
 		default:
-			TERROR1("unknown player party flag", GetPlayerPartyFlag());
+			TERROR1("unknown player party flag", PlayerState().GetPlayerPartyFlag());
 		}
 		Separator = true;
 	}
@@ -791,7 +791,7 @@ TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int Pare
 		AddEntry(EVENT_MENU_EDIT_VIP, Text, nullptr);
 		Text.Format("Remove {}", GetBuddyListName(Position));
 		AddEntry(EVENT_MENU_REMOVE_VIP, Text, nullptr);
-		if (CharacterID != GetPlayerID() && IsBuddyOnline(Position)) {
+		if (CharacterID != PlayerState().GetPlayerID() && IsBuddyOnline(Position)) {
 			Text.Format("Message to {}", GetBuddyListName(Position));
 			AddEntry(EVENT_MENU_MESSAGE_VIP, Text, nullptr);
 		}
@@ -883,7 +883,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 	int ParentHeight)
 {
 	PATELLA_ASSERT(_TextWindow!=nullptr);
-	PATELLA_ASSERT_VALUES(GetCreature(GetPlayerID()), GetPlayerID());
+	PATELLA_ASSERT_VALUES(GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
 	TextWindow = _TextWindow;
 	LineNumber = _LineNumber;
 	TTalkLine *Line = TextWindow->GetTalkLine(_LineNumber);
@@ -893,7 +893,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 		const char *Speaker = Line->Addressee;
 		if (Speaker != nullptr && strlen(Speaker) != 0) {
 			HasSpeaker = true;
-			if (strcmp(GetCreature(GetPlayerID())->Name, Speaker) != 0)
+			if (strcmp(GetCreature(PlayerState().GetPlayerID())->Name, Speaker) != 0)
 				OtherSpeaker = true;
 		}
 		if (TextWindow->TextBuffer->IsRuleViolation() && Line->Mode == TALK_GAMEMASTER_ANSWER) {
@@ -1203,7 +1203,7 @@ void TMarkContextMenu::HandleEvent(int Event)
 		break;
 	case EVENT_MENU_GO_TO_MARK:
 		if (Data.Mark.x != 0 && Data.Mark.y != 0) {
-			switch (SetPlayerDestination(Data.Mark.x, Data.Mark.y, Data.Coordinate.z, false, false)) {
+			switch (PlayerState().SetPlayerDestination(Data.Mark.x, Data.Mark.y, Data.Coordinate.z, false, false)) {
 			case 1:
 				SendWalk();
 				break;

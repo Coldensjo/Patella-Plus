@@ -352,31 +352,8 @@ patella::TCreatures &Creatures();
 patella::TPlayerState &PlayerState();
 
 // The original's functions (the callers' names, and the golden tests'): each calls the member of the same name of
-// TCreatures on Creatures() or of TPlayerState on PlayerState().
-// The player's creature, steps and statistics.
-void GetPlayerPosition(int *x, int *y, int *z); // including the step not confirmed yet
-void ClearPlayerSteps();
+// TCreatures on Creatures().
 bool IsPlayer(uint32 CreatureID);
-uint32 GetPlayerID();
-int GetPlayerHealth();
-int GetPlayerMaxHealth();
-int GetPlayerExperience();
-int GetPlayerLevel();
-int GetPlayerLevelProgress();
-int GetPlayerMana();
-int GetPlayerMaxMana();
-int GetPlayerSoul();
-int GetPlayerMagicLevel();
-int GetPlayerMagicLevelProgress();
-int GetPlayerCapacity();
-bool IsPlayerPoisoned();                // state bit 0
-bool IsPlayerBurning();                 // bit 1
-bool IsPlayerElectrified();             // bit 2
-bool IsPlayerDrunk();                   // bit 3
-bool IsPlayerManaShielded();            // bit 4
-bool IsPlayerParalyzed();               // bit 5
-bool IsPlayerHasted();                  // bit 6
-bool IsPlayerInFight();                 // bit 7
 void SetAttackID(uint32 CreatureID);    // clears the follow target
 void SetFollowID(uint32 CreatureID);    // clears the attack target
 void SetHighlightID(uint32 CreatureID); // battle list entry under the mouse
@@ -385,7 +362,6 @@ uint32 GetFollowID();
 uint32 GetHighlightID();
 int GetBuddyPosition(uint32 CharacterID); // position or -1
 bool IsBuddy(const char *Name);
-int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
 
 // The creature table.
 TCreature *GetCreature(uint32 CreatureID);
@@ -393,14 +369,6 @@ void UpdateSkulls();
 void HideCreature(int CreatureID); // a callback for Map.cpp
 bool MoveCreatures();
 void CheckMonsterHint(TCreature *Creature);
-
-// Experience and skills.
-int GetPlayerSkillValue(int SkillNumber);
-int GetPlayerSkillProgress(int SkillNumber);
-const char *GetSkillName(int SkillNumber);
-bool HasPlayerSkull();
-bool IsPlayerInParty();
-int GetPlayerPartyFlag();
 
 // The battle list.
 bool IsOpponent(TCreature *Creature);

@@ -593,7 +593,7 @@ bool TAutomapView::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 		Mark.x = (x - Width / 2) * 2 / Window->Zoom + Window->ViewX;
 		Mark.y = (y - Height / 2) * 2 / Window->Zoom + Window->ViewY;
 	}
-	const int Result = SetPlayerDestination(Mark.x, Mark.y, Window->ViewZ, false, false);
+	const int Result = PlayerState().SetPlayerDestination(Mark.x, Mark.y, Window->ViewZ, false, false);
 	if (Result == 1)
 		SendWalk();
 	else if (Result == 2)
@@ -692,7 +692,7 @@ void TCapacityLabel::Draw(int Surface, int x, int y)
 	TFixedString<20> Text;
 	PrintFormattedText(Surface, SkinProperties().CapacityLabel.Caption.x + x, SkinProperties().CapacityLabel.Caption.y + y,
 		SkinProperties().CapacityLabel.CaptionFont, "Cap:");
-	Text.Format("{}", GetPlayerCapacity());
+	Text.Format("{}", PlayerState().GetPlayerCapacity());
 	PrintFormattedText(Surface, SkinProperties().CapacityLabel.Value.x + x, SkinProperties().CapacityLabel.Value.y + y,
 		SkinProperties().CapacityLabel.ValueFont, Text);
 }
@@ -702,7 +702,7 @@ void TSoulLabel::Draw(int Surface, int x, int y)
 	TFixedString<20> Text;
 	PrintFormattedText(Surface, SkinProperties().SoulLabel.Caption.x + x, SkinProperties().SoulLabel.Caption.y + y,
 		SkinProperties().SoulLabel.CaptionFont, "Soul:");
-	Text.Format("{}", GetPlayerSoul());
+	Text.Format("{}", PlayerState().GetPlayerSoul());
 	PrintFormattedText(Surface, SkinProperties().SoulLabel.Value.x + x, SkinProperties().SoulLabel.Value.y + y,
 		SkinProperties().SoulLabel.ValueFont, Text);
 }
@@ -755,22 +755,22 @@ void TPlayerStates::Draw(int Surface, int x, int y)
 
 int TPlayerStates::GetNumberOfIcons() const
 {
-	int Count = IsPlayerPoisoned() ? 1 : 0;
-	if (IsPlayerBurning())
+	int Count = PlayerState().IsPlayerPoisoned() ? 1 : 0;
+	if (PlayerState().IsPlayerBurning())
 		Count++;
-	if (IsPlayerManaShielded())
+	if (PlayerState().IsPlayerManaShielded())
 		Count++;
-	if (IsPlayerParalyzed())
+	if (PlayerState().IsPlayerParalyzed())
 		Count++;
-	if (HasPlayerSkull())
+	if (PlayerState().HasPlayerSkull())
 		Count++;
-	if (IsPlayerInFight())
+	if (PlayerState().IsPlayerInFight())
 		Count++;
-	if (IsPlayerDrunk())
+	if (PlayerState().IsPlayerDrunk())
 		Count++;
-	if (IsPlayerElectrified())
+	if (PlayerState().IsPlayerElectrified())
 		Count++;
-	if (IsPlayerHasted())
+	if (PlayerState().IsPlayerHasted())
 		Count++;
 	if (Count > MaxIcons)
 		Count = MaxIcons;
@@ -861,31 +861,31 @@ int TPlayerStates::GetIcon(int Position)
 		Skin = SKIN_NONE;
 		switch (i) {
 		case 0:
-			if (IsPlayerPoisoned()) {
+			if (PlayerState().IsPlayerPoisoned()) {
 				Found++;
 				Skin = SKIN_STATE_POISONED;
 			}
 			break;
 		case 1:
-			if (IsPlayerBurning()) {
+			if (PlayerState().IsPlayerBurning()) {
 				Found++;
 				Skin = SKIN_STATE_BURNING;
 			}
 			break;
 		case 2:
-			if (IsPlayerManaShielded()) {
+			if (PlayerState().IsPlayerManaShielded()) {
 				Found++;
 				Skin = SKIN_STATE_MANA_SHIELD;
 			}
 			break;
 		case 3:
-			if (IsPlayerParalyzed()) {
+			if (PlayerState().IsPlayerParalyzed()) {
 				Found++;
 				Skin = SKIN_STATE_PARALYZED;
 			}
 			break;
 		case 4:
-			switch (GetCreature(GetPlayerID())->PKFlag) {
+			switch (GetCreature(PlayerState().GetPlayerID())->PKFlag) {
 			case PK_YELLOW:
 				Found++;
 				Skin = SKIN_STATE_SKULL_1;
@@ -907,25 +907,25 @@ int TPlayerStates::GetIcon(int Position)
 			}
 			break;
 		case 5:
-			if (IsPlayerInFight()) {
+			if (PlayerState().IsPlayerInFight()) {
 				Found++;
 				Skin = SKIN_STATE_IN_FIGHT;
 			}
 			break;
 		case 6:
-			if (IsPlayerDrunk()) {
+			if (PlayerState().IsPlayerDrunk()) {
 				Found++;
 				Skin = SKIN_STATE_DRUNK;
 			}
 			break;
 		case 7:
-			if (IsPlayerElectrified()) {
+			if (PlayerState().IsPlayerElectrified()) {
 				Found++;
 				Skin = SKIN_STATE_ELECTRIFIED;
 			}
 			break;
 		case 8:
-			if (IsPlayerHasted()) {
+			if (PlayerState().IsPlayerHasted()) {
 				Found++;
 				Skin = SKIN_STATE_HASTED;
 			}
@@ -1343,10 +1343,10 @@ TStatusWindow::TStatusWindow()
 void TStatusWindow::Draw(int Surface, int x, int y)
 {
 	TContentWindow::Draw(Surface, x, y);
-	const int Health = GetPlayerHealth();
-	const int MaxHealth = GetPlayerMaxHealth();
-	const int Mana = GetPlayerMana();
-	const int MaxMana = GetPlayerMaxMana();
+	const int Health = PlayerState().GetPlayerHealth();
+	const int MaxHealth = PlayerState().GetPlayerMaxHealth();
+	const int Mana = PlayerState().GetPlayerMana();
+	const int MaxMana = PlayerState().GetPlayerMaxMana();
 	TFixedString<16> Text;
 	Text.Format("{}", Health);
 	PrintFormattedText(Surface, SkinProperties().StatusWindow.HitpointsValue.x + x, SkinProperties().StatusWindow.HitpointsValue.y + y,
@@ -1936,37 +1936,37 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 	switch (NumberOfLine) {
 	case 1:
 		Name.Assign("Experience");
-		Value = GetPlayerExperience();
+		Value = PlayerState().GetPlayerExperience();
 		break;
 	case 2:
 		Name.Assign("Level");
-		Value = GetPlayerLevel();
+		Value = PlayerState().GetPlayerLevel();
 		if (GetLevelBar())
-			Progress = GetPlayerLevelProgress();
+			Progress = PlayerState().GetPlayerLevelProgress();
 		else
 			Progress = -1;
 		break;
 	case 3:
 		Name.Assign("Hit Points");
-		Value = GetPlayerHealth();
+		Value = PlayerState().GetPlayerHealth();
 		break;
 	case 4:
 		Name.Assign("Mana");
-		Value = GetPlayerMana();
+		Value = PlayerState().GetPlayerMana();
 		break;
 	case 5:
 		Name.Assign("Soul Points");
-		Value = GetPlayerSoul();
+		Value = PlayerState().GetPlayerSoul();
 		break;
 	case 6:
 		Name.Assign("Capacity");
-		Value = GetPlayerCapacity();
+		Value = PlayerState().GetPlayerCapacity();
 		break;
 	case 7:
 		Name.Assign("Magic Level");
-		Value = GetPlayerMagicLevel();
+		Value = PlayerState().GetPlayerMagicLevel();
 		if (GetMagLevelBar())
-			Progress = GetPlayerMagicLevelProgress();
+			Progress = PlayerState().GetPlayerMagicLevelProgress();
 		else
 			Progress = -1;
 		break;
@@ -1980,10 +1980,10 @@ bool TSkillsWindowBody::GetLine(int NumberOfLine, char *Text, int &Value, int &P
 	case 14:
 	case 15: {
 		const int SkillNumber = NumberOfLine - 9;
-		Name.Assign(GetSkillName(SkillNumber));
-		Value = GetPlayerSkillValue(SkillNumber);
+		Name.Assign(PlayerState().GetSkillName(SkillNumber));
+		Value = PlayerState().GetPlayerSkillValue(SkillNumber);
 		if (GetSkillBar(SkillNumber))
-			Progress = GetPlayerSkillProgress(SkillNumber);
+			Progress = PlayerState().GetPlayerSkillProgress(SkillNumber);
 		else
 			Progress = -1;
 		break;
@@ -2101,7 +2101,7 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				int Skin = SKIN_NONE; // none: no shield in the party (flag 1) or an unknown flag
 				switch (Creature->PARTYFlag) {
 				case PARTY_INVITER:
-					if (!IsPlayerInParty())
+					if (!PlayerState().IsPlayerInParty())
 						Skin = SKIN_BATTLE_SHIELD_1;
 					break;
 				case PARTY_INVITEE:
