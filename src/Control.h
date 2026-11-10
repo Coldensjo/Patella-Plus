@@ -34,7 +34,6 @@ void MouseWheel(int x, int y, int Direction);
 void KeyPress(int Key);
 bool CloseRequest();
 
-void HandleEvents();
 void LinkCopyWarning();
 void ConnectionEstablished();
 void ReceivePackets();

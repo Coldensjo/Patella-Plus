@@ -226,7 +226,7 @@ void TPreferences::ClearOpenDialogs()
 	NumberOfOpenDialogs = 0;
 }
 
-const char *TPreferences::GetMotD() const
+const char *TPreferences::GetMessageOfTheDay() const
 {
 	if (MotD == nullptr)
 		return "No current information.";
@@ -527,7 +527,7 @@ void TPreferences::AddOpenDialog(int Identifier)
 
 // Text is "<number>\n<message>"; without a line break nothing changes.
 // Returns true when the number differs from the last one.
-bool TPreferences::SetMotD(const char *Text)
+bool TPreferences::SetMessageOfTheDay(const char *Text)
 {
 	PATELLA_ASSERT(Text != nullptr);
 	const char *Break = strchr(Text, '\n');
@@ -1483,9 +1483,9 @@ void ClearOpenDialogs()
 	patella::bridge::Preferences().ClearOpenDialogs();
 }
 
-const char *GetMotD()
+const char *GetMessageOfTheDay()
 {
-	return patella::bridge::Preferences().GetMotD();
+	return patella::bridge::Preferences().GetMessageOfTheDay();
 }
 
 void SetInfoMessages(bool Value)
@@ -1688,9 +1688,9 @@ void AddOpenDialog(int Identifier)
 	patella::bridge::Preferences().AddOpenDialog(Identifier);
 }
 
-bool SetMotD(const char *Text)
+bool SetMessageOfTheDay(const char *Text)
 {
-	return patella::bridge::Preferences().SetMotD(Text);
+	return patella::bridge::Preferences().SetMessageOfTheDay(Text);
 }
 
 void AddOpenChannel(int Identifier)

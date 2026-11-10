@@ -178,7 +178,7 @@ int patella::TInventory::GetContainerCapacity(int Container) const
 	return Containers[Container].Capacity;
 }
 
-bool patella::TInventory::GetContainerHasParent(int Container) const
+bool patella::TInventory::HasContainerParent(int Container) const
 {
 	PATELLA_ASSERT_VALUES(In(Container,0,OPEN_CONTAINERS-1), Container);
 	PATELLA_ASSERT_VALUES(Containers[Container].IsOpen, Container);
@@ -371,9 +371,9 @@ int GetContainerCapacity(int Container)
 	return patella::bridge::Inventory().GetContainerCapacity(Container);
 }
 
-bool GetContainerHasParent(int Container)
+bool HasContainerParent(int Container)
 {
-	return patella::bridge::Inventory().GetContainerHasParent(Container);
+	return patella::bridge::Inventory().HasContainerParent(Container);
 }
 
 int GetFreeContainer()

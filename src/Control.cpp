@@ -2,7 +2,7 @@
 //
 // Functions are in original source order, which comes from the assertion and
 // catch line numbers. The binary does not keep that order: CheckSurface,
-// Redraw, ProcessEvents, HandleEvents, ReceivePackets and InitControl come
+// Redraw, ProcessEvents, ReceivePackets and InitControl come
 // after the others. Every function had the original's catch wrappers
 // (common.h), except where noted. Since issue #78 the functions here have none
 // apart from the handlers of their own: CheckSurface's (an error of the surface
@@ -323,7 +323,7 @@ void patella::TGUI::MouseMove(int x, int y)
 		// HelpMouseMove and written only after Place, so an exception before
 		// that leaves it as it was (issue #36).
 		THelpBubble *Bubble = static_cast<THelpBubble *>(ModalWindow);
-		if (GetHelpHandleChanged()) {
+		if (TakeHelpHandleChanged()) {
 			DeleteComponent(Bubble);
 			Bubble = nullptr;
 			if (GetHelpHandle() != HELP_NONE)
@@ -573,12 +573,6 @@ bool patella::TGUI::CloseRequest() const
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// After the character list and similar login packets.
-void patella::TGUI::HandleEvents()
-{
-	ProcessEvents();
-}
-
 // Callback for InitStatus.
 void patella::TGUI::LinkCopyWarning()
 {
@@ -635,8 +629,8 @@ void patella::TGUI::ReceivePackets()
 			case LOGIN_RECEIVE_MESSAGE_OF_THE_DAY:
 				ReceiveMessageOfTheDay();
 				break;
-			// The patch packets (Tibia.exe: ReceivePatch, ReceiveWholeFile, ReceivePatchBlock, each followed by
-			// HandleEvents) end the login since Patella-Modern issue #75 (decision D9).
+			// The patch packets (Tibia.exe: ReceivePatch, ReceiveWholeFile, ReceivePatchBlock) end the login since
+			// Patella-Modern issue #75 (decision D9).
 			case LOGIN_RECEIVE_PATCH:
 			case LOGIN_RECEIVE_WHOLE_FILE:
 			case LOGIN_RECEIVE_PATCH_BLOCK: ReceiveUpdateRequest(); break;
@@ -1002,7 +996,7 @@ void patella::TGUI::ProcessEvents()
 			ModalWindow = CreateGeneralOptionsDialog(URLCallback);
 			break;
 		case MESSAGE_MESSAGE_OF_THE_DAY:
-			ModalWindow = CreateMessageDialog("Message of the Day", GetMotD());
+			ModalWindow = CreateMessageDialog("Message of the Day", GetMessageOfTheDay());
 			break;
 		// 0x29, the update dialog (ReceivePatch and ReceiveWholeFile posted it), is gone since issue #75.
 		case MESSAGE_USE_WITH:
@@ -1295,11 +1289,6 @@ void KeyPress(int Key)
 bool CloseRequest()
 {
 	return patella::bridge::GUI().CloseRequest();
-}
-
-void HandleEvents()
-{
-	patella::bridge::GUI().HandleEvents();
 }
 
 void LinkCopyWarning()

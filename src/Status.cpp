@@ -310,7 +310,7 @@ int patella::TSession::GetActiveCharacter() const
 	return ActiveCharacter;
 }
 
-bool patella::TSession::GetGamemaster() const
+bool patella::TSession::IsGamemaster() const
 {
 	return Gamemaster;
 }
@@ -757,9 +757,9 @@ int GetActiveCharacter()
 	return patella::bridge::Session().GetActiveCharacter();
 }
 
-bool GetGamemaster()
+bool IsGamemaster()
 {
-	return patella::bridge::Session().GetGamemaster();
+	return patella::bridge::Session().IsGamemaster();
 }
 
 void SetRight(int rightid, int Value)

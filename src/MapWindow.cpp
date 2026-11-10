@@ -129,7 +129,7 @@ bool TMapWindow::LeftButtonDown(int x, int y, int Flags)
 		const TObject Obj = GetTopMoveObject(FieldX, FieldY, FieldZ, Position);
 		if (Obj.Type != 0) {
 			int ax = FieldX, ay = FieldY, az = FieldZ;
-			RelativeToAbsolute(&ax, &ay, &az);
+			MapToWorld(&ax, &ay, &az);
 			SetDragObject(Obj, Position, ax, ay, az);
 		}
 	}
@@ -160,7 +160,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 				return true;
 			}
 			int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
-			RelativeToAbsolute(&DestX, &DestY, &DestZ);
+			MapToWorld(&DestX, &DestY, &DestZ);
 			SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, DestX, DestY, DestZ, Obj.Type,
 				Position);
 			return true;
@@ -182,7 +182,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		const int Type = DragObject->Type;
 		const int Count = DragObject->Data;
 		int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
-		RelativeToAbsolute(&DestX, &DestY, &DestZ);
+		MapToWorld(&DestX, &DestY, &DestZ);
 		if (DragX != DestX || DragY != DestY || DragZ != DestZ) {
 			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
 				// Patella-Plus, the option Drag Full Stacks: with it a pile moves whole without Ctrl and asks for the
@@ -202,7 +202,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		if (Flags != 0)
 			return RightButtonUp(x, y, Flags);
 		int DestX = FieldX, DestY = FieldY, DestZ = GetMapLevel();
-		RelativeToAbsolute(&DestX, &DestY, &DestZ);
+		MapToWorld(&DestX, &DestY, &DestZ);
 		switch (SetPlayerDestination(DestX, DestY, DestZ, true, false)) {
 		case 1:
 			SendWalk();
@@ -240,13 +240,13 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	TObject Obj = GetTopLookObject(FieldX, FieldY, FieldZ, Position);
 	if (Obj.Type != 0) {
 		int ax = FieldX, ay = FieldY, az = FieldZ;
-		RelativeToAbsolute(&ax, &ay, &az);
+		MapToWorld(&ax, &ay, &az);
 		SetTradeObject(Obj, Position, ax, ay, az);
 	}
 	Obj = GetTopUseObject(FieldX, FieldY, FieldZ, Position);
 	if (Obj.Type != 0) {
 		int ax = FieldX, ay = FieldY, az = FieldZ;
-		RelativeToAbsolute(&ax, &ay, &az);
+		MapToWorld(&ax, &ay, &az);
 		SetUseObject(Obj, Position, ax, ay, az);
 	}
 	const uint32 CreatureID = GetCreatureAt(x, y);
@@ -554,7 +554,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			if (Creature == nullptr)
 				continue;
 			int cx = Creature->RealX, cy = Creature->RealY, cz = Creature->RealZ;
-			AbsoluteToRelative(&cx, &cy, &cz);
+			WorldToMap(&cx, &cy, &cz);
 			bool Visible = false;
 			if (In(cx, 0, MAPSIZE_X - 1) && In(cy, 0, MAPSIZE_Y - 1)) {
 				Visible = true;
@@ -677,7 +677,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 
 	// The talkboxes (their positions follow the walk unless they stick to
 	// an edge) and the status message.
-	if (GetTalkChanged())
+	if (TakeTalkChanged())
 		ArrangeTalkboxes();
 	const int Talkboxes = GetNumberOfTalkboxes();
 	for (int Talkbox = 1; Talkbox <= Talkboxes; Talkbox++) {
@@ -760,7 +760,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int FieldZ, int Mode)
 {
 	int x = FieldX, y = FieldY, z = FieldZ;
-	RelativeToAbsolute(&x, &y, &z);
+	MapToWorld(&x, &y, &z);
 	TObject Obj = GetFirstObject(FieldX, FieldY, FieldZ);
 	if (Obj.Type == 0 && FieldZ == 0 && Mode == 0 && IsFieldVisible(FieldX, FieldY, 0))
 		DrawFieldSprite(posx, posy, 0, false, 0, 0, nullptr);
@@ -1359,7 +1359,7 @@ void TMapWindow::ArrangeTalkboxes()
 		GetTalkboxPosition(Talkbox, &x, &y, &z);
 		int CentreY;
 		if (x != 0) {
-			AbsoluteToRelative(&x, &y, &z);
+			WorldToMap(&x, &y, &z);
 			int cx;
 			if (NoStretching)
 				cx = x * 32 - BorderX - 16;
@@ -1537,7 +1537,7 @@ uint32 TMapWindow::GetCreatureAt(int x, int y)
 		if (Creature == nullptr)
 			continue;
 		int cx = Creature->RealX, cy = Creature->RealY, cz = Creature->RealZ;
-		AbsoluteToRelative(&cx, &cy, &cz);
+		WorldToMap(&cx, &cy, &cz);
 		if (!In(cx, 0, MAPSIZE_X - 1) || !In(cy, 0, MAPSIZE_Y - 1))
 			continue;
 		bool Visible = true;

@@ -462,7 +462,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 			Window->Changed = true;
 		}
 	}
-	if (GetAutomapChanged() || Window->Changed || GetSurface()->SurfaceRecreated(0)) {
+	if (TakeAutomapChanged() || Window->Changed || GetSurface()->SurfaceRecreated(0)) {
 		std::array<uint8, 106 * 106 * 3> Pixels;
 		for (int i = 0; i < 106; i++) {
 			for (int j = 0; j < 106; j++) {
@@ -1636,7 +1636,7 @@ int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 void TContainerWindowBody::UpdateUpButton()
 {
 	TSubWindow *Window = static_cast<TSubWindow *>(GetParent());
-	if (GetContainerHasParent(Container)) {
+	if (HasContainerParent(Container)) {
 		HasParent = true;
 		if (Window != nullptr)
 			Window->ShowUpButton();
@@ -2729,9 +2729,9 @@ void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 					SkinProperties().BuddylistWindow.Logo.y + ItemY + y, SkinProperties().BuddylistWindow.Logo.width,
 					SkinProperties().BuddylistWindow.Logo.height, Icon + SKIN_BUDDY_ICON_BASE, x, y, ClipWidth, ClipHeight, 0, 0);
 			}
-			TRGBColor Color = GetBuddyListOnline(i) ? SkinProperties().BuddylistWindow.OnlineColor
-													: SkinProperties().BuddylistWindow.OfflineColor;
-			if (GetBuddyListNew(i))
+			TRGBColor Color = IsBuddyOnline(i) ? SkinProperties().BuddylistWindow.OnlineColor
+											   : SkinProperties().BuddylistWindow.OfflineColor;
+			if (IsBuddyNewlyOnline(i))
 				Color = SkinProperties().BuddylistWindow.NewColor;
 			const char *Name = GetBuddyListName(i);
 			const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,

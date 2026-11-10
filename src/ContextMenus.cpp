@@ -417,7 +417,7 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	Separator = true;
 	if (LookedObject != CREATURE && !GetObjectFlag(LookedObject, UNMOVE) && GetObjectFlag(LookedObject, TAKE))
 		AddEntry(EVENT_MENU_TRADE_WITH, "Trade with ...", nullptr);
-	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && GetContainerHasParent(LookedObjectY - POSITION_CONTAINER_BASE))
+	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && HasContainerParent(LookedObjectY - POSITION_CONTAINER_BASE))
 		AddEntry(EVENT_MENU_MOVE_UP, "Move up", nullptr);
 	if (CreatureID != 0) {
 		if (CreatureID == GetPlayerID()) {
@@ -803,7 +803,7 @@ TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int Pare
 		AddEntry(EVENT_MENU_EDIT_VIP, Text, nullptr);
 		Text.Format("Remove {}", GetBuddyListName(Position));
 		AddEntry(EVENT_MENU_REMOVE_VIP, Text, nullptr);
-		if (CharacterID != GetPlayerID() && GetBuddyListOnline(Position)) {
+		if (CharacterID != GetPlayerID() && IsBuddyOnline(Position)) {
 			Text.Format("Message to {}", GetBuddyListName(Position));
 			AddEntry(EVENT_MENU_MESSAGE_VIP, Text, nullptr);
 		}
@@ -914,7 +914,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 			TFixedString<50> Text;
 			Text.Format("Message to {}", Speaker);
 			AddEntry(EVENT_MENU_PRIVATE_MESSAGE, Text, nullptr);
-			if (TextWindow->TextBuffer->GetSelected() && TextWindow->TextBuffer->IsPrivateChannel()) {
+			if (TextWindow->TextBuffer->IsSelected() && TextWindow->TextBuffer->IsPrivateChannel()) {
 				if (HasOwnPrivateChannel())
 					AddEntry(EVENT_MENU_EXCLUDE_PRIVATE, "Exclude from private chat", nullptr);
 			} else if (HasOwnPrivateChannel()) {
@@ -1090,7 +1090,7 @@ TChannelContextMenu::TChannelContextMenu(TConsoleWindow *_ConsoleWindow, int x, 
 	TTalkBuffer *TextBuffer = ConsoleWindow->GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
 	if (!TextBuffer->isDefault()) {
-		if (TextBuffer->GetSelected() && TextBuffer->IsPrivateChannel()) {
+		if (TextBuffer->IsSelected() && TextBuffer->IsPrivateChannel()) {
 			AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite player", nullptr);
 			AddEntry(EVENT_MENU_EXCLUDE_PRIVATE, "Exclude player", nullptr);
 			Separator = true;

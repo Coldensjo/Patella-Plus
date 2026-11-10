@@ -86,7 +86,7 @@ public:
 	[[nodiscard]] int GetAccountCharacters() const;
 	[[nodiscard]] int GetPremiumDays() const;
 	[[nodiscard]] int GetActiveCharacter() const;
-	[[nodiscard]] bool GetGamemaster() const;
+	[[nodiscard]] bool IsGamemaster() const;
 	void SetRight(int rightid, int Value);
 	[[nodiscard]] bool CheckRight(int rightid, int Bit) const;
 	void SetAccount(int Number, const char *Password);
@@ -314,7 +314,7 @@ void SetPremiumDays(int Days);
 int GetAccountCharacters();
 int GetPremiumDays();
 int GetActiveCharacter();
-bool GetGamemaster();
+bool IsGamemaster();
 void SetMouseOverText(const char *Text);
 void SetMouseOverTextPosition(int x, int y);
 const char *GetMouseOverText();
