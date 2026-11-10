@@ -954,7 +954,7 @@ void TSmallInventoryWindow::Draw(int Surface, int x, int y)
 	TContentWindow::Draw(Surface, x, y);
 	if (In(GetMouseX() - SkinProperties().Data590.x - x, 0, SkinProperties().Data590.width - 1)
 		&& In(GetMouseY() - SkinProperties().Data590.y - y, 0, SkinProperties().Data590.height - 1)
-		&& GetActionState() == 6)
+		&& GetActionState() == ACTIONSTATE_DRAGGING)
 		GetSurface()->DrawFrame(Surface,
 			TRect(SkinProperties().Data590.x + x, SkinProperties().Data590.y + y,
 				SkinProperties().Data590.width, SkinProperties().Data590.height),
@@ -983,7 +983,7 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TContentWindow::LeftButtonUp(x, y, Flags);
 	if (In(x - SkinProperties().Data590.x, 0, SkinProperties().Data590.width - 1)
-		&& In(y - SkinProperties().Data590.y, 0, SkinProperties().Data590.height - 1) && GetActionState() == 6) {
+		&& In(y - SkinProperties().Data590.y, 0, SkinProperties().Data590.height - 1) && GetActionState() == ACTIONSTATE_DRAGGING) {
 		int Index, SrcX, SrcY, SrcZ;
 		const TObject *Obj = GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
 		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
@@ -1063,7 +1063,7 @@ void TInventoryView::Draw(int Surface, int x, int y)
 			DrawObject(Surface, ObjX, ObjY, 32, Obj, TRGBColor(0, 0, 0), TRect(ObjX, ObjY, 32, 32),
 				SkinProperties().Data498, false);
 		}
-		if (GetActionState() == 6 && In(GetMouseX(), ObjX, ObjX + 31) && In(GetMouseY(), ObjY, ObjY + 31))
+		if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ObjX, ObjX + 31) && In(GetMouseY(), ObjY, ObjY + 31))
 			GetSurface()->DrawFrame(Surface, TRect(ObjX - 1, ObjY - 1, 34, 34), 1, TRGBColor(255, 255, 255));
 	}
 }
@@ -1092,7 +1092,7 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 		const int Slot = GetSlotAt(x, y);
 		if (Slot == 0)
 			return false;
-		if (GetActionState() == 7) {
+		if (GetActionState() == ACTIONSTATE_USE_WITH) {
 			const TObject *Obj = GetBodyObject(Slot);
 			if (Obj->Type != 0) {
 				int SrcIndex, SrcX, SrcY, SrcZ;
@@ -1102,10 +1102,10 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 				SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, 0xffff, Slot, 0, Obj->Type, 0);
 				return true;
 			}
-		} else if (GetActionState() == 8) {
+		} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			SetStatusMessage("Select a player to trade with.", false);
 			return true;
-		} else if (GetActionState() == 6) {
+		} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
 			int DragIndex, DragX, DragY, DragZ;
 			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != 0xffff || DragY != Slot) {
@@ -1469,7 +1469,7 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 							SkinProperties().Data638.height + SlotY + y, 32, GetContainerContent(Container, i),
 							TRGBColor(0, 0, 0), TRect(ScreenX, ScreenY, SlotWidth, ClipHeight), SkinProperties().Data498,
 							false);
-					if (GetActionState() == 6 && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
+					if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
 						&& In(GetMouseY(), ScreenY, ScreenY + ClipHeight - 1))
 						GetSurface()->DrawFrameClipped(Surface,
 							TRect(SkinProperties().Data630.x + SlotX + x,
@@ -1548,7 +1548,7 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
-		if (GetActionState() == 7) {
+		if (GetActionState() == ACTIONSTATE_USE_WITH) {
 			const int Position = GetSlotAt(x, y, true);
 			if (Position != -1) {
 				const TObject Obj = GetContainerContent(Container, Position);
@@ -1561,9 +1561,9 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 						Obj.Type, Position);
 				}
 			}
-		} else if (GetActionState() == 8) {
+		} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			SetStatusMessage("Select a player to trade with.", false);
-		} else if (GetActionState() == 6) {
+		} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
 			const int Position = GetSlotAt(x, y, false);
 			int DragIndex, DragX, DragY, DragZ;
 			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
@@ -2247,7 +2247,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 		if (Position != -1) {
 			const TCreature *Creature = GetOpponent(Position);
 			if (Creature != nullptr) {
-				if (GetActionState() == 7) {
+				if (GetActionState() == ACTIONSTATE_USE_WITH) {
 					int SrcIndex, SrcX, SrcY, SrcZ;
 					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
@@ -2257,7 +2257,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 						return true;
 					}
 					SetStatusMessage("You are not allowed to shoot directly on players.", false);
-				} else if (GetActionState() == 8) {
+				} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
 					int TradeIndex, TradeX, TradeY, TradeZ;
 					const TObject &Obj = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 					PATELLA_ASSERT(Obj!=0);
@@ -2266,7 +2266,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 						return true;
 					}
 					SetStatusMessage("Select a player to trade with.", false);
-				} else if (GetActionState() != 6) {
+				} else if (GetActionState() != ACTIONSTATE_DRAGGING) {
 					if (Flags != 0)
 						RightButtonUp(x, y, Flags);
 					else
@@ -2473,8 +2473,8 @@ void TTradeOffers::Arrange()
 // 0x43b710, line 2801. A click on an object of either offer inspects it.
 bool TTradeOffers::LeftButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::LeftButtonUp(x, y, Flags) && GetActionState() != 6 && GetActionState() != 7
-		&& GetActionState() != 8) {
+	if (!TWindow::LeftButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
+		&& GetActionState() != ACTIONSTATE_TRADE_WITH) {
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
@@ -2493,8 +2493,8 @@ bool TTradeOffers::LeftButtonDown(int x, int y, int Flags)
 // 0x43b900, line 2831
 bool TTradeOffers::RightButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::RightButtonUp(x, y, Flags) && GetActionState() != 6 && GetActionState() != 7
-		&& GetActionState() != 8) {
+	if (!TWindow::RightButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
+		&& GetActionState() != ACTIONSTATE_TRADE_WITH) {
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)

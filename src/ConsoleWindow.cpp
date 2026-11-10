@@ -1583,7 +1583,7 @@ void TConsoleWindow::SetActive(bool Active) const
 	if (!TextBuffer->CanWrite())
 		Active = false;
 	PATELLA_ASSERT(Input!=nullptr);
-	if (!Active && GetActionState() == 11)
+	if (!Active && GetActionState() == ACTIONSTATE_CONTEXT_MENU)
 		return;
 	Input->SetActive(Active);
 }

@@ -155,7 +155,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		return true;
 	int FieldX, FieldY, FieldZ;
 	GetField(x, y, &FieldX, &FieldY, &FieldZ);
-	if (GetActionState() == 7) {
+	if (GetActionState() == ACTIONSTATE_USE_WITH) {
 		int Position;
 		const TObject Obj = GetTopMultiUseObject(FieldX, FieldY, FieldZ, Position);
 		if (Obj.Type != 0) {
@@ -173,7 +173,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 				Position);
 			return true;
 		}
-	} else if (GetActionState() == 8) {
+	} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
 		int TradeIndex, TradeX, TradeY, TradeZ;
 		const TObject &TradeObject = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 		PATELLA_ASSERT(TradeObject!=0);
@@ -184,7 +184,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		}
 		SetStatusMessage(TextSelectPlayerToTrade, false);
 		return true;
-	} else if (GetActionState() == 6) {
+	} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
 		int DragIndex, DragX, DragY, DragZ;
 		const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 		const int Type = DragObject->Type;

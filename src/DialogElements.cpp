@@ -1334,8 +1334,8 @@ bool TEditLine::LeftButtonDoubleClick(int x, int y, int Flags)
 // a left button release (the binary calls TWindow::LeftButtonUp).
 bool TEditLine::RightButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::LeftButtonUp(x, y, Flags) && !IsDisabled() && GetActionState() != 10
-		&& GetActionState() != 11)
+	if (!TWindow::LeftButtonUp(x, y, Flags) && !IsDisabled() && GetActionState() != ACTIONSTATE_DIALOG
+		&& GetActionState() != ACTIONSTATE_CONTEXT_MENU)
 		AddMessage(58, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }

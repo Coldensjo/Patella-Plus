@@ -114,11 +114,11 @@ void patella::TInteraction::SetMouseCursor(int Cursor)
 // 0x4e6e90. The action state overrides the cursor that was set.
 int patella::TInteraction::GetMouseCursor() const
 {
-	if (ActionState == 9)
+	if (ActionState == ACTIONSTATE_HELP)
 		return 6;
-	if (ActionState == 6)
+	if (ActionState == ACTIONSTATE_DRAGGING)
 		return 5;
-	if (ActionState == 7 || ActionState == 8)
+	if (ActionState == ACTIONSTATE_USE_WITH || ActionState == ACTIONSTATE_TRADE_WITH)
 		return 4;
 	return MouseCursor;
 }
@@ -193,9 +193,9 @@ void patella::TInteraction::SetDragTarget(int x, int y, int z)
 // where the button went down.
 void patella::TInteraction::CheckDragStart(int x, int y)
 {
-	if (ActionState != 6 && DraggedObject.Type != 0
+	if (ActionState != ACTIONSTATE_DRAGGING && DraggedObject.Type != 0
 		&& (abs(x - DragStartX) > 3 || abs(y - DragStartY) > 3))
-		ActionState = 6;
+		ActionState = ACTIONSTATE_DRAGGING;
 }
 
 // 0x4e7030
