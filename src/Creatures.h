@@ -15,6 +15,7 @@
 
 #include "common.h"
 #include "Events.h"
+#include "Help.h" // HINT_*
 #include "types/FixedString.h"
 #include "types/Time32.h"
 #include "types/GraphicsTypes.h" // TRGBColor

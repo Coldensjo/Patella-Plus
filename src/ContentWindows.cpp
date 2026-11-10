@@ -244,7 +244,7 @@ void TButtonsWindow::Draw(int Surface, int x, int y)
 // 0x426aa0, line 334
 bool TButtonsWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(16);
+	SetHelpHandle(HELP_CONTROL_BUTTONS);
 	SetHelpSize(Width, Height);
 	return true;
 }
@@ -330,7 +330,7 @@ void TAutomapWindow::OnClose()
 // 0x426e40, line 418
 bool TAutomapWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(10);
+	SetHelpHandle(HELP_AUTOMAP);
 	SetHelpSize(Width, Height);
 	return true;
 }
@@ -1002,7 +1002,7 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 bool TSmallInventoryWindow::HelpMouseMove(int x, int y)
 {
 	if (!TWindow::HelpMouseMove(x, y)) {
-		SetHelpHandle(13);
+		SetHelpHandle(HELP_MINIMISED_INVENTORY);
 		SetHelpSize(Width, Height);
 	}
 	return true;
@@ -1171,7 +1171,7 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 // 0x42b1b0, lines 1339-1344
 bool TInventoryView::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(12);
+	SetHelpHandle(HELP_INVENTORY);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1290,9 +1290,9 @@ void TCombatControls::Draw(int Surface, int x, int y)
 bool TCombatControls::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
 	if (!IsLarge)
-		SetHelpHandle(15);
+		SetHelpHandle(HELP_COMBAT_CONTROLS_SMALL);
 	else
-		SetHelpHandle(14);
+		SetHelpHandle(HELP_COMBAT_CONTROLS_LARGE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1378,7 +1378,7 @@ void TStatusWindow::Draw(int Surface, int x, int y)
 // 0x42c830, line 1571
 bool TStatusWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(11);
+	SetHelpHandle(HELP_STATUS_BARS);
 	SetHelpSize(Width, Height);
 	return true;
 }
@@ -1637,7 +1637,7 @@ bool TContainerWindowBody::MouseWheel(int x, int y, int Code)
 // 0x42de80, lines 1885-1890
 bool TContainerWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(20);
+	SetHelpHandle(HELP_OPEN_CONTAINERS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1824,7 +1824,7 @@ bool TSkillsWindowBody::MouseWheel(int x, int y, int Code)
 // 0x42e8d0, lines 2086-2091
 bool TSkillsWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(17);
+	SetHelpHandle(HELP_SKILLS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -2330,7 +2330,7 @@ bool TBattleWindowBody::MouseWheel(int x, int y, int Code)
 // 0x430450, lines 2616-2621
 bool TBattleWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(18);
+	SetHelpHandle(HELP_BATTLE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -2729,7 +2729,7 @@ void TTradeWindowBody::SetSize(int Width, int Height)
 // 0x4342b0, lines 3076-3081
 bool TTradeWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(21);
+	SetHelpHandle(HELP_TRADE);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -2903,7 +2903,7 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 // 0x435760, lines 3322-3327
 bool TBuddylistWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(19);
+	SetHelpHandle(HELP_VIP);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);

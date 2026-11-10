@@ -1013,7 +1013,7 @@ TWindow *TTabBar::GetContainer(TComponent *Child)
 // whole parent.
 bool TTabBar::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(23);
+	SetHelpHandle(HELP_CONSOLE_CHANNELS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
 	SetHelpSize(Parent->Width, Parent->Height);
@@ -1378,7 +1378,7 @@ bool TConsoleWindow::LeftButtonDown(int x, int y, int Flags)
 bool TConsoleWindow::HelpMouseMove(int x, int y)
 {
 	if (!TWindow::HelpMouseMove(x, y)) {
-		SetHelpHandle(22);
+		SetHelpHandle(HELP_CONSOLE);
 		SetHelpSize(Width, Height);
 	}
 	return true;

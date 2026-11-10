@@ -357,16 +357,16 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		return false;
 	int Position = 0;
 	TObject Obj = GetTopLookObject(FieldX, FieldY, FieldZ, Position);
-	int Handle = 0;
+	int Handle = HELP_NONE;
 	if (Obj.Type == CREATURE && Obj.Data == (int)GetPlayerID())
-		Handle = 1001;
+		Handle = HELP_YOUR_CHARACTER;
 	else if (Obj.Type == CREATURE)
-		Handle = 1000;
+		Handle = HELP_CREATURES;
 	else if (GetObjectFlag(Obj, LENSHELP))
 		Handle = GetObjectLensHelp(Obj.Type);
 	else if (GetObjectFlag(Obj, CONTAINER))
-		Handle = 1002;
-	if (Handle == 0)
+		Handle = HELP_CONTAINERS;
+	if (Handle == HELP_NONE)
 		return false;
 	const TCreature *Player = GetCreature(GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
@@ -750,11 +750,11 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	}
 
 	// The hint button while there is an event help to show.
-	if (GetShowNewHints() && GetEventHelp() != 0 && HintButton == nullptr) {
+	if (GetShowNewHints() && GetEventHelp() != HINT_NONE && HintButton == nullptr) {
 		HintButton = new TBlinkingButton(0, 0, 61, 62, 63, 64, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
 		InsertChild(HintButton);
 		Arrange();
-		if (GetEventHelp() == 1)
+		if (GetEventHelp() == HINT_FIRST_LOGIN)
 			HandleEvent(EVENT_MAP_HINT);
 	} else if (!GetShowNewHints() && HintButton != nullptr) {
 		DeleteChild(HintButton);

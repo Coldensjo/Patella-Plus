@@ -346,7 +346,7 @@ void patella::TGUI::MouseMove(int x, int y)
 		if (GetHelpHandleChanged()) {
 			DeleteComponent(Bubble);
 			Bubble = nullptr;
-			if (GetHelpHandle() != 0)
+			if (GetHelpHandle() != HELP_NONE)
 				Bubble = new THelpBubble(GetCurrentHelpText());
 		}
 		if (Bubble != nullptr)
@@ -676,7 +676,7 @@ void patella::TGUI::ReceivePackets()
 				SetConnectionState(8);
 				EnterGame();
 				ReceiveGameLogin();
-				AddEventHelp(1);
+				AddEventHelp(HINT_FIRST_LOGIN);
 				SendFightModes();
 				break;
 			case 0x0b: ReceiveGamemasterActions(); break;
@@ -1037,7 +1037,7 @@ void patella::TGUI::ProcessEvents()
 			break;
 		case MESSAGE_HELP_MODE:
 			SetActionState(ACTIONSTATE_HELP);
-			SetHelpHandle(0);
+			SetHelpHandle(HELP_NONE);
 			break;
 		case MESSAGE_OPEN_PRIVATE_CONVERSATION:
 			MainWindow->Console->OpenChannel(4, 4, reinterpret_cast<const char *>(Param2), -1, reinterpret_cast<const char *>(Param2));

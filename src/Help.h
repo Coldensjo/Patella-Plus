@@ -9,6 +9,72 @@
 
 inline constexpr int EVENTHELPS = 14; // "In(Number,1,EVENTHELPS)", "In(Hint,1,EVENTHELPS)" (MapWindow.cpp)
 
+// The help numbers, named. Enumerators for the reason GUI.h gives at the modifier flags. No names of the original are
+// known; each is taken from the title of the text Help.cpp returns for the number, or from the code that passes it.
+//
+// HELP_* are the Handle of SetHelpHandle, GetHelpHandle and GetHelpText: what the help bubble of the help mode
+// explains. 10-23 are parts of the screen, which the windows' HelpMouseMove set. 1000-1002 are things on the map,
+// which TMapWindow::HelpMouseMove sets. 1100-1112 are the lens help of an object type, read from Tibia.dat (LENSHELP,
+// Objects.h), so only GetHelpText's case labels have them. InitHelp's handle 1 has no text and stays a number.
+enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	HELP_NONE = 0, // no bubble: an element that explains nothing, a field with nothing to explain
+	HELP_AUTOMAP = 10,
+	HELP_STATUS_BARS = 11,
+	HELP_INVENTORY = 12,
+	HELP_MINIMISED_INVENTORY = 13,
+	HELP_COMBAT_CONTROLS_LARGE = 14, // TCombatControls with IsLarge: "Options" and "Help" are text buttons
+	HELP_COMBAT_CONTROLS_SMALL = 15, // without IsLarge: the two are picture buttons
+	HELP_CONTROL_BUTTONS = 16,       // Skills, Battle, VIP, Logout
+	HELP_SKILLS = 17,
+	HELP_BATTLE = 18,
+	HELP_VIP = 19,
+	HELP_OPEN_CONTAINERS = 20, // a container's window
+	HELP_TRADE = 21,
+	HELP_CONSOLE = 22,
+	HELP_CONSOLE_CHANNELS = 23, // the console's tab bar
+	HELP_CREATURES = 1000,      // a creature that is not the player
+	HELP_YOUR_CHARACTER = 1001,
+	HELP_CONTAINERS = 1002, // a container on the map without a lens help
+	HELP_LADDERS = 1100,
+	HELP_SEWER_GRATES = 1101,
+	HELP_DUNGEON_FLOOR = 1102,
+	HELP_LEVERS = 1103,
+	HELP_DOORS = 1104,
+	HELP_SPECIAL_DOORS = 1105,
+	HELP_STAIRS = 1106,
+	HELP_MAILBOXES = 1107,
+	HELP_DEPOT_BOXES = 1108,
+	HELP_DUSTBINS = 1109,
+	HELP_STONE_PILES = 1110,
+	HELP_SIGNS = 1111,
+	HELP_BOOKS_AND_SCROLLS = 1112,
+};
+
+// HINT_* are the Number of AddEventHelp, GetEventHelpTitle and GetEventHelpText, what GetEventHelp and PopEventHelp
+// return and what Preferences.cpp's KnownHints holds: the event helps, 1 to EVENTHELPS. The prefix is the original's
+// other word for them ("unknown hint", the Hint of MapWindow.cpp's assertion), because EVENT_HELP and EVENT_HINTS
+// are event numbers (Events.h). The names follow GetEventHelpTitle's titles. HINT_FIRST and HINT_LAST bound the loops
+// of THintsDialog (Dialogs.cpp), written "i < HINT_LAST + 1" because "i <= HINT_LAST" compiles to other code.
+enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	HINT_NONE = 0, // GetEventHelp and PopEventHelp: the queue is empty
+	HINT_FIRST_LOGIN = 1,
+	HINT_FIRST = HINT_FIRST_LOGIN,
+	HINT_NPC_CIPFRIED = 2,
+	HINT_ROOKGAARD_CROSSROAD = 3,
+	HINT_NPC_SEYMOUR = 4,
+	HINT_BUYING_AND_SELLING = 5, // the shopkeepers of Rookgaard
+	HINT_UNDERGROUND = 6,
+	HINT_FIRST_EXPERIENCE_POINTS = 7,
+	HINT_LEVEL_2 = 8,
+	HINT_FIRST_SKILL_ADVANCE = 9,
+	HINT_LEVEL_8 = 10,
+	HINT_CONTINENT = 11, // the arrival on the mainland
+	HINT_DEPOT = 12,
+	HINT_PLAYER_KILLING = 13, // a creature with a skull
+	HINT_LEVEL_20 = 14,       // "Level 20 and Security Information"
+	HINT_LAST = HINT_LEVEL_20,
+};
+
 namespace patella {
 
 // Help.cpp's state (issue #107, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#107"): the

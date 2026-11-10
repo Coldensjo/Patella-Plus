@@ -2110,7 +2110,7 @@ bool TWindow::HelpMouseMove(int x, int y)
 			return true;
 		}
 	}
-	SetHelpHandle(0);
+	SetHelpHandle(HELP_NONE);
 	return false;
 }
 

@@ -423,6 +423,6 @@ TGUI &GUI();
 
 inline bool TElement::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	SetHelpHandle(0);
+	SetHelpHandle(HELP_NONE);
 	return false;
 }

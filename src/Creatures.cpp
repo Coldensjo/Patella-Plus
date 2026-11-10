@@ -816,7 +816,7 @@ void patella::TCreatures::CheckMonsterHint(TCreature *Creature)
 void patella::TCreatures::NotifySkull(int Flag)
 {
 	if (Flag != 0)
-		GUI.AddEventHelp(13);
+		GUI.AddEventHelp(HINT_PLAYER_KILLING);
 }
 
 // --- Experience and skills -------------------------------------------------
@@ -827,13 +827,13 @@ void patella::TPlayerState::SetPlayerExperience(int Experience, int Level, int P
 {
 	PATELLA_ASSERT_VALUES(In(Progress,-1,100), Progress);
 	if (PlayerLevel != 0 && PlayerExperience == 0 && Experience > 0)
-		GUI.AddEventHelp(7);
+		GUI.AddEventHelp(HINT_FIRST_EXPERIENCE_POINTS);
 	if (PlayerLevel != 0 && PlayerLevel < 2 && Level >= 2)
-		GUI.AddEventHelp(8);
+		GUI.AddEventHelp(HINT_LEVEL_2);
 	if (PlayerLevel != 0 && PlayerLevel < 8 && Level >= 8)
-		GUI.AddEventHelp(10);
+		GUI.AddEventHelp(HINT_LEVEL_8);
 	if (PlayerLevel != 0 && PlayerLevel < 20 && Level >= 20)
-		GUI.AddEventHelp(14);
+		GUI.AddEventHelp(HINT_LEVEL_20);
 	PlayerExperience = Experience;
 	PlayerLevel = Level;
 	PlayerLevelProgress = Progress;
@@ -844,7 +844,7 @@ void patella::TPlayerState::SetPlayerSkill(int SkillNumber, int Value, int Progr
 {
 	PATELLA_ASSERT_VALUES(In(Progress,0,100), Progress);
 	if (PlayerSkillValue[SkillNumber] != 0 && PlayerSkillValue[SkillNumber] < Value)
-		GUI.AddEventHelp(9);
+		GUI.AddEventHelp(HINT_FIRST_SKILL_ADVANCE);
 	PlayerSkillProgress[SkillNumber] = Progress;
 	PlayerSkillValue[SkillNumber] = Value;
 }
