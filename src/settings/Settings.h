@@ -2,7 +2,7 @@
 //
 // It is the client's only settings file: the options the original kept in Tibia.cfg
 // (settings/PreferenceKeys.h) and everything new the fork lets the user set. An existing Tibia.cfg is
-// imported once (Preferences.cpp InitPreferences) and never written again. The format is plain
+// imported once (Preferences.cpp TPreferences::Init) and never written again. The format is plain
 // `key=value`, one per line:
 //
 //	# a comment (so is a line starting with ';')

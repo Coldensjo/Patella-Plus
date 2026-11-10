@@ -1,5 +1,5 @@
-// Preferences.cpp: the options. Patella.ini is the client's only settings file: InitPreferences, SavePreferences and
-// ExitPreferences read and write it (settings/PreferenceKeys.h). ReadTibiaCfg, the original's loader, imports an
+// Preferences.cpp: the options. Patella.ini is the client's only settings file: TPreferences::Init, SavePreferences and
+// TPreferences::Exit read and write it (settings/PreferenceKeys.h). ReadTibiaCfg, the original's loader, imports an
 // existing Tibia.cfg once; the client never writes Tibia.cfg.
 //
 // The data and the functions are TPreferences' (Preferences.h), which TClient owns. Talk's lists (White, Ignore) are
@@ -387,7 +387,7 @@ void TPreferences::SetMagLevelBar(bool Value)
 
 // Not reset: the windowed position and size, and the hotkey texts past
 // their first byte. MotD is cleared without being freed.
-void TPreferences::SetDefaultPreferences(TTalkLists &Lists)
+void TPreferences::SetDefaults(TTalkLists &Lists)
 {
 	memset(HotkeyAutoSend.data(), 0, sizeof(HotkeyAutoSend));
 	ViewMode = 1;
@@ -613,7 +613,7 @@ void TPreferences::SetSkillBar(int SkillNumber, bool Value)
 	SkillBars[SkillNumber] = Value;
 }
 
-// InitPreferences in the original. Loads Tibia.cfg. Every key is tested on its own (no else), so
+// TPreferences::Init in the original. Loads Tibia.cfg. Every key is tested on its own (no else), so
 // a key runs one block only because the names differ. Unknown keys raise
 // no error but leave their value unread, which then fails as the next key.
 // Any error (also a missing file) resets everything to the defaults. In
@@ -621,7 +621,7 @@ void TPreferences::SetSkillBar(int SkillNumber, bool Value)
 // ServerAddress, ServerPort and LoginMessages are read and dropped.
 void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 {
-	SetDefaultPreferences(Lists);
+	SetDefaults(Lists);
 	try {
 		TReadScriptFile Script;
 		Script.open("Tibia.cfg");
@@ -708,7 +708,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 				AutomapZoom = Script.readNumber();
 			if (strcmp(Identifier, "contentwindow") == 0) {
 				// Appended when it is complete; the original wrote the entry in place and counted it then (an error on
-				// the way resets the options, SetDefaultPreferences, so a partial entry was never read).
+				// the way resets the options, TPreferences::SetDefaults, so a partial entry was never read).
 				TContentWindowSize Entry{};
 				Script.readSymbol('(');
 				Entry.ID = Script.readNumber();
@@ -843,7 +843,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 			}
 		}
 	} catch (TMyException &) {
-		SetDefaultPreferences(Lists);
+		SetDefaults(Lists);
 	}
 	PreferencesLoaded = true;
 }
@@ -853,7 +853,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 // permanent entries of the Talk lists, NoStretching's "not set yet" as no, no
 // fourth FullscreenMode value. A description is read up to its NUL, at most its
 // 128 characters.
-patella::settings::TPreferenceValues TPreferences::GetPreferenceValues(TTalkLists &Lists)
+patella::settings::TPreferenceValues TPreferences::GetValues(TTalkLists &Lists)
 {
 	patella::settings::TPreferenceValues Values;
 	Values.TestServer = TestServerLogin;
@@ -925,10 +925,10 @@ patella::settings::TPreferenceValues TPreferences::GetPreferenceValues(TTalkList
 }
 
 // The options as ReadTibiaCfg reads a Tibia.cfg that holds Values, after
-// SetDefaultPreferences: the lists are appended to. PreferenceKeys.cpp's
+// TPreferences::SetDefaults: the lists are appended to. PreferenceKeys.cpp's
 // ReadPreferences already did what the original's reader does to the values
 // (a hotkey's line breaks, ChaseMode 2, a repeated dialog).
-void TPreferences::SetPreferenceValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists)
+void TPreferences::SetValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists)
 {
 	TestServerLogin = Values.TestServer;
 	if (Values.FullscreenMode) {
@@ -962,7 +962,7 @@ void TPreferences::SetPreferenceValues(const patella::settings::TPreferenceValue
 	BuddyHideOffline = Values.BuddyHideOffline;
 	for (const int Dialog : Values.OpenDialogs) {
 		// ReadTibiaCfg's duplicate check, on the vector's fields as it reads them (entries an earlier load
-		// left count too; in the client InitPreferences runs once).
+		// left count too; in the client TPreferences::Init runs once).
 		int i = OpenDialogs.min;
 		for (;;) {
 			if (i >= OpenDialogs.max) {
@@ -1010,10 +1010,10 @@ void TPreferences::SetPreferenceValues(const patella::settings::TPreferenceValue
 // key), imports Tibia.cfg once: the original's reader (ReadTibiaCfg; the
 // defaults without a Tibia.cfg or with one it cannot read), then the options
 // go into Patella.ini at once. Tibia.cfg is left as it is.
-void TPreferences::InitPreferences(TTalkLists &Lists)
+void TPreferences::Init(TTalkLists &Lists)
 {
 	using namespace patella::settings;
-	SetDefaultPreferences(Lists);
+	SetDefaults(Lists);
 	const std::optional<TSettingsFile> File = Load(FileSystem, FileName, NewFileNewline);
 	// Patella-Plus, not in the original. Before the options: a file written by hand may hold only these keys.
 	if (File) {
@@ -1022,13 +1022,13 @@ void TPreferences::InitPreferences(TTalkLists &Lists)
 	}
 	patella::log::Info("login RSA modulus starts with {}", std::string_view(GetRsaModulus()).substr(0, 12));
 	if (File && HasPreferences(*File)) {
-		TPreferenceValues Values = GetPreferenceValues(Lists);
+		TPreferenceValues Values = GetValues(Lists);
 		for (const std::string &Problem : ReadPreferences(*File, Values))
 			patella::log::Warn("{}: {}", FileName, Problem);
 		// A file of version 1 (Windows-1252) is written as version 2 (UTF-8) at the next save.
 		if (EncodingOf(*File) == TEncoding::Cp1252)
 			patella::log::Info("{}: PreferencesVersion 1 (Windows-1252) read; written as version 2 (UTF-8) at the next save", FileName);
-		SetPreferenceValues(Values, Lists);
+		SetValues(Values, Lists);
 		PreferencesLoaded = true;
 		return;
 	}
@@ -1041,7 +1041,7 @@ void TPreferences::InitPreferences(TTalkLists &Lists)
 	SavePreferences(Lists);
 }
 
-// Writes the options into Patella.ini (its other keys and lines stay), only after InitPreferences loaded them; a
+// Writes the options into Patella.ini (its other keys and lines stay), only after TPreferences::Init loaded them; a
 // failure is reported in the log.
 void TPreferences::SavePreferences(TTalkLists &Lists)
 {
@@ -1053,13 +1053,13 @@ void TPreferences::SavePreferences(TTalkLists &Lists)
 		patella::log::Warn("{} cannot be read: the options are not saved", FileName);
 		return;
 	}
-	WritePreferences(*File, GetPreferenceValues(Lists));
+	WritePreferences(*File, GetValues(Lists));
 	if (!Save(FileSystem, FileName, *File))
 		patella::log::Warn("{} cannot be written: the options are not saved", FileName);
 }
 
 // Frees the message of the day and saves the options (Patella.ini; Tibia.cfg in the original).
-void TPreferences::ExitPreferences(TTalkLists &Lists)
+void TPreferences::Exit(TTalkLists &Lists)
 {
 	if (MotD != nullptr)
 		free(MotD);

@@ -169,7 +169,7 @@ public:
 	[[nodiscard]] bool GetMagLevelBar() const;
 	void SetLevelBar(bool Value);
 	void SetMagLevelBar(bool Value);
-	void SetDefaultPreferences(TTalkLists &Lists);
+	void SetDefaults(TTalkLists &Lists);
 	void SetContentWindowSize(int ID, int Size);
 	int GetContentWindowSize(int ID);
 	int GetOpenDialogs(int **List);
@@ -190,13 +190,13 @@ public:
 	[[nodiscard]] bool GetSkillBar(int SkillNumber) const;
 	void SetSkillBar(int SkillNumber, bool Value);
 	void ReadTibiaCfg(TTalkLists &Lists);
-	patella::settings::TPreferenceValues GetPreferenceValues(TTalkLists &Lists);
-	void SetPreferenceValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists);
-	// InitPreferences, SavePreferences and ExitPreferences read and write Patella.ini (settings/PreferenceKeys.h); the
+	patella::settings::TPreferenceValues GetValues(TTalkLists &Lists);
+	void SetValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists);
+	// Init, SavePreferences and Exit read and write Patella.ini (settings/PreferenceKeys.h); the
 	// client never writes Tibia.cfg. Lists is the one client's TTalk.
-	void InitPreferences(TTalkLists &Lists);
+	void Init(TTalkLists &Lists);
 	void SavePreferences(TTalkLists &Lists);
-	void ExitPreferences(TTalkLists &Lists);
+	void Exit(TTalkLists &Lists);
 
 private:
 	int WindowedWidth = 600; // "WindowedMode = (x,y,Width,Height,Maximized)"
@@ -239,7 +239,7 @@ private:
 	TFullscreenMode FullscreenMode{}; // Width 0 = not set
 	int ViewMode{};
 	bool TestServerLogin{};   // "TestServer = yes"
-	bool PreferencesLoaded{}; // set by InitPreferences; SavePreferences writes only then
+	bool PreferencesLoaded{}; // set by Init; SavePreferences writes only then
 	int WindowedX{};
 	int WindowedY{};
 	// The original's vector<T>(0, 9, 10) each, with the counts above: the lists that append at their count and read
@@ -257,7 +257,7 @@ private:
 	// Not the original's: GetBuddyDescription's text, the entry's description with a NUL.
 	TFixedString<BUDDYDESCRIPTION_LENGTH + 1> BuddyDescription{};
 
-	// SetDefaultPreferences clears HotkeyAutoSend with a memset over its size.
+	// SetDefaults clears HotkeyAutoSend with a memset over its size.
 	static_assert(sizeof(HotkeyAutoSend) == HOTKEYS, "HotkeyAutoSend");
 };
 

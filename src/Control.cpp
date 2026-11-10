@@ -1128,7 +1128,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		Creatures().InitCreatures();
 		::Interaction().InitStatus(Gamemaster, LinkCopyWarning);
 		::Help().Init();
-		Preferences().InitPreferences(::Talk());
+		Preferences().Init(::Talk());
 		::Talk().Init();
 		Graphics().InitGraphics(0xa00000);
 		SkinData().InitSkins();
@@ -1162,7 +1162,7 @@ void patella::TGUI::ExitControl()
 	if (Current != nullptr)
 		Current->ExitSurfaces();
 	GraphicsEngine().SurfaceExitInstance();
-	Preferences().ExitPreferences(::Talk());
+	Preferences().Exit(::Talk());
 	::Talk().Exit();
 	::Help().Exit();
 	::Interaction().ExitStatus();
