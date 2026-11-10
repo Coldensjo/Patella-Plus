@@ -15,8 +15,8 @@
 // ReceiveAddObject is GAME_RECEIVE_ADD_OBJECT), without the server's name where the prefix says it already; those
 // have their function in a comment.
 //
-// After the packet types come values inside the packets: CLIENT_VERSION, FIELD_END, and the original's
-// UNKNOWNCREATURE and OUTDATEDCREATURE.
+// After the packet types come values inside the packets: CLIENT_OS_WINDOWS, CLIENT_VERSION, FIELD_END, and the
+// original's UNKNOWNCREATURE and OUTDATEDCREATURE.
 //
 // Enumerators for the reason GUI.h gives at the modifier flags.
 
@@ -171,6 +171,10 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 };
 
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	// The word that SendLogin and SendGameLogin send before the version. The code does not show what it is; the name
+	// is from what is publicly known of the 7.72 protocol: the client's operating system, 2 for Windows (1 for
+	// Linux). The Linux build sends 2 as well, so that a server sees the same client.
+	CLIENT_OS_WINDOWS = 2,
 	// The client's version, 7.72, which SendLogin and SendGameLogin send to their servers (name ours).
 	CLIENT_VERSION = 772,
 	// ReadField: a word of this value or above ends the objects of a map field, and what it is above tells how many

@@ -119,7 +119,7 @@ void patella::TCommunication::SendLogin(uint32 AccountID, const char *Password)
 		TERROR(Text.str().c_str());
 	}
 	Network.BeginCommand(LOGIN_SEND_LOGIN);
-	Network.SendWord(2);
+	Network.SendWord(CLIENT_OS_WINDOWS);
 	Network.SendWord(CLIENT_VERSION);
 	Network.SendQuad(ObjectTypes.DatSignature);
 	Network.SendQuad(Signatures.SpriteSignature());
@@ -178,7 +178,7 @@ void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, 
 		TERROR(Text.str().c_str());
 	}
 	Network.BeginCommand(GAME_SEND_LOGIN);
-	Network.SendWord(2);
+	Network.SendWord(CLIENT_OS_WINDOWS);
 	Network.SendWord(CLIENT_VERSION);
 	Network.SendBytes(Data);
 	Network.SendCommand(false);
