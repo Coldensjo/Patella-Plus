@@ -25,21 +25,8 @@ inline constexpr int HOTKEY_LENGTH = 256;
 inline constexpr int BUDDYDESCRIPTION_LENGTH = 128;
 inline constexpr int SKILLS = 7;
 
-// The fight modes of the combat controls: "AttackMode" and "ChaseMode" in the configuration, and the first two bytes
-// that SendFightModes sends (Communication.cpp). The names are ours, from the buttons of TCombatControls
-// (ContentWindows.cpp: offensive, balanced, defensive; stand, chase) and their events EVENT_ATTACK_* and
-// EVENT_CHASE_*. A saved ChaseMode of 2 is read as CHASE_STAND; the code does not show what 2 was, so it stays a
-// number. The modes in settings/PreferenceKeys.h stay numbers too: this file includes that one, which keeps the
-// configuration's values without the client's names.
-enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
-	ATTACK_OFFENSIVE = 1,
-	ATTACK_BALANCED = 2, // the default
-	ATTACK_DEFENSIVE = 3,
-};
-enum : int {         // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
-	CHASE_STAND = 0, // the default; PrepareMovement's with AutoChaseOff, when the player walks while attacking
-	CHASE_ON = 1,    // chase the opponent
-};
+// The fight modes of the combat controls (ATTACK_*, CHASE_*) are in settings/PreferenceKeys.h, because the reader
+// of the configuration names them too.
 
 // "FullscreenMode = (Width,Height,Depth)"; the fourth value is not saved.
 struct TFullscreenMode {

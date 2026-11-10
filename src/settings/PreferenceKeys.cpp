@@ -538,8 +538,8 @@ std::vector<std::string> ReadPreferences(const TSettingsFile &File, TPreferenceV
 	Read.Flag("DragFullStacks", Values.DragFullStacks);
 	Read.Number("AttackMode", Values.AttackMode);
 	Read.Number("ChaseMode", Values.ChaseMode);
-	if (Values.ChaseMode == 2)
-		Values.ChaseMode = 0; // as the original's reader
+	if (Values.ChaseMode == CHASE_OBSOLETE)
+		Values.ChaseMode = CHASE_STAND; // as the original's reader
 	Read.Flag("SecureMode", Values.SecureMode);
 	if (const auto Entries = Indexed(File, "Buddy"); !Entries.empty()) {
 		Values.Buddies.clear();

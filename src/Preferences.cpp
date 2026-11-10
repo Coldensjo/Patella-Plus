@@ -779,7 +779,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 				AttackMode = Script.readNumber();
 			if (strcmp(Identifier, "chasemode") == 0) {
 				ChaseMode = Script.readNumber();
-				if (ChaseMode == 2)
+				if (ChaseMode == CHASE_OBSOLETE)
 					ChaseMode = CHASE_STAND;
 			}
 			if (strcmp(Identifier, "securemode") == 0)

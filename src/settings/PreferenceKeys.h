@@ -60,6 +60,23 @@
 #include <string_view>
 #include <vector>
 
+// The fight modes of the combat controls: "AttackMode" and "ChaseMode" in the configuration, and the first two bytes
+// that SendFightModes sends (Communication.cpp). The names are ours, from the buttons of TCombatControls
+// (ContentWindows.cpp: offensive, balanced, defensive; stand, chase) and their events EVENT_ATTACK_* and
+// EVENT_CHASE_*. They are here, below Preferences.h, because the reader of the configuration names them as well.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	ATTACK_OFFENSIVE = 1,
+	ATTACK_BALANCED = 2, // the default
+	ATTACK_DEFENSIVE = 3,
+};
+enum : int {         // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	CHASE_STAND = 0, // the default; PrepareMovement's with AutoChaseOff, when the player walks while attacking
+	CHASE_ON = 1,    // chase the opponent
+	// No button sets it and the client never sends it. A configuration that holds it is read as CHASE_STAND, as the
+	// original's reader read it; the code does not show what the mode was.
+	CHASE_OBSOLETE = 2,
+};
+
 namespace patella::settings {
 
 // Preferences.h's HOTKEYS and SKILLS (Preferences.cpp checks that they are the same).
@@ -117,8 +134,8 @@ struct TPreferenceValues {
 	bool ClassicControl = false;
 	bool AutoChaseOff = true;
 	bool DragFullStacks = false;
-	int AttackMode = 2;
-	int ChaseMode = 0;
+	int AttackMode = ATTACK_BALANCED;
+	int ChaseMode = CHASE_STAND;
 	bool SecureMode = true;
 	std::vector<TBuddyValue> Buddies;
 	std::vector<std::string> White;
