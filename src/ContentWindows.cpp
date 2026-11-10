@@ -100,7 +100,7 @@ TCallback NoCallback(nullptr, 0);
 } // namespace
 
 // TSkillsWindowBody::MouseHover formats the skill's text with this size.
-static_assert(sizeof(patella::bridge::GUI().SkillMouseOverText) == 256, "the skill's mouse-over text");
+static_assert(sizeof(GUI().SkillMouseOverText) == 256, "the skill's mouse-over text");
 
 // --- The creators -----------------------------------------------------------------
 
@@ -365,7 +365,7 @@ bool TAutomapWindow::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int 
 // PrintLine, the same bytes).
 void TAutomapWindow::MouseHover(int x, int y)
 {
-	patella::TGUI &GUI = patella::bridge::GUI();
+	patella::TGUI &GUI = ::GUI();
 	TMark Mark = View->GetMark(x - View->OffsetX, y - View->OffsetY);
 	if (Mark.x != 0 && Mark.y != 0) {
 		const int Length = (int)strlen(Mark.Text);
@@ -650,7 +650,7 @@ TMark TAutomapView::GetMark(int x, int y)
 
 TCompassRose::TCompassRose(int _RoseSkin)
 {
-	PATELLA_ASSERT_VALUES(_RoseSkin<patella::bridge::Skins().NumberOfSkins, _RoseSkin, patella::bridge::Skins().NumberOfSkins);
+	PATELLA_ASSERT_VALUES(_RoseSkin<SkinData().NumberOfSkins, _RoseSkin, SkinData().NumberOfSkins);
 	RoseSkin = _RoseSkin;
 }
 
@@ -1813,7 +1813,7 @@ bool TSkillsWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] i
 // Over a line with a bar: the percent still to go.
 void TSkillsWindowBody::MouseHover(int x, int y)
 {
-	patella::TGUI &GUI = patella::bridge::GUI();
+	patella::TGUI &GUI = ::GUI();
 	if (!IsMinimized()) {
 		const int ScrollY = ScrollBar->Range->Value;
 		const int Bottom = Height - 1;

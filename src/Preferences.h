@@ -2,7 +2,7 @@
 // The option names in the comments are the keys that the Tibia.cfg loader uses, which give the names of the members.
 //
 // The data is TPreferences', which TClient owns (Client.h); the free functions of the original's names are the bridge
-// that the callers use until they hold the object (bridge::Preferences(), defined in Client.cpp).
+// that the callers use until they hold the object (Preferences(), defined in Client.cpp).
 
 #pragma once
 
@@ -259,17 +259,14 @@ private:
 	static_assert(sizeof(HotkeyAutoSend) == HOTKEYS, "HotkeyAutoSend");
 };
 
-// The transition's access path: the options of the one TClient (Client.cpp), and the Talk lists they hold. They go when
-// no free function needs them.
-namespace bridge {
-TPreferences &Preferences();
-TTalkLists &TalkLists();
-} // namespace bridge
-
 } // namespace patella
 
+// The one client's preferences, and the talk lists they are read into and written from (Client.cpp).
+patella::TPreferences &Preferences();
+patella::TTalkLists &TalkLists();
+
 // The original's functions (the callers' names, and the golden tests'): each calls TPreferences' member of the
-// same name on bridge::Preferences(), with bridge::TalkLists() where it takes the lists.
+// same name on Preferences(), with TalkLists() where it takes the lists.
 bool GetTestServerLogin();
 void SetTestServerLogin(bool Value);
 void SetViewMode(int ViewMode);

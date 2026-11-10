@@ -122,7 +122,7 @@ void patella::TGUI::ExitMainWindow()
 // golden Control and Communication tests fake it (commworld.cpp).
 void ExitMainWindow()
 {
-	patella::bridge::GUI().ExitMainWindow();
+	GUI().ExitMainWindow();
 }
 
 // Out of the game an error while drawing the start window becomes
@@ -218,7 +218,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMainWindow::HandleEvent(int Event)
 {
-	const patella::TGUI &GUI = patella::bridge::GUI();
+	const patella::TGUI &GUI = ::GUI();
 	switch (Event) {
 	case EVENT_COPY_LINK:
 		CopyTaintedClipboardText();
@@ -453,7 +453,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		Splitter->Arrange();
 		Console->SetSize(MapWidth, ConsoleHeight);
 		Console->SetPosition(0, MapHeight + SkinProperties().SplitterHeight);
-		Console->OpenDefaultChannel(patella::bridge::Talk().DefaultTextBuffer, "Default");
+		Console->OpenDefaultChannel(Talk().DefaultTextBuffer, "Default");
 		Console->Arrange();
 		SideBar->SetPosition(MapWidth, 0);
 		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->GetMinimumHeight() + SideBar->GetMinimumHeight());
@@ -502,7 +502,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		RemoveHotkey(KEY_ESCAPE);
 	}
 	SetSize(Width, Height);
-	SetConsoleActive(patella::bridge::GUI().ModalWindow == nullptr);
+	SetConsoleActive(GUI().ModalWindow == nullptr);
 }
 
 // The console's new height, at least its minimum; the caller lays out the
@@ -685,7 +685,7 @@ void TStartWindow::SetSize(int Width, int Height)
 // The buttons work only while there is no connection.
 void TStartWindow::HandleEvent(int Event)
 {
-	const patella::TGUI &GUI = patella::bridge::GUI();
+	const patella::TGUI &GUI = ::GUI();
 	if (GetConnectionState() != CONNECTION_OFFLINE)
 		return;
 	switch (Event) {
@@ -732,7 +732,7 @@ void TSplitter::Arrange()
 // follows the mouse; the global MainWindow is used, not the parent.
 bool TSplitter::MouseMove([[maybe_unused]] int x, int y)
 {
-	const patella::TGUI &GUI = patella::bridge::GUI();
+	const patella::TGUI &GUI = ::GUI();
 	SetMouseCursor(CURSOR_SIZENS);
 	if (Dragging) {
 		GUI.MainWindow->ResizeConsole(DragY - y + GUI.MainWindow->GetConsoleWindowHeight());
@@ -778,6 +778,6 @@ void patella::TGUI::InitMainWindow(int Width, int Height, void (*ExitProgram)(),
 void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
 	void (*OpenURL)(const char *URL))
 {
-	patella::bridge::GUI().InitMainWindow(Width, Height, ExitProgram, SetDisplayMode, OpenURL);
+	GUI().InitMainWindow(Width, Height, ExitProgram, SetDisplayMode, OpenURL);
 }
 // NOLINTEND(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)

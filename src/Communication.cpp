@@ -2000,590 +2000,590 @@ void ExitCommunication()
 
 void SendLogin(uint32 AccountID, const char *Password)
 {
-	patella::bridge::Communication().SendLogin(AccountID, Password);
+	Communication().SendLogin(AccountID, Password);
 }
 
 void SendGameLogin(uint32 AccountID, const char *Name, const char *Password)
 {
-	patella::bridge::Communication().SendGameLogin(AccountID, Name, Password);
+	Communication().SendGameLogin(AccountID, Name, Password);
 }
 
 void SendLogout()
 {
-	patella::bridge::Communication().SendLogout();
+	Communication().SendLogout();
 }
 
 void SendWalk()
 {
-	patella::bridge::Communication().SendWalk();
+	Communication().SendWalk();
 }
 
 void SendStopWalk()
 {
-	patella::bridge::Communication().SendStopWalk();
+	Communication().SendStopWalk();
 }
 
 void SendTurnNorth()
 {
-	patella::bridge::Communication().SendTurnNorth();
+	Communication().SendTurnNorth();
 }
 
 void SendTurnEast()
 {
-	patella::bridge::Communication().SendTurnEast();
+	Communication().SendTurnEast();
 }
 
 void SendTurnSouth()
 {
-	patella::bridge::Communication().SendTurnSouth();
+	Communication().SendTurnSouth();
 }
 
 void SendTurnWest()
 {
-	patella::bridge::Communication().SendTurnWest();
+	Communication().SendTurnWest();
 }
 
 void SendMoveObject(int x, int y, int z, int ObjectType, int Position, int DestinationX, int DestinationY, int DestinationZ, int Count)
 {
-	patella::bridge::Communication().SendMoveObject(x, y, z, ObjectType, Position, DestinationX, DestinationY, DestinationZ, Count);
+	Communication().SendMoveObject(x, y, z, ObjectType, Position, DestinationX, DestinationY, DestinationZ, Count);
 }
 
 void SendRequestTrade(int x, int y, int z, int ObjectType, int Position, uint32 CreatureID)
 {
-	patella::bridge::Communication().SendRequestTrade(x, y, z, ObjectType, Position, CreatureID);
+	Communication().SendRequestTrade(x, y, z, ObjectType, Position, CreatureID);
 }
 
 void SendInspectTrade(int Side, int Position)
 {
-	patella::bridge::Communication().SendInspectTrade(Side, Position);
+	Communication().SendInspectTrade(Side, Position);
 }
 
 void SendAcceptTrade()
 {
-	patella::bridge::Communication().SendAcceptTrade();
+	Communication().SendAcceptTrade();
 }
 
 void SendRejectTrade()
 {
-	patella::bridge::Communication().SendRejectTrade();
+	Communication().SendRejectTrade();
 }
 
 void SendUseObject(int x, int y, int z, int ObjectType, int Position, int Container)
 {
-	patella::bridge::Communication().SendUseObject(x, y, z, ObjectType, Position, Container);
+	Communication().SendUseObject(x, y, z, ObjectType, Position, Container);
 }
 
 void SendUseObjectWith(int x1, int y1, int z1, int ObjectType1, int Position1, int x2, int y2, int z2, int ObjectType2, int Position2)
 {
-	patella::bridge::Communication().SendUseObjectWith(x1, y1, z1, ObjectType1, Position1, x2, y2, z2, ObjectType2, Position2);
+	Communication().SendUseObjectWith(x1, y1, z1, ObjectType1, Position1, x2, y2, z2, ObjectType2, Position2);
 }
 
 void SendUseObjectOnCreature(int x, int y, int z, int ObjectType, int Position, uint32 CreatureID)
 {
-	patella::bridge::Communication().SendUseObjectOnCreature(x, y, z, ObjectType, Position, CreatureID);
+	Communication().SendUseObjectOnCreature(x, y, z, ObjectType, Position, CreatureID);
 }
 
 void SendRotateObject(int x, int y, int z, int ObjectType, int Position)
 {
-	patella::bridge::Communication().SendRotateObject(x, y, z, ObjectType, Position);
+	Communication().SendRotateObject(x, y, z, ObjectType, Position);
 }
 
 void SendCloseContainer(int Container)
 {
-	patella::bridge::Communication().SendCloseContainer(Container);
+	Communication().SendCloseContainer(Container);
 }
 
 void SendContainerUp(int Container)
 {
-	patella::bridge::Communication().SendContainerUp(Container);
+	Communication().SendContainerUp(Container);
 }
 
 void SendEditText(uint32 ObjectNumber, const char *Text)
 {
-	patella::bridge::Communication().SendEditText(ObjectNumber, Text);
+	Communication().SendEditText(ObjectNumber, Text);
 }
 
 void SendEditHouseText(int Type, uint32 Identifier, const char *Text)
 {
-	patella::bridge::Communication().SendEditHouseText(Type, Identifier, Text);
+	Communication().SendEditHouseText(Type, Identifier, Text);
 }
 
 void SendLook(int x, int y, int z, int ObjectType, int Position)
 {
-	patella::bridge::Communication().SendLook(x, y, z, ObjectType, Position);
+	Communication().SendLook(x, y, z, ObjectType, Position);
 }
 
 void SendTalk(int Mode, const char *Text)
 {
-	patella::bridge::Communication().SendTalk(Mode, Text);
+	Communication().SendTalk(Mode, Text);
 }
 
 void SendTalk(int Mode, const char *Addressee, const char *Text)
 {
-	patella::bridge::Communication().SendTalk(Mode, Addressee, Text);
+	Communication().SendTalk(Mode, Addressee, Text);
 }
 
 void SendTalk(int Mode, int ChannelID, const char *Text)
 {
-	patella::bridge::Communication().SendTalk(Mode, ChannelID, Text);
+	Communication().SendTalk(Mode, ChannelID, Text);
 }
 
 void SendRequestChannels()
 {
-	patella::bridge::Communication().SendRequestChannels();
+	Communication().SendRequestChannels();
 }
 
 void SendJoinChannel(int ChannelID)
 {
-	patella::bridge::Communication().SendJoinChannel(ChannelID);
+	Communication().SendJoinChannel(ChannelID);
 }
 
 void SendLeaveChannel(int ChannelID)
 {
-	patella::bridge::Communication().SendLeaveChannel(ChannelID);
+	Communication().SendLeaveChannel(ChannelID);
 }
 
 void SendOpenPrivateConversation(const char *Name)
 {
-	patella::bridge::Communication().SendOpenPrivateConversation(Name);
+	Communication().SendOpenPrivateConversation(Name);
 }
 
 void SendProcessRuleViolation(const char *Name)
 {
-	patella::bridge::Communication().SendProcessRuleViolation(Name);
+	Communication().SendProcessRuleViolation(Name);
 }
 
 void SendCloseRuleViolation(const char *Name)
 {
-	patella::bridge::Communication().SendCloseRuleViolation(Name);
+	Communication().SendCloseRuleViolation(Name);
 }
 
 void SendCancelRuleViolation()
 {
-	patella::bridge::Communication().SendCancelRuleViolation();
+	Communication().SendCancelRuleViolation();
 }
 
 void SendFightModes()
 {
-	patella::bridge::Communication().SendFightModes();
+	Communication().SendFightModes();
 }
 
 void SendAttack(uint32 CreatureID)
 {
-	patella::bridge::Communication().SendAttack(CreatureID);
+	Communication().SendAttack(CreatureID);
 }
 
 void SendFollow(uint32 CreatureID)
 {
-	patella::bridge::Communication().SendFollow(CreatureID);
+	Communication().SendFollow(CreatureID);
 }
 
 void SendOpenPrivateChannel()
 {
-	patella::bridge::Communication().SendOpenPrivateChannel();
+	Communication().SendOpenPrivateChannel();
 }
 
 void SendInviteToPrivateChannel(const char *Name)
 {
-	patella::bridge::Communication().SendInviteToPrivateChannel(Name);
+	Communication().SendInviteToPrivateChannel(Name);
 }
 
 void SendExcludeFromPrivateChannel(const char *Name)
 {
-	patella::bridge::Communication().SendExcludeFromPrivateChannel(Name);
+	Communication().SendExcludeFromPrivateChannel(Name);
 }
 
 void SendInviteToParty(uint32 CharacterID)
 {
-	patella::bridge::Communication().SendInviteToParty(CharacterID);
+	Communication().SendInviteToParty(CharacterID);
 }
 
 void SendJoinParty(uint32 CharacterID)
 {
-	patella::bridge::Communication().SendJoinParty(CharacterID);
+	Communication().SendJoinParty(CharacterID);
 }
 
 void SendRevokePartyInvitation(uint32 CharacterID)
 {
-	patella::bridge::Communication().SendRevokePartyInvitation(CharacterID);
+	Communication().SendRevokePartyInvitation(CharacterID);
 }
 
 void SendPassPartyLeadership(uint32 CharacterID)
 {
-	patella::bridge::Communication().SendPassPartyLeadership(CharacterID);
+	Communication().SendPassPartyLeadership(CharacterID);
 }
 
 void SendLeaveParty()
 {
-	patella::bridge::Communication().SendLeaveParty();
+	Communication().SendLeaveParty();
 }
 
 void SendStopAttackAndWalk()
 {
-	patella::bridge::Communication().SendStopAttackAndWalk();
+	Communication().SendStopAttackAndWalk();
 }
 
 void SendRequestOutfit()
 {
-	patella::bridge::Communication().SendRequestOutfit();
+	Communication().SendRequestOutfit();
 }
 
 void SendOutfit(int OutfitType, const int *Colors)
 {
-	patella::bridge::Communication().SendOutfit(OutfitType, Colors);
+	Communication().SendOutfit(OutfitType, Colors);
 }
 
 void SendAddBuddy(const char *Name)
 {
-	patella::bridge::Communication().SendAddBuddy(Name);
+	Communication().SendAddBuddy(Name);
 }
 
 void SendRemoveBuddy(uint32 CharacterID)
 {
-	patella::bridge::Communication().SendRemoveBuddy(CharacterID);
+	Communication().SendRemoveBuddy(CharacterID);
 }
 
 void SendBugReport(const char *Text)
 {
-	patella::bridge::Communication().SendBugReport(Text);
+	Communication().SendBugReport(Text);
 }
 
 void SendRuleViolationReport(const char *Name, uint8 Reason, uint8 Action, const char *Comment, uint32 StatementID, bool IPBanishment)
 {
-	patella::bridge::Communication().SendRuleViolationReport(Name, Reason, Action, Comment, StatementID, IPBanishment);
+	Communication().SendRuleViolationReport(Name, Reason, Action, Comment, StatementID, IPBanishment);
 }
 
 void ReceiveLoginError()
 {
-	patella::bridge::Communication().ReceiveLoginError();
+	Communication().ReceiveLoginError();
 }
 
 void ReceiveLoginMessage()
 {
-	patella::bridge::Communication().ReceiveLoginMessage();
+	Communication().ReceiveLoginMessage();
 }
 
 void ReceiveMessageOfTheDay()
 {
-	patella::bridge::Communication().ReceiveMessageOfTheDay();
+	Communication().ReceiveMessageOfTheDay();
 }
 
 void ReceiveUpdateRequest()
 {
-	patella::bridge::Communication().ReceiveUpdateRequest();
+	Communication().ReceiveUpdateRequest();
 }
 
 void ReceiveCharacterList()
 {
-	patella::bridge::Communication().ReceiveCharacterList();
+	Communication().ReceiveCharacterList();
 }
 
 void ReceiveLoginServerOverloaded()
 {
-	patella::bridge::Communication().ReceiveLoginServerOverloaded();
+	Communication().ReceiveLoginServerOverloaded();
 }
 
 void ReceiveGameLogin()
 {
-	patella::bridge::Communication().ReceiveGameLogin();
+	Communication().ReceiveGameLogin();
 }
 
 void ReceiveGamemasterActions()
 {
-	patella::bridge::Communication().ReceiveGamemasterActions();
+	Communication().ReceiveGamemasterActions();
 }
 
 void ReceiveGameError()
 {
-	patella::bridge::Communication().ReceiveGameError();
+	Communication().ReceiveGameError();
 }
 
 void ReceiveGameMessage()
 {
-	patella::bridge::Communication().ReceiveGameMessage();
+	Communication().ReceiveGameMessage();
 }
 
 void ReceiveLoginWait()
 {
-	patella::bridge::Communication().ReceiveLoginWait();
+	Communication().ReceiveLoginWait();
 }
 
 void ReceivePing()
 {
-	patella::bridge::Communication().ReceivePing();
+	Communication().ReceivePing();
 }
 
 void ReceiveMap()
 {
-	patella::bridge::Communication().ReceiveMap();
+	Communication().ReceiveMap();
 }
 
 void ReceiveMapNorth()
 {
-	patella::bridge::Communication().ReceiveMapNorth();
+	Communication().ReceiveMapNorth();
 }
 
 void ReceiveMapEast()
 {
-	patella::bridge::Communication().ReceiveMapEast();
+	Communication().ReceiveMapEast();
 }
 
 void ReceiveMapSouth()
 {
-	patella::bridge::Communication().ReceiveMapSouth();
+	Communication().ReceiveMapSouth();
 }
 
 void ReceiveMapWest()
 {
-	patella::bridge::Communication().ReceiveMapWest();
+	Communication().ReceiveMapWest();
 }
 
 void ReceiveField()
 {
-	patella::bridge::Communication().ReceiveField();
+	Communication().ReceiveField();
 }
 
 void ReceiveAddObject()
 {
-	patella::bridge::Communication().ReceiveAddObject();
+	Communication().ReceiveAddObject();
 }
 
 void ReceiveChangeObject()
 {
-	patella::bridge::Communication().ReceiveChangeObject();
+	Communication().ReceiveChangeObject();
 }
 
 void ReceiveDeleteObject()
 {
-	patella::bridge::Communication().ReceiveDeleteObject();
+	Communication().ReceiveDeleteObject();
 }
 
 void ReceiveMoveCreature()
 {
-	patella::bridge::Communication().ReceiveMoveCreature();
+	Communication().ReceiveMoveCreature();
 }
 
 void ReceiveOpenContainer(int &Container)
 {
-	patella::bridge::Communication().ReceiveOpenContainer(Container);
+	Communication().ReceiveOpenContainer(Container);
 }
 
 void ReceiveCloseContainer(int &Container)
 {
-	patella::bridge::Communication().ReceiveCloseContainer(Container);
+	Communication().ReceiveCloseContainer(Container);
 }
 
 void ReceiveContainerAddObject()
 {
-	patella::bridge::Communication().ReceiveContainerAddObject();
+	Communication().ReceiveContainerAddObject();
 }
 
 void ReceiveContainerChangeObject()
 {
-	patella::bridge::Communication().ReceiveContainerChangeObject();
+	Communication().ReceiveContainerChangeObject();
 }
 
 void ReceiveContainerDeleteObject()
 {
-	patella::bridge::Communication().ReceiveContainerDeleteObject();
+	Communication().ReceiveContainerDeleteObject();
 }
 
 void ReceiveInventoryObject()
 {
-	patella::bridge::Communication().ReceiveInventoryObject();
+	Communication().ReceiveInventoryObject();
 }
 
 void ReceiveDeleteInventoryObject()
 {
-	patella::bridge::Communication().ReceiveDeleteInventoryObject();
+	Communication().ReceiveDeleteInventoryObject();
 }
 
 void ReceiveOwnTrade()
 {
-	patella::bridge::Communication().ReceiveOwnTrade();
+	Communication().ReceiveOwnTrade();
 }
 
 void ReceiveCounterTrade()
 {
-	patella::bridge::Communication().ReceiveCounterTrade();
+	Communication().ReceiveCounterTrade();
 }
 
 void ReceiveCloseTrade()
 {
-	patella::bridge::Communication().ReceiveCloseTrade();
+	Communication().ReceiveCloseTrade();
 }
 
 void ReceiveWorldLight()
 {
-	patella::bridge::Communication().ReceiveWorldLight();
+	Communication().ReceiveWorldLight();
 }
 
 void ReceiveMagicEffect()
 {
-	patella::bridge::Communication().ReceiveMagicEffect();
+	Communication().ReceiveMagicEffect();
 }
 
 void ReceiveAnimatedText()
 {
-	patella::bridge::Communication().ReceiveAnimatedText();
+	Communication().ReceiveAnimatedText();
 }
 
 void ReceiveDistanceEffect()
 {
-	patella::bridge::Communication().ReceiveDistanceEffect();
+	Communication().ReceiveDistanceEffect();
 }
 
 void ReceiveCreatureMark()
 {
-	patella::bridge::Communication().ReceiveCreatureMark();
+	Communication().ReceiveCreatureMark();
 }
 
 void ReceiveCreatureHealth()
 {
-	patella::bridge::Communication().ReceiveCreatureHealth();
+	Communication().ReceiveCreatureHealth();
 }
 
 void ReceiveCreatureLight()
 {
-	patella::bridge::Communication().ReceiveCreatureLight();
+	Communication().ReceiveCreatureLight();
 }
 
 void ReceiveCreatureOutfit()
 {
-	patella::bridge::Communication().ReceiveCreatureOutfit();
+	Communication().ReceiveCreatureOutfit();
 }
 
 void ReceiveCreatureSpeed()
 {
-	patella::bridge::Communication().ReceiveCreatureSpeed();
+	Communication().ReceiveCreatureSpeed();
 }
 
 void ReceiveCreatureSkull()
 {
-	patella::bridge::Communication().ReceiveCreatureSkull();
+	Communication().ReceiveCreatureSkull();
 }
 
 void ReceiveCreatureShield()
 {
-	patella::bridge::Communication().ReceiveCreatureShield();
+	Communication().ReceiveCreatureShield();
 }
 
 void ReceiveEditText()
 {
-	patella::bridge::Communication().ReceiveEditText();
+	Communication().ReceiveEditText();
 }
 
 void ReceiveEditHouseText()
 {
-	patella::bridge::Communication().ReceiveEditHouseText();
+	Communication().ReceiveEditHouseText();
 }
 
 void ReceivePlayerStats()
 {
-	patella::bridge::Communication().ReceivePlayerStats();
+	Communication().ReceivePlayerStats();
 }
 
 void ReceivePlayerSkills()
 {
-	patella::bridge::Communication().ReceivePlayerSkills();
+	Communication().ReceivePlayerSkills();
 }
 
 void ReceivePlayerIcons()
 {
-	patella::bridge::Communication().ReceivePlayerIcons();
+	Communication().ReceivePlayerIcons();
 }
 
 void ReceiveCancelAttack()
 {
-	patella::bridge::Communication().ReceiveCancelAttack();
+	Communication().ReceiveCancelAttack();
 }
 
 void ReceiveTalk()
 {
-	patella::bridge::Communication().ReceiveTalk();
+	Communication().ReceiveTalk();
 }
 
 void ReceiveChannelList()
 {
-	patella::bridge::Communication().ReceiveChannelList();
+	Communication().ReceiveChannelList();
 }
 
 void ReceiveOpenChannel()
 {
-	patella::bridge::Communication().ReceiveOpenChannel();
+	Communication().ReceiveOpenChannel();
 }
 
 void ReceiveOpenPrivateConversation()
 {
-	patella::bridge::Communication().ReceiveOpenPrivateConversation();
+	Communication().ReceiveOpenPrivateConversation();
 }
 
 void ReceiveRuleViolationChannel()
 {
-	patella::bridge::Communication().ReceiveRuleViolationChannel();
+	Communication().ReceiveRuleViolationChannel();
 }
 
 void ReceiveRemoveRuleViolation()
 {
-	patella::bridge::Communication().ReceiveRemoveRuleViolation();
+	Communication().ReceiveRemoveRuleViolation();
 }
 
 void ReceiveCancelRuleViolation()
 {
-	patella::bridge::Communication().ReceiveCancelRuleViolation();
+	Communication().ReceiveCancelRuleViolation();
 }
 
 void ReceiveLockRuleViolation()
 {
-	patella::bridge::Communication().ReceiveLockRuleViolation();
+	Communication().ReceiveLockRuleViolation();
 }
 
 void ReceiveOwnChannel()
 {
-	patella::bridge::Communication().ReceiveOwnChannel();
+	Communication().ReceiveOwnChannel();
 }
 
 void ReceiveCloseChannel()
 {
-	patella::bridge::Communication().ReceiveCloseChannel();
+	Communication().ReceiveCloseChannel();
 }
 
 void ReceiveTextMessage()
 {
-	patella::bridge::Communication().ReceiveTextMessage();
+	Communication().ReceiveTextMessage();
 }
 
 void ReceiveCancelWalk()
 {
-	patella::bridge::Communication().ReceiveCancelWalk();
+	Communication().ReceiveCancelWalk();
 }
 
 void ReceiveFloorUp()
 {
-	patella::bridge::Communication().ReceiveFloorUp();
+	Communication().ReceiveFloorUp();
 }
 
 void ReceiveFloorDown()
 {
-	patella::bridge::Communication().ReceiveFloorDown();
+	Communication().ReceiveFloorDown();
 }
 
 void ReceiveOutfit()
 {
-	patella::bridge::Communication().ReceiveOutfit();
+	Communication().ReceiveOutfit();
 }
 
 void ReceiveBuddy()
 {
-	patella::bridge::Communication().ReceiveBuddy();
+	Communication().ReceiveBuddy();
 }
 
 void ReceiveBuddyLogin()
 {
-	patella::bridge::Communication().ReceiveBuddyLogin();
+	Communication().ReceiveBuddyLogin();
 }
 
 void ReceiveBuddyLogout()
 {
-	patella::bridge::Communication().ReceiveBuddyLogout();
+	Communication().ReceiveBuddyLogout();
 }

@@ -1,7 +1,7 @@
 // Communication.h: the senders of the client's packets and the handlers of the server's (Tibia 7.72's protocol).
 //
 // The data is TCommunication's, which TClient owns (Client.h); the free functions of the original's names are the
-// bridge that the callers use until they hold the object (bridge::Communication(), defined in Client.cpp).
+// bridge that the callers use until they hold the object (Communication(), defined in Client.cpp).
 
 #pragma once
 
@@ -186,7 +186,7 @@ public:
 	void ReceiveBuddyLogout();
 
 	// Data. Public: Control.cpp writes OutfitRequested and the packet types (ReceivePackets, InitWindow); Status.cpp's
-	// functions reach Session through bridge::Session().
+	// functions reach Session through Session().
 	bool OutfitRequested{};                  // also reset by Control.cpp
 	int LastPacketIndex{};                   // Control.cpp's: next slot in LastPacketTypes
 	std::array<uint8, 10> LastPacketTypes{}; // Control.cpp's: the last ten packet types, a ring
@@ -212,16 +212,13 @@ private:
 	static_assert(sizeof(LastPacketTypes) == 10, "LastPacketTypes");
 };
 
-// The transition's access path: the communication of the one TClient (Client.cpp). It goes when no free function needs
-// it.
-namespace bridge {
-TCommunication &Communication();
-} // namespace bridge
-
 } // namespace patella
 
+// The one client's communication (Client.cpp).
+patella::TCommunication &Communication();
+
 // The original's functions (the callers' names, and the golden tests'): each calls TCommunication's member of the
-// same name on bridge::Communication().
+// same name on Communication().
 void InitCommunication();
 void ExitCommunication();
 void SendLogin(uint32 AccountID, const char *Password);

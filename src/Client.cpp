@@ -1,4 +1,4 @@
-// Client.cpp: the one TClient of the transition and the subsystems' bridge accessors (Client.h).
+// Client.cpp: the one TClient and the subsystems' accessors (Client.h).
 
 #include "Client.h"
 
@@ -55,10 +55,10 @@ TNetworkSession &NetworkSessionAdapter()
 // Creatures.cpp's, so the golden tests' fakes of those functions are reached as before).
 class TMapConsoleAdapter final : public TMapConsole {
 public:
-	bool HasDefaultConsole() override { return bridge::Talk().DefaultTextBuffer != nullptr; }
+	bool HasDefaultConsole() override { return Talk().DefaultTextBuffer != nullptr; }
 	void AddDefaultConsoleLine(const char *Message) override
 	{
-		::AddTextBufferLine(bridge::Talk().DefaultTextBuffer, 0, Message, TALK_EVENT_STATUS_MESSAGE, nullptr, 0);
+		::AddTextBufferLine(Talk().DefaultTextBuffer, 0, Message, TALK_EVENT_STATUS_MESSAGE, nullptr, 0);
 		::SetConsoleChanged();
 	}
 };
@@ -76,8 +76,8 @@ public:
 // so an adapter as the ones above. Stateless: it reads the one TClient's TGraphics.
 class TGraphicsSignatures final : public TLoginSignatures {
 public:
-	uint32 SpriteSignature() override { return bridge::Graphics().SpriteSignature; }
-	uint32 PictureSignature() override { return bridge::Graphics().PictureSignature; }
+	uint32 SpriteSignature() override { return Graphics().SpriteSignature; }
+	uint32 PictureSignature() override { return Graphics().PictureSignature; }
 };
 
 TLoginSignatures &GraphicsSignatures()
@@ -106,96 +106,104 @@ TClient::TClient(platform::TPlatform &Platform)
 {
 }
 
-TClient &bridge::Client()
+TClient &Client()
 {
 	static TClient Instance(platform::Platform());
 	return Instance;
 }
 
-TPreferences &bridge::Preferences()
+} // namespace patella
+
+// The accessors: how code reaches the one client's subsystems. Each subsystem's header declares its own.
+//
+// A member function of a subsystem class uses what its class holds: its own members, and the references to other
+// subsystems that its class was given in its constructor (Network.SendByte(...) inside TCommunication). Every other
+// caller (the windows and dialogs, the free functions, a subsystem that holds no reference to the one it needs) calls
+// the accessor: Talk().AddTalkbox(...). Where a class has a member or a function has a variable of an accessor's
+// name, the accessor is written ::GUI().
+
+patella::TPreferences &Preferences()
 {
-	return Client().Preferences;
+	return patella::Client().Preferences;
 }
 
-TNetwork &bridge::Network()
+patella::TNetwork &Network()
 {
-	return Client().Network;
+	return patella::Client().Network;
 }
 
-TCommunication &bridge::Communication()
+patella::TCommunication &Communication()
 {
-	return Client().Communication;
+	return patella::Client().Communication;
 }
 
-TSession &bridge::Session()
+patella::TSession &Session()
 {
-	return Client().Communication.Session;
+	return patella::Client().Communication.Session;
 }
 
-TObjectTypes &bridge::ObjectTypes()
+patella::TObjectTypes &ObjectTypes()
 {
-	return Client().MapState.ObjectTypes;
+	return patella::Client().MapState.ObjectTypes;
 }
 
-TMap &bridge::Map()
+patella::TMap &Map()
 {
-	return Client().MapState.Map;
+	return patella::Client().MapState.Map;
 }
 
-TCreatures &bridge::Creatures()
+patella::TCreatures &Creatures()
 {
-	return Client().MapState.Creatures;
+	return patella::Client().MapState.Creatures;
 }
 
-TPlayerState &bridge::PlayerState()
+patella::TPlayerState &PlayerState()
 {
-	return Client().MapState.PlayerState;
+	return patella::Client().MapState.PlayerState;
 }
 
-TInventory &bridge::Inventory()
+patella::TInventory &Inventory()
 {
-	return Client().MapState.Inventory;
+	return patella::Client().MapState.Inventory;
 }
 
-TGraphics &bridge::Graphics()
+patella::TGraphics &Graphics()
 {
-	return Client().Graphics;
+	return patella::Client().Graphics;
 }
 
-TGraphicsEngine &bridge::GraphicsEngine()
+patella::TGraphicsEngine &GraphicsEngine()
 {
-	return Client().Graphics.Engine;
+	return patella::Client().Graphics.Engine;
 }
 
-TSkins &bridge::Skins()
+patella::TSkins &SkinData()
 {
-	return Client().Graphics.Skins;
+	return patella::Client().Graphics.Skins;
 }
 
 // TPreferences' TTalkLists is TGUI's TTalk.
-TTalkLists &bridge::TalkLists()
+patella::TTalkLists &TalkLists()
 {
-	return Client().GUI.Talk;
+	return patella::Client().GUI.Talk;
 }
 
-TGUI &bridge::GUI()
+patella::TGUI &GUI()
 {
-	return Client().GUI;
+	return patella::Client().GUI;
 }
 
-TTalk &bridge::Talk()
+patella::TTalk &Talk()
 {
-	return Client().GUI.Talk;
+	return patella::Client().GUI.Talk;
 }
 
-THelp &bridge::Help()
+patella::THelp &Help()
 {
-	return Client().GUI.Help;
+	return patella::Client().GUI.Help;
 }
 
-TInteraction &bridge::Interaction()
+patella::TInteraction &Interaction()
 {
-	return Client().GUI.Interaction;
+	return patella::Client().GUI.Interaction;
 }
-
-} // namespace patella

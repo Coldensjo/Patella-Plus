@@ -742,80 +742,80 @@ void patella::TNetwork::ExitNetwork()
 
 void SetTestServerPort(int Port)
 {
-	patella::bridge::Network().SetTestServerPort(Port);
+	Network().SetTestServerPort(Port);
 }
 
 void SetConnectionTimeout(int Timeout)
 {
-	patella::bridge::Network().SetConnectionTimeout(Timeout);
+	Network().SetConnectionTimeout(Timeout);
 }
 
 void SetNetworkWindow(patella::platform::TWindowHandle Window)
 {
-	patella::bridge::Network().SetNetworkWindow(Window);
+	Network().SetNetworkWindow(Window);
 }
 
 void SetTestServerAddress(const char *Address)
 {
-	patella::bridge::Network().SetTestServerAddress(Address);
+	Network().SetTestServerAddress(Address);
 }
 
 void SetServerError(int errorcode)
 {
-	patella::bridge::Network().SetServerError(errorcode);
+	Network().SetServerError(errorcode);
 }
 
 void SetServerIPAddress(const char *ipaddress)
 {
-	patella::bridge::Network().SetServerIPAddress(ipaddress);
+	Network().SetServerIPAddress(ipaddress);
 }
 
 int GetNextCommand()
 {
-	return patella::bridge::Network().GetNextCommand();
+	return Network().GetNextCommand();
 }
 
 void CheckConnectionTimeout()
 {
-	patella::bridge::Network().CheckConnectionTimeout();
+	Network().CheckConnectionTimeout();
 }
 
 void GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int ErrorCode, int ErrorType)
 {
-	patella::bridge::Network().GetErrorMessage(MessageBuffer, ErrorCode, ErrorType);
+	Network().GetErrorMessage(MessageBuffer, ErrorCode, ErrorType);
 }
 
 const char *GetResolvedIPAddress()
 {
-	return patella::bridge::Network().GetResolvedIPAddress();
+	return Network().GetResolvedIPAddress();
 }
 
 void Disconnect(bool force)
 {
-	patella::bridge::Network().Disconnect(force);
+	Network().Disconnect(force);
 }
 
 void ConnectToLoginServer()
 {
-	patella::bridge::Network().ConnectToLoginServer();
+	Network().ConnectToLoginServer();
 }
 
 void ConnectToGameServer()
 {
-	patella::bridge::Network().ConnectToGameServer();
+	Network().ConnectToGameServer();
 }
 
 void ShutdownConnection()
 {
-	patella::bridge::Network().ShutdownConnection();
+	Network().ShutdownConnection();
 }
 
 void InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)())
 {
-	patella::bridge::Network().InitNetwork(ConnectHandler, ReceiveHandler, CloseHandler);
+	Network().InitNetwork(ConnectHandler, ReceiveHandler, CloseHandler);
 }
 
 void ExitNetwork()
 {
-	patella::bridge::Network().ExitNetwork();
+	Network().ExitNetwork();
 }

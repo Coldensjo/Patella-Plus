@@ -303,20 +303,18 @@ private:
 	bool LastTimeSet{}; // its guard
 };
 
-// The transition's access path: the one TClient's TTalk (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TTalk &Talk();
-} // namespace bridge
-
 } // namespace patella
+
+// The one client's talk (Client.cpp).
+patella::TTalk &Talk();
 
 // Whether this is the console's default buffer.
 inline bool TTalkBuffer::IsDefault()
 {
-	return this == patella::bridge::Talk().DefaultTextBuffer;
+	return this == Talk().DefaultTextBuffer;
 }
 
-// Talk.cpp's functions: each calls TTalk's member of the same name on bridge::Talk().
+// Talk.cpp's functions: each calls TTalk's member of the same name on Talk().
 bool TakeTalkChanged();
 int GetNumberOfTalkboxes();
 const char *GetStatusMessage();

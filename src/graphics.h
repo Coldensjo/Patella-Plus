@@ -245,12 +245,10 @@ private:
 	std::unique_ptr<TFontInfo[]> Fonts{};
 };
 
-// The transition's access path: the one TClient's TGraphics (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TGraphics &Graphics();
-} // namespace bridge
-
 } // namespace patella
+
+// The one client's graphics (Client.cpp).
+patella::TGraphics &Graphics();
 
 // The original's free functions (each forwards to its TGraphics member on the bridge).
 

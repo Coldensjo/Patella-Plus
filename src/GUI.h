@@ -422,12 +422,10 @@ public:
 	void AbandonWindows() noexcept;
 };
 
-// The transition's access path: the one TClient's TGUI (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TGUI &GUI();
-} // namespace bridge
-
 } // namespace patella
+
+// The one client's GUI (Client.cpp).
+patella::TGUI &GUI();
 
 
 inline bool TElement::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)

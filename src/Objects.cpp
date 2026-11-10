@@ -589,235 +589,235 @@ void patella::TObjectTypes::ExitObjects()
 
 bool GetObjectFlag(int Type, int Flag)
 {
-	return patella::bridge::ObjectTypes().GetObjectFlag(Type, Flag);
+	return ObjectTypes().GetObjectFlag(Type, Flag);
 }
 
 int GetObjectBrightness(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectBrightness(Type);
+	return ObjectTypes().GetObjectBrightness(Type);
 }
 
 int GetObjectLightColor(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectLightColor(Type);
+	return ObjectTypes().GetObjectLightColor(Type);
 }
 
 int GetObjectShiftX(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectShiftX(Type);
+	return ObjectTypes().GetObjectShiftX(Type);
 }
 
 int GetObjectShiftY(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectShiftY(Type);
+	return ObjectTypes().GetObjectShiftY(Type);
 }
 
 int GetObjectElevation(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectElevation(Type);
+	return ObjectTypes().GetObjectElevation(Type);
 }
 
 int GetObjectLensHelp(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectLensHelp(Type);
+	return ObjectTypes().GetObjectLensHelp(Type);
 }
 
 int GetObjectWidth(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectWidth(Type);
+	return ObjectTypes().GetObjectWidth(Type);
 }
 
 int GetObjectHeight(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectHeight(Type);
+	return ObjectTypes().GetObjectHeight(Type);
 }
 
 int GetObjectExactSize(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectExactSize(Type);
+	return ObjectTypes().GetObjectExactSize(Type);
 }
 
 int GetObjectLayers(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectLayers(Type);
+	return ObjectTypes().GetObjectLayers(Type);
 }
 
 int GetObjectPatternWidth(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectPatternWidth(Type);
+	return ObjectTypes().GetObjectPatternWidth(Type);
 }
 
 int GetObjectPatternHeight(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectPatternHeight(Type);
+	return ObjectTypes().GetObjectPatternHeight(Type);
 }
 
 int GetObjectPatternDepth(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectPatternDepth(Type);
+	return ObjectTypes().GetObjectPatternDepth(Type);
 }
 
 int GetObjectPhases(int Type)
 {
-	return patella::bridge::ObjectTypes().GetObjectPhases(Type);
+	return ObjectTypes().GetObjectPhases(Type);
 }
 
 int GetObjectSpriteNumber(int Type, int X, int Y, int Layer, int PatternX, int PatternY, int PatternZ, int Phase)
 {
-	return patella::bridge::ObjectTypes().GetObjectSpriteNumber(Type, X, Y, Layer, PatternX, PatternY, PatternZ, Phase);
+	return ObjectTypes().GetObjectSpriteNumber(Type, X, Y, Layer, PatternX, PatternY, PatternZ, Phase);
 }
 
 bool GetOutfitFlag(int Number, int Flag)
 {
-	return patella::bridge::ObjectTypes().GetOutfitFlag(Number, Flag);
+	return ObjectTypes().GetOutfitFlag(Number, Flag);
 }
 
 int GetOutfitBrightness(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitBrightness(Number);
+	return ObjectTypes().GetOutfitBrightness(Number);
 }
 
 int GetOutfitLightColor(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitLightColor(Number);
+	return ObjectTypes().GetOutfitLightColor(Number);
 }
 
 int GetOutfitShiftX(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitShiftX(Number);
+	return ObjectTypes().GetOutfitShiftX(Number);
 }
 
 int GetOutfitShiftY(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitShiftY(Number);
+	return ObjectTypes().GetOutfitShiftY(Number);
 }
 
 int GetOutfitWidth(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitWidth(Number);
+	return ObjectTypes().GetOutfitWidth(Number);
 }
 
 int GetOutfitExactSize(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitExactSize(Number);
+	return ObjectTypes().GetOutfitExactSize(Number);
 }
 
 int GetOutfitHeight(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitHeight(Number);
+	return ObjectTypes().GetOutfitHeight(Number);
 }
 
 int GetOutfitLayers(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitLayers(Number);
+	return ObjectTypes().GetOutfitLayers(Number);
 }
 
 int GetOutfitPhases(int Number)
 {
-	return patella::bridge::ObjectTypes().GetOutfitPhases(Number);
+	return ObjectTypes().GetOutfitPhases(Number);
 }
 
 int GetOutfitSpriteNumber(int Number, int X, int Y, int Layer, int Direction, int Phase)
 {
-	return patella::bridge::ObjectTypes().GetOutfitSpriteNumber(Number, X, Y, Layer, Direction, Phase);
+	return ObjectTypes().GetOutfitSpriteNumber(Number, X, Y, Layer, Direction, Phase);
 }
 
 bool GetEffectFlag(int Number, int Flag)
 {
-	return patella::bridge::ObjectTypes().GetEffectFlag(Number, Flag);
+	return ObjectTypes().GetEffectFlag(Number, Flag);
 }
 
 int GetEffectBrightness(int Number)
 {
-	return patella::bridge::ObjectTypes().GetEffectBrightness(Number);
+	return ObjectTypes().GetEffectBrightness(Number);
 }
 
 int GetEffectLightColor(int Number)
 {
-	return patella::bridge::ObjectTypes().GetEffectLightColor(Number);
+	return ObjectTypes().GetEffectLightColor(Number);
 }
 
 int GetEffectWidth(int Number)
 {
-	return patella::bridge::ObjectTypes().GetEffectWidth(Number);
+	return ObjectTypes().GetEffectWidth(Number);
 }
 
 int GetEffectHeight(int Number)
 {
-	return patella::bridge::ObjectTypes().GetEffectHeight(Number);
+	return ObjectTypes().GetEffectHeight(Number);
 }
 
 int GetEffectLayers(int Number)
 {
-	return patella::bridge::ObjectTypes().GetEffectLayers(Number);
+	return ObjectTypes().GetEffectLayers(Number);
 }
 
 int GetEffectPhases(int Number)
 {
-	return patella::bridge::ObjectTypes().GetEffectPhases(Number);
+	return ObjectTypes().GetEffectPhases(Number);
 }
 
 int GetEffectSpriteNumber(int Number, int X, int Y, int Layer, int Phase)
 {
-	return patella::bridge::ObjectTypes().GetEffectSpriteNumber(Number, X, Y, Layer, Phase);
+	return ObjectTypes().GetEffectSpriteNumber(Number, X, Y, Layer, Phase);
 }
 
 bool GetMissileFlag(int Number, int Flag)
 {
-	return patella::bridge::ObjectTypes().GetMissileFlag(Number, Flag);
+	return ObjectTypes().GetMissileFlag(Number, Flag);
 }
 
 int GetMissileBrightness(int Number)
 {
-	return patella::bridge::ObjectTypes().GetMissileBrightness(Number);
+	return ObjectTypes().GetMissileBrightness(Number);
 }
 
 int GetMissileLightColor(int Number)
 {
-	return patella::bridge::ObjectTypes().GetMissileLightColor(Number);
+	return ObjectTypes().GetMissileLightColor(Number);
 }
 
 int GetMissileWidth(int Number)
 {
-	return patella::bridge::ObjectTypes().GetMissileWidth(Number);
+	return ObjectTypes().GetMissileWidth(Number);
 }
 
 int GetMissileHeight(int Number)
 {
-	return patella::bridge::ObjectTypes().GetMissileHeight(Number);
+	return ObjectTypes().GetMissileHeight(Number);
 }
 
 int GetMissileLayers(int Number)
 {
-	return patella::bridge::ObjectTypes().GetMissileLayers(Number);
+	return ObjectTypes().GetMissileLayers(Number);
 }
 
 int GetMissileSpriteNumber(int Number, int X, int Y, int Layer, int Direction)
 {
-	return patella::bridge::ObjectTypes().GetMissileSpriteNumber(Number, X, Y, Layer, Direction);
+	return ObjectTypes().GetMissileSpriteNumber(Number, X, Y, Layer, Direction);
 }
 
 void GetCumulativePattern(TObject &Obj, int *PatternX, int *PatternY)
 {
-	patella::bridge::ObjectTypes().GetCumulativePattern(Obj, PatternX, PatternY);
+	ObjectTypes().GetCumulativePattern(Obj, PatternX, PatternY);
 }
 
 void GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY)
 {
-	patella::bridge::ObjectTypes().GetLiquidPattern(Obj, PatternX, PatternY);
+	ObjectTypes().GetLiquidPattern(Obj, PatternX, PatternY);
 }
 
 void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY)
 {
-	patella::bridge::ObjectTypes().GetHangPattern(Obj, PatternX, PatternY);
+	ObjectTypes().GetHangPattern(Obj, PatternX, PatternY);
 }
 
 void InitObjects()
 {
-	patella::bridge::ObjectTypes().InitObjects();
+	ObjectTypes().InitObjects();
 }
 
 void ExitObjects()
 {
-	patella::bridge::ObjectTypes().ExitObjects();
+	ObjectTypes().ExitObjects();
 }

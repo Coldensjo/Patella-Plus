@@ -5,9 +5,9 @@
 //
 // The session (the connection state, the account, the character list, the rights) is TSession's, which TCommunication
 // owns (Communication.h); the free functions of the original's names are the bridge that the callers use until they
-// hold the object (bridge::Session(), defined in Client.cpp). The rest of the file's data, the user interaction (the
+// hold the object (Session(), defined in Client.cpp). The rest of the file's data, the user interaction (the
 // action, drag, trade and use state, the mouse, the message queue, the blink, the mouse-over text, the clipboard's link
-// check), is TInteraction's, which TGUI owns (GUI.h); bridge::Interaction() the same way.
+// check), is TInteraction's, which TGUI owns (GUI.h); Interaction() the same way.
 
 #pragma once
 
@@ -203,16 +203,13 @@ private:
 	TObject UseObject{};   // "SrcObj" in MapWindow.cpp
 };
 
-// The transition's access path: the session of the one TClient's TCommunication (Client.cpp). It goes when no free
-// function needs it.
-namespace bridge {
-TSession &Session();
-TInteraction &Interaction(); // the one TClient's TGUI's
-} // namespace bridge
-
 } // namespace patella
 
-// The session's functions: each calls TSession's member of the same name on bridge::Session(); the others are
+// The one client's session, which is its communication's, and user interaction, which is its GUI's (Client.cpp).
+patella::TSession &Session();
+patella::TInteraction &Interaction();
+
+// The session's functions: each calls TSession's member of the same name on Session(); the others are
 // Status.cpp's own.
 bool CheckAnyRight();
 int GetActionNumber();

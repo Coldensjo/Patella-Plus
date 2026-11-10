@@ -914,25 +914,23 @@ public:
 	TSkinProperties SkinProperties{}; // GUI.cpp's; filled by InitSkinProperties
 };
 
-// The transition's access path: the one TClient's TSkins (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TSkins &Skins();
-} // namespace bridge
-
 } // namespace patella
+
+// The one client's TSkins (Client.cpp). Its name is not Skins(), which is the table below.
+patella::TSkins &SkinData();
 
 // The original's globals' names for their about 2,400 readers in the window files: SkinProperties() and Skins() are the
 // one TClient's, so a use reads `SkinProperties().TooltipBorder` where it read `SkinProperties.TooltipBorder`. Not the
-// design's `bridge::Skins().SkinProperties` at each use: the same object, without rewriting every expression of the
+// design's `SkinData().SkinProperties` at each use: the same object, without rewriting every expression of the
 // windows.
 inline TSkinProperties &SkinProperties()
 {
-	return patella::bridge::Skins().SkinProperties;
+	return SkinData().SkinProperties;
 }
 
 inline std::unique_ptr<TSkin[]> &Skins()
 {
-	return patella::bridge::Skins().Skins;
+	return SkinData().Skins;
 }
 
 // The original's free functions (graphics.cpp's: they call the bridge, which patella_core does not have), forwarding to

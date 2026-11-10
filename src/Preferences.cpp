@@ -3,7 +3,7 @@
 // existing Tibia.cfg once; the client never writes Tibia.cfg.
 //
 // The data and the functions are TPreferences' (Preferences.h), which TClient owns; the free functions at the end, the
-// original's names, call them on bridge::Preferences(). Talk's lists (White, Ignore) are reached through TTalkLists, so
+// original's names, call them on Preferences(). Talk's lists (White, Ignore) are reached through TTalkLists, so
 // this file does not include Talk.h.
 
 #include "Preferences.h"
@@ -1074,421 +1074,421 @@ void TPreferences::ExitPreferences(TTalkLists &Lists)
 
 bool GetTestServerLogin()
 {
-	return patella::bridge::Preferences().GetTestServerLogin();
+	return Preferences().GetTestServerLogin();
 }
 
 void SetTestServerLogin(bool Value)
 {
-	patella::bridge::Preferences().SetTestServerLogin(Value);
+	Preferences().SetTestServerLogin(Value);
 }
 
 void SetViewMode(int ViewMode)
 {
-	patella::bridge::Preferences().SetViewMode(ViewMode);
+	Preferences().SetViewMode(ViewMode);
 }
 
 void SetFullscreenMode(const TFullscreenMode *Mode)
 {
-	patella::bridge::Preferences().SetFullscreenMode(Mode);
+	Preferences().SetFullscreenMode(Mode);
 }
 
 void SetWindowsMousepointer(bool Value)
 {
-	patella::bridge::Preferences().SetWindowsMousepointer(Value);
+	Preferences().SetWindowsMousepointer(Value);
 }
 
 void SetLightEffects(bool Value)
 {
-	patella::bridge::Preferences().SetLightEffects(Value);
+	Preferences().SetLightEffects(Value);
 }
 
 void SetTextualEffects(bool Value)
 {
-	patella::bridge::Preferences().SetTextualEffects(Value);
+	Preferences().SetTextualEffects(Value);
 }
 
 void SetCreatureInfo(int Value)
 {
-	patella::bridge::Preferences().SetCreatureInfo(Value);
+	Preferences().SetCreatureInfo(Value);
 }
 
 void SetNoStretching(bool Value)
 {
-	patella::bridge::Preferences().SetNoStretching(Value);
+	Preferences().SetNoStretching(Value);
 }
 
 void SetDefaultNoStretching(bool Value)
 {
-	patella::bridge::Preferences().SetDefaultNoStretching(Value);
+	Preferences().SetDefaultNoStretching(Value);
 }
 
 void SetConfineFramerate(int Value)
 {
-	patella::bridge::Preferences().SetConfineFramerate(Value);
+	Preferences().SetConfineFramerate(Value);
 }
 
 void SetEngine(int Value)
 {
-	patella::bridge::Preferences().SetEngine(Value);
+	Preferences().SetEngine(Value);
 }
 
 int GetViewMode()
 {
-	return patella::bridge::Preferences().GetViewMode();
+	return Preferences().GetViewMode();
 }
 
 TFullscreenMode *GetFullscreenMode()
 {
-	return patella::bridge::Preferences().GetFullscreenMode();
+	return Preferences().GetFullscreenMode();
 }
 
 bool GetWindowsMousepointer()
 {
-	return patella::bridge::Preferences().GetWindowsMousepointer();
+	return Preferences().GetWindowsMousepointer();
 }
 
 bool GetLightEffects()
 {
-	return patella::bridge::Preferences().GetLightEffects();
+	return Preferences().GetLightEffects();
 }
 
 bool GetTextualEffects()
 {
-	return patella::bridge::Preferences().GetTextualEffects();
+	return Preferences().GetTextualEffects();
 }
 
 int GetCreatureInfo()
 {
-	return patella::bridge::Preferences().GetCreatureInfo();
+	return Preferences().GetCreatureInfo();
 }
 
 bool GetNoStretching()
 {
-	return patella::bridge::Preferences().GetNoStretching();
+	return Preferences().GetNoStretching();
 }
 
 int GetConfineFramerate()
 {
-	return patella::bridge::Preferences().GetConfineFramerate();
+	return Preferences().GetConfineFramerate();
 }
 
 int GetEngine()
 {
-	return patella::bridge::Preferences().GetEngine();
+	return Preferences().GetEngine();
 }
 
 void SetWindowedMode(int x, int y, int Width, int Height, bool Maximized)
 {
-	patella::bridge::Preferences().SetWindowedMode(x, y, Width, Height, Maximized);
+	Preferences().SetWindowedMode(x, y, Width, Height, Maximized);
 }
 
 void GetWindowedMode(int *x, int *y, int *Width, int *Height, bool *Maximized)
 {
-	patella::bridge::Preferences().GetWindowedMode(x, y, Width, Height, Maximized);
+	Preferences().GetWindowedMode(x, y, Width, Height, Maximized);
 }
 
 void SetConsoleHeight(int Value)
 {
-	patella::bridge::Preferences().SetConsoleHeight(Value);
+	Preferences().SetConsoleHeight(Value);
 }
 
 int GetConsoleHeight()
 {
-	return patella::bridge::Preferences().GetConsoleHeight();
+	return Preferences().GetConsoleHeight();
 }
 
 void SetAutomapZoom(int Value)
 {
-	patella::bridge::Preferences().SetAutomapZoom(Value);
+	Preferences().SetAutomapZoom(Value);
 }
 
 int GetAutomapZoom()
 {
-	return patella::bridge::Preferences().GetAutomapZoom();
+	return Preferences().GetAutomapZoom();
 }
 
 void SetBuddySortmethods(const int *Methods)
 {
-	patella::bridge::Preferences().SetBuddySortmethods(Methods);
+	Preferences().SetBuddySortmethods(Methods);
 }
 
 void GetBuddySortmethods(int *Methods)
 {
-	patella::bridge::Preferences().GetBuddySortmethods(Methods);
+	Preferences().GetBuddySortmethods(Methods);
 }
 
 void SetBuddyHideOffline(bool Value)
 {
-	patella::bridge::Preferences().SetBuddyHideOffline(Value);
+	Preferences().SetBuddyHideOffline(Value);
 }
 
 bool GetBuddyHideOffline()
 {
-	return patella::bridge::Preferences().GetBuddyHideOffline();
+	return Preferences().GetBuddyHideOffline();
 }
 
 void ClearOpenDialogs()
 {
-	patella::bridge::Preferences().ClearOpenDialogs();
+	Preferences().ClearOpenDialogs();
 }
 
 const char *GetMessageOfTheDay()
 {
-	return patella::bridge::Preferences().GetMessageOfTheDay();
+	return Preferences().GetMessageOfTheDay();
 }
 
 void SetInfoMessages(bool Value)
 {
-	patella::bridge::Preferences().SetInfoMessages(Value);
+	Preferences().SetInfoMessages(Value);
 }
 
 void SetEventMessages(bool Value)
 {
-	patella::bridge::Preferences().SetEventMessages(Value);
+	Preferences().SetEventMessages(Value);
 }
 
 void SetStatusMessages(bool Value)
 {
-	patella::bridge::Preferences().SetStatusMessages(Value);
+	Preferences().SetStatusMessages(Value);
 }
 
 void SetTimeStamps(bool Value)
 {
-	patella::bridge::Preferences().SetTimeStamps(Value);
+	Preferences().SetTimeStamps(Value);
 }
 
 void SetPrivateMessages(bool Value)
 {
-	patella::bridge::Preferences().SetPrivateMessages(Value);
+	Preferences().SetPrivateMessages(Value);
 }
 
 bool GetInfoMessages()
 {
-	return patella::bridge::Preferences().GetInfoMessages();
+	return Preferences().GetInfoMessages();
 }
 
 bool GetEventMessages()
 {
-	return patella::bridge::Preferences().GetEventMessages();
+	return Preferences().GetEventMessages();
 }
 
 bool GetStatusMessages()
 {
-	return patella::bridge::Preferences().GetStatusMessages();
+	return Preferences().GetStatusMessages();
 }
 
 bool GetTimeStamps()
 {
-	return patella::bridge::Preferences().GetTimeStamps();
+	return Preferences().GetTimeStamps();
 }
 
 bool GetPrivateMessages()
 {
-	return patella::bridge::Preferences().GetPrivateMessages();
+	return Preferences().GetPrivateMessages();
 }
 
 void ClearOpenChannels()
 {
-	patella::bridge::Preferences().ClearOpenChannels();
+	Preferences().ClearOpenChannels();
 }
 
 void SetClassicControl(bool Value)
 {
-	patella::bridge::Preferences().SetClassicControl(Value);
+	Preferences().SetClassicControl(Value);
 }
 
 void SetAutoChaseOff(bool Value)
 {
-	patella::bridge::Preferences().SetAutoChaseOff(Value);
+	Preferences().SetAutoChaseOff(Value);
 }
 
 bool GetClassicControl()
 {
-	return patella::bridge::Preferences().GetClassicControl();
+	return Preferences().GetClassicControl();
 }
 
 bool GetAutoChaseOff()
 {
-	return patella::bridge::Preferences().GetAutoChaseOff();
+	return Preferences().GetAutoChaseOff();
 }
 
 void SetDragFullStacks(bool Value)
 {
-	patella::bridge::Preferences().SetDragFullStacks(Value);
+	Preferences().SetDragFullStacks(Value);
 }
 
 bool GetDragFullStacks()
 {
-	return patella::bridge::Preferences().GetDragFullStacks();
+	return Preferences().GetDragFullStacks();
 }
 
 const char *GetRsaModulus()
 {
-	return patella::bridge::Preferences().GetRsaModulus();
+	return Preferences().GetRsaModulus();
 }
 
 void SetAttackMode(int Value)
 {
-	patella::bridge::Preferences().SetAttackMode(Value);
+	Preferences().SetAttackMode(Value);
 }
 
 void SetChaseMode(int Value)
 {
-	patella::bridge::Preferences().SetChaseMode(Value);
+	Preferences().SetChaseMode(Value);
 }
 
 void SetSecureMode(bool Value)
 {
-	patella::bridge::Preferences().SetSecureMode(Value);
+	Preferences().SetSecureMode(Value);
 }
 
 int GetAttackMode()
 {
-	return patella::bridge::Preferences().GetAttackMode();
+	return Preferences().GetAttackMode();
 }
 
 int GetChaseMode()
 {
-	return patella::bridge::Preferences().GetChaseMode();
+	return Preferences().GetChaseMode();
 }
 
 bool GetSecureMode()
 {
-	return patella::bridge::Preferences().GetSecureMode();
+	return Preferences().GetSecureMode();
 }
 
 void SetShowNewHints(bool Value)
 {
-	patella::bridge::Preferences().SetShowNewHints(Value);
+	Preferences().SetShowNewHints(Value);
 }
 
 bool GetShowNewHints()
 {
-	return patella::bridge::Preferences().GetShowNewHints();
+	return Preferences().GetShowNewHints();
 }
 
 bool GetLevelBar()
 {
-	return patella::bridge::Preferences().GetLevelBar();
+	return Preferences().GetLevelBar();
 }
 
 bool GetMagLevelBar()
 {
-	return patella::bridge::Preferences().GetMagLevelBar();
+	return Preferences().GetMagLevelBar();
 }
 
 void SetLevelBar(bool Value)
 {
-	patella::bridge::Preferences().SetLevelBar(Value);
+	Preferences().SetLevelBar(Value);
 }
 
 void SetMagLevelBar(bool Value)
 {
-	patella::bridge::Preferences().SetMagLevelBar(Value);
+	Preferences().SetMagLevelBar(Value);
 }
 
 void SetContentWindowSize(int ID, int Size)
 {
-	patella::bridge::Preferences().SetContentWindowSize(ID, Size);
+	Preferences().SetContentWindowSize(ID, Size);
 }
 
 int GetContentWindowSize(int ID)
 {
-	return patella::bridge::Preferences().GetContentWindowSize(ID);
+	return Preferences().GetContentWindowSize(ID);
 }
 
 int GetOpenDialogs(int **List)
 {
-	return patella::bridge::Preferences().GetOpenDialogs(List);
+	return Preferences().GetOpenDialogs(List);
 }
 
 int GetOpenChannels(int **List)
 {
-	return patella::bridge::Preferences().GetOpenChannels(List);
+	return Preferences().GetOpenChannels(List);
 }
 
 void AddKnownHint(int Hint)
 {
-	patella::bridge::Preferences().AddKnownHint(Hint);
+	Preferences().AddKnownHint(Hint);
 }
 
 bool IsKnownHint(int Hint)
 {
-	return patella::bridge::Preferences().IsKnownHint(Hint);
+	return Preferences().IsKnownHint(Hint);
 }
 
 void SetHotkey(int Number, const char *Text, bool AutoSend)
 {
-	patella::bridge::Preferences().SetHotkey(Number, Text, AutoSend);
+	Preferences().SetHotkey(Number, Text, AutoSend);
 }
 
 const char *GetHotkey(int Number, bool *AutoSend)
 {
-	return patella::bridge::Preferences().GetHotkey(Number, AutoSend);
+	return Preferences().GetHotkey(Number, AutoSend);
 }
 
 void AddOpenDialog(int Identifier)
 {
-	patella::bridge::Preferences().AddOpenDialog(Identifier);
+	Preferences().AddOpenDialog(Identifier);
 }
 
 bool SetMessageOfTheDay(const char *Text)
 {
-	return patella::bridge::Preferences().SetMessageOfTheDay(Text);
+	return Preferences().SetMessageOfTheDay(Text);
 }
 
 void AddOpenChannel(int Identifier)
 {
-	patella::bridge::Preferences().AddOpenChannel(Identifier);
+	Preferences().AddOpenChannel(Identifier);
 }
 
 void SetBuddy(int CharacterID, int Icon, const char *Description, bool Notify)
 {
-	patella::bridge::Preferences().SetBuddy(CharacterID, Icon, Description, Notify);
+	Preferences().SetBuddy(CharacterID, Icon, Description, Notify);
 }
 
 void DeleteBuddy(int CharacterID)
 {
-	patella::bridge::Preferences().DeleteBuddy(CharacterID);
+	Preferences().DeleteBuddy(CharacterID);
 }
 
 int GetBuddyIcon(int CharacterID)
 {
-	return patella::bridge::Preferences().GetBuddyIcon(CharacterID);
+	return Preferences().GetBuddyIcon(CharacterID);
 }
 
 const char *GetBuddyDescription(int CharacterID)
 {
-	return patella::bridge::Preferences().GetBuddyDescription(CharacterID);
+	return Preferences().GetBuddyDescription(CharacterID);
 }
 
 bool GetBuddyNotify(int CharacterID)
 {
-	return patella::bridge::Preferences().GetBuddyNotify(CharacterID);
+	return Preferences().GetBuddyNotify(CharacterID);
 }
 
 bool GetSkillBar(int SkillNumber)
 {
-	return patella::bridge::Preferences().GetSkillBar(SkillNumber);
+	return Preferences().GetSkillBar(SkillNumber);
 }
 
 void SetSkillBar(int SkillNumber, bool Value)
 {
-	patella::bridge::Preferences().SetSkillBar(SkillNumber, Value);
+	Preferences().SetSkillBar(SkillNumber, Value);
 }
 
 void InitPreferences()
 {
-	patella::bridge::Preferences().InitPreferences(patella::bridge::TalkLists());
+	Preferences().InitPreferences(TalkLists());
 }
 
 void SavePreferences()
 {
-	patella::bridge::Preferences().SavePreferences(patella::bridge::TalkLists());
+	Preferences().SavePreferences(TalkLists());
 }
 
 void ExitPreferences()
 {
-	patella::bridge::Preferences().ExitPreferences(patella::bridge::TalkLists());
+	Preferences().ExitPreferences(TalkLists());
 }
 // NOLINTEND(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)

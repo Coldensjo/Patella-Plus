@@ -120,14 +120,12 @@ private:
 	TFixedString<2048> HelpText{};
 };
 
-// The transition's access path: the one TClient's THelp (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-THelp &Help();
-} // namespace bridge
-
 } // namespace patella
 
-// Help.cpp's functions: each calls THelp's member of the same name on bridge::Help().
+// The one client's help (Client.cpp).
+patella::THelp &Help();
+
+// Help.cpp's functions: each calls THelp's member of the same name on Help().
 void SetHelpPosition(int x, int y);
 void MoveHelpPosition(int dx, int dy);
 void SetHelpSize(int Width, int Height);

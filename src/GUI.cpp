@@ -1658,7 +1658,7 @@ void TComponent::Draw(int Surface, int x, int y)
 	for (; i < DrawingListLength; i++) {
 		if (DrawingList[i].skin == SKIN_NONE)
 			continue;
-		PATELLA_ASSERT_VALUES(DrawingList[i].skin<patella::bridge::Skins().NumberOfSkins, DrawingList[i].skin);
+		PATELLA_ASSERT_VALUES(DrawingList[i].skin<SkinData().NumberOfSkins, DrawingList[i].skin);
 		if (DrawingList[i].width == 0 && DrawingList[i].height == 0) {
 			const TSkin *Skin = &Skins()[DrawingList[i].skin];
 			DrawPicturePart(Surface, DrawingList[i].x + x, DrawingList[i].y + y, 4, Skin->x, Skin->y, Skin->width,
@@ -2193,22 +2193,22 @@ bool patella::TGUI::CheckHotkey(int Key)
 
 void AddTimer(TTimer *Timer)
 {
-	patella::bridge::GUI().AddTimer(Timer);
+	GUI().AddTimer(Timer);
 }
 
 void RemoveTimer(TTimer *Timer)
 {
-	patella::bridge::GUI().RemoveTimer(Timer);
+	GUI().RemoveTimer(Timer);
 }
 
 void UpdateTimers()
 {
-	patella::bridge::GUI().UpdateTimers();
+	GUI().UpdateTimers();
 }
 
 void InitHotkeys()
 {
-	patella::bridge::GUI().InitHotkeys();
+	GUI().InitHotkeys();
 }
 
 void ExitHotkeys()
@@ -2218,16 +2218,16 @@ void ExitHotkeys()
 
 void AddHotkey(int Key, TCallback Callback)
 {
-	patella::bridge::GUI().AddHotkey(Key, Callback);
+	GUI().AddHotkey(Key, Callback);
 }
 
 void RemoveHotkey(int Key)
 {
-	patella::bridge::GUI().RemoveHotkey(Key);
+	GUI().RemoveHotkey(Key);
 }
 
 bool CheckHotkey(int Key)
 {
-	return patella::bridge::GUI().CheckHotkey(Key);
+	return GUI().CheckHotkey(Key);
 }
 // NOLINTEND(cppcoreguidelines-owning-memory)

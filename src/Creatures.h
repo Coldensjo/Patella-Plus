@@ -345,17 +345,14 @@ private:
 	static_assert(sizeof(PlayerSteps) == 10 * sizeof(int), "PlayerSteps");
 };
 
-// The transition's access path: the creatures and the player's state of the one TClient (Client.cpp). They go when no
-// free function needs them.
-namespace bridge {
-TCreatures &Creatures();
-TPlayerState &PlayerState();
-} // namespace bridge
-
 } // namespace patella
 
+// The one client's creatures and player state (Client.cpp).
+patella::TCreatures &Creatures();
+patella::TPlayerState &PlayerState();
+
 // The original's functions (the callers' names, and the golden tests'): each calls the member of the same name of
-// TCreatures on bridge::Creatures() or of TPlayerState on bridge::PlayerState().
+// TCreatures on Creatures() or of TPlayerState on PlayerState().
 // The player's creature, steps and statistics.
 void GetPlayerPosition(int *x, int *y, int *z); // including the step not confirmed yet
 void ClearPlayerSteps();

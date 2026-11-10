@@ -209,16 +209,13 @@ public:
 	TObject NoObject;      // never written
 };
 
-// The transition's access path: the object types of the one TClient (Client.cpp). It goes when no free function needs
-// it.
-namespace bridge {
-TObjectTypes &ObjectTypes();
-} // namespace bridge
-
 } // namespace patella
 
+// The one client's object types (Client.cpp).
+patella::TObjectTypes &ObjectTypes();
+
 // The original's functions (the callers' names, and the golden tests'): each calls TObjectTypes' member of the same
-// name on bridge::ObjectTypes().
+// name on ObjectTypes().
 // Object types. Type CREATURE has only UNPASS.
 bool GetObjectFlag(int Type, int Flag);
 inline bool GetObjectFlag(TObject &Obj, int Flag) { return GetObjectFlag(Obj.Type, Flag); }

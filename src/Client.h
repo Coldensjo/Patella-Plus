@@ -10,11 +10,9 @@
 // (platform/Platform.h): TClient takes them in its constructor and passes them on (TPreferences the file system,
 // TNetwork the socket).
 //
-// The bridge: during the transition there is one TClient, made on first use by bridge::Client() (Client.cpp), and
-// each subsystem's header declares an accessor of its own (Preferences.h: bridge::Preferences()) for the free
-// functions of the original's names, which forward to the members. A file's functions stop using the bridge when
-// they hold the object they need; when no file uses it, the bridge goes and the program's entry points own TClient.
-// Only Client.cpp includes this header: the subsystems do not depend on each other through it.
+// There is one TClient, made on first use by Client() (Client.cpp), and each subsystem's header declares an accessor
+// of its own (Preferences.h: Preferences()), which Client.cpp defines; how callers use them is written there. Only
+// Client.cpp includes this header: the subsystems do not depend on each other through it.
 
 #pragma once
 
@@ -47,10 +45,8 @@ public:
 	TGUI GUI;
 };
 
-namespace bridge {
-// The one TClient of the transition, made on first use (its members start as the original's statics did), on the
-// process's platform (platform::Platform(), the entry point's executable's).
+// The one TClient, made on first use (its members start as the original's statics did), on the process's platform
+// (platform::Platform(), the entry point's executable's).
 TClient &Client();
-} // namespace bridge
 
 } // namespace patella

@@ -805,8 +805,8 @@ bool TSkinButton::IsPressed()
 // The assertions print the skin only (the binary's messages).
 void TSkinButton::SetSkins(int _ButtonUp, int _ButtonDown)
 {
-	PATELLA_ASSERT_VALUES(_ButtonUp<patella::bridge::Skins().NumberOfSkins, _ButtonUp);
-	PATELLA_ASSERT_VALUES(_ButtonDown<patella::bridge::Skins().NumberOfSkins, _ButtonDown);
+	PATELLA_ASSERT_VALUES(_ButtonUp<SkinData().NumberOfSkins, _ButtonUp);
+	PATELLA_ASSERT_VALUES(_ButtonDown<SkinData().NumberOfSkins, _ButtonDown);
 	ButtonDown = _ButtonDown;
 	ButtonUp = _ButtonUp;
 }

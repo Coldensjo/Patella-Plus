@@ -79,7 +79,7 @@ void LogDiagnostics() noexcept
 		return;
 	try {
 		// The number the original's report gave: 2 (its DirectX 9) once the engine is set up, 0 before.
-		patella::log::Debug("Graphic engine: {}", patella::bridge::GraphicsEngine().Initialised ? 2 : 0);
+		patella::log::Debug("Graphic engine: {}", GraphicsEngine().Initialised ? 2 : 0);
 	} catch (...) { // NOLINT(bugprone-empty-catch): this part left out
 	}
 	try {
@@ -88,7 +88,7 @@ void LogDiagnostics() noexcept
 	}
 	try {
 		bool Any = false;
-		const auto &PacketHeader = patella::bridge::Network().PacketHeader;
+		const auto &PacketHeader = Network().PacketHeader;
 		for (const uint8 Byte : PacketHeader)
 			Any = Any || Byte != 0;
 		if (Any)
@@ -144,7 +144,7 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 		// After a failed InitControl there is no main window and no surface (GetSurface makes one only once
 		// SurfaceInitInstance has run): SetDisplayMode's calls would fault, so the step is skipped. The original made
 		// them and left the fault to its catch (...).
-		if (GetViewMode() != 1 && patella::bridge::GUI().MainWindow != nullptr && GetSurface() != nullptr)
+		if (GetViewMode() != 1 && GUI().MainWindow != nullptr && GetSurface() != nullptr)
 			patella::sdlframe::SetDisplayMode(1); // the SDL3 window's
 	} catch (...) {                               // NOLINT(bugprone-empty-catch): as above
 	}
@@ -156,7 +156,7 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 	patella::platform::Platform().Window.ShowMessageBox(nullptr, Text, Caption, patella::platform::TMessageBoxIcon::Error);
 	// The main window stays as the original's global did, allocated and not closed. TGUI owns it, and TClient's static
 	// destruction after exit(1) would destroy it and close its children (packets, preferences).
-	patella::bridge::GUI().AbandonWindows();
+	GUI().AbandonWindows();
 	exit(1);
 }
 
@@ -334,7 +334,7 @@ BOOL CPlayerApp::InitInstance()
 						Expected = 0;
 						break;
 					case 3:
-						patella::bridge::GraphicsEngine().CommandLineEngine = atoi(Token); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; a bad number counts as 0
+						GraphicsEngine().CommandLineEngine = atoi(Token); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; a bad number counts as 0
 						Expected = 0;
 						break;
 					default:

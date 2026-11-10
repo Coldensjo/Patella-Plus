@@ -1189,57 +1189,57 @@ std::array<uint8, 10> patella::TGUI::GetLastPacketTypes() const
 
 void Resize(int Width, int Height)
 {
-	patella::bridge::GUI().Resize(Width, Height);
+	GUI().Resize(Width, Height);
 }
 
 void Redraw(bool Force)
 {
-	patella::bridge::GUI().Redraw(Force);
+	GUI().Redraw(Force);
 }
 
 void MouseMove(int x, int y)
 {
-	patella::bridge::GUI().MouseMove(x, y);
+	GUI().MouseMove(x, y);
 }
 
 void LeftButtonDown(int x, int y, int Flags)
 {
-	patella::bridge::GUI().LeftButtonDown(x, y, Flags);
+	GUI().LeftButtonDown(x, y, Flags);
 }
 
 void LeftButtonUp(int x, int y, int Flags)
 {
-	patella::bridge::GUI().LeftButtonUp(x, y, Flags);
+	GUI().LeftButtonUp(x, y, Flags);
 }
 
 void LeftButtonDoubleClick(int x, int y, int Flags)
 {
-	patella::bridge::GUI().LeftButtonDoubleClick(x, y, Flags);
+	GUI().LeftButtonDoubleClick(x, y, Flags);
 }
 
 void RightButtonDown(int x, int y, int Flags)
 {
-	patella::bridge::GUI().RightButtonDown(x, y, Flags);
+	GUI().RightButtonDown(x, y, Flags);
 }
 
 void RightButtonUp(int x, int y, int Flags)
 {
-	patella::bridge::GUI().RightButtonUp(x, y, Flags);
+	GUI().RightButtonUp(x, y, Flags);
 }
 
 void MouseWheel(int x, int y, int Direction)
 {
-	patella::bridge::GUI().MouseWheel(x, y, Direction);
+	GUI().MouseWheel(x, y, Direction);
 }
 
 void KeyPress(int Key)
 {
-	patella::bridge::GUI().KeyPress(Key);
+	GUI().KeyPress(Key);
 }
 
 bool CloseRequest()
 {
-	return patella::bridge::GUI().CloseRequest();
+	return GUI().CloseRequest();
 }
 
 void LinkCopyWarning()
@@ -1249,32 +1249,32 @@ void LinkCopyWarning()
 
 void ConnectionEstablished()
 {
-	patella::bridge::GUI().ConnectionEstablished();
+	GUI().ConnectionEstablished();
 }
 
 void ReceivePackets()
 {
-	patella::bridge::GUI().ReceivePackets();
+	GUI().ReceivePackets();
 }
 
 void ConnectionClosed()
 {
-	patella::bridge::GUI().ConnectionClosed();
+	GUI().ConnectionClosed();
 }
 
 void TimerEvent()
 {
-	patella::bridge::GUI().TimerEvent();
+	GUI().TimerEvent();
 }
 
 void ProcessEvents()
 {
-	patella::bridge::GUI().ProcessEvents();
+	GUI().ProcessEvents();
 }
 
 void InitWindow(patella::platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL))
 {
-	patella::bridge::GUI().InitWindow(Window, ExitProgram, SetDisplayMode, OpenURL);
+	GUI().InitWindow(Window, ExitProgram, SetDisplayMode, OpenURL);
 }
 
 void InitControl(bool Gamemaster)
@@ -1289,6 +1289,6 @@ void ExitControl()
 
 std::array<uint8, 10> GetLastPacketTypes()
 {
-	return patella::bridge::GUI().GetLastPacketTypes();
+	return GUI().GetLastPacketTypes();
 }
 // NOLINTEND(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)

@@ -85,15 +85,13 @@ private:
 	TOffer CounterOffer{};
 };
 
-// The transition's access path: the inventory of the one TClient (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TInventory &Inventory();
-} // namespace bridge
-
 } // namespace patella
 
+// The one client's inventory (Client.cpp).
+patella::TInventory &Inventory();
+
 // The original's functions (the callers' names, and the golden tests'): each calls TInventory's member of the same
-// name on bridge::Inventory().
+// name on Inventory().
 void ClearOffers();
 int GetOwnOfferCount();
 int GetCounterOfferCount();

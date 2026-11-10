@@ -98,15 +98,15 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 // and the golden tests fake GetSurface and SurfaceExitInstance by these symbols.
 TSurface *GetSurface()
 {
-	return patella::bridge::GraphicsEngine().GetSurface();
+	return GraphicsEngine().GetSurface();
 }
 
 void SurfaceExitInstance()
 {
-	patella::bridge::GraphicsEngine().SurfaceExitInstance();
+	GraphicsEngine().SurfaceExitInstance();
 }
 
 void SurfaceInitInstance(patella::platform::TWindowHandle Window)
 {
-	patella::bridge::GraphicsEngine().SurfaceInitInstance(Window);
+	GraphicsEngine().SurfaceInitInstance(Window);
 }

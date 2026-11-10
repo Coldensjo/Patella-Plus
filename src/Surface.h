@@ -35,12 +35,10 @@ private:
 	TSurface *Surface{}; // the engine's surface; raw, as the original's (deleted by SurfaceExitInstance)
 };
 
-// The transition's access path: the one TClient's TGraphicsEngine (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TGraphicsEngine &GraphicsEngine();
-} // namespace bridge
-
 } // namespace patella
+
+// The one client's graphics engine (Client.cpp).
+patella::TGraphicsEngine &GraphicsEngine();
 
 TSurface *GetSurface();
 void SurfaceExitInstance();

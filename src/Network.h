@@ -1,7 +1,7 @@
 // Network.h: the login server list, connecting, and the packets' framing and XTEA encryption (Network.cpp).
 //
 // The data is TNetwork's, which TClient owns (Client.h); the free functions of the original's names are the bridge that
-// the callers use until they hold the object (bridge::Network(), defined in Client.cpp).
+// the callers use until they hold the object (Network(), defined in Client.cpp).
 
 #pragma once
 
@@ -179,15 +179,13 @@ private:
 		"Network.cpp's arrays");
 };
 
-// The transition's access path: the network of the one TClient (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TNetwork &Network();
-} // namespace bridge
-
 } // namespace patella
 
+// The one client's network (Client.cpp).
+patella::TNetwork &Network();
+
 // The original's functions (the callers' names, and the golden tests'): each calls TNetwork's member of the same
-// name on bridge::Network().
+// name on Network().
 void SetTestServerPort(int Port);
 void SetConnectionTimeout(int Timeout);
 void SetNetworkWindow(patella::platform::TWindowHandle Window);

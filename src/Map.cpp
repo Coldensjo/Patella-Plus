@@ -1426,195 +1426,195 @@ void patella::TMap::ExitMap()
 
 void GetMapPosition(int *x, int *y, int *z)
 {
-	patella::bridge::Map().GetMapPosition(x, y, z);
+	Map().GetMapPosition(x, y, z);
 }
 
 int GetMapLevel()
 {
-	return patella::bridge::Map().GetMapLevel();
+	return Map().GetMapLevel();
 }
 
 void MapToWorld(int *x, int *y, int *z)
 {
-	patella::bridge::Map().MapToWorld(x, y, z);
+	Map().MapToWorld(x, y, z);
 }
 
 void WorldToMap(int *x, int *y, int *z)
 {
-	patella::bridge::Map().WorldToMap(x, y, z);
+	Map().WorldToMap(x, y, z);
 }
 
 void SetAmbientLight(int Brightness, int Color)
 {
-	patella::bridge::Map().SetAmbientLight(Brightness, Color);
+	Map().SetAmbientLight(Brightness, Color);
 }
 
 void UpdateAmbientLight()
 {
-	patella::bridge::Map().UpdateAmbientLight();
+	Map().UpdateAmbientLight();
 }
 
 TRGBColor GetAmbientColor()
 {
-	return patella::bridge::Map().GetAmbientColor();
+	return Map().GetAmbientColor();
 }
 
 int GetAmbientBrightness()
 {
-	return patella::bridge::Map().GetAmbientBrightness();
+	return Map().GetAmbientBrightness();
 }
 
 TObject GetFirstObject(int rx, int ry, int rz)
 {
-	return patella::bridge::Map().GetFirstObject(rx, ry, rz);
+	return Map().GetFirstObject(rx, ry, rz);
 }
 
 TObject GetNextObject()
 {
-	return patella::bridge::Map().GetNextObject();
+	return Map().GetNextObject();
 }
 
 TObject GetMapObject(int rx, int ry, int rz, int Position)
 {
-	return patella::bridge::Map().GetMapObject(rx, ry, rz, Position);
+	return Map().GetMapObject(rx, ry, rz, Position);
 }
 
 TObject GetTopMoveObject(int rx, int ry, int rz, int &Position)
 {
-	return patella::bridge::Map().GetTopMoveObject(rx, ry, rz, Position);
+	return Map().GetTopMoveObject(rx, ry, rz, Position);
 }
 
 TObject GetTopLookObject(int rx, int ry, int rz, int &Position)
 {
-	return patella::bridge::Map().GetTopLookObject(rx, ry, rz, Position);
+	return Map().GetTopLookObject(rx, ry, rz, Position);
 }
 
 TObject GetTopUseObject(int rx, int ry, int rz, int &Position)
 {
-	return patella::bridge::Map().GetTopUseObject(rx, ry, rz, Position);
+	return Map().GetTopUseObject(rx, ry, rz, Position);
 }
 
 TObject GetTopMultiUseObject(int rx, int ry, int rz, int &Position)
 {
-	return patella::bridge::Map().GetTopMultiUseObject(rx, ry, rz, Position);
+	return Map().GetTopMultiUseObject(rx, ry, rz, Position);
 }
 
 int GetFirstEffect(int rx, int ry, int rz)
 {
-	return EffectNumberOf(patella::bridge::Map().GetFirstEffect(rx, ry, rz));
+	return EffectNumberOf(Map().GetFirstEffect(rx, ry, rz));
 }
 
 int GetNextEffect()
 {
-	return EffectNumberOf(patella::bridge::Map().GetNextEffect());
+	return EffectNumberOf(Map().GetNextEffect());
 }
 
 int GetEffectStatus(int EffectNumber)
 {
-	return patella::bridge::Map().GetEffectStatus(EffectIdOf(EffectNumber));
+	return Map().GetEffectStatus(EffectIdOf(EffectNumber));
 }
 
 int GetGraphicalEffectType(int EffectNumber)
 {
-	return patella::bridge::Map().GetGraphicalEffectType(EffectIdOf(EffectNumber));
+	return Map().GetGraphicalEffectType(EffectIdOf(EffectNumber));
 }
 
 int GetGraphicalEffectPhase(int EffectNumber)
 {
-	return patella::bridge::Map().GetGraphicalEffectPhase(EffectIdOf(EffectNumber));
+	return Map().GetGraphicalEffectPhase(EffectIdOf(EffectNumber));
 }
 
 int GetTextualEffectColor(int EffectNumber)
 {
-	return patella::bridge::Map().GetTextualEffectColor(EffectIdOf(EffectNumber));
+	return Map().GetTextualEffectColor(EffectIdOf(EffectNumber));
 }
 
 char *GetTextualEffectText(int EffectNumber)
 {
-	return patella::bridge::Map().GetTextualEffectText(EffectIdOf(EffectNumber));
+	return Map().GetTextualEffectText(EffectIdOf(EffectNumber));
 }
 
 int GetTextualEffectPhase(int EffectNumber)
 {
-	return patella::bridge::Map().GetTextualEffectPhase(EffectIdOf(EffectNumber));
+	return Map().GetTextualEffectPhase(EffectIdOf(EffectNumber));
 }
 
 int GetMissileEffectType(int EffectNumber)
 {
-	return patella::bridge::Map().GetMissileEffectType(EffectIdOf(EffectNumber));
+	return Map().GetMissileEffectType(EffectIdOf(EffectNumber));
 }
 
 int GetMissileEffectDirection(int EffectNumber)
 {
-	return patella::bridge::Map().GetMissileEffectDirection(EffectIdOf(EffectNumber));
+	return Map().GetMissileEffectDirection(EffectIdOf(EffectNumber));
 }
 
 int GetMissileEffectX(int EffectNumber)
 {
-	return patella::bridge::Map().GetMissileEffectX(EffectIdOf(EffectNumber));
+	return Map().GetMissileEffectX(EffectIdOf(EffectNumber));
 }
 
 int GetMissileEffectY(int EffectNumber)
 {
-	return patella::bridge::Map().GetMissileEffectY(EffectIdOf(EffectNumber));
+	return Map().GetMissileEffectY(EffectIdOf(EffectNumber));
 }
 
 void ProcessEffects()
 {
-	patella::bridge::Map().ProcessEffects();
+	Map().ProcessEffects();
 }
 
 void ProcessMissileEffects()
 {
-	patella::bridge::Map().ProcessMissileEffects();
+	Map().ProcessMissileEffects();
 }
 
 void ClearMap()
 {
-	patella::bridge::Map().ClearMap();
+	Map().ClearMap();
 }
 
 bool IsFieldThrowable(int rx, int ry, int rz)
 {
-	return patella::bridge::Map().IsFieldThrowable(rx, ry, rz);
+	return Map().IsFieldThrowable(rx, ry, rz);
 }
 
 bool IsFieldTranslucent(int rx, int ry, int rz)
 {
-	return patella::bridge::Map().IsFieldTranslucent(rx, ry, rz);
+	return Map().IsFieldTranslucent(rx, ry, rz);
 }
 
 bool TakeAutomapChanged()
 {
-	return patella::bridge::Map().TakeAutomapChanged();
+	return Map().TakeAutomapChanged();
 }
 
 TRGBColor GetAutomapColor(int x, int y, int z)
 {
-	return patella::bridge::Map().GetAutomapColor(x, y, z);
+	return Map().GetAutomapColor(x, y, z);
 }
 
 void GetAutomapMarks(int x, int y, int z, std::vector<TMark> *Marks, int *Count)
 {
-	patella::bridge::Map().GetAutomapMarks(x, y, z, Marks, Count);
+	Map().GetAutomapMarks(x, y, z, Marks, Count);
 }
 
 void AddAutomapMark(TCoordinate &Coordinate, const char *Text, int Type)
 {
-	patella::bridge::Map().AddAutomapMark(Coordinate, Text, Type);
+	Map().AddAutomapMark(Coordinate, Text, Type);
 }
 
 void DeleteAutomapMark(TMark &Deleted, int z)
 {
-	patella::bridge::Map().DeleteAutomapMark(Deleted, z);
+	Map().DeleteAutomapMark(Deleted, z);
 }
 
 void InitMap(void (*Callback)(int CreatureID))
 {
-	patella::bridge::Map().InitMap(Callback);
+	Map().InitMap(Callback);
 }
 
 void ExitMap()
 {
-	patella::bridge::Map().ExitMap();
+	Map().ExitMap();
 }

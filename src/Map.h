@@ -313,15 +313,13 @@ private:
 	TRGBColor AmbienteActualColor;
 };
 
-// The transition's access path: the map of the one TClient (Client.cpp). It goes when no free function needs it.
-namespace bridge {
-TMap &Map();
-} // namespace bridge
-
 } // namespace patella
 
+// The one client's map (Client.cpp).
+patella::TMap &Map();
+
 // The original's functions (the callers' names, and the golden tests'): each calls TMap's member of the same name on
-// bridge::Map().
+// Map().
 // Position and coordinates (the gap before Map.cpp's first assertion).
 void GetMapPosition(int *x, int *y, int *z);
 int GetMapLevel();

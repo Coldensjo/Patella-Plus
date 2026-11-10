@@ -398,42 +398,42 @@ void patella::THelp::ExitHelp()
 
 void SetHelpPosition(int x, int y)
 {
-	patella::bridge::Help().SetHelpPosition(x, y);
+	Help().SetHelpPosition(x, y);
 }
 
 void MoveHelpPosition(int dx, int dy)
 {
-	patella::bridge::Help().MoveHelpPosition(dx, dy);
+	Help().MoveHelpPosition(dx, dy);
 }
 
 void SetHelpSize(int Width, int Height)
 {
-	patella::bridge::Help().SetHelpSize(Width, Height);
+	Help().SetHelpSize(Width, Height);
 }
 
 void SetHelpHandle(int Handle)
 {
-	patella::bridge::Help().SetHelpHandle(Handle);
+	Help().SetHelpHandle(Handle);
 }
 
 void GetHelpArea(int *x, int *y, int *Width, int *Height)
 {
-	patella::bridge::Help().GetHelpArea(x, y, Width, Height);
+	Help().GetHelpArea(x, y, Width, Height);
 }
 
 int GetHelpHandle()
 {
-	return patella::bridge::Help().GetHelpHandle();
+	return Help().GetHelpHandle();
 }
 
 bool TakeHelpHandleChanged()
 {
-	return patella::bridge::Help().TakeHelpHandleChanged();
+	return Help().TakeHelpHandleChanged();
 }
 
 void InitHelp()
 {
-	patella::bridge::Help().InitHelp();
+	Help().InitHelp();
 }
 
 void ExitHelp()
@@ -443,40 +443,40 @@ void ExitHelp()
 
 int GetEventHelp()
 {
-	return patella::bridge::Help().GetEventHelp();
+	return Help().GetEventHelp();
 }
 
 int PopEventHelp()
 {
-	return patella::bridge::Help().PopEventHelp();
+	return Help().PopEventHelp();
 }
 
 void AddEventHelp(int Number)
 {
-	patella::bridge::Help().AddEventHelp(Number);
+	Help().AddEventHelp(Number);
 }
 
 void CheckEventHelpName(const char *Name)
 {
-	patella::bridge::Help().CheckEventHelpName(Name);
+	Help().CheckEventHelpName(Name);
 }
 
 void CheckEventHelpPosition(int x, int y, int z)
 {
-	patella::bridge::Help().CheckEventHelpPosition(x, y, z);
+	Help().CheckEventHelpPosition(x, y, z);
 }
 
 const char *GetEventHelpTitle(int Number)
 {
-	return patella::bridge::Help().GetEventHelpTitle(Number);
+	return Help().GetEventHelpTitle(Number);
 }
 
 const char *GetEventHelpText(int Number)
 {
-	return patella::bridge::Help().GetEventHelpText(Number);
+	return Help().GetEventHelpText(Number);
 }
 
 const char *GetCurrentHelpText()
 {
-	return patella::bridge::Help().GetCurrentHelpText();
+	return Help().GetCurrentHelpText();
 }

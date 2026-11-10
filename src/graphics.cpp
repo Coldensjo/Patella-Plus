@@ -1169,138 +1169,138 @@ void patella::TGraphics::InitGraphics(int MemoryCacheBytes)
 
 void InitGraphics(int MemoryCacheBytes)
 {
-	patella::bridge::Graphics().InitGraphics(MemoryCacheBytes);
+	Graphics().InitGraphics(MemoryCacheBytes);
 }
 
 void InitVideoCache()
 {
-	patella::bridge::Graphics().InitVideoCache();
+	Graphics().InitVideoCache();
 }
 
 void ResetVideoCache()
 {
-	patella::bridge::Graphics().ResetVideoCache();
+	Graphics().ResetVideoCache();
 }
 
 void ExitGraphics()
 {
-	patella::bridge::Graphics().ExitGraphics();
+	Graphics().ExitGraphics();
 }
 
 void DrawSprite(int Surface, int x, int y, int SpriteNumber)
 {
-	patella::bridge::Graphics().DrawSprite(Surface, x, y, SpriteNumber);
+	Graphics().DrawSprite(Surface, x, y, SpriteNumber);
 }
 
 void DrawSpriteClipped(int Surface, int x, int y, int SpriteNumber, TRect Clip)
 {
-	patella::bridge::Graphics().DrawSpriteClipped(Surface, x, y, SpriteNumber, Clip);
+	Graphics().DrawSpriteClipped(Surface, x, y, SpriteNumber, Clip);
 }
 
 void DrawMaskedSprite(int Surface, int x, int y, int SpriteNumber, int MaskNumber, TRGBColor *Colors)
 {
-	patella::bridge::Graphics().DrawMaskedSprite(Surface, x, y, SpriteNumber, MaskNumber, Colors);
+	Graphics().DrawMaskedSprite(Surface, x, y, SpriteNumber, MaskNumber, Colors);
 }
 
 void DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip, TFont Font, bool ShowCount)
 {
-	patella::bridge::Graphics().DrawObject(Surface, x, y, Size, Obj, Highlight, Clip, Font, ShowCount);
+	Graphics().DrawObject(Surface, x, y, Size, Obj, Highlight, Clip, Font, ShowCount);
 }
 
 void DrawOutfit(int Surface, int x, int y, int Size, int OutfitNumber, patella::TSpan<const int, 4> Colors, TRGBColor Highlight, TRect Clip, TFont Font)
 {
-	patella::bridge::Graphics().DrawOutfit(Surface, x, y, Size, OutfitNumber, Colors, Highlight, Clip, Font);
+	Graphics().DrawOutfit(Surface, x, y, Size, OutfitNumber, Colors, Highlight, Clip, Font);
 }
 
 void DrawPicture(int Surface, int x, int y, int PictureNumber)
 {
-	patella::bridge::Graphics().DrawPicture(Surface, x, y, PictureNumber);
+	Graphics().DrawPicture(Surface, x, y, PictureNumber);
 }
 
 void DrawPicturePart(int Surface, int x, int y, int PictureNumber, int SourceX, int SourceY, int Width, int Height)
 {
-	patella::bridge::Graphics().DrawPicturePart(Surface, x, y, PictureNumber, SourceX, SourceY, Width, Height);
+	Graphics().DrawPicturePart(Surface, x, y, PictureNumber, SourceX, SourceY, Width, Height);
 }
 
 void DrawPicturePartClipped(int Surface, int x, int y, int PictureNumber, int SourceX, int SourceY, int Width, int Height, TRect Clip)
 {
-	patella::bridge::Graphics().DrawPicturePartClipped(Surface, x, y, PictureNumber, SourceX, SourceY, Width, Height, Clip);
+	Graphics().DrawPicturePartClipped(Surface, x, y, PictureNumber, SourceX, SourceY, Width, Height, Clip);
 }
 
 void PrintTextPart(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text, int Length, int Alignment)
 {
-	patella::bridge::Graphics().PrintTextPart(Surface, x, y, FontNumber, Color, Text, Length, Alignment);
+	Graphics().PrintTextPart(Surface, x, y, FontNumber, Color, Text, Length, Alignment);
 }
 
 void PrintTextClipped(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text, int Alignment, TRect Clip)
 {
-	patella::bridge::Graphics().PrintTextClipped(Surface, x, y, FontNumber, Color, Text, Alignment, Clip);
+	Graphics().PrintTextClipped(Surface, x, y, FontNumber, Color, Text, Alignment, Clip);
 }
 
 void PrintText(int Surface, int x, int y, int FontNumber, TRGBColor Color, const char *Text, int Alignment)
 {
-	patella::bridge::Graphics().PrintText(Surface, x, y, FontNumber, Color, Text, Alignment);
+	Graphics().PrintText(Surface, x, y, FontNumber, Color, Text, Alignment);
 }
 
 void PrintFormattedText(int Surface, int x, int y, TFont Format, const char *Text)
 {
-	patella::bridge::Graphics().PrintFormattedText(Surface, x, y, Format, Text);
+	Graphics().PrintFormattedText(Surface, x, y, Format, Text);
 }
 
 void PrintFormattedTextClipped(int Surface, int x, int y, TFont Format, const char *Text, TRect Clip)
 {
-	patella::bridge::Graphics().PrintFormattedTextClipped(Surface, x, y, Format, Text, Clip);
+	Graphics().PrintFormattedTextClipped(Surface, x, y, Format, Text, Clip);
 }
 
 void PrintFormattedTextPart(int Surface, int x, int y, TFont Format, const char *Text, int Length)
 {
-	patella::bridge::Graphics().PrintFormattedTextPart(Surface, x, y, Format, Text, Length);
+	Graphics().PrintFormattedTextPart(Surface, x, y, Format, Text, Length);
 }
 
 int GetFontLineHeight(int FontNumber)
 {
-	return patella::bridge::Graphics().GetFontLineHeight(FontNumber);
+	return Graphics().GetFontLineHeight(FontNumber);
 }
 
 int GetFontHeight(int FontNumber)
 {
-	return patella::bridge::Graphics().GetFontHeight(FontNumber);
+	return Graphics().GetFontHeight(FontNumber);
 }
 
 int GetTextHeight(int FontNumber, const char *Text)
 {
-	return patella::bridge::Graphics().GetTextHeight(FontNumber, Text);
+	return Graphics().GetTextHeight(FontNumber, Text);
 }
 
 int GetTextWidth(int FontNumber, const char *Text)
 {
-	return patella::bridge::Graphics().GetTextWidth(FontNumber, Text);
+	return Graphics().GetTextWidth(FontNumber, Text);
 }
 
 int GetTextPartWidth(int FontNumber, const char *Text, int Length)
 {
-	return patella::bridge::Graphics().GetTextPartWidth(FontNumber, Text, Length);
+	return Graphics().GetTextPartWidth(FontNumber, Text, Length);
 }
 
 int GetFittingTextLength(int FontNumber, const char *Text, int Width)
 {
-	return patella::bridge::Graphics().GetFittingTextLength(FontNumber, Text, Width);
+	return Graphics().GetFittingTextLength(FontNumber, Text, Width);
 }
 
 void GetTextPosition(int *TextX, int *TextY, int x, int y, int Width, int Height, TFont *Format)
 {
-	patella::bridge::Graphics().GetTextPosition(TextX, TextY, x, y, Width, Height, Format);
+	Graphics().GetTextPosition(TextX, TextY, x, y, Width, Height, Format);
 }
 
 // Skins.cpp's free functions (Skins.h), here because Skins.cpp is patella_core's, which has no TClient: each calls its
 // member on the one TClient's TSkins. Control.cpp calls them, the golden tests call and fake them.
 void InitSkins()
 {
-	patella::bridge::Skins().InitSkins();
+	SkinData().InitSkins();
 }
 
 void ExitSkins()
 {
-	patella::bridge::Skins().ExitSkins();
+	SkinData().ExitSkins();
 }
 // NOLINTEND(cppcoreguidelines-owning-memory)

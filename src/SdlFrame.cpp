@@ -1006,7 +1006,7 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 
 	// CMainFrame's constructor.
 	Keys.Reset();
-	memset(patella::bridge::Network().PacketHeader.data(), 0, sizeof(patella::bridge::Network().PacketHeader));
+	memset(Network().PacketHeader.data(), 0, sizeof(Network().PacketHeader));
 	// The cursors (SDL's system cursors for IDC_ARROW, IDC_SIZENS and IDC_WAIT, which SDL loads as those on Windows;
 	// the client's two from its resources, LoadClientCursor).
 	ArrowCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
