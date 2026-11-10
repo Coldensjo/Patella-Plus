@@ -7,7 +7,7 @@
 //
 // Coordinates: rx, ry, rz are map (relative) coordinates, x, y, z world
 // (absolute) ones. rz grows upwards; the player's floor is rz 7-z above
-// ground and rz 2 below it (GetMapLevel).
+// ground and rz 2 below it (TMap::GetLevel).
 
 #pragma once
 
@@ -199,9 +199,9 @@ public:
 	~TMap() = default;
 
 	// Position and coordinates.
-	void SetMapPosition(int x, int y, int z);
-	void GetMapPosition(int *x, int *y, int *z) const;
-	[[nodiscard]] int GetMapLevel() const;
+	void SetPosition(int x, int y, int z);
+	void GetPosition(int *x, int *y, int *z) const;
+	[[nodiscard]] int GetLevel() const;
 	void MapToWorld(int *x, int *y, int *z) const;
 	void WorldToMap(int *x, int *y, int *z) const;
 
@@ -245,9 +245,9 @@ public:
 
 	// Map points and scrolling.
 	void ClearField(int rx, int ry, int rz, bool DeleteEffects);
-	void ClearMap();
-	void ShiftMap(int dx, int dy);
-	void ShiftMapLevel(int dz);
+	void Clear();
+	void Shift(int dx, int dy);
+	void ShiftLevel(int dz);
 	void RequestFieldRefresh(int rx, int ry, int rz);
 	int GetFieldHeight(int rx, int ry, int rz);
 	bool IsFieldPassable(int rx, int ry, int rz, bool CheckHeight);
@@ -266,8 +266,8 @@ public:
 	// Paths, initialisation.
 	int FindPath(int StartX, int StartY, int StartZ, int DestX, int DestY, int DestZ, bool MustReach, int *Steps,
 		int *Directions, bool ForceDiagonal);
-	void InitMap(void (*Callback)(int CreatureID));
-	void ExitMap();
+	void Init(void (*Callback)(int CreatureID));
+	void Exit();
 
 private:
 	void SortObjects(int rx, int ry, int rz);
@@ -276,12 +276,12 @@ private:
 	TEffectId GetEffectIteratorNumber(int n);
 	TEffectId NewEffect(int Status, int rx, int ry, int rz);
 	void DeleteEffect(TEffectId Number);
-	void ShiftMapWest();
-	void ShiftMapEast();
-	void ShiftMapNorth();
-	void ShiftMapSouth();
-	void ShiftMapUp();
-	void ShiftMapDown();
+	void ShiftWest();
+	void ShiftEast();
+	void ShiftNorth();
+	void ShiftSouth();
+	void ShiftUp();
+	void ShiftDown();
 	void GetFieldAutomapInfo(int rx, int ry, int rz, uint8 *Color, uint8 *Speed);
 	void LoadAutomapBlock(int Position, int bx, int by, int bz);
 	void SaveAutomapBlock(int Position);

@@ -903,7 +903,7 @@ void patella::TCommunication::ReadField(int rx, int ry, int rz)
 	} else {
 		SkipFields--;
 	}
-	if (rz == Map.GetMapLevel())
+	if (rz == Map.GetLevel())
 		Map.UpdateAutomap(rx, ry);
 }
 
@@ -912,7 +912,7 @@ void patella::TCommunication::ReadMap(int xmin, int ymin, int xmax, int ymax)
 	int PlayerX;
 	int PlayerY;
 	int PlayerZ;
-	Map.GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
+	Map.GetPosition(&PlayerX, &PlayerY, &PlayerZ);
 	int Floor;
 	int EndFloor;
 	int Step;
@@ -943,8 +943,8 @@ void patella::TCommunication::ReceiveMap()
 	PlayerX = Network.GetWord();
 	PlayerY = Network.GetWord();
 	const int PlayerZ = Network.GetByte();
-	Map.SetMapPosition(PlayerX, PlayerY, PlayerZ);
-	Map.ClearMap();
+	Map.SetPosition(PlayerX, PlayerY, PlayerZ);
+	Map.Clear();
 	Creatures.HideAllCreatures();
 	ReadMap(0, 0, 17, 13);
 	Talk().SetTalkChanged();
@@ -954,49 +954,49 @@ void patella::TCommunication::ReceiveMap()
 
 void patella::TCommunication::ReceiveMapNorth()
 {
-	Map.ShiftMap(0, 1);
+	Map.Shift(0, 1);
 	ReadMap(0, 0, 17, 0);
 	Talk().SetTalkChanged();
 	int x;
 	int y;
 	int z;
-	Map.GetMapPosition(&x, &y, &z);
+	Map.GetPosition(&x, &y, &z);
 	Help().CheckEventHelpPosition(x, y, z);
 }
 
 void patella::TCommunication::ReceiveMapEast()
 {
-	Map.ShiftMap(-1, 0);
+	Map.Shift(-1, 0);
 	ReadMap(17, 0, 17, 13);
 	Talk().SetTalkChanged();
 	int x;
 	int y;
 	int z;
-	Map.GetMapPosition(&x, &y, &z);
+	Map.GetPosition(&x, &y, &z);
 	Help().CheckEventHelpPosition(x, y, z);
 }
 
 void patella::TCommunication::ReceiveMapSouth()
 {
-	Map.ShiftMap(0, -1);
+	Map.Shift(0, -1);
 	ReadMap(0, 13, 17, 13);
 	Talk().SetTalkChanged();
 	int x;
 	int y;
 	int z;
-	Map.GetMapPosition(&x, &y, &z);
+	Map.GetPosition(&x, &y, &z);
 	Help().CheckEventHelpPosition(x, y, z);
 }
 
 void patella::TCommunication::ReceiveMapWest()
 {
-	Map.ShiftMap(1, 0);
+	Map.Shift(1, 0);
 	ReadMap(0, 0, 0, 13);
 	Talk().SetTalkChanged();
 	int x;
 	int y;
 	int z;
-	Map.GetMapPosition(&x, &y, &z);
+	Map.GetPosition(&x, &y, &z);
 	Help().CheckEventHelpPosition(x, y, z);
 }
 
@@ -1013,7 +1013,7 @@ void patella::TCommunication::ReceiveField()
 	Map.ClearField(rx, ry, rz, false);
 	SkipFields = 0;
 	ReadField(rx, ry, rz);
-	if (rz == Map.GetMapLevel())
+	if (rz == Map.GetLevel())
 		Map.UpdateAutomap(rx, ry);
 }
 
@@ -1045,7 +1045,7 @@ void patella::TCommunication::ReceiveAddObject()
 		Object.Data2 = 0;
 	}
 	Map.AddObject(rx, ry, rz, Object);
-	if (rz == Map.GetMapLevel())
+	if (rz == Map.GetLevel())
 		Map.UpdateAutomap(rx, ry);
 }
 
@@ -1098,7 +1098,7 @@ void patella::TCommunication::ReceiveChangeObject()
 			Object.Data2 = 0;
 		}
 		Map.ChangeObject(rx, ry, rz, Position, Object);
-		if (rz == Map.GetMapLevel())
+		if (rz == Map.GetLevel())
 			Map.UpdateAutomap(rx, ry);
 	}
 }
@@ -1123,7 +1123,7 @@ void patella::TCommunication::ReceiveDeleteObject()
 				Creature->Visible = false;
 		}
 		const bool Refresh = Map.DeleteObject(rx, ry, rz, Position);
-		if (rz == Map.GetMapLevel())
+		if (rz == Map.GetLevel())
 			Map.UpdateAutomap(rx, ry);
 		Map.MapToWorld(&rx, &ry, &rz);
 		if (Refresh)
@@ -1267,10 +1267,10 @@ void patella::TCommunication::ReceiveMoveCreature()
 		Map.MapToWorld(&x, &y, &z);
 		SendRefreshField(x, y, z);
 	}
-	if (sz == Map.GetMapLevel())
+	if (sz == Map.GetLevel())
 		Map.UpdateAutomap(sx, sy);
 	Map.AddObject(zx, zy, zz, Object);
-	if (zz == Map.GetMapLevel())
+	if (zz == Map.GetLevel())
 		Map.UpdateAutomap(zx, zy);
 }
 
@@ -1887,20 +1887,20 @@ void patella::TCommunication::ReceiveFloorUp()
 	int x;
 	int y;
 	int z;
-	Map.GetMapPosition(&x, &y, &z);
+	Map.GetPosition(&x, &y, &z);
 	z += -1;
 	x += 1;
 	y += 1;
-	Map.SetMapPosition(x, y, z);
+	Map.SetPosition(x, y, z);
 	if (z < 8) {
 		if (z == 7) {
-			Map.ShiftMapLevel(-3);
+			Map.ShiftLevel(-3);
 			SkipFields = 0;
 			for (int rz = 2; rz < 8; rz++)
 				ReadFloor(rz);
 		}
 	} else {
-		Map.ShiftMapLevel(-1);
+		Map.ShiftLevel(-1);
 		SkipFields = 0;
 		ReadFloor(4);
 	}
@@ -1918,20 +1918,20 @@ void patella::TCommunication::ReceiveFloorDown()
 	int x;
 	int y;
 	int z;
-	Map.GetMapPosition(&x, &y, &z);
+	Map.GetPosition(&x, &y, &z);
 	z += 1;
 	x += -1;
 	y += -1;
-	Map.SetMapPosition(x, y, z);
+	Map.SetPosition(x, y, z);
 	if (z < 9) {
 		if (z == 8) {
-			Map.ShiftMapLevel(3);
+			Map.ShiftLevel(3);
 			SkipFields = 0;
 			for (int rz = 2; rz >= 0; rz--)
 				ReadFloor(rz);
 		}
 	} else {
-		Map.ShiftMapLevel(1);
+		Map.ShiftLevel(1);
 		SkipFields = 0;
 		if (z < 14)
 			ReadFloor(0);

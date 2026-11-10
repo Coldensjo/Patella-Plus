@@ -112,7 +112,7 @@ public:
 	int NumberOfTextualEffects;
 	std::array<TTextualEffectPosition, EFFECTS> TextualEffects;
 	std::array<std::array<TRGBColor, MAPSIZE_Y>, MAPSIZE_X> Light; // the light on each field
-	int PositionX;                                                 // GetMapPosition
+	int PositionX;                                                 // TMap::GetPosition
 	int PositionY;
 	int PositionZ;
 	int MaxLevel;                                                 // the highest level drawn

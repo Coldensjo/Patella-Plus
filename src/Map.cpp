@@ -28,14 +28,14 @@ patella::TMap::TMap(TObjectTypes &ObjectTypesRef, TMapConsole &ConsoleRef) : Obj
 
 // --- Position --------------------------------------------------------------
 
-void patella::TMap::SetMapPosition(int x, int y, int z)
+void patella::TMap::SetPosition(int x, int y, int z)
 {
 	MapX = x;
 	MapY = y;
 	MapZ = z;
 }
 
-void patella::TMap::GetMapPosition(int *x, int *y, int *z) const
+void patella::TMap::GetPosition(int *x, int *y, int *z) const
 {
 	*x = MapX;
 	*y = MapY;
@@ -44,7 +44,7 @@ void patella::TMap::GetMapPosition(int *x, int *y, int *z) const
 
 // The map level (rz) of the centre's floor: above ground all eight floors
 // are on the map, below ground two above and two below.
-int patella::TMap::GetMapLevel() const
+int patella::TMap::GetLevel() const
 {
 	if (MapZ <= 7)
 		return 7 - MapZ;
@@ -55,7 +55,7 @@ int patella::TMap::GetMapLevel() const
 // is shifted by one field to the north-west.
 void patella::TMap::MapToWorld(int *x, int *y, int *z) const
 {
-	const int dz = *z - GetMapLevel();
+	const int dz = *z - GetLevel();
 	*x += MapX - 8 + dz;
 	*y += MapY - 6 + dz;
 	*z = MapZ - dz;
@@ -66,7 +66,7 @@ void patella::TMap::WorldToMap(int *x, int *y, int *z) const
 	const int dz = MapZ - *z;
 	*x += 8 - MapX - dz;
 	*y += 6 - MapY - dz;
-	*z = GetMapLevel() + dz;
+	*z = GetLevel() + dz;
 }
 
 bool patella::TMap::TakeAutomapChanged()
@@ -494,9 +494,9 @@ void patella::TMap::AddTextualEffect(int rx, int ry, int rz, int Color, const ch
 void patella::TMap::AddMissileEffect(int sx, int sy, int sz, int dx, int dy, int dz, int Type)
 {
 	PATELLA_ASSERT_VALUES(Type>0, Type);
-	if (sz != GetMapLevel())
+	if (sz != GetLevel())
 		return;
-	if (dz != GetMapLevel())
+	if (dz != GetLevel())
 		return;
 	const TEffectId Number = NewEffect(3, sx, sy, sz);
 	if (Number == TEffectId::None)
@@ -683,7 +683,7 @@ void patella::TMap::ClearField(int rx, int ry, int rz, bool DeleteEffects)
 }
 
 // Empties every point and deletes every effect.
-void patella::TMap::ClearMap()
+void patella::TMap::Clear()
 {
 	for (int i = 0; i < MAPSIZE_X * MAPSIZE_Y * MAPSIZE_Z; i++) {
 		ClearPointObjects(Fields(i));
@@ -695,7 +695,7 @@ void patella::TMap::ClearMap()
 
 // The points move one field west (the centre moved east); the column
 // that comes in on the east is cleared.
-void patella::TMap::ShiftMapWest()
+void patella::TMap::ShiftWest()
 {
 	for (int z = 0; z < MAPSIZE_Z; z++) {
 		for (int y = 0; y < MAPSIZE_Y; y++) {
@@ -708,7 +708,7 @@ void patella::TMap::ShiftMapWest()
 	}
 }
 
-void patella::TMap::ShiftMapEast()
+void patella::TMap::ShiftEast()
 {
 	for (int z = 0; z < MAPSIZE_Z; z++) {
 		for (int y = 0; y < MAPSIZE_Y; y++) {
@@ -721,7 +721,7 @@ void patella::TMap::ShiftMapEast()
 	}
 }
 
-void patella::TMap::ShiftMapNorth()
+void patella::TMap::ShiftNorth()
 {
 	for (int z = 0; z < MAPSIZE_Z; z++) {
 		for (int x = 0; x < MAPSIZE_X; x++) {
@@ -734,7 +734,7 @@ void patella::TMap::ShiftMapNorth()
 	}
 }
 
-void patella::TMap::ShiftMapSouth()
+void patella::TMap::ShiftSouth()
 {
 	for (int z = 0; z < MAPSIZE_Z; z++) {
 		for (int x = 0; x < MAPSIZE_X; x++) {
@@ -748,22 +748,22 @@ void patella::TMap::ShiftMapSouth()
 }
 
 // Dx, dy: how far the points move (the centre moves the other way).
-void patella::TMap::ShiftMap(int dx, int dy)
+void patella::TMap::Shift(int dx, int dy)
 {
 	MapX -= dx;
 	MapY -= dy;
 	for (; dx > 0; dx--)
-		ShiftMapEast();
+		ShiftEast();
 	for (; dx < 0; dx++)
-		ShiftMapWest();
+		ShiftWest();
 	for (; dy > 0; dy--)
-		ShiftMapSouth();
+		ShiftSouth();
 	for (; dy < 0; dy++)
-		ShiftMapNorth();
+		ShiftNorth();
 }
 
 // The points move one level up; level 0 is cleared.
-void patella::TMap::ShiftMapUp()
+void patella::TMap::ShiftUp()
 {
 	for (int x = 0; x < MAPSIZE_X; x++) {
 		for (int y = 0; y < MAPSIZE_Y; y++) {
@@ -776,7 +776,7 @@ void patella::TMap::ShiftMapUp()
 	}
 }
 
-void patella::TMap::ShiftMapDown()
+void patella::TMap::ShiftDown()
 {
 	for (int x = 0; x < MAPSIZE_X; x++) {
 		for (int y = 0; y < MAPSIZE_Y; y++) {
@@ -791,13 +791,13 @@ void patella::TMap::ShiftMapDown()
 
 // After moving up, the levels 5-7 are cleared as well (the binary decides
 // this on dz before the loops count it down).
-void patella::TMap::ShiftMapLevel(int dz)
+void patella::TMap::ShiftLevel(int dz)
 {
 	const bool Up = dz > 0;
 	for (; dz > 0; dz--)
-		ShiftMapUp();
+		ShiftUp();
 	for (; dz < 0; dz++)
-		ShiftMapDown();
+		ShiftDown();
 	if (Up) {
 		for (int z = 5; z < MAPSIZE_Z; z++)
 			for (int x = 0; x < MAPSIZE_X; x++)
@@ -835,7 +835,7 @@ bool patella::TMap::IsFieldPassable(int rx, int ry, int rz, bool CheckHeight)
 			if ((Bank.Type == 0 || !ObjectTypes.GetObjectFlag(Bank.Type, BANK)) && GetFieldHeight(rx + 1, ry + 1, rz - 1) > 2)
 				return true;
 		}
-		if (GetFieldHeight(8, 6, GetMapLevel()) > 2)
+		if (GetFieldHeight(8, 6, GetLevel()) > 2)
 			return true;
 	}
 	TObject Obj = GetFirstObject(rx, ry, rz);
@@ -1098,7 +1098,7 @@ TAutomapBlock *patella::TMap::GetAutomapBlock(int bx, int by, int bz)
 		AutomapBlocks[MostRecentBlock].Previous = Position;
 		MostRecentBlock = Position;
 	}
-	// The cache list links all AUTOMAP_BLOCKS entries (InitMap), so Position is one of them, the least recent at worst
+	// The cache list links all AUTOMAP_BLOCKS entries (Init), so Position is one of them, the least recent at worst
 	// (MSVC /analyze's C28020 sees LeastRecentBlock as any int).
 	PATELLA_MSVC_WARNING(suppress : 28020)
 	return &AutomapBlocks[Position];
@@ -1109,10 +1109,10 @@ void patella::TMap::UpdateAutomap(int rx, int ry)
 {
 	int x = rx;
 	int y = ry;
-	int z = GetMapLevel();
+	int z = GetLevel();
 	MapToWorld(&x, &y, &z);
 	TAutomapBlock *Block = GetAutomapBlock(x / 256, y / 256, z);
-	GetFieldAutomapInfo(rx, ry, GetMapLevel(), &Block->Color.view()[x % 256, y % 256], &Block->Speed.view()[x % 256, y % 256]);
+	GetFieldAutomapInfo(rx, ry, GetLevel(), &Block->Color.view()[x % 256, y % 256], &Block->Speed.view()[x % 256, y % 256]);
 	Block->Changed = true;
 	AutomapChanged = true;
 }
@@ -1390,13 +1390,13 @@ int patella::TMap::GetAmbientBrightness() const
 
 // Every map position gets its own point; the automap cache is empty.
 // Callback receives the creatures ClearField removes.
-void patella::TMap::InitMap(void (*Callback)(int CreatureID))
+void patella::TMap::Init(void (*Callback)(int CreatureID))
 {
 	for (int x = 0; x < MAPSIZE_X; x++)
 		for (int y = 0; y < MAPSIZE_Y; y++)
 			for (int z = 0; z < MAPSIZE_Z; z++)
 				FieldNumber(x, y, z) = x + (z * MAPSIZE_Y + y) * MAPSIZE_X;
-	ClearMap();
+	Clear();
 	MapX = 0;
 	MapY = 0;
 	MapZ = 0;
@@ -1415,7 +1415,7 @@ void patella::TMap::InitMap(void (*Callback)(int CreatureID))
 }
 
 // Saves the cached automap blocks.
-void patella::TMap::ExitMap()
+void patella::TMap::Exit()
 {
 	int i = 0;
 	for (i = 0; i < AUTOMAP_BLOCKS; i++)

@@ -82,7 +82,7 @@ inline bool DeletePointObject(TMapPoint &Point, int Position)
 	return WasFull;
 }
 
-// ClearField's and ClearMap's: no object left.
+// ClearField's and TMap::Clear's: no object left.
 inline void ClearPointObjects(TMapPoint &Point) noexcept
 {
 	if (!Point.Objects.empty())

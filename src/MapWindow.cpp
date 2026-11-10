@@ -189,7 +189,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 	} else {
 		if (Flags != 0)
 			return RightButtonUp(x, y, Flags);
-		int DestX = FieldX, DestY = FieldY, DestZ = Map().GetMapLevel();
+		int DestX = FieldX, DestY = FieldY, DestZ = Map().GetLevel();
 		Map().MapToWorld(&DestX, &DestY, &DestZ);
 		switch (PlayerState().SetDestination(DestX, DestY, DestZ, true, false)) {
 		case 1:
@@ -377,7 +377,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	PATELLA_ASSERT(Player!=nullptr);
 	ScrollX = Player->GetDeltaX() + 32;
 	ScrollY = Player->GetDeltaY() + 32;
-	const int Level = Map().GetMapLevel();
+	const int Level = Map().GetLevel();
 	MaxLevel = 7;
 
 	// The levels drawn end below the first ground above the player's cross
@@ -429,7 +429,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		TObject Obj;
 		NumberOfNames = 0;
 		NumberOfTextualEffects = 0;
-		Map().GetMapPosition(&PositionX, &PositionY, &PositionZ);
+		Map().GetPosition(&PositionX, &PositionY, &PositionZ);
 		if (GraphicsEngine().GetSurface()->SurfaceRecreated(2)) {
 			for (int i = 0; i < 16; i++) {
 				for (int j = 0; j < 12; j++)
@@ -712,7 +712,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 							Visible = false;
 					}
 				}
-				if (!Visible && TextualEffects[i].FieldZ != Map().GetMapLevel())
+				if (!Visible && TextualEffects[i].FieldZ != Map().GetLevel())
 					continue;
 				const int Color = Map().GetTextualEffectColor(EffectIdOf(TextualEffects[i].EffectNumber));
 				const char *Text = Map().GetTextualEffectText(EffectIdOf(TextualEffects[i].EffectNumber));
@@ -917,7 +917,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		}
 		if (Mode == 0) {
 			if ((::Creatures().IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == PlayerState().GetID())
-				&& FieldZ == Map().GetMapLevel()) {
+				&& FieldZ == Map().GetLevel()) {
 				Names[NumberOfNames].CreatureID = Creatures[i]->CreatureID;
 				Names[NumberOfNames].x = ox - Elevation + posx + 16;
 				Names[NumberOfNames].y = oy - Elevation + posy;

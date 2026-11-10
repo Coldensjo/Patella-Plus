@@ -81,11 +81,11 @@ int patella::TPlayerState::GetNumberOfSteps() const
 	return NumberOfPlayerSteps;
 }
 
-// The map centre (GetMapPosition) plus the step that the server has not
+// The map centre (TMap::GetPosition) plus the step that the server has not
 // confirmed yet.
 void patella::TPlayerState::GetPosition(int *x, int *y, int *z) const
 {
-	Map.GetMapPosition(x, y, z);
+	Map.GetPosition(x, y, z);
 	*x += PlayerStepDX;
 	*y += PlayerStepDY;
 }
@@ -454,13 +454,13 @@ void patella::TPlayerState::StartStep()
 	default: break; // no step: dx and dy stay 0, as without it (bugprone-switch-missing-default-case)
 		// clang-format on
 	}
-	const TObject Bank = Map.GetFirstObject(dx + 8, dy + 6, Map.GetMapLevel());
+	const TObject Bank = Map.GetFirstObject(dx + 8, dy + 6, Map.GetLevel());
 	if (Bank.Type == 0 || !ObjectTypes.GetObjectFlag(Bank.Type, BANK))
 		return;
-	if (!Map.IsFieldPassable(dx + 8, dy + 6, Map.GetMapLevel(), false))
+	if (!Map.IsFieldPassable(dx + 8, dy + 6, Map.GetLevel(), false))
 		return;
-	const int Height = Map.GetFieldHeight(8, 6, Map.GetMapLevel());
-	if (Map.GetFieldHeight(dx + 8, dy + 6, Map.GetMapLevel()) > Height + 1)
+	const int Height = Map.GetFieldHeight(8, 6, Map.GetLevel());
+	if (Map.GetFieldHeight(dx + 8, dy + 6, Map.GetLevel()) > Height + 1)
 		return;
 	Player->StartMovement(dx, dy, ObjectTypes.GetObjectWaypoints(Bank.Type));
 	PlayerStepDX = dx;
@@ -491,7 +491,7 @@ int patella::TPlayerState::FindPath()
 		return 0;
 	}
 	int x, y, z;
-	Map.GetMapPosition(&x, &y, &z);
+	Map.GetPosition(&x, &y, &z);
 	x += PlayerStepDX;
 	y += PlayerStepDY;
 	const int Result = Map.FindPath(x, y, z, DestinationX, DestinationY, DestinationZ, DestinationExact,
@@ -540,7 +540,7 @@ int patella::TPlayerState::SetDestination(int x, int y, int z, bool Exact, bool 
 	DestinationExact = Exact;
 	DestinationDiagonal = Diagonal;
 	Map.WorldToMap(&x, &y, &z);
-	if (In(x, 1, 15) && In(y, 1, 11) && z == Map.GetMapLevel() && (x != 8 || y != 6)) {
+	if (In(x, 1, 15) && In(y, 1, 11) && z == Map.GetLevel() && (x != 8 || y != 6)) {
 		if (!Map.IsFieldPassable(x, y, z, true)) {
 			GUI.SetStatusMessage("Sorry, not possible.", false);
 			DestinationX = 0;
