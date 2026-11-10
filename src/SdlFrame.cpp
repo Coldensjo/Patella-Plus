@@ -295,7 +295,7 @@ void OnDisplayChange(int Width, int Height)
 	}
 }
 
-void Input(const SDL_Event &Event, bool Scripted);
+void Input(const SDL_Event &Event);
 
 // The event watch (above): called by SDL as it sends each event.
 bool SDLCALL WatchEvent([[maybe_unused]] void *UserData, SDL_Event *Event)
@@ -349,7 +349,7 @@ bool SDLCALL WatchEvent([[maybe_unused]] void *UserData, SDL_Event *Event)
 		// Issue #123: the input, as it comes (WM_KEYDOWN, WM_CHAR, WM_LBUTTONDOWN ... in SDL's window procedure); the
 		// test build drops the desktop's with a script (IInput::IgnoreDesktopInput, as its message filter DropInput).
 		if (!platform::Platform().Input.IgnoreDesktopInput())
-			Input(*Event, false);
+			Input(*Event);
 		break;
 	default: break;
 	}
@@ -497,8 +497,8 @@ constexpr bool KeysMakeCharacters = true;
 
 // CMainFrame::KeyDown with its key's character: a modifier remembered, Alt+F4 closes, the other translated keys go to
 // KeyPress; then, where keys make their characters (KeysMakeCharacters), the control character TranslateMessage made
-// of the key (WM_CHAR right after the WM_KEYDOWN). A scripted key's characters are the script's own events.
-void KeyDown(const platform::TKeyEvent &Key, bool Scripted)
+// of the key (WM_CHAR right after the WM_KEYDOWN).
+void KeyDown(const platform::TKeyEvent &Key)
 {
 	const platform::TKeyAction Action = Keys.Down(Key);
 	if (Action.Kind == platform::TKeyAction::TKind::Close) {
@@ -507,7 +507,7 @@ void KeyDown(const platform::TKeyEvent &Key, bool Scripted)
 	}
 	if (Action.Kind == platform::TKeyAction::TKind::Press)
 		KeyPress(Action.Code);
-	if (KeysMakeCharacters && !Scripted) {
+	if (KeysMakeCharacters) {
 		const int Char = platform::KeyCharacter(Key);
 		if (Char >= 0)
 			OnChar(static_cast<unsigned int>(Char));
@@ -517,16 +517,17 @@ void KeyDown(const platform::TKeyEvent &Key, bool Scripted)
 #if !defined(_WIN32)
 // SDL_EVENT_KEY_DOWN and SDL_EVENT_KEY_UP, where SDL's key events are the keys' source (not on Windows: OnKeyMessage).
 // SDL's repeats are the platform's repeated presses.
-void OnKey(const SDL_KeyboardEvent &Event, bool Scripted)
+void OnKey(const SDL_KeyboardEvent &Event)
 {
 	const platform::TKeyEvent Key = DescribeKey(Event);
 	if (Event.down)
-		KeyDown(Key, Scripted);
+		KeyDown(Key);
 	else
 		Keys.Up(Key);
 }
 #endif
 
+#if defined(_WIN32)
 // On Windows the key messages (WM_KEYDOWN, WM_SYSKEYDOWN, WM_KEYUP, WM_SYSKEYUP), as CMainFrame's
 // KeyDown and KeyUp got them: the virtual key with lParam's extended flag, as TranslateKey read them, through the same
 // rules (platform/KeyInput.h). SDL's key events would differ from the messages: SDL keeps its own key state and makes or
@@ -562,16 +563,15 @@ platform::TKeyEvent KeyOfMessage(WPARAM VirtualKey, LPARAM LParam)
 	return Key;
 }
 
-// On Linux (issue #131) the test mode's scripted keys come this way too (WindowMessage below): a key of a script
-// makes no character (its WM_CHAR is its own event), as Scripted says on Windows' KeysMakeCharacters path.
-void OnKeyMessage(UINT Message, WPARAM WParam, LPARAM LParam, bool Scripted = false)
+void OnKeyMessage(UINT Message, WPARAM WParam, LPARAM LParam)
 {
 	const platform::TKeyEvent Key = KeyOfMessage(WParam, LParam);
 	if (Message == WM_KEYDOWN || Message == WM_SYSKEYDOWN)
-		KeyDown(Key, Scripted);
+		KeyDown(Key);
 	else
 		Keys.Up(Key);
 }
+#endif
 
 // SDL_EVENT_TEXT_INPUT: the characters of the typed text (WM_CHAR, which an ANSI window got in the code page), each
 // converted to the client's Windows-1252 (issue #112; a character it does not have is '?', as Windows' conversion for
@@ -584,6 +584,7 @@ void OnText(const char *Text)
 		OnChar(static_cast<unsigned char>(Byte));
 }
 
+#if defined(_WIN32)
 // Win32 until the Linux client: the window's WM_CHAR (a UTF-16 unit: SDL's window is a Unicode window; a surrogate pair
 // comes as two), as CMainFrame::OnChar got it, converted to the client's Windows-1252 (issue #112) and handed to OnChar.
 // SDL's text events would differ from the original's WM_CHAR: SDL delivers text only to the window with the keyboard
@@ -608,6 +609,7 @@ void OnWindowChar(WPARAM WParam)
 	for (const char Byte : text::Utf16ToCp1252(Text))
 		OnChar(static_cast<unsigned char>(Byte));
 }
+#endif
 
 bool InsideClient(float X, float Y)
 {
@@ -711,16 +713,15 @@ POINT EventPoint(float X, float Y)
 // SDL_EVENT_MOUSE_BUTTON_DOWN and _UP, where SDL's button events are the buttons' source (not on Windows: OnButtonMessage
 // below). The point is SDL's mouse position at the button (its last motion's). Whether a press is a double click:
 // Windows' rule over SDL's click counts (platform::TClickCounter; every button's presses count, as every button's
-// messages reset Windows' double click); a scripted press is the script's. The middle and side buttons have no
+// messages reset Windows' double click). The middle and side buttons have no
 // handler, as in the original.
-void OnButton(const SDL_MouseButtonEvent &Event, bool Scripted)
+void OnButton(const SDL_MouseButtonEvent &Event)
 {
 	if (Event.down) {
-		const bool Double = Scripted ? Event.clicks >= 2 : Clicks.IsDouble(Event.button, Event.clicks);
+		const bool Double = Clicks.IsDouble(Event.button, Event.clicks);
 		if (Event.button != SDL_BUTTON_LEFT && Event.button != SDL_BUTTON_RIGHT)
 			return;
-		if (!Scripted)
-			OnSetCursor(Event.x, Event.y);
+		OnSetCursor(Event.x, Event.y);
 		ButtonDown(EventPoint(Event.x, Event.y), Event.button == SDL_BUTTON_LEFT, Double);
 	} else if (Event.button == SDL_BUTTON_LEFT || Event.button == SDL_BUTTON_RIGHT) {
 		ButtonUp(EventPoint(Event.x, Event.y), Event.button == SDL_BUTTON_LEFT);
@@ -728,6 +729,7 @@ void OnButton(const SDL_MouseButtonEvent &Event, bool Scripted)
 }
 #endif
 
+#if defined(_WIN32)
 // Win32 until the Linux client: the button messages, as CMainFrame's handlers got them (OnLButtonDown, OnLButtonDblClk,
 // OnLButtonUp, OnRButtonDown, OnRButtonDblClk, OnRButtonUp), after SDL's window procedure has seen them (their
 // Default()). SDL's button events would differ from the original's messages: their point is SDL's last mouse position,
@@ -753,6 +755,7 @@ void OnButtonMessage(UINT Message, LPARAM LParam)
 	default: break;
 	}
 }
+#endif
 
 // CMainFrame::OnMouseWheel: one MouseWheel call per notch (WM_MOUSEWHEEL's 120; SDL's wheel distance is notches) at
 // the client's mouse position. The horizontal wheel has no handler.
@@ -769,9 +772,8 @@ void OnWheel(const SDL_MouseWheelEvent &Event)
 	}
 }
 
-// Every input event of the window (the event watch's and the test mode's scripted ones), once the client has its
-// window (InitMainWindow).
-void Input(const SDL_Event &Event, bool Scripted)
+// Every input event of the window (the event watch's), once the client has its window (InitMainWindow).
+void Input(const SDL_Event &Event)
 {
 	if (!Created)
 		return;
@@ -779,21 +781,18 @@ void Input(const SDL_Event &Event, bool Scripted)
 	case SDL_EVENT_KEY_DOWN:
 	case SDL_EVENT_KEY_UP:
 #if !defined(_WIN32)
-		OnKey(Event.key, Scripted); // on Windows the key messages (OnKeyMessage)
+		OnKey(Event.key); // on Windows the key messages (OnKeyMessage)
 #endif
 		break;
 	case SDL_EVENT_TEXT_INPUT: OnText(Event.text.text); break;
 	case SDL_EVENT_MOUSE_BUTTON_DOWN:
 	case SDL_EVENT_MOUSE_BUTTON_UP:
 #if !defined(_WIN32)
-		OnButton(Event.button, Scripted); // on Windows the button messages (OnButtonMessage)
+		OnButton(Event.button); // on Windows the button messages (OnButtonMessage)
 #endif
 		break;
 	case SDL_EVENT_MOUSE_WHEEL: OnWheel(Event.wheel); break;
-	case SDL_EVENT_MOUSE_MOTION:
-		if (!Scripted)
-			OnSetCursor(Event.motion.x, Event.motion.y);
-		break;
+	case SDL_EVENT_MOUSE_MOTION: OnSetCursor(Event.motion.x, Event.motion.y); break;
 	default: break;
 	}
 }
@@ -1255,45 +1254,5 @@ void ClientToScreen(int &X, int &Y)
 	X += Left;
 	Y += Top;
 }
-
-void ScriptedInput(const SDL_Event &Event)
-{
-	Input(Event, true);
-}
-
-#if !defined(_WIN32)
-// Issue #131: what the Windows path's window messages do on Linux: the test mode's scripted keys, characters, buttons,
-// main timer ticks and close (TestModeWin32.cpp, SdlInputWin32.cpp), through the handlers the window procedure
-// calls on Windows.
-void WindowMessage(UINT Message, WPARAM WParam, LPARAM LParam)
-{
-	if (!Created)
-		return;
-	switch (Message) {
-	case WM_KEYDOWN:
-	case WM_SYSKEYDOWN:
-	case WM_KEYUP:
-	case WM_SYSKEYUP: OnKeyMessage(Message, WParam, LParam, true); break;
-	case WM_CHAR: OnWindowChar(WParam); break;
-	case WM_LBUTTONDOWN:
-	case WM_LBUTTONDBLCLK:
-	case WM_LBUTTONUP:
-	case WM_RBUTTONDOWN:
-	case WM_RBUTTONDBLCLK:
-	case WM_RBUTTONUP: OnButtonMessage(Message, LParam); break;
-	case WM_TIMER: TimerEvent(); break;
-	case WM_CLOSE: CloseWanted = true; break;
-	default: break;
-	}
-}
-
-void ClientSize(int &Width, int &Height)
-{
-	Width = 0;
-	Height = 0;
-	if (Window != nullptr)
-		SDL_GetWindowSize(Window, &Width, &Height);
-}
-#endif
 
 } // namespace patella::sdlframe

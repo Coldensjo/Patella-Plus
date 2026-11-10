@@ -9,8 +9,7 @@
 // SDL_Vulkan_CreateSurface's since #126). Its input (issue #123): the wheel, motion and IME text events, the mouse
 // capture (SDL_CaptureMouse), the cursors and the window's coordinates are SDL3's; on Windows the keys, the characters
 // and the buttons stay the window's messages, because SDL's events differ from them (notes/decisions.md, "#123").
-// Either way platform/KeyInput.h has the client's rules. The test mode's scripted wheel becomes the same SDL event
-// (SdlInputWin32.cpp, through ScriptedInput); its other messages are dispatched to the window.
+// Either way platform/KeyInput.h has the client's rules.
 //
 // No SDL header here: Player.cpp includes it, and the golden tests compile Player.cpp (their stubs stand in for these
 // functions, tests/golden/client_stubs.cpp).
@@ -19,8 +18,6 @@
 
 #include "common.h"
 #include "platform/Window.h"
-
-union SDL_Event; // SDL3's (SDL_events.h)
 
 namespace patella::sdlframe {
 
@@ -55,16 +52,5 @@ void UpdateMouseCursor();
 // SDL knows it (SDL_GetWindowPosition, the client area's top left corner); nothing without a window.
 void ScreenToClient(int &X, int &Y);
 void ClientToScreen(int &X, int &Y);
-// The test mode's scripted input (SdlInputWin32.cpp): an SDL event made from a script's window message (on
-// Windows the wheel), handled as the desktop's events are, except that a key makes no character (the script's WM_CHAR
-// is its character) and a button's click count is the message's (1, or 2 for a double click).
-void ScriptedInput(const SDL_Event &Event);
-
-#if !defined(_WIN32)
-// Issue #131: the Linux path of the test mode's window messages (SdlInputWin32.cpp): what the window procedure
-// does on Windows with a key, character, button, timer or close message. And the window's client area, GetClientRect's.
-void WindowMessage(UINT Message, WPARAM WParam, LPARAM LParam);
-void ClientSize(int &Width, int &Height);
-#endif
 
 } // namespace patella::sdlframe

@@ -149,12 +149,6 @@ public:
 	// Whether a line of this level is written.
 	[[nodiscard]] bool Enabled(TLevel LineLevel) const noexcept { return LineLevel <= GetLevel(); }
 
-	void SetConsole(TConsole Target) noexcept
-	{
-		const std::lock_guard<std::mutex> Lock(Mutex);
-		Console = Target;
-	}
-
 	// Opens Path for appending (created where it does not exist) through Files (the platform's IFileSystem, issue
 	// #119), instead of an open one. False (and no file) where that fails.
 	bool OpenFile(patella::platform::IFileSystem &Files, const std::string &Path) noexcept
@@ -163,22 +157,10 @@ public:
 		File.Close();
 		try {
 			return Files.Open(File, Path.c_str(), TFile::TAccess::Append, TFile::TContent::Binary);
-		} catch (...) { // an implementation's std::bad_alloc (TFolderFileSystem's list)
+		} catch (...) { // an implementation's std::bad_alloc
 			File.Close();
 			return false;
 		}
-	}
-
-	void CloseFile() noexcept
-	{
-		const std::lock_guard<std::mutex> Lock(Mutex);
-		File.Close();
-	}
-
-	[[nodiscard]] bool HasFile() noexcept
-	{
-		const std::lock_guard<std::mutex> Lock(Mutex);
-		return File.IsOpen();
 	}
 
 	// Writes the message's line (FormatLine) when its level is enabled.

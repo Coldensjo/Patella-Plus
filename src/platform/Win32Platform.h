@@ -61,8 +61,6 @@ public:
 
 // The Win32 implementations, made on first use and never destroyed: Patella.exe's Platform(), and the parts of the
 // test build's (TestModeWin32.cpp) that are not the test mode's.
-TWin32Clock &Win32Clock();
-TWin32Clipboard &Win32Clipboard();
 TWin32Input &Win32Input();
 TWin32Window &Win32Window();
 } // namespace patella::platform

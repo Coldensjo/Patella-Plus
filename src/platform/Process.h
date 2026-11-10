@@ -15,9 +15,6 @@
 
 namespace patella::platform {
 
-// The system clock: Windows' timeGetTime, time and Sleep (TWin32Clock); on Linux steady_clock, time and sleep_for.
-IClock &SystemClock();
-
 // The SDL3 window's input (issue #122; SdlFrame.cpp): the main timer is the loop's (TLoopTimer: SdlFrame.cpp's loop asks
 // TimerDue and calls TimerEvent); the cursor is Win32's GetCursorPos on Windows (issue #123), SDL's global mouse position
 // on Linux. The timer's Id is not kept: the client has one timer (1).

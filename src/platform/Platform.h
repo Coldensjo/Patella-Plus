@@ -14,10 +14,6 @@
 //	Patella.exe, the golden runner     platform/Win32Platform.cpp: TWin32Clock, TDataFileSystem, NetworkSocket()
 //	                                   (issue #125: TPortableSocket, the golden runner's TMfcSocket), TWin32Clipboard,
 //	                                   TWin32Input, TWin32Window
-//	the test build                     TestModeWin32.cpp: the test mode's clock (TVirtualClock with
-//	                                   --test-script, else TWin32Clock), TDataFileSystem, the replay's socket
-//	                                   with --test-replay (issue #120) else TPortableSocket, TMemoryClipboard with a
-//	                                   script else TWin32Clipboard, the test mode's TTestInput and TTestWindow
 //
 // Each is made on first use (a static initialiser, sysinc.cpp's StartTime, reads the clock before main) and never
 // destroyed (the client reads the clocks until its very end, static destructors included).

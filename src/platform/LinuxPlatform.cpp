@@ -68,11 +68,6 @@ std::vector<std::string> &ArgumentList()
 
 } // namespace
 
-IClock &SystemClock()
-{
-	return LinuxClockInstance;
-}
-
 // SDL's global mouse position: where SDL cannot tell the screen's position (Wayland has none for a client) it is the
 // position in the window with the mouse, which the client's ScreenToClient (SDL_GetWindowPosition, 0 there) leaves as it
 // is, so the client still sees its window's coordinates.

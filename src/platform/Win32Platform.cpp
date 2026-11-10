@@ -189,16 +189,6 @@ constinit TWin32Window Win32WindowInstance;
 constinit TSdlLoopInput SdlLoopInputInstance;
 } // namespace
 
-TWin32Clock &Win32Clock()
-{
-	return Win32ClockInstance;
-}
-
-IClock &SystemClock()
-{
-	return Win32ClockInstance;
-}
-
 // Issue #130: the data folder's files (platform/FileSystem.h), set by ConfigureDataFiles (DataLocationWin32.cpp); until
 // then, and in the golden runner, the working folder's. Its folders are not constant-initialised: made on first use,
 // never destroyed (the files are open to the very end, as the clock is read).
@@ -206,11 +196,6 @@ TDataFileSystem &SystemFileSystem()
 {
 	static TDataFileSystem &Instance = *new TDataFileSystem; // NOLINT(cppcoreguidelines-owning-memory): never destroyed
 	return Instance;
-}
-
-TWin32Clipboard &Win32Clipboard()
-{
-	return Win32ClipboardInstance;
 }
 
 TWin32Input &Win32Input()

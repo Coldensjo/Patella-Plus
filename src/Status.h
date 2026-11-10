@@ -97,11 +97,6 @@ public:
 	void InitSession(bool Value);
 	void ExitSession();
 
-	// The test mode's views (ClientView.h's ViewConnectionState and ViewCharacters read through them).
-	[[nodiscard]] const int *ViewConnectionState() const { return &ConnectionState; }
-	[[nodiscard]] const TCharacter *ViewCharacters() const { return Characters.get(); }
-	[[nodiscard]] const int *ViewAccountCharacters() const { return &AccountCharacters; }
-
 private:
 	// Data, in the original's .bss order.
 	std::array<int, RIGHT_ANY> Rights{};

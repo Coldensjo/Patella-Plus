@@ -6,13 +6,12 @@
 // saved channels of ConsoleWindow.cpp, and Preferences.cpp's test whether Tibia.cfg is there. Each goes through the
 // process's IFileSystem (platform/Platform.h):
 //
-//	TSystemFileSystem  the files of the working folder, as the original opened them (TFile::Open, std::filesystem)
 //	TDataFileSystem    issue #130 (plan M8, D14): the files of the data folder (Patella.ini of the settings folder),
 //	                   with the original names found without regard to ASCII case where asked (Linux): Patella.exe's,
 //	                   the test build's and the golden runner's (platform/Win32Platform.h SystemFileSystem). Until
 //	                   the client's start-up sets its folders (settings::ChooseLocations, Player.cpp InitInstance), and
-//	                   wherever the data folder is the working folder, it is TSystemFileSystem: the same calls.
-//	TFolderFileSystem  the files of a folder of the caller's: the unit tests' (tests/unit/platform_test.cpp)
+//	                   wherever the data folder is the working folder, it opens the working folder's files as the
+//	                   original did (TFile::Open, std::filesystem).
 //
 // Both are portable, so the platform's file system is the same code on every platform; what is Windows' is TFile's
 // (its UTF-16 names, _wfsopen). Settings.cpp's Patella.ini and the developer log's LogFile are the fork's own files
@@ -63,24 +62,6 @@ inline std::filesystem::path PathOfName(std::string_view Name)
 	return {patella::text::Cp1252ToUtf8(Name)};
 #endif
 }
-
-// The working folder's files: what the original's fopen and Preferences.cpp's exists (issue #45) did.
-class TSystemFileSystem final : public IFileSystem {
-public:
-	bool Open(TFile &File, const char *Name, TFile::TAccess Access, TFile::TContent Content) override
-	{
-		return File.Open(Name, Access, Content);
-	}
-	[[nodiscard]] bool Exists(const char *Name) override
-	{
-		std::error_code Error;
-		try {
-			return std::filesystem::exists(PathOfName(Name), Error);
-		} catch (...) { // std::bad_alloc of the path
-			return false;
-		}
-	}
-};
 
 // Issue #130: the fork's settings file (settings/Settings.h's FileName), which TDataFileSystem opens in its settings
 // folder; every other name is the data folder's.
@@ -143,7 +124,7 @@ struct TFileLocations {
 };
 
 // The client's files in the data folder, Patella.ini in the settings folder (TFileLocations). With the default
-// locations (the working folder, the names as written), Open and Exists are TSystemFileSystem's, call for call.
+// locations (the working folder, the names as written), Open is TFile::Open and Exists std::filesystem::exists.
 class TDataFileSystem final : public IFileSystem {
 public:
 	TDataFileSystem() = default;
@@ -189,59 +170,6 @@ private:
 	TFileLocations Where;
 
 	[[nodiscard]] bool Plain() const { return Where.Data.empty() && Where.Settings.empty() && !Where.CaseInsensitive; }
-};
-
-// The test implementation: the names are those of the files in Root (the client's text too), and every open is
-// listed (Opened). A name in Missing is not there: Open fails with ENOENT and Exists is false, whatever the folder
-// has (the error paths of the unit tests).
-class TFolderFileSystem final : public IFileSystem {
-public:
-	struct TOpen {
-		std::string Name;
-		TFile::TAccess Access;
-		TFile::TContent Content;
-	};
-
-	explicit TFolderFileSystem(std::string RootFolder) : Root(std::move(RootFolder)) {}
-
-	bool Open(TFile &File, const char *Name, TFile::TAccess Access, TFile::TContent Content) override
-	{
-		Opened.push_back({Name, Access, Content});
-		if (IsMissing(Name)) {
-			errno = ENOENT;
-			return false;
-		}
-		return File.Open(InRoot(Name).c_str(), Access, Content);
-	}
-	[[nodiscard]] bool Exists(const char *Name) override
-	{
-		if (IsMissing(Name))
-			return false;
-		std::error_code Error;
-		return std::filesystem::exists(PathOfName(InRoot(Name)), Error);
-	}
-
-	std::vector<std::string> Missing;
-	std::vector<TOpen> Opened;
-
-private:
-	std::string Root;
-
-	[[nodiscard]] std::string InRoot(std::string_view Name) const
-	{
-		std::string Path = Root;
-		if (!Path.empty() && Path.back() != '/' && Path.back() != '\\')
-			Path += '/';
-		Path += Name;
-		return Path;
-	}
-	[[nodiscard]] bool IsMissing(std::string_view Name) const
-	{
-		for (const std::string &Each : Missing)
-			if (Each == Name)
-				return true;
-		return false;
-	}
 };
 
 } // namespace patella::platform
