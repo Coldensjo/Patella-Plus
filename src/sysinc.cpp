@@ -10,7 +10,6 @@
 #include "BuildConfig.h"
 #include "common.h"
 #include "platform/Platform.h"
-#include <cstdio>
 #include <array>
 #include <cstddef>
 #include <cstdlib>

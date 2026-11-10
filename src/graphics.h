@@ -28,7 +28,6 @@
 #include "types/GraphicsTypes.h" // IWYU pragma: export (TRect, TRGBColor, TFont: graphics.h's until issue #116)
 #include <array>
 #include <memory>
-#include <type_traits>
 
 struct TObject; // Objects.h, passed to DrawObject
 

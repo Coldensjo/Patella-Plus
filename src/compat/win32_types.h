@@ -11,7 +11,6 @@
 #error "compat/win32_types.h is for systems without the Windows headers"
 #endif
 
-#include <cstddef>
 #include <cstdint>
 
 // The compiler's spelling of the Windows headers (the stand-in windows.h of the golden runner defines it too).

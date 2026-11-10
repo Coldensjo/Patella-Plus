@@ -40,7 +40,6 @@
 #include <format>
 #include <string>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #if defined(_WIN32)

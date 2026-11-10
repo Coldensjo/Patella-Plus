@@ -20,7 +20,6 @@
 #include "platform/Platform.h"
 #include "types/FixedString.h"
 #include <array>
-#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>

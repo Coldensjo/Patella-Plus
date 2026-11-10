@@ -15,7 +15,6 @@
 #include "Container.h"
 #include <cstddef>
 #include <memory>
-#include <type_traits>
 
 // A reference to an object (passed by value). Type is named in
 // MapWindow.cpp's "SrcObj.Type!=CREATURE" (CREATURE is 99), Data in Dialogs.cpp's

@@ -5,7 +5,6 @@
 #include "types/IndexedVector.h"
 #include "Preferences.h"
 #include <array>
-#include <type_traits>
 #include <cstring>
 
 struct TRGBColor;
@@ -59,7 +58,6 @@ struct TTalkLine {
 	TTalkLine *Previous, *Next;
 	TFixedString<30> Addressee;
 	char *WithoutTime, *Text;
-	std::int64_t Time; // the line's time, the wall clock's
 	TTalkLine(uint32 _StatementID, int _Mode, const char *_Line, int DiffTime);
 	TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, const char *_Line, int DiffTime);
 	TTalkLine(const TTalkLine &) = delete;

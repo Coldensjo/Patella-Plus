@@ -16,10 +16,8 @@
 
 #include "Extern/regexp/regexp.h"
 
-#include <cstddef>
 #include <cstdlib>
 #include <memory>
-#include <string_view>
 
 namespace patella {
 

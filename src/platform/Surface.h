@@ -11,9 +11,9 @@
 // 	the golden tests' recording surfaces (tests/golden: testsurface.h, commworld.cpp's)
 //
 // No Win32 type in it: the window is a TWindowHandle (platform/Window.h), ClipRect's rectangles a TEdgeRect (RECT's
-// four edges). What the engine shares with the client (the cache surfaces' size, the main window, the available
-// engines) is a TSurfaceShared that the surface's creator passes to its constructor (TGraphicsEngine, src/Surface.h),
-// instead of the client's accessor (bridge::GraphicsEngine(), until issue #138).
+// four edges). What the engine shares with the client (the cache surfaces' size, the main window) is a TSurfaceShared
+// that the surface's creator passes to its constructor (TGraphicsEngine, src/Surface.h), instead of the client's
+// accessor (bridge::GraphicsEngine(), until issue #138).
 //
 // The names from the binary: hWindow, ViewMode, the surface and mode constants (SurfaceDX.cpp's and surfaceDX9.cpp's
 // assertions), TestEngine, InitSurfaces and ExitSurfaces (the original ChangeEngine's error messages); the rest are ours.
@@ -23,7 +23,6 @@
 #include "platform/Window.h"
 #include "types/GraphicsTypes.h"
 #include <cstdint>
-#include <type_traits>
 
 struct TFullscreenMode;
 class TSurface;

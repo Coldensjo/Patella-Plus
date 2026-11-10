@@ -955,7 +955,6 @@ TTalkLine::TTalkLine(uint32 _StatementID, int _Mode, const char *_Line, int Diff
 	Mode = _Mode;
 	StatementID = _StatementID;
 	const std::int64_t LineTime = patella::platform::Platform().Clock.WallSeconds() + DiffTime;
-	Time = LineTime;
 	const std::tm LocalTime = LineLocalTime(LineTime);
 	TFixedString<8> Stamp;
 	Stamp.Format("{:02}:{:02} ", LocalTime.tm_hour, LocalTime.tm_min);
@@ -974,7 +973,6 @@ TTalkLine::TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, con
 	Mode = _Mode;
 	StatementID = _StatementID;
 	const std::int64_t LineTime = patella::platform::Platform().Clock.WallSeconds() + DiffTime;
-	Time = LineTime;
 	const std::tm LocalTime = LineLocalTime(LineTime);
 	TFixedString<8> Stamp;
 	Stamp.Format("{:02}:{:02} ", LocalTime.tm_hour, LocalTime.tm_min);

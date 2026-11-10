@@ -7,7 +7,6 @@
 #pragma once
 
 #include "compat/msvc.h" // PATELLA_NO_SANITIZE_ADDRESS
-#include <type_traits>
 
 // Text alignment (TFont::Alignment, the Alignment parameters).
 // An unnamed enum of int constants (TFont's int Alignment), unscoped as the other unnamed ones (notes/decisions.md,

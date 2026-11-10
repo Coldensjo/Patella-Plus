@@ -13,7 +13,6 @@
 // it Skins.obj loses its .data, .CRT$XCU and ATL sections, and the images' .data moves).
 #include "common.h" // IWYU pragma: keep
 #include "Skins.h"
-#include <memory>
 
 // The data (NumberOfSkins, Skins) is TSkins' since issue #116 (Skins.h): a part of TGraphics, with
 // GUI.cpp's SkinProperties. The original's free functions InitSkins and ExitSkins forward to the members from

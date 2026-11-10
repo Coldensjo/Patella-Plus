@@ -91,7 +91,7 @@ function(patella_client_compile_settings target)
 	target_compile_definitions(${target} PRIVATE
 		$<$<CONFIG:Debug>:_DEBUG>
 		$<$<CONFIG:Release>:NDEBUG>
-		PATELLA_CORE PATELLA_WIN32_TYPES PATELLA_MSVC_RAND PATELLA_VULKAN PATELLA_SDL3)
+		PATELLA_CORE PATELLA_WIN32_TYPES PATELLA_MSVC_RAND PATELLA_VULKAN)
 	patella_target_language(${target})
 	patella_target_warnings(${target})
 	patella_target_hardening(${target})

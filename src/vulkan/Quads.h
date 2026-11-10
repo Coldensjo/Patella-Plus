@@ -22,7 +22,6 @@
 
 #include <array>
 #include <cstdint>
-#include <type_traits>
 
 namespace patella::vulkan {
 

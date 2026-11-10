@@ -23,9 +23,7 @@
 #include "types/FixedString.h"
 #include "Skins.h"
 #include <array>
-#include <cstddef>
 #include <cstring>
-#include <memory>
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
 // the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,

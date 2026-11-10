@@ -14,7 +14,6 @@
 #include "Script.h"
 #include "Container.h"
 #include "common.h"
-#include <memory>
 
 // The data is TObjectTypes' (Objects.h, issue #106).
 

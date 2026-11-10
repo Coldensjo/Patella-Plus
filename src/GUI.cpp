@@ -22,7 +22,6 @@
 #include <climits>
 #include <cstddef>
 #include <cstdlib>
-#include <memory>
 #include <type_traits>
 
 // Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:

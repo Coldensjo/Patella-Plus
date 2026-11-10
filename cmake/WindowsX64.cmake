@@ -80,9 +80,9 @@ set_source_files_properties("${patella_rc}" PROPERTIES OBJECT_DEPENDS "${PATELLA
 # developer log's keys in Patella.ini (issue #77): src/log/LogSettings.cpp, patella_core's, compiled here again too, and
 # so are the options' keys in it (issue #45: src/settings/PreferenceKeys.cpp, Preferences.cpp's Patella.ini).
 include("${PROJECT_SOURCE_DIR}/cmake/Vulkan.cmake")
-# SDL3 (issue #122, plan M8; cmake/Sdl3.cmake): the window and the event loop of src/SdlFrame.cpp. PATELLA_SDL3 gives
-# Patella.exe's Platform() the SDL3 window's input (src/platform/Win32Platform.cpp) and, since issue #124, its clipboard
-# and desktop (src/platform/SdlPlatform.cpp); the golden runner compiles Win32Platform.cpp without it.
+# SDL3 (issue #122, plan M8; cmake/Sdl3.cmake): the window and the event loop of src/SdlFrame.cpp. Patella.exe's
+# Platform() has the SDL3 window's input (src/platform/Win32Platform.cpp) and, since issue #124, its clipboard and
+# desktop (src/platform/SdlPlatform.cpp).
 include("${PROJECT_SOURCE_DIR}/cmake/Sdl3.cmake")
 # The platform's Win32 implementations (issue #109, src/platform: the clock, the files, the network; Patella.exe's
 # Platform()) are compiled with them.
@@ -119,11 +119,10 @@ function(patella_client_compile_settings target)
 	patella_target_hardening(${target})
 	target_compile_definitions(${target} PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:PATELLA_VULKAN>)
 	target_link_libraries(${target} PRIVATE patella_render_vulkan)
-	# Issue #122: SDL3's headers (the library itself is linked by patella_client: the header checks do not build it).
-	target_compile_definitions(${target} PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:PATELLA_SDL3>)
 	if(PATELLA_PLACEHOLDER_RESOURCES) # issue #127: the client's warning at start (Player.cpp)
 		target_compile_definitions(${target} PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:PATELLA_PLACEHOLDER_RESOURCES>)
 	endif()
+	# Issue #122: SDL3's headers (the library itself is linked by patella_client: the header checks do not build it).
 	target_link_libraries(${target} PRIVATE SDL3::Headers)
 endfunction()
 

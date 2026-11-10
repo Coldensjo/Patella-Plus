@@ -21,7 +21,6 @@
 #include "Objects.h" // TObject
 #include "types/Regexp.h"
 #include <array>
-#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <vector>

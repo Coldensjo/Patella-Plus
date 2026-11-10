@@ -15,7 +15,6 @@
 
 #include <optional>
 #include <string>
-#include <utility>
 
 namespace patella::platform {
 
