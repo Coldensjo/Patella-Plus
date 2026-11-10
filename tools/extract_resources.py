@@ -10,13 +10,13 @@ Writes, byte-exact from the image's .rsrc section:
 	                  text (none in Tibia.exe 7.72)
 	resources.tsv     every entry of the image: type, name, language, code page, size, RVA
 
-The text resources (version information, string tables, the dialog) are written by hand in
-src/res/Patella.rc; tools/compare_resources.py checks that the compiled script gives the
-same entries. --list prints the table instead of writing files.
+The text resources (version information, string tables, the dialog) are not written to files:
+the one the client has, its version information, is written by hand in src/res/Patella.rc.
+--list prints the table instead of writing files.
 
-The PE parser is shared with tools/compare_resources.py. CipSoft's icons and cursors and
-the MFC cursors and bitmaps of the image (not used since MFC went, issue #127, but extracted with the rest) are not
-committed: run this script against a local Tibia.exe to get them (notes/resources.md).
+CipSoft's icons and cursors and the MFC cursors and bitmaps of the image (which the client does
+not use; they are extracted with the rest) are not committed: run this script against a local
+Tibia.exe to get them.
 """
 
 import os

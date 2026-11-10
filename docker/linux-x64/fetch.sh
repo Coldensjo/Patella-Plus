@@ -1,5 +1,5 @@
 #!/bin/sh
-# Downloads one pinned file of the image (issue #153; notes/decisions.md, "#153"):
+# Downloads one pinned file of the image:
 #
 #	fetch.sh <sha256> <output> <url> [<fallback url> ...]
 #
@@ -9,7 +9,7 @@
 # PATELLA_DOWNLOAD_TRIES (10). Stopped at once, without trying a fallback: any other HTTP error (a 404 is a wrong pin)
 # and a SHA-256 mismatch. <output> only exists after its SHA-256 matched, whichever URL it came from.
 # curl's own --retry is not used: it has no fallback, and --retry-all-errors would retry a 404.
-# The environment variables are for tools/download_selftest.py.
+# The three PATELLA_DOWNLOAD_ values are environment variables.
 
 set -u
 if [ $# -lt 3 ]; then

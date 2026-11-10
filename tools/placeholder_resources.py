@@ -2,14 +2,15 @@
 
 Usage: python -I tools/placeholder_resources.py <outdir>
 
-Issue #127: hosted CI builds the full client but has no Tibia.exe and must never get it. Patella.rc takes
+Hosted CI builds the full client but has no Tibia.exe and must never get it. Patella.rc takes
 cursor_132.cur, cursor_137.cur and icon_128.ico from the include path; on a machine with Tibia.exe they come from
 tools/extract_resources.py (cmake/Resources.cmake). Here the same file names hold plain generated shapes (a hollow square
 for the cursors, a solid square for the icon) drawn from nothing but this script; they are not CipSoft's pictures and
 not derived from them.
 
-cmake/WindowsX64.cmake runs this only with PATELLA_PLACEHOLDER_RESOURCES=ON and refuses that option where a Tibia.exe
-exists, so a local build never gets them. resources.tsv (the marker the build depends on) says what they are.
+cmake/WindowsX64.cmake and cmake/LinuxX64.cmake run this only with PATELLA_PLACEHOLDER_RESOURCES=ON and refuse that
+option where a Tibia.exe exists, so a local build never gets them. resources.tsv (the marker the build depends on)
+says what they are.
 """
 
 import os

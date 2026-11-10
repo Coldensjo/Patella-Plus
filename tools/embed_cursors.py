@@ -1,4 +1,4 @@
-"""Build the Linux client's built-in cursor resources and window icon (Patella-Modern issues #131, #162).
+"""Build the Linux client's built-in cursor resources and window icon.
 
 Usage: python3 -I tools/embed_cursors.py <resource folder> <output.cpp>
 

@@ -1,6 +1,5 @@
 #!/bin/sh
-# Installs Clang, compiler-rt, clang-format and clang-tidy from LLVM's own apt repository (issue #143;
-# notes/decisions.md, "#143"):
+# Installs Clang, compiler-rt, clang-format and clang-tidy from LLVM's own apt repository:
 #
 #	llvm-apt.sh <fetch.sh> <key sha256> <key fingerprint> <major> <version pattern>
 #
@@ -10,7 +9,7 @@
 # index's hashes check each package), the suite llvm-toolchain-trixie-<major>, and the version pattern, which apt
 # matches (1:23.1.*: LLVM's 23.1 branch). What is not: which snapshot of the branch; the script prints it.
 #
-# Retried, as in fetch.sh (issue #153), with a pause (PATELLA_DOWNLOAD_PAUSE seconds times the attempt, up to
+# Retried, as in fetch.sh, with a pause (PATELLA_DOWNLOAD_PAUSE seconds times the attempt, up to
 # PATELLA_DOWNLOAD_TRIES attempts): apt's whole update and install, since a publication replaces the index and the
 # packages, and a package the index has just named can be gone. Stopped at once: a key that does not match, and an
 # index without a version of the pattern (a wrong pin).

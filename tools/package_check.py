@@ -1,4 +1,4 @@
-r"""What a package may hold: the proof that it holds no CipSoft file (Patella-Modern issue #135, plan M9, D17).
+r"""What a package may hold: the proof that it holds no CipSoft file.
 
   python -I tools/package_check.py <package> [<package> ...]
       every check on a zip, tarball or AppImage. Exit 0 when all pass, 1 with the problems listed.
