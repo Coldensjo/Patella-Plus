@@ -24,22 +24,19 @@
 // its callers that recover test the result instead of catching (notes/decisions.md, issue #80, 80c).
 struct TError {
 	std::string Message;
-	patella::TSourceLocation Location;
 };
 
 class TMyException {
 public:
-	TMyException(std::string Message, const patella::TSourceLocation &Location);
-	// A returned failure thrown after all: the same message and location.
+	explicit TMyException(std::string Message);
+	// A returned failure thrown after all: the same message.
 	explicit TMyException(TError Error);
 	virtual ~TMyException();
 
 	[[nodiscard]] std::string GetMessage() const { return Message; }
-	[[nodiscard]] const patella::TSourceLocation &GetLocation() const { return Location; }
 
 private:
 	std::string Message;
-	patella::TSourceLocation Location;
 };
 
 namespace patella {
@@ -52,18 +49,13 @@ std::string ErrorText(std::string_view File, int Line, std::string_view Kind, st
 // is always appended (", reason:\n" also before an empty message).
 std::string ErrorText(std::string_view File, int Line, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, const TMyException &Inner);
-// The original's origin, "<file> <line>", the file without its path (for the tests' comparison with the original's
-// constructors and the failure reports).
-std::string ErrorOrigin(std::string_view File, int Line);
-// The origin of an exception's location.
-std::string ErrorOrigin(const TMyException &Exception);
 
-// TMYEXCEPTION's exception: ErrorText's message with the site's file and line, and the site's location.
+// TMYEXCEPTION's exception: ErrorText's message with the site's file and line.
 TMyException MakeError(const TSourceLocation &Location, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, std::string_view Reason);
 TMyException MakeError(const TSourceLocation &Location, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, const TMyException &Inner);
-// TUNEXPECTED_REASON's failure: MakeError's message and location as a TError.
+// TUNEXPECTED_REASON's failure: MakeError's message as a TError.
 TError MakeFailure(const TSourceLocation &Location, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, std::string_view Reason);
 
