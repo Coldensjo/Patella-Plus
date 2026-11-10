@@ -562,7 +562,7 @@ void patella::TGUI::LinkCopyWarning()
 	::Interaction().AddMessage(MESSAGE_LINK_COPY_WARNING, reinterpret_cast<std::intptr_t>("Link Copy Warning"), 0);
 }
 
-// The connect handler for InitNetwork: sends the login packet to the login
+// The connect handler for TNetwork::Init: sends the login packet to the login
 // server (state 2) or the game server (state 5).
 void patella::TGUI::ConnectionEstablished()
 {
@@ -591,7 +591,7 @@ void patella::TGUI::ConnectionEstablished()
 	Interaction.SetActionState(ACTIONSTATE_NONE);
 }
 
-// The receive handler for InitNetwork. The connection state chooses the
+// The receive handler for TNetwork::Init. The connection state chooses the
 // table: 4 the login server, otherwise the game server. The first packet
 // moves state 3 to 4 and state 6 to 7.
 void patella::TGUI::ReceivePackets()
@@ -712,7 +712,7 @@ void patella::TGUI::ReceivePackets()
 	}
 }
 
-// The close handler for InitNetwork. A pending reconnect (event 0x3f) logs in again: to the game server if the
+// The close handler for TNetwork::Init. A pending reconnect (event 0x3f) logs in again: to the game server if the
 // character was in the game and the 5 seconds have not passed, else to the login server. GCC's analyzer: the message
 // queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
@@ -1106,7 +1106,7 @@ void patella::TGUI::ProcessEvents()
 void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL))
 {
 	WindowHandle = Window;
-	Network.SetNetworkWindow(Window);
+	Network.SetWindow(Window);
 	ExitCallback = ExitProgram;
 	DisplayModeCallback = SetDisplayMode;
 	URLCallback = OpenURL;
@@ -1133,7 +1133,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		Graphics().InitGraphics(0xa00000);
 		SkinData().InitSkins();
 		InitSkinProperties();
-		::Network().InitNetwork([] { GUI().ConnectionEstablished(); }, [] { GUI().ReceivePackets(); },
+		::Network().Init([] { GUI().ConnectionEstablished(); }, [] { GUI().ReceivePackets(); },
 			[] { GUI().ConnectionClosed(); });
 		::Communication().InitCommunication();
 		GUI().InitHotkeys();
@@ -1155,7 +1155,7 @@ void patella::TGUI::ExitControl()
 	GUI().ExitMainWindow();
 	ExitHotkeys();
 	::Communication().ExitCommunication();
-	::Network().ExitNetwork();
+	::Network().Exit();
 	SkinData().ExitSkins();
 	Graphics().ExitGraphics();
 	TSurface *const Current = GraphicsEngine().GetSurface();

@@ -84,7 +84,7 @@ public:
 	ISocket(ISocket &&) = delete;
 	ISocket &operator=(ISocket &&) = delete;
 
-	// AfxSocketInit: false where the sockets cannot be used (InitNetwork's PROGRAM_ERROR 6).
+	// AfxSocketInit: false where the sockets cannot be used (TNetwork::Init's PROGRAM_ERROR 6).
 	[[nodiscard]] virtual bool Startup() = 0;
 	// WSAGetLastError: the last call's error code.
 	[[nodiscard]] virtual int LastError() = 0;

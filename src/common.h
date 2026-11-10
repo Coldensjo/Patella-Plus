@@ -77,7 +77,7 @@ enum class PROGRAM_ERROR : int {
 	PICTURES_FILE = 3, // "Cannot find file "Tibia.pic"."
 	SPRITES_DATA = 4,  // "Cannot open file "Tibia.spr"." (a sprite's pixels)
 	PICTURES_DATA = 5, // "Cannot open file "Tibia.pic"."
-	SOCKET_INIT = 6,   // "Cannot initialize Windows Sockets." (InitNetwork)
+	SOCKET_INIT = 6,   // "Cannot initialize Windows Sockets." (TNetwork::Init)
 	DIRECTX_INIT = 7,  // "Cannot initialize DirectX."
 	COLOR_DEPTH = 8,   // "Too low color depth detected."
 	CLIPPER = 9,       // "Cannot initialize video graphics mode." (9-11)

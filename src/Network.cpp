@@ -103,7 +103,7 @@ void patella::TNetwork::SetConnectionTimeout(int Timeout)
 		TimeoutLimit = Timeout;
 }
 
-void patella::TNetwork::SetNetworkWindow(platform::TWindowHandle Window)
+void patella::TNetwork::SetWindow(platform::TWindowHandle Window)
 {
 	NetworkWindow = Window;
 }
@@ -707,7 +707,7 @@ void patella::TNetwork::ShutdownConnection() const
 		Sockets.Shutdown(Socket, platform::TShutdown::Both);
 }
 
-void patella::TNetwork::InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)())
+void patella::TNetwork::Init(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)())
 {
 	if (!Sockets.Startup())
 		throw TProgramError{PROGRAM_ERROR::SOCKET_INIT};
@@ -723,17 +723,17 @@ void patella::TNetwork::InitNetwork(void (*ConnectHandler)(), void (*ReceiveHand
 	ReceiveSkip = 0;
 	Socket = nullptr;
 	HostnameResolveBuffer = nullptr;
-	// NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): the original's malloc, freed in ExitNetwork
+	// NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): the original's malloc, freed in Exit
 	HostnameResolveBuffer = static_cast<char *>(malloc(HostnameResolveBufferSize));
 	InitServerList();
 }
 
-void patella::TNetwork::ExitNetwork()
+void patella::TNetwork::Exit()
 {
 	Sockets.Delete(Socket);
 	Socket = nullptr;
 	if (HostnameResolveBuffer != nullptr)
-		// NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): InitNetwork's malloc
+		// NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): Init's malloc
 		free(HostnameResolveBuffer);
 	HostnameResolveBuffer = nullptr;
 }

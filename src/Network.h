@@ -85,7 +85,7 @@ public:
 	void SetTestServerPort(int Port);
 	void ResetServerAvailability();
 	void SetConnectionTimeout(int Timeout);
-	void SetNetworkWindow(platform::TWindowHandle Window);
+	void SetWindow(platform::TWindowHandle Window);
 	void SetTestServerAddress(const char *Address);
 	void SetServerError(int errorcode);
 	void SetServerIPAddress(const char *ipaddress);
@@ -119,8 +119,8 @@ public:
 	void ConnectToLoginServer();
 	void ConnectToGameServer();
 	void ShutdownConnection() const;
-	void InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)());
-	void ExitNetwork();
+	void Init(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)());
+	void Exit();
 
 	// The socket's events: TSocket's OnConnect, OnReceive and OnClose call these.
 	void OnConnect(int ErrorCode) override;
