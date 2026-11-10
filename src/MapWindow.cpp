@@ -368,7 +368,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 PATELLA_MSVC_WARNING(suppress : 6262)
 void TMapWindow::Draw(int Surface, int x, int y)
 {
-	const bool LightEffects = GetLightEffects() && GetSurface()->CanShadeRectangles();
+	const bool LightEffects = GetLightEffects() && GraphicsEngine().GetSurface()->CanShadeRectangles();
 	const bool ShowTexts = GetTextualEffects();
 	const int CreatureInfo = GetCreatureInfo();
 	ProcessMissileEffects();
@@ -428,7 +428,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		NumberOfNames = 0;
 		NumberOfTextualEffects = 0;
 		GetMapPosition(&PositionX, &PositionY, &PositionZ);
-		if (GetSurface()->SurfaceRecreated(2)) {
+		if (GraphicsEngine().GetSurface()->SurfaceRecreated(2)) {
 			for (int i = 0; i < 16; i++) {
 				for (int j = 0; j < 12; j++)
 					Cache[i][j].CachedSprites = 0;
@@ -503,7 +503,8 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				Colors[i * 4 + 3] = Light[Right][Bottom];
 			}
 		}
-		GetSurface()->ShadeRectangles(2, (MAPSIZE_X + 1) * (MAPSIZE_Y + 1), Rects.data(), Colors.data());
+		GraphicsEngine().GetSurface()->ShadeRectangles(2, (MAPSIZE_X + 1) * (MAPSIZE_Y + 1), Rects.data(),
+			Colors.data());
 	} else {
 		for (int FieldX = 0; FieldX < MAPSIZE_X; FieldX++) {
 			for (int FieldY = 0; FieldY < MAPSIZE_Y; FieldY++)
@@ -523,14 +524,14 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		PATELLA_ASSERT_VALUES(GetWidth()<=MAP_WIDTH*32, GetWidth());
 		PATELLA_ASSERT_VALUES(GetHeight()<=MAP_HEIGHT*32, GetHeight());
 		if (Width >= 480 && Height >= 352) {
-			GetSurface()->BlitRect(Surface, x, y, 2, TRect(0, 0, 480, 352));
+			GraphicsEngine().GetSurface()->BlitRect(Surface, x, y, 2, TRect(0, 0, 480, 352));
 		} else {
 			BorderX = (480 - Width) / 2;
 			BorderY = (352 - Height) / 2;
-			GetSurface()->BlitRect(Surface, x, y, 2, TRect(BorderX, BorderY, Width, Height));
+			GraphicsEngine().GetSurface()->BlitRect(Surface, x, y, 2, TRect(BorderX, BorderY, Width, Height));
 		}
 	} else {
-		GetSurface()->StretchBlitRect(Surface, TRect(x, y, ScreenWidth, ScreenHeight), 2,
+		GraphicsEngine().GetSurface()->StretchBlitRect(Surface, TRect(x, y, ScreenWidth, ScreenHeight), 2,
 			TRect(0, 0, 480, 352));
 	}
 	if (CreatureInfo != 0) {
@@ -577,16 +578,20 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				int TextX = BarX - TextWidth / 2 + 14;
 				const int TextY = BarY - GetFontHeight(FONT_BORDERED);
 				Limit(TextX, 1, Width - TextWidth - 1);
-				GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4), TRGBColor(0, 0, 0));
-				GetSurface()->FillRectangle(Surface, TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
+				GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4),
+					TRGBColor(0, 0, 0));
+				GraphicsEngine().GetSurface()->FillRectangle(Surface,
+					TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
 					NameColor);
 				PrintText(Surface, TextX + x, TextY + y, FONT_BORDERED, NameColor, Creature->Name, 0);
 			} else {
 				int BarX = nx - 14;
 				Limit(BarX, 1, Width - 28);
 				Limit(BarY, 1, Height - 5);
-				GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4), TRGBColor(0, 0, 0));
-				GetSurface()->FillRectangle(Surface, TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
+				GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4),
+					TRGBColor(0, 0, 0));
+				GraphicsEngine().GetSurface()->FillRectangle(Surface,
+					TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
 					NameColor);
 			}
 			// The party shield, then the skull (both blink when the skull is
@@ -867,7 +872,8 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			FlushField(cx + 1, cy);
 			FlushField(cx, cy + 1);
 			FlushField(cx + 1, cy + 1);
-			GetSurface()->DrawFrameClipped(2, TRect(ox - Elevation + posx, oy - Elevation + posy, 32, 32), 2,
+			GraphicsEngine().GetSurface()->DrawFrameClipped(2,
+				TRect(ox - Elevation + posx, oy - Elevation + posy, 32, 32), 2,
 				Color, TRect(0, 0, 480, 352));
 		}
 		if (Creatures[i]->IsMarked()) {
@@ -877,7 +883,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			FlushField(cx, cy + 1);
 			FlushField(cx + 1, cy + 1);
 			const int Margin = Color == TRGBColor(0, 0, 0) ? 0 : 2;
-			GetSurface()->DrawFrameClipped(2,
+			GraphicsEngine().GetSurface()->DrawFrameClipped(2,
 				TRect(Margin + ox - Elevation + posx, Margin - Elevation + oy + posy,
 					(16 - Margin) * 2, (16 - Margin) * 2),
 				2, TRGBColor(Creatures[i]->Mark), TRect(0, 0, 480, 352));
@@ -1227,7 +1233,7 @@ void TMapWindow::FlushField(int FieldX, int FieldY)
 						Field->CachedSprites = Field->Sprites;
 					}
 					Field->Copied = true;
-					GetSurface()->BlitRect(2, FieldX * 32 - ScrollX, FieldY * 32 - ScrollY, 4,
+					GraphicsEngine().GetSurface()->BlitRect(2, FieldX * 32 - ScrollX, FieldY * 32 - ScrollY, 4,
 						TRect(Field->x, Field->y, 32, 32));
 				}
 			}

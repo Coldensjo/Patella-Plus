@@ -159,7 +159,7 @@ void TDialogWindow::Draw(int Surface, int x, int y)
 	int Position = 0;
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext()) {
 		if (Child == Dragged) {
-			GetSurface()->FillRectangle(Surface, TRect(x, Position + y, Width, Dragged->Height),
+			GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(x, Position + y, Width, Dragged->Height),
 				SkinProperties().DraggedWindowPlaceColor);
 		} else {
 			Child->Draw(Surface, Child->OffsetX + x, Child->OffsetY + y);

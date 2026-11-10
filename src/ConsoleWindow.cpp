@@ -149,7 +149,8 @@ void TTextWindow::Draw(int Surface, int x, int y)
 			} else {
 				SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText, Format->LineLength);
 			}
-			GetSurface()->FillRectangle(Surface, TRect(SelectionX, LineY, SelectionWidth, SelectionHeight),
+			GraphicsEngine().GetSurface()->FillRectangle(Surface,
+				TRect(SelectionX, LineY, SelectionWidth, SelectionHeight),
 				SkinProperties().ConsoleWindow.SelectionColor);
 		}
 		PrintTextPart(Surface, LineX, LineY, Format->FontNumber, Format->Color, Format->LineText,

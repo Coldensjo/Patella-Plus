@@ -39,7 +39,3 @@ private:
 
 // The one client's graphics engine (Client.cpp).
 patella::TGraphicsEngine &GraphicsEngine();
-
-TSurface *GetSurface();
-void SurfaceExitInstance();
-void SurfaceInitInstance(patella::platform::TWindowHandle Window);

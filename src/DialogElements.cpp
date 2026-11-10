@@ -829,7 +829,7 @@ TColorButton::TColorButton(int x, int y, TRGBColor _Color, int _ButtonUp, int _B
 
 void TColorButton::Draw(int Surface, int x, int y)
 {
-	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), Color);
+	GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), Color);
 	TSkinButton::Draw(Surface, x, y);
 }
 
@@ -1141,7 +1141,7 @@ TEditLine::TEditLine(int _MaxLength, bool _ReadOnly)
 // five action numbers.
 void TEditLine::Draw(int Surface, int x, int y)
 {
-	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height),
+	GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height),
 		IsDisabled() ? SkinProperties().EditLine.DisabledBackground : SkinProperties().EditLine.Background);
 	TWindow::Draw(Surface, x, y);
 	if (!IsDisabled()) {
@@ -1160,14 +1160,14 @@ void TEditLine::Draw(int Surface, int x, int y)
 			const int End = High < FirstVisible + Visible ? High : FirstVisible + Visible;
 			const int Offset = GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible, Begin - FirstVisible);
 			const int SelectionWidth = GetTextPartWidth(Font.FontNumber, Text.get() + Begin, End - Begin);
-			GetSurface()->FillRectangle(Surface,
+			GraphicsEngine().GetSurface()->FillRectangle(Surface,
 				TRect(TextX + Offset, TextY, SelectionWidth,
 					GetFontHeight(Font.FontNumber)),
 				SkinProperties().EditLine.SelectionColor);
 		}
 		PrintFormattedTextPart(Surface, TextX, TextY, Font, Text.get() + FirstVisible, Visible);
 		if (Active && GetActionNumber() / 5 % 2 == 0)
-			GetSurface()->DrawVerticalLine(Surface,
+			GraphicsEngine().GetSurface()->DrawVerticalLine(Surface,
 				TextX + GetTextPartWidth(Font.FontNumber, Text.get() + FirstVisible, Cursor - FirstVisible), TextY, GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
 	}
 }
@@ -1530,7 +1530,8 @@ TEditText::TEditText(int MaxLength, bool _ReadOnly) : TEditLine(MaxLength, _Read
 // cursor shows in its line (or after the end).
 void TEditText::Draw(int Surface, int x, int y)
 {
-	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().EditLine.Background);
+	GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height),
+		SkinProperties().EditLine.Background);
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
 	TWindow::Draw(Surface, x, y);
 	if (!IsDisabled()) {
@@ -1555,7 +1556,7 @@ void TEditText::Draw(int Surface, int x, int y)
 					int SelectionHeight = GetFontLineHeight(Font.FontNumber);
 					if (High < End)
 						SelectionHeight = GetFontHeight(Font.FontNumber);
-					GetSurface()->FillRectangle(Surface,
+					GraphicsEngine().GetSurface()->FillRectangle(Surface,
 						TRect(TextX + Offset, i * LineHeight + TextY, SelectionWidth,
 							SelectionHeight),
 						SkinProperties().EditLine.SelectionColor);
@@ -1566,7 +1567,7 @@ void TEditText::Draw(int Surface, int x, int y)
 			if (Active && !ReadOnly && GetActionNumber() / 5 % 2 == 0) {
 				if ((Cursor >= Start && Cursor <= End - 1)
 					|| (Line == Lines - 1 && Cursor == (int)strlen(Text.get())))
-					GetSurface()->DrawVerticalLine(Surface,
+					GraphicsEngine().GetSurface()->DrawVerticalLine(Surface,
 						TextX + GetTextPartWidth(Font.FontNumber, Text.get() + Start, Cursor - Start), LineY, GetFontHeight(Font.FontNumber), SkinProperties().EditLine.CursorColor);
 			}
 		}
@@ -2340,7 +2341,8 @@ void TListBox::Draw(int Surface, int x, int y)
 	const int First = ScrollBar->Range->Value;
 	if (Editing && First != EditScroll)
 		StopEdit();
-	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().ListBox.Background);
+	GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height),
+		SkinProperties().ListBox.Background);
 	TWindow::Draw(Surface, x, y);
 	x += SkinProperties().ListBox.TextMargin;
 	y += SkinProperties().ListBox.TextMargin;
@@ -2351,7 +2353,7 @@ void TListBox::Draw(int Surface, int x, int y)
 		if (Line == Selected) {
 			if (!Editing) {
 				const int Margin = SkinProperties().ListBoxSelectionMargin;
-				GetSurface()->FillRectangle(Surface,
+				GraphicsEngine().GetSurface()->FillRectangle(Surface,
 					TRect(x - Margin, i * LineHeight - Margin + y, TextWidth + 2 * Margin,
 						GetFontHeight(SkinProperties().ListBox.Font.FontNumber) + 2 * Margin),
 					SkinProperties().ListBox.SelectedBackground);
@@ -2587,7 +2589,8 @@ void TFontListBox::Draw(int Surface, int x, int y)
 	const int First = ScrollBar->Range->Value;
 	if (Editing && First != EditScroll)
 		StopEdit();
-	GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height), SkinProperties().ListBox.Background);
+	GraphicsEngine().GetSurface()->FillRectangle(Surface, TRect(x, y, Width, Height),
+		SkinProperties().ListBox.Background);
 	// NOLINTNEXTLINE(bugprone-parent-virtual-call): the original's call of the base's base (the image's)
 	TWindow::Draw(Surface, x, y);
 	x += SkinProperties().ListBox.TextMargin;
@@ -2599,7 +2602,7 @@ void TFontListBox::Draw(int Surface, int x, int y)
 		if (Line == Selected) {
 			if (!Editing) {
 				const int Margin = SkinProperties().ListBoxSelectionMargin;
-				GetSurface()->FillRectangle(Surface,
+				GraphicsEngine().GetSurface()->FillRectangle(Surface,
 					TRect(x - Margin, i * LineHeight - Margin + y, TextWidth + 2 * Margin,
 						GetFontHeight(FontLines(Line).Font.FontNumber) + 2 * Margin),
 					SkinProperties().ListBox.SelectedBackground);

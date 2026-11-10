@@ -239,7 +239,7 @@ TContextMenuEntry::TContextMenuEntry(const char *_Text, const char *_Shortcut, T
 void TContextMenuEntry::Draw(int Surface, int x, int y)
 {
 	if (In(GetMouseX() - x, 0, Width - 1) && In(GetMouseY() - y, 0, Height - 1)) {
-		GetSurface()->FillRectangle(Surface,
+		GraphicsEngine().GetSurface()->FillRectangle(Surface,
 			TRect(x, y, Width,
 				GetFontHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2),
 			SkinProperties().MenuHighlightBackground);

@@ -2441,7 +2441,7 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 	// GetFullscreenModes stores its new[] list (or NULL) through the pointer it is given; Modes takes it over. The
 	// surface writes the pointer before anything else.
 	TFullscreenMode *List = nullptr;
-	NumberOfModes = GetSurface()->GetFullscreenModes(&List);
+	NumberOfModes = GraphicsEngine().GetSurface()->GetFullscreenModes(&List);
 	Modes.reset(List);
 	const TFullscreenMode *Current = GetFullscreenMode();
 	for (int i = 0; i < NumberOfModes; i++) {
@@ -2554,7 +2554,7 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	SetChildArea(WindowsMousepointer, SkinProperties().AdvancedGraphicsDialog.WindowsMousepointer);
 	SetChildArea(Framerate, SkinProperties().AdvancedGraphicsDialog.Framerate);
 	LightEffects->SetChecked(GetLightEffects());
-	if (!GetSurface()->CanShadeRectangles())
+	if (!GraphicsEngine().GetSurface()->CanShadeRectangles())
 		LightEffects->SetEnabled(false);
 	NoStretching->SetChecked(GetNoStretching());
 	WindowsMousepointer->SetChecked(GetWindowsMousepointer());
@@ -2616,7 +2616,7 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 		Text.Assign("Adjust framerate limit: max");
 	PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.x + x, SkinProperties().AdvancedGraphicsDialog.FramerateLimitText.y + y,
 		SkinProperties().Dialog.TextFont, Text);
-	const double FPS = GetSurface()->GetFPS();
+	const double FPS = GraphicsEngine().GetSurface()->GetFPS();
 	Text.Format("Current framerate: {:2.2f}", FPS);
 	PrintFormattedText(Surface, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.x + x, SkinProperties().AdvancedGraphicsDialog.CurrentFramerateText.y + y,
 		SkinProperties().Dialog.TextFont, Text);
@@ -2634,17 +2634,17 @@ void TAdvancedGraphicsDialog::HandleEvent(int Event)
 		SetWindowsMousepointer(WindowsMousepointer->IsChecked());
 		SetLightEffects(LightEffects->IsChecked());
 		SetConfineFramerate(Framerate->Range->Value);
-		GetSurface()->SetFramerateLimit(GetConfineFramerate());
+		GraphicsEngine().GetSurface()->SetFramerateLimit(GetConfineFramerate());
 		if (Rearrange)
 			Receiver->HandleEvent(EVENT_REARRANGE);
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextAdvancedGraphicsURL);
 		return;
 	} else if (Event == EVENT_FRAMERATE) {
-		GetSurface()->SetFramerateLimit(Framerate->Range->Value);
+		GraphicsEngine().GetSurface()->SetFramerateLimit(Framerate->Range->Value);
 		return;
 	} else if (Event == EVENT_CANCEL) {
-		GetSurface()->SetFramerateLimit(GetConfineFramerate());
+		GraphicsEngine().GetSurface()->SetFramerateLimit(GetConfineFramerate());
 	}
 	SetActionState(ACTIONSTATE_NONE);
 }

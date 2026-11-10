@@ -672,7 +672,7 @@ TStartWindow::TStartWindow()
 void TStartWindow::Draw(int Surface, int x, int y)
 {
 	DrawPicture(2, 0, 0, 1);
-	GetSurface()->StretchBlitRect(Surface, TRect(x, y, Width, Height), 2, TRect(0, 0, 640, 480));
+	GraphicsEngine().GetSurface()->StretchBlitRect(Surface, TRect(x, y, Width, Height), 2, TRect(0, 0, 640, 480));
 	TWindow::Draw(Surface, x, y);
 }
 

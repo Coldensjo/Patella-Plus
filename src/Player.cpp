@@ -144,7 +144,7 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 		// After a failed InitControl there is no main window and no surface (GetSurface makes one only once
 		// SurfaceInitInstance has run): SetDisplayMode's calls would fault, so the step is skipped. The original made
 		// them and left the fault to its catch (...).
-		if (GetViewMode() != 1 && GUI().MainWindow != nullptr && GetSurface() != nullptr)
+		if (GetViewMode() != 1 && GUI().MainWindow != nullptr && GraphicsEngine().GetSurface() != nullptr)
 			patella::sdlframe::SetDisplayMode(1); // the SDL3 window's
 	} catch (...) {                               // NOLINT(bugprone-empty-catch): as above
 	}
@@ -249,8 +249,8 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 	if (!patella::sdlframe::Create(Gamemaster, Title, ClassName))
 		return FALSE;
 	try {
-		SurfaceInitInstance(patella::sdlframe::Handle());
-		GetSurface()->InitSurfaces();
+		GraphicsEngine().SurfaceInitInstance(patella::sdlframe::Handle());
+		GraphicsEngine().GetSurface()->InitSurfaces();
 		InitVideoCache();
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::SURFACE}; // "Video surface allocation failed."

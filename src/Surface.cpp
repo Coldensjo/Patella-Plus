@@ -93,20 +93,3 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	}
 	SetEngine(Engine);
 }
-
-// The original's free functions: each calls its member on the one TClient's TGraphicsEngine. The other files call them,
-// and the golden tests fake GetSurface and SurfaceExitInstance by these symbols.
-TSurface *GetSurface()
-{
-	return GraphicsEngine().GetSurface();
-}
-
-void SurfaceExitInstance()
-{
-	GraphicsEngine().SurfaceExitInstance();
-}
-
-void SurfaceInitInstance(patella::platform::TWindowHandle Window)
-{
-	GraphicsEngine().SurfaceInitInstance(Window);
-}

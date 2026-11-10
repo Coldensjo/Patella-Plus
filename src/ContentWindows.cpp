@@ -507,7 +507,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 			Window->Changed = true;
 		}
 	}
-	if (TakeAutomapChanged() || Window->Changed || GetSurface()->SurfaceRecreated(0)) {
+	if (TakeAutomapChanged() || Window->Changed || GraphicsEngine().GetSurface()->SurfaceRecreated(0)) {
 		std::array<uint8, 106 * 106 * 3> Pixels;
 		for (int i = 0; i < 106; i++) {
 			for (int j = 0; j < 106; j++) {
@@ -523,7 +523,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 				Pixels[(j * 106 + i) * 3 + 2] = (uint8)Color.B;
 			}
 		}
-		GetSurface()->WriteImage(5, 0, 0, 106, 106, Pixels.data());
+		GraphicsEngine().GetSurface()->WriteImage(5, 0, 0, 106, 106, Pixels.data());
 		int CrossX = 53;
 		int CrossY = 53;
 		bool SameLevel = true;
@@ -538,17 +538,17 @@ void TAutomapView::Draw(int Surface, int x, int y)
 		}
 		if (Visible) {
 			if (Window->Zoom <= 2) {
-				GetSurface()->SetPixel(5, CrossX, CrossY, TRGBColor(255, 255, 255));
-				GetSurface()->SetPixel(5, CrossX + 1, CrossY, TRGBColor(255, 255, 255));
-				GetSurface()->SetPixel(5, CrossX - 1, CrossY, TRGBColor(255, 255, 255));
-				GetSurface()->SetPixel(5, CrossX, CrossY + 1, TRGBColor(255, 255, 255));
-				GetSurface()->SetPixel(5, CrossX, CrossY - 1, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX, CrossY, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX + 1, CrossY, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX - 1, CrossY, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX, CrossY + 1, TRGBColor(255, 255, 255));
+				GraphicsEngine().GetSurface()->SetPixel(5, CrossX, CrossY - 1, TRGBColor(255, 255, 255));
 			} else {
 				for (int i = -3; i < 3; i++) {
-					GetSurface()->SetPixel(5, CrossX + i, CrossY, TRGBColor(255, 255, 255));
-					GetSurface()->SetPixel(5, CrossX + i, CrossY - 1, TRGBColor(255, 255, 255));
-					GetSurface()->SetPixel(5, CrossX, CrossY + i, TRGBColor(255, 255, 255));
-					GetSurface()->SetPixel(5, CrossX - 1, CrossY + i, TRGBColor(255, 255, 255));
+					GraphicsEngine().GetSurface()->SetPixel(5, CrossX + i, CrossY, TRGBColor(255, 255, 255));
+					GraphicsEngine().GetSurface()->SetPixel(5, CrossX + i, CrossY - 1, TRGBColor(255, 255, 255));
+					GraphicsEngine().GetSurface()->SetPixel(5, CrossX, CrossY + i, TRGBColor(255, 255, 255));
+					GraphicsEngine().GetSurface()->SetPixel(5, CrossX - 1, CrossY + i, TRGBColor(255, 255, 255));
 				}
 			}
 		}
@@ -579,7 +579,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 		}
 		Window->Changed = false;
 	}
-	GetSurface()->BlitRect(Surface, x, y, 5, TRect(0, 0, 106, 106));
+	GraphicsEngine().GetSurface()->BlitRect(Surface, x, y, 5, TRect(0, 0, 106, 106));
 }
 
 // A click walks to the mark under the mouse, else to the point clicked.
@@ -958,7 +958,7 @@ void TSmallInventoryWindow::Draw(int Surface, int x, int y)
 	if (In(GetMouseX() - SkinProperties().SmallInventoryDropArea.x - x, 0, SkinProperties().SmallInventoryDropArea.width - 1)
 		&& In(GetMouseY() - SkinProperties().SmallInventoryDropArea.y - y, 0, SkinProperties().SmallInventoryDropArea.height - 1)
 		&& GetActionState() == ACTIONSTATE_DRAGGING)
-		GetSurface()->DrawFrame(Surface,
+		GraphicsEngine().GetSurface()->DrawFrame(Surface,
 			TRect(SkinProperties().SmallInventoryDropArea.x + x, SkinProperties().SmallInventoryDropArea.y + y,
 				SkinProperties().SmallInventoryDropArea.width, SkinProperties().SmallInventoryDropArea.height),
 			1, TRGBColor(255, 255, 255));
@@ -1065,7 +1065,8 @@ void TInventoryView::Draw(int Surface, int x, int y)
 				SkinProperties().ObjectCountFont, false);
 		}
 		if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ObjX, ObjX + 31) && In(GetMouseY(), ObjY, ObjY + 31))
-			GetSurface()->DrawFrame(Surface, TRect(ObjX - 1, ObjY - 1, 34, 34), 1, TRGBColor(255, 255, 255));
+			GraphicsEngine().GetSurface()->DrawFrame(Surface, TRect(ObjX - 1, ObjY - 1, 34, 34), 1,
+				TRGBColor(255, 255, 255));
 	}
 }
 
@@ -1460,7 +1461,7 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 							false);
 					if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
 						&& In(GetMouseY(), ScreenY, ScreenY + ClipHeight - 1))
-						GetSurface()->DrawFrameClipped(Surface,
+						GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 							TRect(SkinProperties().ContainerFirstSlot.x + SlotX + x,
 								SlotY + SkinProperties().ContainerFirstSlot.y + y, 34, 34),
 							1, TRGBColor(255, 255, 255),
@@ -1762,7 +1763,7 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 				const int LineMiddle = GetFontHeight(SkinProperties().SkillsFont.FontNumber) / 2 + SkinProperties().SkillsVerticalMargin - 1 + LineY;
 				if (!HasValue) {
 					if (LineMiddle >= 0 && LineMiddle <= Bottom)
-						GetSurface()->DrawHorizontalLine(Surface, ClipX, LineMiddle + y, TextWidth,
+						GraphicsEngine().GetSurface()->DrawHorizontalLine(Surface, ClipX, LineMiddle + y, TextWidth,
 							SkinProperties().SkillsFont.Color);
 				} else {
 					TFixedString<20> Number;
@@ -1775,11 +1776,11 @@ void TSkillsWindowBody::Draw(int Surface, int x, int y)
 						TRect(ClipX, ClipY, TextWidth, ClipHeight));
 					if (Progress != -1) {
 						const int BarHeight = 5;
-						GetSurface()->DrawFrameClipped(Surface,
+						GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 							TRect(Margin + x, LineHeight + 8 + LineY + y, TextWidth,
 								BarHeight),
 							1, TRGBColor(0), TRect(ClipX, ClipY, TextWidth, ClipHeight));
-						GetSurface()->FillRectangleClipped(Surface,
+						GraphicsEngine().GetSurface()->FillRectangleClipped(Surface,
 							TRect(Margin + x + 1, LineHeight + 8 + LineY + y + 1,
 								(TextWidth - 2) * Progress / 100, BarHeight - 2),
 							i < 7 ? SkinProperties().SkillsFirstBarsColor
@@ -2086,16 +2087,16 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				Framed = true;
 			}
 			if (Framed)
-				GetSurface()->DrawFrameClipped(Surface,
+				GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 					TRect(SkinProperties().BattleWindow.Frame.x + x,
 						SkinProperties().BattleWindow.Frame.y + RowY + y, SkinProperties().BattleWindow.Frame.width,
 						SkinProperties().BattleWindow.Frame.height),
 					1, Color, TRect(x, ClipY, ClipWidth, ClipHeight));
-			GetSurface()->Flag26 = true;
+			GraphicsEngine().GetSurface()->Flag26 = true;
 			DrawOutfit(Surface, SkinProperties().BattleWindow.Outfit.x + x, SkinProperties().BattleWindow.Outfit.y + RowY + y,
 				SkinProperties().BattleWindow.Outfit.width, Creature->OutfitType, Creature->Colors,
 				SkinProperties().BattleWindow.OutfitHighlight, TRect(x, ClipY, ClipWidth, ClipHeight), SkinProperties().ObjectCountFont);
-			GetSurface()->Flag26 = false;
+			GraphicsEngine().GetSurface()->Flag26 = false;
 			if (Creature->PARTYFlag > PARTY_NONE) {
 				int Skin = SKIN_NONE; // none: no shield in the party (flag 1) or an unknown flag
 				switch (Creature->PARTYFlag) {
@@ -2164,13 +2165,13 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				PrintFormattedTextClipped(Surface, SkinProperties().BattleWindow.Name.x + Offset + x,
 					SkinProperties().BattleWindow.Name.y + RowY + y, SkinProperties().BattleWindow.NameFont, Name,
 					TRect(x, ClipY, ClipWidth, ClipHeight));
-			GetSurface()->DrawFrameClipped(Surface,
+			GraphicsEngine().GetSurface()->DrawFrameClipped(Surface,
 				TRect(SkinProperties().BattleWindow.HealthBar.x + x,
 					SkinProperties().BattleWindow.HealthBar.y + RowY + y, SkinProperties().BattleWindow.HealthBar.width,
 					SkinProperties().BattleWindow.HealthBar.height),
 				1, SkinProperties().BattleWindow.HealthBarFrameColor,
 				TRect(x, ClipY, ClipWidth, ClipHeight));
-			GetSurface()->FillRectangleClipped(Surface,
+			GraphicsEngine().GetSurface()->FillRectangleClipped(Surface,
 				TRect(SkinProperties().BattleWindow.HealthBar.x + x + 1,
 					SkinProperties().BattleWindow.HealthBar.y + RowY + y + 1,
 					Creature->Health * (SkinProperties().BattleWindow.HealthBar.width - 2) / 100,

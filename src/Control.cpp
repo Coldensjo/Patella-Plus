@@ -110,13 +110,13 @@ void patella::TGUI::CheckSurface(bool Force)
 	TFullscreenMode *Resolution = GetFullscreenMode();
 	bool Success;
 	try {
-		Success = GetSurface()->Init(&WindowHandle, GetViewMode(), Resolution, Force);
+		Success = GraphicsEngine().GetSurface()->Init(&WindowHandle, GetViewMode(), Resolution, Force);
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
 	if (!Success)
 		ChangeDevice(patella::vulkan::TDeviceButton::Automatic);
-	if (GetSurface()->SurfaceRecreated(1))
+	if (GraphicsEngine().GetSurface()->SurfaceRecreated(1))
 		ResetVideoCache();
 }
 
@@ -137,14 +137,14 @@ void patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton Button)
 		return;
 	}
 	SetDeviceChoice(NewChoice);
-	GetSurface()->ExitSurfaces();
-	SurfaceExitInstance();
-	const bool Success = GetSurface()->TestEngine();
+	GraphicsEngine().GetSurface()->ExitSurfaces();
+	GraphicsEngine().SurfaceExitInstance();
+	const bool Success = GraphicsEngine().GetSurface()->TestEngine();
 	if (!Success) {
 		SetDeviceChoice(OldChoice);
-		SurfaceExitInstance();
+		GraphicsEngine().SurfaceExitInstance();
 	}
-	GetSurface()->InitSurfaces();
+	GraphicsEngine().GetSurface()->InitSurfaces();
 	if (Success) {
 		SetEngine(EngineNumberOfButton(Button));
 		SaveDeviceChoice();
@@ -158,7 +158,7 @@ void patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton Button)
 void patella::TGUI::Redraw(bool Force)
 {
 	CheckSurface(Force);
-	if (GetSurface()->IsUnavailable()) {
+	if (GraphicsEngine().GetSurface()->IsUnavailable()) {
 		patella::platform::Platform().Clock.FrameWait(10); // Sleep(10): the platform's frame wait
 		return;
 	}
@@ -198,13 +198,13 @@ void patella::TGUI::Redraw(bool Force)
 				y = 1;
 		}
 		const TRect Rect = {x, y, Width, Height};
-		GetSurface()->FillRectangle(1, Rect, SkinProperties().TooltipBackground);
-		GetSurface()->DrawFrame(1, Rect, 1, SkinProperties().TooltipFrame);
+		GraphicsEngine().GetSurface()->FillRectangle(1, Rect, SkinProperties().TooltipBackground);
+		GraphicsEngine().GetSurface()->DrawFrame(1, Rect, 1, SkinProperties().TooltipFrame);
 		PrintFormattedText(1, SkinProperties().TooltipBorder + x, SkinProperties().TooltipBorder + y,
 			SkinProperties().TooltipFont, Tooltip);
 	}
 	if (ShowFPS) {
-		const double FPS = GetSurface()->GetFPS();
+		const double FPS = GraphicsEngine().GetSurface()->GetFPS();
 		TFixedString<64> Text;
 		// Stays _snprintf: printf's %f and std::format's differ for NaN ("-nan(ind)"), and a rate with more
 		// than 10 digits fills the 20 characters (no NUL), which the type would cut.
@@ -249,7 +249,7 @@ void patella::TGUI::Redraw(bool Force)
 			DrawPicturePart(1, x, y, 4, Picture->x, Picture->y, Picture->width, Picture->height);
 		}
 	}
-	GetSurface()->FinishFrame();
+	GraphicsEngine().GetSurface()->FinishFrame();
 }
 
 // Game packet 0x0a, once the connection state is 8.
@@ -1157,10 +1157,10 @@ void patella::TGUI::ExitControl()
 	ExitNetwork();
 	ExitSkins();
 	ExitGraphics();
-	TSurface *const Current = GetSurface();
+	TSurface *const Current = GraphicsEngine().GetSurface();
 	if (Current != nullptr)
 		Current->ExitSurfaces();
-	SurfaceExitInstance();
+	GraphicsEngine().SurfaceExitInstance();
 	ExitPreferences();
 	ExitTalk();
 	ExitHelp();
