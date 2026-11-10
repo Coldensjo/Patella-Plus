@@ -448,6 +448,13 @@ public:
 	TEditText *EditText; // +0x2c
 };
 
+// The channel ID of the offer that opens an own private channel, and the premium days of a gratis premium account.
+// Enumerators for the reason in GUI.h.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	CHANNEL_NEW_PRIVATE = 0xffff,
+	PREMIUM_DAYS_GRATIS = 0xffff,
+};
+
 // "New Channel" (vtable 0x562418, 0x44 bytes): the channels the server
 // offers (ID 0xffff opens an own private channel) and a name for a private
 // conversation.

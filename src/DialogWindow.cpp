@@ -301,7 +301,7 @@ TContentWindow *TDialogWindow::GetContentWindow(int Identifier)
 void TDialogWindow::StoreOpenDialogs()
 {
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext()) {
-		if ((static_cast<TContentWindow *>(Child))->Identifier < 0x40)
+		if ((static_cast<TContentWindow *>(Child))->Identifier < CONTAINER_WINDOW)
 			AddOpenDialog((static_cast<TContentWindow *>(Child))->Identifier);
 	}
 }
@@ -672,7 +672,7 @@ void TSubWindow::SetSize(int Width, int Height)
 void TSubWindow::Arrange()
 {
 	TContentWindow::Arrange();
-	if (Identifier >= 0x40) {
+	if (Identifier >= CONTAINER_WINDOW) {
 		PATELLA_ASSERT(Body!=nullptr);
 		UpdateContainerUpButton(Body);
 	}
@@ -724,16 +724,16 @@ bool TSubWindow::MouseMove(int x, int y)
 bool TSubWindow::LeftButtonDoubleClick(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonDoubleClick(x, y, Flags))
-		HandleEvent(9);
+		HandleEvent(EVENT_WINDOW_MINIMISE);
 	return true;
 }
 
 // 0x489030, line 1002. Event 10 (the close button) deletes the window.
 void TSubWindow::HandleEvent(int Event)
 {
-	if (Event == 10) {
+	if (Event == EVENT_WINDOW_CLOSE) {
 		GetParent()->DeleteChild(this);
-	} else if (Event == 9) {
+	} else if (Event == EVENT_WINDOW_MINIMISE) {
 		if (IsMinimized)
 			Maximize();
 		else

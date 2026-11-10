@@ -14,6 +14,7 @@
 #pragma once
 
 #include "common.h"
+#include "Events.h"
 #include "types/FixedString.h"
 #include "types/Time32.h"
 #include "types/GraphicsTypes.h" // TRGBColor

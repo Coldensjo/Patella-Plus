@@ -97,8 +97,8 @@ TMapWindow::TMapWindow()
 {
 	HintButton = nullptr;
 	MaxLevel = 0;
-	AddHotkey(0x44e, TCallback(this, 600));
-	AddHotkey(0x457, TCallback(this, 601));
+	AddHotkey(0x44e, TCallback(this, EVENT_CREATURE_INFO));
+	AddHotkey(0x457, TCallback(this, EVENT_REMOVE_TALKBOX));
 	for (int i = 0; i < 16; i++) {
 		for (int j = 0; j < 12; j++) {
 			Cache[i][j].x = i << 5;
@@ -145,8 +145,8 @@ bool TMapWindow::LeftButtonDown(int x, int y, int Flags)
 // 0x4c2710, lines 219-272. Action state 7: use the object chosen before
 // with the top multi-use object of the field (or the creature on it);
 // 8: offer the trade object to the player under the mouse; 6: drop the
-// dragged object here (a cumulative pile asks for the count unless Shift
-// (0x400) is held or both buttons are released, 0x200); otherwise a click
+// dragged object here (a cumulative pile asks for the count unless Ctrl
+// (0x400) moves it whole or 0x200, Shift or both buttons released, moves one); otherwise a click
 // without both buttons walks to the field, Flags != 0 is handled as a
 // right-button release.
 bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
@@ -155,7 +155,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		return true;
 	int FieldX, FieldY, FieldZ;
 	GetField(x, y, &FieldX, &FieldY, &FieldZ);
-	if (GetActionState() == 7) {
+	if (GetActionState() == ACTIONSTATE_USE_WITH) {
 		int Position;
 		const TObject Obj = GetTopMultiUseObject(FieldX, FieldY, FieldZ, Position);
 		if (Obj.Type != 0) {
@@ -173,7 +173,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 				Position);
 			return true;
 		}
-	} else if (GetActionState() == 8) {
+	} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
 		int TradeIndex, TradeX, TradeY, TradeZ;
 		const TObject &TradeObject = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 		PATELLA_ASSERT(TradeObject!=0);
@@ -184,7 +184,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		}
 		SetStatusMessage(TextSelectPlayerToTrade, false);
 		return true;
-	} else if (GetActionState() == 6) {
+	} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
 		int DragIndex, DragX, DragY, DragZ;
 		const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 		const int Type = DragObject->Type;
@@ -192,15 +192,15 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
 		RelativeToAbsolute(&DestX, &DestY, &DestZ);
 		if (DragX != DestX || DragY != DestY || DragZ != DestZ) {
-			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & 0x200) == 0) {
+			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
 				// Patella-Plus, the option Drag Full Stacks: with it a pile moves whole without Ctrl and asks for the
 				// count with it, as on a slot (AsksForCount in ContentWindows.cpp).
-				if (((Flags & 0x400) != 0) != GetDragFullStacks()) {
+				if (((Flags & KEY_CONTROL) != 0) != GetDragFullStacks()) {
 					SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, Count);
 					return true;
 				}
 				SetDragTarget(DestX, DestY, DestZ);
-				AddMessage(13, 0, 0);
+				AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 				return true;
 			}
 			SendMoveObject(DragX, DragY, DragZ, Type, DragIndex, DestX, DestY, DestZ, 1);
@@ -229,7 +229,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 // see anything." (fields next to him always count as visible). Otherwise the
 // look and use objects of the field and the creature under the mouse
 // become the trade object, use object and trade info (Status.cpp). With the
-// classic control, Ctrl+Shift (0x200) looks, Shift (0x400) on an object
+// classic control, Shift or both buttons (0x200) looks, Ctrl (0x400) on an object
 // opens the context menu (message 0x34), and a plain click attacks the
 // creature (unless the use object has FORCEUSE) or uses the object
 // (message 0x2c for a multi-use one). Otherwise 0x800 attacks, 0x200
@@ -263,14 +263,14 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		SetTradeInfo(CreatureID);
 	int Index, ox, oy, oz;
 	if (GetClassicControl()) {
-		if (Flags & 0x200) {
+		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
 			const TObject *LookObj = GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
 				SendLook(ox, oy, oz, LookObj->Type, Index);
 			return true;
 		}
-		if ((Flags & 0x400) && GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
-			AddMessage(0x34, 0, 0);
+		if ((Flags & KEY_CONTROL) && GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0) {
+			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			return true;
 		}
 		const uint32 Target = GetTradeInfo();
@@ -284,13 +284,13 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			return true;
 		PATELLA_ASSERT(UseObj!=CREATURE);
 		if (GetObjectFlag(UseObj, MULTIUSE)) {
-			AddMessage(0x2c, 0, 0);
+			AddMessage(MESSAGE_USE_WITH, 0, 0);
 			return true;
 		}
 		SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
 		return true;
 	} else {
-		if (Flags & 0x800) {
+		if (Flags & KEY_ALT) {
 			const uint32 Target = GetTradeInfo();
 			if (Target == 0 || Target == GetPlayerID())
 				return true;
@@ -298,26 +298,26 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			SendAttack(GetAttackID());
 			return true;
 		}
-		if (Flags & 0x200) {
+		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
 			const TObject *LookObj = GetTradeObject(&Index, &ox, &oy, &oz);
 			if (LookObj->Type != 0)
 				SendLook(ox, oy, oz, LookObj->Type, Index);
 			return true;
 		}
-		if (Flags & 0x400) {
+		if (Flags & KEY_CONTROL) {
 			TObject &UseObj = *GetUseObject(&Index, &ox, &oy, &oz);
 			if (UseObj.Type == 0)
 				return true;
 			PATELLA_ASSERT(UseObj!=CREATURE);
 			if (GetObjectFlag(UseObj, MULTIUSE)) {
-				AddMessage(0x2c, 0, 0);
+				AddMessage(MESSAGE_USE_WITH, 0, 0);
 				return true;
 			}
 			SendUseObject(ox, oy, oz, UseObj.Type, Index, GetFreeContainer());
 			return true;
 		}
 		if (GetTradeObject(&Index, &ox, &oy, &oz)->Type != 0)
-			AddMessage(0x34, 0, 0);
+			AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 		return true;
 	}
 }
@@ -329,11 +329,11 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMapWindow::HandleEvent(int Event)
 {
-	if (Event == 600)
+	if (Event == EVENT_CREATURE_INFO)
 		SetCreatureInfo((GetCreatureInfo() + 1) % 3);
-	if (Event == 601)
+	if (Event == EVENT_REMOVE_TALKBOX)
 		RemoveOldestTalkbox();
-	if (Event == 27) {
+	if (Event == EVENT_MAP_HINT) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;
 		const int Hint = PopEventHelp();
@@ -341,7 +341,7 @@ void TMapWindow::HandleEvent(int Event)
 		const std::size_t Size = strlen(GetEventHelpText(Hint)) + 1;
 		char *Text = new char[Size];
 		TStringBuffer(Text, Size).Assign(GetEventHelpText(Hint));
-		AddMessage(2, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
+		AddMessage(MESSAGE_FORMATTED_DIALOG, reinterpret_cast<std::intptr_t>(GetEventHelpTitle(Hint)), reinterpret_cast<std::intptr_t>(Text));
 	}
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
@@ -751,11 +751,11 @@ void TMapWindow::Draw(int Surface, int x, int y)
 
 	// The hint button while there is an event help to show.
 	if (GetShowNewHints() && GetEventHelp() != 0 && HintButton == nullptr) {
-		HintButton = new TBlinkingButton(0, 0, 61, 62, 63, 64, TCallback(this, 27), TextReceiveHint);
+		HintButton = new TBlinkingButton(0, 0, 61, 62, 63, 64, TCallback(this, EVENT_MAP_HINT), TextReceiveHint);
 		InsertChild(HintButton);
 		Arrange();
 		if (GetEventHelp() == 1)
-			HandleEvent(27);
+			HandleEvent(EVENT_MAP_HINT);
 	} else if (!GetShowNewHints() && HintButton != nullptr) {
 		DeleteChild(HintButton);
 		HintButton = nullptr;

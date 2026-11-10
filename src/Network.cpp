@@ -653,7 +653,7 @@ void patella::TNetwork::ConnectToGameServer()
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), Error, 2);
 		Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
-		Session.AddMessage(10, 300, 0);
+		Session.AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 	}
 	Error = ConnectSocket(IPAddress, Session.GetCharacterPort(Character), false);
 	if (Error != 0) {
@@ -661,7 +661,7 @@ void patella::TNetwork::ConnectToGameServer()
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), Error, 2);
 		Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
-		Session.AddMessage(10, 300, 0);
+		Session.AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 	}
 }
 
@@ -690,7 +690,7 @@ void patella::TNetwork::OnConnect(int ErrorCode)
 	char *Message = new char[1024];
 	GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ErrorCode, 2);
 	Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
-	Session.AddMessage(10, 300, 0);
+	Session.AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 	Disconnect(false);
 	Session.SetConnectionState(0);
 }

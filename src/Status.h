@@ -32,6 +32,7 @@ inline constexpr int RIGHT_ANY = 50;
 // "In(Type,MESSAGE_NONE,MESSAGE_STARTPATCHER)". Other values seen: 1 shows
 // a message box (Param1 title, Param2 text, which the queue owns), 10 with
 // Param1 300 follows a failed game server connection.
+// The other numbers' names: Events.h.
 inline constexpr int MESSAGE_NONE = 0;
 inline constexpr int MESSAGE_STARTPATCHER = 72;
 
@@ -246,11 +247,23 @@ void ClearRights();
 int GetActionNumber();
 void IncrementActionNumber();
 // The action state of no action (name from MainWindow.cpp's
-// "GetActionState()==ACTIONSTATE_NONE"; the other states are numbers: 1 left
-// button down, 2 right button down, 3 both down, 4 and 5 one of both
-// released, 7 and 8 set by events 0x2c and 0x2d, 9 help mode, 10 dialog
-// open, 11 context menu open).
+// "GetActionState()==ACTIONSTATE_NONE"). The other states are named below,
+// from what the code does with them; 1, left button down, stays a number. 4
+// and 5: both buttons were down (classic control) and one has gone up; the
+// release of the other sends the left button up of BOTH_BUTTONS_RELEASED.
 inline constexpr int ACTIONSTATE_NONE = 0;
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	ACTIONSTATE_RIGHT_BUTTON_DOWN = 2,
+	ACTIONSTATE_BOTH_BUTTONS_DOWN = 3,
+	ACTIONSTATE_RIGHT_RELEASED = 4, // the left button is still down
+	ACTIONSTATE_LEFT_RELEASED = 5,  // the right button is still down
+	ACTIONSTATE_DRAGGING = 6,
+	ACTIONSTATE_USE_WITH = 7,   // the player chooses what to use the use object on (message 0x2c)
+	ACTIONSTATE_TRADE_WITH = 8, // the player chooses whom to trade with (message 0x2d)
+	ACTIONSTATE_HELP = 9,
+	ACTIONSTATE_DIALOG = 10,       // a centred dialog is the modal window
+	ACTIONSTATE_CONTEXT_MENU = 11, // a context menu is the modal window
+};
 void SetActionState(int State);
 int GetActionState();
 void SetMousePosition(int x, int y);
@@ -356,3 +369,7 @@ void CheckClipboardText(patella::TSpan<const char> Characters); // the copied ch
 void CopyToClipboard(const char *text);
 void CopyTaintedClipboardText();
 void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
+
+// Events.h, the message and event numbers, comes last on purpose: included at the top of this file, its enumerators
+// moved data in the executable (measured; the Release build is compared byte for byte).
+#include "Events.h"

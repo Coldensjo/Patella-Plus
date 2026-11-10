@@ -9,6 +9,7 @@
 #pragma once
 
 #include "common.h"
+#include "Events.h"
 #include "TXTEA.h"
 #include "Utils.h"
 #include "compat/span.h"

@@ -36,6 +36,17 @@ struct TObject {
 // Object type of a creature on a map field ("SrcObj.Type!=CREATURE").
 inline constexpr int CREATURE = 99;
 
+// An object's position when it is not on the map, in the three coordinates of the Send functions and of the drag,
+// trade and use objects: x is POSITION_NOT_ON_MAP, y an inventory slot (0: the first free one) or
+// POSITION_CONTAINER_BASE plus the container number, and z the position in that container. As z,
+// POSITION_PARENT_CONTAINER moves the object up to the container the y container is in. Enumerators for the reason
+// in GUI.h.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	POSITION_NOT_ON_MAP = 0xffff,
+	POSITION_CONTAINER_BASE = 0x40,
+	POSITION_PARENT_CONTAINER = 0xfe,
+};
+
 // Tibia.dat flags: the bit numbers in TProperties::Flags. The names of
 // 1-20 follow CipSoft's game server (medium confidence); 22, 23, 26 and 27
 // are ours (low).

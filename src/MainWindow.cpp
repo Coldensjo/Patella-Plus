@@ -74,8 +74,8 @@ TMainWindow::TMainWindow(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
 	ChangeMode(false);
-	AddHotkey(0x446, TCallback(this, 0x1f8));
-	AddHotkey(0x80d, TCallback(this, 0x1f8));
+	AddHotkey(0x446, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	AddHotkey(0x80d, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
 }
 
 // 0x4ac010. Its work is the close since issue #108.
@@ -235,40 +235,40 @@ void TMainWindow::HandleEvent(int Event)
 {
 	const patella::TGUI &GUI = patella::bridge::GUI();
 	switch (Event) {
-	case 0x21:
+	case EVENT_COPY_LINK:
 		CopyTaintedClipboardText();
 		[[fallthrough]];
-	case 2:
+	case EVENT_CANCEL:
 		SetActionState(0);
 		break;
-	case 7:
+	case EVENT_EXIT_PROGRAM:
 		GUI.ExitProgramCallback();
 		break;
-	case 8:
-		AddMessage(0x21, 0, 0);
+	case EVENT_OPTIONS:
+		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
-	case 9:
+	case EVENT_REARRANGE:
 		SetSize(Width, Height);
 		break;
-	case 0xe:
+	case EVENT_TOGGLE_SKILLS:
 		if (DialogWindow->GetContentWindow(6) != nullptr)
 			CloseContentWindow(6);
 		else
 			OpenContentWindow(6);
 		break;
-	case 0xf:
+	case EVENT_TOGGLE_BATTLE:
 		if (DialogWindow->GetContentWindow(7) != nullptr)
 			CloseContentWindow(7);
 		else
 			OpenContentWindow(7);
 		break;
-	case 0x16:
+	case EVENT_TOGGLE_VIP:
 		if (DialogWindow->GetContentWindow(9) != nullptr)
 			CloseContentWindow(9);
 		else
 			OpenContentWindow(9);
 		break;
-	case 0x17: {
+	case EVENT_MINIMISE_INVENTORY: {
 		TContentWindow *OldWindow = SidePanel->GetContentWindow(1);
 		PATELLA_ASSERT(OldWindow!=nullptr);
 		SidePanel->InsertChildAfter(OldWindow, CreateSmallInventoryWindow(this));
@@ -278,7 +278,7 @@ void TMainWindow::HandleEvent(int Event)
 		SetSize(Width, Height);
 		break;
 	}
-	case 0x18: {
+	case EVENT_MAXIMISE_INVENTORY: {
 		TContentWindow *OldWindow = SidePanel->GetContentWindow(2);
 		PATELLA_ASSERT(OldWindow!=nullptr);
 		SidePanel->InsertChildAfter(OldWindow, CreateInventoryWindow(this));
@@ -288,21 +288,21 @@ void TMainWindow::HandleEvent(int Event)
 		SetSize(Width, Height);
 		break;
 	}
-	case 0x1d:
+	case EVENT_ABORT:
 		Disconnect(false);
 		if (GetConnectionState() == 5 || GetConnectionState() == 6) {
-			AddMessage(9, 20, 0);
-			AddMessage(10, 300, 0);
+			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
+			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		}
 		SetConnectionState(0);
 		SetActionState(0);
 		break;
-	case 0x20:
+	case EVENT_STOP:
 		ClearPlayerSteps();
 		SetAttackID(0);
 		SendCancel();
 		break;
-	case 0x1f8:
+	case EVENT_TOGGLE_FULLSCREEN:
 		if (GetFullscreenMode()->Width != 0) {
 			TFullscreenMode Mode = *GetFullscreenMode();
 			if (Mode.Width < 640 || Mode.Height < 480) {
@@ -314,54 +314,54 @@ void TMainWindow::HandleEvent(int Event)
 			GUI.SetDisplayModeCallback(GetViewMode() == 1 ? 2 : 1);
 		}
 		break;
-	case 0x1f9:
+	case EVENT_BUG_REPORT:
 		if (!CheckRight(40, -1)) {
 			SetStatusMessage(TextNoBugReportRight, false);
 		} else if (GetConnectionState() == 8 && GUI.ModalWindow == nullptr) {
-			AddMessage(0x11, 0, 0);
+			AddMessage(MESSAGE_BUG_REPORT_DIALOG, 0, 0);
 		}
 		break;
-	case 0x1fa:
+	case EVENT_LOGOUT:
 		SetActionState(0);
 		SendLogout();
 		break;
-	case 0x1fb: {
+	case EVENT_LEAVE_QUESTION: {
 		// A question with an answer event; message 6 deletes the block.
 		std::intptr_t *Data = new std::intptr_t[4];
 		Data[0] = reinterpret_cast<std::intptr_t>("Warning");
 		Data[1] = reinterpret_cast<std::intptr_t>("Are you sure you want to leave Tibia?");
 		Data[2] = reinterpret_cast<std::intptr_t>(this);
-		Data[3] = 0x1fa;
-		AddMessage(6, reinterpret_cast<std::intptr_t>(Data), 0);
+		Data[3] = EVENT_LOGOUT;
+		AddMessage(MESSAGE_QUESTION_DIALOG, reinterpret_cast<std::intptr_t>(Data), 0);
 		break;
 	}
-	case 0x1fd:
-		AddMessage(10, 300, 0);
+	case EVENT_CHARACTER_LIST:
+		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 		break;
-	case 0x2bd:
-		AddMessage(0x1f, 0, 0);
+	case EVENT_HELP:
+		AddMessage(MESSAGE_HELP_DIALOG, 0, 0);
 		break;
-	case 0x2be:
+	case EVENT_HELP_MODE:
 		SetActionState(0);
-		AddMessage(0x2e, 0, 0);
+		AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
-	case 0x2c0:
+	case EVENT_TUTOR_HELP:
 		SendJoinChannel(7);
 		break;
-	case 0x2c1:
-		AddMessage(0x16, 0, 0);
+	case EVENT_REPORT:
+		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
 		break;
-	case 0x2c4:
+	case EVENT_RULE_VIOLATION:
 		if (CheckAnyRight())
-			AddMessage(0x1c, 0, 0);
+			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 		break;
-	case 800:
+	case EVENT_DEVICE_AUTOMATIC:
 		patella::TGUI::ChangeEngine(0); // Control.cpp's (issue #118)
 		break;
-	case 801:
+	case EVENT_DEVICE_GPU:
 		patella::TGUI::ChangeEngine(2); // Control.cpp's (issue #118)
 		break;
-	case 802:
+	case EVENT_DEVICE_CPU:
 		patella::TGUI::ChangeEngine(1); // Control.cpp's (issue #118)
 		break;
 	default:
@@ -488,18 +488,18 @@ void TMainWindow::ChangeMode(bool InGame)
 		// Ctrl+Z reports a bug, Ctrl+R a rule violation, Ctrl+Y opens the
 		// gamemaster dialog, Ctrl+H the hints, Ctrl+T the channel 7 and
 		// Escape cancels the attack and the walk.
-		AddHotkey(0x44c, TCallback(this, 0x1fa));
-		AddHotkey(0x451, TCallback(this, 0x1fa));
-		AddHotkey(0x447, TCallback(this, 0x1fd));
-		AddHotkey(0x453, TCallback(this, 0xe));
-		AddHotkey(0x442, TCallback(this, 0xf));
-		AddHotkey(0x450, TCallback(this, 0x16));
-		AddHotkey(0x45a, TCallback(this, 0x1f9));
-		AddHotkey(0x452, TCallback(this, 0x2c1));
-		AddHotkey(0x459, TCallback(this, 0x2c4));
-		AddHotkey(0x448, TCallback(this, 0x2be));
-		AddHotkey(0x454, TCallback(this, 0x2c0));
-		AddHotkey(0x1b, TCallback(this, 0x20));
+		AddHotkey(0x44c, TCallback(this, EVENT_LOGOUT));
+		AddHotkey(0x451, TCallback(this, EVENT_LOGOUT));
+		AddHotkey(0x447, TCallback(this, EVENT_CHARACTER_LIST));
+		AddHotkey(0x453, TCallback(this, EVENT_TOGGLE_SKILLS));
+		AddHotkey(0x442, TCallback(this, EVENT_TOGGLE_BATTLE));
+		AddHotkey(0x450, TCallback(this, EVENT_TOGGLE_VIP));
+		AddHotkey(0x45a, TCallback(this, EVENT_BUG_REPORT));
+		AddHotkey(0x452, TCallback(this, EVENT_REPORT));
+		AddHotkey(0x459, TCallback(this, EVENT_RULE_VIOLATION));
+		AddHotkey(0x448, TCallback(this, EVENT_HELP_MODE));
+		AddHotkey(0x454, TCallback(this, EVENT_TUTOR_HELP));
+		AddHotkey(0x1b, TCallback(this, EVENT_STOP));
 	} else {
 		StartWindow = new TStartWindow;
 		InsertChild(StartWindow);
@@ -569,7 +569,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMainWindow::OpenContainer(int Container) const
 {
 	PATELLA_ASSERT(DialogWindow!=nullptr);
-	TSubWindow *Window = static_cast<TSubWindow *>(DialogWindow->GetContentWindow(Container + 0x40));
+	TSubWindow *Window = static_cast<TSubWindow *>(DialogWindow->GetContentWindow(Container + CONTAINER_WINDOW));
 	if (Window == nullptr) {
 		DialogWindow->Rearrange(16, CreateContainerWindow(Container));
 		return;
@@ -592,7 +592,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 void TMainWindow::CloseContainer(int Container) const
 {
 	if (DialogWindow != nullptr) {
-		TContentWindow *Window = DialogWindow->GetContentWindow(Container + 0x40);
+		TContentWindow *Window = DialogWindow->GetContentWindow(Container + CONTAINER_WINDOW);
 		if (Window != nullptr)
 			DialogWindow->DeleteChild(Window);
 	}
@@ -613,7 +613,7 @@ void TMainWindow::UpdateTrade() const
 	const TSubWindow *Window = static_cast<TSubWindow *>(DialogWindow->GetContentWindow(TRADE_WINDOW));
 	if (Window != nullptr) {
 		PATELLA_ASSERT(Window->getBody()!=nullptr);
-		Window->getBody()->HandleEvent(0x15);
+		Window->getBody()->HandleEvent(EVENT_TRADE_COUNTER_OFFER);
 	}
 }
 
@@ -672,19 +672,19 @@ TStartWindow::TStartWindow()
 {
 	TWindow *Panel = new TWindow;
 	Panel->SetSize(SkinProperties().Style0D8.Data00, SkinProperties().Style0D8.Data04);
-	TComponent *Button = new TTextButton(0, 0, "Enter Game", 0x12, 0x13, TCallback(this, 0x1f5), nullptr);
+	TComponent *Button = new TTextButton(0, 0, "Enter Game", 0x12, 0x13, TCallback(this, EVENT_ENTER_GAME), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data10.x, SkinProperties().Style0D8.Data10.y);
-	Button = new TTextButton(0, 0, "Options", 0x12, 0x13, TCallback(this, 0x1f7), nullptr);
+	Button = new TTextButton(0, 0, "Options", 0x12, 0x13, TCallback(this, EVENT_START_OPTIONS), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data18.x, SkinProperties().Style0D8.Data18.y);
-	Button = new TTextButton(0, 0, "Info", 0x12, 0x13, TCallback(this, 0x1f6), nullptr);
+	Button = new TTextButton(0, 0, "Info", 0x12, 0x13, TCallback(this, EVENT_INFO), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data20.x, SkinProperties().Style0D8.Data20.y);
-	Button = new TTextButton(0, 0, "Exit Game", 0x12, 0x13, TCallback(this, 7), nullptr);
+	Button = new TTextButton(0, 0, "Exit Game", 0x12, 0x13, TCallback(this, EVENT_EXIT_PROGRAM), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data28.x, SkinProperties().Style0D8.Data28.y);
-	Button = new TTextButton(0, 0, "Access Account", 0x12, 0x13, TCallback(this, 0x1fc), nullptr);
+	Button = new TTextButton(0, 0, "Access Account", 0x12, 0x13, TCallback(this, EVENT_ACCOUNT_URL), nullptr);
 	Panel->InsertChild(Button);
 	Panel->SetChildPosition(Button, SkinProperties().Style0D8.Data30.x, SkinProperties().Style0D8.Data30.y);
 	Frame = new TBorder(Panel, 0x34, 0x3a, 0x35, 0x38, 0x39, 0x36, 0x3b, 0x37, 0x3c, SkinProperties().Data134);
@@ -715,19 +715,19 @@ void TStartWindow::HandleEvent(int Event)
 	if (GetConnectionState() != 0)
 		return;
 	switch (Event) {
-	case 0x1f5:
-		AddMessage(8, 0, 0);
+	case EVENT_ENTER_GAME:
+		AddMessage(MESSAGE_LOGIN_DIALOG, 0, 0);
 		break;
-	case 0x1f6:
-		AddMessage(0x1b, 0, 0);
+	case EVENT_INFO:
+		AddMessage(MESSAGE_INFO_DIALOG, 0, 0);
 		break;
-	case 0x1f7:
-		AddMessage(0x21, 0, 0);
+	case EVENT_START_OPTIONS:
+		AddMessage(MESSAGE_OPTIONS_DIALOG, 0, 0);
 		break;
-	case 7:
+	case EVENT_EXIT_PROGRAM:
 		GUI.ExitProgramCallback();
 		break;
-	case 0x1fc:
+	case EVENT_ACCOUNT_URL:
 		GUI.OpenURLCallback(TextAccountURL);
 		break;
 	default:

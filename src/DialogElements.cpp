@@ -1334,9 +1334,9 @@ bool TEditLine::LeftButtonDoubleClick(int x, int y, int Flags)
 // a left button release (the binary calls TWindow::LeftButtonUp).
 bool TEditLine::RightButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::LeftButtonUp(x, y, Flags) && !IsDisabled() && GetActionState() != 10
-		&& GetActionState() != 11)
-		AddMessage(58, reinterpret_cast<std::intptr_t>(this), 0);
+	if (!TWindow::LeftButtonUp(x, y, Flags) && !IsDisabled() && GetActionState() != ACTIONSTATE_DIALOG
+		&& GetActionState() != ACTIONSTATE_CONTEXT_MENU)
+		AddMessage(MESSAGE_EDIT_MENU, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }
 
@@ -1372,15 +1372,15 @@ void TEditLine::KeyPress(int Key)
 		}
 		if (!ReadOnly) {
 			if (Key == 0x310 || Key == 0x476)
-				HandleEvent(18);
+				HandleEvent(EVENT_PASTE);
 			if (Key == 0x510 || Key == 0x463)
-				HandleEvent(16);
+				HandleEvent(EVENT_COPY);
 			if (Key == 0x311 || Key == 0x478)
-				HandleEvent(17);
+				HandleEvent(EVENT_CUT);
 			if (Key == 0x511)
-				HandleEvent(19);
+				HandleEvent(EVENT_DELETE);
 			if (Key == 0x461)
-				HandleEvent(20);
+				HandleEvent(EVENT_SELECT_ALL);
 			if (Code == 8) {
 				if (SelectionStart == -1 || SelectionLength == 0) {
 					if (Cursor > 0) {
@@ -1389,22 +1389,22 @@ void TEditLine::KeyPress(int Key)
 					}
 				} else {
 					SetCursor(Cursor - 1);
-					HandleEvent(19);
+					HandleEvent(EVENT_DELETE);
 				}
 			}
 			if (Key == 0x111 && Cursor <= (int)strlen(Text.get())) {
 				if (SelectionStart == -1 || SelectionLength == 0)
 					DeleteChar(Cursor);
 				else
-					HandleEvent(19);
+					HandleEvent(EVENT_DELETE);
 			}
 			// Past the modifier test the binary keeps the code in Key's stack slot
 			// (0x4682b2-0x4682b8): the original's catch wrapper then prints the code.
-			if ((Key & 0x400) == 0 || (Key & 0x800) != 0) {
+			if ((Key & KEY_CONTROL) == 0 || (Key & KEY_ALT) != 0) {
 				Key = Code;
 				if (Key > 0x1f && Key < 0x100 && (int)strlen(Text.get()) < MaxLength) {
 					if (HasSelection())
-						HandleEvent(19);
+						HandleEvent(EVENT_DELETE);
 					InsertChar(Cursor, (char)Key);
 					SetCursor(Cursor + 1);
 				}
@@ -1418,14 +1418,14 @@ void TEditLine::KeyPress(int Key)
 void TEditLine::HandleEvent(int Event)
 {
 	switch (Event) {
-	case 16:
+	case EVENT_COPY:
 		if (SelectionStart != -1 && SelectionLength != 0) {
 			const int End = SelectionLength < 0 ? SelectionStart : SelectionStart + SelectionLength;
 			const int Begin = SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart;
 			CheckClipboardText(patella::TSpan<const char>(Text.get() + Begin, static_cast<std::size_t>(End - Begin)));
 		}
 		return;
-	case 17: {
+	case EVENT_CUT: {
 		if (ReadOnly || !HasSelection())
 			return;
 		int Begin = SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart;
@@ -1438,7 +1438,7 @@ void TEditLine::HandleEvent(int Event)
 		SelectionLength = 0;
 		return;
 	}
-	case 18: {
+	case EVENT_PASTE: {
 		if (ReadOnly || IsClipboardEmpty())
 			return;
 		const char *Clipboard = GetClipboardText();
@@ -1457,7 +1457,7 @@ void TEditLine::HandleEvent(int Event)
 			SetCursor(Cursor + InsertText(Cursor, Clipboard, (int)strcspn(Clipboard, "\n")));
 		return;
 	}
-	case 19: {
+	case EVENT_DELETE: {
 		if (ReadOnly || !HasSelection())
 			return;
 		SetCursor(SelectionLength < 0 ? SelectionStart + SelectionLength : SelectionStart);
@@ -1467,7 +1467,7 @@ void TEditLine::HandleEvent(int Event)
 		SelectionLength = 0;
 		return;
 	}
-	case 20:
+	case EVENT_SELECT_ALL:
 		// The cursor goes to max(length, 0) (the binary keeps the test).
 		SelectionStart = 0;
 		SelectionLength = (int)strlen(Text.get());
@@ -1601,8 +1601,8 @@ void TPasswordEditLine::Draw(int Surface, int x, int y)
 // constant 18.
 void TPasswordEditLine::HandleEvent(int Event)
 {
-	if (Event == 18) {
-		TEditLine::HandleEvent(18);
+	if (Event == EVENT_PASTE) {
+		TEditLine::HandleEvent(EVENT_PASTE);
 	}
 }
 
@@ -1702,9 +1702,9 @@ void TEditText::KeyPress(int Key)
 	if (ReadOnly) {
 		int Value = ScrollBar->Range->Value;
 		if (Key == 0x510 || Key == 0x463)
-			HandleEvent(16);
+			HandleEvent(EVENT_COPY);
 		if (Key == 0x461)
-			HandleEvent(20);
+			HandleEvent(EVENT_SELECT_ALL);
 		switch (Key & 0x1ff) {
 		case 0x10c:
 			Value--;
@@ -1730,7 +1730,7 @@ void TEditText::KeyPress(int Key)
 	}
 	if (Key == 0x0d && (int)strlen(Text.get()) < MaxLength) {
 		if (SelectionStart != -1 && SelectionLength != 0)
-			HandleEvent(19);
+			HandleEvent(EVENT_DELETE);
 		InsertChar(Cursor, '\n');
 		SetCursor(Cursor + 1);
 	}
@@ -2156,8 +2156,8 @@ THorizontalScrollBar::THorizontalScrollBar(int Min, int Max, int _Value, int _Vi
 	TCallback _Callback)
 {
 	PATELLA_ASSERT_VALUES(_ButtonRange>0, _ButtonRange);
-	LeftButton = new TSkinButton(0, 0, 165, 166, TCallback(this, 5), nullptr, true);
-	RightButton = new TSkinButton(0, 0, 167, 168, TCallback(this, 6), nullptr, true);
+	LeftButton = new TSkinButton(0, 0, 165, 166, TCallback(this, EVENT_SCROLL_LEFT), nullptr, true);
+	RightButton = new TSkinButton(0, 0, 167, 168, TCallback(this, EVENT_SCROLL_RIGHT), nullptr, true);
 	TWindow::InsertChild(LeftButton);
 	TWindow::InsertChild(RightButton);
 	Range = new THorizontalScrollBarRange(Min, Max, _Value, _Visible, _Callback);
@@ -2193,9 +2193,9 @@ bool THorizontalScrollBar::MouseWheel(int x, int y, int Code)
 // 0x460280, line 3213. The buttons' events.
 void THorizontalScrollBar::HandleEvent(int Event)
 {
-	if (Event == 5)
+	if (Event == EVENT_SCROLL_LEFT)
 		Range->SetValue(Range->Value - Range->ButtonRange);
-	else if (Event == 6)
+	else if (Event == EVENT_SCROLL_RIGHT)
 		Range->SetValue(Range->Value + Range->ButtonRange);
 }
 
@@ -2387,8 +2387,8 @@ void TScrollBarRange::KeyPress(int Key)
 TScrollBar::TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, int _ButtonRange)
 {
 	PATELLA_ASSERT_VALUES(_ButtonRange>0, _ButtonRange);
-	UpButton = new TSkinButton(0, 0, 157, 158, TCallback(this, 3), nullptr, true);
-	DownButton = new TSkinButton(0, 0, 159, 160, TCallback(this, 4), nullptr, true);
+	UpButton = new TSkinButton(0, 0, 157, 158, TCallback(this, EVENT_SCROLL_UP), nullptr, true);
+	DownButton = new TSkinButton(0, 0, 159, 160, TCallback(this, EVENT_SCROLL_DOWN), nullptr, true);
 	TWindow::InsertChild(UpButton);
 	TWindow::InsertChild(DownButton);
 	Range = new TScrollBarRange(0, 0, Area.width, Area.height - DownButton->Height - UpButton->Height, Min, Max,
@@ -2426,9 +2426,9 @@ bool TScrollBar::MouseWheel(int x, int y, int Code)
 // 0x461b60, line 3534. The buttons' events.
 void TScrollBar::HandleEvent(int Event)
 {
-	if (Event == 3)
+	if (Event == EVENT_SCROLL_UP)
 		Range->SetValue(Range->Value - Range->ButtonRange);
-	else if (Event == 4)
+	else if (Event == EVENT_SCROLL_DOWN)
 		Range->SetValue(Range->Value + Range->ButtonRange);
 }
 

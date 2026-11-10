@@ -1114,7 +1114,7 @@ void patella::TCreatures::RemoveBuddy(uint32 CharacterID)
 	const int Position = GetBuddyPosition(CharacterID);
 	if (Position == -1)
 		return;
-	GUI.AddMessage(0x1a, reinterpret_cast<std::intptr_t>(MsvcStrdup(Buddies[Position].Name)), 0);
+	GUI.AddMessage(MESSAGE_TEMPORARY_UNIGNORE, reinterpret_cast<std::intptr_t>(MsvcStrdup(Buddies[Position].Name)), 0);
 	if (Buddies[Position].Online)
 		NumberOfOnlineBuddies--;
 	for (int i = Position; i < NumberOfBuddies - 1; i++)

@@ -96,7 +96,7 @@ TContentWindow *CreateSmallInventoryWindow(TWindow *Receiver)
 	TCombatControls *Controls = new TCombatControls(Receiver, false);
 	Window->InsertChild(Controls);
 	Window->SetChildPosition(Controls, SkinProperties().Data550.x, SkinProperties().Data550.y);
-	TSkinButton *Maximise = new TSkinButton(0, 0, 140, 141, TCallback(Receiver, 24), TextMaximiseInventory, false);
+	TSkinButton *Maximise = new TSkinButton(0, 0, 140, 141, TCallback(Receiver, EVENT_MAXIMISE_INVENTORY), TextMaximiseInventory, false);
 	Window->InsertChild(Maximise);
 	Window->SetChildPosition(Maximise, SkinProperties().Data550.width, SkinProperties().Data550.height);
 	TCapacityLabel *Capacity = new TCapacityLabel;
@@ -118,10 +118,10 @@ TContentWindow *CreateSmallInventoryWindow(TWindow *Receiver)
 TSubWindow *CreateContainerWindow(int Container)
 {
 	TContainerWindowBody *Body = new TContainerWindowBody(Container);
-	TSubWindow *Window = new TSubWindow(Container + 0x40, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, 10), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, 9), TextMaximiseOrMinimise, false);
-	TSkinButton *UpButton = new TSkinButton(0, 0, 126, 127, TCallback(Body, 3), TextShowHigherContainer, false);
+	TSubWindow *Window = new TSubWindow(Container + CONTAINER_WINDOW, Body, true, false);
+	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
+	TSkinButton *UpButton = new TSkinButton(0, 0, 126, 127, TCallback(Body, EVENT_CONTAINER_UP), TextShowHigherContainer, false);
 	TObjectIcon *Icon = new TObjectIcon(GetContainerObject(Container), &SkinProperties().Style194.Data80, false);
 	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, GetContainerName(Container));
 	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
@@ -139,8 +139,8 @@ TSubWindow *CreateSkillsWindow()
 {
 	TSkillsWindowBody *Body = new TSkillsWindowBody;
 	TSubWindow *Window = new TSubWindow(6, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, 10), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, 9), TextMaximiseOrMinimise, false);
+	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "Skills");
 	TSkinIcon *Icon = new TSkinIcon(142);
 	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
@@ -157,8 +157,8 @@ TSubWindow *CreateBattleWindow()
 {
 	TBattleWindowBody *Body = new TBattleWindowBody;
 	TSubWindow *Window = new TSubWindow(7, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, 10), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, 9), TextMaximiseOrMinimise, false);
+	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "Battle");
 	TSkinIcon *Icon = new TSkinIcon(144);
 	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
@@ -175,8 +175,8 @@ TSubWindow *CreateTradeWindow()
 {
 	TTradeWindowBody *Body = new TTradeWindowBody;
 	TSubWindow *Window = new TSubWindow(TRADE_WINDOW, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, 10), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, 9), TextMaximiseOrMinimise, false);
+	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "Trade");
 	TSkinIcon *Icon = new TSkinIcon(145);
 	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
@@ -184,7 +184,7 @@ TSubWindow *CreateTradeWindow()
 	Window->SetMinimizeButton(MinimizeButton);
 	Window->SetIcon(Icon);
 	Window->SetTitle(Title);
-	Body->Buttons->Callback = TCallback(Window, 10);
+	Body->Buttons->Callback = TCallback(Window, EVENT_WINDOW_CLOSE);
 	Body->Buttons->SetCancelButton(true);
 	Window->Arrange();
 	return Window;
@@ -195,8 +195,8 @@ TSubWindow *CreateBuddylistWindow()
 {
 	TBuddylistWindowBody *Body = new TBuddylistWindowBody;
 	TSubWindow *Window = new TSubWindow(9, Body, true, false);
-	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, 10), TextCloseWindow, false);
-	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, 9), TextMaximiseOrMinimise, false);
+	TSkinButton *CloseButton = new TSkinButton(0, 0, 136, 137, TCallback(Window, EVENT_WINDOW_CLOSE), TextCloseWindow, false);
+	TSkinButton *MinimizeButton = new TSkinButton(0, 0, 138, 139, TCallback(Window, EVENT_WINDOW_MINIMISE), TextMaximiseOrMinimise, false);
 	TLabel *Title = new TLabel(SkinProperties().Style194.Data38, "VIP");
 	TSkinIcon *Icon = new TSkinIcon(143);
 	Window->SetSize(SkinProperties().Data184, TSubWindow::GetFrameHeight() + Body->GetInitialHeight());
@@ -219,16 +219,16 @@ TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
 	CheckObject = _CheckObject;
 	SetSize(SkinProperties().Data184, SkinProperties().Data608);
 	SkillsButton = new TTextToggleButton(SkinProperties().Data60C.x, SkinProperties().Data60C.y, "Skills", 14, 15,
-		TCallback(Receiver, 14), TextOpenSkillsWindow, TextCloseSkillsWindow, false);
+		TCallback(Receiver, EVENT_TOGGLE_SKILLS), TextOpenSkillsWindow, TextCloseSkillsWindow, false);
 	InsertChild(SkillsButton);
 	BattleButton = new TTextToggleButton(SkinProperties().Data60C.width, SkinProperties().Data60C.height, "Battle", 14,
-		15, TCallback(Receiver, 15), TextOpenBattleWindow, TextCloseBattleWindow, false);
+		15, TCallback(Receiver, EVENT_TOGGLE_BATTLE), TextOpenBattleWindow, TextCloseBattleWindow, false);
 	InsertChild(BattleButton);
 	BuddyButton = new TTextToggleButton(SkinProperties().Data61C.x, SkinProperties().Data61C.y, "VIP", 14, 15,
-		TCallback(Receiver, 22), TextOpenVIPWindow, TextCloseVIPWindow, false);
+		TCallback(Receiver, EVENT_TOGGLE_VIP), TextOpenVIPWindow, TextCloseVIPWindow, false);
 	InsertChild(BuddyButton);
 	LogoutButton = new TTextButton(SkinProperties().Data61C.width, SkinProperties().Data61C.height, "Logout",
-		TCallback(Receiver, 507), TextLeaveGame);
+		TCallback(Receiver, EVENT_LEAVE_QUESTION), TextLeaveGame);
 	InsertChild(LogoutButton);
 }
 
@@ -267,16 +267,16 @@ TAutomapWindow::TAutomapWindow()
 	if (Zoom != 1 && Zoom != 2 && Zoom != 4 && Zoom != 8)
 		Zoom = 2;
 	View = new TAutomapView;
-	CentreButton = new TTextButton(SkinProperties().Data264.x, SkinProperties().Data264.y, "Centre", TCallback(this, 106),
+	CentreButton = new TTextButton(SkinProperties().Data264.x, SkinProperties().Data264.y, "Centre", TCallback(this, EVENT_AUTOMAP_CENTRE),
 		TextCentreAroundPlayer);
-	FloorUpButton = new TSkinButton(SkinProperties().Data254.x, SkinProperties().Data254.y, 70, 71, TCallback(this, 3),
+	FloorUpButton = new TSkinButton(SkinProperties().Data254.x, SkinProperties().Data254.y, 70, 71, TCallback(this, EVENT_AUTOMAP_FLOOR_UP),
 		TextShowHigherFloor, false);
 	FloorDownButton = new TSkinButton(SkinProperties().Data254.width, SkinProperties().Data254.height, 72, 73,
-		TCallback(this, 4), TextShowLowerFloor, false);
-	ZoomInButton = new TSkinButton(SkinProperties().Data244.x, SkinProperties().Data244.y, 66, 67, TCallback(this, 107),
+		TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN), TextShowLowerFloor, false);
+	ZoomInButton = new TSkinButton(SkinProperties().Data244.x, SkinProperties().Data244.y, 66, 67, TCallback(this, EVENT_AUTOMAP_ZOOM_IN),
 		TextZoomIn, false);
 	ZoomOutButton = new TSkinButton(SkinProperties().Data244.width, SkinProperties().Data244.height, 68, 69,
-		TCallback(this, 108), TextZoomOut, false);
+		TCallback(this, EVENT_AUTOMAP_ZOOM_OUT), TextZoomOut, false);
 	CompassRose = new TCompassRose(65);
 	InsertChild(View);
 	InsertChild(CentreButton);
@@ -289,14 +289,14 @@ TAutomapWindow::TAutomapWindow()
 	SetChildPosition(CompassRose, SkinProperties().Data264.width, SkinProperties().Data264.height);
 	CompassRose->SetSize(Skins()[65].width, Skins()[65].height);
 	Arrange();
-	AddHotkey(0x912, TCallback(this, 108));
-	AddHotkey(0x913, TCallback(this, 107));
-	AddHotkey(0x914, TCallback(this, 3));
-	AddHotkey(0x915, TCallback(this, 4));
-	AddHotkey(0x90c, TCallback(this, 109));
-	AddHotkey(0x90d, TCallback(this, 112));
-	AddHotkey(0x90e, TCallback(this, 110));
-	AddHotkey(0x90f, TCallback(this, 111));
+	AddHotkey(0x912, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
+	AddHotkey(0x913, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
+	AddHotkey(0x914, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
+	AddHotkey(0x915, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
+	AddHotkey(0x90c, TCallback(this, EVENT_AUTOMAP_NORTH));
+	AddHotkey(0x90d, TCallback(this, EVENT_AUTOMAP_WEST));
+	AddHotkey(0x90e, TCallback(this, EVENT_AUTOMAP_EAST));
+	AddHotkey(0x90f, TCallback(this, EVENT_AUTOMAP_SOUTH));
 }
 
 // 0x426c40, line 406 (deleting destructor 0x436e80). Its work is the close
@@ -375,11 +375,11 @@ void TAutomapWindow::Arrange()
 void TAutomapWindow::HandleEvent(int Event)
 {
 	switch (Event) {
-	case 106:
+	case EVENT_AUTOMAP_CENTRE:
 		Centred = true;
 		Changed = true;
 		break;
-	case 3:
+	case EVENT_AUTOMAP_FLOOR_UP:
 		if (Centred) {
 			GetMapPosition(&ViewX, &ViewY, &ViewZ);
 			GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
@@ -389,7 +389,7 @@ void TAutomapWindow::HandleEvent(int Event)
 			ViewZ--;
 		Changed = true;
 		break;
-	case 4:
+	case EVENT_AUTOMAP_FLOOR_DOWN:
 		if (Centred) {
 			GetMapPosition(&ViewX, &ViewY, &ViewZ);
 			GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
@@ -399,28 +399,28 @@ void TAutomapWindow::HandleEvent(int Event)
 			ViewZ++;
 		Changed = true;
 		break;
-	case 107:
+	case EVENT_AUTOMAP_ZOOM_IN:
 		if (Zoom < 8) {
 			Zoom *= 2;
 			Changed = true;
 		}
 		break;
-	case 108:
+	case EVENT_AUTOMAP_ZOOM_OUT:
 		if (Zoom > 1) {
 			Zoom /= 2;
 			Changed = true;
 		}
 		break;
-	case 109:
+	case EVENT_AUTOMAP_NORTH:
 		Scroll(1);
 		break;
-	case 111:
+	case EVENT_AUTOMAP_SOUTH:
 		Scroll(2);
 		break;
-	case 112:
+	case EVENT_AUTOMAP_WEST:
 		Scroll(3);
 		break;
-	case 110:
+	case EVENT_AUTOMAP_EAST:
 		Scroll(4);
 		break;
 	default:
@@ -594,7 +594,7 @@ bool TAutomapView::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	Data->Coordinate.y = (y - Height / 2) * 2 / Window->Zoom + Window->ViewY;
 	Data->Coordinate.z = Window->ViewZ;
 	Data->Mark = GetMark(x, y);
-	AddMessage(59, reinterpret_cast<std::intptr_t>(Data), 0);
+	AddMessage(MESSAGE_MARK_MENU, reinterpret_cast<std::intptr_t>(Data), 0);
 	return true;
 }
 
@@ -954,7 +954,7 @@ void TSmallInventoryWindow::Draw(int Surface, int x, int y)
 	TContentWindow::Draw(Surface, x, y);
 	if (In(GetMouseX() - SkinProperties().Data590.x - x, 0, SkinProperties().Data590.width - 1)
 		&& In(GetMouseY() - SkinProperties().Data590.y - y, 0, SkinProperties().Data590.height - 1)
-		&& GetActionState() == 6)
+		&& GetActionState() == ACTIONSTATE_DRAGGING)
 		GetSurface()->DrawFrame(Surface,
 			TRect(SkinProperties().Data590.x + x, SkinProperties().Data590.y + y,
 				SkinProperties().Data590.width, SkinProperties().Data590.height),
@@ -970,7 +970,7 @@ namespace {
 // the same rule for the floor.
 bool AsksForCount(int Flags)
 {
-	const bool Ctrl = (Flags & 0x400) != 0;
+	const bool Ctrl = (Flags & KEY_CONTROL) != 0;
 	return GetDragFullStacks() ? Ctrl : !Ctrl;
 }
 
@@ -983,16 +983,16 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TContentWindow::LeftButtonUp(x, y, Flags);
 	if (In(x - SkinProperties().Data590.x, 0, SkinProperties().Data590.width - 1)
-		&& In(y - SkinProperties().Data590.y, 0, SkinProperties().Data590.height - 1) && GetActionState() == 6) {
+		&& In(y - SkinProperties().Data590.y, 0, SkinProperties().Data590.height - 1) && GetActionState() == ACTIONSTATE_DRAGGING) {
 		int Index, SrcX, SrcY, SrcZ;
 		const TObject *Obj = GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
-		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & 0x200) != 0) {
-			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, 0xffff, 0, 0, 1);
+		if (!GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, 1);
 		} else if (AsksForCount(Flags)) {
-			SetDragTarget(0xffff, 0, 0);
-			AddMessage(13, 0, 0);
+			SetDragTarget(POSITION_NOT_ON_MAP, 0, 0);
+			AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 		} else {
-			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, 0xffff, 0, 0, Obj->Data);
+			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, Obj->Data);
 		}
 	}
 	return Result;
@@ -1015,7 +1015,7 @@ bool TSmallInventoryWindow::HelpMouseMove(int x, int y)
 TInventoryView::TInventoryView(TWindow *Receiver)
 {
 	SetSize(SkinProperties().Style288.Data00, SkinProperties().Style288.Data04);
-	TSkinButton *Minimise = new TSkinButton(0, 0, 138, 139, TCallback(Receiver, 23), TextMinimiseInventory, false);
+	TSkinButton *Minimise = new TSkinButton(0, 0, 138, 139, TCallback(Receiver, EVENT_MINIMISE_INVENTORY), TextMinimiseInventory, false);
 	InsertChild(Minimise);
 	SetChildPosition(Minimise, SkinProperties().Style288.Data08.x, SkinProperties().Style288.Data08.y);
 	TCapacityLabel *Capacity = new TCapacityLabel;
@@ -1063,7 +1063,7 @@ void TInventoryView::Draw(int Surface, int x, int y)
 			DrawObject(Surface, ObjX, ObjY, 32, Obj, TRGBColor(0, 0, 0), TRect(ObjX, ObjY, 32, 32),
 				SkinProperties().Data498, false);
 		}
-		if (GetActionState() == 6 && In(GetMouseX(), ObjX, ObjX + 31) && In(GetMouseY(), ObjY, ObjY + 31))
+		if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ObjX, ObjX + 31) && In(GetMouseY(), ObjY, ObjY + 31))
 			GetSurface()->DrawFrame(Surface, TRect(ObjX - 1, ObjY - 1, 34, 34), 1, TRGBColor(255, 255, 255));
 	}
 }
@@ -1077,7 +1077,7 @@ bool TInventoryView::LeftButtonDown(int x, int y, int Flags)
 			return false;
 		const TObject *Obj = GetBodyObject(Slot);
 		if (Obj->Type != 0)
-			SetDragObject(*Obj, 0, 0xffff, Slot, 0);
+			SetDragObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 	}
 	return true;
 }
@@ -1092,31 +1092,31 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 		const int Slot = GetSlotAt(x, y);
 		if (Slot == 0)
 			return false;
-		if (GetActionState() == 7) {
+		if (GetActionState() == ACTIONSTATE_USE_WITH) {
 			const TObject *Obj = GetBodyObject(Slot);
 			if (Obj->Type != 0) {
 				int SrcIndex, SrcX, SrcY, SrcZ;
 				const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 				PATELLA_ASSERT(SrcObj!=0);
 				PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-				SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, 0xffff, Slot, 0, Obj->Type, 0);
+				SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				return true;
 			}
-		} else if (GetActionState() == 8) {
+		} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			SetStatusMessage("Select a player to trade with.", false);
 			return true;
-		} else if (GetActionState() == 6) {
+		} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
 			int DragIndex, DragX, DragY, DragZ;
 			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
-			if (DragX != 0xffff || DragY != Slot) {
-				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & 0x200) != 0) {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, 0xffff, Slot, 0, 1);
+			if (DragX != POSITION_NOT_ON_MAP || DragY != Slot) {
+				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Slot, 0, 1);
 				} else if (AsksForCount(Flags)) {
-					SetDragTarget(0xffff, Slot, 0);
-					AddMessage(13, 0, 0);
+					SetDragTarget(POSITION_NOT_ON_MAP, Slot, 0);
+					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, 0xffff, Slot, 0,
+					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Slot, 0,
 						DragObject->Data);
 				}
 			}
@@ -1141,27 +1141,27 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 		SetUseObject(TObject(), 0, 0, 0, 0);
 		SetTradeInfo(0);
 		const TObject *Obj = GetBodyObject(Slot);
-		SetTradeObject(*Obj, 0, 0xffff, Slot, 0);
-		SetUseObject(*Obj, 0, 0xffff, Slot, 0);
+		SetTradeObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
+		SetUseObject(*Obj, 0, POSITION_NOT_ON_MAP, Slot, 0);
 		if (Obj->Type != 0) {
 			if (GetClassicControl()) {
-				if ((Flags & 0x200) != 0)
-					SendLook(0xffff, Slot, 0, Obj->Type, 0);
-				else if ((Flags & 0x400) != 0)
-					AddMessage(52, 0, 0);
+				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
+					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
+				else if ((Flags & KEY_CONTROL) != 0)
+					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 				else if (GetObjectFlag(Obj->Type, MULTIUSE))
-					AddMessage(44, 0, 0);
+					AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
-					SendUseObject(0xffff, Slot, 0, Obj->Type, 0, GetFreeContainer());
+					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, GetFreeContainer());
 			} else {
-				if ((Flags & 0x200) != 0)
-					SendLook(0xffff, Slot, 0, Obj->Type, 0);
-				else if ((Flags & 0x400) == 0)
-					AddMessage(52, 0, 0);
+				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
+					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
+				else if ((Flags & KEY_CONTROL) == 0)
+					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 				else if (GetObjectFlag(Obj->Type, MULTIUSE))
-					AddMessage(44, 0, 0);
+					AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
-					SendUseObject(0xffff, Slot, 0, Obj->Type, 0, GetFreeContainer());
+					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, GetFreeContainer());
 			}
 		}
 	}
@@ -1204,40 +1204,40 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 	AttackModes.reset(new TRadioButtonGroup);
 	ChaseModes.reset(new TRadioButtonGroup);
 	SetSize(Layout.Width, Layout.Height);
-	TSkinButton *Offensive = new TSkinButton(Layout.Buttons[0].x, Layout.Buttons[0].y, 103, 104, TCallback(this, 100),
+	TSkinButton *Offensive = new TSkinButton(Layout.Buttons[0].x, Layout.Buttons[0].y, 103, 104, TCallback(this, EVENT_ATTACK_OFFENSIVE),
 		TextOffensiveFighting, false);
 	Offensive->SetRadioButtonGroup(AttackModes.get());
 	InsertChild(Offensive);
-	TSkinButton *Balanced = new TSkinButton(Layout.Buttons[1].x, Layout.Buttons[1].y, 105, 106, TCallback(this, 101),
+	TSkinButton *Balanced = new TSkinButton(Layout.Buttons[1].x, Layout.Buttons[1].y, 105, 106, TCallback(this, EVENT_ATTACK_BALANCED),
 		TextBalancedFighting, false);
 	Balanced->SetRadioButtonGroup(AttackModes.get());
 	InsertChild(Balanced);
-	TSkinButton *Defensive = new TSkinButton(Layout.Buttons[2].x, Layout.Buttons[2].y, 107, 108, TCallback(this, 102),
+	TSkinButton *Defensive = new TSkinButton(Layout.Buttons[2].x, Layout.Buttons[2].y, 107, 108, TCallback(this, EVENT_ATTACK_DEFENSIVE),
 		TextDefensiveFighting, false);
 	Defensive->SetRadioButtonGroup(AttackModes.get());
 	InsertChild(Defensive);
-	StandButton = new TSkinButton(Layout.Buttons[3].x, Layout.Buttons[3].y, 109, 110, TCallback(this, 103),
+	StandButton = new TSkinButton(Layout.Buttons[3].x, Layout.Buttons[3].y, 109, 110, TCallback(this, EVENT_CHASE_STAND),
 		TextStandWhileFighting, false);
 	StandButton->SetRadioButtonGroup(ChaseModes.get());
 	InsertChild(StandButton);
-	ChaseButton = new TSkinButton(Layout.Buttons[4].x, Layout.Buttons[4].y, 111, 112, TCallback(this, 104),
+	ChaseButton = new TSkinButton(Layout.Buttons[4].x, Layout.Buttons[4].y, 111, 112, TCallback(this, EVENT_CHASE_ON),
 		TextChaseOpponent, false);
 	ChaseButton->SetRadioButtonGroup(ChaseModes.get());
 	InsertChild(ChaseButton);
-	SecureButton = new TToggleButton(Layout.Buttons[5].x, Layout.Buttons[5].y, 113, 114, TCallback(this, 105),
+	SecureButton = new TToggleButton(Layout.Buttons[5].x, Layout.Buttons[5].y, 113, 114, TCallback(this, EVENT_SECURE_MODE),
 		TextCannotAttackUnmarked, TextCanAttackAny, false);
 	InsertChild(SecureButton);
-	InsertChild(new TTextButton(Layout.Buttons[6].x, Layout.Buttons[6].y, "Stop", TCallback(Receiver, 32),
+	InsertChild(new TTextButton(Layout.Buttons[6].x, Layout.Buttons[6].y, "Stop", TCallback(Receiver, EVENT_STOP),
 		TextStopCurrentAction));
 	if (!IsLarge) {
-		InsertChild(new TSkinButton(Layout.Buttons[7].x, Layout.Buttons[7].y, 115, 116, TCallback(Receiver, 8),
+		InsertChild(new TSkinButton(Layout.Buttons[7].x, Layout.Buttons[7].y, 115, 116, TCallback(Receiver, EVENT_OPTIONS),
 			TextOpenOptions, false));
-		InsertChild(new TSkinButton(Layout.Buttons[8].x, Layout.Buttons[8].y, 117, 118, TCallback(Receiver, 701),
+		InsertChild(new TSkinButton(Layout.Buttons[8].x, Layout.Buttons[8].y, 117, 118, TCallback(Receiver, EVENT_HELP),
 			TextOpenHelpMenu, false));
 	} else {
-		InsertChild(new TTextButton(Layout.Buttons[7].x, Layout.Buttons[7].y, "Options", TCallback(Receiver, 8),
+		InsertChild(new TTextButton(Layout.Buttons[7].x, Layout.Buttons[7].y, "Options", TCallback(Receiver, EVENT_OPTIONS),
 			TextOpenOptions));
-		InsertChild(new TTextButton(Layout.Buttons[8].x, Layout.Buttons[8].y, "Help", TCallback(Receiver, 701),
+		InsertChild(new TTextButton(Layout.Buttons[8].x, Layout.Buttons[8].y, "Help", TCallback(Receiver, EVENT_HELP),
 			TextOpenHelpMenu));
 	}
 	switch (GetAttackMode()) {
@@ -1305,22 +1305,22 @@ bool TCombatControls::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int
 void TCombatControls::HandleEvent(int Event)
 {
 	switch (Event) {
-	case 102:
+	case EVENT_ATTACK_DEFENSIVE:
 		SetAttackMode(3);
 		break;
-	case 101:
+	case EVENT_ATTACK_BALANCED:
 		SetAttackMode(2);
 		break;
-	case 100:
+	case EVENT_ATTACK_OFFENSIVE:
 		SetAttackMode(1);
 		break;
-	case 103:
+	case EVENT_CHASE_STAND:
 		SetChaseMode(0);
 		break;
-	case 104:
+	case EVENT_CHASE_ON:
 		SetChaseMode(1);
 		break;
-	case 105:
+	case EVENT_SECURE_MODE:
 		SetSecureMode(!SecureButton->State);
 		break;
 	default:
@@ -1469,7 +1469,7 @@ void TContainerWindowBody::Draw(int Surface, int x, int y)
 							SkinProperties().Data638.height + SlotY + y, 32, GetContainerContent(Container, i),
 							TRGBColor(0, 0, 0), TRect(ScreenX, ScreenY, SlotWidth, ClipHeight), SkinProperties().Data498,
 							false);
-					if (GetActionState() == 6 && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
+					if (GetActionState() == ACTIONSTATE_DRAGGING && In(GetMouseX(), ScreenX, ScreenX + SlotWidth - 1)
 						&& In(GetMouseY(), ScreenY, ScreenY + ClipHeight - 1))
 						GetSurface()->DrawFrameClipped(Surface,
 							TRect(SkinProperties().Data630.x + SlotX + x,
@@ -1537,7 +1537,7 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 		if (Position != -1) {
 			const TObject Obj = GetContainerContent(Container, Position);
 			if (Obj.Type != 0)
-				SetDragObject(Obj, Position, 0xffff, Container + 0x40, Position);
+				SetDragObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 		}
 	}
 	return true;
@@ -1548,7 +1548,7 @@ bool TContainerWindowBody::LeftButtonDown(int x, int y, int Flags)
 bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
-		if (GetActionState() == 7) {
+		if (GetActionState() == ACTIONSTATE_USE_WITH) {
 			const int Position = GetSlotAt(x, y, true);
 			if (Position != -1) {
 				const TObject Obj = GetContainerContent(Container, Position);
@@ -1557,26 +1557,26 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
 					PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-					SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, 0xffff, Container + 0x40, Position,
+					SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						Obj.Type, Position);
 				}
 			}
-		} else if (GetActionState() == 8) {
+		} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
 			SetStatusMessage("Select a player to trade with.", false);
-		} else if (GetActionState() == 6) {
+		} else if (GetActionState() == ACTIONSTATE_DRAGGING) {
 			const int Position = GetSlotAt(x, y, false);
 			int DragIndex, DragX, DragY, DragZ;
 			const TObject *DragObject = GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
-			if (DragX != 0xffff || DragY != Container + 0x40 || DragZ != Position) {
-				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & 0x200) != 0) {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, 0xffff, Container + 0x40, Position,
+			if (DragX != POSITION_NOT_ON_MAP || DragY != Container + POSITION_CONTAINER_BASE || DragZ != Position) {
+				if (!GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
+					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						1);
 				} else if (AsksForCount(Flags)) {
-					SetDragTarget(0xffff, Container + 0x40, Position);
-					AddMessage(13, 0, 0);
+					SetDragTarget(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, 0xffff, Container + 0x40, Position,
+					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						DragObject->Data);
 				}
 			}
@@ -1599,28 +1599,28 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 		SetUseObject(TObject(), 0, 0, 0, 0);
 		SetTradeInfo(0);
 		const TObject Obj = GetContainerContent(Container, Position);
-		SetTradeObject(Obj, Position, 0xffff, Container + 0x40, Position);
-		SetUseObject(Obj, Position, 0xffff, Container + 0x40, Position);
+		SetTradeObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
+		SetUseObject(Obj, Position, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 		if (Obj.Type == 0)
 			return true;
 		if (GetClassicControl()) {
-			if ((Flags & 0x200) != 0)
-				SendLook(0xffff, Container + 0x40, Position, Obj.Type, Position);
-			else if ((Flags & 0x400) != 0)
-				AddMessage(52, 0, 0);
+			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
+				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
+			else if ((Flags & KEY_CONTROL) != 0)
+				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			else if (GetObjectFlag(Obj.Type, MULTIUSE))
-				AddMessage(44, 0, 0);
+				AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
-				SendUseObject(0xffff, Container + 0x40, Position, Obj.Type, Position, Container);
+				SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
 		} else {
-			if ((Flags & 0x200) != 0)
-				SendLook(0xffff, Container + 0x40, Position, Obj.Type, Position);
-			else if ((Flags & 0x400) == 0)
-				AddMessage(52, 0, 0);
+			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
+				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
+			else if ((Flags & KEY_CONTROL) == 0)
+				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			else if (GetObjectFlag(Obj.Type, MULTIUSE))
-				AddMessage(44, 0, 0);
+				AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
-				SendUseObject(0xffff, Container + 0x40, Position, Obj.Type, Position, Container);
+				SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
 		}
 	}
 	return true;
@@ -1649,7 +1649,7 @@ bool TContainerWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]
 // container is in, once.
 void TContainerWindowBody::HandleEvent(int Event)
 {
-	if (Event == 3 && HasParent) {
+	if (Event == EVENT_CONTAINER_UP && HasParent) {
 		HasParent = false;
 		SendContainerUp(Container);
 	}
@@ -1876,7 +1876,7 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 // 0x42eb70, line 2144. Opens the skill menu (Control.cpp's message 60).
 bool TSkillsWindowBody::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
-	AddMessage(60, reinterpret_cast<std::intptr_t>(this), 0);
+	AddMessage(MESSAGE_SKILL_MENU, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }
 
@@ -2247,7 +2247,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 		if (Position != -1) {
 			const TCreature *Creature = GetOpponent(Position);
 			if (Creature != nullptr) {
-				if (GetActionState() == 7) {
+				if (GetActionState() == ACTIONSTATE_USE_WITH) {
 					int SrcIndex, SrcX, SrcY, SrcZ;
 					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
@@ -2257,7 +2257,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 						return true;
 					}
 					SetStatusMessage("You are not allowed to shoot directly on players.", false);
-				} else if (GetActionState() == 8) {
+				} else if (GetActionState() == ACTIONSTATE_TRADE_WITH) {
 					int TradeIndex, TradeX, TradeY, TradeZ;
 					const TObject &Obj = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 					PATELLA_ASSERT(Obj!=0);
@@ -2266,11 +2266,11 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 						return true;
 					}
 					SetStatusMessage("Select a player to trade with.", false);
-				} else if (GetActionState() != 6) {
+				} else if (GetActionState() != ACTIONSTATE_DRAGGING) {
 					if (Flags != 0)
 						RightButtonUp(x, y, Flags);
 					else
-						RightButtonUp(x, y, 0x800);
+						RightButtonUp(x, y, KEY_ALT);
 				}
 			}
 		}
@@ -2287,14 +2287,14 @@ bool TBattleWindowBody::RightButtonUp(int x, int y, int Flags)
 		if (Position != -1) {
 			const TCreature *Creature = GetOpponent(Position);
 			if (Creature != nullptr) {
-				if ((Flags & 0x800) != 0) {
+				if ((Flags & KEY_ALT) != 0) {
 					const uint32 AttackID = GetAttackID();
 					SetAttackID(Creature->CreatureID == AttackID ? 0 : Creature->CreatureID);
 					SendAttack(GetAttackID());
-				} else if ((Flags & 0x200) != 0) {
+				} else if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendLook(Creature->RealX, Creature->RealY, Creature->RealZ, CREATURE, 0);
 				} else {
-					AddMessage(53, Creature->CreatureID, 0);
+					AddMessage(MESSAGE_CREATURE_MENU, Creature->CreatureID, 0);
 				}
 			}
 		}
@@ -2473,8 +2473,8 @@ void TTradeOffers::Arrange()
 // 0x43b710, line 2801. A click on an object of either offer inspects it.
 bool TTradeOffers::LeftButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::LeftButtonUp(x, y, Flags) && GetActionState() != 6 && GetActionState() != 7
-		&& GetActionState() != 8) {
+	if (!TWindow::LeftButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
+		&& GetActionState() != ACTIONSTATE_TRADE_WITH) {
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
@@ -2493,8 +2493,8 @@ bool TTradeOffers::LeftButtonDown(int x, int y, int Flags)
 // 0x43b900, line 2831
 bool TTradeOffers::RightButtonUp(int x, int y, int Flags)
 {
-	if (!TWindow::RightButtonUp(x, y, Flags) && GetActionState() != 6 && GetActionState() != 7
-		&& GetActionState() != 8) {
+	if (!TWindow::RightButtonUp(x, y, Flags) && GetActionState() != ACTIONSTATE_DRAGGING && GetActionState() != ACTIONSTATE_USE_WITH
+		&& GetActionState() != ACTIONSTATE_TRADE_WITH) {
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
@@ -2761,7 +2761,7 @@ int TTradeWindowBody::GetMaximumHeight()
 // UpdateTrade); event 1: "Accept".
 void TTradeWindowBody::HandleEvent(int Event)
 {
-	if (Event == 21) {
+	if (Event == EVENT_TRADE_COUNTER_OFFER) {
 		Buttons->ShowAcceptButton(this);
 		Arrange();
 	} else if (Event == 1) {
@@ -2855,7 +2855,7 @@ bool TBuddylistWindowBody::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
 		const int Position = GetBuddyAt(x, y);
-		AddMessage(54, Position == -1 ? 0 : GetBuddyListID(Position), 0);
+		AddMessage(MESSAGE_BUDDY_MENU, Position == -1 ? 0 : GetBuddyListID(Position), 0);
 	}
 	return true;
 }
