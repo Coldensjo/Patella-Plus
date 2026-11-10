@@ -811,7 +811,7 @@ void TReconnectWindow::HandleEvent(int Event)
 			TimeLabel->SetText(Text, false);
 		} else if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
 			AddMessage(MESSAGE_RECONNECT, 0, 0);
-			SendLogout();
+			Communication().SendLogout();
 		} else {
 			AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
 			AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
@@ -979,7 +979,7 @@ void TCharacterListDialog::HandleEvent(int Event)
 			Session().SetActiveCharacter(Selection);
 			if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
 				AddMessage(MESSAGE_RECONNECT, 0, 0);
-				SendLogout();
+				Communication().SendLogout();
 			} else {
 				AddMessage(MESSAGE_CONNECT_GAME_SERVER, 0, 0);
 				AddMessage(MESSAGE_CONNECTING_GAME_DIALOG, 0, 0);
@@ -1065,8 +1065,8 @@ void TMoveObjectsDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const int Count = ScrollBar->Range->Value;
 		if (Count > 0)
-			SendMoveObject(SourceX, SourceY, SourceZ, DraggedObject.Type, SourceIndex, DestinationX, DestinationY,
-				DestinationZ, Count);
+			Communication().SendMoveObject(SourceX, SourceY, SourceZ, DraggedObject.Type, SourceIndex, DestinationX,
+				DestinationY, DestinationZ, Count);
 	}
 	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
@@ -1168,7 +1168,7 @@ void TOutfitDialog::HandleEvent(int Event)
 		OutfitIcon->SetOutfit(Outfit);
 		OutfitIcon->Arrange();
 	} else if (Event == 1) {
-		SendOutfit(Outfit, Colors.data());
+		Communication().SendOutfit(Outfit, Colors.data());
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 	} else if (Event == EVENT_CANCEL) {
 		Interaction().SetActionState(ACTIONSTATE_NONE);
@@ -1207,7 +1207,7 @@ TTextDialog::TTextDialog(int MaximumLength, const char *Text, uint32 _ObjectNumb
 void TTextDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
-		SendEditText(ObjectNumber, EditText->Text.get());
+		Communication().SendEditText(ObjectNumber, EditText->Text.get());
 	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
@@ -1246,7 +1246,7 @@ void TEditListDialog::Arrange()
 void TEditListDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
-		SendEditHouseText(Type, Identifier, EditText->Text.get());
+		Communication().SendEditHouseText(Type, Identifier, EditText->Text.get());
 	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
 
@@ -1607,7 +1607,7 @@ void TBugReportDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const char *Text = EditText->Text.get();
 		if (strlen(Text) != 0)
-			SendBugReport(Text);
+			Communication().SendBugReport(Text);
 	}
 	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
@@ -1671,7 +1671,7 @@ void TNewChannelDialog::HandleEvent(int Event)
 			if (CompareStrings(Creature->Name, Name, -1) == 0)
 				SetStatusMessage(TextNoPrivateChannelWithYourself, false);
 			else
-				SendOpenPrivateConversation(Name);
+				Communication().SendOpenPrivateConversation(Name);
 		} else {
 			Event = EVENT_NEW_CHANNEL_JOIN;
 		}
@@ -1681,9 +1681,9 @@ void TNewChannelDialog::HandleEvent(int Event)
 		if (Selection != -1) {
 			const int ChannelID = ChannelIDs[Selection];
 			if (ChannelID == CHANNEL_NEW_PRIVATE)
-				SendOpenPrivateChannel();
+				Communication().SendOpenPrivateChannel();
 			else
-				SendJoinChannel(ChannelID);
+				Communication().SendJoinChannel(ChannelID);
 		}
 	}
 	Interaction().SetActionState(ACTIONSTATE_NONE);
@@ -1721,9 +1721,9 @@ void TPrivateChannelDialog::HandleEvent(int Event)
 		const char *Name = NameEdit->Text.get();
 		if (strlen(Name) != 0) {
 			if (!Exclude)
-				SendInviteToPrivateChannel(Name);
+				Communication().SendInviteToPrivateChannel(Name);
 			else
-				SendExcludeFromPrivateChannel(Name);
+				Communication().SendExcludeFromPrivateChannel(Name);
 		}
 	}
 	Interaction().SetActionState(ACTIONSTATE_NONE);
@@ -1796,7 +1796,7 @@ void TAddBuddyDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const char *Name = NameEdit->Text.get();
 		if (strlen(Name) != 0)
-			SendAddBuddy(Name);
+			Communication().SendAddBuddy(Name);
 	}
 	Interaction().SetActionState(ACTIONSTATE_NONE);
 }
@@ -1937,7 +1937,7 @@ void THelpDialog::HandleEvent(int Event)
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_TUTOR_HELP:
-		SendJoinChannel(7);
+		Communication().SendJoinChannel(7);
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_REPORT:
@@ -2124,7 +2124,7 @@ void TRuleViolationDialog::HandleEvent(int Event)
 		}
 		if (Valid) {
 			const uint32 ID = StatementEdit->IsDisabled() ? 0 : StatementID;
-			SendRuleViolationReport(NameEdit->Text.get(), Reason, Action, CommentEdit->Text.get(), ID,
+			Communication().SendRuleViolationReport(NameEdit->Text.get(), Reason, Action, CommentEdit->Text.get(), ID,
 				IPBanishment->IsChecked());
 		}
 		break;

@@ -491,49 +491,50 @@ void TObjectContextMenu::HandleEvent(int Event)
 {
 	switch (Event) {
 	case EVENT_MENU_LOOK:
-		SendLook(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type, LookedObjectIndex);
+		Communication().SendLook(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type, LookedObjectIndex);
 		break;
 	case EVENT_MENU_USE:
-		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, 0);
+		Communication().SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, 0);
 		break;
 	case EVENT_MENU_USE_WITH:
 		AddMessage(MESSAGE_USE_WITH, 0, 0);
 		break;
 	case EVENT_MENU_ROTATE:
-		SendRotateObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex);
+		Communication().SendRotateObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex);
 		break;
 	case EVENT_MENU_ATTACK:
 		Creatures().SetAttackID(CreatureID);
-		SendAttack(CreatureID);
+		Communication().SendAttack(CreatureID);
 		break;
 	case EVENT_MENU_STOP_ATTACK:
 		Creatures().SetAttackID(0);
-		SendAttack(0);
+		Communication().SendAttack(0);
 		break;
 	case EVENT_MENU_FOLLOW:
 		Creatures().SetFollowID(CreatureID);
-		SendFollow(CreatureID);
+		Communication().SendFollow(CreatureID);
 		break;
 	case EVENT_MENU_STOP_FOLLOW:
 		Creatures().SetFollowID(0);
-		SendFollow(0);
+		Communication().SendFollow(0);
 		break;
 	case EVENT_MENU_SET_OUTFIT:
-		SendRequestOutfit();
+		Communication().SendRequestOutfit();
 		break;
 	case EVENT_MENU_MOVE_UP:
 		PATELLA_ASSERT_VALUES(LookedObjectX==0xFFFF, LookedObjectX);
 		PATELLA_ASSERT(LookedObject.Type!=CREATURE);
-		SendMoveObject(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type, LookedObjectIndex,
+		Communication().SendMoveObject(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type,
+			LookedObjectIndex,
 			LookedObjectX, LookedObjectY, POSITION_PARENT_CONTAINER, ObjectTypes().GetObjectFlag(LookedObject, CUMULATIVE) ? LookedObject.Data : 1);
 		break;
 	case EVENT_MENU_OPEN:
 		PATELLA_ASSERT_VALUES(UsedObjectX==0xFFFF, UsedObjectX);
 		PATELLA_ASSERT_VALUES(UsedObjectY>=64, UsedObjectY);
-		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, UsedObjectY - POSITION_CONTAINER_BASE);
+		Communication().SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, UsedObjectY - POSITION_CONTAINER_BASE);
 		break;
 	case EVENT_MENU_OPEN_NEW_WINDOW:
-		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex,
+		Communication().SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex,
 			Inventory().GetFreeContainer());
 		break;
 	case EVENT_MENU_TRADE_WITH:
@@ -542,19 +543,19 @@ void TObjectContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_ADD_VIP: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendAddBuddy(Creature->Name);
+			Communication().SendAddBuddy(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_INVITE_PRIVATE: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendInviteToPrivateChannel(Creature->Name);
+			Communication().SendInviteToPrivateChannel(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_PRIVATE_MESSAGE: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendOpenPrivateConversation(Creature->Name);
+			Communication().SendOpenPrivateConversation(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_IGNORE: {
@@ -576,29 +577,29 @@ void TObjectContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_INVITE_PARTY: {
 		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendInviteToParty(Creature->CreatureID);
+			Communication().SendInviteToParty(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_JOIN_PARTY: {
 		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendJoinParty(Creature->CreatureID);
+			Communication().SendJoinParty(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_REVOKE_PARTY_INVITE: {
 		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendRevokePartyInvitation(Creature->CreatureID);
+			Communication().SendRevokePartyInvitation(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_PASS_PARTY_LEADER: {
 		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendPassPartyLeadership(Creature->CreatureID);
+			Communication().SendPassPartyLeadership(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_LEAVE_PARTY:
-		SendLeaveParty();
+		Communication().SendLeaveParty();
 		break;
 	case EVENT_MENU_RULE_VIOLATION: {
 		// The rule violation dialog gets a copy of the name (Control.cpp
@@ -694,36 +695,36 @@ void TCreatureContextMenu::HandleEvent(int Event)
 	switch (Event) {
 	case EVENT_MENU_ATTACK:
 		Creatures().SetAttackID(CreatureID);
-		SendAttack(CreatureID);
+		Communication().SendAttack(CreatureID);
 		break;
 	case EVENT_MENU_STOP_ATTACK:
 		Creatures().SetAttackID(0);
-		SendAttack(0);
+		Communication().SendAttack(0);
 		break;
 	case EVENT_MENU_FOLLOW:
 		Creatures().SetFollowID(CreatureID);
-		SendFollow(CreatureID);
+		Communication().SendFollow(CreatureID);
 		break;
 	case EVENT_MENU_STOP_FOLLOW:
 		Creatures().SetFollowID(0);
-		SendFollow(0);
+		Communication().SendFollow(0);
 		break;
 	case EVENT_MENU_ADD_VIP: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendAddBuddy(Creature->Name);
+			Communication().SendAddBuddy(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_INVITE_PRIVATE: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendInviteToPrivateChannel(Creature->Name);
+			Communication().SendInviteToPrivateChannel(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_PRIVATE_MESSAGE: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendOpenPrivateConversation(Creature->Name);
+			Communication().SendOpenPrivateConversation(Creature->Name);
 		break;
 	}
 	case EVENT_MENU_IGNORE: {
@@ -745,25 +746,25 @@ void TCreatureContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_INVITE_PARTY: {
 		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendInviteToParty(Creature->CreatureID);
+			Communication().SendInviteToParty(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_JOIN_PARTY: {
 		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendJoinParty(Creature->CreatureID);
+			Communication().SendJoinParty(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_REVOKE_PARTY_INVITE: {
 		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendRevokePartyInvitation(Creature->CreatureID);
+			Communication().SendRevokePartyInvitation(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_PASS_PARTY_LEADER: {
 		const TCreature *Creature = Creatures().GetCreature(CreatureID);
 		if (Creature != nullptr)
-			SendPassPartyLeadership(Creature->CreatureID);
+			Communication().SendPassPartyLeadership(Creature->CreatureID);
 		break;
 	}
 	case EVENT_MENU_RULE_VIOLATION: {
@@ -837,7 +838,7 @@ void TBuddyContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_INVITE_PRIVATE: {
 		const int Position = Creatures().GetBuddyPosition(CharacterID);
 		if (Position != -1)
-			SendInviteToPrivateChannel(Creatures().GetBuddyListName(Position));
+			Communication().SendInviteToPrivateChannel(Creatures().GetBuddyListName(Position));
 		break;
 	}
 	case EVENT_MENU_COPY_NAME: {
@@ -848,7 +849,7 @@ void TBuddyContextMenu::HandleEvent(int Event)
 	}
 	case EVENT_MENU_REMOVE_VIP:
 		Creatures().RemoveBuddy(CharacterID);
-		SendRemoveBuddy(CharacterID);
+		Communication().SendRemoveBuddy(CharacterID);
 		break;
 	case EVENT_MENU_NEW_VIP:
 		AddMessage(MESSAGE_ADD_BUDDY_DIALOG, 0, 0);
@@ -859,7 +860,7 @@ void TBuddyContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_MESSAGE_VIP: {
 		const int Position = Creatures().GetBuddyPosition(CharacterID);
 		if (Position != -1)
-			SendOpenPrivateConversation(Creatures().GetBuddyListName(Position));
+			Communication().SendOpenPrivateConversation(Creatures().GetBuddyListName(Position));
 		break;
 	}
 	case EVENT_MENU_SORT_BY_NAME:
@@ -947,7 +948,7 @@ void TTextContextMenu::HandleEvent(int Event)
 	switch (Event) {
 	case EVENT_MENU_PRIVATE_MESSAGE:
 		if (Speaker != nullptr)
-			SendOpenPrivateConversation(Speaker);
+			Communication().SendOpenPrivateConversation(Speaker);
 		break;
 	case EVENT_MENU_IGNORE:
 		if (Speaker != nullptr) {
@@ -966,15 +967,15 @@ void TTextContextMenu::HandleEvent(int Event)
 		break;
 	case EVENT_MENU_INVITE_PRIVATE:
 		if (Speaker != nullptr)
-			SendInviteToPrivateChannel(Speaker);
+			Communication().SendInviteToPrivateChannel(Speaker);
 		break;
 	case EVENT_MENU_EXCLUDE_PRIVATE:
 		if (Speaker != nullptr)
-			SendExcludeFromPrivateChannel(Speaker);
+			Communication().SendExcludeFromPrivateChannel(Speaker);
 		break;
 	case EVENT_MENU_ADD_VIP:
 		if (Speaker != nullptr)
-			SendAddBuddy(Speaker);
+			Communication().SendAddBuddy(Speaker);
 		break;
 	case EVENT_MENU_COPY_NAME:
 		if (Speaker != nullptr)
@@ -1048,11 +1049,11 @@ void TRequestContextMenu::HandleEvent(int Event)
 			TextBuffer->Clear();
 			AddTextBufferLine(TextBuffer, Line->StatementID, Line->Text, TALK_PLAYER_ANSWER, Name, 0);
 			TextBuffer->SetWriteEnabled(true);
-			SendProcessRuleViolation(Name);
+			Communication().SendProcessRuleViolation(Name);
 			break;
 		}
 		case EVENT_MENU_REMOVE_REPORT:
-			SendCloseRuleViolation(Name);
+			Communication().SendCloseRuleViolation(Name);
 			break;
 		case EVENT_MENU_COPY_NAME:
 			Interaction().CopyToClipboard(Name);
@@ -1210,10 +1211,10 @@ void TMarkContextMenu::HandleEvent(int Event)
 		if (Data.Mark.x != 0 && Data.Mark.y != 0) {
 			switch (PlayerState().SetPlayerDestination(Data.Mark.x, Data.Mark.y, Data.Coordinate.z, false, false)) {
 			case 1:
-				SendWalk();
+				Communication().SendWalk();
 				break;
 			case 2:
-				SendStopWalk();
+				Communication().SendStopWalk();
 				break;
 			default:
 				break;

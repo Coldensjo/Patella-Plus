@@ -720,18 +720,18 @@ static_assert(std::is_nothrow_destructible_v<TTab> && std::is_nothrow_destructib
 void TTab::OnClose()
 {
 	if (TextBuffer->IsRuleViolation() && TextBuffer->GetReceiveTalkMode() == TALK_GAMEMASTER_ANSWER) {
-		SendCancelRuleViolation();
+		Communication().SendCancelRuleViolation();
 	} else if (TextBuffer->IsRuleViolation() && TextBuffer->GetReceiveTalkMode() == TALK_PLAYER_ANSWER
 		&& TextBuffer->CanWrite()) {
 		const char *PlayerName = TextBuffer->GetAddressee();
 		PATELLA_ASSERT(PlayerName!=nullptr);
-		SendCloseRuleViolation(PlayerName);
+		Communication().SendCloseRuleViolation(PlayerName);
 	} else if (!TextBuffer->IsPrivateChannel()) {
 		if (TextBuffer->GetChannelID() != -1)
-			SendLeaveChannel(TextBuffer->GetChannelID());
+			Communication().SendLeaveChannel(TextBuffer->GetChannelID());
 	} else if (!TextBuffer->IsSelected() || TextBuffer->IsLocked()) {
 		if (TextBuffer->CanWrite())
-			SendLeaveChannel(TextBuffer->GetChannelID());
+			Communication().SendLeaveChannel(TextBuffer->GetChannelID());
 	}
 	Talk().DeleteTextBuffer(TextBuffer);
 	TextBuffer = nullptr;
@@ -1188,7 +1188,7 @@ TConsoleWindow::TConsoleWindow()
 	int *Channels;
 	const int Count = Preferences().GetOpenChannels(&Channels);
 	for (int i = 0; i < Count; i++)
-		SendJoinChannel(Channels[i]);
+		Communication().SendJoinChannel(Channels[i]);
 	if (Count > 0)
 		delete[] Channels;
 }
@@ -1468,7 +1468,7 @@ void TConsoleWindow::HandleEvent(int Event)
 		AddMessage(MESSAGE_IGNORE_LIST_DIALOG, 0, 0);
 		break;
 	case EVENT_REQUEST_CHANNELS:
-		SendRequestChannels();
+		Communication().SendRequestChannels();
 		break;
 	case EVENT_VOLUME_SAY:
 		TalkMode = TALK_SAY;
@@ -1670,7 +1670,7 @@ void TConsoleWindow::ReportRuleViolation(const char *Question)
 	AddTextBufferLine(TextBuffer, 0, Question, TALK_PLAYER_ANSWER,
 		Creatures().GetCreature(PlayerState().GetPlayerID())->Name, 0);
 	AddTextBufferLine(TextBuffer, 0, TextWaitForGamemaster, TALK_ADMIN_MESSAGE, nullptr, 0);
-	SendTalk(TALK_GAMEMASTER_REQUEST, Question);
+	Communication().SendTalk(TALK_GAMEMASTER_REQUEST, Question);
 	TextBuffer->SetWriteEnabled(false);
 }
 
@@ -1731,9 +1731,9 @@ void TConsoleWindow::SendInput()
 	}
 	if (Talk().HasOwnPrivateChannel() && Text != nullptr && strlen(Text) != 0) {
 		if (MessageSeparator == 'I')
-			SendInviteToPrivateChannel(Text);
+			Communication().SendInviteToPrivateChannel(Text);
 		if (MessageSeparator == 'X')
-			SendExcludeFromPrivateChannel(Text);
+			Communication().SendExcludeFromPrivateChannel(Text);
 	}
 	if (Text != nullptr) {
 		switch (TalkMode) {
@@ -1744,7 +1744,7 @@ void TConsoleWindow::SendInput()
 		case TALK_YELL:
 		case TALK_GAMEMASTER_BROADCAST:
 		case TALK_ANONYMOUS_BROADCAST:
-			SendTalk(TalkMode, Text);
+			Communication().SendTalk(TalkMode, Text);
 			break;
 		case TALK_PRIVATE_MESSAGE:
 		case TALK_GAMEMASTER_MESSAGE:
@@ -1754,24 +1754,24 @@ void TConsoleWindow::SendInput()
 			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text, TalkMode,
 				Addressee, ChannelID);
 			if (CompareStrings(Addressee, Creatures().GetCreature(PlayerState().GetPlayerID())->Name, -1) != 0)
-				SendTalk(TalkMode, Addressee, Text);
+				Communication().SendTalk(TalkMode, Addressee, Text);
 			break;
 		case TALK_CHANNEL_CALL:
 		case TALK_GAMEMASTER_CHANNELCALL:
 		case TALK_ANONYMOUS_CHANNELCALL:
 			PATELLA_ASSERT(ChannelID!=-1);
-			SendTalk(TalkMode, ChannelID, Text);
+			Communication().SendTalk(TalkMode, ChannelID, Text);
 			break;
 		case TALK_GAMEMASTER_ANSWER:
 			PATELLA_ASSERT(Addressee!=nullptr);
 			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
-			SendTalk(TALK_GAMEMASTER_ANSWER, Addressee, Text);
+			Communication().SendTalk(TALK_GAMEMASTER_ANSWER, Addressee, Text);
 			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text,
 				TALK_PLAYER_ANSWER, Addressee, -1);
 			break;
 		case TALK_PLAYER_ANSWER:
 			PATELLA_ASSERT_VALUES(Creatures().GetCreature(PlayerState().GetPlayerID()), PlayerState().GetPlayerID());
-			SendTalk(TALK_PLAYER_ANSWER, Text);
+			Communication().SendTalk(TALK_PLAYER_ANSWER, Text);
 			Talk().AddChannelNotice(Creatures().GetCreature(PlayerState().GetPlayerID())->Name, Text,
 				TALK_GAMEMASTER_ANSWER, "", -1);
 			break;

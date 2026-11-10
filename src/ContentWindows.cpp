@@ -595,9 +595,9 @@ bool TAutomapView::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	}
 	const int Result = PlayerState().SetPlayerDestination(Mark.x, Mark.y, Window->ViewZ, false, false);
 	if (Result == 1)
-		SendWalk();
+		Communication().SendWalk();
 	else if (Result == 2)
-		SendStopWalk();
+		Communication().SendStopWalk();
 	return true;
 }
 
@@ -991,12 +991,12 @@ bool TSmallInventoryWindow::LeftButtonUp(int x, int y, int Flags)
 		const TObject *Obj = Interaction().GetDragObject(&Index, &SrcX, &SrcY, &SrcZ);
 		if (!ObjectTypes().GetObjectFlag(Obj->Type, CUMULATIVE) || Obj->Data < 2
 			|| (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
-			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, 1);
+			Communication().SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, 1);
 		} else if (AsksForCount(Flags)) {
 			Interaction().SetDragTarget(POSITION_NOT_ON_MAP, 0, 0);
 			AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 		} else {
-			SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, Obj->Data);
+			Communication().SendMoveObject(SrcX, SrcY, SrcZ, Obj->Type, Index, POSITION_NOT_ON_MAP, 0, 0, Obj->Data);
 		}
 	}
 	return Result;
@@ -1102,7 +1102,8 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 				const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 				PATELLA_ASSERT(SrcObj!=0);
 				PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-				SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
+				Communication().SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Slot, 0,
+					Obj->Type, 0);
 				return true;
 			}
 		} else if (Interaction().GetActionState() == ACTIONSTATE_TRADE_WITH) {
@@ -1113,14 +1114,15 @@ bool TInventoryView::LeftButtonUp(int x, int y, int Flags)
 			const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != POSITION_NOT_ON_MAP || DragY != Slot) {
 				if (!ObjectTypes().GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Slot, 0, 1);
+					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex,
+						POSITION_NOT_ON_MAP, Slot, 0, 1);
 				} else if (AsksForCount(Flags)) {
 					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Slot, 0);
 					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Slot, 0,
-						DragObject->Data);
+					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex,
+						POSITION_NOT_ON_MAP, Slot, 0, DragObject->Data);
 				}
 			}
 		} else if (Flags != 0) {
@@ -1149,22 +1151,24 @@ bool TInventoryView::RightButtonUp(int x, int y, int Flags)
 		if (Obj->Type != 0) {
 			if (Preferences().GetClassicControl()) {
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
-					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
+					Communication().SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) != 0)
 					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 				else if (ObjectTypes().GetObjectFlag(Obj->Type, MULTIUSE))
 					AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
-					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, Inventory().GetFreeContainer());
+					Communication().SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0,
+						Inventory().GetFreeContainer());
 			} else {
 				if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
-					SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
+					Communication().SendLook(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0);
 				else if ((Flags & KEY_CONTROL) == 0)
 					AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 				else if (ObjectTypes().GetObjectFlag(Obj->Type, MULTIUSE))
 					AddMessage(MESSAGE_USE_WITH, 0, 0);
 				else
-					SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0, Inventory().GetFreeContainer());
+					Communication().SendUseObject(POSITION_NOT_ON_MAP, Slot, 0, Obj->Type, 0,
+						Inventory().GetFreeContainer());
 			}
 		}
 	}
@@ -1325,7 +1329,7 @@ void TCombatControls::HandleEvent(int Event)
 	default:
 		return;
 	}
-	SendFightModes();
+	Communication().SendFightModes();
 }
 
 // --- TStatusWindow ----------------------------------------------------------------
@@ -1413,7 +1417,7 @@ TContainerWindowBody::~TContainerWindowBody()
 void TContainerWindowBody::OnClose()
 {
 	try {
-		SendCloseContainer(Container);
+		Communication().SendCloseContainer(Container);
 	} catch (...) {
 		CloseWhileUnwinding([this] { TSubWindowBody::OnClose(); });
 		throw;
@@ -1548,7 +1552,7 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 					const TObject &SrcObj = *Interaction().GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
 					PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-					SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
+					Communication().SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						Obj.Type, Position);
 				}
 			}
@@ -1560,14 +1564,14 @@ bool TContainerWindowBody::LeftButtonUp(int x, int y, int Flags)
 			const TObject *DragObject = Interaction().GetDragObject(&DragIndex, &DragX, &DragY, &DragZ);
 			if (DragX != POSITION_NOT_ON_MAP || DragY != Container + POSITION_CONTAINER_BASE || DragZ != Position) {
 				if (!ObjectTypes().GetObjectFlag(DragObject->Type, CUMULATIVE) || DragObject->Data < 2 || (Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
+					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						1);
 				} else if (AsksForCount(Flags)) {
 					Interaction().SetDragTarget(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position);
 					AddMessage(MESSAGE_MOVE_OBJECTS_DIALOG, 0, 0);
 					return true;
 				} else {
-					SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
+					Communication().SendMoveObject(DragX, DragY, DragZ, DragObject->Type, DragIndex, POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position,
 						DragObject->Data);
 				}
 			}
@@ -1596,22 +1600,24 @@ bool TContainerWindowBody::RightButtonUp(int x, int y, int Flags)
 			return true;
 		if (Preferences().GetClassicControl()) {
 			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
-				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
+				Communication().SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type,
+					Position);
 			else if ((Flags & KEY_CONTROL) != 0)
 				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			else if (ObjectTypes().GetObjectFlag(Obj.Type, MULTIUSE))
 				AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
-				SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
+				Communication().SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
 		} else {
 			if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0)
-				SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position);
+				Communication().SendLook(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type,
+					Position);
 			else if ((Flags & KEY_CONTROL) == 0)
 				AddMessage(MESSAGE_OBJECT_MENU, 0, 0);
 			else if (ObjectTypes().GetObjectFlag(Obj.Type, MULTIUSE))
 				AddMessage(MESSAGE_USE_WITH, 0, 0);
 			else
-				SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
+				Communication().SendUseObject(POSITION_NOT_ON_MAP, Container + POSITION_CONTAINER_BASE, Position, Obj.Type, Position, Container);
 		}
 	}
 	return true;
@@ -1641,7 +1647,7 @@ void TContainerWindowBody::HandleEvent(int Event)
 {
 	if (Event == EVENT_CONTAINER_UP && HasParent) {
 		HasParent = false;
-		SendContainerUp(Container);
+		Communication().SendContainerUp(Container);
 	}
 }
 
@@ -2226,7 +2232,8 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 					PATELLA_ASSERT(SrcObj!=0);
 					PATELLA_ASSERT(SrcObj.Type!=CREATURE);
 					if (!Creatures().IsPlayer(Creature->CreatureID)) {
-						SendUseObjectOnCreature(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, Creature->CreatureID);
+						Communication().SendUseObjectOnCreature(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex,
+							Creature->CreatureID);
 						return true;
 					}
 					SetStatusMessage("You are not allowed to shoot directly on players.", false);
@@ -2235,7 +2242,8 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 					const TObject &Obj = *Interaction().GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 					PATELLA_ASSERT(Obj!=0);
 					if (Creatures().IsPlayer(Creature->CreatureID)) {
-						SendRequestTrade(TradeX, TradeY, TradeZ, Obj.Type, TradeIndex, Creature->CreatureID);
+						Communication().SendRequestTrade(TradeX, TradeY, TradeZ, Obj.Type, TradeIndex,
+							Creature->CreatureID);
 						return true;
 					}
 					SetStatusMessage("Select a player to trade with.", false);
@@ -2263,9 +2271,9 @@ bool TBattleWindowBody::RightButtonUp(int x, int y, int Flags)
 				if ((Flags & KEY_ALT) != 0) {
 					const uint32 AttackID = Creatures().GetAttackID();
 					Creatures().SetAttackID(Creature->CreatureID == AttackID ? 0 : Creature->CreatureID);
-					SendAttack(Creatures().GetAttackID());
+					Communication().SendAttack(Creatures().GetAttackID());
 				} else if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
-					SendLook(Creature->RealX, Creature->RealY, Creature->RealZ, CREATURE, 0);
+					Communication().SendLook(Creature->RealX, Creature->RealY, Creature->RealZ, CREATURE, 0);
 				} else {
 					AddMessage(MESSAGE_CREATURE_MENU, Creature->CreatureID, 0);
 				}
@@ -2443,7 +2451,7 @@ bool TTradeOffers::LeftButtonUp(int x, int y, int Flags)
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
-			SendInspectTrade(Side, Position);
+			Communication().SendInspectTrade(Side, Position);
 	}
 	return true;
 }
@@ -2461,7 +2469,7 @@ bool TTradeOffers::RightButtonUp(int x, int y, int Flags)
 		int Side, Position;
 		GetOfferAt(x, y, &Side, &Position);
 		if (Side != -1)
-			SendInspectTrade(Side, Position);
+			Communication().SendInspectTrade(Side, Position);
 	}
 	return true;
 }
@@ -2643,7 +2651,7 @@ void TTradeWindowBody::OnClose()
 {
 	try {
 		if (Inventory().GetOwnOfferCount() > 0)
-			SendRejectTrade();
+			Communication().SendRejectTrade();
 		Inventory().ClearOffers();
 	} catch (...) {
 		CloseWhileUnwinding([this] { TSubWindowBody::OnClose(); });
@@ -2711,7 +2719,7 @@ void TTradeWindowBody::HandleEvent(int Event)
 		Buttons->ShowAcceptButton(this);
 		Arrange();
 	} else if (Event == 1) {
-		SendAcceptTrade();
+		Communication().SendAcceptTrade();
 		Buttons->Wait();
 		Arrange();
 	}
@@ -2811,7 +2819,7 @@ bool TBuddylistWindowBody::LeftButtonDoubleClick(int x, int y, int Flags)
 	if (!TWindow::LeftButtonDoubleClick(x, y, Flags)) {
 		const int Position = GetBuddyAt(x, y);
 		if (Position != -1)
-			SendOpenPrivateConversation(Creatures().GetBuddyListName(Position));
+			Communication().SendOpenPrivateConversation(Creatures().GetBuddyListName(Position));
 	}
 	return true;
 }

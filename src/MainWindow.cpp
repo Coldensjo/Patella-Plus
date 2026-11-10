@@ -193,10 +193,10 @@ void TMainWindow::KeyPress(int Key)
 	case KEY_PAD_PAGE_DOWN: Walk(1, 1, true); break;
 	case KEY_PAD_HOME: Walk(-1, -1, true); break;
 	case KEY_PAD_PAGE_UP: Walk(1, -1, true); break;
-	case KEY_CONTROL | KEY_UP: SendTurnNorth(); break;
-	case KEY_CONTROL | KEY_LEFT: SendTurnWest(); break;
-	case KEY_CONTROL | KEY_RIGHT: SendTurnEast(); break;
-	case KEY_CONTROL | KEY_DOWN: SendTurnSouth(); break;
+	case KEY_CONTROL | KEY_UP: Communication().SendTurnNorth(); break;
+	case KEY_CONTROL | KEY_LEFT: Communication().SendTurnWest(); break;
+	case KEY_CONTROL | KEY_RIGHT: Communication().SendTurnEast(); break;
+	case KEY_CONTROL | KEY_DOWN: Communication().SendTurnSouth(); break;
 	default:
 		Console->KeyPress(Key);
 		break;
@@ -278,7 +278,7 @@ void TMainWindow::HandleEvent(int Event)
 	case EVENT_STOP:
 		PlayerState().ClearPlayerSteps();
 		Creatures().SetAttackID(0);
-		SendStopAttackAndWalk();
+		Communication().SendStopAttackAndWalk();
 		break;
 	case EVENT_TOGGLE_FULLSCREEN:
 		if (Preferences().GetFullscreenMode()->Width != 0) {
@@ -301,7 +301,7 @@ void TMainWindow::HandleEvent(int Event)
 		break;
 	case EVENT_LOGOUT:
 		Interaction().SetActionState(ACTIONSTATE_NONE);
-		SendLogout();
+		Communication().SendLogout();
 		break;
 	case EVENT_LEAVE_QUESTION: {
 		// A question with an answer event; message 6 deletes the block.
@@ -324,7 +324,7 @@ void TMainWindow::HandleEvent(int Event)
 		AddMessage(MESSAGE_HELP_MODE, 0, 0);
 		break;
 	case EVENT_TUTOR_HELP:
-		SendJoinChannel(7);
+		Communication().SendJoinChannel(7);
 		break;
 	case EVENT_REPORT:
 		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
@@ -522,10 +522,10 @@ void TMainWindow::Walk(int dx, int dy, bool Diagonal)
 	PlayerState().GetPlayerPosition(&x, &y, &z);
 	switch (PlayerState().SetPlayerDestination(x + dx, y + dy, z, true, Diagonal)) {
 	case 1:
-		SendWalk();
+		Communication().SendWalk();
 		break;
 	case 2:
-		SendStopWalk();
+		Communication().SendStopWalk();
 		break;
 	default:
 		break;

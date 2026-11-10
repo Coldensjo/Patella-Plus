@@ -570,7 +570,7 @@ void patella::TGUI::ConnectionEstablished()
 		SetConnectionState(CONNECTION_LOGIN_SENT);
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 		const char *Password = Session().GetAccountPassword();
-		SendLogin(Session().GetAccountNumber(), Password);
+		Communication.SendLogin(Session().GetAccountNumber(), Password);
 		return;
 	}
 	if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER) {
@@ -583,7 +583,7 @@ void patella::TGUI::ConnectionEstablished()
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 		const char *Password = Session().GetAccountPassword();
 		const char *Name = Session().GetCharacterName(GetActiveCharacter());
-		SendGameLogin(Session().GetAccountNumber(), Name, Password);
+		Communication.SendGameLogin(Session().GetAccountNumber(), Name, Password);
 		return;
 	}
 	SetConnectionState(CONNECTION_OFFLINE);
@@ -606,17 +606,17 @@ void patella::TGUI::ReceivePackets()
 			SetConnectionState(CONNECTION_LOGIN_ANSWERED);
 		if (GetConnectionState() == CONNECTION_LOGIN_ANSWERED) {
 			switch (Type) {
-			case LOGIN_RECEIVE_ERROR: ReceiveLoginError(); break;
-			case LOGIN_RECEIVE_MESSAGE: ReceiveLoginMessage(); break;
+			case LOGIN_RECEIVE_ERROR: Communication.ReceiveLoginError(); break;
+			case LOGIN_RECEIVE_MESSAGE: Communication.ReceiveLoginMessage(); break;
 			case LOGIN_RECEIVE_MESSAGE_OF_THE_DAY:
-				ReceiveMessageOfTheDay();
+				Communication.ReceiveMessageOfTheDay();
 				break;
 			// The patch packets (Tibia.exe: ReceivePatch, ReceiveWholeFile, ReceivePatchBlock) end the login.
 			case LOGIN_RECEIVE_PATCH:
 			case LOGIN_RECEIVE_WHOLE_FILE:
-			case LOGIN_RECEIVE_PATCH_BLOCK: ReceiveUpdateRequest(); break;
-			case LOGIN_RECEIVE_SERVER_OVERLOADED: ReceiveLoginServerOverloaded(); break;
-			case LOGIN_RECEIVE_CHARACTER_LIST: ReceiveCharacterList(); break;
+			case LOGIN_RECEIVE_PATCH_BLOCK: Communication.ReceiveUpdateRequest(); break;
+			case LOGIN_RECEIVE_SERVER_OVERLOADED: Communication.ReceiveLoginServerOverloaded(); break;
+			case LOGIN_RECEIVE_CHARACTER_LIST: Communication.ReceiveCharacterList(); break;
 			default:
 				TERROR1("unknown packet type during login", Type);
 			}
@@ -627,84 +627,84 @@ void patella::TGUI::ReceivePackets()
 			case GAME_RECEIVE_LOGIN:
 				SetConnectionState(CONNECTION_IN_GAME);
 				EnterGame();
-				ReceiveGameLogin();
+				Communication.ReceiveGameLogin();
 				AddEventHelp(HINT_FIRST_LOGIN);
-				SendFightModes();
+				Communication.SendFightModes();
 				break;
-			case GAME_RECEIVE_GAMEMASTER_ACTIONS: ReceiveGamemasterActions(); break;
-			case GAME_RECEIVE_ERROR: ReceiveGameError(); break;
-			case GAME_RECEIVE_MESSAGE: ReceiveGameMessage(); break;
-			case GAME_RECEIVE_LOGIN_WAIT: ReceiveLoginWait(); break;
-			case GAME_RECEIVE_PING: ReceivePing(); break;
-			case GAME_RECEIVE_MAP: ReceiveMap(); break;
-			case GAME_RECEIVE_MAP_NORTH: ReceiveMapNorth(); break;
-			case GAME_RECEIVE_MAP_EAST: ReceiveMapEast(); break;
-			case GAME_RECEIVE_MAP_SOUTH: ReceiveMapSouth(); break;
-			case GAME_RECEIVE_MAP_WEST: ReceiveMapWest(); break;
-			case GAME_RECEIVE_FIELD: ReceiveField(); break;
-			case GAME_RECEIVE_ADD_OBJECT: ReceiveAddObject(); break;
-			case GAME_RECEIVE_CHANGE_OBJECT: ReceiveChangeObject(); break;
-			case GAME_RECEIVE_DELETE_OBJECT: ReceiveDeleteObject(); break;
-			case GAME_RECEIVE_MOVE_CREATURE: ReceiveMoveCreature(); break;
+			case GAME_RECEIVE_GAMEMASTER_ACTIONS: Communication.ReceiveGamemasterActions(); break;
+			case GAME_RECEIVE_ERROR: Communication.ReceiveGameError(); break;
+			case GAME_RECEIVE_MESSAGE: Communication.ReceiveGameMessage(); break;
+			case GAME_RECEIVE_LOGIN_WAIT: Communication.ReceiveLoginWait(); break;
+			case GAME_RECEIVE_PING: Communication.ReceivePing(); break;
+			case GAME_RECEIVE_MAP: Communication.ReceiveMap(); break;
+			case GAME_RECEIVE_MAP_NORTH: Communication.ReceiveMapNorth(); break;
+			case GAME_RECEIVE_MAP_EAST: Communication.ReceiveMapEast(); break;
+			case GAME_RECEIVE_MAP_SOUTH: Communication.ReceiveMapSouth(); break;
+			case GAME_RECEIVE_MAP_WEST: Communication.ReceiveMapWest(); break;
+			case GAME_RECEIVE_FIELD: Communication.ReceiveField(); break;
+			case GAME_RECEIVE_ADD_OBJECT: Communication.ReceiveAddObject(); break;
+			case GAME_RECEIVE_CHANGE_OBJECT: Communication.ReceiveChangeObject(); break;
+			case GAME_RECEIVE_DELETE_OBJECT: Communication.ReceiveDeleteObject(); break;
+			case GAME_RECEIVE_MOVE_CREATURE: Communication.ReceiveMoveCreature(); break;
 			case GAME_RECEIVE_OPEN_CONTAINER: {
 				int Container;
-				ReceiveOpenContainer(Container);
+				Communication.ReceiveOpenContainer(Container);
 				MainWindow->OpenContainer(Container);
 				break;
 			}
 			case GAME_RECEIVE_CLOSE_CONTAINER: {
 				int Container;
-				ReceiveCloseContainer(Container);
+				Communication.ReceiveCloseContainer(Container);
 				MainWindow->CloseContainer(Container);
 				break;
 			}
-			case GAME_RECEIVE_CONTAINER_ADD_OBJECT: ReceiveContainerAddObject(); break;
-			case GAME_RECEIVE_CONTAINER_CHANGE_OBJECT: ReceiveContainerChangeObject(); break;
-			case GAME_RECEIVE_CONTAINER_DELETE_OBJECT: ReceiveContainerDeleteObject(); break;
-			case GAME_RECEIVE_INVENTORY_OBJECT: ReceiveInventoryObject(); break;
+			case GAME_RECEIVE_CONTAINER_ADD_OBJECT: Communication.ReceiveContainerAddObject(); break;
+			case GAME_RECEIVE_CONTAINER_CHANGE_OBJECT: Communication.ReceiveContainerChangeObject(); break;
+			case GAME_RECEIVE_CONTAINER_DELETE_OBJECT: Communication.ReceiveContainerDeleteObject(); break;
+			case GAME_RECEIVE_INVENTORY_OBJECT: Communication.ReceiveInventoryObject(); break;
 			case GAME_RECEIVE_DELETE_INVENTORY_OBJECT:
-				ReceiveDeleteInventoryObject();
+				Communication.ReceiveDeleteInventoryObject();
 				break;
 				// clang-format off
-			case GAME_RECEIVE_OWN_TRADE: ReceiveOwnTrade(); MainWindow->OpenTrade(); break;
-			case GAME_RECEIVE_COUNTER_TRADE: ReceiveCounterTrade(); MainWindow->UpdateTrade(); break;
-			case GAME_RECEIVE_CLOSE_TRADE: ReceiveCloseTrade(); MainWindow->CloseTrade(); break;
+			case GAME_RECEIVE_OWN_TRADE: Communication.ReceiveOwnTrade(); MainWindow->OpenTrade(); break;
+			case GAME_RECEIVE_COUNTER_TRADE: Communication.ReceiveCounterTrade(); MainWindow->UpdateTrade(); break;
+			case GAME_RECEIVE_CLOSE_TRADE: Communication.ReceiveCloseTrade(); MainWindow->CloseTrade(); break;
 			// clang-format on
-			case GAME_RECEIVE_WORLD_LIGHT: ReceiveWorldLight(); break;
-			case GAME_RECEIVE_MAGIC_EFFECT: ReceiveMagicEffect(); break;
-			case GAME_RECEIVE_ANIMATED_TEXT: ReceiveAnimatedText(); break;
-			case GAME_RECEIVE_DISTANCE_EFFECT: ReceiveDistanceEffect(); break;
-			case GAME_RECEIVE_CREATURE_MARK: ReceiveCreatureMark(); break;
-			case GAME_RECEIVE_CREATURE_HEALTH: ReceiveCreatureHealth(); break;
-			case GAME_RECEIVE_CREATURE_LIGHT: ReceiveCreatureLight(); break;
-			case GAME_RECEIVE_CREATURE_OUTFIT: ReceiveCreatureOutfit(); break;
-			case GAME_RECEIVE_CREATURE_SPEED: ReceiveCreatureSpeed(); break;
-			case GAME_RECEIVE_CREATURE_SKULL: ReceiveCreatureSkull(); break;
-			case GAME_RECEIVE_CREATURE_SHIELD: ReceiveCreatureShield(); break;
-			case GAME_RECEIVE_EDIT_TEXT: ReceiveEditText(); break;
-			case GAME_RECEIVE_EDIT_HOUSE_TEXT: ReceiveEditHouseText(); break;
-			case GAME_RECEIVE_PLAYER_STATS: ReceivePlayerStats(); break;
-			case GAME_RECEIVE_PLAYER_SKILLS: ReceivePlayerSkills(); break;
-			case GAME_RECEIVE_PLAYER_ICONS: ReceivePlayerIcons(); break;
-			case GAME_RECEIVE_CANCEL_ATTACK: ReceiveCancelAttack(); break;
-			case GAME_RECEIVE_TALK: ReceiveTalk(); break;
-			case GAME_RECEIVE_CHANNEL_LIST: ReceiveChannelList(); break;
-			case GAME_RECEIVE_OPEN_CHANNEL: ReceiveOpenChannel(); break;
-			case GAME_RECEIVE_OPEN_PRIVATE_CONVERSATION: ReceiveOpenPrivateConversation(); break;
-			case GAME_RECEIVE_RULE_VIOLATION_CHANNEL: ReceiveRuleViolationChannel(); break;
-			case GAME_RECEIVE_REMOVE_RULE_VIOLATION: ReceiveRemoveRuleViolation(); break;
-			case GAME_RECEIVE_CANCEL_RULE_VIOLATION: ReceiveCancelRuleViolation(); break;
-			case GAME_RECEIVE_LOCK_RULE_VIOLATION: ReceiveLockRuleViolation(); break;
-			case GAME_RECEIVE_OWN_CHANNEL: ReceiveOwnChannel(); break;
-			case GAME_RECEIVE_CLOSE_CHANNEL: ReceiveCloseChannel(); break;
-			case GAME_RECEIVE_TEXT_MESSAGE: ReceiveTextMessage(); break;
-			case GAME_RECEIVE_CANCEL_WALK: ReceiveCancelWalk(); break;
-			case GAME_RECEIVE_FLOOR_UP: ReceiveFloorUp(); break;
-			case GAME_RECEIVE_FLOOR_DOWN: ReceiveFloorDown(); break;
-			case GAME_RECEIVE_OUTFIT: ReceiveOutfit(); break;
-			case GAME_RECEIVE_BUDDY: ReceiveBuddy(); break;
-			case GAME_RECEIVE_BUDDY_LOGIN: ReceiveBuddyLogin(); break;
-			case GAME_RECEIVE_BUDDY_LOGOUT: ReceiveBuddyLogout(); break;
+			case GAME_RECEIVE_WORLD_LIGHT: Communication.ReceiveWorldLight(); break;
+			case GAME_RECEIVE_MAGIC_EFFECT: Communication.ReceiveMagicEffect(); break;
+			case GAME_RECEIVE_ANIMATED_TEXT: Communication.ReceiveAnimatedText(); break;
+			case GAME_RECEIVE_DISTANCE_EFFECT: Communication.ReceiveDistanceEffect(); break;
+			case GAME_RECEIVE_CREATURE_MARK: Communication.ReceiveCreatureMark(); break;
+			case GAME_RECEIVE_CREATURE_HEALTH: Communication.ReceiveCreatureHealth(); break;
+			case GAME_RECEIVE_CREATURE_LIGHT: Communication.ReceiveCreatureLight(); break;
+			case GAME_RECEIVE_CREATURE_OUTFIT: Communication.ReceiveCreatureOutfit(); break;
+			case GAME_RECEIVE_CREATURE_SPEED: Communication.ReceiveCreatureSpeed(); break;
+			case GAME_RECEIVE_CREATURE_SKULL: Communication.ReceiveCreatureSkull(); break;
+			case GAME_RECEIVE_CREATURE_SHIELD: Communication.ReceiveCreatureShield(); break;
+			case GAME_RECEIVE_EDIT_TEXT: Communication.ReceiveEditText(); break;
+			case GAME_RECEIVE_EDIT_HOUSE_TEXT: Communication.ReceiveEditHouseText(); break;
+			case GAME_RECEIVE_PLAYER_STATS: Communication.ReceivePlayerStats(); break;
+			case GAME_RECEIVE_PLAYER_SKILLS: Communication.ReceivePlayerSkills(); break;
+			case GAME_RECEIVE_PLAYER_ICONS: Communication.ReceivePlayerIcons(); break;
+			case GAME_RECEIVE_CANCEL_ATTACK: Communication.ReceiveCancelAttack(); break;
+			case GAME_RECEIVE_TALK: Communication.ReceiveTalk(); break;
+			case GAME_RECEIVE_CHANNEL_LIST: Communication.ReceiveChannelList(); break;
+			case GAME_RECEIVE_OPEN_CHANNEL: Communication.ReceiveOpenChannel(); break;
+			case GAME_RECEIVE_OPEN_PRIVATE_CONVERSATION: Communication.ReceiveOpenPrivateConversation(); break;
+			case GAME_RECEIVE_RULE_VIOLATION_CHANNEL: Communication.ReceiveRuleViolationChannel(); break;
+			case GAME_RECEIVE_REMOVE_RULE_VIOLATION: Communication.ReceiveRemoveRuleViolation(); break;
+			case GAME_RECEIVE_CANCEL_RULE_VIOLATION: Communication.ReceiveCancelRuleViolation(); break;
+			case GAME_RECEIVE_LOCK_RULE_VIOLATION: Communication.ReceiveLockRuleViolation(); break;
+			case GAME_RECEIVE_OWN_CHANNEL: Communication.ReceiveOwnChannel(); break;
+			case GAME_RECEIVE_CLOSE_CHANNEL: Communication.ReceiveCloseChannel(); break;
+			case GAME_RECEIVE_TEXT_MESSAGE: Communication.ReceiveTextMessage(); break;
+			case GAME_RECEIVE_CANCEL_WALK: Communication.ReceiveCancelWalk(); break;
+			case GAME_RECEIVE_FLOOR_UP: Communication.ReceiveFloorUp(); break;
+			case GAME_RECEIVE_FLOOR_DOWN: Communication.ReceiveFloorDown(); break;
+			case GAME_RECEIVE_OUTFIT: Communication.ReceiveOutfit(); break;
+			case GAME_RECEIVE_BUDDY: Communication.ReceiveBuddy(); break;
+			case GAME_RECEIVE_BUDDY_LOGIN: Communication.ReceiveBuddyLogin(); break;
+			case GAME_RECEIVE_BUDDY_LOGOUT: Communication.ReceiveBuddyLogout(); break;
 			default:
 				TERROR1("unknown packet type during game", Type);
 			}
@@ -1096,7 +1096,7 @@ void patella::TGUI::ProcessEvents()
 		}
 	}
 	if (GetConnectionState() == CONNECTION_IN_GAME && Creatures().MoveCreatures())
-		SendWalk();
+		Communication.SendWalk();
 	Redraw(false);
 }
 
@@ -1133,7 +1133,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		InitSkinProperties();
 		::Network().InitNetwork([] { GUI().ConnectionEstablished(); }, [] { GUI().ReceivePackets(); },
 			[] { GUI().ConnectionClosed(); });
-		InitCommunication();
+		::Communication().InitCommunication();
 		GUI().InitHotkeys();
 	} catch (const TProgramError &Error) {
 		try {
@@ -1152,7 +1152,7 @@ void patella::TGUI::ExitControl()
 {
 	GUI().ExitMainWindow();
 	ExitHotkeys();
-	ExitCommunication();
+	::Communication().ExitCommunication();
 	::Network().ExitNetwork();
 	SkinData().ExitSkins();
 	Graphics().ExitGraphics();
