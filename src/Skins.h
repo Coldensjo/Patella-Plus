@@ -349,8 +349,7 @@ struct TGUIPoint {
 // compiler-generated: they construct the members that have constructors (TGUIPoint,
 // TRGBColor, TRect, TFont) and leave the ints alone. Names from the assertions where there
 // are any. The other names are ours, after the window or element that reads the member and
-// what it does with the value; a member or block that no code reads, or whose use does not
-// show what it is, is named by its offset. Some TRects hold two positions (x, y and width,
+// what it does with the value. Some TRects hold two positions (x, y and width,
 // height): their comments say which. The block boundaries are those of the out-of-line block
 // constructors; blocks whose constructor was inlined are not visible and their members are
 // direct members here (for example those of the inventory, which ContentWindows.cpp reads as
@@ -369,8 +368,6 @@ struct TStartWindowProperties {
 	TGUIPoint InfoButton;          // "Info"
 	TGUIPoint ExitGameButton;      // "Exit Game"
 	TGUIPoint AccessAccountButton; // "Access Account"
-	TRect Data38;                  // zeroed: a type with a constructor (a guess)
-	TFont Data48;
 };
 
 // The frame of a sub window (TSubWindow,
@@ -462,7 +459,6 @@ struct TTradeWindowProperties {
 };
 
 struct TBuddylistWindowProperties {
-	int Data00;
 	int RowHeight;
 	TRect Logo;
 	TRect Name; // the name: its position, and its width as the longest name
@@ -477,12 +473,6 @@ struct TButtonsProperties {
 	TFont DisabledFont;
 	int PressedOffset; // the text moves by this while the button is pressed
 	TGUIPoint Texture;
-};
-
-struct TSkinProperties8C4 {
-	TFont Data00;
-	TFont Data14;
-	TFont Data28;
 };
 
 struct TCheckBoxProperties {
@@ -520,9 +510,7 @@ struct TListBoxProperties {
 struct TConsoleWindowProperties {
 	int MinimumHeight;              // the console's minimum height
 	TRect TabBar;                   // the tab bar (SetChildArea)
-	TRect Data14;                   // not used by ConsoleWindow.cpp
 	TRect Input;                    // the edit line
-	TRect Data34;                   // not used by ConsoleWindow.cpp
 	TRect CurrentConsole;           // the current channel (TConsole)
 	TGUIPoint MoveRightButton;      // the button "Move channels to the right"
 	TGUIPoint MoveLeftButton;       // "Move channels to the left"
@@ -785,7 +773,7 @@ struct TSkinProperties {
 	TBattleWindowProperties BattleWindow;
 	TTradeWindowProperties TradeWindow;
 	TBuddylistWindowProperties BuddylistWindow;
-	int BuddylistWindowExtraHeight;
+	int BuddylistWindowExtraHeight;  // added to the height of the buddies' rows (TBuddylistWindowBody::GetContentHeight)
 	int ScrollBarRangeMinimumHeight; // the vertical scroll bar (DialogElements.h): its range's minimum height
 	int ScrollBarMinimumWidth;       // its and its range's minimum width
 	int ScrollBarMinimumHeight;
@@ -793,10 +781,8 @@ struct TSkinProperties {
 	int HorizontalScrollBarRangeMinimumWidth; // the horizontal scroll bar: its range's minimum width
 	int HorizontalScrollBarHeight;
 	int HorizontalScrollBarMinimumWidth;
-	int Data888;
 	TButtonsProperties Buttons;
 	int BlinkingButtonInterval; // milliseconds between a blinking button's changes (TBlinkingButton)
-	TSkinProperties8C4 Style8C4;
 	TCheckBoxProperties CheckBox;
 	int ObjectIconFrameWidth; // the frame of a framed object icon (TObjectIcon::Draw)
 	TEditLineProperties EditLine;
@@ -871,11 +857,6 @@ struct TSkinProperties {
 	TRect AddBuddyDialogName;  // the VIP dialog's name
 	TRect AddBuddyDialogLabel; // its label
 	TEditBuddyDialogProperties EditBuddyDialog;
-	int Data104C;
-	int Data1050;
-	TRect Data1054; // the update dialog's label
-	TRect Data1064; // zeroed, not used
-	TRect Data1074; // its progress bar
 	THelpDialogProperties HelpDialog;
 	int HintsDialogWidth;
 	int HintsDialogHeight;
@@ -922,12 +903,6 @@ struct TSkinProperties {
 	TRect HotkeyDialogTextLabel;
 	TRect HotkeyDialogAutoSend;
 	TRGBColor HotkeyDialogAutoSendColor; // the lines of hotkeys sent automatically
-	int Data14E0;
-	int Data14E4;
-	TRect Data14E8; // the error report's labels and fields (set, unread since #74)
-	TRect Data14F8;
-	TRect Data1508;
-	TRect Data1518;
 };
 
 namespace patella {
