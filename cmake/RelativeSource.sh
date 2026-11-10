@@ -1,5 +1,5 @@
 #!/bin/sh
-# The compiler launcher of the Clang sanitizer preset (cmake/Reproducible.cmake, issue #136): AddressSanitizer records each
+# The compiler launcher of a Clang build with AddressSanitizer (cmake/Reproducible.cmake): AddressSanitizer records each
 # source as its module's name, the path given on the command line, which -ffile-prefix-map does not reach. The launcher
 # rewrites the argument of -c to a path relative to the build folder (Ninja's working directory), which does not depend on
 # where the repository is.

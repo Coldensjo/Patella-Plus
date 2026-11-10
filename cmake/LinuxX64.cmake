@@ -1,7 +1,7 @@
-# The client of the Linux presets (Patella-Modern issue #131, plan M8; notes/decisions.md, "#131"): the client's sources as
-# on Windows (cmake/WindowsX64.cmake), on the SDL3 window and the Vulkan engine, with the platform layer's Linux files
-# (src/platform/*Linux.cpp) in place of the Win32 ones. No resource compiler: the cursors and the window icon (issue #162)
-# are built in from the local Tibia.exe's (or the placeholders, tools/embed_cursors.py; the MFC-era resources are not used).
+# The client of the Linux presets: the client's sources as on Windows (cmake/WindowsX64.cmake), on the SDL3 window and
+# the Vulkan engine, with the platform layer's Linux files (src/platform/*Linux.cpp) in place of the Win32 ones. No
+# resource compiler: the cursors and the window icon are built in from the local Tibia.exe's (or the placeholders,
+# tools/embed_cursors.py; the MFC-era resources are not used).
 #
 # The client's code is compiled with PATELLA_CORE (common.h: no Windows headers, as patella_core; the types its platform
 # layer still names come from compat/win32_types.h, PATELLA_WIN32_TYPES), and with MSVC's rand (compat/msvc.h,
@@ -21,7 +21,7 @@ if(DEFINED ENV{PATELLA_PLACEHOLDER_RESOURCES} AND NOT "$ENV{PATELLA_PLACEHOLDER_
 else()
 	set(patella_placeholder_default OFF)
 endif()
-option(PATELLA_PLACEHOLDER_RESOURCES "Build the client with neutral placeholder pictures instead of Tibia.exe's (the hosted CI's build; refused where a Tibia.exe is present, issue #127)" ${patella_placeholder_default})
+option(PATELLA_PLACEHOLDER_RESOURCES "Build the client with neutral placeholder pictures instead of Tibia.exe's (the hosted CI's build; refused where a Tibia.exe is present)" ${patella_placeholder_default})
 
 if(DEFINED ENV{PATELLA_TIBIA_EXE} AND NOT "$ENV{PATELLA_TIBIA_EXE}" STREQUAL "")
 	set(patella_tibia_exe_default "$ENV{PATELLA_TIBIA_EXE}")
@@ -85,7 +85,7 @@ set(patella_linux_client_sources
 	"${PROJECT_SOURCE_DIR}/src/platform/WindowIconLinux.cpp"
 	"${PROJECT_BINARY_DIR}/EmbeddedCursors.cpp")
 
-# The compile settings of the client's targets and of the header checks (cmake/HeaderCheck.cmake).
+# The compile settings of the client's target.
 function(patella_client_compile_settings target)
 	target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}/src")
 	target_compile_definitions(${target} PRIVATE

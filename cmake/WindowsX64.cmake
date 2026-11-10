@@ -1,22 +1,16 @@
-# The client of the preset windows-x64 (issue #5; notes/modernization-plan.md, section 7, M1): today's
-# code as a 64-bit Patella.exe with MSVC x64 on SDL3 (issue #127: MFC is gone). Its only graphics engine is the Vulkan
-# engine (issue #19; cmake/Vulkan.cmake, notes/vulkan.md) as engine 2: since issue #20 (plan M2) the
-# original engines (DirectDraw, Direct3D 9, OpenGL) are not compiled, and ddraw, dxguid, opengl32 and glu32
-# are not linked; their sources left the fork with the 32-bit oracle (Patella-Modern issue #94).
+# The client of the preset windows-x64: a 64-bit Patella.exe with MSVC x64 on SDL3. Its only graphics engine is the
+# Vulkan engine (cmake/Vulkan.cmake).
 #
-# - The sources, definitions, import libraries and linker options of the oracle's Patella.exe (the former
-#   Patella.vcxproj's, until issue #94), so the program does what that one does: the static CRT, no manifest (a manifest
-#   would change the common controls and the DPI handling the user sees).
-# - The product settings instead of the original's flags: cmake/Warnings.cmake (C++23, /W4 with the
-#   baseline list, /WX) and cmake/Hardening.cmake (/guard:cf, /CETCOMPAT); CMake's default
-#   optimisation flags; a PDB in Release and Debug.
-# - The resource pictures are extracted from the local Tibia.exe at configure time, as for the oracle.
+# - The static CRT and no manifest (a manifest would change the common controls and the DPI handling the user sees).
+# - The product settings: cmake/Warnings.cmake (C++23, /W4 with the baseline list, /WX) and cmake/Hardening.cmake
+#   (/guard:cf, /CETCOMPAT); CMake's default optimisation flags; a PDB in Release and Debug.
+# - The resource pictures are extracted from the local Tibia.exe at configure time.
 #
 # Configure with MSVC for x64 set up (vcvarsall.bat x64; `python -I tools/build.py windows-x64` does
 # it). Without Tibia.exe (PATELLA_TIBIA_EXE) the configure stops; PATELLA_CLIENT=OFF builds only the
-# unit tests, for machines without it.
+# portable libraries, for machines without it.
 #
-# PATELLA_PLACEHOLDER_RESOURCES=ON (issue #127; hosted CI, which has no Tibia.exe and must never get it): the full
+# PATELLA_PLACEHOLDER_RESOURCES=ON (hosted CI, which has no Tibia.exe and must never get it): the full
 # Patella.exe with neutral placeholder pictures (tools/placeholder_resources.py, generated at
 # configure time, no CipSoft file read). The option refuses to run where a Tibia.exe is present (the source tree's or
 # PATELLA_TIBIA_EXE's), so it can never quietly replace the real pictures in a local build; the picture files then
@@ -30,11 +24,11 @@ endif()
 
 enable_language(RC)
 
-# The Python on PATH before any registered elsewhere, as for the oracle.
+# The Python on PATH before any registered elsewhere.
 set(Python3_FIND_REGISTRY LAST)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-option(PATELLA_PLACEHOLDER_RESOURCES "Build the client with neutral placeholder pictures instead of Tibia.exe's (the hosted CI's build; refused where a Tibia.exe is present, issue #127)" OFF)
+option(PATELLA_PLACEHOLDER_RESOURCES "Build the client with neutral placeholder pictures instead of Tibia.exe's (the hosted CI's build; refused where a Tibia.exe is present)" OFF)
 
 set(PATELLA_TIBIA_EXE "${PROJECT_SOURCE_DIR}/Tibia.exe" CACHE FILEPATH
 	"The original Tibia.exe: the resource pictures are extracted from it")
@@ -61,7 +55,7 @@ endif()
 include("${PROJECT_SOURCE_DIR}/cmake/Warnings.cmake")
 include("${PROJECT_SOURCE_DIR}/cmake/Hardening.cmake")
 
-# rc.exe as for the oracle.
+# rc.exe: English (United States) where Patella.rc names no language.
 set(CMAKE_RC_FLAGS "/l0x0409 /nologo")
 
 file(GLOB patella_cpp_sources CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
@@ -71,35 +65,33 @@ list(SORT patella_c_sources CASE INSENSITIVE)
 set(patella_rc "${PROJECT_SOURCE_DIR}/src/res/Patella.rc")
 set_source_files_properties("${patella_rc}" PROPERTIES OBJECT_DEPENDS "${PATELLA_RES_DIR}/resources.tsv")
 
-# The Vulkan engine (issue #19): cmake/Vulkan.cmake builds the back end and the CPU driver; the client
-# adds TSurfaceVulkan (src/vulkan, which the oracle's glob of src/*.cpp does not reach) and the
-# definition PATELLA_VULKAN, with which Surface.cpp and Control.cpp take the client's own engine
-# selection (issue #20). The graphics device choice (issue #31): src/vulkan/DeviceSettings.cpp, the
+# The Vulkan engine: cmake/Vulkan.cmake builds the back end and the CPU driver; the client adds
+# TSurfaceVulkan (src/vulkan, which the glob of src/*.cpp above does not reach) and the definition
+# PATELLA_VULKAN, which no source tests. The graphics device choice: src/vulkan/DeviceSettings.cpp, the
 # advanced options' buttons and Patella.ini (src/settings/Settings.cpp, patella_core's parser compiled
 # here again for the static CRT); the environment variable PATELLA_VULKAN=auto|gpu|gpuN|cpu overrides it. The
-# developer log's keys in Patella.ini (issue #77): src/log/LogSettings.cpp, patella_core's, compiled here again too, and
-# so are the options' keys in it (issue #45: src/settings/PreferenceKeys.cpp, Preferences.cpp's Patella.ini).
+# developer log's keys in Patella.ini: src/log/LogSettings.cpp, patella_core's, compiled here again too, and so
+# are the options' keys in it (src/settings/PreferenceKeys.cpp, Preferences.cpp's Patella.ini).
 include("${PROJECT_SOURCE_DIR}/cmake/Vulkan.cmake")
-# SDL3 (issue #122, plan M8; cmake/Sdl3.cmake): the window and the event loop of src/SdlFrame.cpp. Patella.exe's
-# Platform() has the SDL3 window's input (src/platform/Win32Platform.cpp) and, since issue #124, its clipboard and
-# desktop (src/platform/SdlPlatform.cpp).
+# SDL3 (cmake/Sdl3.cmake): the window and the event loop of src/SdlFrame.cpp. Patella.exe's Platform() has the SDL3
+# window's input (src/platform/Win32Platform.cpp) and its clipboard and desktop (src/platform/SdlPlatform.cpp).
 include("${PROJECT_SOURCE_DIR}/cmake/Sdl3.cmake")
-# The platform's Win32 implementations (issue #109, src/platform: the clock, the files, the network; Patella.exe's
-# Platform()) are compiled with them.
-# The engine's window system (issue #126, src/vulkan/WindowSystem.h): SDL3's (SDL_Vulkan_CreateSurface).
+# The platform's Win32 implementations (src/platform: the clock, the files, the network; Patella.exe's Platform())
+# are compiled with them.
+# The engine's window system (src/vulkan/WindowSystem.h): SDL3's (SDL_Vulkan_CreateSurface).
 set(patella_vulkan_window_sources "${PROJECT_SOURCE_DIR}/src/vulkan/WindowSystemSdl.cpp")
 set(patella_vulkan_client_sources "${PROJECT_SOURCE_DIR}/src/vulkan/SurfaceVulkan.cpp" ${patella_vulkan_window_sources}
 	"${PROJECT_SOURCE_DIR}/src/vulkan/DeviceSettings.cpp" "${PROJECT_SOURCE_DIR}/src/settings/Settings.cpp"
 	"${PROJECT_SOURCE_DIR}/src/settings/PreferenceKeys.cpp" "${PROJECT_SOURCE_DIR}/src/log/LogSettings.cpp"
 	"${PROJECT_SOURCE_DIR}/src/platform/Win32Platform.cpp"
-	# Issue #124: the SDL3 window's clipboard and desktop (message boxes, display modes).
+	# The SDL3 window's clipboard and desktop (message boxes, display modes).
 	"${PROJECT_SOURCE_DIR}/src/platform/SdlPlatform.cpp" "${PROJECT_SOURCE_DIR}/src/platform/SdlClipboard.cpp"
-	# Issue #125: the network, TPortableSocket (patella_platform's source, compiled here again for the static CRT) and
+	# The network, TPortableSocket (patella_platform's source, compiled here again for the static CRT) and
 	# the Windows client's glue (the lookups' replies to the window, the modal loops' polling).
 	"${PROJECT_SOURCE_DIR}/src/platform/PortableSocket.cpp" "${PROJECT_SOURCE_DIR}/src/platform/NetworkWin32.cpp"
-	# Issue #130: where the data files and Patella.ini are (settings::ChooseLocations' inputs from the process).
+	# Where the data files and Patella.ini are (settings::ChooseLocations' inputs from the process).
 	"${PROJECT_SOURCE_DIR}/src/platform/DataLocationWin32.cpp"
-	# Issue #127: the process's entry, WinMain, where MFC's was.
+	# The process's entry, WinMain.
 	"${PROJECT_SOURCE_DIR}/src/platform/EntryWin32.cpp")
 
 # The client: Patella.exe.
@@ -119,10 +111,10 @@ function(patella_client_compile_settings target)
 	patella_target_hardening(${target})
 	target_compile_definitions(${target} PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:PATELLA_VULKAN>)
 	target_link_libraries(${target} PRIVATE patella_render_vulkan)
-	if(PATELLA_PLACEHOLDER_RESOURCES) # issue #127: the client's warning at start (Player.cpp)
+	if(PATELLA_PLACEHOLDER_RESOURCES) # the client's warning at start (Player.cpp)
 		target_compile_definitions(${target} PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:PATELLA_PLACEHOLDER_RESOURCES>)
 	endif()
-	# Issue #122: SDL3's headers (the library itself is linked by patella_client: the header checks do not build it).
+	# SDL3's headers (the library itself is linked by patella_client).
 	target_link_libraries(${target} PRIVATE SDL3::Headers)
 endfunction()
 

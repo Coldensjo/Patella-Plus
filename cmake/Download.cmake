@@ -1,4 +1,4 @@
-# The pinned downloads of the configure step, with retries (issue #153; notes/decisions.md, "#153").
+# The pinned downloads of the configure step, with retries.
 #
 #	patella_fetch_declare(<name> URL <url> URL_HASH SHA256=<hash> <FetchContent_Declare's other options>)
 #
@@ -11,7 +11,7 @@
 # 5xx, timeouts, a refused or dropped connection, an unfinished transfer. PATELLA_DOWNLOAD_TRIES attempts, 10 by
 # default: about 6.5 minutes of pauses. Stopped at once: any other HTTP error (a 404 is a wrong pin) and a SHA-256
 # mismatch. The file only gets its final name after its SHA-256 matched, and FetchContent checks URL_HASH on it again.
-# Both environment variables are for tools/download_selftest.py.
+# PATELLA_DOWNLOAD_PAUSE and PATELLA_DOWNLOAD_TRIES are environment variables.
 #
 # The files stay in <FETCHCONTENT_BASE_DIR>/patella-downloads/<name>, so a later configure, also a --fresh one, uses
 # them without the network. FETCHCONTENT_FULLY_DISCONNECTED and FETCHCONTENT_SOURCE_DIR_<NAME> keep their meaning,

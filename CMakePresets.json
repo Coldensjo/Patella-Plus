@@ -62,7 +62,7 @@
 		},
 		{
 			"name": "linux-x64-gcc",
-			"displayName": "linux-x64-gcc: GCC 16 on Linux x64: the Linux client (Patella; issue #131)",
+			"displayName": "linux-x64-gcc: GCC 16 on Linux x64: the Linux client (Patella)",
 			"description": "Needs GCC 16 (gcc, g++) on PATH and SDL3's X11/Wayland build dependencies; the Docker image of docker/linux-x64 has them. On Windows: python -I tools/build.py linux-x64-gcc runs it in that image, with the local Tibia.exe's cursors (mounted read-only). PATELLA_CLIENT=OFF: only the portable libraries; PATELLA_PLACEHOLDER_RESOURCES=ON: neutral pictures, the hosted CI's build.",
 			"inherits": "linux-base",
 			"cacheVariables": {
@@ -72,7 +72,7 @@
 		},
 		{
 			"name": "package-windows-x64",
-			"displayName": "package-windows-x64: the Windows zip (issue #135, cmake/Package.cmake): the client with the placeholder pictures",
+			"displayName": "package-windows-x64: the Windows zip (cmake/Package.cmake): the client with the placeholder pictures",
 			"description": "A folder without Tibia.exe: the placeholders are refused where a Tibia.exe exists, and PATELLA_PACKAGE is refused without them.",
 			"inherits": "windows-x64",
 			"cacheVariables": {
@@ -82,7 +82,7 @@
 		},
 		{
 			"name": "package-linux-x64",
-			"displayName": "package-linux-x64: the Linux tarball and AppImage (issue #135, cmake/Package.cmake): the client with the placeholder pictures",
+			"displayName": "package-linux-x64: the Linux tarball and AppImage (cmake/Package.cmake): the client with the placeholder pictures",
 			"description": "A folder without Tibia.exe, in the image of docker/linux-x64: the placeholders are refused where a Tibia.exe exists, and PATELLA_PACKAGE is refused without them.",
 			"inherits": "linux-x64-gcc",
 			"cacheVariables": {

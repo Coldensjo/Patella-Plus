@@ -1,5 +1,5 @@
-# BuildConfig.cmake (Patella-Modern issue #169, the owner's decision after #166): the values someone fixes when building
-# the client for their own server, src/BuildConfig.h and src/BuildConfigDefaults.h.
+# The values someone fixes when building the client for their own server, src/BuildConfig.h and
+# src/BuildConfigDefaults.h.
 #
 # PATELLA_BUILD_CONFIG names a developer's own copy of src/BuildConfigDefaults.h (unset by default): the whole build compiles
 # with it through the definition PATELLA_BUILD_CONFIG_FILE, so pulling updates never conflicts with its values. src/BuildConfig.h

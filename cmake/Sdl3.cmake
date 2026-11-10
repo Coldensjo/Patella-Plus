@@ -1,21 +1,18 @@
-# SDL3, the platform layer of plan M8 (decision D3; notes/modernization-plan.md, sections 5 and 7, M8;
-# notes/decisions.md, "#122: the SDL3 window and its event loop"). Included by cmake/WindowsX64.cmake: the x64 client's
-# window and event loop (src/SdlFrame.cpp, issue #122), its input since #123; the clipboard, URLs and message boxes
-# since #124 (src/platform/SdlPlatform.cpp, the display modes SDL3's since #152; SDL_OpenURL in
-# SdlFrame.cpp); the Vulkan engine's
-# surfaces are SDL_Vulkan_CreateSurface's since #126 (src/vulkan/WindowSystem.h, also in tests_vulkan). patella_core
-# does not use it.
+# SDL3, the platform layer's library. Included by cmake/WindowsX64.cmake and cmake/LinuxX64.cmake: the client's window
+# and event loop (src/SdlFrame.cpp) and its input; the clipboard, URLs, message boxes and display modes
+# (src/platform/SdlPlatform.cpp; SDL_OpenURL in SdlFrame.cpp); the Vulkan engine's surfaces are
+# SDL_Vulkan_CreateSurface's (src/vulkan/WindowSystem.h). patella_core does not use it.
 #
 #	SDL3::SDL3-static   SDL 3.4.18, built from its release archive with its own CMakeLists as a static library
 #	                    with the client's CRT (the static one), only the subsystems the client needs (video and
-#	                    events; Vulkan on: SDL_Vulkan_CreateSurface, #126)
-#	SDL3::Headers       its headers alone: what the header checks compile against, so they do not build the library
+#	                    events; Vulkan on: SDL_Vulkan_CreateSurface)
+#	SDL3::Headers       its headers alone: what compiles against SDL3 without linking the library
 #
 # Pinned as cmake/Vulkan.cmake pins its libraries: one release, by URL and SHA256 (the digest GitHub publishes for the
 # release asset SDL3-3.4.18.tar.gz), fetched at the first configure into build/<preset>/_deps and built there; nothing
-# is installed on the system. Plan section 5: `find_package` first where a distribution has its own SDL3, which is
-# Linux's (FetchContent's FIND_PACKAGE_ARGS, 3.4.18 or a newer 3.x); on Windows always the pinned archive. The Linux client
-# (issue #131, cmake/LinuxX64.cmake) builds the pinned archive in the Docker image, which has SDL3's build dependencies
+# is installed on the system. `find_package` comes first where a distribution has its own SDL3, which is Linux's
+# (FetchContent's FIND_PACKAGE_ARGS, 3.4.18 or a newer 3.x); on Windows always the pinned archive. The Linux client
+# (cmake/LinuxX64.cmake) builds the pinned archive in the Docker image, which has SDL3's build dependencies
 # (docker/linux-x64/Dockerfile: its X11 and Wayland video drivers, no SDL3 package).
 
 include_guard(GLOBAL)
@@ -61,8 +58,8 @@ function(patella_add_sdl3)
 	set(SDL_OPENGL OFF)
 	set(SDL_OPENGLES OFF)
 	set(SDL_WERROR OFF)
-	# Linux (issue #131): the X11 and Wayland video drivers, loaded with dlopen at run time; what the client does not use is
-	# off (the input methods' bus connections, the kernel's mode setting and device discovery).
+	# Linux: the X11 and Wayland video drivers, loaded with dlopen at run time; what the client does not use is off (the
+	# input methods' bus connections, the kernel's mode setting and device discovery).
 	set(SDL_IBUS OFF)
 	set(SDL_FCITX OFF)
 	set(SDL_DBUS OFF)
@@ -71,8 +68,8 @@ function(patella_add_sdl3)
 	set(SDL_X11_XTEST OFF)
 	# The client's CRT: the static one (cmake/WindowsX64.cmake); CMake gives it to the targets SDL makes here.
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-	# MSVC's /d1trimfile (cmake/Reproducible.cmake, issue #136) does not reach __FILE__ in a source compiled with a precompiled
-	# header, which SDL_assert's file name is.
+	# MSVC's /d1trimfile (cmake/Reproducible.cmake) does not reach __FILE__ in a source compiled with a precompiled header,
+	# which SDL_assert's file name is.
 	if(MSVC)
 		set(CMAKE_DISABLE_PRECOMPILE_HEADERS ON)
 	endif()
@@ -86,7 +83,7 @@ if(TARGET SDL3-static AND NOT MSVC)
 endif()
 if(TARGET SDL3-static AND MSVC)
 	# Third-party code: not with the product's warning settings, and no warning of its own in the build log (build.py
-	# fails a build on any warning, issue #17). SDL gives its sources /W3; /W0 replaces it (a later /W option wins
+	# fails a build on any warning). SDL gives its sources /W3; /W0 replaces it (a later /W option wins
 	# without the D9025 warning that a /W0 in CMAKE_C_FLAGS before SDL's /W3 would print).
 	get_target_property(patella_sdl3_options SDL3-static COMPILE_OPTIONS)
 	if(patella_sdl3_options)

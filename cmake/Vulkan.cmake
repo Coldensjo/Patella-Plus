@@ -1,24 +1,18 @@
-# The Vulkan engine of the x64 client (issue #19; notes/vulkan.md; notes/modernization-plan.md, 6.2 and M2), the
-# client's only engine since issue #20. Included by cmake/WindowsX64.cmake and, since issue #131, cmake/LinuxX64.cmake
-# (there the CPU driver is the system's Mesa lavapipe, and tests_vulkan, which is Windows' windows and messages, is left
-# out):
+# The Vulkan engine, the client's only engine. Included by cmake/WindowsX64.cmake and cmake/LinuxX64.cmake (there the
+# CPU driver is the system's Mesa lavapipe):
 #
 #	patella_vulkan_deps     the libraries' sources: volk, vk-bootstrap, VMA (src/vulkan/Vma.cpp), without
 #	                        the product's warning settings (they are not ours)
 #	patella_render_vulkan   the back end, src/vulkan/Renderer.cpp, Quads.cpp,
-#	                        DeviceChoice.cpp (the device choice's words, issue #31) and PresentWindow.cpp
-#	                        (one window per device, issue #52), with the product's
+#	                        DeviceChoice.cpp (the device choice's words) and PresentWindow.cpp
+#	                        (one window per device), with the product's
 #	                        settings; the shaders of src/vulkan/shaders compiled to SPIR-V by glslang
-#	tests_vulkan            the headless check of the back end on the CPU driver (and a GPU if there is
-#	                        one): known primitives drawn off screen, read back and compared (tests/vulkan)
 #	the CPU driver          Mesa's lavapipe (vulkan_lvp.dll and lvp_icd.x86_64.json), copied next to
 #	                        every executable that uses the engine (patella_vulkan_cpu_driver)
 #
-# The client adds src/vulkan/SurfaceVulkan.cpp (TSurfaceVulkan, the TSurface on the SDL3 window) and
-# PATELLA_VULKAN (Surface.cpp's and Control.cpp's engine selection of the x64 client). The libraries
-# and the client link the static CRT, as the client does. Every dependency is pinned by URL and SHA256
-# (notes/vulkan.md, "Dependencies"); the first configure downloads them (about 85 MB, most of it Mesa's
-# archive), later ones reuse build/<preset>/_deps.
+# The client adds src/vulkan/SurfaceVulkan.cpp (TSurfaceVulkan, the TSurface on the SDL3 window). The libraries
+# link the static CRT, as the client does. Every dependency is pinned by URL and SHA256; the first configure
+# downloads them (about 85 MB, most of it Mesa's archive), later ones reuse build/<preset>/_deps.
 
 include_guard(GLOBAL)
 include(FetchContent)
@@ -93,8 +87,8 @@ target_include_directories(patella_vulkan_deps SYSTEM PUBLIC
 	"${patella_volk_SOURCE_DIR}"
 	"${patella_vma_SOURCE_DIR}/include"
 	"${patella_vk_bootstrap_SOURCE_DIR}/src")
-# volk declares the functions (VK_NO_PROTOTYPES everywhere); its loader also loads the Win32 surface
-# functions, which SurfaceVulkan.cpp declares the same way.
+# volk declares the functions (VK_NO_PROTOTYPES everywhere); on Windows its loader also loads the Win32 surface
+# functions.
 target_compile_definitions(patella_vulkan_deps PUBLIC VK_NO_PROTOTYPES)
 if(WIN32)
 	set_source_files_properties("${patella_volk_SOURCE_DIR}/volk.c" PROPERTIES COMPILE_DEFINITIONS VK_USE_PLATFORM_WIN32_KHR)
@@ -140,11 +134,11 @@ add_library(patella_render_vulkan STATIC
 	${patella_shader_headers})
 target_include_directories(patella_render_vulkan PUBLIC "${PROJECT_SOURCE_DIR}/src")
 target_include_directories(patella_render_vulkan PRIVATE "${patella_shader_dir}")
-# comctl32: PresentWindow.cpp subclasses the main window (SetWindowSubclass, issue #71).
+# comctl32: PresentWindow.cpp subclasses the main window (SetWindowSubclass).
 if(WIN32)
 	target_link_libraries(patella_render_vulkan PUBLIC patella_vulkan_deps comctl32)
 else()
-	# PresentWindow.cpp's device test window (Linux, issue #131).
+	# PresentWindow.cpp's device test window (Linux).
 	target_link_libraries(patella_render_vulkan PUBLIC patella_vulkan_deps PRIVATE SDL3::Headers)
 endif()
 set_target_properties(patella_render_vulkan PROPERTIES

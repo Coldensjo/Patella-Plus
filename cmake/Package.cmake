@@ -1,7 +1,7 @@
-# The packages (Patella-Modern issue #135, plan M9, D4; notes/decisions.md, "#135"): CPack's ZIP on Windows, TGZ and
-# AppImage on Linux. Included by CMakeLists.txt only with PATELLA_PACKAGE=ON, after the client's own cmake file, so
-# without that option a build has no install rules, no CPackConfig.cmake and no "package" target. The presets
-# package-windows-x64 and package-linux-x64 set it, with PATELLA_PLACEHOLDER_RESOURCES=ON.
+# The packages: CPack's ZIP on Windows, TGZ and AppImage on Linux. Included by CMakeLists.txt only with
+# PATELLA_PACKAGE=ON, after the client's own cmake file, so without that option a build has no install rules, no
+# CPackConfig.cmake and no "package" target. The presets package-windows-x64 and package-linux-x64 set it, with
+# PATELLA_PLACEHOLDER_RESOURCES=ON.
 #
 # A package never holds CipSoft's files, and a local build embeds Tibia.exe's cursors and icon (cmake/Resources.cmake),
 # so a package is only made from a build of the placeholder pictures (tools/placeholder_resources.py). Refused here at
@@ -9,10 +9,9 @@
 # files themselves: CPACK_PRE_BUILD_SCRIPTS (cmake/PackagePreBuild.cmake) runs tools/package_check.py --staged, which
 # looks for the placeholders in the executable and for anything like the data files.
 #
-# What a package holds: the client (Patella, not the test build, which reads the login server and the RSA key from the
-# environment), on Windows the CPU driver next to it (Mesa's lavapipe, cmake/Vulkan.cmake), README.txt, the licences.
-# Linux's CPU driver is the system's, and the Vulkan loader is the system's on both. The list is
-# tools/package_check.py's EXPECTED, which fails a package with any other file.
+# What a package holds: the client, on Windows the CPU driver next to it (Mesa's lavapipe, cmake/Vulkan.cmake),
+# README.txt, the licences. Linux's CPU driver is the system's, and the Vulkan loader is the system's on both. The list
+# is tools/package_check.py's EXPECTED, which fails a package with any other file.
 #
 # The AppImage's build tools, only here and only fetched with this option (patella_fetch_declare, SHA-256 pinned):
 # appimagetool and its runtime (AppImage project), patchelf (CPack's generator calls it to set the RPATH). Not in the
