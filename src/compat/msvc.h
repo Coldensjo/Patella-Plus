@@ -118,7 +118,6 @@
 // how many names the translation unit declares: with them, Surface.cpp's globals came out rotated, its .bss in
 // the oracle and its .data on x64). Measured on the images (issue #43; notes/decisions.md).
 #define MsvcSnprintf _snprintf
-#define MsvcVsnprintf _vsnprintf
 #define MsvcStricmp _stricmp
 #define MsvcStrdup _strdup
 #define MsvcDupenv _dupenv_s

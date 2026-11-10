@@ -83,9 +83,6 @@ public:
 	// The contents to write: every line as it was read but the ones Set changed or appended.
 	[[nodiscard]] std::string Text() const;
 
-	// The lines (1 on) that are neither blank, a comment nor `key=value`: kept, never read.
-	[[nodiscard]] std::vector<int> BadLines() const;
-
 	[[nodiscard]] const std::string &Newline() const { return LineEnd; }
 
 private:

@@ -27,7 +27,6 @@ public:
 	}
 	// Stops it (KillTimer): no tick is due until the next Start.
 	void Stop() { Running = false; }
-	[[nodiscard]] bool IsRunning() const { return Running; }
 	// One tick when it is due at Now (the elapsed time computed modulo 2^32, so it holds across the clock's wrap).
 	[[nodiscard]] bool Due(std::uint32_t Now)
 	{

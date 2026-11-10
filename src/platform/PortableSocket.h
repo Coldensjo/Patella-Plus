@@ -40,8 +40,8 @@ using TNativeSocket = int;
 inline constexpr TNativeSocket InvalidNativeSocket = -1;
 #endif
 
-// A connection: the original's CAsyncSocket of Network.cpp with its four events, which call the ISocketEvents it
-// was made for (OnSend: the original's is empty). TPortableSocket keeps its state here; the replay's
+// A connection: the original's CAsyncSocket of Network.cpp with its events, which call the ISocketEvents it
+// was made for (the original's OnSend is empty and has no counterpart). TPortableSocket keeps its state here; the replay's
 // TPipeSocketWin32 calls the events itself.
 class TSocket final {
 public:
@@ -53,7 +53,6 @@ public:
 	~TSocket() = default;
 
 	void OnReceive(int ErrorCode) { Events.OnReceive(*this, ErrorCode); }
-	void OnSend(int /*ErrorCode*/) {}
 	void OnConnect(int ErrorCode) { Events.OnConnect(ErrorCode); }
 	void OnClose(int /*ErrorCode*/) { Events.OnClose(); }
 

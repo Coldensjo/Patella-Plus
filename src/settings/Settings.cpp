@@ -175,16 +175,6 @@ std::string TSettingsFile::Text() const
 	return Result;
 }
 
-std::vector<int> TSettingsFile::BadLines() const
-{
-	std::vector<int> Result;
-	for (size_t i = 0; i < Lines.size(); i++) {
-		if (Lines[i].Bad)
-			Result.push_back(static_cast<int>(i + 1));
-	}
-	return Result;
-}
-
 TEncoding EncodingOf(const TSettingsFile &File)
 {
 	return File.Get(VersionKey) == "1" ? TEncoding::Cp1252 : TEncoding::Utf8;

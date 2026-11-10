@@ -135,22 +135,6 @@ public:
 	}
 #endif
 
-	// tmpfile(): a new binary file for reading and writing ("w+b"), deleted when it is closed.
-	bool OpenTemporary() noexcept
-	{
-		if (Handle != nullptr) {
-			errno = EBUSY;
-			return false;
-		}
-#if defined(_MSC_VER)
-		if (tmpfile_s(&Handle) != 0)
-			Handle = nullptr;
-#else
-		Handle = std::tmpfile(); // NOLINT(cppcoreguidelines-owning-memory): TFile owns it (Close)
-#endif
-		return Handle != nullptr;
-	}
-
 	// fclose: its result, 0 on a closed TFile.
 	int Close() noexcept
 	{
@@ -177,8 +161,6 @@ public:
 	{
 		return Text.empty() || std::fwrite(Text.data(), 1, Text.size(), Handle) == Text.size();
 	}
-	// fputc: the character, or EOF.
-	int PutChar(int Character) noexcept { return std::fputc(Character, Handle); }
 	// getc and ungetc: the next byte (0-255) or EOF; the byte back, for the next GetChar.
 	int GetChar() noexcept { return std::getc(Handle); }
 	int UngetChar(int Character) noexcept { return std::ungetc(Character, Handle); }

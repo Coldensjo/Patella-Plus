@@ -59,8 +59,6 @@ public:
 	void FillUncovered(HDC Context) const;
 
 	[[nodiscard]] HWND Current() const { return CurrentWindow; }
-	[[nodiscard]] HWND Retired() const { return RetiredWindow; }
-	[[nodiscard]] HWND Subclassed() const { return SubclassedWindow; }
 
 private:
 	static LRESULT CALLBACK ParentProc(

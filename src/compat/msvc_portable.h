@@ -51,17 +51,6 @@ inline int PortableVsnprintf(char *Buffer, std::size_t Count, const char *Format
 	return Result < 0 ? -1 : Result;
 }
 
-// _snprintf: PortableVsnprintf's semantics.
-PATELLA_PRINTF_FORMAT(3, 4)
-inline int PortableSnprintf(char *Buffer, std::size_t Count, const char *Format, ...) // NOLINT(cppcoreguidelines-pro-type-vararg): _snprintf's interface
-{
-	std::va_list Arguments;      // NOLINT(cppcoreguidelines-pro-type-vararg): _snprintf's interface
-	va_start(Arguments, Format); // NOLINT(cppcoreguidelines-pro-type-vararg)
-	const int Result = PortableVsnprintf(Buffer, Count, Format, Arguments);
-	va_end(Arguments); // NOLINT(cppcoreguidelines-pro-type-vararg)
-	return Result;
-}
-
 // _stricmp in the "C" locale (the client never calls setlocale): compares the bytes as unsigned char, a pair
 // that differs with A-Z mapped to a-z (so "abc_" < "ABCD", '_' < 'd'), and returns the difference of the first
 // pair that still differs, or 0. Bytes from 0x80 are not folded. (UCRT string/stricmp.cpp __ascii_stricmp.)
@@ -114,13 +103,6 @@ inline int MsvcSnprintf(char *Buffer, std::size_t Count, const char *Format, ...
 	const int Result = patella::compat::PortableVsnprintf(Buffer, Count, Format, Values);
 	va_end(Values); // NOLINT(cppcoreguidelines-pro-type-vararg)
 	return Result;
-}
-
-// _vsnprintf.
-PATELLA_PRINTF_FORMAT(3, 0)
-inline int MsvcVsnprintf(char *Buffer, std::size_t Count, const char *Format, std::va_list Values)
-{
-	return patella::compat::PortableVsnprintf(Buffer, Count, Format, Values);
 }
 
 // _stricmp.

@@ -38,20 +38,6 @@ public:
 	// when not, when Text is nullptr or the TRegexp is empty.
 	int Execute(const char *Text) noexcept { return regexec(Program.get(), const_cast<char *>(Text)); }
 
-	// Subexpression Number (0: the whole match, 1 to NSUBEXP - 1: the parentheses in order) of the last match, as
-	// regexec left it: empty when that one did not take part in the match, the TRegexp is empty or Number is out
-	// of range. Valid while the text of the last Execute is.
-	[[nodiscard]] std::string_view Subexpression(int Number) const noexcept
-	{
-		if (!Program || Number < 0 || Number >= NSUBEXP)
-			return {};
-		const char *const Start = Program->startp[Number];
-		const char *const End = Program->endp[Number];
-		if (Start == nullptr || End == nullptr || End < Start)
-			return {};
-		return {Start, static_cast<std::size_t>(End - Start)};
-	}
-
 	// Frees the program; the TRegexp is empty again.
 	void Reset() noexcept { Program.reset(); }
 
