@@ -10,8 +10,8 @@
 //   (at the end of this file).
 //
 // The expression is evaluated exactly once, the values only when it is false (after it, in an unspecified order, as
-// the old macros' arguments were). The file and line are the assertion's own (std::source_location::current(), or
-// __FILE__ and __LINE__ below), no longer the original's line. Each is an expression of type void, so it is one
+// the old macros' arguments were). The file and line are the assertion's own (std::source_location::current()),
+// no longer the original's line. Each is an expression of type void, so it is one
 // statement anywhere a statement fits (an if without braces, an else: no dangling else), and nothing is compiled out in any build: assertions on packets and files stay
 // checked (notes/modernization-plan.md, M5).
 //
@@ -21,49 +21,17 @@
 // too), whose semantic a compiler flag changes (ignore compiles the check out), which may evaluate the predicate more
 // than once, and in which GCC 16.2 cannot tell a predicate that threw from a false one.
 //
-// The location: std::source_location where the library has it (PATELLA_HAS_SOURCE_LOCATION 1: every product preset),
-// otherwise (the oracle's /std:c++17), or with PATELLA_SOURCE_LOCATION_STANDIN, which tests/unit's stand-in build
-// defines for a whole target, a stand-in with file_name, line and function_name from __FILE__, __LINE__ and __func__.
-// The failure functions are TMyException.cpp's.
+// The location is a std::source_location. The failure functions are TMyException.cpp's.
 
 #pragma once
 
-#include <version> // IWYU pragma: keep (the feature-test macro of the #if line)
-
-#if defined(__cpp_lib_source_location) && __cpp_lib_source_location >= 201907L \
-	&& !defined(PATELLA_SOURCE_LOCATION_STANDIN)
-#define PATELLA_HAS_SOURCE_LOCATION 1
 #include <source_location> // IWYU pragma: export
-#else
-#define PATELLA_HAS_SOURCE_LOCATION 0
-#include <cstdint>
-#endif
 
 namespace patella {
-
-#if PATELLA_HAS_SOURCE_LOCATION
 
 using TSourceLocation = std::source_location;
 
 #define PATELLA_SOURCE_LOCATION() ::std::source_location::current()
-
-#else
-
-// The part of std::source_location the assertions use. An aggregate, so an assertion's failure path is three stores and
-// the call, no constructor.
-struct TSourceLocation {
-	const char *File;
-	std::uint_least32_t Line;
-	const char *Function;
-
-	[[nodiscard]] constexpr const char *file_name() const noexcept { return File; }
-	[[nodiscard]] constexpr std::uint_least32_t line() const noexcept { return Line; }
-	[[nodiscard]] constexpr const char *function_name() const noexcept { return Function; }
-};
-
-#define PATELLA_SOURCE_LOCATION() (::patella::TSourceLocation{__FILE__, __LINE__, __func__})
-
-#endif
 
 // Throw the assertion's TMyException. Names is the values' source text as the preprocessor stringized it
 // ("Position, NumberOfBuddies-1"): it is split at its top-level commas.
