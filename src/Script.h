@@ -7,11 +7,9 @@
 // binary; see notes/decisions.md.
 //
 // The constructors, destructors and close() functions are defined here. The
-// linker kept their out-of-line copies from Preferences.obj, the first object
-// that uses them (0x4df550-0x4df6c9, after the Tibia.cfg loader and saver).
-// The FILE * members are TFiles (types/File.h, Patella-Modern issue #64):
-// fopen, fclose and the reads and writes with an owner, the same bytes. Each
-// class's TryOpen returns open's failures (Patella-Modern issue #80).
+// FILE * members are TFiles (types/File.h, Patella-Modern issue #64): fopen,
+// fclose and the reads and writes with an owner, the same bytes. Each class's
+// TryOpen returns open's failures (Patella-Modern issue #80).
 
 #pragma once
 
@@ -45,7 +43,7 @@ class TReadScriptFile {
 public:
 	TReadScriptFile(const TReadScriptFile &) = delete;
 	TReadScriptFile &operator=(const TReadScriptFile &) = delete;
-	// 0x4df550. Token is not set.
+	// Token is not set.
 	TReadScriptFile()
 	{
 		memset(Filename, 0, sizeof(Filename));
@@ -59,13 +57,12 @@ public:
 		Special = '#';
 	}
 
-	// 0x4df5b0
 	~TReadScriptFile()
 	{
 		File.Close();
 	}
 
-	// 0x4df5d0. Resets everything but Token, like the constructor.
+	// Resets everything but Token, like the constructor.
 	void close()
 	{
 		File.Close();
@@ -113,22 +110,19 @@ class TWriteScriptFile {
 public:
 	TWriteScriptFile(const TWriteScriptFile &) = delete;
 	TWriteScriptFile &operator=(const TWriteScriptFile &) = delete;
-	// 0x4df640
 	TWriteScriptFile()
 	{
 		memset(Filename, 0, sizeof(Filename));
 		Line = 0;
 	}
 
-	// Only closes the file; the copy the linker kept is 0x4df6b0, folded with
-	// the binary files' close() (the Tibia.cfg saver calls close() and then
-	// this destructor).
+	// Only closes the file (the Tibia.cfg saver calls close() and then this
+	// destructor).
 	~TWriteScriptFile()
 	{
 		File.Close();
 	}
 
-	// 0x4df660
 	void close()
 	{
 		File.Close();
@@ -150,9 +144,7 @@ public:
 	int Line;            // +0x404, set to 0 and never used
 };
 
-// 0x404 bytes. The constructor (0x4df690) and close() (0x4df6b0) are shared
-// with TWriteBinaryFile: the linker folded the identical code. The
-// destructor is close().
+// 0x404 bytes. The destructor is close().
 class TReadBinaryFile {
 public:
 	TReadBinaryFile(const TReadBinaryFile &) = delete;

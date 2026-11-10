@@ -2,14 +2,13 @@
 // free (Patella-Modern issue #102, plan M7's fixed-capacity lists). Not part of the original source. Its one user is
 // Map.cpp's effect table (TSlotTable<TEffect, EFFECTS>).
 //
-// The original's effect table is an array of EFFECTS entries (0x5d16f8); an entry's number is its index, which the
-// map points and the entries' links hold, and NewEffect (0x4ba6e0) takes the first entry with Status 0, or none
-// (-1) when all are taken, which drops the new effect. TSlotTable keeps those numbers: its entries are a
-// TStaticVector<T, N> (compat/cxx26.h: std::inplace_vector where the library has it) that only grows, by one entry
-// when no entry below its size is free, and is emptied by Clear only. So the entries from Size() to N are the ones
-// the original had free and had not taken since its last clear (or the start), and New() gives the number the
-// original's search gave. An entry beyond Size() reads as a free one, value-initialised (Get). A freed entry keeps
-// its other members until it is taken again, as the original's did.
+// The original's effect table is an array of EFFECTS entries; an entry's number is its index, which the map points and the
+// entries' links hold, and NewEffect takes the first entry with Status 0, or none (-1) when all are taken, which drops the
+// new effect. TSlotTable keeps those numbers: its entries are a TStaticVector<T, N> (compat/cxx26.h: std::inplace_vector
+// where the library has it) that only grows, by one entry when no entry below its size is free, and is emptied by Clear
+// only. So the entries from Size() to N are the ones the original had free and had not taken since its last clear (or the
+// start), and New() gives the number the original's search gave. An entry beyond Size() reads as a free one,
+// value-initialised (Get). A freed entry keeps its other members until it is taken again, as the original's did.
 //
 // T: an implicit-lifetime aggregate with an int Status, value-initialised by T{} (TEffect). Key: the entries' numbers,
 // int or an enumeration over int (MapPoint.h's TEffectId, issue #103), its value the number; New() gives Key(-1) when full.

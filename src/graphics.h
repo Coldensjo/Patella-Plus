@@ -230,28 +230,28 @@ public:
 	TGraphicsEngine Engine;
 	TSkins Skins;
 
-	// graphics.cpp's data, in .bss order (0x5cc75c is not used).
-	std::array<int, HASH_TABLE_SIZE> MemoryHashTable{}; // 0x5cc430
-	std::array<int, HASH_TABLE_SIZE> VideoHashTable{};  // 0x5cc5c0
-	int NumberOfFonts{};                                // 0x5cc750
-	int NumberOfPictures{};                             // 0x5cc754
-	uint32 PictureSignature{};                          // 0x5cc758
-	TFixedString<GRAPHICS_PATH_MAX> PictureFileName{};  // 0x5cc760
-	int NumberOfSprites{};                              // 0x5ccb60
-	uint32 SpriteSignature{};                           // 0x5ccb64
-	TFixedString<GRAPHICS_PATH_MAX> SpriteFileName{};   // 0x5ccb68
-	int LeastRecentMemoryItem{};                        // 0x5ccf68, tail of the memory cache's LRU list
-	int MostRecentMemoryItem{};                         // 0x5ccf6c, head
-	int MemoryCacheSize{};                              // 0x5ccf70
-	std::unique_ptr<uint8[]> MemoryCacheData{};         // 0x5ccf74, MemoryCacheSize tiles of 32*32*3 bytes
-	int LeastRecentVideoItem{};                         // 0x5ccf78
-	int MostRecentVideoItem{};                          // 0x5ccf7c
-	int VideoCacheSize{};                               // 0x5ccf80
-	std::unique_ptr<TVideoCacheItem[]> VideoCache{};    // 0x5ccf84
-	std::unique_ptr<TMemoryCacheItem[]> MemoryCache{};  // 0x5ccf88
-	std::unique_ptr<TSprite[]> Sprites{};               // 0x5ccf8c
-	std::unique_ptr<TPicture[]> Pictures{};             // 0x5ccf90
-	std::unique_ptr<TFontInfo[]> Fonts{};               // 0x5ccf94
+	// graphics.cpp's data, in .bss order.
+	std::array<int, HASH_TABLE_SIZE> MemoryHashTable{};
+	std::array<int, HASH_TABLE_SIZE> VideoHashTable{};
+	int NumberOfFonts{};
+	int NumberOfPictures{};
+	uint32 PictureSignature{};
+	TFixedString<GRAPHICS_PATH_MAX> PictureFileName{};
+	int NumberOfSprites{};
+	uint32 SpriteSignature{};
+	TFixedString<GRAPHICS_PATH_MAX> SpriteFileName{};
+	int LeastRecentMemoryItem{}; // tail of the memory cache's LRU list
+	int MostRecentMemoryItem{};  // head
+	int MemoryCacheSize{};
+	std::unique_ptr<uint8[]> MemoryCacheData{}; // MemoryCacheSize tiles of 32*32*3 bytes
+	int LeastRecentVideoItem{};
+	int MostRecentVideoItem{};
+	int VideoCacheSize{};
+	std::unique_ptr<TVideoCacheItem[]> VideoCache{};
+	std::unique_ptr<TMemoryCacheItem[]> MemoryCache{};
+	std::unique_ptr<TSprite[]> Sprites{};
+	std::unique_ptr<TPicture[]> Pictures{};
+	std::unique_ptr<TFontInfo[]> Fonts{};
 };
 
 // The transition's access path (notes/decisions.md, "#104: TClient and the subsystem objects"): the one TClient's

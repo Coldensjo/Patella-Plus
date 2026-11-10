@@ -1,5 +1,5 @@
 // Skins.cpp: rectangles of the GUI graphics (file name inferred), and SkinProperties, the window graphics' positions,
-// sizes, colours and fonts (GUI.cpp's global 0x5ccfc8, which InitSkinProperties fills).
+// sizes, colours and fonts (GUI.cpp's global, which InitSkinProperties fills).
 //
 // TSkins (Patella-Modern issue #116, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#116"):
 // Skins.cpp's data and SkinProperties, a part of TGraphics (graphics.h), declared here and defined in Skins.cpp, as
@@ -344,29 +344,24 @@ struct TGUIPoint {
 	int x, y;
 };
 
-// SkinProperties (0x5ccfc8, 0x1528 bytes): positions, sizes, colours and
-// fonts of the window graphics, filled in by InitSkinProperties (0x498160).
-// Its constructor (0x496800) and those of the blocks below (the gap
-// 0x495480-0x4964ff) are compiler-generated: they construct the members
-// that have constructors (TGUIPoint, TRGBColor, TRect, TFont) and leave the
-// ints alone. Names from the assertions where there are any. The other
-// names are ours, after the window or element that reads the member and what
-// it does with the value; a member or block that no code reads, or whose use
-// does not show what it is, is named by its offset. Some TRects hold two
-// positions (x, y and width, height): their comments say which. The block
-// boundaries are those of the out-of-line block constructors; blocks whose
-// constructor was inlined are
-// not visible and their members are direct members here (for example
-// those of the inventory, which ContentWindows.cpp reads as arrays). The member types of the
-// zero-initialised members (TGUIPoint, TRGBColor or TRect) are guesses from
-// the values InitSkinProperties stores.
+// SkinProperties (0x1528 bytes): positions, sizes, colours and fonts of the window graphics,
+// filled in by InitSkinProperties. Its constructor and those of the blocks below are
+// compiler-generated: they construct the members that have constructors (TGUIPoint,
+// TRGBColor, TRect, TFont) and leave the ints alone. Names from the assertions where there
+// are any. The other names are ours, after the window or element that reads the member and
+// what it does with the value; a member or block that no code reads, or whose use does not
+// show what it is, is named by its offset. Some TRects hold two positions (x, y and width,
+// height): their comments say which. The block boundaries are those of the out-of-line block
+// constructors; blocks whose constructor was inlined are not visible and their members are
+// direct members here (for example those of the inventory, which ContentWindows.cpp reads as
+// arrays). The member types of the zero-initialised members (TGUIPoint, TRGBColor or TRect)
+// are guesses from the values InitSkinProperties stores.
 
-// GUIStyle+0xd8 (0x5cd0a0); compiler-generated constructor 0x495480. The
-// start window's buttons (MainWindow.cpp): the size of their panel, its
-// position and the positions of "Enter Game", "Options", "Info", "Exit
-// Game" and "Access Account" in it (the constructor zeroes +0x08-+0x47,
-// which leaves the types open; MainWindow.cpp reads +0x08-+0x37 as points,
-// +0x38-+0x47 is not used).
+// GUIStyle+0xd8. The start window's buttons (MainWindow.cpp): the size of
+// their panel, its position and the positions of "Enter Game", "Options",
+// "Info", "Exit Game" and "Access Account" in it (the constructor zeroes
+// +0x08-+0x47, which leaves the types open; MainWindow.cpp reads
+// +0x08-+0x37 as points, +0x38-+0x47 is not used).
 struct TStartWindowProperties {
 	int PanelWidth;                // +0x00
 	int PanelHeight;               // +0x04
@@ -380,8 +375,8 @@ struct TStartWindowProperties {
 	TFont Data48;                  // +0x48
 };
 
-// GUIStyle+0x194 (0x5cd15c); compiler-generated constructor 0x4954f0.
-// The frame of a sub window (TSubWindow, DialogWindow.cpp).
+// GUIStyle+0x194. The frame of a sub window (TSubWindow,
+// DialogWindow.cpp).
 struct TSubWindowProperties {
 	TRect Icon;               // +0x00, the icon's area (TSubWindow::SetIcon)
 	TGUIPoint CloseButton;    // +0x10
@@ -390,14 +385,14 @@ struct TSubWindowProperties {
 	TRect Title;              // +0x28, the title's area (TSubWindow::SetTitle, DialogWindow.cpp)
 	TFont TitleFont;          // +0x38
 	int MinimizedHeight;      // +0x4c, the height of a minimized window (TSubWindow::SetSize)
-	TRect Body;               // +0x50, the body's area, also passed to FitToChild (0x4882c0)
+	TRect Body;               // +0x50, the body's area, also passed to FitToChild
 	TRect Resizer1;           // +0x60, the area of the first resizer (TSubWindow::SetSize)
 	TRect Resizer2;           // +0x70, the area of the second resizer
 	TRGBColor IconHighlight;  // +0x80, the highlight colour of a container's icon (TObjectIcon)
 };
 
-// GUIStyle+0x288 (0x5cd250); compiler-generated constructor 0x496180.
-// The inventory's view (TInventoryView, ContentWindows.cpp).
+// GUIStyle+0x288. The inventory's view (TInventoryView,
+// ContentWindows.cpp).
 struct TInventoryViewProperties {
 	int Width;                          // +0x00
 	int Height;                         // +0x04
@@ -410,8 +405,8 @@ struct TInventoryViewProperties {
 	TRect States;                       // +0x148, the area of the player states (TPlayerStates)
 };
 
-// GUIStyle+0x3e0, +0x428 (0x5cd3a8, 0x5cd3f0); compiler-generated constructor 0x495590.
-// The capacity and the soul points of the inventory (TCapacityLabel and TSoulLabel, ContentWindows.cpp).
+// GUIStyle+0x3e0, +0x428. The capacity and the soul points of the inventory (TCapacityLabel and
+// TSoulLabel, ContentWindows.cpp).
 struct TSkinProperties3E0 {
 	TRect Caption;     // +0x00, the caption ("Cap:", "Soul:"): only x and y are read
 	TFont CaptionFont; // +0x10
@@ -419,7 +414,7 @@ struct TSkinProperties3E0 {
 	TFont ValueFont;   // +0x34
 };
 
-// GUIStyle+0x5a0 (0x5cd568); compiler-generated constructor 0x495610.
+// GUIStyle+0x5a0.
 struct TStatusWindowProperties {
 	int Height;           // +0x00
 	TRect Pictures;       // +0x04, x, y: the position of skin 119; width, height: that of skin 122
@@ -430,8 +425,8 @@ struct TStatusWindowProperties {
 	TFont ValueFont;      // +0x54
 };
 
-// GUIStyle+0x688 (0x5cd650); compiler-generated constructor 0x495680.
-// A row of the battle window (TBattleWindowBody, ContentWindows.cpp).
+// GUIStyle+0x688. A row of the battle window (TBattleWindowBody,
+// ContentWindows.cpp).
 struct TBattleWindowProperties {
 	int RowHeight;                 // +0x00
 	TRect Outfit;                  // +0x04, the creature's outfit: its position, and its width as the size
@@ -444,8 +439,8 @@ struct TBattleWindowProperties {
 	TRGBColor OutfitHighlight;     // +0x68, the highlight colour passed to DrawOutfit
 };
 
-// GUIStyle+0x6fc (0x5cd6c4); compiler-generated constructor 0x495700.
-// The trade window (TTradeWindowBody and its parts, ContentWindows.cpp).
+// GUIStyle+0x6fc. The trade window (TTradeWindowBody and its parts,
+// ContentWindows.cpp).
 struct TTradeWindowProperties {
 	int MinimumHeight;            // +0x00
 	TRect Names;                  // +0x04, the names' area in the trade window's body (TTradeWindowBody::SetSize, ContentWindows.cpp)
@@ -469,7 +464,7 @@ struct TTradeWindowProperties {
 	TFont WaitFont;               // +0xf8
 };
 
-// GUIStyle+0x808 (0x5cd7d0); compiler-generated constructor 0x495870.
+// GUIStyle+0x808.
 struct TBuddylistWindowProperties {
 	int Data00;             // +0x00
 	int RowHeight;          // +0x04
@@ -481,7 +476,7 @@ struct TBuddylistWindowProperties {
 	TRGBColor NewColor;     // +0x54, a buddy who just came online
 };
 
-// GUIStyle+0x88c (0x5cd854); compiler-generated constructor 0x4958e0.
+// GUIStyle+0x88c.
 struct TButtonsProperties {
 	TFont Font;         // +0x00, the text of a button (TTextButton::Draw, DialogElements.cpp)
 	TFont DisabledFont; // +0x14
@@ -489,14 +484,14 @@ struct TButtonsProperties {
 	TGUIPoint Texture;  // +0x2c
 };
 
-// GUIStyle+0x8c4 (0x5cd88c); compiler-generated constructor 0x495950.
+// GUIStyle+0x8c4.
 struct TSkinProperties8C4 {
 	TFont Data00; // +0x00
 	TFont Data14; // +0x14
 	TFont Data28; // +0x28
 };
 
-// GUIStyle+0x900 (0x5cd8c8); compiler-generated constructor 0x4959e0.
+// GUIStyle+0x900.
 struct TCheckBoxProperties {
 	TGUIPoint Item;     // +0x00
 	TRect Label;        // +0x08, the text's area (DialogElements.cpp's TCheckBox)
@@ -504,8 +499,8 @@ struct TCheckBoxProperties {
 	TFont DisabledFont; // +0x2c
 };
 
-// GUIStyle+0x944 (0x5cd90c); compiler-generated constructor 0x495a60.
-// The edit lines (TEditLine and TEditText, DialogElements.cpp).
+// GUIStyle+0x944. The edit lines (TEditLine and TEditText,
+// DialogElements.cpp).
 struct TEditLineProperties {
 	TRGBColor Background;         // +0x00
 	TRGBColor DisabledBackground; // +0x0c
@@ -515,8 +510,8 @@ struct TEditLineProperties {
 	TRGBColor SelectionColor;     // +0x4c
 };
 
-// GUIStyle+0x9a0 (0x5cd968); compiler-generated constructor 0x495af0.
-// The list boxes (TListBox and TFontListBox, DialogElements.cpp).
+// GUIStyle+0x9a0. The list boxes (TListBox and TFontListBox,
+// DialogElements.cpp).
 struct TListBoxProperties {
 	TRGBColor Background;         // +0x00
 	TFont Font;                   // +0x0c
@@ -525,11 +520,11 @@ struct TListBoxProperties {
 	TFont SelectedFont;           // +0x30
 };
 
-// GUIStyle+0x9e8 (0x5cd9b0); compiler-generated constructor 0x495b70 (it
-// zeroes +0x04-+0xa7, so the types are open; these are ConsoleWindow.cpp's).
-// The console: its minimum height, the areas of the tab bar, the edit line
-// and the text, the button positions, the text window's area in its TConsole,
-// the selection colour and the font of the channels other than the default.
+// GUIStyle+0x9e8 (the constructor zeroes +0x04-+0xa7, so the types are open;
+// these are ConsoleWindow.cpp's). The console: its minimum height, the areas
+// of the tab bar, the edit line and the text, the button positions, the text
+// window's area in its TConsole, the selection colour and the font of the
+// channels other than the default.
 struct TConsoleWindowProperties {
 	int MinimumHeight;              // +0x00, the console's minimum height
 	TRect TabBar;                   // +0x04, the tab bar (SetChildArea)
@@ -549,8 +544,7 @@ struct TConsoleWindowProperties {
 	TFont InputFont;                // +0xa8, the edit line's font in a channel that accepts no messages (TConsoleWindow, ConsoleWindow.cpp)
 };
 
-// GUIStyle+0xaa4 (0x5cda6c); compiler-generated constructor 0x495c60.
-// A tab of the console (TTab, ConsoleWindow.cpp).
+// GUIStyle+0xaa4. A tab of the console (TTab, ConsoleWindow.cpp).
 struct TTabProperties {
 	int Width;          // +0x00
 	int Height;         // +0x04
@@ -562,9 +556,8 @@ struct TTabProperties {
 	TFont BlinkingFont; // +0x50, an unread tab while it blinks
 };
 
-// GUIStyle+0xb08 (0x5cdad0); compiler-generated constructor 0x4962c0.
-// The frame of a dialog (TDialog, Dialogs.cpp). Data64 and Data78 are the fonts of the dialogs' texts and labels;
-// they hold the same values and the code does not show how they differ.
+// GUIStyle+0xb08. The frame of a dialog (TDialog, Dialogs.cpp). Data64 and Data78 are the fonts of the dialogs'
+// texts and labels; they hold the same values and the code does not show how they differ.
 struct TDialogProperties {
 	int MinimumWidth;                 // +0x00
 	int MinimumHeight;                // +0x04
@@ -577,8 +570,8 @@ struct TDialogProperties {
 	TFont Data78;                     // +0x78
 };
 
-// GUIStyle+0xd3c (0x5cdd04); compiler-generated constructor 0x495d20.
-// The ignore list dialog (TIgnoreListDialog, Dialogs.cpp).
+// GUIStyle+0xd3c. The ignore list dialog (TIgnoreListDialog,
+// Dialogs.cpp).
 struct TIgnoreListDialogProperties {
 	int Width;                    // +0x00
 	int Height;                   // +0x04
@@ -602,8 +595,7 @@ struct TIgnoreListDialogProperties {
 	TRect AllowBuddies;           // +0xf4
 };
 
-// GUIStyle+0xe68 (0x5cde30); compiler-generated constructor 0x495e50.
-// The info dialog (CreateInfoDialog, Dialogs.cpp).
+// GUIStyle+0xe68. The info dialog (CreateInfoDialog, Dialogs.cpp).
 struct TInfoDialogProperties {
 	int Width;       // +0x00
 	int Height;      // +0x04
@@ -615,8 +607,8 @@ struct TInfoDialogProperties {
 	TRect Separator; // +0x54
 };
 
-// GUIStyle+0xf8c (0x5cdf54); compiler-generated constructor 0x4963a0.
-// The dialog that edits a VIP (TEditBuddyDialog, Dialogs.cpp).
+// GUIStyle+0xf8c. The dialog that edits a VIP (TEditBuddyDialog,
+// Dialogs.cpp).
 struct TEditBuddyDialogProperties {
 	int Width;                             // +0x00
 	int Height;                            // +0x04
@@ -629,8 +621,7 @@ struct TEditBuddyDialogProperties {
 	TRect Notify;                          // +0xb0
 };
 
-// GUIStyle+0x1084 (0x5ce04c); compiler-generated constructor 0x496430.
-// The help dialog (THelpDialog, Dialogs.cpp).
+// GUIStyle+0x1084. The help dialog (THelpDialog, Dialogs.cpp).
 struct THelpDialogProperties {
 	int Width;                     // +0x00
 	int Height;                    // +0x04
@@ -648,8 +639,8 @@ struct THelpDialogProperties {
 	TGUIPoint FAQLabel;            // +0x60
 };
 
-// GUIStyle+0x1114 (0x5ce0dc); compiler-generated constructor 0x495ee0.
-// The rule violation dialog (TRuleViolationDialog, Dialogs.cpp).
+// GUIStyle+0x1114. The rule violation dialog (TRuleViolationDialog,
+// Dialogs.cpp).
 struct TRuleViolationDialogProperties {
 	int Width;            // +0x00
 	int Height;           // +0x04
@@ -666,8 +657,7 @@ struct TRuleViolationDialogProperties {
 	TRect IPBanishment;   // +0xa8
 };
 
-// GUIStyle+0x1274 (0x5ce23c); compiler-generated constructor 0x4964a0.
-// The options dialog (TOptionsDialog, Dialogs.cpp).
+// GUIStyle+0x1274. The options dialog (TOptionsDialog, Dialogs.cpp).
 struct TOptionsDialogProperties {
 	int Width;                // +0x00
 	int Height;               // +0x04
@@ -686,8 +676,8 @@ struct TOptionsDialogProperties {
 	TRect Separator;          // +0x68
 };
 
-// GUIStyle+0x1394 (0x5ce35c); compiler-generated constructor 0x495fa0.
-// The advanced graphics dialog (TAdvancedGraphicsDialog, Dialogs.cpp).
+// GUIStyle+0x1394. The advanced graphics dialog
+// (TAdvancedGraphicsDialog, Dialogs.cpp).
 struct TAdvancedGraphicsDialogProperties {
 	int Width;                      // +0x00
 	int Height;                     // +0x04
@@ -703,7 +693,7 @@ struct TAdvancedGraphicsDialogProperties {
 	TGUIPoint CurrentFramerateText; // +0x70
 };
 
-// GUIStyle+0x470 (0x5cd438), PlayerStates in ContentWindows.cpp's assertion
+// GUIStyle+0x470, PlayerStates in ContentWindows.cpp's assertion
 // ("SkinProperties.PlayerStates.NumberOfIcons"); its constructor is inlined
 // into SkinProperties' (the extent of the block is a guess: the members
 // TPlayerStates reads). LargeRow and SmallRow hold the first icon's position
@@ -715,11 +705,11 @@ struct TPlayerStatesProperties {
 	int IconDistance;  // +0x24
 };
 
-// GUIStyle+0x4ac and +0x4fc (0x5cd474, 0x5cd4c4): the layout of the large and
-// the small combat controls (ContentWindows.cpp copies a whole block by
-// value): their height and width and the positions of the offensive,
-// balanced, defensive, stand, chase, secure, stop, options and help buttons.
-// The type and member names are ours.
+// GUIStyle+0x4ac and +0x4fc: the layout of the large and the small combat
+// controls (ContentWindows.cpp copies a whole block by value): their height
+// and width and the positions of the offensive, balanced, defensive, stand,
+// chase, secure, stop, options and help buttons. The type and member names
+// are ours.
 struct TCombatControlsProperties {
 	int Height;                       // +0x00
 	int Width;                        // +0x04
@@ -964,13 +954,13 @@ public:
 	TSkins &operator=(TSkins &&) = delete;
 	~TSkins() = default;
 
-	void InitSkins(); // 0x4e3cb0
-	void ExitSkins(); // 0x4e6da0
+	void InitSkins();
+	void ExitSkins();
 
 	// Data, in .bss order (Skins.cpp's), then GUI.cpp's.
-	int NumberOfSkins{};              // 0x71c450
-	std::unique_ptr<TSkin[]> Skins;   // 0x71c454 (issue #58: the table's only owner, a pointer as the original's)
-	TSkinProperties SkinProperties{}; // 0x5ccfc8, GUI.cpp's; filled by InitSkinProperties
+	int NumberOfSkins{};
+	std::unique_ptr<TSkin[]> Skins;   // issue #58: the table's only owner, a pointer as the original's
+	TSkinProperties SkinProperties{}; // GUI.cpp's; filled by InitSkinProperties
 };
 
 // The transition's access path (notes/decisions.md, "#104: TClient and the subsystem objects"): the one TClient's

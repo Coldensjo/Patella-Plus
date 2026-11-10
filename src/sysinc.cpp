@@ -1,13 +1,10 @@
-// sysinc.cpp: reconstructed from Tibia.exe 7.72 (0x4fcb90-0x4fd43f).
+// sysinc.cpp: reconstructed from Tibia.exe 7.72.
 //
 // System helpers: the millisecond clock, file checks, the PROGRAM_ERROR
 // texts, the clipboard with its buffer, and half of the encoded window title
-// and class name. The functions without line
-// evidence (the gap after SurfaceGL.cpp, 0x4fcb90-0x4fcd4f) come first, in
-// binary order; they use only this file's data (0x71dbc4-0x71dbcc). The
-// asserted functions follow in line order. 0x4fcd50-0x4fce4f is ATL header
-// code kept in this object (code page lookup, AtlThrow, a free list), not
-// part of the source; names.tsv lists it as kind stl.
+// and class name. The functions without line evidence come first, in binary
+// order; they use only this file's data. The asserted functions follow in
+// line order.
 
 #include "sysinc.h"
 #include "BuildConfig.h"
@@ -31,47 +28,43 @@
 // class name ("TibiaClient"); the keys are Player.cpp's. First in this
 // object's .rdata, before the PROGRAM_ERROR texts (owner: notes/decisions.md,
 // "Unknown-owner data (issue #12)"; low).
-const std::array<int, 8> TitleCode = {68, 75, 129, 81, 98, 78, 96, 141};                         // 0x5733a4
-const std::array<int, 11> ClassNameCode = {57, 193, 225, 58, 140, 118, 195, 214, 239, 244, 137}; // 0x5733c4
+const std::array<int, 8> TitleCode = {68, 75, 129, 81, 98, 78, 96, 141};
+const std::array<int, 11> ClassNameCode = {57, 193, 225, 58, 140, 118, 195, 214, 239, 244, 137};
 
 namespace {
 
 // Data, in .bss order.
-char *ClipboardBuffer;            // 0x71dbc4
-unsigned int ClipboardBufferSize; // 0x71dbc8
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's initialiser (0x55a130) reads the clock before main; the platform's clock does not throw
-int StartTime = (int)patella::platform::Platform().Clock.Milliseconds(); // 0x71dbcc, initialiser at 0x55a130
+char *ClipboardBuffer;
+unsigned int ClipboardBufferSize;
+// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's initialiser reads the clock before main; the platform's clock does not throw
+int StartTime = (int)patella::platform::Platform().Clock.Milliseconds();
 
 } // namespace
 
-// 0x4fcb90
 int GetMilliseconds()
 {
 	return (int)patella::platform::Platform().Clock.Milliseconds() - StartTime;
 }
 
-// 0x4fcba0
 bool FileExists(const char *FileName)
 {
 	return MsvcAccess(FileName, 0) == 0;
 }
 
-// 0x4fcbc0
 bool RemoveFile(const char *FileName)
 {
 	return std::remove(FileName) == 0;
 }
 
-// 0x4fcbe0. True when the clipboard has no text. Since Patella-Modern issue
-// #112 the clipboard's text is its UTF-16 text (CF_UNICODETEXT; Windows makes
-// it from CF_TEXT and CF_TEXT from it, so the one is there when the other is).
+// True when the clipboard has no text. Since Patella-Modern issue #112 the clipboard's text is its UTF-16 text
+// (CF_UNICODETEXT; Windows makes it from CF_TEXT and CF_TEXT from it, so the one is there when the other is).
 // Since issue #119 the clipboard is the platform's IClipboard (platform/Clipboard.h; Win32's: TWin32Clipboard).
 bool IsClipboardEmpty()
 {
 	return !patella::platform::Platform().Clipboard.HasText();
 }
 
-// 0x4fcbf0. What failed, for a PROGRAM_ERROR code (Player.cpp).
+// What failed, for a PROGRAM_ERROR code (Player.cpp).
 const char *GetErrorText(int Error)
 {
 	switch (Error) {
@@ -118,7 +111,7 @@ constexpr auto BugReportHint = patella::buildconfig::ComposeText<patella::buildc
 
 } // namespace
 
-// 0x4fcc90. What to do about it.
+// What to do about it.
 const char *GetErrorHint(int Error)
 {
 	switch (Error) {
@@ -150,7 +143,7 @@ const char *GetErrorHint(int Error)
 	}
 }
 
-// 0x4fcd00. Also seeds rand.
+// Also seeds rand.
 void InitSysinc()
 {
 	ClipboardBuffer = new char[1024];
@@ -158,14 +151,14 @@ void InitSysinc()
 	srand(patella::platform::Platform().Clock.Milliseconds());
 }
 
-// 0x4fcd30. The buffer comes from new but is released with free.
+// The buffer comes from new but is released with free.
 void ExitSysinc()
 {
 	free(ClipboardBuffer);
 	ClipboardBuffer = nullptr;
 }
 
-// 0x4fce50, line 63. Grows the buffer, keeping its contents.
+// Grows the buffer, keeping its contents.
 void ResizeClipboardBuffer(unsigned int Size)
 {
 	if (ClipboardBufferSize < Size) {
@@ -178,23 +171,17 @@ void ResizeClipboardBuffer(unsigned int Size)
 	}
 }
 
-// 0x4fcff0, line 104. The clipboard text in the buffer with CRs removed and
-// line breaks turned into spaces; NULL when the clipboard cannot be opened.
-// Odd behaviour kept: each removed CR moves Size-i bytes from i+1, one byte
-// past the clipboard data.
-// Patella-Modern issue #112 (plan D4): the original read CF_TEXT, the text in
-// the system's ANSI code page (or the code page of the input language that
-// put it there); the client's text is Windows-1252 on every system, so the
-// clipboard's UTF-16 text is converted (types/Cp1252.h: '?' for a character
-// the code page does not have). Size is the converted text's with its NUL
-// (the original's was the CF_TEXT memory's, at least that).
-// Since issue #119 the clipboard's calls (OpenClipboard to CloseClipboard, the
-// conversion with them) are the platform's IClipboard::Text (platform/
-// Clipboard.h; Win32's: TWin32Clipboard, the same calls): the clipboard is
-// closed before the buffer is filled, and a clipboard without text gives an
-// empty text, Size 1 (the original's Size 0 and a NUL in the buffer: the same
-// buffer).
-// GCC's analyzer (Debug, issue #111): the original's read one byte past the text at a removed CR (above), kept.
+// The clipboard text in the buffer with CRs removed and line breaks turned into spaces; NULL when the clipboard
+// cannot be opened. Odd behaviour kept: each removed CR moves Size-i bytes from i+1, one byte past the
+// clipboard data. Patella-Modern issue #112 (plan D4): the original read CF_TEXT, the text in the system's ANSI
+// code page (or the code page of the input language that put it there); the client's text is Windows-1252 on
+// every system, so the clipboard's UTF-16 text is converted (types/Cp1252.h: '?' for a character the code page
+// does not have). Size is the converted text's with its NUL (the original's was the CF_TEXT memory's, at least
+// that). Since issue #119 the clipboard's calls (OpenClipboard to CloseClipboard, the conversion with them) are
+// the platform's IClipboard::Text (platform/ Clipboard.h; Win32's: TWin32Clipboard, the same calls): the
+// clipboard is closed before the buffer is filled, and a clipboard without text gives an empty text, Size 1
+// (the original's Size 0 and a NUL in the buffer: the same buffer). GCC's analyzer (Debug, issue #111): the
+// original's read one byte past the text at a removed CR (above), kept.
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-out-of-bounds\"")
 char *GetClipboardText()
@@ -217,12 +204,11 @@ char *GetClipboardText()
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// 0x4fd1b0, lines 139-143. Since Patella-Modern issue #112 the text (the
-// client's, Windows-1252) goes on the clipboard as UTF-16 (CF_UNICODETEXT),
-// instead of the original's CF_TEXT, so that another program reads it as the client
-// shows it whatever the system's ANSI code page and the input language.
-// Since issue #119 the platform's IClipboard::SetText (TWin32Clipboard: the
-// same calls).
+// Since Patella-Modern issue #112 the text (the client's, Windows-1252) goes on the
+// clipboard as UTF-16 (CF_UNICODETEXT), instead of the original's CF_TEXT, so that
+// another program reads it as the client shows it whatever the system's ANSI code
+// page and the input language. Since issue #119 the platform's IClipboard::SetText
+// (TWin32Clipboard: the same calls).
 bool SetClipboardText(const char *Text)
 {
 	return patella::platform::Platform().Clipboard.SetText(Text);

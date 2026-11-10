@@ -1,5 +1,4 @@
-// TMyException: the client's exception type, the only game class with RTTI.
-// Implemented at 0x508300-0x508968, between Talk.cpp and Utils.cpp; the
+// TMyException: the client's exception type, the only game class with RTTI. The
 // original file name is unknown ("TMyException" fits the alphabetical link
 // order, which puts this file after Talk and before TRSA, TXTEA and Utils).
 //
@@ -33,9 +32,8 @@ public:
 	TMyException(std::string Message, const patella::TSourceLocation &Location);
 	// A returned failure thrown after all: the same message and location.
 	explicit TMyException(TError Error);
-	virtual ~TMyException(); // 0x508300; scalar deleting destructor at 0x404570
+	virtual ~TMyException();
 
-	// Inline; the original's GetMessage was emitted at 0x4042f0 and 0x4d9110.
 	[[nodiscard]] std::string GetMessage() const { return Message; }
 	[[nodiscard]] const patella::TSourceLocation &GetLocation() const { return Location; }
 
@@ -46,11 +44,11 @@ private:
 
 namespace patella {
 
-// The text of the original's constructor 0x508400: "<file> <line>: <Kind>[ (<Name1> = <Value1>)][ (<Name2> =
+// The text of the original's constructor: "<file> <line>: <Kind>[ (<Name1> = <Value1>)][ (<Name2> =
 // <Value2>)][, reason:\n<Reason>]", the file without its path, each part only when its text is not empty.
 std::string ErrorText(std::string_view File, int Line, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, std::string_view Reason);
-// The text of the wrapping constructor 0x5086a0: the same, with the caught exception's message as the reason, which
+// The text of the wrapping constructor: the same, with the caught exception's message as the reason, which
 // is always appended (", reason:\n" also before an empty message).
 std::string ErrorText(std::string_view File, int Line, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, const TMyException &Inner);
@@ -72,7 +70,7 @@ TError MakeFailure(const TSourceLocation &Location, std::string_view Kind, std::
 // The original's handlers around InitInstance and Run (Player.cpp, after its PROGRAM_ERROR handler), in one place since
 // issue #159. Called inside a catch; throws the TMyException, for HandleException, that the exception being handled
 // becomes, with Location as the site. Its texts are the original's. An out-of-memory error, std::bad_alloc here, says
-// "unknown exception occurred": the original's operator new was MFC's (nafxcw.lib, 0x5237e7), whose handler threw a
+// "unknown exception occurred": the original's operator new was MFC's (nafxcw.lib), whose handler threw a
 // CMemoryException *, which only the original's catch (...) took. Its "bad_alloc_exception occurred" was never that error's.
 [[noreturn]] void ThrowTopLevelError(const TSourceLocation &Location);
 

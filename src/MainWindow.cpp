@@ -1,4 +1,4 @@
-// MainWindow.cpp: reconstructed from Tibia.exe 7.72 (0x4ac010-0x4b07c6).
+// MainWindow.cpp: reconstructed from Tibia.exe 7.72.
 //
 // The main game window (TMainWindow), the start window shown before the
 // game (TStartWindow) and the splitter above the console (TSplitter); see
@@ -18,10 +18,9 @@
 // sub-windows of both columns in the preferences; entering the game opens
 // them again.
 //
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none
-// apart from Draw's, which turns an error of the start window into
-// PROGRAM_ERROR 12.
+// The original's catch wrappers (common.h) are gone since issue #78; the
+// functions here have no handlers apart from Draw's, which turns an error of
+// the start window into PROGRAM_ERROR 12.
 
 #include "MainWindow.h"
 #include "ContentWindows.h"
@@ -53,13 +52,11 @@
 // the window tree owns its children, the message queue its blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
-// The .bss before NoCallback (OpenURLCallback 0x5d16a0, SetDisplayModeCallback 0x5d16a4, ExitProgramCallback 0x5d16a8,
-// ModalWindow 0x5d16ac, MainWindow 0x5d16b0) is TGUI's (GUI.h, issue #107).
+// The .bss before NoCallback (OpenURLCallback, SetDisplayModeCallback, ExitProgramCallback, ModalWindow, MainWindow)
+// is TGUI's (GUI.h, issue #107).
 
 namespace {
 
-// At 0x5d16b4, constructed by the static initialiser 0x559f30 as
-// TCallback(NULL, 0) and never used (MapWindow.cpp has one too).
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
 TCallback NoCallback(nullptr, 0);
 
@@ -67,9 +64,9 @@ TCallback NoCallback(nullptr, 0);
 
 // --- TMainWindow -----------------------------------------------------------
 
-// 0x4b03c0, line 85. The size is set before the children exist (TWindow's
-// SetSize, not the own one); ChangeMode creates them. Ctrl+F and Alt+Enter
-// switch between windowed and fullscreen mode.
+// The size is set before the children exist (TWindow's SetSize, not the
+// own one); ChangeMode creates them. Ctrl+F and Alt+Enter switch between
+// windowed and fullscreen mode.
 TMainWindow::TMainWindow(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
@@ -78,15 +75,14 @@ TMainWindow::TMainWindow(int Width, int Height)
 	AddHotkey(KEY_ALT | KEY_RETURN, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
 }
 
-// 0x4ac010. Its work is the close since issue #108.
+// Its work is the close since issue #108.
 TMainWindow::~TMainWindow()
 {
 	CheckClosed("TMainWindow");
 }
 
-// The destructor's work until issue #108 (0x4ac010; no exception frame of its
-// own; ChangeMode starts with the same code): the open sub-windows go into the
-// preferences; then the children.
+// The destructor's work until issue #108 (ChangeMode starts with the same
+// code): the open sub-windows go into the preferences; then the children.
 void TMainWindow::OnClose()
 {
 	try {
@@ -116,9 +112,9 @@ void patella::TGUI::AbandonWindows() noexcept
 	(void)MainWindow.release(); // NOLINT(bugprone-unused-return-value): left allocated on purpose (GUI.h)
 }
 
-// 0x4ac090. Called by Control.cpp's ExitControl. Each window is closed and then
-// freed where the original deleted it (issue #108); a close that throws leaves
-// its window allocated (the main window in its owner).
+// Called by Control.cpp's ExitControl. Each window is closed and then freed
+// where the original deleted it (issue #108); a close that throws leaves its
+// window allocated (the main window in its owner).
 void patella::TGUI::ExitMainWindow()
 {
 	if (MainWindow != nullptr)
@@ -138,10 +134,10 @@ void ExitMainWindow()
 	patella::bridge::GUI().ExitMainWindow();
 }
 
-// 0x4ac0f0, line 127. Out of the game an error while drawing the start
-// window becomes PROGRAM_ERROR 12 (the code is shared with the surface
-// errors of Control.cpp, Player.cpp and Surface.cpp). In the game the
-// children are drawn in a fixed order, the map frame after the right column.
+// Out of the game an error while drawing the start window becomes
+// PROGRAM_ERROR 12 (the code is shared with the surface errors of
+// Control.cpp, Player.cpp and Surface.cpp). In the game the children are
+// drawn in a fixed order, the map frame after the right column.
 void TMainWindow::Draw(int Surface, int x, int y)
 {
 	if (!InGame) {
@@ -159,8 +155,8 @@ void TMainWindow::Draw(int Surface, int x, int y)
 	Splitter->Draw(Surface, Splitter->OffsetX + x, Splitter->OffsetY + y);
 }
 
-// 0x4ac340, line 177. The map gets the height the console leaves, at least
-// its minimum height and at most what the console's minimum height leaves.
+// The map gets the height the console leaves, at least its minimum height
+// and at most what the console's minimum height leaves.
 void TMainWindow::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
@@ -197,9 +193,9 @@ void TMainWindow::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x4aea50, line 203. Only in connection state 8 (in the game): the arrow
-// keys and the keypad walk (the diagonals with Diagonal set), Ctrl with an
-// arrow key turns, every other key goes to the console.
+// Only in connection state 8 (in the game): the arrow keys and the keypad
+// walk (the diagonals with Diagonal set), Ctrl with an arrow key turns,
+// every other key goes to the console.
 void TMainWindow::KeyPress(int Key)
 {
 	if (GetConnectionState() != CONNECTION_IN_GAME)
@@ -223,12 +219,10 @@ void TMainWindow::KeyPress(int Key)
 	}
 }
 
-// 0x4aed10, lines 308-339. The events of the hotkeys, the buttons of the
-// side-bar windows and the menus. 0x17 and 0x18 swap the two inventory
-// windows; 0xe, 0xf and 0x16 open or close the skill, battle and VIP
-// windows; 0x1d gives up a connection; 0x1f8 switches between windowed and
-// fullscreen mode (a fullscreen mode below 640x480 is raised to it first).
-// GCC's analyzer (issue #111): the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
+// The events of the hotkeys, the buttons of the side-bar windows and the menus. 0x17 and 0x18 swap the two inventory windows; 0xe,
+// 0xf and 0x16 open or close the skill, battle and VIP windows; 0x1d gives up a connection; 0x1f8 switches between windowed and
+// fullscreen mode (a fullscreen mode below 640x480 is raised to it first). GCC's analyzer (issue #111): the message queue owns the
+// block it gets as an integer (AddMessage; the message's handler deletes it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMainWindow::HandleEvent(int Event)
@@ -370,14 +364,14 @@ void TMainWindow::HandleEvent(int Event)
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// 0x4af5e0, line 463. Rebuilds the window for the game (InGame) or for the
-// start window. The open sub-windows are stored in the preferences first and
-// read back when the game starts: the side-bar windows 1-5 (missing ones are
-// added: 5, the inventory, 4 and 3; InsertChild puts each on top) and the
-// skill, battle and VIP windows (not the trade window). The member pointers
-// are not initialised before the first call: only FirstChild guards them.
-// SideBar is not cleared with the others: out of the game it points to the
-// deleted frame (never used there).
+// Rebuilds the window for the game (InGame) or for the start window. The
+// open sub-windows are stored in the preferences first and read back when
+// the game starts: the side-bar windows 1-5 (missing ones are added: 5, the
+// inventory, 4 and 3; InsertChild puts each on top) and the skill, battle
+// and VIP windows (not the trade window). The member pointers are not
+// initialised before the first call: only FirstChild guards them. SideBar is
+// not cleared with the others: out of the game it points to the deleted
+// frame (never used there).
 void TMainWindow::ChangeMode(bool InGame)
 {
 	if (FirstChild != nullptr && this->InGame) {
@@ -520,26 +514,24 @@ void TMainWindow::ChangeMode(bool InGame)
 	SetConsoleActive(patella::bridge::GUI().ModalWindow == nullptr);
 }
 
-// 0x4ac610, line 475. The console's new height, at least its minimum; the
-// caller lays out the window again.
+// The console's new height, at least its minimum; the caller lays out the
+// window again.
 void TMainWindow::ResizeConsole(int ConsoleHeight) const
 {
-	// One call of getMinimumHeight (0x4ac642; issue #34).
+	// One call of getMinimumHeight (issue #34).
 	const int MinimumHeight = Console->getMinimumHeight();
 	if (ConsoleHeight < MinimumHeight)
 		ConsoleHeight = MinimumHeight;
 	Console->SetSize(Console->Width, ConsoleHeight);
 }
 
-// 0x4ac7c0. The try block is gone (nothing in it can throw); the function
-// shares its exception tables with TSplitter::Arrange.
 int TMainWindow::GetConsoleWindowHeight() const
 {
 	return Console->Height;
 }
 
-// 0x4ac7f0, line 503. SetPlayerDestination returns 1 when the step can be
-// walked and 2 when the player has to stop.
+// SetPlayerDestination returns 1 when the step can be walked and 2 when
+// the player has to stop.
 void TMainWindow::Walk(int dx, int dy, bool Diagonal)
 {
 	int x, y, z;
@@ -556,13 +548,11 @@ void TMainWindow::Walk(int dx, int dy, bool Diagonal)
 	}
 }
 
-// 0x4ac9e0, lines 511-539. The assertion comes before the try block. An
-// open container window is filled again: the body is updated (scrolled to
-// the top, its counts, icon, title and "up" button; ContentWindows.cpp) and,
-// while it is minimized, the window gets the name and the object of the
-// container and the "up" state of a container that has a parent here.
-// GCC's analyzer (Debug, issue #111) takes SkinProperties()' styles, set by InitSkinProperties, as uninitialized, and
-// the title and icon SetTitle and SetIcon take as leaks (the window owns them).
+// An open container window is filled again: the body is updated (scrolled to the top, its counts, icon, title and
+// "up" button; ContentWindows.cpp) and, while it is minimized, the window gets the name and the object of the
+// container and the "up" state of a container that has a parent here. GCC's analyzer (Debug, issue #111) takes
+// SkinProperties()' styles, set by InitSkinProperties, as uninitialized, and the title and icon SetTitle and
+// SetIcon take as leaks (the window owns them).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-use-of-uninitialized-value\"")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
@@ -588,7 +578,6 @@ void TMainWindow::OpenContainer(int Container) const
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// 0x4acdb0, line 552
 void TMainWindow::CloseContainer(int Container) const
 {
 	if (DialogWindow != nullptr) {
@@ -598,7 +587,6 @@ void TMainWindow::CloseContainer(int Container) const
 	}
 }
 
-// 0x4afec0, lines 560-565. Both assertions come before the try block.
 void TMainWindow::OpenTrade() const
 {
 	PATELLA_ASSERT(DialogWindow!=nullptr);
@@ -606,8 +594,7 @@ void TMainWindow::OpenTrade() const
 	OpenContentWindow(TRADE_WINDOW);
 }
 
-// 0x4acf60, lines 576-579. The trade window's body gets event 0x15 (the
-// counter offer arrived).
+// The trade window's body gets event 0x15 (the counter offer arrived).
 void TMainWindow::UpdateTrade() const
 {
 	const TSubWindow *Window = static_cast<TSubWindow *>(DialogWindow->GetContentWindow(TRADE_WINDOW));
@@ -617,13 +604,11 @@ void TMainWindow::UpdateTrade() const
 	}
 }
 
-// 0x4b0230, line 590
 void TMainWindow::CloseTrade() const
 {
 	CloseContentWindow(TRADE_WINDOW);
 }
 
-// 0x4ad1e0, lines 606-610. The jump table 0x4ad48c has the four cases.
 void TMainWindow::OpenContentWindow(int Identifier) const
 {
 	if (DialogWindow->GetContentWindow(Identifier) == nullptr) {
@@ -648,7 +633,6 @@ void TMainWindow::OpenContentWindow(int Identifier) const
 	}
 }
 
-// 0x4ad4a0, line 621
 void TMainWindow::CloseContentWindow(int Identifier) const
 {
 	TContentWindow *Window = DialogWindow->GetContentWindow(Identifier);
@@ -656,8 +640,8 @@ void TMainWindow::CloseContentWindow(int Identifier) const
 		DialogWindow->DeleteChild(Window);
 }
 
-// 0x4ad650, line 632. The console takes the keyboard while no modal window
-// is open (Control.cpp passes ModalWindow==NULL).
+// The console takes the keyboard while no modal window is open
+// (Control.cpp passes ModalWindow==NULL).
 void TMainWindow::SetConsoleActive(bool Active) const
 {
 	if (Console != nullptr)
@@ -666,8 +650,8 @@ void TMainWindow::SetConsoleActive(bool Active) const
 
 // --- TStartWindow ----------------------------------------------------------
 
-// 0x4ad7f0, line 671. The buttons sit on a plain window that the frame
-// (skins 0x34-0x3c) surrounds.
+// The buttons sit on a plain window that the frame (skins 0x34-0x3c)
+// surrounds.
 TStartWindow::TStartWindow()
 {
 	TWindow *Panel = new TWindow;
@@ -692,8 +676,8 @@ TStartWindow::TStartWindow()
 	Frame->FitToWindow();
 }
 
-// 0x4adc60, line 691. Picture 1, the start screen, goes to the 640x480
-// surface 2 and is stretched over the window.
+// Picture 1, the start screen, goes to the 640x480 surface 2 and is
+// stretched over the window.
 void TStartWindow::Draw(int Surface, int x, int y)
 {
 	DrawPicture(2, 0, 0, 1);
@@ -701,14 +685,13 @@ void TStartWindow::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 }
 
-// 0x4ade70, line 703
 void TStartWindow::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
 	SetChildPosition(Frame, SkinProperties().StartWindow.FramePosition.x, SkinProperties().StartWindow.FramePosition.y);
 }
 
-// 0x4ae030, line 731. The buttons work only while there is no connection.
+// The buttons work only while there is no connection.
 void TStartWindow::HandleEvent(int Event)
 {
 	const patella::TGUI &GUI = patella::bridge::GUI();
@@ -737,7 +720,6 @@ void TStartWindow::HandleEvent(int Event)
 
 // --- TSplitter -------------------------------------------------------------
 
-// 0x4ae240, line 749
 TSplitter::TSplitter()
 {
 	Dragging = false;
@@ -747,8 +729,7 @@ TSplitter::TSplitter()
 		DrawingList[i].skin = SKIN_NONE;
 }
 
-// 0x4ae430. Skins 8 (top), 7 (middle, stretched) and 9 (bottom). As in
-// GetConsoleWindowHeight the try block is gone.
+// Skins 8 (top), 7 (middle, stretched) and 9 (bottom).
 void TSplitter::Arrange()
 {
 	DrawingList[0] = TDrawing(SKIN_FRAME_EDGE_BOTTOM, 0, 0, Width, Skins()[SKIN_FRAME_EDGE_BOTTOM].height, 0, 0);
@@ -756,9 +737,9 @@ void TSplitter::Arrange()
 	DrawingList[2] = TDrawing(SKIN_FRAME_EDGE_TOP, 0, Height - Skins()[SKIN_FRAME_EDGE_TOP].height, Width, Skins()[SKIN_FRAME_EDGE_TOP].height, 0, 0);
 }
 
-// 0x4ae530, line 780. Mouse cursor 2 is the vertical size arrow. While
-// dragging, the console follows the mouse; the global MainWindow is used,
-// not the parent. x has no name in the catch block.
+// Mouse cursor 2 is the vertical size arrow. While dragging, the console
+// follows the mouse; the global MainWindow is used, not the parent. x has
+// no name in the catch block.
 bool TSplitter::MouseMove([[maybe_unused]] int x, int y)
 {
 	const patella::TGUI &GUI = patella::bridge::GUI();
@@ -770,7 +751,6 @@ bool TSplitter::MouseMove([[maybe_unused]] int x, int y)
 	return true;
 }
 
-// 0x4ae700, line 795
 bool TSplitter::LeftButtonDown(int x, int y, [[maybe_unused]] int Flags)
 {
 	SetCapture(nullptr);
@@ -780,7 +760,7 @@ bool TSplitter::LeftButtonDown(int x, int y, [[maybe_unused]] int Flags)
 	return true;
 }
 
-// 0x4ae8b0, line 807. ReleaseCapture clears Dragging.
+// ReleaseCapture clears Dragging.
 bool TSplitter::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
 	if (Dragging)
@@ -790,7 +770,7 @@ bool TSplitter::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[m
 
 // --- The main window -------------------------------------------------------
 
-// 0x4b05b0, lines 822-828. Called by CMainFrame::OnCreate.
+// Called by CMainFrame::OnCreate.
 void patella::TGUI::InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
 	void (*OpenURL)(const char *URL))
 {

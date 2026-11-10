@@ -7,7 +7,7 @@
 // the layout unfreezes (M6): TCreature::SkullTime (+0x98, Creatures.h) and TTalkLine::Time (Talk.h). They are
 // Time32, and each is written through StoreTime32 and read through LoadTime32, nowhere else.
 //
-// StoreTime32 keeps what the original kept: its time() (MSVC 7.1's, Tibia.exe 0x5121ea, decompiled with REA) was
+// StoreTime32 keeps what the original kept: its time() (MSVC 7.1's, decompiled with REA) was
 // the 64-bit count of seconds from GetSystemTimeAsFileTime truncated to its low 32 bits, never -1. So a field holds
 // the time itself up to 2038-01-19 03:14:07 UTC (INT32_MAX), then the original's wrapped value: negative up to
 // 2106-02-07 06:28:15 UTC, then from 0 again. The same on every platform (the UCRT's _time32, -1 after 2038-01-18

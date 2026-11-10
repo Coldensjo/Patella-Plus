@@ -1,15 +1,9 @@
-// Preferences.cpp: reconstructed from Tibia.exe 7.72 (0x4db2a0-0x4df53f).
+// Preferences.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The functions without line evidence (0x4db2a0-0x4dc170, the gap after
-// Player.cpp) come first, in binary order; they use only Preferences data
-// (0x719e70-0x71c44f, after Player.cpp's last global at 0x719e6c, and
-// 0x5c2558-0x5c255f in .data). The asserted functions follow in line order,
+// The functions without line evidence come first, in binary order. The asserted functions follow in line order,
 // which is also their binary order. None of them has a try block.
 //
-// The Tibia.cfg loader, saver and ExitPreferences (0x4ddc00-0x4df53f, in the
-// gap before Script.cpp) use the same data and end the file, in binary
-// order. The inline TReadScriptFile/TWriteScriptFile code after them
-// (0x4df550-0x4df6c9) is Script.h's, kept from this object.
+// The Tibia.cfg loader, saver and ExitPreferences end the file, in binary order.
 //
 // Patella-Modern issue #45: Patella.ini is the x64 client's only settings file.
 // The original's loader and saver are ReadTibiaCfg and WriteTibiaCfg: the first
@@ -57,134 +51,114 @@ static_assert(HOTKEYS == patella::settings::PreferenceHotkeys && SKILLS == patel
 
 namespace patella {
 
-// 0x4db2a0
 bool TPreferences::GetTestServerLogin() const
 {
 	return TestServerLogin;
 }
 
-// 0x4db2b0
 void TPreferences::SetTestServerLogin(bool Value)
 {
 	TestServerLogin = Value;
 }
 
-// 0x4db2c0
 void TPreferences::SetViewMode(int Value)
 {
 	ViewMode = Value;
 }
 
-// 0x4db2d0
 void TPreferences::SetFullscreenMode(const TFullscreenMode *Mode)
 {
 	FullscreenMode = *Mode;
 }
 
-// 0x4db300
 void TPreferences::SetWindowsMousepointer(bool Value)
 {
 	WindowsMousepointer = Value;
 }
 
-// 0x4db310
 void TPreferences::SetLightEffects(bool Value)
 {
 	LightEffects = Value;
 }
 
-// 0x4db320
 void TPreferences::SetTextualEffects(bool Value)
 {
 	TextualEffects = Value;
 }
 
-// 0x4db330
 void TPreferences::SetCreatureInfo(int Value)
 {
 	CreatureInfo = Value;
 }
 
-// 0x4db340
 void TPreferences::SetNoStretching(bool Value)
 {
 	NoStretching = Value ? 1 : 0;
 }
 
-// 0x4db360. Only takes effect while the option has never been set.
+// Only takes effect while the option has never been set.
 void TPreferences::SetDefaultNoStretching(bool Value)
 {
 	if (NoStretching == 2)
 		NoStretching = Value ? 1 : 0;
 }
 
-// 0x4db380
 void TPreferences::SetConfineFramerate(int Value)
 {
 	ConfineFramerate = Value;
 }
 
-// 0x4db390
 void TPreferences::SetEngine(int Value)
 {
 	Engine = Value;
 }
 
-// 0x4db3a0
 int TPreferences::GetViewMode() const
 {
 	return ViewMode;
 }
 
-// 0x4db3b0
 TFullscreenMode *TPreferences::GetFullscreenMode()
 {
 	return &FullscreenMode;
 }
 
-// 0x4db3c0
 bool TPreferences::GetWindowsMousepointer() const
 {
 	return WindowsMousepointer;
 }
 
-// 0x4db3d0
 bool TPreferences::GetLightEffects() const
 {
 	return LightEffects;
 }
 
-// 0x4db3e0
 bool TPreferences::GetTextualEffects() const
 {
 	return TextualEffects;
 }
 
-// 0x4db3f0
 int TPreferences::GetCreatureInfo() const
 {
 	return CreatureInfo;
 }
 
-// 0x4db400. "Not set yet" (2) reads as false.
+// "Not set yet" (2) reads as false.
 bool TPreferences::GetNoStretching() const
 {
 	return NoStretching == 1;
 }
 
-// 0x4db410
 int TPreferences::GetConfineFramerate() const
 {
 	return ConfineFramerate;
 }
 
-// 0x4db420
 int TPreferences::GetEngine() const
 {
 	return Engine;
 }
 
-// 0x4db430
 void TPreferences::SetWindowedMode(int x, int y, int Width, int Height, bool Maximized)
 {
 	WindowedX = x;
@@ -194,7 +168,6 @@ void TPreferences::SetWindowedMode(int x, int y, int Width, int Height, bool Max
 	WindowedMaximized = Maximized;
 }
 
-// 0x4db470
 void TPreferences::GetWindowedMode(int *x, int *y, int *Width, int *Height, bool *Maximized) const
 {
 	*x = WindowedX;
@@ -204,31 +177,26 @@ void TPreferences::GetWindowedMode(int *x, int *y, int *Width, int *Height, bool
 	*Maximized = WindowedMaximized;
 }
 
-// 0x4db4b0
 void TPreferences::SetConsoleHeight(int Value)
 {
 	ConsoleHeight = Value;
 }
 
-// 0x4db4c0
 int TPreferences::GetConsoleHeight() const
 {
 	return ConsoleHeight;
 }
 
-// 0x4db4d0
 void TPreferences::SetAutomapZoom(int Value)
 {
 	AutomapZoom = Value;
 }
 
-// 0x4db4e0
 int TPreferences::GetAutomapZoom() const
 {
 	return AutomapZoom;
 }
 
-// 0x4db4f0
 void TPreferences::SetBuddySortmethods(const int *Methods)
 {
 	BuddySortmethods[0] = Methods[0];
@@ -236,7 +204,6 @@ void TPreferences::SetBuddySortmethods(const int *Methods)
 	BuddySortmethods[2] = Methods[2];
 }
 
-// 0x4db510
 void TPreferences::GetBuddySortmethods(int *Methods) const
 {
 	Methods[0] = BuddySortmethods[0];
@@ -244,25 +211,21 @@ void TPreferences::GetBuddySortmethods(int *Methods) const
 	Methods[2] = BuddySortmethods[2];
 }
 
-// 0x4db530
 void TPreferences::SetBuddyHideOffline(bool Value)
 {
 	BuddyHideOffline = Value;
 }
 
-// 0x4db540
 bool TPreferences::GetBuddyHideOffline() const
 {
 	return BuddyHideOffline;
 }
 
-// 0x4db550
 void TPreferences::ClearOpenDialogs()
 {
 	NumberOfOpenDialogs = 0;
 }
 
-// 0x4db560
 const char *TPreferences::GetMotD() const
 {
 	if (MotD == nullptr)
@@ -270,91 +233,76 @@ const char *TPreferences::GetMotD() const
 	return MotD;
 }
 
-// 0x4db570
 void TPreferences::SetInfoMessages(bool Value)
 {
 	InfoMessages = Value;
 }
 
-// 0x4db580
 void TPreferences::SetEventMessages(bool Value)
 {
 	EventMessages = Value;
 }
 
-// 0x4db590
 void TPreferences::SetStatusMessages(bool Value)
 {
 	StatusMessages = Value;
 }
 
-// 0x4db5a0
 void TPreferences::SetTimeStamps(bool Value)
 {
 	TimeStamps = Value;
 }
 
-// 0x4db5b0
 void TPreferences::SetPrivateMessages(bool Value)
 {
 	PrivateMessages = Value;
 }
 
-// 0x4db5c0
 bool TPreferences::GetInfoMessages() const
 {
 	return InfoMessages;
 }
 
-// 0x4db5d0
 bool TPreferences::GetEventMessages() const
 {
 	return EventMessages;
 }
 
-// 0x4db5e0
 bool TPreferences::GetStatusMessages() const
 {
 	return StatusMessages;
 }
 
-// 0x4db5f0
 bool TPreferences::GetTimeStamps() const
 {
 	return TimeStamps;
 }
 
-// 0x4db600
 bool TPreferences::GetPrivateMessages() const
 {
 	return PrivateMessages;
 }
 
-// 0x4db610
 void TPreferences::ClearOpenChannels()
 {
 	OpenChannels.clear();
 }
 
-// 0x4db620
 void TPreferences::SetClassicControl(bool Value)
 {
 	ClassicControl = Value;
 }
 
-// 0x4db630
 void TPreferences::SetAutoChaseOff(bool Value)
 {
 	AutoChaseOff = Value;
 }
 
-// 0x4db640
 bool TPreferences::GetClassicControl() const
 {
 	return ClassicControl;
 }
 
-// 0x4db650
 bool TPreferences::GetAutoChaseOff() const
 {
 	return AutoChaseOff;
@@ -388,80 +336,69 @@ const char *TPreferences::GetRsaModulus() const
 		return ServerValues.RsaModulus.empty() ? patella::buildconfig::RsaModulus : ServerValues.RsaModulus.c_str();
 }
 
-// 0x4db660
 void TPreferences::SetAttackMode(int Value)
 {
 	AttackMode = Value;
 }
 
-// 0x4db670
 void TPreferences::SetChaseMode(int Value)
 {
 	ChaseMode = Value;
 }
 
-// 0x4db680. A byte, although it is saved as a number like AttackMode.
+// A byte, although it is saved as a number like AttackMode.
 void TPreferences::SetSecureMode(bool Value)
 {
 	SecureMode = Value;
 }
 
-// 0x4db690
 int TPreferences::GetAttackMode() const
 {
 	return AttackMode;
 }
 
-// 0x4db6a0
 int TPreferences::GetChaseMode() const
 {
 	return ChaseMode;
 }
 
-// 0x4db6b0
 bool TPreferences::GetSecureMode() const
 {
 	return SecureMode;
 }
 
-// 0x4db6c0
 void TPreferences::SetShowNewHints(bool Value)
 {
 	ShowNewHints = Value;
 }
 
-// 0x4db6d0
 bool TPreferences::GetShowNewHints() const
 {
 	return ShowNewHints;
 }
 
-// 0x4db6e0
 bool TPreferences::GetLevelBar() const
 {
 	return LevelBar;
 }
 
-// 0x4db6f0
 bool TPreferences::GetMagLevelBar() const
 {
 	return MagLevelBar;
 }
 
-// 0x4db700
 void TPreferences::SetLevelBar(bool Value)
 {
 	LevelBar = Value;
 }
 
-// 0x4db710
 void TPreferences::SetMagLevelBar(bool Value)
 {
 	MagLevelBar = Value;
 }
 
-// 0x4db720. Not reset: the windowed position and size, and the hotkey texts
-// past their first byte. MotD is cleared without being freed.
+// Not reset: the windowed position and size, and the hotkey texts past
+// their first byte. MotD is cleared without being freed.
 void TPreferences::SetDefaultPreferences(TTalkLists &Lists)
 {
 	memset(HotkeyAutoSend.data(), 0, sizeof(HotkeyAutoSend));
@@ -510,10 +447,7 @@ void TPreferences::SetDefaultPreferences(TTalkLists &Lists)
 	Lists.ClearIgnoreList();
 }
 
-// 0x4db880: vector<TContentWindowSize>::operator() (Container.h).
-// 0x4dba60: vector<TBuddy>::operator() (Container.h).
-
-// 0x4dbcd0. Updates the entry for ID or appends one.
+// Updates the entry for ID or appends one.
 void TPreferences::SetContentWindowSize(int ID, int Size)
 {
 	for (TContentWindowSize &Entry : ContentWindows) {
@@ -525,7 +459,7 @@ void TPreferences::SetContentWindowSize(int ID, int Size)
 	ContentWindows.push_back({ID, Size});
 }
 
-// 0x4dbd50. 0 for an unknown ID.
+// 0 for an unknown ID.
 int TPreferences::GetContentWindowSize(int ID)
 {
 	for (const TContentWindowSize &Entry : ContentWindows) {
@@ -535,8 +469,8 @@ int TPreferences::GetContentWindowSize(int ID)
 	return 0;
 }
 
-// 0x4dbd90. Returns a new array in *List (left unchanged when there are
-// none) and the number of entries.
+// Returns a new array in *List (left unchanged when there are none) and
+// the number of entries.
 int TPreferences::GetOpenDialogs(int **List)
 {
 	if (NumberOfOpenDialogs == 0)
@@ -547,7 +481,7 @@ int TPreferences::GetOpenDialogs(int **List)
 	return NumberOfOpenDialogs;
 }
 
-// 0x4dbde0. Like GetOpenDialogs.
+// Like GetOpenDialogs.
 int TPreferences::GetOpenChannels(int **List)
 {
 	if (OpenChannels.empty())
@@ -557,22 +491,17 @@ int TPreferences::GetOpenChannels(int **List)
 	return static_cast<int>(OpenChannels.size());
 }
 
-// 0x4dbe30. Does not check for duplicates.
+// Does not check for duplicates.
 void TPreferences::AddKnownHint(int Hint)
 {
 	KnownHints.push_back(Hint);
 }
 
-// 0x4dbe50
 bool TPreferences::IsKnownHint(int Hint)
 {
 	return std::ranges::find(KnownHints, Hint) != KnownHints.end();
 }
 
-// 0x4dbe90: vector<TContentWindowSize>::vector(min, max, block) (Container.h).
-// 0x4dc170: vector<TBuddy>::vector(min, max, block) (Container.h).
-
-// 0x4dc450, lines 223-225
 void TPreferences::SetHotkey(int Number, const char *Text, bool AutoSend)
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,HOTKEYS-1), Number);
@@ -582,7 +511,6 @@ void TPreferences::SetHotkey(int Number, const char *Text, bool AutoSend)
 	HotkeyAutoSend[Number] = AutoSend;
 }
 
-// 0x4dc7e0, line 235
 const char *TPreferences::GetHotkey(int Number, bool *AutoSend) const
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,HOTKEYS-1), Number);
@@ -590,7 +518,6 @@ const char *TPreferences::GetHotkey(int Number, bool *AutoSend) const
 	return Hotkeys[Number];
 }
 
-// 0x4dc950, line 393
 void TPreferences::AddOpenDialog(int Identifier)
 {
 	PATELLA_ASSERT_VALUES(Identifier>=0, Identifier);
@@ -598,8 +525,8 @@ void TPreferences::AddOpenDialog(int Identifier)
 	NumberOfOpenDialogs++;
 }
 
-// 0x4dcac0, line 425. Text is "<number>\n<message>"; without a line break
-// nothing changes. Returns true when the number differs from the last one.
+// Text is "<number>\n<message>"; without a line break nothing changes.
+// Returns true when the number differs from the last one.
 bool TPreferences::SetMotD(const char *Text)
 {
 	PATELLA_ASSERT(Text != nullptr);
@@ -617,14 +544,13 @@ bool TPreferences::SetMotD(const char *Text)
 	return New;
 }
 
-// 0x4dccb0, line 551
 void TPreferences::AddOpenChannel(int Identifier)
 {
 	PATELLA_ASSERT_VALUES(Identifier>=0, Identifier);
 	OpenChannels.push_back(Identifier);
 }
 
-// 0x4dce20, line 680. Index of the buddy entry, -1 if there is none.
+// Index of the buddy entry, -1 if there is none.
 int TPreferences::FindBuddy(int CharacterID)
 {
 	PATELLA_ASSERT_VALUES(CharacterID!=0, CharacterID);
@@ -635,7 +561,7 @@ int TPreferences::FindBuddy(int CharacterID)
 	return -1;
 }
 
-// 0x4dcfb0, lines 691-693. Deleted entries are not reused.
+// Deleted entries are not reused.
 void TPreferences::SetBuddy(int CharacterID, int Icon, const char *Description, bool Notify)
 {
 	PATELLA_ASSERT_VALUES(CharacterID!=0, CharacterID);
@@ -649,7 +575,7 @@ void TPreferences::SetBuddy(int CharacterID, int Icon, const char *Description, 
 	Buddy->Notify = Notify;
 }
 
-// 0x4dd360, line 711. Only marks the entry as free.
+// Only marks the entry as free.
 void TPreferences::DeleteBuddy(int CharacterID)
 {
 	PATELLA_ASSERT_VALUES(CharacterID!=0, CharacterID);
@@ -658,7 +584,6 @@ void TPreferences::DeleteBuddy(int CharacterID)
 		Buddies[static_cast<std::size_t>(Number)].CharacterID = 0;
 }
 
-// 0x4dd4c0, line 722
 int TPreferences::GetBuddyIcon(int CharacterID)
 {
 	PATELLA_ASSERT_VALUES(CharacterID!=0, CharacterID);
@@ -668,7 +593,7 @@ int TPreferences::GetBuddyIcon(int CharacterID)
 	return Buddies[static_cast<std::size_t>(Number)].Icon;
 }
 
-// 0x4dd640, line 733. NULL for an unknown character.
+// NULL for an unknown character.
 const char *TPreferences::GetBuddyDescription(int CharacterID)
 {
 	PATELLA_ASSERT_VALUES(CharacterID!=0, CharacterID);
@@ -679,7 +604,6 @@ const char *TPreferences::GetBuddyDescription(int CharacterID)
 	return BuddyDescription;
 }
 
-// 0x4dd7c0, line 744
 bool TPreferences::GetBuddyNotify(int CharacterID)
 {
 	PATELLA_ASSERT_VALUES(CharacterID!=0, CharacterID);
@@ -689,21 +613,19 @@ bool TPreferences::GetBuddyNotify(int CharacterID)
 	return Buddies[static_cast<std::size_t>(Number)].Notify;
 }
 
-// 0x4dd940, line 825
 bool TPreferences::GetSkillBar(int SkillNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(SkillNumber,0,SKILLS-1), SkillNumber);
 	return SkillBars[SkillNumber];
 }
 
-// 0x4ddaa0, line 850
 void TPreferences::SetSkillBar(int SkillNumber, bool Value)
 {
 	PATELLA_ASSERT_VALUES(In(SkillNumber,0,SKILLS-1), SkillNumber);
 	SkillBars[SkillNumber] = Value;
 }
 
-// 0x4ddc00 (InitPreferences in the original). Loads Tibia.cfg. Every key is tested on its own (no else), so
+// InitPreferences in the original. Loads Tibia.cfg. Every key is tested on its own (no else), so
 // a key runs one block only because the names differ. Unknown keys raise
 // no error but leave their value unread, which then fails as the next key.
 // Any error (also a missing file) resets everything to the defaults. In
@@ -939,7 +861,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 	PreferencesLoaded = true;
 }
 
-// 0x4de890 (SavePreferences in the original). Writes Tibia.cfg, only after the
+// SavePreferences in the original. Writes Tibia.cfg, only after the
 // options were loaded (ReadTibiaCfg or InitPreferences); errors are
 // ignored. Odd behaviour kept: one counter serves all loops, and the White
 // list does not reset it, so it starts at the number of buddy entries and writes a
@@ -1386,8 +1308,8 @@ void TPreferences::SavePreferences(TTalkLists &Lists)
 		patella::log::Warn("{} cannot be written: the options are not saved", FileName);
 }
 
-// 0x4df520. Frees the message of the day and saves the options (Patella.ini
-// since issue #45; Tibia.cfg in the original).
+// Frees the message of the day and saves the options (Patella.ini since
+// issue #45; Tibia.cfg in the original).
 void TPreferences::ExitPreferences(TTalkLists &Lists)
 {
 	if (MotD != nullptr)

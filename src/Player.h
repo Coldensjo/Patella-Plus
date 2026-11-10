@@ -28,7 +28,7 @@ public:
 };
 
 
-extern CPlayerApp theApp; // 0x719dc0, initialiser at 0x55a030
+extern CPlayerApp theApp;
 
 void GetWindowTitle(char *Text);     // "Tibia   "
 void GetWindowClassName(char *Text); // "TibiaClient"

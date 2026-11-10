@@ -1,4 +1,4 @@
-// Player.cpp: reconstructed from Tibia.exe 7.72 (0x4d7cd0-0x4db29f).
+// Player.cpp: reconstructed from Tibia.exe 7.72.
 //
 // The application: start-up (InitInstance), the message loop (Run),
 // idle processing, and the top-level error handling, which ends the client
@@ -8,19 +8,12 @@
 // the developer log instead (issue #77, D16: log/Log.h; stderr, and a log file
 // when Patella.ini names one), with the report's diagnostics at the debug level.
 //
-// The range also holds code the linker kept in this object that is not part
-// of the source: CWinApp's destructor, AfxGetMainWnd, <fstream>/<sstream>
-// and <string> members, the ofstream/ifstream constructors and destructors
-// (0x4d9700-0x4d9bbf) and TMyException::GetOrigin. They have names.tsv rows
-// of kind stl.
-//
-// Order: the functions without line evidence first, in binary order
-// (message map, constructor, FatalError), then the two text decoders
-// (lines 62, 75), the window counter for EnumWindows, the error handlers
-// (binary order, before their first user; the error.txt reader that followed
-// them, 0x4da140, is gone since issue #74), then
-// InitInstance (lines 255-347), Run (383-408) and OnIdle (456). The
-// compiler placed OnIdle right after the decoders.
+// Order: the functions without line evidence first, in binary order (message
+// map, constructor, FatalError), then the two text decoders, the window counter
+// for EnumWindows, the error handlers (binary order, before their first user;
+// the error.txt reader that followed them is gone since issue #74), then
+// InitInstance, Run and OnIdle. The compiler placed OnIdle right after the
+// decoders.
 
 #include "Player.h"
 #include "Control.h"
@@ -53,15 +46,15 @@
 namespace {
 
 // The window title and class name are stored XOR-encoded. The key of each
-// string is in this object's .rdata (0x56dd98, 0x56ddb8); the other half,
-// TitleCode and ClassNameCode, is sysinc.cpp's (0x5733a4, 0x5733c4).
-const std::array<int, 8> TitleKey = {16, 34, 227, 56, 3, 110, 64, 173};                         // 0x56dd98
-const std::array<int, 11> ClassNameKey = {109, 168, 131, 83, 237, 53, 175, 191, 138, 154, 253}; // 0x56ddb8
+// string is here; the other half, TitleCode and ClassNameCode, is
+// sysinc.cpp's.
+const std::array<int, 8> TitleKey = {16, 34, 227, 56, 3, 110, 64, 173};
+const std::array<int, 11> ClassNameKey = {109, 168, 131, 83, 237, 53, 175, 191, 138, 154, 253};
 
 // Data, in .data/.bss order.
-int LastMouseCursor = CURSOR_ARROW; // 0x5c2518
-int NumberOfTibiaWindows;           // 0x719db0, counted by CountTibiaWindows
-POINT LastMousePosition;            // 0x719db4
+int LastMouseCursor = CURSOR_ARROW;
+int NumberOfTibiaWindows; // counted by CountTibiaWindows
+POINT LastMousePosition;
 // Not in the original (Patella-Modern issue #127): OnIdle's local. Where Windows cannot read the cursor (another desktop:
 // the lock screen, UAC's secure desktop; GetCursorPos fails) the point stays what it last was; the original read an
 // uninitialised local there, in practice the stack slot's previous value.
@@ -127,19 +120,18 @@ void SdlScreenToClient(POINT &Point)
 
 } // namespace
 
-CPlayerApp theApp; // 0x719dc0 // NOLINT(bugprone-throwing-static-initialization): the application object, constructed before main; a failure there ends the program
+CPlayerApp theApp; // NOLINT(bugprone-throwing-static-initialization): the application object, constructed before main; a failure there ends the program
 
-// 0x4d7cf0
 CPlayerApp::CPlayerApp()
 {
 	Terminating = false;
 }
 
-// 0x4d7d80. Every step is guarded on its own; the program ends here. this
-// is passed but not used. Since issue #74 (D2) the box's caption and text go
-// to stderr first, the fork's record of a fatal error; since issue #77 (D16)
-// through the developer log, at the error level. Debug builds then write the
-// stack (std::stacktrace, where the standard library has it) and stop in an
+// Every step is guarded on its own; the program ends here. this is passed
+// but not used. Since issue #74 (D2) the box's caption and text go to stderr
+// first, the fork's record of a fatal error; since issue #77 (D16) through
+// the developer log, at the error level. Debug builds then write the stack
+// (std::stacktrace, where the standard library has it) and stop in an
 // attached debugger; without a debugger they go on as Release builds do.
 void CPlayerApp::FatalError(const char *Text, const char *Caption)
 {
@@ -177,7 +169,7 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 	exit(1);
 }
 
-// 0x4d9140, line 62. Text needs 9 bytes.
+// Text needs 9 bytes.
 void GetWindowTitle(char *Text)
 {
 	PATELLA_ASSERT(Text != nullptr);
@@ -186,7 +178,7 @@ void GetWindowTitle(char *Text)
 	Text[8] = 0;
 }
 
-// 0x4d92b0, line 75. Text needs 12 bytes.
+// Text needs 12 bytes.
 void GetWindowClassName(char *Text)
 {
 	PATELLA_ASSERT(Text != nullptr);
@@ -197,11 +189,11 @@ void GetWindowClassName(char *Text)
 
 namespace {
 
-// 0x4d9420 (missed by Ghidra). EnumWindows callback: counts the windows
-// whose title or class matches the client's (caseless), this one included.
-// Since Patella-Modern issue #119 the platform's IWindow::VisitWindows calls it
-// with the window's title and class (TWin32Window: the original's
-// GetWindowTextA and GetClassNameA with 30, platform/Win32Platform.cpp).
+// EnumWindows callback: counts the windows whose title or class matches the
+// client's (caseless), this one included. Since Patella-Modern issue #119 the
+// platform's IWindow::VisitWindows calls it with the window's title and class
+// (TWin32Window: the original's GetWindowTextA and GetClassNameA with 30,
+// platform/Win32Platform.cpp).
 void CountTibiaWindows(const char *WindowText, int TextLength, const char *WindowClass, int ClassLength)
 {
 	TFixedString<32> Title;
@@ -215,8 +207,8 @@ void CountTibiaWindows(const char *WindowText, int TextLength, const char *Windo
 
 } // namespace
 
-// 0x4d9910. Shows the error code with its texts and ends the program. If
-// a fatal error is already being shown it only sets Terminating again.
+// Shows the error code with its texts and ends the program. If a fatal
+// error is already being shown it only sets Terminating again.
 void CPlayerApp::HandleProgramError(PROGRAM_ERROR Error)
 {
 	if (Terminating) {
@@ -230,16 +222,16 @@ void CPlayerApp::HandleProgramError(PROGRAM_ERROR Error)
 	FatalError(Message.str().c_str(), "Tibia Error");
 }
 
-// 0x4d9bd0. Ends the program with the critical error box. The original
-// appended a report to error.txt first (the client version, the exception's
-// origin, the time, the Windows version, the engine, the last packets, the
-// player's position and the message), which ReadErrorFile read back at the
-// next start for the error report dialog and Control.cpp sent to the server
-// as packet 0xe8. That report is gone (Patella-Modern issue #74, decision D2):
-// the exception's message goes to stderr, then FatalError's box (whose text,
-// TextCriticalError, no longer mentions the error file) ends the client.
-// Since issue #77 (D16) the message goes through the developer log at the
-// error level, and the report's other lines at the debug level (LogDiagnostics).
+// Ends the program with the critical error box. The original appended a report
+// to error.txt first (the client version, the exception's origin, the time, the
+// Windows version, the engine, the last packets, the player's position and the
+// message), which ReadErrorFile read back at the next start for the error report
+// dialog and Control.cpp sent to the server as packet 0xe8. That report is gone
+// (Patella-Modern issue #74, decision D2): the exception's message goes to
+// stderr, then FatalError's box (whose text, TextCriticalError, no longer
+// mentions the error file) ends the client. Since issue #77 (D16) the message
+// goes through the developer log at the error level, and the report's other
+// lines at the debug level (LogDiagnostics).
 void CPlayerApp::HandleException(TMyException &Exception)
 {
 	if (Terminating) {
@@ -303,16 +295,14 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 
 } // namespace
 
-// 0x4da3e0, lines 255-347. Registers the window class, parses the command
-// line, creates the frame window and the surfaces, and refuses to run twice
-// (except for gamemasters). Odd behaviour kept: "host" and "port" are
-// recognised but their values are dropped (the test server is always
-// BuildConfig.h's, by default 127.0.0.1:7171), and after an error InitInstance still returns TRUE.
-// A PROGRAM_ERROR shows its code, any other error is turned into a
-// TMyException for HandleException (patella::ThrowTopLevelError, TMyException.h:
-// the original's handlers). The original read error.txt first and
-// posted event 0x2a at the end (the error report dialog); both are gone
-// since issue #74.
+// Registers the window class, parses the command line, creates the frame window and the surfaces,
+// and refuses to run twice (except for gamemasters). Odd behaviour kept: "host" and "port" are
+// recognised but their values are dropped (the test server is always BuildConfig.h's, by default
+// 127.0.0.1:7171), and after an error InitInstance still returns TRUE. A PROGRAM_ERROR shows its
+// code, any other error is turned into a TMyException for HandleException
+// (patella::ThrowTopLevelError, TMyException.h: the original's handlers). The original read
+// error.txt first and posted event 0x2a at the end (the error report dialog); both are gone since
+// issue #74.
 BOOL CPlayerApp::InitInstance()
 {
 	// Not in the original (Patella-Modern issue #130, D14): the data folder and Patella.ini's folder (the working
@@ -376,9 +366,8 @@ BOOL CPlayerApp::InitInstance()
 	return TRUE;
 }
 
-// 0x4dae60, lines 383-408. The same handlers as InitInstance around the
-// message loop. Tibia.exe's Run then started patch.exe (_execl) when CloseProgram had set RunPatch: gone with the
-// patcher since Patella-Modern issue #75 (decision D9).
+// The same handlers as InitInstance around the message loop. Tibia.exe's Run then started patch.exe (_execl) when
+// CloseProgram had set RunPatch: gone with the patcher since Patella-Modern issue #75 (decision D9).
 int CPlayerApp::Run()
 {
 	const int Result = 0;
@@ -398,9 +387,9 @@ int CPlayerApp::Run()
 	return Result;
 }
 
-// 0x4d94c0, line 456. Forwards mouse moves and cursor changes, then
-// handles the event queue (Control.cpp). The original's returned TRUE (MFC's
-// idle count argument and CWinApp::OnIdle's own housekeeping went with MFC, issue #127).
+// Forwards mouse moves and cursor changes, then handles the event queue (Control.cpp).
+// The original's returned TRUE (MFC's idle count argument and CWinApp::OnIdle's own
+// housekeeping went with MFC, issue #127).
 void CPlayerApp::OnIdle()
 {
 	// Issue #125: the socket's events and lookups, where the message loop had just dispatched WinSock's messages.

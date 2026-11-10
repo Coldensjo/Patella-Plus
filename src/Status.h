@@ -59,7 +59,7 @@ static_assert(sizeof(TCharacter) == 0x54 && offsetof(TCharacter, World) == 0x1e 
 
 namespace patella {
 
-// Status.cpp's session (issue #105): the globals 0x71c478-0x71c58b of the original are the members, in its order
+// Status.cpp's session (issue #105): the globals of the original are the members, in its order
 // with the same initial values (0, as the original's .bss), and the functions that read and write only them the
 // members of the same names. InitSession and ExitSession are InitStatus's and ExitStatus's part of them (not functions
 // of the original: InitStatus inlined ClearRights).
@@ -106,21 +106,21 @@ public:
 
 private:
 	// Data, in the original's .bss order.
-	std::array<int, RIGHT_ANY> Rights{};      // 0x71c478
-	bool Gamemaster{};                        // 0x71c540, sent in the game login packet
-	int PremiumDays{};                        // 0x71c544
-	int ActiveCharacter{};                    // 0x71c548
-	std::unique_ptr<TCharacter[]> Characters; // 0x71c54c (issue #58)
+	std::array<int, RIGHT_ANY> Rights{};
+	bool Gamemaster{}; // sent in the game login packet
+	int PremiumDays{};
+	int ActiveCharacter{};
+	std::unique_ptr<TCharacter[]> Characters; // issue #58
 
 public:
-	int AccountCharacters{}; // 0x71c550, name from an assertion; public: the golden Errors test sets it (TestErrorStatics)
+	int AccountCharacters{}; // name from an assertion; public: the golden Errors test sets it (TestErrorStatics)
 
 private:
-	TFixedString<30> AccountPassword{};     // 0x71c554
-	TFixedString<12> AccountNumberString{}; // 0x71c574
-	int AccountNumber{};                    // 0x71c580
-	int Progress{};                         // 0x71c584, -1 = none
-	int ConnectionState{};                  // 0x71c588, see SetConnectionState
+	TFixedString<30> AccountPassword{};
+	TFixedString<12> AccountNumberString{};
+	int AccountNumber{};
+	int Progress{};        // -1 = none
+	int ConnectionState{}; // see SetConnectionState
 
 	// The arrays std::arrays and TFixedStrings (issue #60).
 	static_assert(sizeof(Rights) == RIGHT_ANY * sizeof(int) && sizeof(AccountPassword) == 30
@@ -128,7 +128,7 @@ private:
 		"Status.cpp's arrays");
 };
 
-// Status.cpp's user interaction (issue #107): the globals of 0x71c458-0x71c64f that are not the session's are the
+// Status.cpp's user interaction (issue #107): the globals that are not the session's are the
 // members, in the original's .bss order with the same initial values (0, as its .bss), and the functions that read and
 // write them the members of the same names. TGUI owns it (GUI.h). GetRightName and GetActionName read no data and
 // stay free functions.
@@ -186,49 +186,49 @@ public:
 	void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
 
 private:
-	// Data, in the original's .bss order (0x71c478-0x71c58b, between MouseOverText and TradeInfo, is TSession's).
-	TRegexp LinkRegexp;                  // 0x71c458, LinkPattern compiled (issue #129: owned, TRegexp)
-	char *TaintedClipboardText{};        // 0x71c45c, name from an assertion
-	void (*LinkWarningEventHandler)(){}; // 0x71c460, from "linkwarningeventhandler!=NULL"
-	bool BlinkState{};                   // 0x71c464, toggled every 300 ms
-	int BlinkTime{};                     // 0x71c468
-	int MouseOverTextY{};                // 0x71c46c
-	int MouseOverTextX{};                // 0x71c470
-	const char *MouseOverText{};         // 0x71c474
-	int TradeInfo{};                     // 0x71c58c
-	int UseZ{};                          // 0x71c590
-	int UseY{};                          // 0x71c594
-	int UseX{};                          // 0x71c598
-	int UseIndex{};                      // 0x71c59c
-	int TradeZ{};                        // 0x71c5a0
-	int TradeY{};                        // 0x71c5a4
-	int TradeX{};                        // 0x71c5a8
-	int TradeIndex{};                    // 0x71c5ac
-	int DragTargetZ{};                   // 0x71c5b0
-	int DragTargetY{};                   // 0x71c5b4
-	int DragTargetX{};                   // 0x71c5b8
-	int DragZ{};                         // 0x71c5bc
-	int DragY{};                         // 0x71c5c0
-	int DragX{};                         // 0x71c5c4
-	int DragIndex{};                     // 0x71c5c8
-	int DragStartY{};                    // 0x71c5cc
-	int DragStartX{};                    // 0x71c5d0
-	int PendingActionNumber{};           // 0x71c5d4
-	int PendingActionState{};            // 0x71c5d8
-	int WindowHeight{};                  // 0x71c5dc
-	int WindowWidth{};                   // 0x71c5e0
-	int MouseCursor{};                   // 0x71c5e4
-	int ActionState{};                   // 0x71c5e8, from "GetActionState()" in Control.cpp
-	int ActionNumber{};                  // 0x71c5ec
-	// 0x71c5f0 NumberOfMessages and 0x71c5f4 (initialiser 0x55a0f0) the original's vector<TMessage>(0, 9, 10): a
+	// Data, in the original's .bss order.
+	TRegexp LinkRegexp;                  // LinkPattern compiled (issue #129: owned, TRegexp)
+	char *TaintedClipboardText{};        // name from an assertion
+	void (*LinkWarningEventHandler)(){}; // from "linkwarningeventhandler!=NULL"
+	bool BlinkState{};                   // toggled every 300 ms
+	int BlinkTime{};
+	int MouseOverTextY{};
+	int MouseOverTextX{};
+	const char *MouseOverText{};
+	int TradeInfo{};
+	int UseZ{};
+	int UseY{};
+	int UseX{};
+	int UseIndex{};
+	int TradeZ{};
+	int TradeY{};
+	int TradeX{};
+	int TradeIndex{};
+	int DragTargetZ{};
+	int DragTargetY{};
+	int DragTargetX{};
+	int DragZ{};
+	int DragY{};
+	int DragX{};
+	int DragIndex{};
+	int DragStartY{};
+	int DragStartX{};
+	int PendingActionNumber{};
+	int PendingActionState{};
+	int WindowHeight{};
+	int WindowWidth{};
+	int MouseCursor{};
+	int ActionState{}; // from "GetActionState()" in Control.cpp
+	int ActionNumber{};
+	// NumberOfMessages and the original's vector<TMessage>(0, 9, 10): a
 	// queue that appends at its count (AddMessage), inserts at 0 (AddMessageFirst), pops at 0 and reads below the
 	// count only, so a std::vector, its size the count (issue #100; notes/decisions.md, "#100").
 	std::vector<TMessage> Messages;
-	int MouseX{};            // 0x71c61c
-	int MouseY{};            // 0x71c620
-	TObject DraggedObject{}; // 0x71c624
-	TObject TradeObject{};   // 0x71c630, from "TradeObject!=0" in MapWindow.cpp
-	TObject UseObject{};     // 0x71c63c, "SrcObj" in MapWindow.cpp
+	int MouseX{};
+	int MouseY{};
+	TObject DraggedObject{};
+	TObject TradeObject{}; // from "TradeObject!=0" in MapWindow.cpp
+	TObject UseObject{};   // "SrcObj" in MapWindow.cpp
 };
 
 // The transition's access path (issue #105; notes/decisions.md, "#104: TClient and the subsystem objects"): the
@@ -342,26 +342,10 @@ int GetCharacterPort(int Number);
 namespace {
 
 // The regular expression of a link (a domain or an IPv4 address), which
-// CheckClipboardText looks for in copied text; InitStatus compiles it.
-// Defined here with internal linkage: every object that includes this
-// header has its own copy of the pointer in .data (all point to the text
-// 0x55b758), 17 in the image (notes/decisions.md, "LinkPattern (issue
-// #33)"):
-//
-//   0x5c039c Communication.obj   0x5c16f4 graphics.obj
-//   0x5c0668 ConsoleWindow.obj   0x5c1704 GUI.obj
-//   0x5c08c4 ContentWindows.obj  0x5c1bac MainFrm.obj
-//   0x5c0b20 ContextMenus.obj    0x5c1e08 MainWindow.obj
-//   0x5c0b30 Control.obj         0x5c22b0 MapWindow.obj
-//   0x5c0fdc Creatures.obj       0x5c22c0 Network.obj
-//   0x5c122c DialogElements.obj  0x5c22c8 Player.obj
-//   0x5c1488 Dialogs.obj         0x5c2560 Status.obj (the one InitStatus reads)
-//   0x5c16e4 DialogWindow.obj
-//
-// MainFrm.obj, MainWindow.obj and Player.obj medium (they use Status.cpp,
-// their neighbours do not), the others high. Only Status.cpp reads it (the
-// others' copies are unused: [[maybe_unused]] for GCC and Clang, issue #91). The
-// name is ours.
+// CheckClipboardText looks for in copied text; InitStatus compiles it. Defined
+// here with internal linkage: every object that includes this header has its own
+// copy of the pointer. Only Status.cpp reads it (the others' copies are unused:
+// [[maybe_unused]] for GCC and Clang, issue #91). The name is ours.
 [[maybe_unused]] const char *LinkPattern =
 	"(^|[ .,:;/@<>|()\"\n\r%])(([a-z0-9-]+(\\.|\\%2e))+(ac|ad|ae|aero|af|ag|ai|al|am|an|ao|aq|a"
 	"r|arpa|as|at|au|aw|az|ba|bb|bd|be|bf|bg|bh|bi|biz|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|c"

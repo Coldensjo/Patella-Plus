@@ -1,6 +1,6 @@
-// Utils.cpp: reconstructed from Tibia.exe 7.72 (0x508fa0-0x50bfef).
+// Utils.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The functions before line 66 have no assertions; they are assigned to this
+// The first functions have no assertions; they are assigned to this
 // file because they run straight up to its first assertion and are inlined
 // into its later functions. None of the functions has the original's catch
 // wrappers (common.h).
@@ -11,13 +11,11 @@
 #include "types/FixedString.h"
 #include <cstring>
 
-// 0x508fa0
 int IsSpace(int c)
 {
 	return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
 }
 
-// 0x508fd0
 int IsAlpha(int c)
 {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
@@ -26,13 +24,11 @@ int IsAlpha(int c)
 		|| c == (char)0xdf;                                      // ß
 }
 
-// 0x509020
 int IsDigit(int c)
 {
 	return c >= '0' && c <= '9';
 }
 
-// 0x509040
 int ToLower(int c)
 {
 	if ((c >= 'A' && c <= 'Z') || ((uint8)c >= 0xc0 && (uint8)c <= 0xde))
@@ -40,7 +36,6 @@ int ToLower(int c)
 	return c;
 }
 
-// 0x509060
 int ToUpper(int c)
 {
 	if ((c >= 'a' && c <= 'z') || ((uint8)c >= 0xe0 && (uint8)c != 0xff))
@@ -48,7 +43,7 @@ int ToUpper(int c)
 	return c;
 }
 
-// 0x509080. All components 0..1; results 0..255, truncated.
+// All components 0..1; results 0..255, truncated.
 void HSVToRGB(double H, double S, double V, int *R, int *G, int *B)
 {
 	if (V == 0.0) {
@@ -92,8 +87,8 @@ void HSVToRGB(double H, double S, double V, int *R, int *G, int *B)
 	*B = (int)(b * 255.0);
 }
 
-// 0x509280. The outfit palette: 7 rows of 19 colours; column 0 is grey,
-// columns 1-18 are hues.
+// The outfit palette: 7 rows of 19 colours; column 0 is grey, columns
+// 1-18 are hues.
 void GetOutfitColor(int Color, int *R, int *G, int *B)
 {
 	if (Color >= 133)
@@ -120,7 +115,6 @@ void GetOutfitColor(int Color, int *R, int *G, int *B)
 	HSVToRGB((Color % 19) * (1.0 / 18), S, V, R, G, B);
 }
 
-// 0x5093d0, line 66
 void LowerString(char *s)
 {
 	PATELLA_ASSERT(s!=nullptr);
@@ -130,7 +124,7 @@ void LowerString(char *s)
 	}
 }
 
-// 0x509540, line 88. Upper-cases the first letter of each word.
+// Upper-cases the first letter of each word.
 void CapitalizeString(char *s)
 {
 	PATELLA_ASSERT(s!=nullptr);
@@ -146,7 +140,7 @@ void CapitalizeString(char *s)
 	}
 }
 
-// 0x509710, lines 106-107. Like strnicmp, with the Latin-1 case rules above.
+// Like strnicmp, with the Latin-1 case rules above.
 int CompareStrings(const char *s1, const char *s2, int Count)
 {
 	PATELLA_ASSERT(s1!=nullptr);
@@ -162,9 +156,9 @@ int CompareStrings(const char *s1, const char *s2, int Count)
 	return 0;
 }
 
-// 0x509a60, lines 124-125. The original's parameters (Destination, Size) are the span's pointer and its size as an int,
-// the names of the assertions' text: a null pointer still fails 124, a size above INT_MAX is the original's negative
-// Size (issue #69, as #59).
+// The original's parameters (Destination, Size) are the span's pointer and its size as an int, the names of the
+// assertions' text: a null pointer still fails 124, a size above INT_MAX is the original's negative Size (issue #69, as
+// #59).
 void CopyString(patella::TSpan<char> DestinationBytes, const char *Source)
 {
 	char *const Destination = DestinationBytes.data();
@@ -175,7 +169,7 @@ void CopyString(patella::TSpan<char> DestinationBytes, const char *Source)
 	Destination[Size - 1] = 0;
 }
 
-// 0x509d10, lines 158-159. Copies Source without leading and trailing white space.
+// Copies Source without leading and trailing white space.
 void TrimString(char *Destination, const char *Source)
 {
 	PATELLA_ASSERT(Source!=nullptr);
@@ -190,8 +184,8 @@ void TrimString(char *Destination, const char *Source)
 		Destination[Length - 1] = 0;
 }
 
-// 0x50a040, line 179. Cuts Text to MaxLength characters ending in "...";
-// returns whether it was cut.
+// Cuts Text to MaxLength characters ending in "..."; returns whether it
+// was cut.
 bool ShortenString(char *Text, int MaxLength)
 {
 	PATELLA_ASSERT(Text!=nullptr);
@@ -204,9 +198,8 @@ bool ShortenString(char *Text, int MaxLength)
 	return true;
 }
 
-// 0x50a200, lines 286-287. The original's parameters (data, size) are the span's pointer and its size as an int, the
-// names of the assertions' text: a null pointer, or a size above INT_MAX (the original's negative size), still fails
-// them (issue #59).
+// The original's parameters (data, size) are the span's pointer and its size as an int, the names of the assertions'
+// text: a null pointer, or a size above INT_MAX (the original's negative size), still fails them (issue #59).
 TReadBuffer::TReadBuffer(patella::TSpan<uint8> Bytes)
 {
 	uint8 *const data = Bytes.data();
@@ -218,14 +211,12 @@ TReadBuffer::TReadBuffer(patella::TSpan<uint8> Bytes)
 	Data = data;
 }
 
-// 0x50a4b0, line 299
 uint8 TReadBuffer::GetByte()
 {
 	PATELLA_ASSERT_VALUES(Position<=Size-1, Position, Size);
 	return Data[Position++];
 }
 
-// 0x50a610, line 310
 uint16 TReadBuffer::GetWord()
 {
 	PATELLA_ASSERT_VALUES(Position<=Size-2, Position, Size);
@@ -234,7 +225,6 @@ uint16 TReadBuffer::GetWord()
 	return Result;
 }
 
-// 0x50a780, line 321
 uint32 TReadBuffer::GetQuad()
 {
 	PATELLA_ASSERT_VALUES(Position<=Size-4, Position, Size);
@@ -244,9 +234,9 @@ uint32 TReadBuffer::GetQuad()
 	return Result;
 }
 
-// 0x50a900, lines 334-340. Reads at most MaxLength-1 characters; skips the rest. Text is the original's (Buffer,
-// MaxLength): its size as an int is MaxLength, so a size above INT_MAX is the original's negative MaxLength, no
-// limit (only the tests pass one; issue #59).
+// Reads at most MaxLength-1 characters; skips the rest. Text is the original's (Buffer, MaxLength): its size as
+// an int is MaxLength, so a size above INT_MAX is the original's negative MaxLength, no limit (only the tests
+// pass one; issue #59).
 void TReadBuffer::GetString(patella::TSpan<char> Text)
 {
 	char *const Buffer = Text.data();
@@ -267,9 +257,9 @@ void TReadBuffer::GetString(patella::TSpan<char> Text)
 	Position += Length;
 }
 
-// 0x50abb0, line 359. The caller owns the result. Patella-Modern issue #139, item 4, a deliberate difference
-// (notes/decisions.md, "#139"): the check comes before the allocation, so a text that does not fit throws with
-// nothing allocated. The binary allocated first and lost the text when the check threw.
+// The caller owns the result. Patella-Modern issue #139, item 4, a deliberate difference (notes/decisions.md,
+// "#139"): the check comes before the allocation, so a text that does not fit throws with nothing allocated.
+// The binary allocated first and lost the text when the check threw.
 char *TReadBuffer::GetString()
 {
 	const int Length = GetWord();
@@ -281,7 +271,6 @@ char *TReadBuffer::GetString()
 	return Result;
 }
 
-// 0x50ad50, lines 371-372
 void TReadBuffer::GetBytes(patella::TSpan<uint8> Bytes)
 {
 	uint8 *const Buffer = Bytes.data();
@@ -292,7 +281,7 @@ void TReadBuffer::GetBytes(patella::TSpan<uint8> Bytes)
 	Position += Count;
 }
 
-// 0x50b030, lines 387-388; the parameters as in TReadBuffer's constructor.
+// The parameters as in TReadBuffer's constructor.
 TWriteBuffer::TWriteBuffer(patella::TSpan<uint8> Bytes)
 {
 	uint8 *const data = Bytes.data();
@@ -304,14 +293,12 @@ TWriteBuffer::TWriteBuffer(patella::TSpan<uint8> Bytes)
 	Data = data;
 }
 
-// 0x50b2e0, line 400
 void TWriteBuffer::PutByte(uint8 Data)
 {
 	PATELLA_ASSERT_VALUES(Position<=Size-1, Position, Size);
 	this->Data[Position++] = Data;
 }
 
-// 0x50b450, line 410
 void TWriteBuffer::PutWord(uint16 Data)
 {
 	PATELLA_ASSERT_VALUES(Position<=Size-2, Position, Size);
@@ -320,7 +307,6 @@ void TWriteBuffer::PutWord(uint16 Data)
 	Position += 2;
 }
 
-// 0x50b5e0, line 421
 void TWriteBuffer::PutQuad(uint32 Data)
 {
 	PATELLA_ASSERT_VALUES(Position<=Size-4, Position, Size);
@@ -331,8 +317,8 @@ void TWriteBuffer::PutQuad(uint32 Data)
 	Position += 4;
 }
 
-// 0x50b780, lines 437-441. It stays a C string (issue #59): a std::string_view could not carry the null pointer
-// that line 437 reports (its construction from a null C string faults before the assertion).
+// It stays a C string (issue #59): a std::string_view could not carry the null pointer that the assertion reports
+// (its construction from a null C string faults before the assertion).
 void TWriteBuffer::PutString(const char *s)
 {
 	PATELLA_ASSERT(s!=nullptr);
@@ -345,7 +331,6 @@ void TWriteBuffer::PutString(const char *s)
 	Position += Length;
 }
 
-// 0x50ba00, lines 451-452
 void TWriteBuffer::PutBytes(patella::TSpan<const uint8> Bytes)
 {
 	const uint8 *const Buffer = Bytes.data();
@@ -356,10 +341,10 @@ void TWriteBuffer::PutBytes(patella::TSpan<const uint8> Bytes)
 		PutByte(Buffer[i]);
 }
 
-// 0x50bce0, lines 467-468. Buffer is the span's pointer, the name of the assertion's text (issue #69). The text is
-// built where the original built it in the caller's buffer, in Text: at most 10 digits and 3 commas ("2,147,483,647")
-// and the NUL. Copied into the caller's buffer it is the original's bytes (it wrote nothing after the final NUL), cut
-// at the buffer's size where the original wrote past it (#57's contract; every caller's buffer holds 14).
+// Buffer is the span's pointer, the name of the assertion's text (issue #69). The text is built where the original
+// built it in the caller's buffer, in Text: at most 10 digits and 3 commas ("2,147,483,647") and the NUL. Copied into
+// the caller's buffer it is the original's bytes (it wrote nothing after the final NUL), cut at the buffer's size
+// where the original wrote past it (#57's contract; every caller's buffer holds 14).
 void FormatNumber(int Number, patella::TSpan<char> BufferBytes)
 {
 	char *const Buffer = BufferBytes.data();

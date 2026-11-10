@@ -6,12 +6,12 @@
 // The original's point (0xac bytes) held ObjectCount and an array of OBJECTS_PER_POINT objects; here the objects are a
 // TStaticVector<TObject, OBJECTS_PER_POINT> (compat/cxx26.h: std::inplace_vector where the library has it), its size
 // the count. What happens when the stack is full is the original's (notes/decisions.md, "#102b"):
-//	- InsertObject (0x4b8310) shifts the objects from Position up by one, but from index 9 at most: on a full point the
-//	  top object falls off and the count stays OBJECTS_PER_POINT (InsertPointObject).
-//	- AddObject (0x4b88f0) inserts only when its position is below OBJECTS_PER_POINT: an object that belongs above
-//	  every object of a full point is dropped (AddPosition gives OBJECTS_PER_POINT then).
-//	- AppendObject (0x4b8ec0) throws "too many objects on map point" on a full point (CheckPointRoom).
-//	- DeleteObject (0x4b9420) returns true when the point was full (DeletePointObject).
+// 	- InsertObject shifts the objects from Position up by one, but from index 9 at most: on a full point the
+// 	  top object falls off and the count stays OBJECTS_PER_POINT (InsertPointObject).
+// 	- AddObject inserts only when its position is below OBJECTS_PER_POINT: an object that belongs above
+// 	  every object of a full point is dropped (AddPosition gives OBJECTS_PER_POINT then).
+// 	- AppendObject throws "too many objects on map point" on a full point (CheckPointRoom).
+// 	- DeleteObject returns true when the point was full (DeletePointObject).
 // The original's array kept the objects beyond the count. One of them is read: the GetTop*Object functions return
 // Objects[0] of an empty point, the last object that was at the bottom when the point became empty (or the cleared
 // object of the start). Vacated holds it (PointObject), set where the point becomes empty: the last DeletePointObject

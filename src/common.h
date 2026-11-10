@@ -52,9 +52,7 @@ inline bool In(int Value, int Min, int Max)
 	return Value >= Min && Value <= Max;
 }
 
-// Keeps *Value between Min and Max, in either order. The name is ours. The
-// out-of-line copy 0x425920 is ContentWindows.obj's (TTradeWindowBody::SetSize
-// inlines it); DialogElements.cpp calls it (0x45d8a3 and four more).
+// Keeps *Value between Min and Max, in either order. The name is ours.
 inline void Limit(int *Value, int Min, int Max)
 {
 	if (Min > Max) {
@@ -70,15 +68,15 @@ inline void Limit(int *Value, int Min, int Max)
 	}
 }
 
-// Thrown by value (ThrowInfo at 0x57b3b4).
+// Thrown by value.
 #include "TMyException.h" // IWYU pragma: export
 
 // The client's second exception: an error code, PROGRAM_ERROR, that
 // CPlayerApp::HandleProgramError shows with sysinc.cpp's texts. The original
-// throws the enum by value (ThrowInfo 0x57b3c4, ".?AW4PROGRAM_ERROR@@"); since
-// Patella-Modern issue #80 it is an enum class carried by its own exception
-// type, TProgramError (golden_eh.h's OurThrow gives it the original's kind:
-// a PROGRAM_ERROR with its value). The enumerator names are ours, after
+// throws the enum by value (".?AW4PROGRAM_ERROR@@"); since Patella-Modern
+// issue #80 it is an enum class carried by its own exception type,
+// TProgramError (golden_eh.h's OurThrow gives it the original's kind: a
+// PROGRAM_ERROR with its value). The enumerator names are ours, after
 // GetErrorText's texts and the sites that throw them.
 enum class PROGRAM_ERROR : int {
 	OBJECTS_FILE = 1,  // "Cannot find file "Tibia.dat"." (InitObjects)
@@ -150,7 +148,6 @@ static_assert(sizeof(TProgramError) == sizeof(PROGRAM_ERROR) && std::is_triviall
 // as catch blocks after each function: a PROGRAM_ERROR passed through
 // unchanged, a TMyException was wrapped with the wrapper's line and up to two
 // values ("exception occurred"), and anything else became "unknown exception
-// occurred". A hand-written stack trace for error.txt (gone since issue #74);
-// the function comments still name the wrappers' lines and values as line
-// evidence. Since issue #78 an exception passes unchanged to the first handler
-// that really handles it (notes/decisions.md, issue #78's section).
+// occurred". A hand-written stack trace for error.txt (gone since issue #74).
+// Since issue #78 an exception passes unchanged to the first handler that
+// really handles it (notes/decisions.md, issue #78's section).

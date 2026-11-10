@@ -1,13 +1,12 @@
-// Skins.cpp: reconstructed from Tibia.exe 7.72 (0x4e3cb0-0x4e6dbf).
+// Skins.cpp: reconstructed from Tibia.exe 7.72.
 //
 // The file name is inferred. These two functions sit between Script.cpp and
 // Status.cpp and have no assertions; the linker placed objects in
 // alphabetical order, and the table is the one GUI.cpp asserts on as
 // "Skins[skin].width>0" and "In(skin,0,LASTSKIN-1)". It has its own init and
-// exit calls (the client's start-up function at 0x44b510 in Control.cpp calls
-// InitSkins separately from InitStatus; the shut-down function at 0x448e30
-// calls ExitSkins right after ExitNetwork), and InitStatus and ExitStatus
-// never touch its data.
+// exit calls (the client's start-up function in Control.cpp calls InitSkins
+// separately from InitStatus; the shut-down function calls ExitSkins right
+// after ExitNetwork), and InitStatus and ExitStatus never touch its data.
 
 // common.h first, where Skins.h included it before (issue #49): Skins.cpp uses nothing of it, but in the
 // client's builds it brings MFC, whose per-object statics and initialisers Skins.obj has in the image (without
@@ -16,7 +15,7 @@
 #include "Skins.h"
 #include <memory>
 
-// The data (NumberOfSkins 0x71c450, Skins 0x71c454) is TSkins' since issue #116 (Skins.h): a part of TGraphics, with
+// The data (NumberOfSkins, Skins) is TSkins' since issue #116 (Skins.h): a part of TGraphics, with
 // GUI.cpp's SkinProperties. The original's free functions InitSkins and ExitSkins forward to the members from
 // graphics.cpp (the client's; this file is patella_core's, which has no bridge).
 
@@ -25,11 +24,11 @@
 static_assert(sizeof(std::unique_ptr<TSkin[]>) == sizeof(TSkin *) && alignof(std::unique_ptr<TSkin[]>) == alignof(TSkin *),
 	"std::unique_ptr<TSkin[]> is a pointer");
 
-// 0x4e3cb0. Fills the rectangles of the GUI graphics in Tibia.pic.
-// The table is a local array, so it is written to the stack on every call
-// (12,506 bytes of code). Odd behaviour kept from the binary: the loop stops
-// one entry before the LASTSKIN terminator, and no entry has skin number 152,
-// so Skins[152] stays uninitialised.
+// Fills the rectangles of the GUI graphics in Tibia.pic. The table is a local
+// array, so it is written to the stack on every call (12,506 bytes of code).
+// Odd behaviour kept from the binary: the loop stops one entry before the
+// LASTSKIN terminator, and no entry has skin number 152, so Skins[152] stays
+// uninitialised.
 void patella::TSkins::InitSkins()
 {
 	const struct { // NOLINT(modernize-avoid-c-arrays): the binary's table of an unnamed type, sized by its entries (issue #60)
@@ -308,7 +307,6 @@ void patella::TSkins::InitSkins()
 		Skins[SkinTable[i].skin] = SkinTable[i].Rect;
 }
 
-// 0x4e6da0
 void patella::TSkins::ExitSkins()
 {
 	Skins.reset();

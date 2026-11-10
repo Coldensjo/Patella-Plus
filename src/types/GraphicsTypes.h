@@ -23,7 +23,7 @@ static_assert(std::is_same_v<std::underlying_type_t<decltype(LEFT_ALIGN)>, int>)
 // --- Graphics types -----------------------------------------------------------
 // The types of the drawing interface, used by every window file (GUI.h
 // includes graphics.h, which exports this header). Default construction zeroes them, as the binary's
-// compiler-generated constructors do (SkinProperties' constructor 0x496800,
+// compiler-generated constructors do (SkinProperties' constructor,
 // the new TSprite[] and new TPicture[] loops, DrawOutfit's colours).
 
 // A rectangle: position and size. The members are named by the assertions
@@ -43,17 +43,13 @@ struct TRect { // passed by value (16 bytes)
 struct TRGBColor { // passed by value (12 bytes)
 	constexpr TRGBColor() : R(0), G(0), B(0) {}
 	constexpr TRGBColor(int Red, int Green, int Blue) : R(Red), G(Green), B(Blue) {}
-	// 0x425950 (out-of-line copy between ConsoleWindow.cpp and
-	// ContentWindows.cpp; inlined in Map.cpp's SetAmbientLight): a colour of
-	// the 6x6x6 palette, Color = R*36 + G*6 + B with steps of 51.
+	// A colour of the 6x6x6 palette, Color = R*36 + G*6 + B with steps of 51.
 	TRGBColor(int Color)
 	{
 		R = Color / 36 * 51;
 		B = Color % 6 * 51;
 		G = Color / 6 % 6 * 51;
 	}
-	// 0x48b380 and 0x48b3b0: out-of-line copies at the start of graphics.obj,
-	// the first object that calls them (SurfaceGL.cpp calls 0x48b380 too).
 	// operator!= negates the inlined operator==, as the binary's does.
 	// Not checked by AddressSanitizer (issue #70): GetVideoPicture compares the colour key of the picture after
 	// the one it draws, past the end of Pictures for the last one, as the original does (graphics.cpp).
@@ -69,8 +65,7 @@ struct TRGBColor { // passed by value (12 bytes)
 };
 
 // The colour TFont's default constructor reads from memory. Every object
-// that constructs a TFont has its own copy (GUI.obj 0x5c1954, DialogElements
-// 0x5c1230, an earlier object 0x5c066c), so it is a constant defined in a
+// that constructs a TFont has its own copy, so it is a constant defined in a
 // header (internal linkage). The name is ours.
 constexpr TRGBColor DefaultFontColor(224, 224, 224); // constexpr since issue #116 (constant-initialised as before)
 

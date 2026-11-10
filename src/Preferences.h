@@ -1,7 +1,6 @@
-// Preferences.cpp: the options stored in Tibia.cfg by the original, in
-// Patella.ini by the x64 client (Patella-Modern issue #45). The option names in
-// the comments are the keys that the loader and saver after Preferences.cpp
-// (0x4ddc00, 0x4de890) use, which give the names of the globals.
+// Preferences.cpp: the options stored in Tibia.cfg by the original, in Patella.ini by the x64 client
+// (Patella-Modern issue #45). The option names in the comments are the keys that the Tibia.cfg loader and
+// saver use, which give the names of the globals.
 //
 // Names are ours unless a comment says they come from the binary.
 //
@@ -110,10 +109,10 @@ protected:
 	~TTalkLists() = default;
 };
 
-// Preferences.cpp's data and functions (issue #104): the globals of the original (0x719e70-0x71c44f, 0x5c2558) are
-// the members, with the same initial values (the others 0, as the original's .bss), and the functions the members
-// of the same names. The ones that reach Talk's lists take them as Lists. The files are the platform's (issue #109:
-// IFileSystem, platform/FileSystem.h; Tibia.cfg's existence; Script.cpp opens the file itself).
+// Preferences.cpp's data and functions (issue #104): the globals of the original are the members, with the same
+// initial values (the others 0, as the original's .bss), and the functions the members of the same names. The ones
+// that reach Talk's lists take them as Lists. The files are the platform's (issue #109: IFileSystem,
+// platform/FileSystem.h; Tibia.cfg's existence; Script.cpp opens the file itself).
 class TPreferences {
 public:
 	explicit TPreferences(patella::platform::IFileSystem &FileSystemRef) : FileSystem(FileSystemRef) {}
@@ -217,58 +216,58 @@ public:
 
 private:
 	// Data, in the original's .data/.bss order.
-	int WindowedWidth = 600;              // 0x5c2558, "WindowedMode = (x,y,Width,Height,Maximized)"
-	int WindowedHeight = 400;             // 0x5c255c
-	std::array<bool, SKILLS> SkillBars{}; // 0x719e70, "SkillBars = {...}"
-	bool MagLevelBar{};                   // 0x719e77
-	bool LevelBar{};                      // 0x719e78
-	bool ShowNewHints{};                  // 0x719e79
-	// 0x719e7c NumberOfKnownHints and 0x719e80 NumberOfBuddyEntries: KnownHints.size() and Buddies.size() (issue #100).
-	bool SecureMode{};     // 0x719e84
-	int ChaseMode{};       // 0x719e88
-	int AttackMode{};      // 0x719e8c
-	bool AutoChaseOff{};   // 0x719e90
-	bool ClassicControl{}; // 0x719e91
+	int WindowedWidth = 600; // "WindowedMode = (x,y,Width,Height,Maximized)"
+	int WindowedHeight = 400;
+	std::array<bool, SKILLS> SkillBars{}; // "SkillBars = {...}"
+	bool MagLevelBar{};
+	bool LevelBar{};
+	bool ShowNewHints{};
+	// NumberOfKnownHints and NumberOfBuddyEntries: KnownHints.size() and Buddies.size() (issue #100).
+	bool SecureMode{};
+	int ChaseMode{};
+	int AttackMode{};
+	bool AutoChaseOff{};
+	bool ClassicControl{};
 	bool DragFullStacks{}; // Patella-Plus, not in the original
-	// 0x719e94 NumberOfOpenChannels: OpenChannels.size().
-	bool PrivateMessages{};                // 0x719e98
-	bool TimeStamps{};                     // 0x719e99
-	bool StatusMessages{};                 // 0x719e9a
-	bool EventMessages{};                  // 0x719e9b
-	bool InfoMessages{};                   // 0x719e9c
-	char *MotD = nullptr;                  // 0x719ea0, text of the message of the day
-	int LastMotD{};                        // 0x719ea4, its number
-	int NumberOfOpenDialogs{};             // 0x719ea8, "OpenDialogs = ..."
-	bool BuddyHideOffline{};               // 0x719eac
-	std::array<int, 3> BuddySortmethods{}; // 0x719eb0
-	// 0x719ebc NumberOfContentWindows: ContentWindows.size().
-	int AutomapZoom{};                                          // 0x719ec0
-	int ConsoleHeight{};                                        // 0x719ec4
-	bool WindowedMaximized{};                                   // 0x719ec8
-	std::array<bool, HOTKEYS> HotkeyAutoSend{};                 // 0x719ecc, saved as a '\n' after the text
-	std::array<TFixedString<HOTKEY_LENGTH>, HOTKEYS> Hotkeys{}; // 0x719ef0, "Hotkey = (Number,Text)"
-	int Engine{};                                               // 0x71c2f0, -1 = not chosen
-	int ConfineFramerate{};                                     // 0x71c2f4
-	int NoStretching{};                                         // 0x71c2f8, 0 or 1, 2 = not set yet
-	int CreatureInfo{};                                         // 0x71c2fc
-	bool TextualEffects{};                                      // 0x71c300
-	bool LightEffects{};                                        // 0x71c301
-	bool WindowsMousepointer{};                                 // 0x71c302
-	TFullscreenMode FullscreenMode{};                           // 0x71c304, Width 0 = not set
-	int ViewMode{};                                             // 0x71c314, "ViewMode" in a MainFrm.cpp catch block
-	bool TestServerLogin{};                                     // 0x71c318, "TestServer = yes"
-	bool PreferencesLoaded{};                                   // 0x71c319, set by InitPreferences; SavePreferences writes only then
-	int WindowedX{};                                            // 0x71c31c
-	int WindowedY{};                                            // 0x71c320
+	// NumberOfOpenChannels: OpenChannels.size().
+	bool PrivateMessages{};
+	bool TimeStamps{};
+	bool StatusMessages{};
+	bool EventMessages{};
+	bool InfoMessages{};
+	char *MotD = nullptr;      // text of the message of the day
+	int LastMotD{};            // its number
+	int NumberOfOpenDialogs{}; // "OpenDialogs = ..."
+	bool BuddyHideOffline{};
+	std::array<int, 3> BuddySortmethods{};
+	// NumberOfContentWindows: ContentWindows.size().
+	int AutomapZoom{};
+	int ConsoleHeight{};
+	bool WindowedMaximized{};
+	std::array<bool, HOTKEYS> HotkeyAutoSend{};                 // saved as a '\n' after the text
+	std::array<TFixedString<HOTKEY_LENGTH>, HOTKEYS> Hotkeys{}; // "Hotkey = (Number,Text)"
+	int Engine{};                                               // -1 = not chosen
+	int ConfineFramerate{};
+	int NoStretching{}; // 0 or 1, 2 = not set yet
+	int CreatureInfo{};
+	bool TextualEffects{};
+	bool LightEffects{};
+	bool WindowsMousepointer{};
+	TFullscreenMode FullscreenMode{}; // Width 0 = not set
+	int ViewMode{};                   // "ViewMode" in a MainFrm.cpp catch block
+	bool TestServerLogin{};           // "TestServer = yes"
+	bool PreferencesLoaded{};         // set by InitPreferences; SavePreferences writes only then
+	int WindowedX{};
+	int WindowedY{};
 	// The original's vector<T>(0, 9, 10) each, with the counts above (issue #100; notes/decisions.md, "#100"): the
 	// lists that append at their count and read below it are std::vectors, their size the count. OpenDialogs stays
 	// a TIndexedVector: ReadTibiaCfg's duplicate check reads its entries from min to max - 1, the init fill (-1) and
 	// the entries past NumberOfOpenDialogs that ClearOpenDialogs left.
-	std::vector<TContentWindowSize> ContentWindows; // 0x71c324, "ContentWindow = (...)", initialiser at 0x55a050
-	TIndexedVector<int> OpenDialogs{0, 9, 10, -1};  // 0x71c348, initialiser at 0x55a070
-	std::vector<int> OpenChannels;                  // 0x71c368, "OpenChannel = ...", initialiser at 0x55a090
-	std::vector<TBuddy> Buddies;                    // 0x71c388, "Buddy = (...)", deleted entries included, 0x55a0b0
-	std::vector<int> KnownHints;                    // 0x71c430, "KnownHints = {...}", initialiser at 0x55a0d0
+	std::vector<TContentWindowSize> ContentWindows; // "ContentWindow = (...)"
+	TIndexedVector<int> OpenDialogs{0, 9, 10, -1};
+	std::vector<int> OpenChannels; // "OpenChannel = ..."
+	std::vector<TBuddy> Buddies;   // "Buddy = (...)", deleted entries included
+	std::vector<int> KnownHints;   // "KnownHints = {...}"
 
 	patella::platform::IFileSystem &FileSystem;
 	patella::settings::TServerValues ServerValues; // Patella-Plus, not in the original
@@ -375,7 +374,7 @@ const char *GetBuddyDescription(int CharacterID);
 bool GetBuddyNotify(int CharacterID);
 bool GetSkillBar(int SkillNumber);
 void SetSkillBar(int SkillNumber, bool Value);
-// The original's Tibia.cfg reader and writer (0x4ddc00, 0x4de890; issue #45): the import and the golden
+// The original's Tibia.cfg reader and writer (issue #45): the import and the golden
 // corpus's reference. The client calls InitPreferences, SavePreferences and ExitPreferences, which read and
 // write Patella.ini (settings/PreferenceKeys.h); it never writes Tibia.cfg.
 void ReadTibiaCfg();

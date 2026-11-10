@@ -1,6 +1,5 @@
-// TXTEA: the XTEA cipher used for the session (0x508c70-0x508f98). The original
-// file name is unknown; "TXTEA" fits the alphabetical link order (after TRSA,
-// before Utils).
+// TXTEA: the XTEA cipher used for the session. The original file name is
+// unknown; "TXTEA" fits the alphabetical link order (after TRSA, before Utils).
 
 #pragma once
 
@@ -18,11 +17,11 @@ public:
 	using TKey = patella::TSpan<const uint8, 16>;
 	using TBlock = patella::TSpan<uint8, 8>;
 
-	TXTEA();                         // 0x508c70
-	virtual ~TXTEA() = default;      // scalar deleting destructor at 0x508f40 (vtable 0x573efc)
-	void SetKey(TKey Key);           // 0x508ca0
-	void EncryptBlock(TBlock Block); // 0x508f60, in place
-	void DecryptBlock(TBlock Block); // 0x508f80
+	TXTEA();
+	virtual ~TXTEA() = default;
+	void SetKey(TKey Key);
+	void EncryptBlock(TBlock Block); // in place
+	void DecryptBlock(TBlock Block);
 
 private:
 	std::array<uint32, 4> Key; // +0x4

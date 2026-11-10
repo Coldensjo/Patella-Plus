@@ -1,19 +1,18 @@
 // ContextMenus.h: the help bubble and the context menus, modal windows that
 // Control.cpp creates (the help bubble in action state 9, help mode).
 //
-// THelpBubble (vtable 0x55f8b8, 0x30 bytes) shows a help text next to the
-// window it explains (Help.cpp's help area), on the side where it fits. A
-// TContextMenu (vtable 0x55f730, 0x34 bytes) is a column of entries
-// (TContextMenuEntry, vtable 0x55f6a8, 0x74 bytes: a text, an optional
-// shortcut on the right and a callback) with separators between groups. Its
-// subclasses fill it in their constructors and do the work of an entry in
-// HandleEvent: the menus of a map object (TObjectContextMenu), of a creature
-// in the battle list (TCreatureContextMenu), of a VIP (TBuddyContextMenu), of
-// a console line (TTextContextMenu), of a line in the rule violation channel
+// THelpBubble shows a help text next to the window it explains (Help.cpp's
+// help area), on the side where it fits. A TContextMenu is a column of
+// entries (TContextMenuEntry: a text, an optional shortcut on the right and a
+// callback) with separators between groups. Its subclasses fill it in their
+// constructors and do the work of an entry in HandleEvent: the menus of a map
+// object (TObjectContextMenu), of a creature in the battle list
+// (TCreatureContextMenu), of a VIP (TBuddyContextMenu), of a console line
+// (TTextContextMenu), of a line in the rule violation channel
 // (TRequestContextMenu), of the console channel (TChannelContextMenu), of an
 // edit line (TEditContextMenu), of an automap point (TMarkContextMenu) and of
-// the skill window (TSkillContextMenu). Every click or Escape ends the
-// action state, and Control.cpp deletes the menu.
+// the skill window (TSkillContextMenu). Every click or Escape ends the action
+// state, and Control.cpp deletes the menu.
 //
 // Names from the binary: the members LookedObject,
 // LookedObjectX, UsedObjectX, UsedObjectY, LastEntry and the parameter names
@@ -42,15 +41,13 @@ class TAutomapWindow;    // ContentWindows.h
 // The help bubble: a formatted text in a frame of skins 52-60.
 class THelpBubble : public TWindow {
 public:
-	THelpBubble(const char *HelpText); // 0x441d60, lines 106-121
-	// The destructor is the implicit one (deleting destructor 0x4adc40, folded).
-	void SetSize(int Width, int Height) override; // +0x34, 0x43d730, line 142
-	// Inline: emitted with the vtable after the constructor (0x4420f0, 0x442100).
-	int getMinimumWidth() override { return SkinProperties().HelpBubbleMinimumWidth; }   // +0x3c
-	int getMinimumHeight() override { return SkinProperties().HelpBubbleMinimumHeight; } // +0x40
-	void Arrange() override;                                                             // +0x48, 0x43d9b0
-	void Place(TWindow *Window);                                                         // 0x442110, lines 257-272
-	bool FitsIn(int &x, int &y, int &Width, int &Height, TWindow *Window);               // 0x43dca0, lines 289-293
+	THelpBubble(const char *HelpText);
+	void SetSize(int Width, int Height) override;
+	int getMinimumWidth() override { return SkinProperties().HelpBubbleMinimumWidth; }
+	int getMinimumHeight() override { return SkinProperties().HelpBubbleMinimumHeight; }
+	void Arrange() override;
+	void Place(TWindow *Window);
+	bool FitsIn(int &x, int &y, int &Width, int &Height, TWindow *Window);
 
 	TFormattedText *Text; // +0x2c
 };
@@ -58,11 +55,10 @@ public:
 // One entry of a context menu.
 class TContextMenuEntry final : public TElement {
 public:
-	TContextMenuEntry(const char *_Text, const char *_Shortcut, TCallback _Callback); // 0x43dfe0, line 316
-	// The destructor is the implicit one (deleting destructor 0x429590, folded).
-	void Draw(int Surface, int x, int y) override;       // +0x44, 0x43e210, line 338
-	bool LeftButtonUp(int x, int y, int Flags) override; // +0x54, 0x43e4d0, line 349
-	void SetLast();                                      // 0x43e660, line 361
+	TContextMenuEntry(const char *_Text, const char *_Shortcut, TCallback _Callback);
+	void Draw(int Surface, int x, int y) override;
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	void SetLast();
 
 	TFixedString<50> Text;     // +0x24
 	TFixedString<20> Shortcut; // +0x56
@@ -72,18 +68,17 @@ public:
 // The base class of the menus.
 class TContextMenu : public TWindow {
 public:
-	TContextMenu(); // 0x43e820, line 381
-	// The destructor is the implicit one (deleting destructor 0x4adc40, folded).
-	void Arrange() override;                              // +0x48, 0x43ea00
-	bool LeftButtonUp(int x, int y, int Flags) override;  // +0x54, 0x43ecf0, line 437
-	bool RightButtonUp(int x, int y, int Flags) override; // +0x5c, 0x43eea0, line 449
-	void KeyPress(int Key) override;                      // +0x6c, 0x43f030, line 460
-	// Inline: emitted with the vtable after the constructor (0x43e9f0). The
-	// subclasses override it; an entry of the base class only closes the menu.
-	void HandleEvent([[maybe_unused]] int Event) override { SetActionState(ACTIONSTATE_NONE); } // +0x70
-	void Show(int x, int y, int ParentWidth, int ParentHeight);                                 // 0x442de0, lines 486-498
-	void AddEntry(int Event, const char *Text, const char *Shortcut);                           // 0x442910, lines 506-521
-	void AddSeparator();                                                                        // 0x43f1d0, line 542
+	TContextMenu();
+	void Arrange() override;
+	bool LeftButtonUp(int x, int y, int Flags) override;
+	bool RightButtonUp(int x, int y, int Flags) override;
+	void KeyPress(int Key) override;
+	// The subclasses override it; an entry of the base class only closes the
+	// menu.
+	void HandleEvent([[maybe_unused]] int Event) override { SetActionState(ACTIONSTATE_NONE); }
+	void Show(int x, int y, int ParentWidth, int ParentHeight);
+	void AddEntry(int Event, const char *Text, const char *Shortcut);
+	void AddSeparator();
 
 	int EntryWidth; // +0x2c, the widest entry
 	bool Separator; // +0x30, the next entry starts a new group
@@ -95,8 +90,8 @@ public:
 // on the field (GetTradeInfo).
 class TObjectContextMenu : public TContextMenu {
 public:
-	TObjectContextMenu(int x, int y, int ParentWidth, int ParentHeight); // 0x443130, lines 560-670
-	void HandleEvent(int Event) override;                                // +0x70, 0x43f3a0, lines 712-780
+	TObjectContextMenu(int x, int y, int ParentWidth, int ParentHeight);
+	void HandleEvent(int Event) override;
 
 	TObject LookedObject;  // +0x34
 	int LookedObjectIndex; // +0x40, the position on the field or in the container
@@ -114,8 +109,8 @@ public:
 // The menu of a creature in the battle list.
 class TCreatureContextMenu : public TContextMenu {
 public:
-	TCreatureContextMenu(uint32 CreatureID, int x, int y, int ParentWidth, int ParentHeight); // 0x443960, lines 845-862
-	void HandleEvent(int Event) override;                                                     // +0x70, 0x43fed0, lines 934-937
+	TCreatureContextMenu(uint32 CreatureID, int x, int y, int ParentWidth, int ParentHeight);
+	void HandleEvent(int Event) override;
 
 	uint32 CreatureID; // +0x34
 };
@@ -123,8 +118,8 @@ public:
 // The menu of the VIP list, on a VIP or on the free space.
 class TBuddyContextMenu : public TContextMenu {
 public:
-	TBuddyContextMenu(uint32 _CharacterID, int x, int y, int ParentWidth, int ParentHeight); // 0x443e20, line 987
-	void HandleEvent(int Event) override;                                                    // +0x70, 0x440460, lines 1040-1043
+	TBuddyContextMenu(uint32 _CharacterID, int x, int y, int ParentWidth, int ParentHeight);
+	void HandleEvent(int Event) override;
 
 	uint32 CharacterID; // +0x34
 };
@@ -133,8 +128,8 @@ public:
 class TTextContextMenu : public TContextMenu {
 public:
 	TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, int x, int y, int ParentWidth,
-		int ParentHeight);                // 0x444160, lines 1056-1120
-	void HandleEvent(int Event) override; // +0x70, 0x4408f0, line 1173
+		int ParentHeight);
+	void HandleEvent(int Event) override;
 
 	TTextWindow *TextWindow; // +0x34
 	int LineNumber;          // +0x38
@@ -144,8 +139,8 @@ public:
 class TRequestContextMenu : public TContextMenu {
 public:
 	TRequestContextMenu(TConsoleWindow *_ConsoleWindow, int _LineNumber, int x, int y, int ParentWidth,
-		int ParentHeight);                // 0x444720, lines 1181-1203
-	void HandleEvent(int Event) override; // +0x70, 0x440c60, lines 1221-1241
+		int ParentHeight);
+	void HandleEvent(int Event) override;
 
 	TConsoleWindow *ConsoleWindow; // +0x34
 	int LineNumber;                // +0x38
@@ -154,8 +149,8 @@ public:
 // The menu of the console's current channel (its tab).
 class TChannelContextMenu : public TContextMenu {
 public:
-	TChannelContextMenu(TConsoleWindow *_ConsoleWindow, int x, int y, int ParentWidth, int ParentHeight); // 0x444a70, lines 1248-1275
-	void HandleEvent(int Event) override;                                                                 // +0x70, 0x440fe0, lines 1307-1312
+	TChannelContextMenu(TConsoleWindow *_ConsoleWindow, int x, int y, int ParentWidth, int ParentHeight);
+	void HandleEvent(int Event) override;
 
 	TConsoleWindow *ConsoleWindow; // +0x34
 	bool ShowServerMessages;       // +0x38, the value "Show/Hide server messages" sets
@@ -164,8 +159,8 @@ public:
 // The menu of an edit line.
 class TEditContextMenu : public TContextMenu {
 public:
-	TEditContextMenu(TEditLine *_Edit, int x, int y, int ParentWidth, int ParentHeight); // 0x444eb0, lines 1324-1349
-	void HandleEvent(int Event) override;                                                // +0x70, 0x441370, lines 1363-1366
+	TEditContextMenu(TEditLine *_Edit, int x, int y, int ParentWidth, int ParentHeight);
+	void HandleEvent(int Event) override;
 
 	TEditLine *Edit; // +0x34
 };
@@ -190,8 +185,8 @@ struct TMarkMenuData {
 // The menu of a point of the automap.
 class TMarkContextMenu : public TContextMenu {
 public:
-	TMarkContextMenu(TMarkMenuData *_Data, int x, int y, int ParentWidth, int ParentHeight); // 0x4451e0, lines 1379-1397
-	void HandleEvent(int Event) override;                                                    // +0x70, 0x441660, lines 1426-1429
+	TMarkContextMenu(TMarkMenuData *_Data, int x, int y, int ParentWidth, int ParentHeight);
+	void HandleEvent(int Event) override;
 
 	TMarkMenuData Data; // +0x34
 };
@@ -199,9 +194,9 @@ public:
 // The menu of the skill window: which bars it shows.
 class TSkillContextMenu : public TContextMenu {
 public:
-	TSkillContextMenu(TSkillsWindowBody *_SkillsWindow, int x, int y, int ParentWidth, int ParentHeight); // 0x4454f0, lines 1442-1465
-	~TSkillContextMenu() override;                                                                        // +0x00, 0x43d6f0 (deleting 0x43d710)
-	void HandleEvent(int Event) override;                                                                 // +0x70, 0x441a00, lines 1525-1530
+	TSkillContextMenu(TSkillsWindowBody *_SkillsWindow, int x, int y, int ParentWidth, int ParentHeight);
+	~TSkillContextMenu() override;
+	void HandleEvent(int Event) override;
 
 	TSkillsWindowBody *SkillsWindow; // +0x34, its ContextMenu points back
 };

@@ -1,14 +1,14 @@
 // Surface.h: TSurface, the platform's drawing surface (Patella-Modern issue #138, plan M7; notes/decisions.md,
 // "#138: TSurface as a platform interface"). Portable: no platform header.
 //
-// TSurface is the original's base class of the graphics engines (Surface.cpp, vtable 0x56ef78): the client draws
+// TSurface is the original's base class of the graphics engines (Surface.cpp): the client draws
 // through it (graphics.cpp, the window files, Control.cpp) and the engine implements it. It moved here from
 // src/Surface.h with its slots, their order and their default bodies (still Surface.cpp's code, at its addresses),
 // so that the engine is a platform implementation behind it:
 //
-//	TSurfaceVulkan   the Vulkan engine (vulkan/SurfaceVulkan.h): Patella.exe's and the test build's; its surfaces are
-//	                 SDL_Vulkan_CreateSurface's since M8's #126 (vulkan/WindowSystem.h)
-//	the golden tests' recording surfaces (tests/golden: testsurface.h, commworld.cpp's)
+// 	TSurfaceVulkan   the Vulkan engine (vulkan/SurfaceVulkan.h): Patella.exe's and the test build's; its surfaces are
+// 	                 SDL_Vulkan_CreateSurface's since M8's #126 (vulkan/WindowSystem.h)
+// 	the golden tests' recording surfaces (tests/golden: testsurface.h, commworld.cpp's)
 //
 // No Win32 type in it: the window is a TWindowHandle (platform/Window.h), ClipRect's rectangles and ScreenRect a
 // TEdgeRect (RECT's four edges), SurfaceGL.cpp's device context a pointer. What the engine shares with the client
@@ -88,37 +88,37 @@ protected:
 	~TSurfaceShared() = default;
 
 	friend class ::TSurface;
-	TWindowHandle SurfaceWindow{}; // 0x71d0c0, the main window, from SurfaceInitInstance
+	TWindowHandle SurfaceWindow{}; // the main window, from SurfaceInitInstance
 
 public:
 	// .data
-	int CacheSurfaceWidth = 256;  // 0x5c2568, the size of a video cache surface (256 at start)
-	int CacheSurfaceHeight = 256; // 0x5c256c
+	int CacheSurfaceWidth = 256; // the size of a video cache surface (256 at start)
+	int CacheSurfaceHeight = 256;
 	// .bss. The statistics count the blits of a frame (the engines').
-	int InitStep{};         // 0x71d0bc, the step reached in Direct3D's initialisation; 0 done
-	int BlitCount{};        // 0x71d0d0
-	int BlitPixels{};       // 0x71d0d4
-	int Data71D0D8{};       // 0x71d0d8, cleared by surfaceDX9.cpp and SurfaceGL.cpp
-	int ScreenWidth{};      // 0x71d0dc, of the last frame
-	int ScreenHeight{};     // 0x71d0e0
-	int ScreenDepth{};      // 0x71d0e4
-	int LastBlitCount{};    // 0x71d0e8, BlitCount of the last frame
-	int LastBlitPixels{};   // 0x71d0ec
-	int NumberOfSurfaces{}; // 0x71d0f0, the surfaces created (SurfaceDX.cpp's SurfaceMemory entries)
-	int Data71D0F4{};       // 0x71d0f4, SurfaceGL.cpp's
+	int InitStep{}; // the step reached in Direct3D's initialisation; 0 done
+	int BlitCount{};
+	int BlitPixels{};
+	int Data71D0D8{};  // cleared by surfaceDX9.cpp and SurfaceGL.cpp
+	int ScreenWidth{}; // of the last frame
+	int ScreenHeight{};
+	int ScreenDepth{};
+	int LastBlitCount{}; // BlitCount of the last frame
+	int LastBlitPixels{};
+	int NumberOfSurfaces{}; // the surfaces created (SurfaceDX.cpp's SurfaceMemory entries)
+	int Data71D0F4{};       // SurfaceGL.cpp's
 
 protected:
-	std::uint8_t AvailableEngines{}; // 0x71d0c8, bit 0 OpenGL works, bit 1 DirectX 9 passed TestEngine
+	std::uint8_t AvailableEngines{}; // bit 0 OpenGL works, bit 1 DirectX 9 passed TestEngine
 };
 
 } // namespace patella::platform
 
-// The vtable is at 0x56ef78. Slots with _purecall in the binary are pure;
-// the others have the default bodies in Surface.cpp. Slot names and
-// parameters come from the calls (graphics.cpp and the window files) and
-// from SurfaceDX.cpp's implementations; ToSurface, FromSurface, VMode, GMode
-// and ViewMode are the binary's (assertions), the other names are ours.
-// Surfaces 6 and up are the video cache surfaces.
+// Slots with _purecall in the binary are pure; the others have the default
+// bodies in Surface.cpp. Slot names and parameters come from the calls
+// (graphics.cpp and the window files) and from SurfaceDX.cpp's
+// implementations; ToSurface, FromSurface, VMode, GMode and ViewMode are the
+// binary's (assertions), the other names are ours. Surfaces 6 and up are the
+// video cache surfaces.
 class TSurface {
 public:
 	// Shared: the data the engines share with the client (above), the creator's; it outlives the surface.
@@ -196,7 +196,7 @@ public:
 	virtual void InitSurfaces() = 0;                   // +0xb4
 	virtual void ExitSurfaces() = 0;                   // +0xb8
 	virtual bool TestEngine();                         // +0xbc
-	std::uint8_t GetAvailableEngines();                // 0x4eabe0, the engines found at start-up (bit 0 OpenGL, bit 1 DirectX 9)
+	std::uint8_t GetAvailableEngines();                // the engines found at start-up (bit 0 OpenGL, bit 1 DirectX 9)
 
 	// The members the engines share: the engines' identical copies of
 	// GetCacheSurfaces, IsUnavailable, GetFPS and the frame timer use the same

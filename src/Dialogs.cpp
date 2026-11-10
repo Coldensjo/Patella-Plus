@@ -1,19 +1,14 @@
 // Dialogs.cpp: the dialogs of the client (c:\mud\tibiaplayer\Dialogs.cpp);
 // see Dialogs.h.
 //
-// Order: the functions follow the source's line numbers: the creators
-// (lines 48-617), the frame TDialog (650-891) and the dialog bodies. The
-// binary moves the creators, the constructors that call functions defined
-// further down (TDialog's, the outfit's, the edit list's, the ignore
-// list's, the hotkeys', the error report's, the rule violation's) and the
-// rule violation's HandleEvent to the end of the object, Creatures.cpp's
-// pattern. The error report dialog (CreateErrorReportDialog, line 631, and
-// TErrorReportDialog, lines 4053-4084) is gone since Patella-Modern issue
-// #74 (decision D2). The header code at the start of the object (0x46b790-0x46c0cf
-// with Container.h's vector<TIgnoreEntry>) is in Dialogs.h and Container.h.
-//
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none.
+// Order: the functions follow the source's line numbers: the creators, the
+// frame TDialog and the dialog bodies. The binary moves the creators, the
+// constructors that call functions defined further down (TDialog's, the
+// outfit's, the edit list's, the ignore list's, the hotkeys', the error
+// report's, the rule violation's) and the rule violation's HandleEvent to
+// the end of the object, Creatures.cpp's pattern. The error report dialog
+// (CreateErrorReportDialog and TErrorReportDialog) is gone since
+// Patella-Modern issue #74 (decision D2).
 
 #include "Dialogs.h"
 #include "vulkan/DeviceSettings.h"
@@ -64,18 +59,14 @@ const char *TextUseCpuDevice = "CPU (compatibility): draw without the graphics c
 
 namespace {
 
-// Data. Dialogs.obj's only static is NoCallback (static initialiser
-// 0x559e10). Its copy of the text table (0x5c123c-0x5c1484, then its
-// regular expression pointer 0x5c1488 and its copy of DefaultFontColor
-// 0x5c148c) is Text.h's (Dialogs.h includes it).
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0); // 0x5cc420
+TCallback NoCallback(nullptr, 0);
 
 } // namespace
 
 // --- Creators ----------------------------------------------------------------------
 
-// 0x47f8a0, line 48. A message; OK and Escape close it.
+// A message; OK and Escape close it.
 TDialog *CreateMessageDialog(const char *Caption, const char *Text)
 {
 	TLabel *Label = new TLabel(0, 0, SkinProperties().Dialog.Data64, Text);
@@ -85,7 +76,7 @@ TDialog *CreateMessageDialog(const char *Caption, const char *Text)
 	return Dialog;
 }
 
-// 0x47faf0, line 67. A message with formatting tokens.
+// A message with formatting tokens.
 TDialog *CreateFormattedMessageDialog(const char *Caption, const char *Text)
 {
 	TFormattedText *FormattedText = new TFormattedText(Text);
@@ -97,8 +88,8 @@ TDialog *CreateFormattedMessageDialog(const char *Caption, const char *Text)
 	return Dialog;
 }
 
-// 0x47fd30, line 84. "Connecting": Abort (and Escape) send 29 to the
-// receiver (the main window); the next queued message closes it.
+// "Connecting": Abort (and Escape) send 29 to the receiver (the main
+// window); the next queued message closes it.
 TDialog *CreateConnectingDialog(const char *Caption, const char *Text, TComponent *Receiver)
 {
 	TWaitLabel *Label = new TWaitLabel(Text, true, false);
@@ -109,8 +100,8 @@ TDialog *CreateConnectingDialog(const char *Caption, const char *Text, TComponen
 	return Dialog;
 }
 
-// 0x47ff60, line 102. "Please wait": Abort clears the message queue; a
-// timeout (tenths of a second) closes the dialog.
+// "Please wait": Abort clears the message queue; a timeout (tenths of
+// a second) closes the dialog.
 TDialog *CreateWaitDialog(const char *Caption, const char *Text, int Timeout)
 {
 	TWaitLabel *Label = new TWaitLabel(Text, false, true);
@@ -123,7 +114,7 @@ TDialog *CreateWaitDialog(const char *Caption, const char *Text, int Timeout)
 	return Dialog;
 }
 
-// 0x4801c0, line 119. The reconnect countdown (timeout in seconds).
+// The reconnect countdown (timeout in seconds).
 TDialog *CreateReconnectDialog(const char *Caption, const char *Text, int timeout)
 {
 	TReconnectWindow *Window = new TReconnectWindow(Text, timeout);
@@ -134,7 +125,7 @@ TDialog *CreateReconnectDialog(const char *Caption, const char *Text, int timeou
 	return Dialog;
 }
 
-// 0x4803f0, line 134. A yes/no question whose answers go to the receiver.
+// A yes/no question whose answers go to the receiver.
 TDialog *CreateQuestionDialog(const char *Caption, const char *Text, TComponent *Receiver, int YesEvent,
 	int NoEvent)
 {
@@ -146,8 +137,7 @@ TDialog *CreateQuestionDialog(const char *Caption, const char *Text, TComponent 
 	return Dialog;
 }
 
-// 0x480640, line 149. Logout (506), Cancel (2) and Exit (7) go to the
-// receiver.
+// Logout (506), Cancel (2) and Exit (7) go to the receiver.
 TDialog *CreateLogoutDialog(const char *Caption, const char *Text, TComponent *Receiver)
 {
 	TLogoutLabel *Label = new TLogoutLabel(SkinProperties().Dialog.Data64, Text, TCallback(Receiver, EVENT_LOGOUT),
@@ -162,8 +152,8 @@ TDialog *CreateLogoutDialog(const char *Caption, const char *Text, TComponent *R
 // BuildConfig.h's limit for a caption is what TTextButton's text holds.
 static_assert(sizeof(TTextButton::Text) == patella::buildconfig::MaxCaption + 1, "TTextButton::Text and MaxCaption");
 
-// 0x4808b0, line 177. "Info": the client version and a link to the web
-// site, in a frame of skins.
+// "Info": the client version and a link to the web site, in a frame of
+// skins.
 TDialog *CreateInfoDialog(void (*OpenURL)(const char *URL))
 {
 	TWindow *Window = new TWindow();
@@ -186,8 +176,8 @@ TDialog *CreateInfoDialog(void (*OpenURL)(const char *URL))
 	return Dialog;
 }
 
-// 0x480cd0, line 200. Only for a dragged pile of 1-100 objects; otherwise
-// it ends the drag and makes no dialog.
+// Only for a dragged pile of 1-100 objects; otherwise it ends the drag
+// and makes no dialog.
 TDialog *CreateMoveObjectsDialog()
 {
 	int Unused;
@@ -203,7 +193,6 @@ TDialog *CreateMoveObjectsDialog()
 	return nullptr;
 }
 
-// 0x480f40, line 214
 TDialog *CreateLoginDialog(void (*OpenURL)(const char *URL))
 {
 	TLoginDialog *Body = new TLoginDialog(OpenURL);
@@ -213,7 +202,7 @@ TDialog *CreateLoginDialog(void (*OpenURL)(const char *URL))
 	return Dialog;
 }
 
-// 0x481160, line 230. Timeout in tenths of a second, 0 for none.
+// Timeout in tenths of a second, 0 for none.
 TDialog *CreateCharacterListDialog(int Timeout)
 {
 	TCharacterListDialog *Body = new TCharacterListDialog();
@@ -224,10 +213,10 @@ TDialog *CreateCharacterListDialog(int Timeout)
 	return Dialog;
 }
 
-// 0x481370, line 280. ObjectData holds the server's object number, the
-// object type and the maximum length. The text can be edited when the
-// object is writable, or writable once and still empty; Return does not
-// close either form (OkCallback is cleared).
+// ObjectData holds the server's object number, the object type and the
+// maximum length. The text can be edited when the object is writable,
+// or writable once and still empty; Return does not close either form
+// (OkCallback is cleared).
 TDialog *CreateTextDialog(const int *ObjectData, const char *Author, const char *Text)
 {
 	const int ObjectNumber = ObjectData[0];
@@ -267,7 +256,7 @@ TDialog *CreateTextDialog(const int *ObjectData, const char *Author, const char 
 	return Dialog;
 }
 
-// 0x4817c0, line 294. HouseData holds the list's type and identifier.
+// HouseData holds the list's type and identifier.
 TDialog *CreateEditListDialog(int *HouseData, const char *Text)
 {
 	TEditListDialog *Body = new TEditListDialog(2000, Text, HouseData[0], HouseData[1], TextEnterOneNamePerLine);
@@ -277,7 +266,6 @@ TDialog *CreateEditListDialog(int *HouseData, const char *Text)
 	return Dialog;
 }
 
-// 0x4819f0, line 307
 TDialog *CreateOutfitDialog(int *Data)
 {
 	TOutfitDialog *Body = new TOutfitDialog(Data);
@@ -286,7 +274,6 @@ TDialog *CreateOutfitDialog(int *Data)
 	return Dialog;
 }
 
-// 0x481bf0, line 321
 TDialog *CreateBugReportDialog()
 {
 	TBugReportDialog *Body = new TBugReportDialog();
@@ -296,7 +283,6 @@ TDialog *CreateBugReportDialog()
 	return Dialog;
 }
 
-// 0x481e00, line 334
 TDialog *CreateNewChannelDialog(int NumberOfChannels, int *ChannelIDs, const char (*ChannelNames)[30]) // NOLINT(modernize-avoid-c-arrays): Dialogs.h
 {
 	TNewChannelDialog *Body = new TNewChannelDialog(NumberOfChannels, ChannelIDs, ChannelNames);
@@ -305,7 +291,6 @@ TDialog *CreateNewChannelDialog(int NumberOfChannels, int *ChannelIDs, const cha
 	return Dialog;
 }
 
-// 0x482010, line 347
 TDialog *CreateInviteDialog()
 {
 	TPrivateChannelDialog *Body = new TPrivateChannelDialog(false);
@@ -314,7 +299,7 @@ TDialog *CreateInviteDialog()
 	return Dialog;
 }
 
-// 0x482210, line 360. The OK button says "Add" here too.
+// The OK button says "Add" here too.
 TDialog *CreateExcludeDialog()
 {
 	TPrivateChannelDialog *Body = new TPrivateChannelDialog(true);
@@ -323,7 +308,7 @@ TDialog *CreateExcludeDialog()
 	return Dialog;
 }
 
-// 0x482410, line 375. OK sends 602.
+// OK sends 602.
 TDialog *CreateIgnoreListDialog()
 {
 	TIgnoreListDialog *Body = new TIgnoreListDialog();
@@ -334,8 +319,8 @@ TDialog *CreateIgnoreListDialog()
 	return Dialog;
 }
 
-// 0x482640, line 407. Only one open request at a time (a rule violation
-// channel buffer exists while one is open).
+// Only one open request at a time (a rule violation channel buffer
+// exists while one is open).
 TDialog *CreateReportDialog()
 {
 	if (GetTextBuffer(TALK_GAMEMASTER_ANSWER, nullptr, -1) != nullptr) {
@@ -348,7 +333,6 @@ TDialog *CreateReportDialog()
 	return Dialog;
 }
 
-// 0x482870, line 420
 TDialog *CreateAddBuddyDialog()
 {
 	TAddBuddyDialog *Body = new TAddBuddyDialog();
@@ -357,7 +341,6 @@ TDialog *CreateAddBuddyDialog()
 	return Dialog;
 }
 
-// 0x482a70, line 434
 TDialog *CreateEditBuddyDialog(int CharacterID)
 {
 	TEditBuddyDialog *Body = new TEditBuddyDialog(CharacterID);
@@ -367,10 +350,9 @@ TDialog *CreateEditBuddyDialog(int CharacterID)
 	return Dialog;
 }
 
-// 0x482c80, CreateUpdateDialog (line 448), is gone with the update dialog since Patella-Modern issue #75 (decision
-// D9).
+// CreateUpdateDialog is gone with the update dialog since Patella-Modern issue #75 (decision D9).
 
-// 0x482ea0, line 462. OK goes to the frame (which closes the dialog).
+// OK goes to the frame (which closes the dialog).
 TDialog *CreateHelpDialog(void (*OpenURL)(const char *URL))
 {
 	THelpDialog *Body = new THelpDialog(OpenURL);
@@ -380,7 +362,7 @@ TDialog *CreateHelpDialog(void (*OpenURL)(const char *URL))
 	return Dialog;
 }
 
-// 0x4830c0, line 476. Cancel goes to the frame.
+// Cancel goes to the frame.
 TDialog *CreateHintsDialog()
 {
 	THintsDialog *Body = new THintsDialog();
@@ -390,7 +372,7 @@ TDialog *CreateHintsDialog()
 	return Dialog;
 }
 
-// 0x485290, line 490. Name and Statement may be NULL.
+// Name and Statement may be NULL.
 TDialog *CreateRuleViolationDialog(const char *Name, TTalkLine *Statement)
 {
 	TRuleViolationDialog *Body = new TRuleViolationDialog(Name, Statement);
@@ -400,7 +382,7 @@ TDialog *CreateRuleViolationDialog(const char *Name, TTalkLine *Statement)
 	return Dialog;
 }
 
-// 0x4832e0, line 504. The body deletes the coordinate and the mark.
+// The body deletes the coordinate and the mark.
 TDialog *CreateEditMarkDialog(TCoordinate *Coordinate, TMark *Mark)
 {
 	TEditMarkDialog *Body = new TEditMarkDialog(Coordinate, Mark);
@@ -410,7 +392,7 @@ TDialog *CreateEditMarkDialog(TCoordinate *Coordinate, TMark *Mark)
 	return Dialog;
 }
 
-// 0x483500, line 533. Escape is OK here (both save the options).
+// Escape is OK here (both save the options).
 TDialog *CreateOptionsDialog()
 {
 	TOptionsDialog *Body = new TOptionsDialog();
@@ -421,7 +403,6 @@ TDialog *CreateOptionsDialog()
 	return Dialog;
 }
 
-// 0x483730, line 547
 TDialog *CreateGeneralOptionsDialog(void (*OpenURL)(const char *URL))
 {
 	TGeneralOptionsDialog *Body = new TGeneralOptionsDialog(OpenURL);
@@ -431,7 +412,6 @@ TDialog *CreateGeneralOptionsDialog(void (*OpenURL)(const char *URL))
 	return Dialog;
 }
 
-// 0x483950, line 561
 TDialog *CreateGraphicsOptionsDialog(void (*OpenURL)(const char *URL), void (*SetDisplayMode)(int Mode),
 	TWindow *Parent)
 {
@@ -442,7 +422,6 @@ TDialog *CreateGraphicsOptionsDialog(void (*OpenURL)(const char *URL), void (*Se
 	return Dialog;
 }
 
-// 0x483b80, line 576
 TDialog *CreateAdvancedGraphicsDialog(void (*OpenURL)(const char *URL), TComponent *Receiver)
 {
 	TAdvancedGraphicsDialog *Body = new TAdvancedGraphicsDialog(OpenURL, Receiver);
@@ -453,7 +432,6 @@ TDialog *CreateAdvancedGraphicsDialog(void (*OpenURL)(const char *URL), TCompone
 	return Dialog;
 }
 
-// 0x483dc0, line 590
 TDialog *CreateConsoleOptionsDialog(void (*OpenURL)(const char *URL))
 {
 	TConsoleOptionsDialog *Body = new TConsoleOptionsDialog(OpenURL);
@@ -463,7 +441,6 @@ TDialog *CreateConsoleOptionsDialog(void (*OpenURL)(const char *URL))
 	return Dialog;
 }
 
-// 0x483fe0, line 604
 TDialog *CreateNetworkOptionsDialog(void (*OpenURL)(const char *URL))
 {
 	TNetworkOptionsDialog *Body = new TNetworkOptionsDialog(OpenURL);
@@ -473,7 +450,6 @@ TDialog *CreateNetworkOptionsDialog(void (*OpenURL)(const char *URL))
 	return Dialog;
 }
 
-// 0x484200, line 617
 TDialog *CreateHotkeyDialog(void (*OpenURL)(const char *URL))
 {
 	THotkeyDialog *Body = new THotkeyDialog(OpenURL);
@@ -484,10 +460,9 @@ TDialog *CreateHotkeyDialog(void (*OpenURL)(const char *URL))
 
 // --- TDialog ----------------------------------------------------------------------
 
-// 0x47c970, lines 650-677. The assertions come after the base class and the
-// two callbacks, before the original's try block. The frame has nine skins (43-51, Arrange);
-// the caption is copied, the buttons are OK and Cancel until the creator
-// changes them.
+// The assertions come after the base class and the two callbacks, before the original's try
+// block. The frame has nine skins (43-51, Arrange); the caption is copied, the buttons are
+// OK and Cancel until the creator changes them.
 TDialog::TDialog(const char *_Caption, TComponent *_Dialog)
 {
 	PATELLA_ASSERT(_Caption!=nullptr);
@@ -513,7 +488,6 @@ TDialog::TDialog(const char *_Caption, TComponent *_Dialog)
 	SetCancelButton("Cancel", TCallback(this, EVENT_CANCEL));
 }
 
-// 0x46c3e0, lines 687-700
 void TDialog::SetOkButton(const char *Text, TCallback Callback)
 {
 	if (Text == nullptr) {
@@ -533,7 +507,7 @@ void TDialog::SetOkButton(const char *Text, TCallback Callback)
 	Arrange();
 }
 
-// 0x46c710, lines 710-723. Without a button Escape still sends (this, 2).
+// Without a button Escape still sends (this, 2).
 void TDialog::SetCancelButton(const char *Text, TCallback Callback)
 {
 	if (Text == nullptr) {
@@ -553,7 +527,6 @@ void TDialog::SetCancelButton(const char *Text, TCallback Callback)
 	Arrange();
 }
 
-// 0x46ca40, lines 734-744
 void TDialog::SetExtraButton(const char *Text, TCallback Callback)
 {
 	if (Text == nullptr) {
@@ -569,9 +542,9 @@ void TDialog::SetExtraButton(const char *Text, TCallback Callback)
 	Arrange();
 }
 
-// 0x46cd20, line 812. The buttons take the positions from the right in the
-// order Cancel, OK, extra. The bottom edge starts at Skins[45].height (the
-// corner's height where its width would fit; kept).
+// The buttons take the positions from the right in the order Cancel, OK,
+// extra. The bottom edge starts at Skins[45].height (the corner's height
+// where its width would fit; kept).
 void TDialog::Arrange()
 {
 	SetChildArea(Dialog, SkinProperties().Dialog.Body);
@@ -608,7 +581,6 @@ void TDialog::Arrange()
 		Height - Skins()[SKIN_DIALOG_EDGE_BOTTOM].height - Skins()[SKIN_DIALOG_EDGE_TOP].height, 0, 0);
 }
 
-// 0x46d220, line 831
 void TDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN) {
@@ -624,9 +596,8 @@ void TDialog::KeyPress(int Key)
 	Dialog->KeyPress(Key);
 }
 
-// 0x46d410, line 848. A drag keeps the dialog inside the game window. The new
-// position is a value of its own (ebx, edi; the parameters' stack slots are
-// never written): the original's catch wrapper prints the mouse position.
+// A drag keeps the dialog inside the game window. The new position is a value
+// of its own: the original's catch wrapper prints the mouse position.
 bool TDialog::MouseMove(int x, int y)
 {
 	if (!Dragging)
@@ -639,8 +610,7 @@ bool TDialog::MouseMove(int x, int y)
 	return true;
 }
 
-// 0x46d660, line 867. A press on the caption line that no child takes
-// starts a drag.
+// A press on the caption line that no child takes starts a drag.
 bool TDialog::LeftButtonDown(int x, int y, int Flags)
 {
 	if (!TWindow::LeftButtonDown(x, y, Flags) && In(x, 0, Width - 1) && In(y, 0, Skins()[SKIN_DIALOG_EDGE_TOP].height - 1)) {
@@ -651,7 +621,6 @@ bool TDialog::LeftButtonDown(int x, int y, int Flags)
 	return true;
 }
 
-// 0x46d830, line 880
 bool TDialog::LeftButtonUp(int x, int y, int Flags)
 {
 	if (!Dragging)
@@ -660,8 +629,8 @@ bool TDialog::LeftButtonUp(int x, int y, int Flags)
 	return true;
 }
 
-// 0x46d9f0, line 891. Events 1 and 2 (the default callbacks) close the
-// dialog, and so does every other.
+// Events 1 and 2 (the default callbacks) close the dialog, and so does
+// every other.
 void TDialog::HandleEvent([[maybe_unused]] int Event)
 {
 	SetActionState(ACTIONSTATE_NONE);
@@ -669,7 +638,6 @@ void TDialog::HandleEvent([[maybe_unused]] int Event)
 
 // --- TQuestionLabel, TLogoutLabel ----------------------------------------------
 
-// 0x46db80, line 915
 void TQuestionLabel::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN || Key == 'y' || Key == 'Y')
@@ -678,7 +646,6 @@ void TQuestionLabel::KeyPress(int Key)
 		NoAnswerCallback.Send();
 }
 
-// 0x46dd40, line 952
 void TLogoutLabel::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN || Key == 'l' || Key == 'L') {
@@ -693,14 +660,13 @@ void TLogoutLabel::KeyPress(int Key)
 
 // --- TWaitLabel ---------------------------------------------------------------------
 
-// 0x46df20, line 985
 void TWaitLabel::SetTimer(int Time, TCallback Callback)
 {
 	Timer.reset();
 	Timer.reset(new TTimer(Time, Callback));
 }
 
-// 0x46e0e0, line 1000. The timer's ticks wait until it runs out.
+// The timer's ticks wait until it runs out.
 void TWaitLabel::HandleEvent(int Event)
 {
 	if (Event == EVENT_TIMER) {
@@ -712,7 +678,6 @@ void TWaitLabel::HandleEvent(int Event)
 	SetActionState(ACTIONSTATE_NONE);
 }
 
-// 0x46e2b0, line 1011
 void TWaitLabel::Draw(int Surface, int x, int y)
 {
 	TLabel::Draw(Surface, x, y);
@@ -722,9 +687,8 @@ void TWaitLabel::Draw(int Surface, int x, int y)
 
 // --- TReconnectWindow ----------------------------------------------------------
 
-// 0x46e470, line 1052. The width is the widest of the text, the bar and the
-// time label with room for four digits (each compared twice, as with a max
-// macro).
+// The width is the widest of the text, the bar and the time label with room
+// for four digits (each compared twice, as with a max macro).
 TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 {
 	Timeout = timeout * 10;
@@ -755,7 +719,6 @@ TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 	Arrange();
 }
 
-// 0x46e8b0, line 1073
 void TReconnectWindow::Draw(int Surface, int x, int y)
 {
 	TWindow::Draw(Surface, x, y);
@@ -763,9 +726,9 @@ void TReconnectWindow::Draw(int Surface, int x, int y)
 		SetActionState(ACTIONSTATE_NONE);
 }
 
-// 0x46ea60, line 1122. When the time is up it logs out of a running game
-// (states 7 and 8) or connects to the game world again; Abort (29) gives
-// up and shows the character list again.
+// When the time is up it logs out of a running game (states 7 and 8) or
+// connects to the game world again; Abort (29) gives up and shows the
+// character list again.
 void TReconnectWindow::HandleEvent(int Event)
 {
 	if (Event == EVENT_TIMER) {
@@ -792,7 +755,6 @@ void TReconnectWindow::HandleEvent(int Event)
 
 // --- TLoginDialog -------------------------------------------------------------------
 
-// 0x46ecf0, line 1162
 TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 {
 	TComponent::SetSize(SkinProperties().LoginDialogWidth, SkinProperties().LoginDialogHeight);
@@ -818,7 +780,6 @@ TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 	Arrange();
 }
 
-// 0x46f160, lines 1183-1187
 void TLoginDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN) {
@@ -832,7 +793,7 @@ void TLoginDialog::KeyPress(int Key)
 	}
 }
 
-// 0x46f3e0, line 1203. OK (1) logs in with the account and password.
+// OK (1) logs in with the account and password.
 void TLoginDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -845,8 +806,8 @@ void TLoginDialog::HandleEvent(int Event)
 
 // --- TCharacterListDialog ------------------------------------------------------
 
-// 0x46f5c0, line 1262. The selection is the character played last while
-// still in the game, else the first.
+// The selection is the character played last while still in the game,
+// else the first.
 TCharacterListDialog::TCharacterListDialog()
 {
 	Timer = nullptr;
@@ -896,35 +857,32 @@ TCharacterListDialog::TCharacterListDialog()
 	Arrange();
 }
 
-// 0x46fa10, line 1274. Every click starts the timeout again.
+// Every click starts the timeout again.
 bool TCharacterListDialog::LeftButtonDown(int x, int y, int Flags)
 {
 	SetTimeout(Seconds);
 	return TWindow::LeftButtonDown(x, y, Flags);
 }
 
-// 0x46fbc0, line 1286
 bool TCharacterListDialog::RightButtonUp(int x, int y, int Flags)
 {
 	SetTimeout(Seconds);
 	return TWindow::RightButtonUp(x, y, Flags);
 }
 
-// 0x46fd70, line 1298
 bool TCharacterListDialog::MouseWheel(int x, int y, int Code)
 {
 	SetTimeout(Seconds);
 	return TWindow::MouseWheel(x, y, Code);
 }
 
-// 0x46ff20, line 1309
 void TCharacterListDialog::PositionChanged()
 {
 	SetTimeout(Seconds);
 }
 
-// 0x4700b0, line 1335. Another key stops the timer before the list gets it;
-// SetTimeout starts it again.
+// Another key stops the timer before the list gets it; SetTimeout starts it
+// again.
 void TCharacterListDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN) {
@@ -939,8 +897,8 @@ void TCharacterListDialog::KeyPress(int Key)
 	SetTimeout(Seconds);
 }
 
-// 0x470280, line 1361. OK (1) or a double click enters the game with the
-// selected character (logging out of a running game first).
+// OK (1) or a double click enters the game with the selected character
+// (logging out of a running game first).
 void TCharacterListDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -961,7 +919,6 @@ void TCharacterListDialog::HandleEvent(int Event)
 	SetActionState(ACTIONSTATE_NONE);
 }
 
-// 0x470490, line 1374
 void TCharacterListDialog::SetTimeout(int seconds)
 {
 	Timer.reset();
@@ -971,7 +928,6 @@ void TCharacterListDialog::SetTimeout(int seconds)
 
 // --- TMoveObjectsDialog ---------------------------------------------------------
 
-// 0x470670, lines 1392-1406
 TMoveObjectsDialog::TMoveObjectsDialog()
 {
 	LastDigit = 0;
@@ -989,8 +945,8 @@ TMoveObjectsDialog::TMoveObjectsDialog()
 	Arrange();
 }
 
-// 0x470b60, line 1423. The pile is drawn with the chosen count; the
-// cumulative pattern is computed and not used.
+// The pile is drawn with the chosen count; the cumulative pattern
+// is computed and not used.
 void TMoveObjectsDialog::Draw(int Surface, int x, int y)
 {
 	DraggedObject.Data = ScrollBar->Range->Value;
@@ -1004,9 +960,8 @@ void TMoveObjectsDialog::Draw(int Surface, int x, int y)
 	TWindow::Draw(Surface, x, y);
 }
 
-// 0x470de0, line 1459. Digits type the count (the last two digits);
-// PageUp/PageDown change it by 10, Home/End and the arrow keys as they do
-// in a list.
+// Digits type the count (the last two digits); PageUp/PageDown change it
+// by 10, Home/End and the arrow keys as they do in a list.
 void TMoveObjectsDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN) {
@@ -1033,7 +988,6 @@ void TMoveObjectsDialog::KeyPress(int Key)
 	}
 }
 
-// 0x471080, line 1475
 void TMoveObjectsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -1061,8 +1015,8 @@ inline TRGBColor OutfitColor(int Color)
 
 } // namespace
 
-// 0x47cf70, lines 1488-1542. The colour buttons are laid out in rows of
-// 19 from SkinProperties.OutfitDialogColorButtons; the head is the first part shown.
+// The colour buttons are laid out in rows of 19 from
+// SkinProperties.OutfitDialogColorButtons; the head is the first part shown.
 TOutfitDialog::TOutfitDialog(const int *Data)
 {
 	PATELLA_ASSERT(Data!=nullptr);
@@ -1122,9 +1076,9 @@ TOutfitDialog::TOutfitDialog(const int *Data)
 	HandleEvent(EVENT_OUTFIT_PART);
 }
 
-// 0x471250, line 1586. A part button selects the colour button of its
-// colour; the loop runs over 216 colours and reads past the 133 buttons
-// (into the members after them) when a part has a higher colour (kept).
+// A part button selects the colour button of its colour; the loop runs
+// over 216 colours and reads past the 133 buttons (into the members
+// after them) when a part has a higher colour (kept).
 void TOutfitDialog::HandleEvent(int Event)
 {
 	if (Event >= EVENT_OUTFIT_PART && Event <= EVENT_OUTFIT_PART_LAST) {
@@ -1153,8 +1107,8 @@ void TOutfitDialog::HandleEvent(int Event)
 
 // --- TTextDialog ----------------------------------------------------------------
 
-// 0x471500, lines 1702-1727. A read-only text keeps its scroll position
-// (SetText's second argument).
+// A read-only text keeps its scroll position (SetText's second
+// argument).
 TTextDialog::TTextDialog(int MaximumLength, const char *Text, uint32 _ObjectNumber, TObject _Obj,
 	const char *Description)
 {
@@ -1179,7 +1133,6 @@ TTextDialog::TTextDialog(int MaximumLength, const char *Text, uint32 _ObjectNumb
 	Arrange();
 }
 
-// 0x4719b0, line 1739
 void TTextDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
@@ -1189,7 +1142,6 @@ void TTextDialog::HandleEvent(int Event)
 
 // --- TEditListDialog ----------------------------------------------------------
 
-// 0x47d660, lines 1752-1775
 TEditListDialog::TEditListDialog(int MaxLength, const char *Text, int _Type, uint32 _Identifier,
 	const char *Description)
 {
@@ -1213,15 +1165,13 @@ TEditListDialog::TEditListDialog(int MaxLength, const char *Text, int _Type, uin
 	Arrange();
 }
 
-// 0x471b60. The original's catch wrapper's states without a try block; the children keep their
-// areas (TWindow::Arrange is not called).
+// The children keep their areas (TWindow::Arrange is not called).
 void TEditListDialog::Arrange()
 {
 	DrawingList[0] = TDrawing(SKIN_EDIT_LIST_PICTURE, SkinProperties().EditListDialogPicture.x, SkinProperties().EditListDialogPicture.y, Skins()[SKIN_EDIT_LIST_PICTURE].width,
 		Skins()[SKIN_EDIT_LIST_PICTURE].height, 0, 0);
 }
 
-// 0x471be0, line 1800
 void TEditListDialog::HandleEvent(int Event)
 {
 	if (Event == 1)
@@ -1231,8 +1181,8 @@ void TEditListDialog::HandleEvent(int Event)
 
 // --- TIgnoreListDialog --------------------------------------------------------
 
-// 0x47db60, lines 1875-1975. Talk.cpp's lists come as one text with a name
-// on every line; the names are sorted, each into an entry and a line.
+// Talk.cpp's lists come as one text with a name on every line; the names
+// are sorted, each into an entry and a line.
 TIgnoreListDialog::TIgnoreListDialog()
 	: IgnoreEntries(0, 9, 10), WhiteEntries(0, 9, 10)
 {
@@ -1375,21 +1325,20 @@ TIgnoreListDialog::TIgnoreListDialog()
 	HandleEvent(EVENT_LIST_SELECTED);
 }
 
-// 0x471d90, line 1987
 void TIgnoreListDialog::Arrange()
 {
 	TWindow::Arrange();
 }
 
-// 0x471f20, line 2171. OK (602) replaces Talk.cpp's lists with the lines of
-// the list boxes (except empty lines and "new entry") and sets the global
-// switches; OK then closes the dialog like every event not handled below.
-// Add (709, 712) keeps the line being edited in its entry and appends
-// "new entry" for editing; Delete (710, 713) removes the selected entry and
-// rebuilds the list from the entries (the loops stop one short of the
-// vector's last index, so they never see the entry moved last). A
-// selection (11) shows the selected entries' permanent flags; it computes
-// each entry once more without using it (kept).
+// OK (602) replaces Talk.cpp's lists with the lines of the list boxes
+// (except empty lines and "new entry") and sets the global switches; OK
+// then closes the dialog like every event not handled below. Add (709, 712)
+// keeps the line being edited in its entry and appends "new entry" for
+// editing; Delete (710, 713) removes the selected entry and rebuilds the
+// list from the entries (the loops stop one short of the vector's last
+// index, so they never see the entry moved last). A selection (11) shows
+// the selected entries' permanent flags; it computes each entry once more
+// without using it (kept).
 void TIgnoreListDialog::HandleEvent(int Event)
 {
 	if (Event == EVENT_IGNORE_LIST_OK) {
@@ -1523,8 +1472,8 @@ void TIgnoreListDialog::HandleEvent(int Event)
 	}
 }
 
-// 0x472970, line 2205. A click that changes a permanent check box recolours
-// the selected line and stores the flag in its entry.
+// A click that changes a permanent check box recolours the selected line
+// and stores the flag in its entry.
 bool TIgnoreListDialog::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TWindow::LeftButtonUp(x, y, Flags);
@@ -1561,7 +1510,6 @@ bool TIgnoreListDialog::LeftButtonUp(int x, int y, int Flags)
 	return Result;
 }
 
-// 0x472d80, line 2216
 void TIgnoreListDialog::KeyPress(int Key)
 {
 	IgnoreList->KeyPress(Key);
@@ -1570,7 +1518,6 @@ void TIgnoreListDialog::KeyPress(int Key)
 
 // --- TBugReportDialog ------------------------------------------------------------
 
-// 0x472f20, line 2240
 TBugReportDialog::TBugReportDialog()
 {
 	TComponent::SetSize(SkinProperties().BugReportDialogWidth, SkinProperties().BugReportDialogHeight);
@@ -1584,7 +1531,6 @@ TBugReportDialog::TBugReportDialog()
 	Arrange();
 }
 
-// 0x4731e0, line 2252
 void TBugReportDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -1597,7 +1543,6 @@ void TBugReportDialog::HandleEvent(int Event)
 
 // --- TNewChannelDialog -----------------------------------------------------------
 
-// 0x4733a0, lines 2265-2297
 TNewChannelDialog::TNewChannelDialog(int _NumberOfChannels, const int *_ChannelIDs, const char (*ChannelNames)[30]) // NOLINT(modernize-avoid-c-arrays): Dialogs.h
 {
 	PATELLA_ASSERT(_ChannelIDs!=nullptr);
@@ -1625,9 +1570,9 @@ TNewChannelDialog::TNewChannelDialog(int _NumberOfChannels, const int *_ChannelI
 	Arrange();
 }
 
-// 0x473980, line 2321. Return sends 301 (join the selected channel)
-// without a name and 302 (nothing but closing) with one; the frame's OK
-// button takes Return first.
+// Return sends 301 (join the selected channel) without a name and 302
+// (nothing but closing) with one; the frame's OK button takes Return
+// first.
 void TNewChannelDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN) {
@@ -1642,9 +1587,9 @@ void TNewChannelDialog::KeyPress(int Key)
 	}
 }
 
-// 0x473b80, lines 2333-2349. OK (1) with a name opens a private
-// conversation (not with oneself), without one it joins the selected
-// channel like a double click (301).
+// OK (1) with a name opens a private conversation (not with
+// oneself), without one it joins the selected channel like a double
+// click (301).
 void TNewChannelDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -1675,7 +1620,6 @@ void TNewChannelDialog::HandleEvent(int Event)
 
 // --- TPrivateChannelDialog -------------------------------------------------------
 
-// 0x473e60, line 2378
 TPrivateChannelDialog::TPrivateChannelDialog(bool _Exclude)
 {
 	Exclude = _Exclude;
@@ -1690,7 +1634,6 @@ TPrivateChannelDialog::TPrivateChannelDialog(bool _Exclude)
 	Arrange();
 }
 
-// 0x474110, line 2392
 void TPrivateChannelDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN)
@@ -1701,7 +1644,6 @@ void TPrivateChannelDialog::KeyPress(int Key)
 		NameEdit->KeyPress(Key);
 }
 
-// 0x4742e0, line 2406
 void TPrivateChannelDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -1718,7 +1660,6 @@ void TPrivateChannelDialog::HandleEvent(int Event)
 
 // --- TReportDialog ----------------------------------------------------------------
 
-// 0x4744b0, line 2551
 TReportDialog::TReportDialog()
 {
 	TComponent::SetSize(SkinProperties().ReportDialogWidth, SkinProperties().ReportDialogHeight);
@@ -1732,7 +1673,6 @@ TReportDialog::TReportDialog()
 	Arrange();
 }
 
-// 0x474760, line 2565
 void TReportDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN)
@@ -1743,8 +1683,7 @@ void TReportDialog::KeyPress(int Key)
 		TextEdit->KeyPress(Key);
 }
 
-// 0x474930, line 2580. The request goes to Control.cpp's event queue as a
-// copy (event 0x33).
+// The request goes to Control.cpp's event queue as a copy (event 0x33).
 void TReportDialog::HandleEvent(int Event)
 {
 	if (Event == 1 && strlen(TextEdit->Text.get()) != 0) {
@@ -1758,7 +1697,6 @@ void TReportDialog::HandleEvent(int Event)
 
 // --- TAddBuddyDialog ------------------------------------------------------------
 
-// 0x474b20, line 2607
 TAddBuddyDialog::TAddBuddyDialog()
 {
 	TComponent::SetSize(SkinProperties().AddBuddyDialogWidth, SkinProperties().AddBuddyDialogHeight);
@@ -1772,7 +1710,6 @@ TAddBuddyDialog::TAddBuddyDialog()
 	Arrange();
 }
 
-// 0x474dd0, line 2621
 void TAddBuddyDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN)
@@ -1783,7 +1720,6 @@ void TAddBuddyDialog::KeyPress(int Key)
 		NameEdit->KeyPress(Key);
 }
 
-// 0x474fa0, line 2635
 void TAddBuddyDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -1796,7 +1732,7 @@ void TAddBuddyDialog::HandleEvent(int Event)
 
 // --- TEditBuddyDialog -----------------------------------------------------------
 
-// 0x475160, lines 2652-2696. The icons are skins 218-227 after "none".
+// The icons are skins 218-227 after "none".
 TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 {
 	CharacterID = _CharacterID;
@@ -1842,7 +1778,7 @@ TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 	Arrange();
 }
 
-// 0x475820, line 2720. Without a selected icon the icon is 0.
+// Without a selected icon the icon is 0.
 void TEditBuddyDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -1860,13 +1796,12 @@ void TEditBuddyDialog::HandleEvent(int Event)
 
 // --- TUpdateDialog -----------------------------------------------------------------
 
-// TUpdateDialog ("Updating ... Please wait": the progress of a patch from the login server; constructor 0x4759f0, line
-// 2761, Draw 0x475d00, line 2793, HandleEvent 0x475f00, line 2806) is gone with the patcher since Patella-Modern issue
-// #75 (decision D9).
+// TUpdateDialog ("Updating ... Please wait": the progress of a patch from the login server) is gone with the patcher
+// since Patella-Modern issue #75 (decision D9).
 
 // --- THelpDialog -------------------------------------------------------------------
 
-// 0x4760a0, line 2869. No Arrange at the end.
+// No Arrange at the end.
 THelpDialog::THelpDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
@@ -1909,7 +1844,6 @@ THelpDialog::THelpDialog(void (*_OpenURL)(const char *URL))
 	SetChildPosition(Label, SkinProperties().HelpDialog.FAQLabel.x, SkinProperties().HelpDialog.FAQLabel.y);
 }
 
-// 0x476770, line 2882
 void THelpDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN)
@@ -1918,9 +1852,8 @@ void THelpDialog::KeyPress(int Key)
 		HandleEvent(EVENT_CANCEL);
 }
 
-// 0x476930, lines 2914-2918. Client Help (702) closes first and then asks
-// for the client info; Hints (703) opens the hints dialog (0x1f) after
-// closing the help menu (0x20).
+// Client Help (702) closes first and then asks for the client info; Hints
+// (703) opens the hints dialog (0x1f) after closing the help menu (0x20).
 void THelpDialog::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -1960,7 +1893,7 @@ void THelpDialog::HandleEvent(int Event)
 
 // --- THintsDialog ------------------------------------------------------------------
 
-// 0x476cd0, line 2945. The hints 1-14 the player has seen.
+// The hints 1-14 the player has seen.
 THintsDialog::THintsDialog()
 {
 	TComponent::SetSize(SkinProperties().HintsDialogWidth, SkinProperties().HintsDialogHeight);
@@ -1976,7 +1909,6 @@ THintsDialog::THintsDialog()
 	}
 }
 
-// 0x476fb0, line 2959
 void THintsDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN)
@@ -1987,8 +1919,8 @@ void THintsDialog::KeyPress(int Key)
 		ListBox->KeyPress(Key);
 }
 
-// 0x477180, lines 2974-2983. The selected hint is shown again: the help
-// menu (0x20) and the hint (2) are put first in the event queue.
+// The selected hint is shown again: the help menu (0x20) and the hint
+// (2) are put first in the event queue.
 void THintsDialog::HandleEvent(int Event)
 {
 	if (Event == 1 && ListBox->GetSelection() != -1) {
@@ -2013,8 +1945,8 @@ void THintsDialog::HandleEvent(int Event)
 
 // --- TRuleViolationDialog --------------------------------------------------------
 
-// 0x484620, line 3056. A given name (or the statement's author) cannot be
-// changed; the statement line is read-only and as long as its text.
+// A given name (or the statement's author) cannot be changed; the
+// statement line is read-only and as long as its text.
 TRuleViolationDialog::TRuleViolationDialog(const char *Name, TTalkLine *Statement)
 {
 	for (int i = 0; i < 50; i++)
@@ -2079,7 +2011,6 @@ TRuleViolationDialog::TRuleViolationDialog(const char *Name, TTalkLine *Statemen
 	Arrange();
 }
 
-// 0x4774d0, line 3080
 void TRuleViolationDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN) {
@@ -2091,8 +2022,8 @@ void TRuleViolationDialog::KeyPress(int Key)
 	}
 }
 
-// 0x484e70, lines 3124-3128. Every missing part gets a status message; the
-// dialog closes in any case. A disabled statement line sends statement 0.
+// Every missing part gets a status message; the dialog closes in any case.
+// A disabled statement line sends statement 0.
 void TRuleViolationDialog::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -2143,9 +2074,8 @@ void TRuleViolationDialog::HandleEvent(int Event)
 	SetActionState(ACTIONSTATE_NONE);
 }
 
-// 0x47eae0, line 3158. The actions the reason allows; the statement line
-// is enabled for reasons with action 0, 2 or 6 among the statement reasons
-// 9-27 and 29.
+// The actions the reason allows; the statement line is enabled for reasons
+// with action 0, 2 or 6 among the statement reasons 9-27 and 29.
 void TRuleViolationDialog::UpdateActions()
 {
 	const int Reason = GetReason();
@@ -2163,7 +2093,6 @@ void TRuleViolationDialog::UpdateActions()
 	}
 }
 
-// 0x4776b0, line 3171
 int TRuleViolationDialog::GetReason()
 {
 	const int Selection = ReasonList->GetSelection();
@@ -2172,7 +2101,7 @@ int TRuleViolationDialog::GetReason()
 	return Reasons[Selection];
 }
 
-// 0x477860, line 3191. The action of the selected line, by its name.
+// The action of the selected line, by its name.
 int TRuleViolationDialog::GetAction() const
 {
 	const int Selection = ActionList->GetSelection();
@@ -2187,7 +2116,7 @@ int TRuleViolationDialog::GetAction() const
 
 // --- TEditMarkDialog ------------------------------------------------------------
 
-// 0x477c80, lines 3207-3242. The symbols are skins 74-87.
+// The symbols are skins 74-87.
 TEditMarkDialog::TEditMarkDialog(TCoordinate *_Coordinate, TMark *_Mark)
 {
 	Coordinate.x = 0;
@@ -2225,7 +2154,6 @@ TEditMarkDialog::TEditMarkDialog(TCoordinate *_Coordinate, TMark *_Mark)
 		delete _Mark;
 }
 
-// 0x478200, line 3268
 void TEditMarkDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN)
@@ -2236,8 +2164,7 @@ void TEditMarkDialog::KeyPress(int Key)
 		TextEdit->KeyPress(Key);
 }
 
-// 0x4783d0, lines 3294-3298. An edited mark is deleted and added again at
-// its own position.
+// An edited mark is deleted and added again at its own position.
 void TEditMarkDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -2263,8 +2190,8 @@ void TEditMarkDialog::HandleEvent(int Event)
 
 // --- TOptionsDialog -----------------------------------------------------------------
 
-// 0x4786d0, line 3366. The labels of Network and Motd use the label
-// constructor with a position.
+// The labels of Network and Motd use the label constructor with a
+// position.
 TOptionsDialog::TOptionsDialog()
 {
 	TComponent::SetSize(SkinProperties().OptionsDialog.Width, SkinProperties().OptionsDialog.Height);
@@ -2310,7 +2237,6 @@ TOptionsDialog::TOptionsDialog()
 	Arrange();
 }
 
-// 0x478e50, line 3380
 void TOptionsDialog::KeyPress(int Key)
 {
 	if (Key == KEY_RETURN)
@@ -2319,8 +2245,8 @@ void TOptionsDialog::KeyPress(int Key)
 		HandleEvent(EVENT_CANCEL);
 }
 
-// 0x479010, lines 3422-3426. Closing saves the options; each button opens
-// its dialog and this one again after it (0x21).
+// Closing saves the options; each button opens its dialog and this one
+// again after it (0x21).
 void TOptionsDialog::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -2360,7 +2286,6 @@ void TOptionsDialog::HandleEvent(int Event)
 
 // --- TGeneralOptionsDialog ------------------------------------------------------
 
-// 0x479310, line 3472
 TGeneralOptionsDialog::TGeneralOptionsDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
@@ -2397,8 +2322,8 @@ TGeneralOptionsDialog::TGeneralOptionsDialog(void (*_OpenURL)(const char *URL))
 	Arrange();
 }
 
-// 0x479720, lines 3495-3498. The creature names are creature info 2 (names
-// and bars) or 0. Help (701) keeps the dialog open.
+// The creature names are creature info 2 (names and bars) or 0. Help (701)
+// keeps the dialog open.
 void TGeneralOptionsDialog::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -2424,8 +2349,8 @@ void TGeneralOptionsDialog::HandleEvent(int Event)
 
 // --- TGraphicsOptionsDialog ------------------------------------------------------
 
-// 0x479a30, line 3549. The selection is the configured fullscreen mode (by
-// size and depth), else the first.
+// The selection is the configured fullscreen mode (by size and depth),
+// else the first.
 TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL), void (*_SetDisplayMode)(int Mode),
 	TWindow *_Parent)
 {
@@ -2470,7 +2395,7 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 	Arrange();
 }
 
-// 0x479f50, line 3573. Only the arrow keys up and down reach the list.
+// Only the arrow keys up and down reach the list.
 void TGraphicsOptionsDialog::KeyPress(int Key)
 {
 	switch (Key) {
@@ -2491,11 +2416,11 @@ void TGraphicsOptionsDialog::KeyPress(int Key)
 	}
 }
 
-// 0x47a150, line 3598. OK stores the selected mode and switches the
-// display mode when the fullscreen setting changed (to fullscreen only with
-// a selected mode); the OpenGL engine (2) is resized for fullscreen.
-// Advanced (407) closes and opens the advanced options and this dialog
-// again; Help (701) keeps it open.
+// OK stores the selected mode and switches the display mode when the
+// fullscreen setting changed (to fullscreen only with a selected mode); the
+// OpenGL engine (2) is resized for fullscreen. Advanced (407) closes and
+// opens the advanced options and this dialog again; Help (701) keeps it
+// open.
 void TGraphicsOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -2520,9 +2445,9 @@ void TGraphicsOptionsDialog::HandleEvent(int Event)
 
 // --- TAdvancedGraphicsDialog ------------------------------------------------------
 
-// 0x47a3d0, line 3689. Fullscreen allows no engine switch; otherwise the
-// engines the surface reports are enabled and the current one selected
-// (curEngine 0 DirectX 5, 1 OpenGL, 2 DirectX 9).
+// Fullscreen allows no engine switch; otherwise the engines the surface
+// reports are enabled and the current one selected (curEngine 0 DirectX
+// 5, 1 OpenGL, 2 DirectX 9).
 TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *URL), TComponent *_Receiver)
 {
 	OpenURL = _OpenURL;
@@ -2629,8 +2554,8 @@ void TAdvancedGraphicsDialog::ShowDevice()
 	DeviceLabel->SetText(Text, true);
 }
 
-// 0x47aa30, line 3723. Draws the frame rate texts over the children and
-// shows the current engine as selected.
+// Draws the frame rate texts over the children and shows the current
+// engine as selected.
 void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 {
 	TWindow::Draw(Surface, x, y);
@@ -2661,9 +2586,9 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 	ShowDevice();
 }
 
-// 0x47ad10, line 3751. The frame rate bar (30) sets the limit while it
-// moves; Cancel (2) restores the configured one. Turning on "don't stretch"
-// makes the receiver arrange the game window again (event 9).
+// The frame rate bar (30) sets the limit while it moves; Cancel (2)
+// restores the configured one. Turning on "don't stretch" makes the
+// receiver arrange the game window again (event 9).
 void TAdvancedGraphicsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -2689,7 +2614,6 @@ void TAdvancedGraphicsDialog::HandleEvent(int Event)
 
 // --- TConsoleOptionsDialog --------------------------------------------------------
 
-// 0x47afb0, line 3797
 TConsoleOptionsDialog::TConsoleOptionsDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
@@ -2717,7 +2641,6 @@ TConsoleOptionsDialog::TConsoleOptionsDialog(void (*_OpenURL)(const char *URL))
 	Arrange();
 }
 
-// 0x47b3c0, line 3819
 void TConsoleOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -2736,7 +2659,6 @@ void TConsoleOptionsDialog::HandleEvent(int Event)
 
 // --- TNetworkOptionsDialog ---------------------------------------------------------
 
-// 0x47b5e0, line 3843
 TNetworkOptionsDialog::TNetworkOptionsDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
@@ -2748,7 +2670,6 @@ TNetworkOptionsDialog::TNetworkOptionsDialog(void (*_OpenURL)(const char *URL))
 	Arrange();
 }
 
-// 0x47b800, line 3860
 void TNetworkOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
@@ -2762,8 +2683,8 @@ void TNetworkOptionsDialog::HandleEvent(int Event)
 
 // --- THotkeyDialog -------------------------------------------------------------------
 
-// 0x47edf0, line 3906. Every hotkey gets a line (271 characters at most)
-// that UpdateLine fills.
+// Every hotkey gets a line (271 characters at most) that UpdateLine
+// fills.
 THotkeyDialog::THotkeyDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
@@ -2792,8 +2713,7 @@ THotkeyDialog::THotkeyDialog(void (*_OpenURL)(const char *URL))
 	Arrange();
 }
 
-// 0x47b9c0, lines 3914-3933. Hotkeys sent automatically are drawn in their
-// own colour.
+// Hotkeys sent automatically are drawn in their own colour.
 void THotkeyDialog::UpdateLine(int Number)
 {
 	PATELLA_ASSERT_VALUES(In(Number,0,HOTKEYS-1), Number);
@@ -2810,8 +2730,8 @@ void THotkeyDialog::UpdateLine(int Number)
 	ListBox->SetLine(Number, Line, Font);
 }
 
-// 0x47bd40, line 3958. Every other key edits the selected hotkey's text; an
-// empty text cannot be sent automatically.
+// Every other key edits the selected hotkey's text; an empty text cannot be
+// sent automatically.
 void THotkeyDialog::KeyPress(int Key)
 {
 	switch (Key) {
@@ -2842,10 +2762,10 @@ void THotkeyDialog::KeyPress(int Key)
 	}
 }
 
-// 0x47c010, lines 3993-3996. OK stores the hotkeys and saves the options
-// unless the options dialog comes next (it saves them itself). A selection
-// (11) stores the check box of the hotkey left and edits the new one; no
-// selection (-1) reads before the texts (kept).
+// OK stores the hotkeys and saves the options unless the options dialog
+// comes next (it saves them itself). A selection (11) stores the check box
+// of the hotkey left and edits the new one; no selection (-1) reads before
+// the texts (kept).
 void THotkeyDialog::HandleEvent(int Event)
 {
 	switch (Event) {
@@ -2877,7 +2797,7 @@ void THotkeyDialog::HandleEvent(int Event)
 	}
 }
 
-// 0x47c400, line 4010. A click may have changed the check box.
+// A click may have changed the check box.
 bool THotkeyDialog::LeftButtonUp(int x, int y, int Flags)
 {
 	const bool Result = TWindow::LeftButtonUp(x, y, Flags);

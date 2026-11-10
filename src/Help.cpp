@@ -1,13 +1,10 @@
-// Help.cpp: reconstructed from Tibia.exe 7.72 (0x4a2a00-0x4a444f).
+// Help.cpp: reconstructed from Tibia.exe 7.72.
 //
 // The help system: the help bubble of the help mode (the area and handle of
 // the window under the magnifying glass, and its text), and the event helps
 // ("hints") shown at certain places and NPCs. The functions without line
-// evidence come first, in binary order: the gap after GUI.cpp
-// (0x4a2a00-0x4a2b88, Help.cpp's data 0x5ce520-0x5ce538), then the asserted
-// functions in line order, then GetCurrentHelpText (0x4a4440, the gap before
-// Inventory.cpp). The vector<int> constructor at 0x4a2b90 is Container.h
-// code kept in this object.
+// evidence come first, in binary order, then the asserted functions in line
+// order, then GetCurrentHelpText.
 
 #include "Help.h"
 #include "BuildConfig.h"
@@ -18,30 +15,26 @@
 #include <cstring>
 
 
-// The data (0x5ce520-0x5ced5f) is THelp's (Help.h, issue #107).
+// The data is THelp's (Help.h, issue #107).
 
-// 0x4a2a00
 void patella::THelp::SetHelpPosition(int x, int y)
 {
 	HelpX = x;
 	HelpY = y;
 }
 
-// 0x4a2a20
 void patella::THelp::MoveHelpPosition(int dx, int dy)
 {
 	HelpX += dx;
 	HelpY += dy;
 }
 
-// 0x4a2a50
 void patella::THelp::SetHelpSize(int Width, int Height)
 {
 	HelpWidth = Width;
 	HelpHeight = Height;
 }
 
-// 0x4a2a70
 void patella::THelp::SetHelpHandle(int Handle)
 {
 	const bool Changed = HelpHandle != Handle;
@@ -50,7 +43,6 @@ void patella::THelp::SetHelpHandle(int Handle)
 		HelpHandleChanged = true;
 }
 
-// 0x4a2a90
 void patella::THelp::GetHelpArea(int *x, int *y, int *Width, int *Height) const
 {
 	*x = HelpX;
@@ -59,13 +51,12 @@ void patella::THelp::GetHelpArea(int *x, int *y, int *Width, int *Height) const
 	*Height = HelpHeight;
 }
 
-// 0x4a2ac0
 int patella::THelp::GetHelpHandle() const
 {
 	return HelpHandle;
 }
 
-// 0x4a2ad0. Reports a change of the handle once.
+// Reports a change of the handle once.
 bool patella::THelp::GetHelpHandleChanged()
 {
 	const bool Changed = HelpHandleChanged;
@@ -73,7 +64,6 @@ bool patella::THelp::GetHelpHandleChanged()
 	return Changed;
 }
 
-// 0x4a2ae0
 void patella::THelp::InitHelp()
 {
 	HelpHandle = 1;
@@ -81,7 +71,7 @@ void patella::THelp::InitHelp()
 	EventHelps.clear();
 }
 
-// 0x4a2b00. The next event help to show, 0 if none.
+// The next event help to show, 0 if none.
 int patella::THelp::GetEventHelp()
 {
 	if (EventHelps.empty())
@@ -89,7 +79,7 @@ int patella::THelp::GetEventHelp()
 	return EventHelps.front();
 }
 
-// 0x4a2b20. Takes the next event help from the queue.
+// Takes the next event help from the queue.
 int patella::THelp::PopEventHelp()
 {
 	if (EventHelps.empty())
@@ -99,12 +89,12 @@ int patella::THelp::PopEventHelp()
 	return Number;
 }
 
-// 0x4a2e70, line 354. The help bubble text of a handle: 10-23 parts of the
-// screen, 1000+ things in the game world. SKIN numbers are skins of the
-// buttons drawn inside the text. Texts without arguments are also passed as
-// the format. _snprintf until issue #64, now std::format's language ("%d" is
-// "{}"): no text has a brace or another conversion, and the longest (1297
-// characters) fits HelpText, so the bytes are the same.
+// The help bubble text of a handle: 10-23 parts of the screen, 1000+ things
+// in the game world. SKIN numbers are skins of the buttons drawn inside the
+// text. Texts without arguments are also passed as the format. _snprintf
+// until issue #64, now std::format's language ("%d" is "{}"): no text has a
+// brace or another conversion, and the longest (1297 characters) fits
+// HelpText, so the bytes are the same.
 const char *patella::THelp::GetHelpText(int Handle)
 {
 	switch (Handle) {
@@ -204,7 +194,7 @@ const char *patella::THelp::GetHelpText(int Handle)
 	return HelpText;
 }
 
-// 0x4a32e0, line 369. Queues an event help that was not shown before.
+// Queues an event help that was not shown before.
 void patella::THelp::AddEventHelp(int Number)
 {
 	PATELLA_ASSERT_VALUES(In(Number,1,EVENTHELPS), Number);
@@ -214,8 +204,8 @@ void patella::THelp::AddEventHelp(int Number)
 	}
 }
 
-// 0x4a3460, line 381. Event helps for talking to the NPCs of Rookgaard.
-// Every name is tested on its own.
+// Event helps for talking to the NPCs of Rookgaard. Every name is
+// tested on its own.
 void patella::THelp::CheckEventHelpName(const char *Name)
 {
 	PATELLA_ASSERT(Name!=nullptr);
@@ -237,9 +227,9 @@ void patella::THelp::CheckEventHelpName(const char *Name)
 		AddEventHelp(HINT_BUYING_AND_SELLING);
 }
 
-// 0x4a3690. Event helps for places: the Rookgaard crossroad (3), the
-// Rookgaard underground (6), the arrival on the mainland (11) and the
-// depots (12). Written as independent tests in an order that gives the
+// Event helps for places: the Rookgaard crossroad (3), the Rookgaard
+// underground (6), the arrival on the mainland (11) and the depots
+// (12). Written as independent tests in an order that gives the
 // binary's results (the compiler merged the tests that share an x and
 // returned early where no later test can match); the bounds are the
 // binary's, exclusive where written with < and >.
@@ -315,7 +305,6 @@ void patella::THelp::CheckEventHelpPosition(int x, int y, int z)
 		AddEventHelp(HINT_DEPOT);
 }
 
-// 0x4a3b60, lines 571-602
 const char *patella::THelp::GetEventHelpTitle(int Number)
 {
 	PATELLA_ASSERT_VALUES(In(Number,1,EVENTHELPS), Number);
@@ -363,7 +352,6 @@ constexpr auto WelcomeHelpText = patella::buildconfig::ComposeText<patella::buil
 
 } // namespace
 
-// 0x4a3fd0, lines 610-691
 const char *patella::THelp::GetEventHelpText(int Number)
 {
 	PATELLA_ASSERT_VALUES(In(Number,1,EVENTHELPS), Number);
@@ -401,14 +389,13 @@ const char *patella::THelp::GetEventHelpText(int Number)
 	}
 }
 
-// 0x4a4440. The text for the current help handle.
+// The text for the current help handle.
 const char *patella::THelp::GetCurrentHelpText()
 {
 	return GetHelpText(HelpHandle);
 }
 
-// Empty; the linker kept one copy of the identical empty functions (0x496160,
-// GUI.obj). ExitControl calls it where Help.cpp's exit belongs in the reverse
+// Empty. ExitControl calls it where Help.cpp's exit belongs in the reverse
 // order of InitControl (name ours, low confidence).
 void patella::THelp::ExitHelp()
 {

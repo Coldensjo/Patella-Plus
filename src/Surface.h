@@ -50,18 +50,18 @@ public:
 	TGraphicsEngine &operator=(TGraphicsEngine &&) = delete;
 	~TGraphicsEngine() = default;
 
-	[[nodiscard]] int GetCurrentEngine() const;               // 0x4eaa80
-	TSurface *GetSurface();                                   // 0x4eaa90 (the x64 client's)
-	void SurfaceExitInstance();                               // 0x4eab60
+	[[nodiscard]] int GetCurrentEngine() const;
+	TSurface *GetSurface(); // the x64 client's
+	void SurfaceExitInstance();
 	void SurfaceInitInstance(platform::TWindowHandle Window); // the x64 client's
 
 	// .data (the base's after the cache surfaces' size)
-	int CommandLineEngine = -1; // 0x5c2564, "engine N" on the command line (Player.cpp); -1 = none
+	int CommandLineEngine = -1; // "engine N" on the command line (Player.cpp); -1 = none
 	// .bss (the base's, but for these two)
-	int curEngine{}; // 0x71d0c4
+	int curEngine{};
 
 private:
-	TSurface *Surface{}; // 0x71d0cc, the engine's surface; raw, as the original's (deleted by SurfaceExitInstance)
+	TSurface *Surface{}; // the engine's surface; raw, as the original's (deleted by SurfaceExitInstance)
 };
 
 // The transition's access path (notes/decisions.md, "#104: TClient and the subsystem objects"): the one TClient's
@@ -79,5 +79,5 @@ void SurfaceInitInstance(patella::platform::TWindowHandle Window);
 
 // surfaceDX9.cpp (surfaceDX9.h): declared here because SurfaceDX.h's DirectX 6
 // d3d.h and surfaceDX9.h's d3d9.h cannot be included together.
-bool IsDirect3D9Installed();  // 0x4efd10
-TSurface *CreateSurfaceDX9(); // 0x4f1430
+bool IsDirect3D9Installed();
+TSurface *CreateSurfaceDX9();

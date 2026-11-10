@@ -3,7 +3,7 @@
 // source.
 //
 // ctime/asctime: the client writes ctime's text into saved channels (ConsoleWindow.cpp SaveChannel; error.txt
-// too, Player.cpp HandleException, until Patella-Modern issue #74). MSVC 7.1's asctime (0x517f6d in Tibia.exe)
+// too, Player.cpp HandleException, until Patella-Modern issue #74). MSVC 7.1's asctime
 // writes every number with two digits, the day of the month too (tm_mday / 10 + '0', tm_mday % 10 + '0'):
 // "Mon Nov 02 12:14:46 2026\n". The UCRT and glibc pad the day with a space, "Mon Nov  2 12:14:46 2026\n", as the C standard asks (found by
 // tools/compare_files.py, issue #21). FormatCRT71Time writes MSVC 7.1's text itself (Patella-Modern issue #61;

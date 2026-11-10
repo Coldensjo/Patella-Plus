@@ -78,8 +78,8 @@ enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 namespace patella {
 
 // Help.cpp's state (issue #107, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#107"): the
-// globals 0x5ce520-0x5ced5f of the original are the members, in its .bss order with the same initial values, and the
-// file's functions the members of the same names. TGUI owns it (GUI.h).
+// globals of the original are the members, in its .bss order with the same initial values, and the file's functions
+// the members of the same names. TGUI owns it (GUI.h).
 class THelp {
 public:
 	THelp() = default;
@@ -111,17 +111,17 @@ public:
 
 private:
 	// Data, in the original's .bss order.
-	// 0x5ce520, NumberOfEventHelps: EventHelps.size() (issue #100).
-	bool HelpHandleChanged{}; // 0x5ce524
-	int HelpHandle{};         // 0x5ce528, what the help bubble explains
-	int HelpHeight{};         // 0x5ce52c
-	int HelpWidth{};          // 0x5ce530
-	int HelpY{};              // 0x5ce534
-	int HelpX{};              // 0x5ce538
-	// 0x5ce53c (initialiser 0x559e80), the original's vector<int>(0, 9, 10) with NumberOfEventHelps: a queue that
+	// NumberOfEventHelps: EventHelps.size() (issue #100).
+	bool HelpHandleChanged{};
+	int HelpHandle{}; // what the help bubble explains
+	int HelpHeight{};
+	int HelpWidth{};
+	int HelpY{};
+	int HelpX{};
+	// The original's vector<int>(0, 9, 10) with NumberOfEventHelps: a queue that
 	// appends at its count and pops at 0, read below the count only, so a std::vector (issue #100).
 	std::vector<int> EventHelps;
-	TFixedString<2048> HelpText{}; // 0x5ce560
+	TFixedString<2048> HelpText{};
 
 	// HelpText a TFixedString (issue #60).
 	static_assert(sizeof(HelpText) == 2048, "HelpText");
@@ -144,7 +144,7 @@ void GetHelpArea(int *x, int *y, int *Width, int *Height);
 int GetHelpHandle();
 bool GetHelpHandleChanged();
 void InitHelp();
-void ExitHelp(); // empty, folded into 0x496160
+void ExitHelp();
 int GetEventHelp();
 int PopEventHelp();
 const char *GetHelpText(int Handle);

@@ -1,8 +1,5 @@
-// TMyException.cpp: reconstructed from Tibia.exe 7.72 (0x508300-0x508968).
-// The code between 0x508270 and 0x508390 that is not listed here is STL
-// (std::string::find_last_of and the substring constructor), instantiated in
-// this object. Since Patella-Modern issue #80 the constructors' formatting is
-// ErrorText's (TMyException.h).
+// TMyException.cpp: reconstructed from Tibia.exe 7.72. Since Patella-Modern
+// issue #80 the constructors' formatting is ErrorText's (TMyException.h).
 
 #include "TMyException.h"
 #include "compat/assertion.h"
@@ -17,7 +14,7 @@
 
 namespace {
 
-// 0x508390. The part of a path after the last '/' or '\'.
+// The part of a path after the last '/' or '\'.
 std::string_view GetFileName(std::string_view Path)
 {
 	const std::string_view::size_type Separator = Path.find_last_of("/\\");
@@ -62,7 +59,6 @@ int GetLine(const patella::TSourceLocation &Location)
 
 } // namespace
 
-// 0x508300
 TMyException::~TMyException() = default;
 
 TMyException::TMyException(std::string Message_, const patella::TSourceLocation &Location_)
@@ -74,7 +70,7 @@ TMyException::TMyException(TError Error) : Message(std::move(Error.Message)), Lo
 
 namespace patella {
 
-// 0x508400's text
+// The text of the original's constructor.
 std::string ErrorText(std::string_view File, int Line, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, std::string_view Reason)
 {
@@ -90,7 +86,7 @@ std::string ErrorText(std::string_view File, int Line, std::string_view Kind, st
 	return Text.str();
 }
 
-// 0x5086a0's text
+// The text of the original's wrapping constructor.
 std::string ErrorText(std::string_view File, int Line, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, const TMyException &Inner)
 {

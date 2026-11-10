@@ -5,28 +5,7 @@
 // this order (142 here: 117 and 118, the error report dialog's texts, are
 // gone since Patella-Modern issue #74, and 74-76, the update dialog's, since
 // issue #75), and reads only its own copy.
-// Sixteen copies are in the image, all with the same pointers
-// (notes/decisions.md, "external.h removed (issue #14)"):
 //
-//   0x5c0150 Communication.obj   reads 126, 127
-//   0x5c041c ConsoleWindow.obj   reads 12-19, 119, 120, 122, 146
-//   0x5c0678 ContentWindows.obj  reads 0-11, 20-50, 52, 56, 57
-//   0x5c08d4 ContextMenus.obj    reads none (link order)
-//   0x5c0b34 Control.obj         reads 109-111, 114, 115, 145
-//   0x5c0d90 Creatures.obj       reads none (link order)
-//   0x5c0fe0 DialogElements.obj  reads none (link order)
-//   0x5c123c Dialogs.obj         reads 53-55, 58-72, 74-76 (until #75), 77-89, 92-108, 112, 113, 117 and 118 (until
-//                                #74), 121, 123, 128-133, 135-142
-//   0x5c1498 DialogWindow.obj    reads none (link order)
-//   0x5c1708 GUI.obj             reads none (link order; its DefaultFontColor follows)
-//   0x5c1960 Help.obj            reads none (low: Help.obj or Inventory.obj)
-//   0x5c1bb0 MainFrm.obj         reads none (low: one of Help, Inventory and MainFrm)
-//   0x5c1e0c MainWindow.obj      reads 124, 143
-//   0x5c2064 MapWindow.obj       reads 51, 125
-//   0x5c22cc Player.obj          reads 116
-//   0x5c258c Talk.obj            reads 134
-//
-// An entry of a copy is at the copy's address plus four times its number.
 // The pointers are not const (the copies are in .data and the code reads
 // them from memory). The texts are the image's, except 97 (the fork's own, the
 // owner's choice, Patella-Modern issue #166), 116 (below) and the links 135-144, which are BuildConfig.h's (issue #169;

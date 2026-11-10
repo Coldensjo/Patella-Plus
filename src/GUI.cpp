@@ -1,5 +1,4 @@
-// GUI.cpp: reconstructed from Tibia.exe 7.72 (0x495480-0x4a29df; the
-// 0x4a29e0 deleting destructor is TWindow's).
+// GUI.cpp: reconstructed from Tibia.exe 7.72.
 //
 // The window system's base classes (TComponent, TElement, TWindow), skin
 // drawing, the timers, the hotkey table and the skin properties. Functions
@@ -9,13 +8,10 @@
 // without exception frame), then the asserted ones in line order. The
 // TComponent functions that the binary has only as inline copies in earlier
 // objects (GetNext, GetParent, ...) are in GUI.h.
-//
-// The try blocks and catch lines the comments name are the original's (its
-// catch wrappers, common.h); since issue #78 the functions here have none.
 
 #include "GUI.h"
 #include "Skins.h"
-#include "Status.h" // IWYU pragma: keep (uses nothing from it, but GUI.obj has its LinkPattern copy, 0x5c1704)
+#include "Status.h" // IWYU pragma: keep (uses nothing from it, but GUI.obj has its LinkPattern copy)
 #include "Text.h"   // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "sysinc.h"
 #include "Help.h"
@@ -44,9 +40,8 @@ static_assert(sizeof(std::unique_ptr<TDrawing[]>) == sizeof(TDrawing *)
 		&& alignof(std::unique_ptr<TDrawing[]>) == alignof(TDrawing *),
 	"std::unique_ptr<TDrawing[]> is a pointer");
 
-// The data of .bss (NumberOfHotkeys 0x5ccf98, Timers 0x5ccfa4, Hotkeys 0x5ce4f0, UpdateTimers' static LastTime 0x5ce518)
-// is TGUI's (GUI.h, issue #107); SkinProperties (0x5ccfc8, initialiser 0x559e50, constructor 0x496800) TGraphics'
-// TSkins' (Skins.h, issue #116), which InitSkinProperties below fills.
+// The data of .bss (NumberOfHotkeys, Timers, Hotkeys, UpdateTimers' static LastTime) is TGUI's (GUI.h, issue #107);
+// SkinProperties is TGraphics' TSkins' (Skins.h, issue #116), which InitSkinProperties below fills.
 
 // The skins' arrays std::arrays (issue #60): the original's layouts (no pointers: the same on x64).
 static_assert(sizeof(TInventoryViewProperties) == 0x158 && offsetof(TInventoryViewProperties, Objects) == 0x10
@@ -60,26 +55,21 @@ static_assert(sizeof(TSkinProperties) == 0x1528 && offsetof(TSkinProperties, Out
 		&& offsetof(TSkinProperties, EditMarkDialogTypeButtons) == 0x1204,
 	"TSkinProperties' layout");
 
-// --- Functions without exception frame (no line evidence) ------------------
-
-// 0x496000
 int TTimer::GetTime() const
 {
 	return Remaining / 100;
 }
 
-// 0x496020
 bool TTimer::IsExpired() const
 {
 	return !(Active && Remaining != 0);
 }
 
-// 0x496040, inlined into the deleting destructor 0x496520. noexcept since issue
-// #108: the work of the window classes' destructors that could throw (TTab's
-// assertion, the Send functions, the preferences, DeleteTextBuffer) is their
-// Close (OnClose), which every delete of a component runs first; it was
-// noexcept(false) from issue #34 to #108 (VC7.1's destructors let exceptions
-// out; notes/ownership.md, section 7).
+// noexcept since issue #108: the work of the window classes' destructors that
+// could throw (TTab's assertion, the Send functions, the preferences,
+// DeleteTextBuffer) is their Close (OnClose), which every delete of a component
+// runs first; it was noexcept(false) from issue #34 to #108 (VC7.1's
+// destructors let exceptions out; notes/ownership.md, section 7).
 TComponent::~TComponent()
 {
 	if (DrawingList != nullptr)
@@ -126,21 +116,18 @@ void DeleteComponent(TComponent *Component)
 	delete Component;
 }
 
-// 0x496060
 void TComponent::SetPosition(int _OffsetX, int _OffsetY)
 {
 	OffsetX = _OffsetX;
 	OffsetY = _OffsetY;
 }
 
-// 0x496080
 TWindow::TWindow()
 {
 	FirstChild = nullptr;
 	Capture = nullptr;
 }
 
-// 0x4960b0
 bool TWindow::IsChild(TComponent *Child)
 {
 	for (const TComponent *Search = FirstChild; Search != nullptr; Search = Search->Next) {
@@ -150,7 +137,6 @@ bool TWindow::IsChild(TComponent *Child)
 	return false;
 }
 
-// 0x4960e0
 TComponent *TWindow::GetLastChild()
 {
 	if (FirstChild == nullptr)
@@ -161,25 +147,24 @@ TComponent *TWindow::GetLastChild()
 	return Search;
 }
 
-// 0x496100
 TElement::TElement() = default;
 
-// 0x496130. Identical code to any two-member constructor, so the linker may
-// have folded others into it.
+// Identical code to any two-member constructor, so the linker may have
+// folded others into it.
 TCallback::TCallback(TComponent *Receiver, int Event)
 {
 	this->Receiver = Receiver;
 	this->Event = Event;
 }
 
-// 0x496150. Called last by InitControl.
+// Called last by InitControl.
 void patella::TGUI::InitHotkeys()
 {
 	Hotkeys.clear();
 }
 
-// 0x496160, the one copy the linker kept of many identical empty functions
-// (folded). ExitControl calls this one first; TComponent::Arrange and
+// The one copy the linker kept of many identical empty functions (folded).
+// ExitControl calls this one first; TComponent::Arrange and
 // PositionChanged and TElement::StopDragging have the same body.
 void patella::TGUI::ExitHotkeys()
 {
@@ -187,9 +172,8 @@ void patella::TGUI::ExitHotkeys()
 
 // --- Skins ----------------------------------------------------------------
 
-// 0x497a00, lines 42-86. Tiles the skin over width x height; srcx and srcy
-// cut that much off the first column and row. The assertions come before the
-// try block (it starts at state 35).
+// Tiles the skin over width x height; srcx and srcy cut that much off the
+// first column and row.
 void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int srcx, int srcy)
 {
 	if (skin == SKIN_NONE || width == 0 || height == 0)
@@ -237,9 +221,8 @@ void DrawSkin(int Surface, int x, int y, int width, int height, int skin, int sr
 	}
 }
 
-// 0x4a1690, lines 99-160. DrawSkin with a clipping rectangle, which is
-// passed on to the picture function. The assertions come before the try
-// block (it starts at state 15).
+// DrawSkin with a clipping rectangle, which is passed on to the picture
+// function.
 void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin, int ClipX, int ClipY,
 	int ClipWidth, int ClipHeight, int skinoffsetx, int skinoffsety)
 {
@@ -297,10 +280,8 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 
 // --- Skin properties ------------------------------------------------------
 
-// 0x498160. Called by InitControl after InitSkins. The exception tables have
-// the states of a catch wrapper but no try block (the compiler removed it: the
-// body cannot throw); the catch line is unknown. The binary stores the
-// values in another order; they are written here by offset.
+// Called by InitControl after InitSkins. The binary stores the values in
+// another order; they are written here by offset.
 void InitSkinProperties()
 {
 	SkinProperties().CursorHotspot1.x = 0;
@@ -1648,7 +1629,7 @@ void InitSkinProperties()
 
 // --- Timers ---------------------------------------------------------------
 
-// 0x49af20, line 851. Takes the first free entry.
+// Takes the first free entry.
 void patella::TGUI::AddTimer(TTimer *Timer)
 {
 	const auto Free = std::ranges::find(Timers, nullptr);
@@ -1658,7 +1639,6 @@ void patella::TGUI::AddTimer(TTimer *Timer)
 		*Free = Timer;
 }
 
-// 0x49b0d0, line 868
 void patella::TGUI::RemoveTimer(TTimer *Timer)
 {
 	const auto Entry = std::ranges::find(Timers, Timer);
@@ -1666,8 +1646,7 @@ void patella::TGUI::RemoveTimer(TTimer *Timer)
 		*Entry = nullptr;
 }
 
-// 0x4a27c0, line 887. Called by ProcessEvents. The first call only starts
-// the clock.
+// Called by ProcessEvents. The first call only starts the clock.
 void patella::TGUI::UpdateTimers()
 {
 	if (!LastTimeSet) { // the original's function-local static, initialised on the first call (issue #107)
@@ -1683,7 +1662,7 @@ void patella::TGUI::UpdateTimers()
 	}
 }
 
-// 0x49b290, line 905. A time of 0 leaves the timer inactive.
+// A time of 0 leaves the timer inactive.
 TTimer::TTimer(int Time, TCallback Callback)
 {
 	this->Callback = Callback;
@@ -1696,15 +1675,14 @@ TTimer::TTimer(int Time, TCallback Callback)
 	}
 }
 
-// 0x4a1dc0, the deleting destructor; this destructor is inlined into it.
+// The deleting destructor; this destructor is inlined into it.
 TTimer::~TTimer()
 {
 	RemoveTimer(this);
 	Active = false;
 }
 
-// 0x4a1df0, line 947. The callback is sent on every update, not only when
-// the time is up.
+// The callback is sent on every update, not only when the time is up.
 void TTimer::Update(int elapsed)
 {
 	if (Active) {
@@ -1723,51 +1701,41 @@ void TTimer::Update(int elapsed)
 
 // --- TComponent -------------------------------------------------------------
 
-// 0x49b450, line 993
 void TComponent::InsertChild([[maybe_unused]] TComponent *Child)
 {
 	TERROR("not possible");
 }
 
-// 0x49b570, line 1001
 void TComponent::AppendChild([[maybe_unused]] TComponent *Child)
 {
 	TERROR("not possible");
 }
 
-// 0x49b690, line 1009
 void TComponent::RemoveChild([[maybe_unused]] TComponent *Child)
 {
 	TERROR("not possible");
 }
 
-// 0x49b7b0, line 1017
 void TComponent::DeleteChild([[maybe_unused]] TComponent *Child)
 {
 	TERROR("not possible");
 }
 
-// 0x49b8d0, line 1025
 void TComponent::InsertChildAfter([[maybe_unused]] TComponent *Previous, [[maybe_unused]] TComponent *Child)
 {
 	TERROR("not possible");
 }
 
-// Line 1033 has no function in the binary (removed by the linker).
-
-// 0x49b9f0, line 1041
 void TComponent::SwapChildren([[maybe_unused]] TComponent *Child1, [[maybe_unused]] TComponent *Child2)
 {
 	TERROR("not possible");
 }
 
-// 0x49bb10, line 1049
 bool TComponent::IsChild([[maybe_unused]] TComponent *Child)
 {
 	TERROR("not possible");
 }
 
-// 0x49bc30, lines 1057-1066. The assertion comes before the try block.
 TComponent *TComponent::GetPrevious()
 {
 	PATELLA_ASSERT(Parent!=nullptr);
@@ -1780,7 +1748,6 @@ TComponent *TComponent::GetPrevious()
 	return nullptr;
 }
 
-// 0x49bee0, lines 1092-1093. No try block.
 void TComponent::SetSize(int _Width, int _Height)
 {
 	PATELLA_ASSERT_VALUES(_Width>=0, _Width);
@@ -1789,8 +1756,8 @@ void TComponent::SetSize(int _Width, int _Height)
 	Width = _Width;
 }
 
-// 0x4a1fb0, lines 1118-1163. Draws the drawing list at (x, y); entries
-// without a size draw the whole skin once.
+// Draws the drawing list at (x, y); entries without a size draw the
+// whole skin once.
 void TComponent::Draw(int Surface, int x, int y)
 {
 	int i = 0;
@@ -1824,7 +1791,7 @@ void TComponent::Draw(int Surface, int x, int y)
 
 // --- TWindow ----------------------------------------------------------------
 
-// 0x49c190, lines 1193-1194. Inserts the child at the front. No try block.
+// Inserts the child at the front.
 void TWindow::InsertChild(TComponent *Child)
 {
 	PATELLA_ASSERT(Child!=nullptr);
@@ -1834,8 +1801,7 @@ void TWindow::InsertChild(TComponent *Child)
 	Child->Parent = this;
 }
 
-// 0x49c430, lines 1206-1207. No try block. The first child's Next is not
-// reset.
+// The first child's Next is not reset.
 void TWindow::AppendChild(TComponent *Child)
 {
 	PATELLA_ASSERT(Child!=nullptr);
@@ -1852,17 +1818,17 @@ void TWindow::AppendChild(TComponent *Child)
 	Child->Parent = this;
 }
 
-// 0x49c6f0, line 1231. The child is closed after it is removed, where the
-// original's delete ran its destructor (issue #108).
+// The child is closed after it is removed, where the original's delete
+// ran its destructor (issue #108).
 void TWindow::DeleteChild(TComponent *Child)
 {
 	RemoveChild(Child);
 	DeleteComponent(Child);
 }
 
-// 0x49c890, lines 1239-1260. The assertions before the try block. A child
-// holding the capture stops dragging and releases it through itself (with
-// NULL), which reaches this window's ReleaseCapture by its parent.
+// A child holding the capture stops dragging and releases it through
+// itself (with NULL), which reaches this window's ReleaseCapture by its
+// parent.
 void TWindow::RemoveChild(TComponent *Child)
 {
 	PATELLA_ASSERT(Child!=nullptr);
@@ -1887,8 +1853,7 @@ void TWindow::RemoveChild(TComponent *Child)
 	Child->Next = nullptr;
 }
 
-// 0x49cd00, lines 1269-1287. Inserts the child after Previous, at the front
-// when Previous is NULL. The first two assertions are before the try block.
+// Inserts the child after Previous, at the front when Previous is NULL.
 void TWindow::InsertChildAfter(TComponent *Previous, TComponent *Child)
 {
 	PATELLA_ASSERT(Child!=nullptr);
@@ -1907,10 +1872,9 @@ void TWindow::InsertChildAfter(TComponent *Previous, TComponent *Child)
 	Search->Next = Child;
 }
 
-// 0x49d200, lines 1295-1347. The first five assertions are before the try
-// block. Odd behaviour kept: two children that are not neighbours are
-// removed and inserted again after their own predecessors, so they keep
-// their places.
+// Odd behaviour kept: two children that are not neighbours are removed
+// and inserted again after their own predecessors, so they keep their
+// places.
 void TWindow::SwapChildren(TComponent *Child1, TComponent *Child2)
 {
 	PATELLA_ASSERT(Child1!=nullptr);
@@ -1957,7 +1921,6 @@ void TWindow::SwapChildren(TComponent *Child1, TComponent *Child2)
 	}
 }
 
-// 0x49da60, line 1389
 void TWindow::SetPosition(int _OffsetX, int _OffsetY)
 {
 	OffsetX = _OffsetX;
@@ -1966,13 +1929,12 @@ void TWindow::SetPosition(int _OffsetX, int _OffsetY)
 		Child->PositionChanged();
 }
 
-// 0x4a2590. Deletes the children. The deleting destructor is 0x4a29e0. After
-// the window's Close (issue #108) its children are closed and DeleteChild only
-// removes and frees them. A window destroyed without a close is one whose
-// constructor threw (its fully made bases are destroyed): then DeleteChild
-// closes each child, as the original's destructors did their work there, and an
-// exception of it ends the program, as the original's second exception during
-// the unwinding did.
+// Deletes the children. After the window's Close (issue #108) its children are
+// closed and DeleteChild only removes and frees them. A window destroyed
+// without a close is one whose constructor threw (its fully made bases are
+// destroyed): then DeleteChild closes each child, as the original's destructors
+// did their work there, and an exception of it ends the program, as the
+// original's second exception during the unwinding did.
 TWindow::~TWindow()
 {
 	while (FirstChild != nullptr)
@@ -1992,7 +1954,7 @@ void TWindow::OnClose()
 	}
 }
 
-// 0x4a2600, line 1408. The window's own drawing list, then the children.
+// The window's own drawing list, then the children.
 void TWindow::Draw(int Surface, int x, int y)
 {
 	TComponent::Draw(Surface, x, y);
@@ -2000,16 +1962,15 @@ void TWindow::Draw(int Surface, int x, int y)
 		Child->Draw(Surface, Child->OffsetX + x, Child->OffsetY + y);
 }
 
-// 0x49dc20, line 1424
 void TWindow::Arrange()
 {
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->Next)
 		Child->Arrange();
 }
 
-// 0x49ddc0, line 1448. The mouse functions go to the capture if there is
-// one, else to the first child under the point that takes the event, in
-// child coordinates.
+// The mouse functions go to the capture if there is one, else to the
+// first child under the point that takes the event, in child
+// coordinates.
 bool TWindow::MouseMove(int x, int y)
 {
 	if (Capture != nullptr)
@@ -2022,7 +1983,6 @@ bool TWindow::MouseMove(int x, int y)
 	return false;
 }
 
-// 0x49dff0, line 1472
 bool TWindow::LeftButtonDown(int x, int y, int Flags)
 {
 	if (Capture != nullptr)
@@ -2035,7 +1995,6 @@ bool TWindow::LeftButtonDown(int x, int y, int Flags)
 	return false;
 }
 
-// 0x49e230, line 1496
 bool TWindow::LeftButtonUp(int x, int y, int Flags)
 {
 	if (Capture != nullptr)
@@ -2048,7 +2007,6 @@ bool TWindow::LeftButtonUp(int x, int y, int Flags)
 	return false;
 }
 
-// 0x49e470, line 1520
 bool TWindow::LeftButtonDoubleClick(int x, int y, int Flags)
 {
 	if (Capture != nullptr)
@@ -2061,7 +2019,6 @@ bool TWindow::LeftButtonDoubleClick(int x, int y, int Flags)
 	return false;
 }
 
-// 0x49e6b0, line 1544
 bool TWindow::RightButtonUp(int x, int y, int Flags)
 {
 	if (Capture != nullptr)
@@ -2074,7 +2031,6 @@ bool TWindow::RightButtonUp(int x, int y, int Flags)
 	return false;
 }
 
-// 0x49e8f0, line 1568
 bool TWindow::MouseWheel(int x, int y, int Direction)
 {
 	if (Capture != nullptr)
@@ -2087,8 +2043,7 @@ bool TWindow::MouseWheel(int x, int y, int Direction)
 	return false;
 }
 
-// 0x49eb30, line 1588. No capture check; only the first child under the
-// point gets it.
+// No capture check; only the first child under the point gets it.
 void TWindow::MouseHover(int x, int y)
 {
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->Next) {
@@ -2099,8 +2054,8 @@ void TWindow::MouseHover(int x, int y)
 	}
 }
 
-// 0x49ed10, line 1611. No capture check. The child that explains itself
-// moves the help area by its offset; without one the help handle is cleared.
+// No capture check. The child that explains itself moves the help area by
+// its offset; without one the help handle is cleared.
 bool TWindow::HelpMouseMove(int x, int y)
 {
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->Next) {
@@ -2114,8 +2069,7 @@ bool TWindow::HelpMouseMove(int x, int y)
 	return false;
 }
 
-// 0x49ef10, lines 1633-1638. The assertion is before the try block. The
-// parents up to the main window capture this window in turn.
+// The parents up to the main window capture this window in turn.
 void TWindow::SetCapture(TComponent *Component)
 {
 	PATELLA_ASSERT(Capture==nullptr);
@@ -2124,7 +2078,6 @@ void TWindow::SetCapture(TComponent *Component)
 		Parent->SetCapture(this);
 }
 
-// 0x49f1a0, lines 1648-1653. The assertion is before the try block.
 void TWindow::ReleaseCapture(TComponent *Component)
 {
 	PATELLA_ASSERT(Capture==Component);
@@ -2133,7 +2086,7 @@ void TWindow::ReleaseCapture(TComponent *Component)
 		Parent->ReleaseCapture(this);
 }
 
-// 0x49f430, line 1668. Does not release the parents' capture.
+// Does not release the parents' capture.
 void TWindow::StopDragging()
 {
 	if (Capture != nullptr) {
@@ -2142,9 +2095,8 @@ void TWindow::StopDragging()
 	}
 }
 
-// 0x49f5d0, lines 1679-1690. Negative coordinates count from the right and
-// bottom edges, sizes below 1 are relative to the space left. The
-// assertions are before the try block; they name the window's Width and
+// Negative coordinates count from the right and bottom edges, sizes below
+// 1 are relative to the space left. They name the window's Width and
 // Height, not the area (whose name is ours, as FitToChild's).
 void TWindow::SetChildArea(TComponent *Child, TRect Area)
 {
@@ -2163,7 +2115,6 @@ void TWindow::SetChildArea(TComponent *Child, TRect Area)
 	Child->SetSize(Area.width, Area.height);
 }
 
-// 0x49fa40, lines 1700-1708. The assertions are before the try block.
 void TWindow::SetChildPosition(TComponent *Child, int x, int y)
 {
 	PATELLA_ASSERT(Child->Parent==this);
@@ -2176,11 +2127,10 @@ void TWindow::SetChildPosition(TComponent *Child, int x, int y)
 	Child->SetPosition(x, y);
 }
 
-// 0x49fe70, lines 1724-1738. Sizes the window to the child placed at
-// (Area.x, Area.y), with a negative Area.width and Area.height as margins
-// after it, and not below the minimum size. Notify chooses the virtual
-// SetSize; otherwise only the size fields change. The assertions are before
-// the try block.
+// Sizes the window to the child placed at (Area.x, Area.y), with a negative
+// Area.width and Area.height as margins after it, and not below the minimum
+// size. Notify chooses the virtual SetSize; otherwise only the size fields
+// change.
 void TWindow::FitToChild(TComponent *Child, TRect Area, bool Notify)
 {
 	PATELLA_ASSERT(Child!=nullptr);
@@ -2200,10 +2150,10 @@ void TWindow::FitToChild(TComponent *Child, TRect Area, bool Notify)
 		TComponent::SetSize(NewWidth, NewHeight);
 }
 
-// 0x4a0300, lines 1772-1794. Moves the children so that their bounding box
-// starts at (|left margin|, |top margin|) and sizes the window to it plus
-// the right and bottom margins (also taken as absolute values), not below
-// the minimum size. Nothing happens without children.
+// Moves the children so that their bounding box starts at (|left margin|,
+// |top margin|) and sizes the window to it plus the right and bottom
+// margins (also taken as absolute values), not below the minimum size.
+// Nothing happens without children.
 void TWindow::FitToChildren(TRect Margin, bool Notify)
 {
 	if (FirstChild == nullptr)
@@ -2245,10 +2195,10 @@ void TWindow::FitToChildren(TRect Margin, bool Notify)
 		TComponent::SetSize(Width, Height);
 }
 
-// 0x4a0920, line 1860. Cuts the children to the window. A child that
-// sticks out is deleted when Strict is set (or when nothing of it is left),
-// else moved and resized to the visible part. The checks against the right
-// and bottom edges use the old position.
+// Cuts the children to the window. A child that sticks out is deleted when
+// Strict is set (or when nothing of it is left), else moved and resized to
+// the visible part. The checks against the right and bottom edges use the
+// old position.
 void TWindow::ClipChildren(bool Strict)
 {
 	if (FirstChild != nullptr) {
@@ -2298,15 +2248,13 @@ void TWindow::ClipChildren(bool Strict)
 
 // --- TElement -------------------------------------------------------------
 
-// 0x4a0bc0, line 1893. Captures this element in the parent; the argument is
-// not used.
+// Captures this element in the parent; the argument is not used.
 void TElement::SetCapture([[maybe_unused]] TComponent *Component)
 {
 	if (GetParent() != nullptr)
 		GetParent()->SetCapture(this);
 }
 
-// 0x4a0d60, line 1905
 void TElement::ReleaseCapture([[maybe_unused]] TComponent *Component)
 {
 	if (GetParent() != nullptr)
@@ -2315,7 +2263,6 @@ void TElement::ReleaseCapture([[maybe_unused]] TComponent *Component)
 
 // --- TCallback --------------------------------------------------------------
 
-// 0x4a0f00, line 1931
 void TCallback::Send() const
 {
 	if (Receiver != nullptr)
@@ -2324,20 +2271,20 @@ void TCallback::Send() const
 
 // --- Hotkeys --------------------------------------------------------------
 
-// 0x4a10a0, line 1965. Replaces the callback of a key that is already there.
+// Replaces the callback of a key that is already there.
 void patella::TGUI::AddHotkey(int Key, TCallback Callback)
 {
 	Hotkeys.insert_or_assign(Key, Callback);
 }
 
-// 0x4a12a0, lines 1983. The last entry takes the place of the removed one.
+// The last entry takes the place of the removed one.
 void patella::TGUI::RemoveHotkey(int Key)
 {
 	Hotkeys.erase(Key);
 }
 
-// 0x4a1480, line 2004. Called by Control.cpp's KeyPress when no modal window
-// is open. Flag 0x200 is ignored and lower-case letters count as upper case.
+// Called by Control.cpp's KeyPress when no modal window is open. Flag 0x200
+// is ignored and lower-case letters count as upper case.
 bool patella::TGUI::CheckHotkey(int Key)
 {
 	if ((Key & KEY_SHIFT) != 0)

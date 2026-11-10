@@ -1,21 +1,13 @@
-// Control.cpp: reconstructed from Tibia.exe 7.72 (0x445900-0x44b738).
+// Control.cpp: reconstructed from Tibia.exe 7.72.
 //
 // Functions are in original source order, which comes from the assertion and
-// catch line numbers; the comment before each gives its address and those
-// lines. The binary does not keep that order: CheckSurface, Redraw,
-// ProcessEvents, HandleEvents, ReceivePackets and InitControl come after the
-// others. Every function had the original's catch wrappers (common.h),
-// starting at try state 0 (tools/ehinfo.py), except where noted. The try
-// blocks and catch lines the comments name are the original's; since issue
-// #78 the functions here have none apart from the handlers of their own:
-// CheckSurface's (an error of the surface becomes PROGRAM_ERROR 12),
-// ChangeEngine's (each step's error with its message) and InitControl's (a
-// PROGRAM_ERROR shuts the modules down again).
-//
-// The file starts at 0x445900 (OutputControlErrorInformations, which printed
-// LastPacketTypes for error.txt; gone since Patella-Modern issue #74) and
-// 0x4459b0 (Resize, its catch wrapper at line 93), once the gap to
-// ContextMenus.cpp.
+// catch line numbers. The binary does not keep that order: CheckSurface,
+// Redraw, ProcessEvents, HandleEvents, ReceivePackets and InitControl come
+// after the others. Every function had the original's catch wrappers
+// (common.h), except where noted. Since issue #78 the functions here have none
+// apart from the handlers of their own: CheckSurface's (an error of the surface
+// becomes PROGRAM_ERROR 12), ChangeEngine's (each step's error with its
+// message) and InitControl's (a PROGRAM_ERROR shuts the modules down again).
 //
 // Patella-Modern issue #118: the functions are TGUI's members (GUI.h), the data
 // they read TGUI's (#107) and, through its constructor references, TNetwork's
@@ -71,27 +63,16 @@
 
 namespace {
 
-// Data, in .data/.bss order. 0x5c4540-0x5c4553 is not used by any code.
-// 0x5c0d8c LastPacketType, 0x5c4510 LastPacketIndex and 0x5c4514 LastPacketTypes are TCommunication's
-// (Communication.h, issue #105).
-// 0x5c4520 ReconnectTimeout and 0x5c4524 Reconnect are TNetwork's (Network.h, issue #105).
-// 0x5c4528 LastMouseMove, 0x5c452c URLCallback, 0x5c4530 DisplayModeCallback, 0x5c4538 ExitCallback, 0x5c453c
-// WindowHandle and 0x5c4554 ShowFPS are TGUI's (GUI.h, issue #107).
-// 0x5c4534, CloseCallback (event 0x48: CloseProgram, then patch.exe), is gone with the patcher (issue #75).
-// At 0x5c4558, constructed by the static initialiser 0x559df0 as
-// TCallback(NULL, 0) and never used (the other window files have one too);
-// the end of Control.obj's .bss, after ShowFPS and before Creatures.obj's
-// BuddySortMethods (0x5c4560).
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
 TCallback NoCallback(nullptr, 0);
 
 } // namespace
 
 
-// 0x4459b0, line 93. The client area changed size (MainFrm.cpp); in
-// fullscreen mode (view mode 2) the screen size counts. An open context
-// menu (action state 11) is closed, a dialog (10) is centred again and a
-// help bubble (9) follows the main window.
+// The client area changed size (MainFrm.cpp); in fullscreen mode (view
+// mode 2) the screen size counts. An open context menu (action state 11)
+// is closed, a dialog (10) is centred again and a help bubble (9)
+// follows the main window.
 void patella::TGUI::Resize(int Width, int Height)
 {
 	SetMouseCursor(CURSOR_ARROW);
@@ -116,8 +97,8 @@ void patella::TGUI::Resize(int Width, int Height)
 	}
 }
 
-// 0x449010, line 124. Lets the surface check the window and display mode;
-// falls back to DirectX 5 when that fails.
+// Lets the surface check the window and display mode; falls back to
+// DirectX 5 when that fails.
 void patella::TGUI::CheckSurface(bool Force)
 {
 	TFullscreenMode *Resolution = GetFullscreenMode();
@@ -133,9 +114,8 @@ void patella::TGUI::CheckSurface(bool Force)
 		ResetVideoCache();
 }
 
-// 0x445c20, lines 145-201. The engine test runs on a new surface; when it
-// fails, the old engine is set again. The early return comes before the try
-// block in the binary (the try state is set after the comparison).
+// The engine test runs on a new surface; when it fails, the old engine is
+// set again.
 void patella::TGUI::ChangeEngine(int engine)
 {
 	// The x64 client (Patella-Modern issues #20 and #31; Surface.cpp SurfaceInitInstance): one engine, and
@@ -169,10 +149,10 @@ void patella::TGUI::ChangeEngine(int engine)
 	}
 }
 
-// 0x449210, lines 218-366. Draws the windows, the tooltip, the frame rate and
-// the mouse cursor, then shows the frame. The tooltip is kept inside the
-// screen; when it is wider or higher than the screen, the order of the two
-// limits is swapped and it ends at 1.
+// Draws the windows, the tooltip, the frame rate and the mouse cursor, then
+// shows the frame. The tooltip is kept inside the screen; when it is wider or
+// higher than the screen, the order of the two limits is swapped and it ends
+// at 1.
 void patella::TGUI::Redraw(bool Force)
 {
 	CheckSurface(Force);
@@ -285,8 +265,8 @@ void patella::TGUI::Redraw(bool Force)
 	GetSurface()->FinishFrame();
 }
 
-// 0x4465f0, line 418. Game packet 0x0a, once the connection state is 8. Out of line (PATELLA_NOINLINE): the
-// golden corpus's Communication test replaces it, and ReceivePackets would inline it (issue #78).
+// Game packet 0x0a, once the connection state is 8. Out of line (PATELLA_NOINLINE): the golden corpus's
+// Communication test replaces it, and ReceivePackets would inline it (issue #78).
 PATELLA_NOINLINE void patella::TGUI::EnterGame() const
 {
 	MainWindow->ChangeMode(true);
@@ -302,7 +282,7 @@ PATELLA_NOINLINE void patella::TGUI::EnterGame() const
 	SetAmbientLight(-1, 0);
 }
 
-// 0x4467d0, line 438. The game connection was closed.
+// The game connection was closed.
 void patella::TGUI::LeaveGame()
 {
 	MainWindow->ChangeMode(false);
@@ -317,8 +297,8 @@ void patella::TGUI::LeaveGame()
 		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 }
 
-// 0x4469b0, lines 461-483. In help mode (action state 9) the help bubble is
-// replaced when the help text has changed.
+// In help mode (action state 9) the help bubble is replaced when the help
+// text has changed.
 void patella::TGUI::MouseMove(int x, int y)
 {
 	SetMousePosition(x, y);
@@ -340,8 +320,8 @@ void patella::TGUI::MouseMove(int x, int y)
 		SetHelpSize(0, 0);
 		MainWindow->HelpMouseMove(x, y);
 		// The bubble is kept in a local: ModalWindow is read after
-		// HelpMouseMove and written only after Place (0x446b2a, 0x446b8f), so
-		// an exception before that leaves it as it was (issue #36).
+		// HelpMouseMove and written only after Place, so an exception before
+		// that leaves it as it was (issue #36).
 		THelpBubble *Bubble = static_cast<THelpBubble *>(ModalWindow);
 		if (GetHelpHandleChanged()) {
 			DeleteComponent(Bubble);
@@ -359,7 +339,6 @@ void patella::TGUI::MouseMove(int x, int y)
 	SetMouseOverText(nullptr);
 }
 
-// 0x446d10, lines 503-511
 void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
@@ -385,8 +364,8 @@ void patella::TGUI::LeftButtonDown(int x, int y, int Flags)
 	SetMouseOverText(nullptr);
 }
 
-// 0x447000, lines 548-566. Releasing the second of both buttons (state 4)
-// sends a left button release with Flags 0x200.
+// Releasing the second of both buttons (state 4) sends a left button
+// release with Flags 0x200.
 void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
@@ -433,7 +412,6 @@ void patella::TGUI::LeftButtonUp(int x, int y, int Flags)
 	SetMouseOverText(nullptr);
 }
 
-// 0x447390, lines 586-599
 void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
@@ -464,8 +442,8 @@ void patella::TGUI::LeftButtonDoubleClick(int x, int y, int Flags)
 	SetMouseOverText(nullptr);
 }
 
-// 0x4476c0, line 619. Only changes the action state; the windows are not told
-// (the position and flags are not used).
+// Only changes the action state; the windows are not told (the position and
+// flags are not used).
 void patella::TGUI::RightButtonDown([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
 	switch (GetActionState()) {
@@ -483,8 +461,8 @@ void patella::TGUI::RightButtonDown([[maybe_unused]] int x, [[maybe_unused]] int
 	SetMouseOverText(nullptr);
 }
 
-// 0x447880, lines 652-669. Releasing the second of both buttons (state 5)
-// sends a left button release with Flags 0x200.
+// Releasing the second of both buttons (state 5) sends a left button
+// release with Flags 0x200.
 void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 {
 	switch (GetActionState()) {
@@ -529,7 +507,7 @@ void patella::TGUI::RightButtonUp(int x, int y, int Flags)
 	SetMouseOverText(nullptr);
 }
 
-// 0x447bd0, lines 681-692. Direction 1 up, 2 down (MainFrm's OnMouseWheel).
+// Direction 1 up, 2 down (MainFrm's OnMouseWheel).
 void patella::TGUI::MouseWheel(int x, int y, int Direction)
 {
 	switch (GetActionState()) {
@@ -548,7 +526,7 @@ void patella::TGUI::MouseWheel(int x, int y, int Direction)
 	SetMouseOverText(nullptr);
 }
 
-// 0x447e60, line 1086. Key 0x907 switches the frame rate display.
+// Key 0x907 switches the frame rate display.
 void patella::TGUI::KeyPress(int Key)
 {
 	if (Key == (KEY_ALT | KEY_F8)) {
@@ -571,10 +549,9 @@ void patella::TGUI::KeyPress(int Key)
 	SetMouseOverText(nullptr);
 }
 
-// 0x4480b0, line 1117. False while a character is in the game; then the
-// logout warning is posted (event 7) unless another window is open. The
-// array is allocated with new[]; ProcessEvents deletes it.
-// GCC's analyzer (issue #111): the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
+// False while a character is in the game; then the logout warning is posted (event 7) unless another window is open. The array is
+// allocated with new[]; ProcessEvents deletes it. GCC's analyzer (issue #111): the message queue owns the block it gets as an integer
+// (AddMessage; the message's handler deletes it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 bool patella::TGUI::CloseRequest() const
@@ -596,21 +573,21 @@ bool patella::TGUI::CloseRequest() const
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// 0x44a770, line 1133. After the character list and similar login packets.
+// After the character list and similar login packets.
 void patella::TGUI::HandleEvents()
 {
 	ProcessEvents();
 }
 
-// 0x448290, line 1155. Callback for InitStatus.
+// Callback for InitStatus.
 void patella::TGUI::LinkCopyWarning()
 {
 	SetActionState(ACTIONSTATE_NONE);
 	AddMessage(MESSAGE_LINK_COPY_WARNING, reinterpret_cast<std::intptr_t>("Link Copy Warning"), 0);
 }
 
-// 0x448430, lines 1174-1182. The connect handler for InitNetwork: sends the
-// login packet to the login server (state 2) or the game server (state 5).
+// The connect handler for InitNetwork: sends the login packet to the login
+// server (state 2) or the game server (state 5).
 void patella::TGUI::ConnectionEstablished()
 {
 	if (GetConnectionState() == CONNECTION_CONNECTING_LOGIN_SERVER) {
@@ -638,9 +615,9 @@ void patella::TGUI::ConnectionEstablished()
 	SetActionState(ACTIONSTATE_NONE);
 }
 
-// 0x44a900, lines 1208-1280. The receive handler for InitNetwork. The
-// connection state chooses the table: 4 the login server, otherwise the game
-// server. The first packet moves state 3 to 4 and state 6 to 7.
+// The receive handler for InitNetwork. The connection state chooses the
+// table: 4 the login server, otherwise the game server. The first packet
+// moves state 3 to 4 and state 6 to 7.
 void patella::TGUI::ReceivePackets()
 {
 	int Type = -1;
@@ -761,10 +738,9 @@ void patella::TGUI::ReceivePackets()
 	}
 }
 
-// 0x448720, line 1322. The close handler for InitNetwork. A pending
-// reconnect (event 0x3f) logs in again: to the game server if the character
-// was in the game and the 5 seconds have not passed, else to the login server.
-// GCC's analyzer (issue #111): the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
+// The close handler for InitNetwork. A pending reconnect (event 0x3f) logs in again: to the game server if the character was in the
+// game and the 5 seconds have not passed, else to the login server. GCC's analyzer (issue #111): the message queue owns the block it
+// gets as an integer (AddMessage; the message's handler deletes it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void patella::TGUI::ConnectionClosed()
@@ -811,11 +787,11 @@ TMousePosition MousePosition()
 }
 } // namespace
 
-// 0x4489a0, line 1379. Called by the main frame's timer. Ten ticks after the
-// last mouse move the window under the mouse is told (hover). While the left
-// button is held (button event 6), it is told again every tick from the
-// seventh tick on; before that the function returns early and skips the
-// connection timeout check and the two calls after it.
+// Called by the main frame's timer. Ten ticks after the last mouse move the
+// window under the mouse is told (hover). While the left button is held
+// (button event 6), it is told again every tick from the seventh tick on;
+// before that the function returns early and skips the connection timeout
+// check and the two calls after it.
 void patella::TGUI::TimerEvent() const
 {
 	IncrementActionNumber();
@@ -855,13 +831,13 @@ void patella::TGUI::TimerEvent() const
 	UpdateSkulls();
 }
 
-// 0x4498a0, lines 1541-1560. Handles queued events until a window is open,
-// the main window is dragging or the queue is empty. Events below 0x34 that
-// open a window open a centred dialog (action state 10), 0x34-0x3c open a
-// context menu at the mouse (state 11). Event 0x40 (logout) is posted again
-// while connected and ends the loop; 0x48 ends the program. Odd cases kept
-// from the binary: event 0x2f passes Param2 twice to OpenChannel, and event
-// 0x32 deletes Param2 after using Param1.
+// Handles queued events until a window is open, the main window is dragging
+// or the queue is empty. Events below 0x34 that open a window open a
+// centred dialog (action state 10), 0x34-0x3c open a context menu at the
+// mouse (state 11). Event 0x40 (logout) is posted again while connected and
+// ends the loop; 0x48 ends the program. Odd cases kept from the binary:
+// event 0x2f passes Param2 twice to OpenChannel, and event 0x32 deletes
+// Param2 after using Param1.
 void patella::TGUI::ProcessEvents()
 {
 	int Type = 0;
@@ -1133,7 +1109,7 @@ void patella::TGUI::ProcessEvents()
 		// 0x40 (wait until the login connection is closed), 0x41-0x44 (InstallPatch: Tibia.dat, .spr, .pic,
 		// Patch.exe), 0x45-0x47 (ReloadObjects, ReloadSprites, ReloadPictures after a patch) and 0x48 (CloseCallback:
 		// the client closes and runs patch.exe) were posted only by ReceivePatchBlock; they are gone with it since
-		// Patella-Modern issue #75 (decision D9), and with 0x40 the shared exit block 0x44a2f5 it jumped to (#42).
+		// Patella-Modern issue #75 (decision D9), and with 0x40 the shared exit block it jumped to (#42).
 		default:
 			TERROR1("unknown message type", Type);
 		}
@@ -1153,8 +1129,8 @@ void patella::TGUI::ProcessEvents()
 	Redraw(false);
 }
 
-// 0x448c50, line 1585. Called when the main frame window is created. Tibia.exe's third parameter, CloseProgram
-// (event 0x48's callback), is gone with the patcher since issue #75.
+// Called when the main frame window is created. Tibia.exe's third parameter, CloseProgram (event 0x48's
+// callback), is gone with the patcher since issue #75.
 void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL))
 {
 	WindowHandle = Window;
@@ -1168,8 +1144,8 @@ void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgra
 	Network.Reconnect = false;
 }
 
-// 0x44b510, line 1633. Initialises the modules; on a PROGRAM_ERROR it shuts
-// them down again (ignoring any error from that) and passes the error on.
+// Initialises the modules; on a PROGRAM_ERROR it shuts them down again
+// (ignoring any error from that) and passes the error on.
 void patella::TGUI::InitControl(bool Gamemaster)
 {
 	try {
@@ -1197,17 +1173,16 @@ void patella::TGUI::InitControl(bool Gamemaster)
 	}
 }
 
-// 0x448e30, line 1661. Called from the main frame's destructor, and from
-// InitControl after a failed step. GetSurface creates a surface first if there
-// is none, so one may be created only to be deleted. Patella-Modern issue #90:
-// the x64 GetSurface makes one only once SurfaceInitInstance has set the
-// engine (after InitControl), so after a failed InitControl there is none and
-// the surface step is skipped. Tibia.exe's GetSurface made a DirectX 5 surface
-// there whose ExitSurfaces faulted on its uninitialised members (seen under
-// cdb); its catch wrapper and InitControl's catch (...) (MSVC 7.1: an access
-// violation as well) swallowed that, and the PROGRAM_ERROR went on to the box.
-// The five empty Exit functions are folded into one copy (0x496160); which
-// module each belongs to follows InitControl's order in reverse (names ours).
+// Called from the main frame's destructor, and from InitControl after a failed
+// step. GetSurface creates a surface first if there is none, so one may be
+// created only to be deleted. Patella-Modern issue #90: the x64 GetSurface
+// makes one only once SurfaceInitInstance has set the engine (after
+// InitControl), so after a failed InitControl there is none and the surface
+// step is skipped. Tibia.exe's GetSurface made a DirectX 5 surface there whose
+// ExitSurfaces faulted on its uninitialised members (seen under cdb); its
+// catch wrapper and InitControl's catch (...) (MSVC 7.1: an access violation
+// as well) swallowed that, and the PROGRAM_ERROR went on to the box.
+// Which module each of the five empty Exit functions belongs to follows InitControl's order in reverse (names ours).
 void patella::TGUI::ExitControl()
 {
 	::ExitMainWindow();

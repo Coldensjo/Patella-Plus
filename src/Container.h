@@ -1,57 +1,10 @@
 // Container.h: CipSoft's container templates (c:\mud\tibiaplayer\Container.h).
 //
-// Every member here is written once and compiles to all of the binary's
-// instances listed below (issue #13: each checked against its disassembly and
-// exception table). The assertion texts and line numbers come from the
+// The assertion texts and line numbers come from the binary's
 // instances; member names other than space and block are ours.
 //
-// The original file's growable vector<T> (lines 353-370) is TIndexedVector<T> of
-// src/types/IndexedVector.h since Patella-Modern issue #99, the same semantics
-// over a std::vector; its instances in the binary are listed here, by the
-// original's name.
-//
-// The linker keeps one copy of an instance, normally in the first object that
-// uses it (objects are in alphabetical order), so most copies sit in an
-// object before the file that the instance is named after. Identical code of
-// different T is not folded when the functions have exception tables (the
-// constructors, one copy per object); the operator() of every vector of a
-// 4-byte element is the one copy 0x452ac0. Instances, by element type:
-//   vector<TLineFormat>     constructor 0x417aa0, operator() 0x417710
-//                           (ConsoleWindow.h's TTextWindow::Lines, 0x28 bytes;
-//                           new[] and init run TLineFormat's inline constructor)
-//   vector<TSkinButton *>   initialized constructor 0x425e70 (DialogElements.h's
-//                           TRadioButtonGroup, inline constructor in ContentWindows.obj)
-//   vector<TMark>           constructor 0x426170, operator() 0x425b20,
-//                           destructor 0x425b10 (Map.h's TAutomapBlock and the
-//                           automap windows of ContentWindows.cpp; kept in
-//                           ContentWindows.obj, before Map.obj)
-//   vector<int>             initialized constructor 0x453300, constructor
-//                           0x4a2b90, operator() 0x452ac0, destructor 0x452c50
-//                           (DialogElements.h's TEditText line starts,
-//                           Help.cpp's EventHelps, Preferences.cpp's lists;
-//                           0x452ac0 and 0x452c50 also serve vector<TEditLine *>,
-//                           vector<char *>, vector<TTimer *> and vector<TTalkFilter *>)
-//   vector<TListBoxLine>    constructor 0x453600, operator() 0x452eb0,
-//                           destructor 0x452c60 (DialogElements.h's TFontListBox
-//                           lines, 0x18 bytes, the implicit element constructor
-//                           0x452c70)
-//   vector<TIgnoreEntry>    constructor 0x46c0d0, operator() 0x46bb70,
-//                           destructor 0x46bb60 (Dialogs.h's 31-byte ignore
-//                           list entries, with an inline constructor)
-//   vector<THotkey>         constructor 0x4976f0, operator() 0x496570 (GUI.cpp's
-//                           Hotkeys; new[] and init run TCallback's inline constructor)
-//   vector<TTimer *>        initialized constructor 0x4973f0 (GUI.cpp's Timers)
-//   vector<TContentWindowSize>  constructor 0x4dbe90, operator() 0x4db880 (Preferences.cpp)
-//   vector<TBuddy>          constructor 0x4dc170, operator() 0x4dba60 (Preferences.cpp)
-//   vector<TMessage>        constructor 0x4e7f50, operator() 0x4e7390 (Status.cpp)
-//   vector<TErrorReport>    constructor 0x4e8230, operator() 0x4e7860 (Status.cpp until issue #74; the golden
-//                           test keeps comparing it with a record of TErrorReport's size)
-//   vector<TTalkFilter *>   initialized constructor 0x4fd6e0 (Talk.cpp's lists)
-// The four initialized constructors (0x425e70, 0x453300, 0x4973f0, 0x4fd6e0)
-// are the same code apart from addresses. The destructor is inline; its
-// out-of-line copies are called from unwind funclets and atexit thunks, the
-// other static vectors' atexit handlers (0x55a320 and following) free entry
-// inline.
+// The original file's growable vector<T> is TIndexedVector<T> of src/types/IndexedVector.h since
+// Patella-Modern issue #99, the same semantics over a std::vector.
 
 #pragma once
 
@@ -67,12 +20,9 @@
 static_assert(sizeof(std::unique_ptr<int[]>) == sizeof(int *) && alignof(std::unique_ptr<int[]>) == alignof(int *),
 	"std::unique_ptr<T[]> is a pointer");
 
-// array<T> is a fixed array indexed from min to min+d-1 (lines 152-178;
-// it comes before vector in the original file). The class name is ours;
-// min, d, i, low() and high() are named in the assertions and in the
-// error message of operator(). Instances:
-//   array<TProperties>  constructor 0x4cfa30, operator() 0x4d1a10 (Objects.cpp)
-//   array<TMapPoint>    constructor 0x4b0bc0, operator() 0x4b5900 (Map.cpp)
+// array<T> is a fixed array indexed from min to min+d-1. The class name is
+// ours; min, d, i, low() and high() are named in the assertions and in the
+// error message of operator().
 template <class T> class array {
 public:
 	array(const array &) = delete;
@@ -90,7 +40,6 @@ public:
 	std::unique_ptr<T[]> entry; // +0x08
 };
 
-// Line 152. No try block; the assertion is the only EH state.
 template <class T> array<T>::array(int Min, int Max)
 {
 	min = Min;
@@ -99,8 +48,7 @@ template <class T> array<T>::array(int Min, int Max)
 	entry.reset(new T[d]);
 }
 
-// Line 178. The error has no try block either; its message is built in a
-// stringstream.
+// The error's message is built in a stringstream.
 template <class T> T &array<T>::operator()(int i)
 {
 	i -= min;
@@ -113,15 +61,9 @@ template <class T> T &array<T>::operator()(int i)
 	return entry[i];
 }
 
-// matrix<T> is a fixed two-dimensional array indexed from xmin/ymin (lines
-// 217-253); matrix3d<T> its three-dimensional counterpart (lines 282-328).
-// The class names are ours; xmin, ymin, zmin, dx, dy, dz, x, y and z are named
-// in the assertions and error messages. x is the fastest index. The
-// destructors free the entries; their only out-of-line copy is matrix's at
-// 0x4b0b20, called when an exception unwinds Map.cpp's FindPath.
-// Instances (Map.cpp):
-//   matrix<TPathNode>  constructor 0x4b1100, operator() 0x4b5e90, destructor 0x4b0b20
-//   matrix3d<int>      constructor 0x4b0d70, operator() 0x4b5b40
+// matrix<T> is a fixed two-dimensional array indexed from xmin/ymin; matrix3d<T> its three-dimensional counterpart.
+// The class names are ours; xmin, ymin, zmin, dx, dy, dz, x, y and z are named in the assertions and error messages.
+// x is the fastest index. The destructors free the entries.
 //
 // The entries are indexed through a std::mdspan view over the owned storage since Patella-Modern issue #101
 // (src/compat/mdspan.h; notes/decisions.md, "#101: the matrices and the automap layers as mdspan views"): view()
@@ -149,7 +91,6 @@ public:
 	std::unique_ptr<T[]> entry; // +0x10
 };
 
-// Lines 217-218. No try block; the assertions are the only EH states.
 template <class T> matrix<T>::matrix(int XMin, int XMax, int YMin, int YMax)
 {
 	xmin = XMin;
@@ -161,7 +102,6 @@ template <class T> matrix<T>::matrix(int XMin, int XMax, int YMin, int YMax)
 	entry.reset(new T[dx * dy]);
 }
 
-// Line 253.
 template <class T> T &matrix<T>::operator()(int x, int y)
 {
 	x -= xmin;
@@ -199,7 +139,6 @@ public:
 	std::unique_ptr<T[]> entry; // +0x18
 };
 
-// Lines 282-284.
 template <class T> matrix3d<T>::matrix3d(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax)
 {
 	xmin = XMin;
@@ -214,7 +153,7 @@ template <class T> matrix3d<T>::matrix3d(int XMin, int XMax, int YMin, int YMax,
 	entry.reset(new T[dx * dy * dz]);
 }
 
-// Line 328. Unlike the other containers, the error names a bug number as its
+// Unlike the other containers, the error names a bug number as its
 // expression.
 template <class T> T &matrix3d<T>::operator()(int x, int y, int z)
 {

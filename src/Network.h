@@ -84,12 +84,11 @@ enum class TFrameDrop : unsigned char {
 	TooLarge, // #139, item 6: a frame larger than ReceiveData, which can never hold it (OnReceive)
 };
 
-// Network.cpp's data and functions (issue #105): the globals of the original (0x5c22c4, 0x7152f0-0x719d8b), with
-// Control.cpp's ReconnectTimeout and Reconnect (0x5c4520-0x5c4524) and MainFrm.cpp's PacketHeader (0x5d1644), are
-// the members, with the same initial values (the others 0, as the original's .bss), and the functions the members of
-// the same names. The data is public: the golden Network test reads and sets every member (network_tests.cpp's
-// views), the MainFrm and Control tests PacketHeader, Reconnect and ReconnectTimeout, Control.cpp the last two,
-// MainFrm.cpp and Player.cpp PacketHeader.
+// Network.cpp's data and functions (issue #105): the globals of the original, with Control.cpp's ReconnectTimeout and
+// Reconnect and MainFrm.cpp's PacketHeader, are the members, with the same initial values (the others 0, as the
+// original's .bss), and the functions the members of the same names. The data is public: the golden Network test
+// reads and sets every member (network_tests.cpp's views), the MainFrm and Control tests PacketHeader, Reconnect and
+// ReconnectTimeout, Control.cpp the last two, MainFrm.cpp and Player.cpp PacketHeader.
 //
 // Issue #109: the socket and the name resolution are the platform's ISocket (platform/Socket.h), which TNetwork takes
 // in its constructor and calls where it called WinSock and CAsyncSocket; the connection's events come to it as
@@ -145,39 +144,39 @@ public:
 	void InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)());
 	void ExitNetwork();
 
-	// The socket's events: TSocket's OnConnect, OnReceive and OnClose (0x4cf5e0, 0x4ce530, 0x4ce750) call these.
+	// The socket's events: TSocket's OnConnect, OnReceive and OnClose call these.
 	void OnConnect(int ErrorCode) override;
 	void OnReceive(platform::TSocket &Receiver, int ErrorCode) override;
 	void OnClose() override;
 
 	// Data, in the original's .data/.bss order.
-	int HostnameResolveBufferSize = platform::HostEntrySize; // 0x5c22c4, initialised to 0x400 (MAXGETHOSTSTRUCT)
-	int ReconnectTimeout{};                                  // 0x5c4520, Control.cpp's: GetMilliseconds time
-	bool Reconnect{};                                        // 0x5c4524, Control.cpp's: set by event 0x3f
-	std::array<uint8, 16> PacketHeader{};                    // 0x5d1644, MainFrm.cpp's: the first bytes of the last packet
-	int CurrentServer{};                                     // 0x7152f0
-	TServer TestServer{};                                    // 0x7152f8
-	std::array<TServer, NUMBEROFSERVER> Servers{};           // 0x715368
-	void *HostnameRequest{};                                 // 0x715528, ResolveHostname's request (a HANDLE)
-	char *HostnameResolveBuffer{};                           // 0x71552c, a HOSTENT filled by WSAAsyncGetHostByName
-	int ReceiveDataSize{};                                   // 0x715530, bytes in ReceiveData
-	int ReceivePacketEnd{};                                  // 0x715534, end of the complete packets
-	int ReceiveRead{};                                       // 0x715538, start of the next unread packet
+	int HostnameResolveBufferSize = platform::HostEntrySize; // initialised to 0x400 (MAXGETHOSTSTRUCT)
+	int ReconnectTimeout{};                                  // Control.cpp's: GetMilliseconds time
+	bool Reconnect{};                                        // Control.cpp's: set by event 0x3f
+	std::array<uint8, 16> PacketHeader{};                    // MainFrm.cpp's: the first bytes of the last packet
+	int CurrentServer{};
+	TServer TestServer{};
+	std::array<TServer, NUMBEROFSERVER> Servers{};
+	void *HostnameRequest{};       // ResolveHostname's request (a HANDLE)
+	char *HostnameResolveBuffer{}; // a HOSTENT filled by WSAAsyncGetHostByName
+	int ReceiveDataSize{};         // bytes in ReceiveData
+	int ReceivePacketEnd{};        // end of the complete packets
+	int ReceiveRead{};             // start of the next unread packet
 	// A frame whose inner length runs past it is dropped in PrepareNextPacket (issues #72 and #139), so
 	// ReceiveBuffer's reads stay inside the frame: Tibia.exe read on past ReceiveData, into SendData.
-	std::array<uint8, 0x4000> ReceiveData{};            // 0x715540
-	std::array<uint8, 0x800> SendData{};                // 0x719540
-	platform::TWindowHandle NetworkWindow{};            // 0x719d40, receives WM_USER+1 when a name is resolved
-	void (*CloseCallback)(){};                          // 0x719d44
-	void (*ReceiveCallback)(){};                        // 0x719d48
-	void (*ConnectCallback)(){};                        // 0x719d4c
-	platform::TSocket *Socket{};                        // 0x719d50, the platform's connection (issue #109)
-	int TimeoutCounter{};                               // 0x719d54
-	int TimeoutLimit{};                                 // 0x719d58, in CheckConnectionTimeout calls
-	TWriteBuffer SendBuffer{SendData};                  // 0x719d5c, initialiser at 0x559fd0
-	TReadBuffer ReceiveBuffer{{ReceiveData.data(), 0}}; // 0x719d68, initialiser at 0x559ff0
-	TXTEA SymmetricKey;                                 // 0x719d74, initialiser at 0x55a010
-	int RecursionProtection{};                          // 0x719d88
+	std::array<uint8, 0x4000> ReceiveData{};
+	std::array<uint8, 0x800> SendData{};
+	platform::TWindowHandle NetworkWindow{}; // receives WM_USER+1 when a name is resolved
+	void (*CloseCallback)(){};
+	void (*ReceiveCallback)(){};
+	void (*ConnectCallback)(){};
+	platform::TSocket *Socket{}; // the platform's connection (issue #109)
+	int TimeoutCounter{};
+	int TimeoutLimit{}; // in CheckConnectionTimeout calls
+	TWriteBuffer SendBuffer{SendData};
+	TReadBuffer ReceiveBuffer{{ReceiveData.data(), 0}};
+	TXTEA SymmetricKey;
+	int RecursionProtection{};
 
 	// Not the original's (issues #72 and #139, deliberate differences; notes/decisions.md, "#139"): a server frame
 	// the client cannot use is dropped, a warn line goes to the developer log, and the connection goes on with the
