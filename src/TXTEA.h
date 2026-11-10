@@ -9,8 +9,8 @@
 
 class TXTEA {
 public:
-	// The key's 16 bytes and a block's 8 (issue #59: the original took pointers). A span whose pointer is null is
-	// ignored, as the original's null pointer was.
+	// The key's 16 bytes and a block's 8 (the original took pointers). A span whose pointer is null is ignored, as the
+	// original's null pointer was.
 	using TKey = patella::TSpan<const uint8, 16>;
 	using TBlock = patella::TSpan<uint8, 8>;
 

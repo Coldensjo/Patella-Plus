@@ -1,8 +1,8 @@
 // Resource script of Patella, the reconstruction of the Tibia 7.72 client.
 //
 // Every entry has the type, ID and language of Tibia.exe's .rsrc section and compiles to
-// the same bytes (tools/compare_resources.py; notes/resources.md lists the entries and
-// their users), except the version block's strings (issue #166, the owner's choice).
+// the same bytes (tools/compare_resources.py), except the version block's strings (the
+// owner's choice).
 // The pictures (cursors, icon, bitmaps) are not in the repository: run
 //	python -I tools/extract_resources.py Tibia.exe build/res
 // and compile with build/res on the include path (CMake does both, into build/<preset>/res).
@@ -11,7 +11,7 @@
 // order of this script, and the original's numbers (cursors 1-2, icons 3-4, cursors 5-20)
 // come out only in this order. It is also the order of the data in Tibia.exe.
 //
-// Since issue #127 only the client's own resources: MFC's half (MFC 7.1's afxres.rc as Tibia.exe has it) went with MFC.
+// Only the client's own resources: MFC's half (MFC 7.1's afxres.rc as Tibia.exe has it) went with MFC.
 
 #include "resource.h"
 #include <winresrc.h>

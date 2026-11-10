@@ -74,7 +74,7 @@ public:
 	TTalkBuffer(int TalkMode) : ReceiveTalkMode(TalkMode), SendTalkMode(TalkMode),
 								Changed(true), first(nullptr), last(nullptr), cursor(nullptr), lines(0), limit(1000),
 								ShowMessages(false), Enabled(true), Complete(true), LinesChanged(true), Locked(false), Selected(false) {}
-	~TTalkBuffer(); // noexcept (issue #81)
+	~TTalkBuffer();
 	virtual bool TakeChanged()
 	{
 		const bool Result = Changed;
@@ -83,9 +83,9 @@ public:
 	}
 	virtual bool TakeClosed()
 	{
-		// Issue #131: Closed is never set by the constructor (the original's; the golden corpus records the bytes it leaves
-		// untouched), so it holds whatever the heap had: read as the byte the original tested (a load of a bool that holds
-		// another value is undefined, UBSan's report on Linux).
+		// Closed is never set by the constructor (the original's; the golden corpus records the bytes it leaves
+		// untouched), so it holds whatever the heap had: read as the byte the original tested (a load of a bool that
+		// holds another value is undefined, UBSan's report on Linux).
 		unsigned char Byte = 0;
 		std::memcpy(&Byte, &Closed, sizeof(Byte));
 		const bool Result = Byte != 0;
@@ -201,10 +201,9 @@ struct TTalkFilter {
 };
 namespace patella {
 
-// Talk.cpp's state (issue #107, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#107"): the
-// globals of the original are the members, in its .bss order with the same initial values, and the file's functions
-// the members of the same names. TGUI owns it (GUI.h). It is TPreferences' TTalkLists: the White and Ignore lists
-// that the options read and write.
+// Talk.cpp's state: the globals of the original are the members, in its .bss order with the same initial values, and
+// the file's functions the members of the same names. TGUI owns it (GUI.h). It is TPreferences' TTalkLists: the White
+// and Ignore lists that the options read and write.
 class TTalk final : public TTalkLists {
 public:
 	TTalk() = default;
@@ -310,8 +309,7 @@ private:
 	bool LastTimeSet{}; // its guard
 };
 
-// The transition's access path (issue #107; notes/decisions.md, "#104: TClient and the subsystem objects"): the one
-// TClient's TTalk (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the one TClient's TTalk (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 TTalk &Talk();
 } // namespace bridge
@@ -324,7 +322,7 @@ inline bool TTalkBuffer::IsDefault()
 	return this == patella::bridge::Talk().DefaultTextBuffer;
 }
 
-// Talk.cpp's functions (issue #107): each calls TTalk's member of the same name on bridge::Talk().
+// Talk.cpp's functions: each calls TTalk's member of the same name on bridge::Talk().
 bool TakeTalkChanged();
 int GetNumberOfTalkboxes();
 const char *GetStatusMessage();

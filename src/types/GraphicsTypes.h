@@ -1,16 +1,15 @@
 // types/GraphicsTypes.h: the value types of the drawing interface (TRect, TRGBColor, TFont and the text
-// alignments), moved here from graphics.h (Patella-Modern issue #116) so that Surface.cpp (TSurface's slots take them)
-// and Skins.h (SkinProperties holds them) need them without graphics.cpp's module: the {Surface, graphics} module cycle
-// was Surface.cpp's include of graphics.h for these types (notes/decisions.md, "#116"). Header only, portable
-// (patella_core's header list). graphics.h exports it, so the files that include graphics.h see them as before.
+// alignments), moved here from graphics.h so that Surface.cpp (TSurface's slots take them) and Skins.h
+// (SkinProperties holds them) need them without graphics.cpp's module: the {Surface, graphics} module cycle was
+// Surface.cpp's include of graphics.h for these types. Header only, portable (patella_core's header list).
+// graphics.h exports it, so the files that include graphics.h see them as before.
 
 #pragma once
 
 #include "compat/msvc.h" // PATELLA_NO_SANITIZE_ADDRESS
 
 // Text alignment (TFont::Alignment, the Alignment parameters).
-// An unnamed enum of int constants (TFont's int Alignment), unscoped as the other unnamed ones (notes/decisions.md,
-// "The other ten stay unscoped"); clang-tidy's image checks it since it is a core header (issue #116).
+// An unnamed enum of int constants (TFont's int Alignment), unscoped as the other unnamed ones.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	LEFT_ALIGN = 0,
 	CENTER_ALIGN = 1,
@@ -28,11 +27,10 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 // and "ToRect.width<=..." (StretchBlit), and by the TRect members of
 // SkinProperties that GUI.cpp's assertions name with .x and .y
 // (StatusWindow.HitpointsBar.x, BuddylistWindow.Logo.y); TSkin (Skins.h) and
-// TDrawing (GUI.h) have the same lower-case names (issue #29).
+// TDrawing (GUI.h) have the same lower-case names.
 struct TRect { // passed by value
 	constexpr TRect() : x(0), y(0), width(0), height(0) {}
-	// The parameters are not named as the members (Patella-Modern issue #116): patella_core's GCC -Wshadow, since
-	// Skins.h includes this header.
+	// The parameters are not named as the members: patella_core's GCC -Wshadow, since Skins.h includes this header.
 	constexpr TRect(int X, int Y, int Width, int Height) : x(X), y(Y), width(Width), height(Height) {}
 	int x, y, width, height;
 };
@@ -48,8 +46,8 @@ struct TRGBColor { // passed by value
 		G = Color / 6 % 6 * 51;
 	}
 	// operator!= negates the inlined operator==, as the binary's does.
-	// Not checked by AddressSanitizer (issue #70): GetVideoPicture compares the colour key of the picture after
-	// the one it draws, past the end of Pictures for the last one, as the original does (graphics.cpp).
+	// Not checked by AddressSanitizer: GetVideoPicture compares the colour key of the picture after the one it
+	// draws, past the end of Pictures for the last one, as the original does (graphics.cpp).
 	PATELLA_NO_SANITIZE_ADDRESS bool operator==(TRGBColor Other) const
 	{
 		return R == Other.R && G == Other.G && B == Other.B;
@@ -64,7 +62,7 @@ struct TRGBColor { // passed by value
 // The colour TFont's default constructor reads from memory. Every object
 // that constructs a TFont has its own copy, so it is a constant defined in a
 // header (internal linkage). The name is ours.
-constexpr TRGBColor DefaultFontColor(224, 224, 224); // constexpr since issue #116 (constant-initialised as before)
+constexpr TRGBColor DefaultFontColor(224, 224, 224);
 
 // The numbers of the four fonts (TFont::FontNumber, the FontNumber parameters, InitFont's FontName), 1 to
 // NumberOfFonts. The original's names are not known; these say what graphics.cpp's InitFonts and the fonts' pictures

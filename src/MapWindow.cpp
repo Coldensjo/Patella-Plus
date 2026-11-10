@@ -14,9 +14,8 @@
 // blitted (FlushField). Light sources add up in Light[][], which is drawn
 // last as shaded rectangles or as darkness tiles of picture 7.
 //
-// The original's catch wrappers (common.h) are gone since issue #78; the functions
-// here have no handlers apart from AddLightSource's, which names the object whose
-// flag could not be read.
+// The functions here have no handlers apart from AddLightSource's, which names
+// the object whose flag could not be read.
 
 #include "MapWindow.h"
 #include "Communication.h"
@@ -53,9 +52,8 @@ const char *TextSelectPlayerToTrade = "Select a player to trade with."; // 125
 
 } // namespace
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory is off for the file, for the original's raw owners: the window tree owns its
+// children, the message queue its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
 namespace {
@@ -313,8 +311,9 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	}
 }
 
-// Events 600 and 601 are the hotkeys of the constructor, 27 the hint button: it shows the next event help as a message. GCC's
-// analyzer (issue #111): the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
+// Events 600 and 601 are the hotkeys of the constructor, 27 the hint button: it shows the next event help as a message.
+// GCC's analyzer: the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes
+// it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMapWindow::HandleEvent(int Event)
@@ -361,8 +360,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	const TCreature *Player = GetCreature(GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
 	// The help position goes into x and y, so the original's catch wrapper
-	// printed it after an error in MoveHelpPosition or SetHelpSize (issue
-	// #34).
+	// printed it after an error in MoveHelpPosition or SetHelpSize.
 	if (GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
 		y = FieldY * 32 - (352 - Height) / 2 - Player->GetDeltaY() - 32;
@@ -378,8 +376,8 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	return true;
 }
 
-// The blocks with their own try follow the binary's exception table. MSVC's analysis (C6262, issue #111): the
-// original's buffers on the stack.
+// The blocks with their own try follow the binary's exception table. MSVC's analysis (C6262): the original's buffers on
+// the stack.
 PATELLA_MSVC_WARNING(suppress : 6262)
 void TMapWindow::Draw(int Surface, int x, int y)
 {
@@ -788,7 +786,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (Elevation > 24)
 			Elevation = 24;
 	}
-	// The catch block prints the object ("Obj" and the type; issue #34).
+	// The catch block prints the object ("Obj" and the type).
 	if (Lying) {
 		if (FieldX > 0) {
 			if (FieldY > 0)
@@ -1012,7 +1010,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 // The pattern comes from the absolute position (x, y, z), the count, the
 // liquid or the hook; objects with several phases are animated and bypass the
 // field cache. A pattern size or phase count of 0 in Tibia.dat throws a
-// TMyException (PATELLA_DIVISOR, issue #67).
+// TMyException (PATELLA_DIVISOR).
 void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, int y, int z)
 {
 	PATELLA_ASSERT(Obj.Type!=0);
@@ -1045,7 +1043,7 @@ void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, i
 
 // Outfits are always animated; the second layer is the colour mask (head,
 // body, legs, feet). A phase count of 0 in Tibia.dat throws a TMyException
-// (PATELLA_DIVISOR, issue #67).
+// (PATELLA_DIVISOR).
 void TMapWindow::DrawCreature(int posx, int posy, int Level, TCreature *Creature)
 {
 	PATELLA_ASSERT(Creature!=nullptr);
@@ -1194,8 +1192,8 @@ void TMapWindow::CacheSprite(int FieldX, int FieldY, int SpriteNumber, int dx, i
 		Field->SpriteX[Field->CachedSprites] = dx;
 		Field->SpriteY[Field->CachedSprites] = dy;
 		Field->CachedSprites++;
-		// MSVC's analysis (C28020 on the next line, issue #111) takes Sprites as any int: it is below CachedSprites
-		// there (they differ, and Sprites only counts up to it), and a field with 10 was flushed above.
+		// MSVC's analysis (C28020 on the next line) takes Sprites as any int: it is below CachedSprites there (they
+		// differ, and Sprites only counts up to it), and a field with 10 was flushed above.
 		PATELLA_MSVC_WARNING(suppress : 28020)
 	} else if (Field->Sprite[Field->Sprites] != SpriteNumber || Field->SpriteX[Field->Sprites] != dx
 		|| Field->SpriteY[Field->Sprites] != dy) {

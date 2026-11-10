@@ -14,8 +14,7 @@
 // Key, Surface, seconds, MaximumLength, _ObjectNumber, _NumberOfChannels,
 // _ChannelIDs, _CharacterID, CharacterID, DataSize, Timeout, Number, x, y,
 // Code, Text, MaxLength, Data, _Coordinate and the locals Position,
-// Creature, Number and AllocationNumber. The class, function and other member names are ours; see
-// notes/decisions.md, "Dialogs.cpp".
+// Creature, Number and AllocationNumber. The class, function and other member names are ours.
 
 #pragma once
 
@@ -31,8 +30,8 @@
 #include <cstddef>
 #include <memory>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-pro-type-vararg off for the file:
-// the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-pro-type-vararg is off for the file, for the original's varargs (TMultiStateButton's constructor,
+// _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 
 class TDialog;
@@ -59,7 +58,7 @@ TDialog *CreateTextDialog(const int *ObjectData, const char *Author, const char 
 TDialog *CreateEditListDialog(int *HouseData, const char *Text);
 TDialog *CreateOutfitDialog(int *Data);
 TDialog *CreateBugReportDialog();
-TDialog *CreateNewChannelDialog(int NumberOfChannels, int *ChannelIDs, const char (*ChannelNames)[30]); // NOLINT(modernize-avoid-c-arrays): the names as Communication.cpp allocates them, 30 bytes each (issue #60)
+TDialog *CreateNewChannelDialog(int NumberOfChannels, int *ChannelIDs, const char (*ChannelNames)[30]); // NOLINT(modernize-avoid-c-arrays): the names as Communication.cpp allocates them, 30 bytes each
 TDialog *CreateInviteDialog();
 TDialog *CreateExcludeDialog();
 TDialog *CreateIgnoreListDialog();
@@ -172,7 +171,7 @@ public:
 	void HandleEvent(int Event) override;
 	virtual void SetTimer(int Time, TCallback Callback);
 
-	std::unique_ptr<TTimer> Timer; // issue #58
+	std::unique_ptr<TTimer> Timer;
 	bool CloseOnMessage;
 	bool ClearOnAbort;
 };
@@ -194,7 +193,7 @@ public:
 
 	int Timeout;                   // tenths of a second
 	TFixedString<512> Text;        // the time left
-	std::unique_ptr<TTimer> Timer; // event 31 (issue #58)
+	std::unique_ptr<TTimer> Timer; // event 31
 	TProgressBar *ProgressBar;
 	TLabel *TimeLabel;
 };
@@ -214,7 +213,7 @@ public:
 
 	TPasswordEditLine *Account;
 	TPasswordEditLine *Password;
-	std::unique_ptr<TFocusGroup> FocusGroup; // issue #58
+	std::unique_ptr<TFocusGroup> FocusGroup;
 };
 
 // "Select Character": the account's characters and its premium state. With a
@@ -239,7 +238,7 @@ public:
 	virtual void SetTimeout(int seconds);
 
 	TListBox *ListBox;
-	std::unique_ptr<TTimer> Timer; // event 31 (issue #58)
+	std::unique_ptr<TTimer> Timer; // event 31
 	int Seconds;
 };
 
@@ -285,10 +284,10 @@ public:
 	void HandleEvent(int Event) override;
 
 	TOutfitIcon *OutfitIcon;
-	std::array<TTextButton *, 4> PartButtons;      // events 1000-1003
-	std::unique_ptr<TRadioButtonGroup> PartGroup;  // issue #58
-	std::array<TColorButton *, 133> ColorButtons;  // events 2000-2132
-	std::unique_ptr<TRadioButtonGroup> ColorGroup; // issue #58
+	std::array<TTextButton *, 4> PartButtons; // events 1000-1003
+	std::unique_ptr<TRadioButtonGroup> PartGroup;
+	std::array<TColorButton *, 133> ColorButtons; // events 2000-2132
+	std::unique_ptr<TRadioButtonGroup> ColorGroup;
 	std::array<int, 4> Colors;
 	int Outfit;
 	int FirstOutfit;
@@ -340,16 +339,16 @@ struct TIgnoreEntry {
 		Name[0] = 0;
 		Permanent = false;
 	}
-	// strcpy(Name, Text) as the original wrote it (issue #85): the text and its NUL within the entry's 31 bytes.
-	// A name of 30 characters, the most the lists' edit line takes, is kept whole, and its NUL lands in
-	// Permanent, which every caller sets next (Name.Assign kept 29 characters, #57).
+	// strcpy(Name, Text) as the original wrote it: the text and its NUL within the entry's 31 bytes. A name of 30
+	// characters, the most the lists' edit line takes, is kept whole, and its NUL lands in Permanent, which every
+	// caller sets next (Name.Assign would keep 29 characters).
 	void AssignName(const char *Text) noexcept
 	{
 		TStringBuffer(reinterpret_cast<char *>(this), sizeof(TIgnoreEntry)).Assign(Text);
 	}
-	// The name as a C string, at most its 30 characters (issue #86, a deliberate difference): one of 30 has no NUL
-	// of its own (its 31st byte is Permanent), and Tibia.exe read on past it, so with Permanent set the rebuilt
-	// list's line had the byte 1 and the next entry's name after it.
+	// The name as a C string, at most its 30 characters: one of 30 has no NUL of its own (its 31st byte is Permanent).
+	// Tibia.exe read on past it, so with Permanent set the rebuilt list's line had the byte 1 and the next entry's name
+	// after it.
 	[[nodiscard]] TFixedString<31> NameText() const noexcept
 	{
 		TFixedString<31> Text;
@@ -425,7 +424,7 @@ class TNewChannelDialog final : public TWindow {
 public:
 	TNewChannelDialog(const TNewChannelDialog &) = delete;
 	TNewChannelDialog &operator=(const TNewChannelDialog &) = delete;
-	TNewChannelDialog(int _NumberOfChannels, const int *_ChannelIDs, const char (*ChannelNames)[30]); // NOLINT(modernize-avoid-c-arrays): as CreateNewChannelDialog (issue #60)
+	TNewChannelDialog(int _NumberOfChannels, const int *_ChannelIDs, const char (*ChannelNames)[30]); // NOLINT(modernize-avoid-c-arrays): as CreateNewChannelDialog
 	~TNewChannelDialog() override { ChannelIDs.reset(); }
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
@@ -433,7 +432,7 @@ public:
 	TListBox *ListBox; // double click 301
 	TEditLine *NameEdit;
 	int NumberOfChannels;
-	std::unique_ptr<int[]> ChannelIDs; // issue #58
+	std::unique_ptr<int[]> ChannelIDs;
 };
 
 // "Invite player to private chat channel" and "Exclude player from private
@@ -483,15 +482,13 @@ public:
 	void HandleEvent(int Event) override;
 
 	int CharacterID;
-	std::unique_ptr<TRadioButtonGroup> IconGroup; // issue #58
+	std::unique_ptr<TRadioButtonGroup> IconGroup;
 	TCheckBox *Notify;
 	TEditText *Description;
 	std::array<TIconButton *, 11> IconButtons;
 };
 
 // --- Updates, help and hints ----------------------------------------------------
-
-// TUpdateDialog ("Updating ... Please wait") is gone with the patcher since Patella-Modern issue #75.
 
 // "Help": six buttons with their texts.
 class THelpDialog final : public TWindow {
@@ -530,7 +527,7 @@ public:
 	int GetReason();
 	[[nodiscard]] int GetAction() const;
 
-	std::unique_ptr<TFocusGroup> FocusGroup; // issue #58
+	std::unique_ptr<TFocusGroup> FocusGroup;
 	TEditLine *NameEdit;
 	TListBox *ReasonList; // event 21
 	TListBox *ActionList;
@@ -557,7 +554,7 @@ public:
 	TCoordinate Coordinate;
 	TMark Mark;
 	TEditLine *TextEdit;
-	std::unique_ptr<TRadioButtonGroup> TypeGroup; // issue #58
+	std::unique_ptr<TRadioButtonGroup> TypeGroup;
 	std::array<TIconButton *, 14> TypeButtons;
 };
 
@@ -602,7 +599,7 @@ public:
 	TCheckBox *Fullscreen;
 	TListBox *ResolutionList;
 	int NumberOfModes;
-	std::unique_ptr<TFullscreenMode[]> Modes; // the surface's list (issue #58)
+	std::unique_ptr<TFullscreenMode[]> Modes; // the surface's list
 	void (*SetDisplayMode)(int Mode);         // 1 windowed, 2 fullscreen
 	TWindow *Parent;                          // passed on to the advanced options
 	TTextButton *AdvancedButton;
@@ -630,11 +627,9 @@ public:
 	TTextButton *AutomaticButton;
 	TTextButton *GpuButton;
 	TTextButton *CpuButton;
-	std::unique_ptr<TRadioButtonGroup> DeviceGroup; // issue #58
-	// The x64 client (Patella-Modern issue #31, plan 6.3): the three buttons choose the graphics device
-	// ("Automatic", "GPU", "CPU", in the places of the original's DirectX 5, DirectX 9 and OpenGL buttons), and the
-	// line above them names the device in use. Since issue #111 without PATELLA_VULKAN's guard (the oracle,
-	// whose layout kept the original's, left with #94), so patella_core compiles it too.
+	std::unique_ptr<TRadioButtonGroup> DeviceGroup;
+	// The three buttons choose the graphics device ("Automatic", "GPU", "CPU", in the places of the original's
+	// DirectX 5, DirectX 9 and OpenGL buttons), and the line above them names the device in use.
 	void ShowDevice();                 // the selected button and the device's name
 	TLabel *DeviceLabel;               // the line above the buttons (the original's "Select graphics engine:")
 	TFixedString<128> DeviceLabelName; // the device the line names

@@ -1,26 +1,25 @@
-// PresentWindow.h: the windows the Vulkan engine presents in (issue #52; notes/vulkan.md, "One window per
-// device").
+// PresentWindow.h: the windows the Vulkan engine presents in.
 //
 // Every device the engine creates for the client's window draws into a child window of its own, which
 // covers the main window's client area, lets every mouse message through to it (WM_NCHITTEST:
 // HTTRANSPARENT) and paints nothing itself; the main window never gets a Vulkan surface. When the device
 // goes (a device switch, a change of the view mode, the end), its window is retired, and destroyed once the
 // next device has shown its first frame, or at once when it never showed one. Destroying the window takes
-// with it whatever the system or a driver still keeps bound to it for presentation: issue #52, where the
-// AMD Radeon iGPU's cross-adapter presentation stayed bound to the main window after its device, swapchain,
-// surface and instance were destroyed, and the desktop compositor showed its last frame for good over every
-// later device's swapchain. Until the next device's first frame, the retired window keeps showing the old
-// device's last one, as the main window did before.
+// with it whatever the system or a driver still keeps bound to it for presentation: on the main window, the
+// AMD Radeon iGPU's cross-adapter presentation stayed bound to it after its device, swapchain, surface and
+// instance were destroyed, and the desktop compositor showed its last frame for good over every later
+// device's swapchain. Until the next device's first frame, the retired window keeps showing the old
+// device's last one.
 //
 // The main window's client area that no device window covers is filled black whenever the main window
-// erases its background (issue #71): while Windows runs its modal size loop the client draws no frame, and
-// the device window keeps its size until the next one (Fit), so the part a larger window uncovers showed
-// whatever the compositor had left there, stripes of old pixels, until the mouse was released. The main
-// window's class has no background brush (Player.cpp InitInstance, as the original's); TPresentWindows
-// subclasses it from the first Open to Close or the main window's end.
+// erases its background: while Windows runs its modal size loop the client draws no frame, and the device
+// window keeps its size until the next one (Fit), so the part a larger window uncovers would show whatever
+// the compositor had left there, stripes of old pixels, until the mouse was released. The main window's
+// class has no background brush (Player.cpp InitInstance, as the original's); TPresentWindows subclasses it
+// from the first Open to Close or the main window's end.
 //
-// Windows: the x64 client and tests_vulkan; everything runs on the window's thread. Linux (issue #131): SDL3 has no
-// child windows there, so the device's window is the main window itself, and these functions keep only that state
+// Windows: the x64 client and tests_vulkan; everything runs on the window's thread. Linux: SDL3 has no child
+// windows there, so the device's window is the main window itself, and these functions keep only that state
 // (a retired device has no window to outlive); the device test's window is a hidden SDL window of its own.
 
 #pragma once
@@ -31,7 +30,7 @@
 #endif
 #include <windows.h>
 #else
-#include "compat/win32_types.h" // issue #131: the Linux client's HWND
+#include "compat/win32_types.h" // the Linux client's HWND
 #endif
 
 namespace patella::vulkan {
@@ -66,7 +65,7 @@ private:
 
 	HWND CurrentWindow = nullptr;
 	HWND RetiredWindow = nullptr;
-	HWND SubclassedWindow = nullptr; // the main window, subclassed (issue #71)
+	HWND SubclassedWindow = nullptr; // the main window, subclassed
 	bool CurrentPresented = false;
 };
 

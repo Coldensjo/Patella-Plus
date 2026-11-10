@@ -6,9 +6,7 @@
 // constructors that call functions defined further down (TDialog's, the
 // outfit's, the edit list's, the ignore list's, the hotkeys', the error
 // report's, the rule violation's) and the rule violation's HandleEvent to
-// the end of the object, Creatures.cpp's pattern. The error report dialog
-// (CreateErrorReportDialog and TErrorReportDialog) is gone since
-// Patella-Modern issue #74 (decision D2).
+// the end of the object, Creatures.cpp's pattern.
 
 #include "Dialogs.h"
 #include "vulkan/DeviceSettings.h"
@@ -16,8 +14,8 @@
 
 namespace {
 
-// The x64 client's graphics device choice in the advanced options (issue #31): the line above the
-// buttons before a device exists, and the buttons' help texts.
+// The graphics device choice in the advanced options: the line above the buttons before a device exists,
+// and the buttons' help texts.
 const char *TextSelectDevice = "Select graphics device:";
 const char *TextUseAutomaticDevice = "Use the best graphics device: a GPU, else the CPU";
 const char *TextUseGpuDevice = "Use the graphics card (GPU); with several, each click takes the next";
@@ -125,9 +123,9 @@ const char *TextSignupURL = patella::buildconfig::LinkSignup;                   
 
 } // namespace
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-owning-memory and cppcoreguidelines-pro-type-vararg are off for the file, for the original's raw
+// owners (the window tree owns its children, the message queue its blocks, the lists their entries) and its varargs
+// (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
 
@@ -423,8 +421,6 @@ TDialog *CreateEditBuddyDialog(int CharacterID)
 	Dialog->OkCallback = NoCallback;
 	return Dialog;
 }
-
-// CreateUpdateDialog is gone with the update dialog since Patella-Modern issue #75 (decision D9).
 
 // OK goes to the frame (which closes the dialog).
 TDialog *CreateHelpDialog(void (*OpenURL)(const char *URL))
@@ -1878,11 +1874,6 @@ void TEditBuddyDialog::HandleEvent(int Event)
 	SetActionState(ACTIONSTATE_NONE);
 }
 
-// --- TUpdateDialog -----------------------------------------------------------------
-
-// TUpdateDialog ("Updating ... Please wait": the progress of a patch from the login server) is gone with the patcher
-// since Patella-Modern issue #75 (decision D9).
-
 // --- THelpDialog -------------------------------------------------------------------
 
 // No Arrange at the end.
@@ -2458,8 +2449,8 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 	SetChildArea(AdvancedLabel, SkinProperties().GraphicsOptionsDialogAdvancedLabel);
 	SetChildPosition(AdvancedButton, SkinProperties().GraphicsOptionsDialogAdvancedButton.x, SkinProperties().GraphicsOptionsDialogAdvancedButton.y);
 	Fullscreen->SetChecked(GetViewMode() == 2);
-	// GetFullscreenModes stores its new[] list (or NULL) through the pointer it is given; Modes takes it over (issue
-	// #58). Every engine writes the pointer before anything else.
+	// GetFullscreenModes stores its new[] list (or NULL) through the pointer it is given; Modes takes it over. Every
+	// engine writes the pointer before anything else.
 	TFullscreenMode *List = nullptr;
 	NumberOfModes = GetSurface()->GetFullscreenModes(&List);
 	Modes.reset(List);
@@ -2516,7 +2507,7 @@ void TGraphicsOptionsDialog::HandleEvent(int Event)
 			&& (!Fullscreen->IsChecked() || ResolutionList->GetSelection() != -1))
 			SetDisplayMode(Fullscreen->IsChecked() + 1);
 		if (Fullscreen->IsChecked())
-			patella::bridge::GUI().Resize(0, 0); // Control.cpp's (issues #107, #118)
+			patella::bridge::GUI().Resize(0, 0); // Control.cpp's
 	} else if (Event == EVENT_OPTIONS_ADVANCED) {
 		AddMessageFirst(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
 		AddMessageFirst(MESSAGE_ADVANCED_GRAPHICS_DIALOG, reinterpret_cast<std::intptr_t>(Parent), 0);
@@ -2541,10 +2532,10 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	NoStretching = new TCheckBox("Don't stretch/shrink the Map");
 	WindowsMousepointer = new TCheckBox("Windows Mouse Pointer");
 	Framerate = new THorizontalScrollBar(10, 201, 10, 11, 1, TCallback(this, EVENT_FRAMERATE));
-	// The x64 client (issue #31): the graphics device choice in the engine buttons' places, with the
-	// original's events (MainWindow.cpp: 800, 801, 802; Control.cpp ChangeDevice). The buttons are 58
-	// pixels wide (skin 16), which "CPU (compatibility)" does not fit: its help text says it. The line
-	// above them is as wide as the dialog; a longer device name is shortened, the whole one is its help.
+	// The graphics device choice in the original's engine buttons' places, with their events (MainWindow.cpp:
+	// 800, 801, 802; Control.cpp ChangeDevice). The buttons are 58 pixels wide (skin 16), which
+	// "CPU (compatibility)" does not fit: its help text says it. The line above them is as wide as the dialog;
+	// a longer device name is shortened, the whole one is its help.
 	DeviceLabelName[0] = 0;
 	DeviceLabel = new TLabel(SkinProperties().AdvancedGraphicsDialog.DeviceLabel.x, SkinProperties().AdvancedGraphicsDialog.DeviceLabel.y,
 		SkinProperties().AdvancedGraphicsDialog.Width - SkinProperties().AdvancedGraphicsDialog.DeviceLabel.x,

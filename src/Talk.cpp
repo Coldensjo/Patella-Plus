@@ -28,12 +28,12 @@ const char *TextPermanentlyIgnoring = "You are permanently ignoring players."; /
 
 } // namespace
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
-// the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):
-// the window tree owns its children, the message queue its blocks, the lists their entries
+// cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file: the original's malloc'd entries and
+// texts, freed by their lists; the original's raw owners: the window tree owns its children, the message queue its
+// blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
-// The data is TTalk's (Talk.h, issue #107).
+// The data is TTalk's (Talk.h).
 
 bool patella::TTalk::TakeTalkChanged()
 {
@@ -107,8 +107,8 @@ TTalkbox *patella::TTalk::GetTalkbox(int Number)
 	int Position = 0;
 	while (Talkboxes[Position].State != 1 || --Number != 0)
 		Position++;
-	// MSVC's analysis (C28020, issue #111) takes Position as any int: the assertion keeps Number within the open
-	// talkboxes, so the loop stops at one of them.
+	// MSVC's analysis (C28020) takes Position as any int: the assertion keeps Number within the open talkboxes, so the
+	// loop stops at one of them.
 	PATELLA_MSVC_WARNING(suppress : 28020)
 	return &Talkboxes[Position];
 }
@@ -334,7 +334,7 @@ PATELLA_MSVC_WARNING(disable : 4701)
 void patella::TTalk::UpdateTalkboxes()
 {
 	int i;
-	if (!LastTimeSet) { // the original's function-local static, initialised on the first call (issue #107)
+	if (!LastTimeSet) { // the original's function-local static, initialised on the first call
 		LastTime = GetMilliseconds();
 		LastTimeSet = true;
 	}
@@ -449,7 +449,7 @@ char *patella::TTalk::GetBuddyIgnoreText()
 	if (Length == 0)
 		return nullptr;
 	char *Text = new (std::nothrow) char[Length + 1];
-	// MSVC's analysis (C28182, issue #111): the original's unchecked allocation (VC7.1's new returned null), kept.
+	// MSVC's analysis (C28182): the original's unchecked allocation (VC7.1's new returned null), kept.
 	PATELLA_MSVC_WARNING(suppress : 28182)
 	Text[0] = 0;
 	// The original wrote each name and its line break at Text + Length, the text's length so far.
@@ -519,7 +519,7 @@ char *patella::TTalk::GetIgnoreListText()
 	if (Length == 0)
 		return nullptr;
 	char *Text = new (std::nothrow) char[Length + 1];
-	// MSVC's analysis (C28182, issue #111): the original's unchecked allocation (VC7.1's new returned null), kept.
+	// MSVC's analysis (C28182): the original's unchecked allocation (VC7.1's new returned null), kept.
 	PATELLA_MSVC_WARNING(suppress : 28182)
 	Text[0] = 0;
 	// The original wrote each name and its line break at Text + Length, the text's length so far.
@@ -716,7 +716,7 @@ void patella::TTalk::DeleteTextBuffer(TTalkBuffer *TextBuffer)
 		free(ConsoleFilterList(Filter));
 		ConsoleFilterList(Filter) = nullptr;
 		if (TextBuffer != nullptr) {
-			TextBuffer->TTalkBuffer::~TTalkBuffer(); // non-virtual, by its qualified name (issue #111: Clang's warning)
+			TextBuffer->TTalkBuffer::~TTalkBuffer(); // non-virtual, by its qualified name (Clang's warning)
 			free(TextBuffer);
 		}
 	}
@@ -734,10 +734,10 @@ bool patella::TTalk::HasOwnPrivateChannel()
 	}
 	return false;
 }
-// noexcept (issue #81; noexcept(false) until then): Clear removes the
-// first line until there is none, and Remove of the first line takes its
-// first two branches, never the search with its assertion; free does not
-// throw. In a destructor the virtual calls are TTalkBuffer's own.
+// noexcept: Clear removes the first line until there is none, and Remove of
+// the first line takes its first two branches, never the search with its
+// assertion; free does not throw. In a destructor the virtual calls are
+// TTalkBuffer's own.
 TTalkBuffer::~TTalkBuffer() { Clear(); }
 void TTalkBuffer::Clear()
 {
@@ -751,8 +751,8 @@ void TTalkBuffer::AddText(int Mode, const char *text, int DiffTime)
 		Append(new (std::nothrow) TTalkLine(0, Mode, text, DiffTime));
 	}
 }
-// The original frees with free() what AddText allocates with new (VC7.1's new was malloc; notes/ownership.md): GCC's
-// -Wmismatched-new-delete (mingw-w64, where it inlines AddText here) names it, allowed for this function (issue #111).
+// The original frees with free() what AddText allocates with new (VC7.1's new was malloc): GCC's
+// -Wmismatched-new-delete (mingw-w64, where it inlines AddText here) names it, allowed for this function.
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wmismatched-new-delete\"")
 void TTalkBuffer::Append(TTalkLine *line)
@@ -772,8 +772,8 @@ void TTalkBuffer::Append(TTalkLine *line)
 	} else {
 		line->Next = nullptr;
 		line->Previous = last;
-		// MSVC's analysis (C6011, issue #111): first and last are null together (the list's ends), so last is not
-		// null when first is not.
+		// MSVC's analysis (C6011): first and last are null together (the list's ends), so last is not null when first
+		// is not.
 		PATELLA_MSVC_WARNING(suppress : 6011)
 		last->Next = line;
 		last = line;
@@ -820,7 +820,7 @@ void TTalkBuffer::Remove(TTalkLine *line)
 void TTalkBuffer::Remove(int lineNumber)
 {
 	PATELLA_ASSERT(first!=nullptr);
-	// Not const (issue #39): as a constant the compiler folds i away; the binary keeps it in a stack slot.
+	// Not const: as a constant the compiler folds i away; the binary keeps it in a stack slot.
 	int i = 0; // NOLINT(misc-const-correctness)
 	TTalkLine *Search = first;
 	while (i != lineNumber) {
@@ -934,10 +934,9 @@ void TRuleViolationChannel::Append(TTalkLine *line)
 }
 namespace {
 
-// Ours (issue #62): the local time of a talk line's 64-bit time, for its stamp: the C library's localtime
-// (compat/crt71.h), which up to 2038 gives the fields _localtime32 gave. Where it gives none (before 1970 or after
-// 3000, which only a time offset from the server reaches) the original read localtime's NULL and crashed; here the
-// stamp is "00:00".
+// Ours: the local time of a talk line's 64-bit time, for its stamp: the C library's localtime (compat/crt71.h), which
+// up to 2038 gives the fields _localtime32 gave. Where it gives none (before 1970 or after 3000, which only a time
+// offset from the server reaches) the original read localtime's NULL and crashed; here the stamp is "00:00".
 std::tm LineLocalTime(std::int64_t Time)
 {
 	std::tm Local{};
@@ -1012,13 +1011,13 @@ void patella::TTalk::ExitTalk()
 	ClearTemporaryIgnore();
 	ClearIgnoreList();
 	if (DefaultTextBuffer != nullptr) {
-		DefaultTextBuffer->TTalkBuffer::~TTalkBuffer(); // non-virtual, by its qualified name (issue #111)
+		DefaultTextBuffer->TTalkBuffer::~TTalkBuffer(); // non-virtual, by its qualified name
 		free(DefaultTextBuffer);
 	}
 	DefaultTextBuffer = nullptr;
 }
 
-// The functions of the original (issue #107): each calls its member on the one TClient's TTalk.
+// The functions of the original: each calls its member on the one TClient's TTalk.
 
 bool TakeTalkChanged()
 {

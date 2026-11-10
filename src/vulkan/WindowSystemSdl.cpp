@@ -1,15 +1,15 @@
-// WindowSystemSdl.cpp: the Vulkan engine's window system on the SDL3 window (WindowSystem.h; Patella-Modern issue
-// #126, plan M8). Not part of the original source.
+// WindowSystemSdl.cpp: the Vulkan engine's window system on the SDL3 window (WindowSystem.h). Not part of the original
+// source.
 //
 // The main window is SdlFrame.cpp's SDL_Window, which the client knows by its native handle (TWindowHandle, the HWND
-// on Windows: TGUI's, TNetwork's and the surface's window since issue #122); the window system finds the SDL_Window of
-// a handle among SDL's windows. Each device's surface is SDL_Vulkan_CreateSurface's, on the device's own window
-// (PresentWindow.h, issue #52). SDL3 has no child windows of its own, so that window is a native child window which
-// SDL wraps for the call (SDL_PROP_WINDOW_CREATE_WIN32_HWND_POINTER, with Vulkan); the wrapper goes again as soon as
-// the surface exists. The surface belongs to the native window, which TPresentWindows keeps for the device's life; SDL's
-// window procedure stays off the device windows, which must keep letting every mouse message through to the main
-// window and paint nothing (the wrapper's events, its creation, size and destruction, name its own window id, which
-// SdlFrame.cpp's event watch ignores).
+// on Windows: TGUI's, TNetwork's and the surface's window); the window system finds the SDL_Window of a handle among
+// SDL's windows. Each device's surface is SDL_Vulkan_CreateSurface's, on the device's own window (PresentWindow.h).
+// SDL3 has no child windows of its own, so that window is a native child window which SDL wraps for the call
+// (SDL_PROP_WINDOW_CREATE_WIN32_HWND_POINTER, with Vulkan); the wrapper goes again as soon as the surface exists. The
+// surface belongs to the native window, which TPresentWindows keeps for the device's life; SDL's window procedure
+// stays off the device windows, which must keep letting every mouse message through to the main window and paint
+// nothing (the wrapper's events, its creation, size and destruction, name its own window id, which SdlFrame.cpp's
+// event watch ignores).
 
 #include "vulkan/WindowSystem.h"
 
@@ -40,7 +40,7 @@ void *NativeHandle(SDL_Window *Window)
 #if defined(_WIN32)
 	return SDL_GetPointerProperty(SDL_GetWindowProperties(Window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
 #else
-	return Window; // Linux: the client's handle is the SDL_Window (SdlFrame.cpp, issue #131)
+	return Window; // Linux: the client's handle is the SDL_Window (SdlFrame.cpp)
 #endif
 }
 
@@ -83,8 +83,8 @@ public:
 		if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
 			throw TVulkanError("SDL_Vulkan_CreateSurface: SDL's video subsystem is not started");
 #if !defined(_WIN32)
-		// Issue #131: SDL3 has no child windows here: the surface is the window's own (PresentWindow.h), the main window's,
-		// or the hidden one of the device test (TTestWindow).
+		// SDL3 has no child windows here: the surface is the window's own (PresentWindow.h), the main window's, or the
+		// hidden one of the device test (TTestWindow).
 		if (Window == nullptr || Find(Window) == nullptr)
 			throw TVulkanError("SDL_Vulkan_CreateSurface: not a window of this process");
 		VkSurfaceKHR Own = VK_NULL_HANDLE;

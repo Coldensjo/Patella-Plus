@@ -1,16 +1,15 @@
-// SurfaceVulkan.h: the Vulkan engine's surface on the client's window (issue #19; notes/vulkan.md; plan 6.2).
+// SurfaceVulkan.h: the Vulkan engine's surface on the client's window.
 //
-// TSurfaceVulkan does what surfaceDX9.cpp's TSurfaceDX9 does, call for call, the reference engine of
-// the frames (plan D7): the same surfaces and sizes, the same batching of quads (drawn when the
-// texture or the target changes, when 9,600 vertices are queued, and at the end of the frame), the
-// same colour fills, uploads, colour key and light, and the same statistics. Instead of Direct3D 9 it
-// drives the Vulkan back end (Renderer.h); the display modes come from the platform's list (SDL3's since issue #152), in the order
-// and with the filter DirectDraw 4 gave surfaceDX9.cpp (issue #20). Windows x64 client only
+// TSurfaceVulkan does what surfaceDX9.cpp's TSurfaceDX9 does, call for call, the reference engine of the frames: the
+// same surfaces and sizes, the same batching of quads (drawn when the texture or the target changes, when 9,600
+// vertices are queued, and at the end of the frame), the same colour fills, uploads, colour key and light, and the
+// same statistics. Instead of Direct3D 9 it drives the Vulkan back end (Renderer.h); the display modes come from the
+// platform's list (SDL3's), in the order and with the filter DirectDraw 4 gave surfaceDX9.cpp. Windows x64 client only
 // (cmake/Vulkan.cmake).
 //
-// The engine is the x64 client's only engine (Surface.cpp; notes/vulkan.md, "Choosing the engine"). Its device is the graphics device choice of
-// DeviceSettings.h (issue #31): the advanced options' buttons, Patella.ini's Device, PATELLA_VULKAN. Its window system
-// (the client area, the screen, the surfaces) is SDL3's, vulkan/WindowSystem.h (issue #126).
+// The engine is the x64 client's only engine (Surface.cpp). Its device is the graphics device choice of
+// DeviceSettings.h: the advanced options' buttons, Patella.ini's Device, PATELLA_VULKAN. Its window system (the client
+// area, the screen, the surfaces) is SDL3's, vulkan/WindowSystem.h.
 
 #pragma once
 
@@ -30,7 +29,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): an int constant, as in
 
 class TSurfaceVulkan final : public TSurface {
 public:
-	// Shared: the data the engine shares with the client (platform/Surface.h; TGraphicsEngine, issue #138).
+	// Shared: the data the engine shares with the client (platform/Surface.h; TGraphicsEngine).
 	explicit TSurfaceVulkan(patella::platform::TSurfaceShared &Shared);
 	~TSurfaceVulkan() override;
 
@@ -81,7 +80,7 @@ public:
 	[[nodiscard]] const char *DeviceName() const;
 
 private:
-	using TEdgeRect = patella::platform::TEdgeRect; // the rectangles (RECT's edges; RECTs until issue #126)
+	using TEdgeRect = patella::platform::TEdgeRect; // the rectangles (RECT's edges)
 
 	void AddShadeQuad(int Left, int Top, int Right, int Bottom, uint32 TopLeft, uint32 TopRight, uint32 BottomRight,
 		uint32 BottomLeft);
@@ -93,15 +92,14 @@ private:
 	void AddQuad(int Left, int Top, int Right, int Bottom, double Left_u, double Right_u, double Top_v,
 		double Bottom_v, uint32 TopLeft, uint32 TopRight, uint32 BottomRight, uint32 BottomLeft);
 	void ColorFill(int Image, const patella::platform::TEdgeRect *Rect, uint32 Color);
-	// The main window as Win32's, for the devices' own windows (PresentWindow.h, issue #52; hWindow, a TWindowHandle
-	// since issue #138).
+	// The main window as Win32's, for the devices' own windows (PresentWindow.h; hWindow is a TWindowHandle).
 	[[nodiscard]] HWND MainWindow() const { return static_cast<HWND>(hWindow); }
 	patella::vulkan::TDeviceRequest Request(patella::platform::TWindowHandle Window);
 	void Fail();
 
 	bool Ready;                                            // CreateSurfaces has finished (SurfaceRecreated)
 	std::array<TEdgeRect, NUMBER_OF_SURFACES_VULKAN> Rect; // the surfaces' rectangles, as surfaceDX9.cpp's
-	TEdgeRect WindowRect;                                  // the client area (from 0, 0 since issue #126: only its size)
+	TEdgeRect WindowRect;                                  // the client area (from 0, 0: only its size)
 	bool Initialized;                                      // between InitSurfaces and ExitSurfaces (surfaceDX9.cpp: DirectDraw exists)
 	std::unique_ptr<patella::vulkan::TRenderer> Renderer;  // surfaceDX9.cpp's Direct3D and Device
 	std::array<int, NUMBER_OF_SURFACES_VULKAN> Image;      // the renderer's images (SCREEN_SURFACE: the canvas)

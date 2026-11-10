@@ -15,7 +15,7 @@
 #include "Container.h"
 #include "common.h"
 
-// The data is TObjectTypes' (Objects.h, issue #106).
+// The data is TObjectTypes' (Objects.h).
 
 namespace {
 
@@ -353,7 +353,7 @@ int patella::TObjectTypes::GetMissileSpriteNumber(int Number, int X, int Y, int 
 		return GetEntrySpriteNumber((*MissileProperties)(Number), X, Y, Layer, 1, 2, 1, 1);
 	case 7:
 		return GetEntrySpriteNumber((*MissileProperties)(Number), X, Y, Layer, 1, 1, 1, 1);
-	default: // the 0 below, as without it (bugprone-switch-missing-default-case, issue #110)
+	default: // the 0 below, as without it (bugprone-switch-missing-default-case)
 		break;
 	}
 	return 0;
@@ -361,9 +361,8 @@ int patella::TObjectTypes::GetMissileSpriteNumber(int Number, int X, int Y, int 
 
 // --- Patterns ----------------------------------------------------------------
 
-// Obj.Data is the count: 1, 2, 3, 4, then up to 9, 24, 49 and more in the second row.
-// Both results wrap around the object's pattern size. A pattern size of 0 in Tibia.dat
-// throws a TMyException (PATELLA_DIVISOR, issue #67).
+// Obj.Data is the count: 1, 2, 3, 4, then up to 9, 24, 49 and more in the second row. Both results wrap around the
+// object's pattern size. A pattern size of 0 in Tibia.dat throws a TMyException (PATELLA_DIVISOR).
 void patella::TObjectTypes::GetCumulativePattern(TObject &Obj, int *PatternX, int *PatternY) const
 {
 	PATELLA_ASSERT(GetObjectFlag(Obj,CUMULATIVE));
@@ -395,8 +394,8 @@ void patella::TObjectTypes::GetCumulativePattern(TObject &Obj, int *PatternX, in
 	*PatternY = *PatternY % PATELLA_DIVISOR(GetObjectPatternHeight(Obj.Type)) + 1;
 }
 
-// Obj.Data is the liquid: four columns per row. A pattern size of 0 in Tibia.dat
-// throws a TMyException (PATELLA_DIVISOR, issue #67).
+// Obj.Data is the liquid: four columns per row. A pattern size of 0 in Tibia.dat throws a TMyException
+// (PATELLA_DIVISOR).
 void patella::TObjectTypes::GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY) const
 {
 	PATELLA_ASSERT(GetObjectFlag(Obj,LIQUIDPOOL) || GetObjectFlag(Obj,LIQUIDCONTAINER));
@@ -483,7 +482,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 		case BANK:
 			Entry->Waypoints = File->readWord();
 			break;
-		case WRITE: // and WRITEONCE: the same read (two identical cases until issue #110, bugprone-branch-clone)
+		case WRITE: // and WRITEONCE: the same read
 		case WRITEONCE:
 			Entry->MaxLength = File->readWord();
 			break;
@@ -504,7 +503,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 		case LENSHELP:
 			Entry->LensHelp = File->readWord();
 			break;
-		default: // nothing, as without it (bugprone-switch-missing-default-case, issue #110)
+		default: // nothing, as without it (bugprone-switch-missing-default-case)
 			break;
 		}
 	}
@@ -521,7 +520,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 	Entry->Phases = File->readByte();
 	const int Count = Entry->Width * Entry->Height * Entry->Layers * Entry->PatternWidth * Entry->PatternHeight
 		* Entry->PatternDepth * Entry->Phases;
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the entry's sprite table, deleted by ReleaseObjects (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the entry's sprite table, deleted by ReleaseObjects
 	Entry->Sprites = new uint16[Count];
 	for (int i = 0; i < Count; i++)
 		Entry->Sprites[i] = File->readWord();
@@ -543,10 +542,10 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 	const int Outfits = File.readWord();
 	const int Effects = File.readWord();
 	const int Missiles = File.readWord();
-	// Patella-Modern issue #139, item 1, a deliberate difference (notes/decisions.md, "#139"): every entry's sprite
-	// table starts empty, each table's as soon as it is allocated, so ReleaseObjects, after a file that ends before
-	// the last entry (or a count of 0, which the next table's constructor refuses), deletes only the tables
-	// LoadProperties allocated. The binary left the entries' Sprites indeterminate and deleted them.
+	// A deliberate difference from the original: every entry's sprite table starts empty, each table's as soon as it is
+	// allocated, so ReleaseObjects, after a file that ends before the last entry (or a count of 0, which the next
+	// table's constructor refuses), deletes only the tables LoadProperties allocated. The original left the entries'
+	// Sprites indeterminate and deleted them.
 	const auto ClearSprites = [](array<TProperties> &Table) {
 		for (int i = Table.low(); i <= Table.high(); i++)
 			Table(i).Sprites = nullptr;
@@ -578,12 +577,12 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 // unknown); InitControl then shuts down. The original catches a
 // TMyException; its LoadObjects' catch wrapper made every other exception
 // one (LoadProperties' new[] of a size from Tibia.dat can throw
-// std::bad_array_new_length or std::bad_alloc). That wrapper is gone (issue
-// #78), so the boundary catches everything (LoadObjects throws no
-// PROGRAM_ERROR): the outcome is the original's.
+// std::bad_array_new_length or std::bad_alloc). That wrapper is gone, so
+// the boundary catches everything (LoadObjects throws no PROGRAM_ERROR):
+// the outcome is the original's.
 void patella::TObjectTypes::InitObjects()
 {
-	// Cleared, not freed, as the original does (issue #58: release, not reset).
+	// Cleared, not freed, as the original does (release, not reset).
 	static_cast<void>(ObjectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
 	static_cast<void>(OutfitProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
 	static_cast<void>(EffectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
@@ -600,7 +599,7 @@ void patella::TObjectTypes::ExitObjects()
 	ReleaseObjects();
 }
 
-// The original's functions (issue #106): each calls its member on the one TClient's TObjectTypes.
+// The original's functions: each calls its member on the one TClient's TObjectTypes.
 
 bool GetObjectFlag(int Type, int Flag)
 {

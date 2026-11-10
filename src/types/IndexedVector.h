@@ -1,6 +1,5 @@
 // IndexedVector.h: TIndexedVector<T>, CipSoft's growable vector<T> of Container.h (c:\mud\tibiaplayer\Container.h,
-// and its operator()) over a std::vector. Patella-Modern issue #99 (notes/modernization-plan.md, section
-// 7, M7; notes/decisions.md, "TIndexedVector over std::vector"). The semantics are the original's, unchanged:
+// and its operator()) over a std::vector. The semantics are the original's, unchanged:
 //
 // - The entries are indexed from min to max, the lowest and highest index used so far; entry[0] is index start, and
 //   space entries are allocated (start <= min <= max < start + space).
@@ -41,8 +40,8 @@ public:
 	T *allocate(std::size_t Count) { return static_cast<T *>(::operator new[](Count * sizeof(T))); }
 	void deallocate(T *Entries, std::size_t /*Count*/) noexcept { ::operator delete[](static_cast<void *>(Entries)); }
 
-	// new T[n]'s initialisation of each entry; with arguments a plain construction. GCC's analyzer (issue #111) takes
-	// the null storage of a vector of no entries into the loop that constructs none (-Wanalyzer-null-dereference).
+	// new T[n]'s initialisation of each entry; with arguments a plain construction. GCC's analyzer takes the null
+	// storage of a vector of no entries into the loop that constructs none (-Wanalyzer-null-dereference).
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wanalyzer-null-dereference"
@@ -64,8 +63,7 @@ public:
 
 // Swaps two entries as the original does when its vector<T> grows: through a copy, each entry copied as a block of
 // bytes with its padding (VC7.1 copies a structure so, and so does MSVC; GCC and Clang do not copy the padding when
-// they copy a structure member by member, Patella-Modern issue #91); a
-// type that is not trivially copyable is copied with its assignment.
+// they copy a structure member by member); a type that is not trivially copyable is copied with its assignment.
 template <class T> inline void SwapIndexedEntries(T &A, T &B)
 {
 	if constexpr (std::is_trivially_copyable_v<T>) {

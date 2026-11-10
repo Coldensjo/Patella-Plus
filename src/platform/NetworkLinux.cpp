@@ -1,7 +1,7 @@
-// NetworkLinux.cpp: the Linux client's network, TPortableSocket (platform/PortableSocket.h; Patella-Modern issue #131,
-// plan M8), the counterpart of NetworkWin32.cpp. There is no message loop to poll a socket from: the loop's idle step does
-// (Player.cpp OnIdle, ISocket::Poll), so the Busy callback has nothing to do. A finished lookup goes to SdlFrame.cpp's
-// OnHostResolved, as on Windows.
+// NetworkLinux.cpp: the Linux client's network, TPortableSocket (platform/PortableSocket.h), the counterpart of
+// NetworkWin32.cpp. There is no message loop to poll a socket from: the loop's idle step does (Player.cpp OnIdle,
+// ISocket::Poll), so the Busy callback has nothing to do. A finished lookup goes to SdlFrame.cpp's OnHostResolved, as
+// on Windows.
 
 #include "SdlFrame.h"
 

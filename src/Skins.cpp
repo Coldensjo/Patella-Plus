@@ -8,18 +8,18 @@
 // separately from InitStatus; the shut-down function calls ExitSkins right
 // after ExitNetwork), and InitStatus and ExitStatus never touch its data.
 
-// common.h first, where Skins.h included it before (issue #49): Skins.cpp uses nothing of it, but in the
-// client's builds it brings MFC, whose per-object statics and initialisers Skins.obj has in the image (without
-// it Skins.obj loses its .data, .CRT$XCU and ATL sections, and the images' .data moves).
+// common.h first, where Skins.h included it before: Skins.cpp uses nothing of it, but in the client's builds it
+// brings MFC, whose per-object statics and initialisers Skins.obj has in the image (without it Skins.obj loses
+// its .data, .CRT$XCU and ATL sections, and the images' .data moves).
 #include "common.h" // IWYU pragma: keep
 #include "Skins.h"
 
-// The data (NumberOfSkins, Skins) is TSkins' since issue #116 (Skins.h): a part of TGraphics, with
-// GUI.cpp's SkinProperties. The original's free functions InitSkins and ExitSkins forward to the members from
-// graphics.cpp (the client's; this file is patella_core's, which has no bridge).
+// The data (NumberOfSkins, Skins) is TSkins' (Skins.h): a part of TGraphics, with GUI.cpp's SkinProperties. The
+// original's free functions InitSkins and ExitSkins forward to the members from graphics.cpp (the client's;
+// this file is patella_core's, which has no bridge).
 
-// The table is a std::unique_ptr (issue #58). TSkin has no destructor, so a table
-// still set when FatalError calls exit(1) is only memory freed during static destruction.
+// The table is a std::unique_ptr. TSkin has no destructor, so a table still set when FatalError calls exit(1)
+// is only memory freed during static destruction.
 
 // Fills the rectangles of the GUI graphics in Tibia.pic. The table is a local
 // array, so it is written to the stack on every call (12,506 bytes of code).
@@ -28,7 +28,7 @@
 // uninitialised.
 void patella::TSkins::InitSkins()
 {
-	const struct { // NOLINT(modernize-avoid-c-arrays): the binary's table of an unnamed type, sized by its entries (issue #60)
+	const struct { // NOLINT(modernize-avoid-c-arrays): the binary's table of an unnamed type, sized by its entries
 		int skin;
 		TSkin Rect;
 	} SkinTable[] = {

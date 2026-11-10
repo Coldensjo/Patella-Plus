@@ -2,15 +2,14 @@
 // original file name is unknown ("TMyException" fits the alphabetical link
 // order, which puts this file after Talk and before TRSA, TXTEA and Utils).
 //
-// Since Patella-Modern issue #80 (M5) a message and the source location of the
-// site that threw it. The original's two constructors took the file, the line,
-// the kind, two named values and a reason (a text, or a caught TMyException
-// whose message became the reason and whose origin was kept); their formatting
-// is ErrorText now, the message's text, and the origin ("<file> <line>" of the
-// site that first raised the error) went with error.txt's report (issue #74),
-// its only reader. The sites build the exception through common.h's
-// TMYEXCEPTION and TERROR* and compat/assertion.h's PATELLA_ASSERT*, which pass
-// their own location (notes/decisions.md, issue #80).
+// A message and the source location of the site that threw it. The original's
+// two constructors took the file, the line, the kind, two named values and a
+// reason (a text, or a caught TMyException whose message became the reason and
+// whose origin was kept); their formatting is ErrorText now, the message's
+// text, and the origin ("<file> <line>" of the site that first raised the
+// error) went with error.txt's report, its only reader. The sites build the
+// exception through common.h's TMYEXCEPTION and TERROR* and
+// compat/assertion.h's PATELLA_ASSERT*, which pass their own location.
 
 #pragma once
 
@@ -19,9 +18,9 @@
 #include <string>
 #include <string_view>
 
-// A recoverable failure (issue #80): what a TMyException would carry, returned in a patella::TExpected<T, TError>
-// (compat/expected.h) instead of thrown. A function that the original exposes throws it on (TMyException(TError));
-// its callers that recover test the result instead of catching (notes/decisions.md, issue #80, 80c).
+// A recoverable failure: what a TMyException would carry, returned in a patella::TExpected<T, TError>
+// (compat/expected.h) instead of thrown. A function that the original exposes throws it on (TMyException(TError)); its
+// callers that recover test the result instead of catching.
 struct TError {
 	std::string Message;
 };
@@ -59,11 +58,11 @@ TMyException MakeError(const TSourceLocation &Location, std::string_view Kind, s
 TError MakeFailure(const TSourceLocation &Location, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, std::string_view Reason);
 
-// The original's handlers around InitInstance and Run (Player.cpp, after its PROGRAM_ERROR handler), in one place since
-// issue #159. Called inside a catch; throws the TMyException, for HandleException, that the exception being handled
-// becomes, with Location as the site. Its texts are the original's. An out-of-memory error, std::bad_alloc here, says
-// "unknown exception occurred": the original's operator new was MFC's (nafxcw.lib), whose handler threw a
-// CMemoryException *, which only the original's catch (...) took. Its "bad_alloc_exception occurred" was never that error's.
+// The original's handlers around InitInstance and Run (Player.cpp, after its PROGRAM_ERROR handler), in one place.
+// Called inside a catch; throws the TMyException, for HandleException, that the exception being handled becomes, with
+// Location as the site. Its texts are the original's. An out-of-memory error, std::bad_alloc here, says "unknown
+// exception occurred": the original's operator new was MFC's (nafxcw.lib), whose handler threw a CMemoryException *,
+// which only the original's catch (...) took. Its "bad_alloc_exception occurred" was never that error's.
 [[noreturn]] void ThrowTopLevelError(const TSourceLocation &Location);
 
 } // namespace patella

@@ -1,6 +1,6 @@
-// Settings.h: Patella.ini, the fork's settings file (Patella-Modern issues #31, #45; plan D12).
+// Settings.h: Patella.ini, the fork's settings file.
 //
-// Since issue #45 it is the x64 client's only settings file: the options the original kept in Tibia.cfg
+// It is the x64 client's only settings file: the options the original kept in Tibia.cfg
 // (settings/PreferenceKeys.h) and everything new the fork lets the user set, in the working directory. An
 // existing Tibia.cfg is imported once (Preferences.cpp InitPreferences) and never written again. The format
 // is plain `key=value`, one per line:
@@ -11,18 +11,17 @@
 // Keys are compared without regard to ASCII case; spaces and tabs around keys and values are dropped;
 // the first line with a key counts. Every other line (comments, blank lines, unknown keys, lines without
 // '=') is kept as it is when the file is written again, and so are the file's line ends (CRLF or LF, as
-// its first line has them). A parser of our own (D12: no dependency); no platform header, so it is part
+// its first line has them). A parser of our own (no dependency); no platform header, so it is part
 // of patella_core and tested on every preset (tests/unit/core_settings_test.cpp).
 //
-// Keys today: Device (auto, gpu, gpuN, cpu; notes/vulkan.md, "Choosing the device"), LogLevel and LogFile
-// (log/LogSettings.h, issue #77), the options of Tibia.cfg (settings/PreferenceKeys.h, issue #45), DataFolder (issue
-// #130, ChooseLocations below), ServerAddress, ServerPort and RsaModulus (settings/PreferenceKeys.h). The other D12 keys (scale,
-// vsync) come with their issues.
+// Keys today: Device (auto, gpu, gpuN, cpu), LogLevel and LogFile (log/LogSettings.h), the options of Tibia.cfg
+// (settings/PreferenceKeys.h), DataFolder (ChooseLocations below), ServerAddress, ServerPort and RsaModulus
+// (settings/PreferenceKeys.h).
 //
-// The text (issue #117, plan D4): the file is UTF-8, and a value that is the client's text (a hotkey, a name, LogFile)
-// is converted to the client's Windows-1252 when read (types/Cp1252.h; '?' for a character it does not have). A file
-// with PreferencesVersion=1 (written by #45's client until issue #117) has the client's Windows-1252 bytes as they are:
-// it is read as such and converted to UTF-8 as a whole at the next save of the options (PreferenceKeys.h).
+// The text: the file is UTF-8, and a value that is the client's text (a hotkey, a name, LogFile) is converted to the
+// client's Windows-1252 when read (types/Cp1252.h; '?' for a character it does not have). A file with
+// PreferencesVersion=1 has the client's Windows-1252 bytes as they are: it is read as such and converted to UTF-8 as
+// a whole at the next save of the options (PreferenceKeys.h).
 
 #pragma once
 
@@ -37,7 +36,7 @@
 
 namespace patella::settings {
 
-// The file's name, next to the data files by default (ChooseLocations below; the working folder's until issue #130).
+// The file's name, next to the data files by default (ChooseLocations below).
 inline constexpr const char *FileName = patella::platform::SettingsFileName;
 
 // The first line of a file the client creates, and its line ends.
@@ -104,9 +103,9 @@ private:
 // A value of File as the client's text (Windows-1252): converted from UTF-8, or as it is in a file of version 1.
 [[nodiscard]] std::string ClientText(const TSettingsFile &File, std::string_view Value);
 
-// The file is opened through Files (the platform's IFileSystem, issue #119: Patella.exe's TDataFileSystem, the
-// data folder or the settings folder; Path is the client's text, as every name TFile opens), as a binary file (TFile, _wfsopen with
-// _SH_DENYNO on Windows: what std::fstream opened until then).
+// The file is opened through Files (the platform's IFileSystem: Patella.exe's TDataFileSystem, the data folder or the
+// settings folder; Path is the client's text, as every name TFile opens), as a binary file (TFile, _wfsopen with
+// _SH_DENYNO on Windows).
 
 // Reads the file. Nothing when it does not exist, cannot be read or is larger than MaxFileSize.
 std::optional<TSettingsFile> Load(patella::platform::IFileSystem &Files, const std::string &Path,
@@ -120,7 +119,7 @@ std::optional<TSettingsFile> LoadForUpdate(patella::platform::IFileSystem &Files
 // Writes Settings.Text() to the file (created or replaced). False when that fails.
 bool Save(patella::platform::IFileSystem &Files, const std::string &Path, const TSettingsFile &Settings);
 
-// --- Where the files are (issue #130, plans D4, D12, D14) ------------------------------------------------------------
+// --- Where the files are ---------------------------------------------------------------------------------------------
 //
 // The data folder (Tibia.dat, Tibia.spr, Tibia.pic, Tibia.cfg, the automap and the saved channels), the first of:
 //	1. Option      --data <folder> of the command line (relative to the working folder);
@@ -130,7 +129,7 @@ bool Save(patella::platform::IFileSystem &Files, const std::string &Path, const 
 //	               Tibia.dat: the XDG folder's with the XDG option, else the working folder's, then the executable's;
 //	5. Default     the working folder (the original's error where Tibia.dat is missing).
 // Tibia.dat is looked for without regard to ASCII case where CaseInsensitive (Linux; platform::FindNoCase).
-// Patella.ini is in the settings folder: XdgFolder with the XDG option (Linux, D4), else the folder of the Patella.ini
+// Patella.ini is in the settings folder: XdgFolder with the XDG option (Linux), else the folder of the Patella.ini
 // that step 4 read, else the data folder (portable). A folder that is the working folder stays an empty path in the
 // locations, so the files open by their names as written, as before.
 

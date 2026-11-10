@@ -1,4 +1,4 @@
-// PresentWindow.cpp: the windows the Vulkan engine presents in (PresentWindow.h; issue #52).
+// PresentWindow.cpp: the windows the Vulkan engine presents in (PresentWindow.h).
 
 #include "vulkan/PresentWindow.h"
 
@@ -193,7 +193,7 @@ TTestWindow::~TTestWindow()
 	DestroyChild(Window);
 }
 
-#else // Linux (issue #131): the device's window is the main window
+#else // Linux: the device's window is the main window
 
 void TPresentWindows::Subclass(HWND Window)
 {

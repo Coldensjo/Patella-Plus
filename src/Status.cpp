@@ -1,12 +1,11 @@
 // Status.cpp: reconstructed from Tibia.exe 7.72.
 //
 // The functions without line evidence (all of them small accessors) come
-// first, in binary order (the error report list's and its vector are gone
-// since Patella-Modern issue #74, decision D2); the rest follow the assertion
-// and catch line numbers, which are also their binary order.
+// first, in binary order; the rest follow the assertion and catch line
+// numbers, which are also their binary order.
 //
-// Of all functions here only CheckClipboardText had a try block (its catch
-// wrapper, gone since issue #78); the others have assertions only.
+// Of all functions here only CheckClipboardText had a try block (its catch wrapper, gone); the others have assertions
+// only.
 
 #include "Status.h"
 #include "Utils.h"
@@ -22,13 +21,11 @@
 #include <cstring>
 #include <vector>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory off for the file: the original's raw owners: the window tree owns its children, the
+// message queue its blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-// The data is TInteraction's (the user interaction, issue #107) and TSession's (the session, issue #105), both in
-// Status.h.
+// The data is TInteraction's (the user interaction) and TSession's (the session), both in Status.h.
 
 namespace {
 
@@ -434,12 +431,11 @@ void patella::TInteraction::ClearMessages()
 }
 
 // TaintedClipboardText is freed but not cleared, and the queued messages are
-// not freed. The original cleared the error reports first (gone since issue
-// #74). LinkRegexp is freed and, since issue #129 (TRegexp), cleared too:
-// the original left it dangling until InitStatus.
+// not freed. LinkRegexp is freed and cleared (TRegexp): the original left it
+// dangling until InitStatus.
 void patella::TInteraction::ExitStatus()
 {
-	patella::bridge::Session().ExitSession(); // the character list (issue #105)
+	patella::bridge::Session().ExitSession(); // the character list
 	if (TaintedClipboardText != nullptr)
 		delete[] TaintedClipboardText;
 	LinkRegexp.Reset();
@@ -543,7 +539,7 @@ void patella::TSession::SetAccount(int Number, const char *Password)
 	TStringBuffer(AccountNumberString, sizeof(AccountNumberString)).Format("{}", Number); // at most 11 characters
 	AccountNumberString[11] = 0;
 	// The original's copy, up to the buffer's 30 bytes (the assertion keeps the password shorter; GCC's
-	// -Wstringop-truncation sees the bound only, issue #111).
+	// -Wstringop-truncation sees the bound only).
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wstringop-truncation\"")
 	strncpy(AccountPassword, Password, 30);
@@ -598,9 +594,9 @@ int patella::TSession::GetCharacterPort(int Number) const
 	return Characters[Number].Port;
 }
 
-// Keeps a copy of the text; if its lower-case form contains something like a web or IP address, the
-// link warning handler is called instead of copying (it can copy later with CopyTaintedClipboardText).
-// Text and Length are the span's pointer and its size as an int (issue #69).
+// Keeps a copy of the text; if its lower-case form contains something like a web or IP address, the link warning
+// handler is called instead of copying (it can copy later with CopyTaintedClipboardText). Text and Length are the
+// span's pointer and its size as an int.
 void patella::TInteraction::CheckClipboardText(patella::TSpan<const char> Characters)
 {
 	const char *const Text = Characters.data();
@@ -642,9 +638,9 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	LinkWarningEventHandler = linkwarningeventhandler;
 	TaintedClipboardText = nullptr;
 	// The original set LinkRegexp to NULL first, so a second InitStatus without ExitStatus leaked the program;
-	// TRegexp's assignment frees it (issue #129).
+	// TRegexp's assignment frees it.
 	LinkRegexp = patella::TRegexp(LinkPattern);
-	patella::bridge::Session().InitSession(Gamemaster); // the session's part (issue #105), in its order below
+	patella::bridge::Session().InitSession(Gamemaster); // the session's part, in its order below
 	Messages.clear();                                   // the parameters not freed, as the original
 	ActionNumber = 0;
 	DraggedObject.Type = 0;
@@ -663,8 +659,8 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	PendingActionNumber = 0;
 }
 
-// InitStatus's part (issue #105): the session's members in the order InitStatus wrote them (Gamemaster and
-// the rights first, ClearRights inlined there; the rest after its other data).
+// InitStatus's part: the session's members in the order InitStatus wrote them (Gamemaster and the rights first,
+// ClearRights inlined there; the rest after its other data).
 void patella::TSession::InitSession(bool Value)
 {
 	Gamemaster = Value;
@@ -678,7 +674,7 @@ void patella::TSession::InitSession(bool Value)
 	ActiveCharacter = 0;
 }
 
-// ExitStatus's part (issue #105): the character list, freed first.
+// ExitStatus's part: the character list, freed first.
 void patella::TSession::ExitSession()
 {
 	if (Characters != nullptr)
@@ -686,7 +682,7 @@ void patella::TSession::ExitSession()
 	Characters = nullptr;
 }
 
-// The session's functions of the original (issue #105): each calls its member on the one TClient's TSession.
+// The session's functions of the original: each calls its member on the one TClient's TSession.
 
 bool CheckAnyRight()
 {
@@ -768,7 +764,7 @@ int GetCharacterPort(int Number)
 	return patella::bridge::Session().GetCharacterPort(Number);
 }
 
-// The functions of the original (issue #107): each calls its member on the one TClient's TInteraction.
+// The functions of the original: each calls its member on the one TClient's TInteraction.
 
 int GetActionNumber()
 {

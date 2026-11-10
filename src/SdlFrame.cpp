@@ -1,18 +1,16 @@
-// SdlFrame.cpp: the client's main window and event loop on SDL3 (Patella-Modern issue #122, plan M8; SdlFrame.h,
-// notes/decisions.md, "#122: the SDL3 window and its event loop"). Not part of the original source.
+// SdlFrame.cpp: the client's main window and event loop on SDL3 (SdlFrame.h). Not part of the original source.
 //
-// Each function says which of MainFrm.cpp's (CMainFrame) or MFC's it stands for; the client calls are theirs, in
-// their order. What SDL3 does here (the window, its placement and size, the fullscreen switch, its activation, close
-// and display events, the loop): SDL_CreateWindow, SDL_SetWindowPosition/Size, SDL_SetWindowFullscreen, the window and
-// display events; since issue #123 the input's wheel, motion and IME text events, SDL_CaptureMouse, SDL's cursors and
-// window coordinates (platform/KeyInput.h has the client's rules). What stays Win32's until its own issue, in the
-// "Win32 until ..." parts below: the keys, the characters and the buttons as window messages (SDL's events differ from
-// them for posted messages and keys Windows does not hold), the loss of the mouse capture (WM_CAPTURECHANGED: SDL has
-// no event for it), the
-// cursor's screen position (GetCursorPos, TSdlLoopInput: it keeps the last position where SDL would report (0, 0)), and
-// on Windows the message pump itself (SDL's own is off: the loop dispatches the thread's
-// messages as MFC's did, so the socket's polling timer's and the test mode's messages are dispatched in the same
-// order). The host lookup's reply is no message since #125 (HostResolved, below).
+// Each function says which of MainFrm.cpp's (CMainFrame) or MFC's it stands for; the client calls are theirs, in their
+// order. What SDL3 does here (the window, its placement and size, the fullscreen switch, its activation, close and
+// display events, the loop): SDL_CreateWindow, SDL_SetWindowPosition/Size, SDL_SetWindowFullscreen, the window and
+// display events; the input's wheel, motion and IME text events, SDL_CaptureMouse, SDL's cursors and window coordinates
+// (platform/KeyInput.h has the client's rules). What stays Win32's, in the "Win32 until ..." parts below: the keys, the
+// characters and the buttons as window messages (SDL's events differ from them for posted messages and keys Windows
+// does not hold), the loss of the mouse capture (WM_CAPTURECHANGED: SDL has no event for it), the cursor's screen
+// position (GetCursorPos, TSdlLoopInput: it keeps the last position where SDL would report (0, 0)), and on Windows the
+// message pump itself (SDL's own is off: the loop dispatches the thread's messages as MFC's did, so the socket's
+// polling timer's and the test mode's messages are dispatched in the same order). The host lookup's reply is no message
+// (HostResolved, below).
 //
 // Events: the size, move and activation changes come through an event watch (SDL_AddEventWatch), which SDL calls as it
 // sends the event, inside the window procedure, so the client sees a size change within the call that made it, as
@@ -83,8 +81,8 @@ bool DisplayChange = false;   // a display mode change (OnDisplayChange), with t
 int DisplayWidth = 0;
 int DisplayHeight = 0;
 
-// The client's input state (issue #123: platform/KeyInput.h's rules over SDL's events): CMainFrame::KeyFlags and
-// MainFrm.cpp's file-local button flags and wheel rest, with SDL's click counts made into Windows' double clicks.
+// The client's input state (platform/KeyInput.h's rules over SDL's events): CMainFrame::KeyFlags and MainFrm.cpp's
+// file-local button flags and wheel rest, with SDL's click counts made into Windows' double clicks.
 platform::TKeyFlags Keys;
 #if !defined(_WIN32)
 platform::TClickCounter Clicks; // SDL's click counts as Windows' double clicks (not on Windows: OnButtonMessage)
@@ -121,8 +119,8 @@ struct TFrame {
 TFrame FrameSize()
 {
 #if !defined(_WIN32)
-	// Issue #131: a scripted run on Linux has the Windows frame of the recordings (WS_OVERLAPPEDWINDOW with its client
-	// edge on the recording machine's metrics, 33 above the client area and 10 on each other side), so Patella.ini's 800 x 600
+	// A scripted run on Linux has the Windows frame of the recordings (WS_OVERLAPPEDWINDOW with its client edge on the
+	// recording machine's metrics, 33 above the client area and 10 on each other side), so Patella.ini's 800 x 600
 	// outer window is the recording's 780 x 557 client area, under any X11 or Wayland window manager or none (SDL
 	// reports no borders under Xvfb or the dummy driver).
 	if (platform::Platform().Input.IgnoreCaptureChange())
@@ -345,8 +343,8 @@ bool SDLCALL WatchEvent([[maybe_unused]] void *UserData, SDL_Event *Event)
 	case SDL_EVENT_MOUSE_BUTTON_UP:
 	case SDL_EVENT_MOUSE_WHEEL:
 	case SDL_EVENT_MOUSE_MOTION:
-		// Issue #123: the input, as it comes (WM_KEYDOWN, WM_CHAR, WM_LBUTTONDOWN ... in SDL's window procedure); the
-		// test build drops the desktop's with a script (IInput::IgnoreDesktopInput, as its message filter DropInput).
+		// The input, as it comes (WM_KEYDOWN, WM_CHAR, WM_LBUTTONDOWN ... in SDL's window procedure); the test build
+		// drops the desktop's with a script (IInput::IgnoreDesktopInput, as its message filter DropInput).
 		if (!platform::Platform().Input.IgnoreDesktopInput())
 			Input(*Event);
 		break;
@@ -363,7 +361,7 @@ void OnClose()
 	DestroyWanted = true;
 }
 
-// Issue #123: the cursors (MainFrm.cpp's: CMainFrame's constructor loaded them, UpdateMouseCursor sets them) as SDL's.
+// The cursors (MainFrm.cpp's: CMainFrame's constructor loaded them, UpdateMouseCursor sets them) as SDL's.
 SDL_Cursor *HandCursor = nullptr;    // cursor resource 0x89 (mouse cursor 6)
 SDL_Cursor *SizeCursor = nullptr;    // IDC_SIZENS (mouse cursor 2)
 SDL_Cursor *WaitCursor = nullptr;    // IDC_WAIT (mouse cursor 3)
@@ -573,8 +571,8 @@ void OnKeyMessage(UINT Message, WPARAM WParam, LPARAM LParam)
 #endif
 
 // SDL_EVENT_TEXT_INPUT: the characters of the typed text (WM_CHAR, which an ANSI window got in the code page), each
-// converted to the client's Windows-1252 (issue #112; a character it does not have is '?', as Windows' conversion for
-// the ANSI window made it on this code page).
+// converted to the client's Windows-1252 (a character it does not have is '?', as Windows' conversion for the ANSI
+// window made it on this code page).
 void OnText(const char *Text)
 {
 	if (Text == nullptr)
@@ -585,12 +583,12 @@ void OnText(const char *Text)
 
 #if defined(_WIN32)
 // Win32 until the Linux client: the window's WM_CHAR (a UTF-16 unit: SDL's window is a Unicode window; a surrogate pair
-// comes as two), as CMainFrame::OnChar got it, converted to the client's Windows-1252 (issue #112) and handed to OnChar.
-// SDL's text events would differ from the original's WM_CHAR: SDL delivers text only to the window with the keyboard
-// focus and drops every text that starts with a control character, but the original handled every WM_CHAR its window
-// got, focused or not, posted by another program or made by TranslateMessage (Return, Tab, Ctrl+letter ...). So on
-// Windows SDL never sees WM_CHAR; its text events still bring the IME's results (SDL takes those from
-// WM_IME_COMPOSITION itself) and the test mode's scripted characters (OnText).
+// comes as two), as CMainFrame::OnChar got it, converted to the client's Windows-1252 and handed to OnChar. SDL's text
+// events would differ from the original's WM_CHAR: SDL delivers text only to the window with the keyboard focus and
+// drops every text that starts with a control character, but the original handled every WM_CHAR its window got, focused
+// or not, posted by another program or made by TranslateMessage (Return, Tab, Ctrl+letter ...). So on Windows SDL never
+// sees WM_CHAR; its text events still bring the IME's results (SDL takes those from WM_IME_COMPOSITION itself) and the
+// test mode's scripted characters (OnText).
 char16_t HighSurrogate = 0;
 
 void OnWindowChar(WPARAM WParam)
@@ -765,7 +763,7 @@ void OnWheel(const SDL_MouseWheelEvent &Event)
 		Distance = -Distance;
 	const int Notches = Wheel.Notches(static_cast<int>(std::lround(Distance)));
 	for (int i = 0; i < std::abs(Notches); i++) {
-		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
+		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 		const int MouseY = GetMouseY();
 		MouseWheel(GetMouseX(), MouseY, Notches > 0 ? 1 : 2);
 	}
@@ -806,7 +804,7 @@ void OnCaptureChanged()
 	if (platform::Platform().Input.IgnoreCaptureChange())
 		return;
 	POINT Point;
-	platform::ReadCursorPosition(platform::Platform().Input, Point); // GetCursorPos (issue #119)
+	platform::ReadCursorPosition(platform::Platform().Input, Point); // GetCursorPos
 	if (GetViewMode() == 1) {
 		int x = Point.x;
 		int y = Point.y;
@@ -825,8 +823,8 @@ void OnCaptureChanged()
 }
 #endif
 
-// CMainFrame::OnHostResolved: the name lookup is done (Error 0: the address is there). Since issue #125 the portable
-// socket's Poll calls it (HostResolved, below), where WSAAsyncGetHostByName posted WM_USER + 1 to the window.
+// CMainFrame::OnHostResolved: the name lookup is done (Error 0: the address is there). The portable socket's Poll calls
+// it (HostResolved, below), where WSAAsyncGetHostByName posted WM_USER + 1 to the window.
 void OnHostResolved(int Error)
 {
 	if (Error == 0) {
@@ -854,9 +852,9 @@ void OnHostResolved(int Error)
 #if defined(_WIN32)
 // The SDL window's subclass, for what SDL3 has no event for or gives otherwise: the loss of the mouse capture
 // (WM_CAPTURECHANGED, then SDL's own handling of it), the typed characters (WM_CHAR, OnWindowChar), the mouse buttons
-// (OnButtonMessage), the keys (OnKeyMessage), the test mode's main timer ticks (WM_TIMER 1: with a script the driver dispatches them)
-// and the fullscreen window's hit test (the host lookup's WM_USER + 1 until issue #125). The wheel, the
-// cursors, the capture, the window's coordinates and the IME's text are SDL's (issue #123).
+// (OnButtonMessage), the keys (OnKeyMessage), the test mode's main timer ticks (WM_TIMER 1: with a script the driver
+// dispatches them) and the fullscreen window's hit test. The wheel, the cursors, the capture, the window's coordinates
+// and the IME's text are SDL's.
 LRESULT CALLBACK InputProc(HWND Hwnd, UINT Message, WPARAM WParam, LPARAM LParam, [[maybe_unused]] UINT_PTR Id,
 	[[maybe_unused]] DWORD_PTR Data)
 {
@@ -943,8 +941,8 @@ void DestroyFrame()
 		ReadPlacement();
 	SetWindowedMode(Placement.Left, Placement.Top, Placement.Right - Placement.Left, Placement.Bottom - Placement.Top,
 		IsMaximized());
-	platform::Platform().Input.StopTimer(WindowHandle, 1); // KillTimer (issue #119; the loop's timer, #122)
-	// The cursors (OnDestroy destroyed the two of the client's resources; issue #123: all five are SDL's).
+	platform::Platform().Input.StopTimer(WindowHandle, 1); // KillTimer (the loop's timer)
+	// The cursors (OnDestroy destroyed the two of the client's resources; all five are SDL's).
 	for (SDL_Cursor **Cursor : {&DefaultCursor, &HandCursor, &ArrowCursor, &SizeCursor, &WaitCursor}) {
 		SDL_DestroyCursor(*Cursor);
 		*Cursor = nullptr;
@@ -967,9 +965,10 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 	// (resource 128, which InitInstance gave the MFC frame's class and WM_SETICON); a fullscreen window is not
 	// minimized when it loses the focus (the client leaves fullscreen mode instead, OnActivateApp); Alt+F4 is the
 	// client's key (KeyDown).
-	// Issue #123, the input as Windows gave it to the MFC frame: the click that activates the window is a click
-	// (Windows' WM_MOUSEACTIVATE default; SDL would drop it from its own button state); the system menu's keys (Alt+Space: WM_SYSCHAR, SC_KEYMENU) work, as DefWindowProc gave them; the frame keeps
-	// Windows' cursors while the client's is hidden.
+	// The input as Windows gave it to the MFC frame: the click that activates the window is a click (Windows'
+	// WM_MOUSEACTIVATE default; SDL would drop it from its own button state); the system menu's keys (Alt+Space:
+	// WM_SYSCHAR, SC_KEYMENU) work, as DefWindowProc gave them; the frame keeps Windows' cursors while the client's is
+	// hidden.
 	SDL_SetHint(SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP, "0");
 	SDL_SetHint("SDL_WINDOWS_DPI_AWARENESS", "unaware");
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
@@ -992,7 +991,7 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 	}
 #else
 	static_cast<void>(ClassName);
-	// Issue #131: a headless test client (--test-headless) has no display at all: SDL's dummy video driver.
+	// A headless test client (--test-headless) has no display at all: SDL's dummy video driver.
 	if (platform::Platform().Window.Headless())
 		SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "dummy"); // read at SDL_Init; a display-less run never probes X11 or Wayland
 #endif
@@ -1008,8 +1007,8 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 	// CMainFrame's constructor.
 	Keys.Reset();
 	memset(patella::bridge::Network().PacketHeader.data(), 0, sizeof(patella::bridge::Network().PacketHeader));
-	// The cursors (issue #123: SDL's system cursors for IDC_ARROW, IDC_SIZENS and IDC_WAIT, which SDL loads as those on
-	// Windows; the client's two from its resources, LoadClientCursor).
+	// The cursors (SDL's system cursors for IDC_ARROW, IDC_SIZENS and IDC_WAIT, which SDL loads as those on Windows;
+	// the client's two from its resources, LoadClientCursor).
 	ArrowCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
 	SizeCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NS_RESIZE);
 	WaitCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT);
@@ -1021,7 +1020,7 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 
 	// Create (CFrameWnd::Create with WS_OVERLAPPEDWINDOW: SDL's resizable window), hidden, as the MFC frame is until
 	// InitInstance shows it.
-	// Issue #131: on Linux SDL_Vulkan_CreateSurface needs the Vulkan flag (the surface is the main window's own there,
+	// On Linux SDL_Vulkan_CreateSurface needs the Vulkan flag (the surface is the main window's own there,
 	// PresentWindow.h; on Windows each device has a window of its own).
 #if defined(_WIN32)
 	constexpr SDL_WindowFlags VulkanFlag = 0;
@@ -1047,15 +1046,15 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 #else
 	// Linux: the client knows the window by the SDL_Window itself (platform/SdlPlatform.cpp SdlWindowOf).
 	WindowHandle = reinterpret_cast<HWND>(Window);
-	// Issue #162: the window icon, which on Windows is the window class's (resource 128). SDL's dummy driver has none.
+	// The window icon, which on Windows is the window class's (resource 128). SDL's dummy driver has none.
 	if (!platform::Platform().Window.Headless())
 		platform::ApplyWindowIcon(Window);
 #endif
 	SetFrameStyle(0, WS_EX_CLIENTEDGE); // CFrameWnd::PreCreateWindow's
 	// OnGetMinMaxInfo: the client area at least 550x450.
 	SDL_SetWindowMinimumSize(Window, 550, 450);
-	// Issue #123: the typed characters as SDL_EVENT_TEXT_INPUT (WM_CHAR, the IME's results, dead keys combined), for as
-	// long as the window lives.
+	// The typed characters as SDL_EVENT_TEXT_INPUT (WM_CHAR, the IME's results, dead keys combined), for as long as the
+	// window lives.
 	if (!SDL_StartTextInput(Window))
 		log::Warn("SDL_StartTextInput failed: {}", SDL_GetError());
 
@@ -1076,7 +1075,7 @@ bool Create(bool Gamemaster, const char *Title, const char *ClassName)
 		MoveWindowTo(x, y, Width, Height);
 	else
 		SetDefaultWindowPosition();
-	platform::Platform().Input.StartTimer(WindowHandle, 1, 100); // SetTimer until #122: the loop's timer
+	platform::Platform().Input.StartTimer(WindowHandle, 1, 100); // the loop's timer
 	// The WM_SIZE that CreateWindowEx sends after WM_CREATE: the client gets the window's size once more.
 	SDL_GetWindowSize(Window, &ClientWidth, &ClientHeight);
 	OnSize(ClientWidth, ClientHeight);
@@ -1092,8 +1091,8 @@ void Show(bool Maximized)
 {
 	if (Window == nullptr)
 		return;
-	// Issue #145: a headless test client's window is never shown (nor maximized: SDL keeps a hidden window's
-	// maximize for its show); it keeps its place and size and gets its messages as a shown one.
+	// A headless test client's window is never shown (nor maximized: SDL keeps a hidden window's maximize for its
+	// show); it keeps its place and size and gets its messages as a shown one.
 	if (platform::Platform().Window.Headless()) {
 		if (Maximized)
 			log::Warn("headless: the window stays hidden, so it is not maximized");
@@ -1118,7 +1117,7 @@ int Run(void (*Idle)())
 #if defined(_WIN32)
 		// Win32's on Windows: the thread's messages, as MFC's PumpMessage dispatched them (the test build drops the
 		// desktop's input with a script), each followed by what it noted; SDL's own pump is off
-		// (SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP: its order differs, notes/decisions.md "#122").
+		// (SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP: its order differs).
 		MSG Message = {};
 		while (!Destroyed && ::PeekMessageA(&Message, nullptr, 0, 0, PM_REMOVE)) {
 			if (Message.message == WM_QUIT) {
@@ -1138,7 +1137,7 @@ int Run(void (*Idle)())
 		HandleNoted();
 		if (Destroyed)
 			break;
-		// The main timer in the loop (issue #122): WM_TIMER came when the queue was otherwise empty.
+		// The main timer in the loop: WM_TIMER came when the queue was otherwise empty.
 		if (platform::SdlLoopInput().TimerDue(platform::Platform().Clock.Milliseconds()))
 			TimerEvent();
 		Idle();
@@ -1161,7 +1160,7 @@ void ExitProgram()
 	if (WindowHandle != nullptr)
 		PostMessageA(WindowHandle, WM_CLOSE, 0, 0);
 #else
-	// Issue #131: the close request SDL_EVENT_WINDOW_CLOSE_REQUESTED would make, for the loop.
+	// The close request SDL_EVENT_WINDOW_CLOSE_REQUESTED would make, for the loop.
 	CloseWanted = true;
 #endif
 }
@@ -1185,8 +1184,8 @@ void SetDisplayMode(int ViewMode)
 	} else {
 		SetFrameStyle(0, WS_EX_APPWINDOW | WS_EX_CLIENTEDGE);
 		Redraw(false);
-		// Issue #152: the display back in the desktop's mode first, by the one path that makes sure of it (not SDL's own
-		// when the window leaves fullscreen); the Vulkan engine's ExitDisplay finds nothing left to do.
+		// The display back in the desktop's mode first, by the one path that makes sure of it (not SDL's own when the
+		// window leaves fullscreen); the Vulkan engine's ExitDisplay finds nothing left to do.
 		platform::SdlSetFullscreenMode(WindowHandle, nullptr);
 		SDL_SetWindowFullscreen(Window, false);
 		SDL_SyncWindow(Window);
@@ -1194,9 +1193,8 @@ void SetDisplayMode(int ViewMode)
 	}
 }
 
-// MainFrm.cpp's OpenURL: leaves fullscreen mode first. ShellExecuteA(nullptr, nullptr, URL, ..., SW_SHOWNORMAL) until
-// issue #124: SDL_OpenURL (on Windows ShellExecuteW's "open", the default verb, with SW_SHOWNORMAL), the URL (the
-// client's text) in UTF-8. As ShellExecute's, a failure is not reported to the client.
+// MainFrm.cpp's OpenURL: leaves fullscreen mode first. SDL_OpenURL (on Windows ShellExecuteW's "open", the default
+// verb, with SW_SHOWNORMAL) gets the URL (the client's text) in UTF-8. A failure is not reported to the client.
 void OpenURL(const char *URL)
 {
 	if (GetViewMode() == 2)
@@ -1205,8 +1203,8 @@ void OpenURL(const char *URL)
 		log::Warn("SDL_OpenURL failed: {}", SDL_GetError());
 }
 
-// MainFrm.cpp's UpdateMouseCursor: the cursor for the client's mouse cursor (Status.cpp), or none when the client
-// draws its own (SetCursor(NULL): SDL_HideCursor). Issue #123: SDL's cursors, which SDL sets in the client area (its
+// MainFrm.cpp's UpdateMouseCursor: the cursor for the client's mouse cursor (Status.cpp), or none when the client draws
+// its own (SetCursor(NULL): SDL_HideCursor). They are SDL's cursors, which SDL sets in the client area (its
 // WM_SETCURSOR); a cursor that could not be made is none, as SetCursor of LoadCursor's null cursor.
 void UpdateMouseCursor()
 {

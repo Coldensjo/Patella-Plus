@@ -1,6 +1,6 @@
 // FixedString.h: TFixedString<N>, the client's fixed text buffers (char[N]) with bounded writes, and
-// TStringBuffer, the same writes into a buffer the code has only a pointer to and knows the size of. Patella-Modern
-// issue #57 (notes/modernization-plan.md, section 7, M4). Not part of the original source.
+// TStringBuffer, the same writes into a buffer the code has only a pointer to and knows the size of. Not part of
+// the original source.
 //
 // TFixedString<N> is exactly char[N]: its only member is that array, so it has the array's size and alignment
 // (1), it is standard layout, trivially copyable and an aggregate (no constructor: a local is as uninitialised as
@@ -8,7 +8,7 @@
 // checks it.
 //
 // It converts to char * and const char * as the array did, so the code that reads it (strlen, strcmp, the error
-// macros' expressions, whose text must not change until M5: `strlen(Address)<100`) stays as it is. Never pass it
+// macros' expressions, whose text must not change: `strlen(Address)<100`) stays as it is. Never pass it
 // through "..." (MsvcSnprintf, a varargs constructor): that copies the N bytes, not a pointer; pass the Chars
 // member or View().
 //
@@ -157,7 +157,7 @@ struct TFixedString {
 	static_assert(N > 0, "a fixed string holds at least its terminating NUL");
 
 	// The original's array, the only member (public: the type is an aggregate, as the array was).
-	char Chars[N]; // NOLINT(modernize-avoid-c-arrays): the type is the array (issue #57); .Chars is the C string varargs need
+	char Chars[N]; // NOLINT(modernize-avoid-c-arrays): the type is the array; .Chars is the C string varargs need
 
 	// As the array decays: the code that reads the buffer as a C string is unchanged.
 	operator char *() noexcept { return Chars; }

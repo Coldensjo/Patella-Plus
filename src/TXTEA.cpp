@@ -63,9 +63,9 @@ void TXTEA::SetKey(TKey Key)
 void TXTEA::EncryptBlock(TBlock Block)
 {
 	if (Block.data() != nullptr) {
-		// The block's two words through an aligned copy (Patella-Modern issue #91): a packet's blocks start at any
-		// byte (the length before them), and a uint32 read there is undefined (UBSan: misaligned); x86 reads it all
-		// the same, as the original did. The same bytes, little-endian.
+		// The block's two words through an aligned copy: a packet's blocks start at any byte (the length before them),
+		// and a uint32 read there is undefined (UBSan: misaligned); x86 reads it all the same, as the original did. The
+		// same bytes, little-endian.
 		std::array<uint32, 2> Words{};
 		std::memcpy(Words.data(), Block.data(), sizeof(Words));
 		EncryptXTEA(Words.data(), Key.data());
@@ -76,9 +76,9 @@ void TXTEA::EncryptBlock(TBlock Block)
 void TXTEA::DecryptBlock(TBlock Block)
 {
 	if (Block.data() != nullptr) {
-		// The block's two words through an aligned copy (Patella-Modern issue #91): a packet's blocks start at any
-		// byte (the length before them), and a uint32 read there is undefined (UBSan: misaligned); x86 reads it all
-		// the same, as the original did. The same bytes, little-endian.
+		// The block's two words through an aligned copy: a packet's blocks start at any byte (the length before them),
+		// and a uint32 read there is undefined (UBSan: misaligned); x86 reads it all the same, as the original did. The
+		// same bytes, little-endian.
 		std::array<uint32, 2> Words{};
 		std::memcpy(Words.data(), Block.data(), sizeof(Words));
 		DecryptXTEA(Words.data(), Key.data());

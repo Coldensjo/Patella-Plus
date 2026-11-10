@@ -3,9 +3,9 @@
 // The file name Surface.cpp is inferred: the code lies between Status.cpp and
 // SurfaceDX.cpp in the alphabetical link order and is the engine-independent
 // part of the surface classes (SurfaceDX.cpp, surfaceDX9.cpp, SurfaceGL.cpp
-// derive from TSurface). The name SurfaceExitInstance is the binary's;
-// the rest are ours. TSurface itself, the engines' base class, is the platform's
-// interface since Patella-Modern issue #138 (platform/Surface.h, exported here); its default bodies are still
+// derive from TSurface). The name SurfaceExitInstance is the binary's; the rest
+// are ours. TSurface itself, the engines' base class, is the platform's
+// interface (platform/Surface.h, exported here); its default bodies are still
 // Surface.cpp's.
 
 #pragma once
@@ -15,16 +15,14 @@
 
 namespace patella {
 
-// Surface.cpp's data (issue #116, M7; notes/decisions.md, "#104: TClient and the subsystem objects", "#116" and
-// "#138"): the command line's engine number, the engine's surface object, and the data the engines share (the blit statistics,
-// the screen, the cache surfaces' size, the main window: platform::TSurfaceShared, the base,
-// which the engine's surface gets at its construction), with the same initial values. A part of TGraphics
-// (graphics.h, its member Engine), declared here and defined in Surface.cpp, as TSession is Status.cpp's inside
-// TCommunication. Its size is the same as before issue #138 (80 bytes on x64), so TGraphics' and TClient's later members
-// keep their offsets. Surface.cpp's functions are its members of the same names; the free functions forward to them. The
-// data the other files read or write was extern and is public (Control.cpp, Dialogs.cpp, MainFrm.cpp, Player.cpp and
-// the golden tests; the Vulkan engine through its TSurfaceShared); the surface object is private, and the main window
-// is the base's, read by TSurface's TestEngine.
+// Surface.cpp's data: the command line's engine number, the engine's surface object, and the data the engines share
+// (the blit statistics, the screen, the cache surfaces' size, the main window: platform::TSurfaceShared, the base,
+// which the engine's surface gets at its construction), with the same initial values. A part of TGraphics (graphics.h,
+// its member Engine), declared here and defined in Surface.cpp, as TSession is Status.cpp's inside TCommunication.
+// Surface.cpp's functions are its members of the same names; the free functions forward to them. The data the other
+// files read or write was extern and is public (Control.cpp, Dialogs.cpp, MainFrm.cpp, Player.cpp and the golden tests;
+// the Vulkan engine through its TSurfaceShared); the surface object is private, and the main window is the base's, read
+// by TSurface's TestEngine.
 class TGraphicsEngine final : public platform::TSurfaceShared {
 public:
 	TGraphicsEngine() = default;
@@ -47,8 +45,7 @@ private:
 	TSurface *Surface{}; // the engine's surface; raw, as the original's (deleted by SurfaceExitInstance)
 };
 
-// The transition's access path (notes/decisions.md, "#104: TClient and the subsystem objects"): the one TClient's
-// TGraphicsEngine (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the one TClient's TGraphicsEngine (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 TGraphicsEngine &GraphicsEngine();
 } // namespace bridge

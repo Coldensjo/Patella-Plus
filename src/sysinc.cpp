@@ -17,15 +17,14 @@
 #include <optional>
 #include <string>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
-// the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):
-// the window tree owns its children, the message queue its blocks, the lists their entries
+// cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file: the original's malloc'd entries and
+// texts, freed by their lists; the original's raw owners: the window tree owns its children, the message queue its
+// blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
 // The other half of Player.cpp's XOR-encoded window title ("Tibia   ") and
 // class name ("TibiaClient"); the keys are Player.cpp's. First in this
-// object's .rdata, before the PROGRAM_ERROR texts (owner: notes/decisions.md,
-// "Unknown-owner data (issue #12)"; low).
+// object's .rdata, before the PROGRAM_ERROR texts.
 const std::array<int, 8> TitleCode = {68, 75, 129, 81, 98, 78, 96, 141};
 const std::array<int, 11> ClassNameCode = {57, 193, 225, 58, 140, 118, 195, 214, 239, 244, 137};
 
@@ -44,9 +43,9 @@ int GetMilliseconds()
 	return (int)patella::platform::Platform().Clock.Milliseconds() - StartTime;
 }
 
-// True when the clipboard has no text. Since Patella-Modern issue #112 the clipboard's text is its UTF-16 text
-// (CF_UNICODETEXT; Windows makes it from CF_TEXT and CF_TEXT from it, so the one is there when the other is).
-// Since issue #119 the clipboard is the platform's IClipboard (platform/Clipboard.h; TSdlClipboard).
+// True when the clipboard has no text. The clipboard's text is its UTF-16 text (CF_UNICODETEXT; Windows makes it from
+// CF_TEXT and CF_TEXT from it, so the one is there when the other is). The clipboard is the platform's IClipboard
+// (platform/Clipboard.h; TSdlClipboard).
 bool IsClipboardEmpty()
 {
 	return !patella::platform::Platform().Clipboard.HasText();
@@ -91,7 +90,7 @@ const char *GetErrorText(int Error)
 
 namespace {
 
-// The last hint names the bug report address (BuildConfig.h, issue #169).
+// The last hint names the bug report address (BuildConfig.h).
 constexpr const char *BugReportBefore = "Please submit a detailed bugreport including the error code number to ";
 constexpr const char *BugReportAfter = ".";
 constexpr auto BugReportHint = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(BugReportBefore,
@@ -192,11 +191,10 @@ char *GetClipboardText()
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// Since Patella-Modern issue #112 the text (the client's, Windows-1252) goes on the
-// clipboard as UTF-16 (CF_UNICODETEXT), instead of the original's CF_TEXT, so that
-// another program reads it as the client shows it whatever the system's ANSI code
-// page and the input language. Since issue #119 the platform's IClipboard::SetText
-// (TSdlClipboard).
+// The text (the client's, Windows-1252) goes on the clipboard as UTF-16
+// (CF_UNICODETEXT), instead of the original's CF_TEXT, so that another program
+// reads it as the client shows it whatever the system's ANSI code page and the
+// input language: the platform's IClipboard::SetText (TSdlClipboard).
 bool SetClipboardText(const char *Text)
 {
 	return patella::platform::Platform().Clipboard.SetText(Text);

@@ -1,19 +1,18 @@
 // Player.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The application: start-up (InitInstance), the message loop (Run),
-// idle processing, and the top-level error handling, which ends the client
-// with the critical error box. The original also wrote the error to error.txt
-// and read it back at the next start for the error report dialog; that
-// report is gone (Patella-Modern issue #74, decision D2): the message goes to
-// the developer log instead (issue #77, D16: log/Log.h; stderr, and a log file
-// when Patella.ini names one), with the report's diagnostics at the debug level.
+// The application: start-up (InitInstance), the message loop (Run), idle
+// processing, and the top-level error handling, which ends the client with
+// the critical error box. The original also wrote the error to error.txt and
+// read it back at the next start for the error report dialog; that report is
+// gone: the message goes to the developer log instead (log/Log.h; stderr, and
+// a log file when Patella.ini names one), with the report's diagnostics at
+// the debug level.
 //
 // Order: the functions without line evidence first, in binary order (message
 // map, constructor, FatalError), then the two text decoders, the window counter
 // for EnumWindows, the error handlers (binary order, before their first user;
-// the error.txt reader that followed them is gone since issue #74), then
-// InitInstance, Run and OnIdle. The compiler placed OnIdle right after the
-// decoders.
+// the error.txt reader that followed them is gone), then InitInstance, Run and
+// OnIdle. The compiler placed OnIdle right after the decoders.
 
 #include "Player.h"
 #include "Control.h"
@@ -46,7 +45,7 @@ namespace {
 
 // The texts of the user interface that this file shows. The numbers are their places in the original's table of
 // texts, a header every file included.
-// 116: the first sentence of the original's text (Patella-Modern issue #74, decision D2: there is no error file).
+// 116: the first sentence of the original's text (there is no error file).
 // The original went on: "\r\n\r\nA detailed error report has been written to the error file which\r\nyou are asked
 // to submit at your next login." 117 and 118, the error report dialog's texts, are gone with that dialog.
 const char *TextCriticalError = "The Tibia client encountered a critical error and had to be stopped.";
@@ -65,13 +64,12 @@ const std::array<int, 11> ClassNameKey = {109, 168, 131, 83, 237, 53, 175, 191, 
 int LastMouseCursor = CURSOR_ARROW;
 int NumberOfTibiaWindows; // counted by CountTibiaWindows
 POINT LastMousePosition;
-// Not in the original (Patella-Modern issue #127): OnIdle's local. Where Windows cannot read the cursor (another desktop:
-// the lock screen, UAC's secure desktop; GetCursorPos fails) the point stays what it last was; the original read an
-// uninitialised local there, in practice the stack slot's previous value.
+// Not in the original: OnIdle's local. Where Windows cannot read the cursor (another desktop: the lock screen, UAC's
+// secure desktop; GetCursorPos fails) the point stays what it last was; the original read an uninitialised local there,
+// in practice the stack slot's previous value.
 POINT LastCursorPosition;
 
-// Not in the original (Patella-Modern issue #77, D16): bytes as error.txt listed them until issue #74, " 016 000 ...",
-// each as three digits.
+// Not in the original: bytes as the original's error.txt listed them, " 016 000 ...", each as three digits.
 template <std::size_t N>
 std::string ByteList(const std::array<uint8, N> &Bytes)
 {
@@ -84,9 +82,9 @@ std::string ByteList(const std::array<uint8, N> &Bytes)
 	return Text;
 }
 
-// Not in the original (Patella-Modern issue #77, D16): at the debug level, what HandleException's report in error.txt
-// held besides the message until issue #74: the engine, the last ten packet types (the newest first), the first bytes
-// of the last packet when there was one, and the player's position in the game. A part that fails is left out.
+// Not in the original: at the debug level, what the original's report in error.txt held besides the message: the
+// engine, the last ten packet types (the newest first), the first bytes of the last packet when there was one, and the
+// player's position in the game. A part that fails is left out.
 void LogDiagnostics() noexcept
 {
 	if (!patella::log::Enabled(patella::log::TLevel::Debug))
@@ -119,7 +117,7 @@ void LogDiagnostics() noexcept
 	}
 }
 
-// Issue #123: ScreenToClient on the SDL3 window (its client area's place as SDL knows it).
+// ScreenToClient on the SDL3 window (its client area's place as SDL knows it).
 void SdlScreenToClient(POINT &Point)
 {
 	int x = Point.x;
@@ -139,10 +137,9 @@ CPlayerApp::CPlayerApp()
 }
 
 // Every step is guarded on its own; the program ends here. this is passed
-// but not used. Since issue #74 (D2) the box's caption and text go to stderr
-// first, the fork's record of a fatal error; since issue #77 (D16) through
-// the developer log, at the error level. Debug builds then write the stack
-// (std::stacktrace, where the standard library has it) and stop in an
+// but not used. The box's caption and text go to the developer log first, at
+// the error level: the record of a fatal error. Debug builds then write the
+// stack (std::stacktrace, where the standard library has it) and stop in an
 // attached debugger; without a debugger they go on as Release builds do.
 void CPlayerApp::FatalError(const char *Text, const char *Caption)
 {
@@ -156,26 +153,26 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 	} catch (...) { // NOLINT(bugprone-empty-catch): every step of the fatal path is guarded on its own, and the box still comes
 	}
 	try {
-		// Patella-Modern issue #90: after a failed InitControl (CMainFrame's constructor) there is no main
-		// window and, on x64, no surface (GetSurface makes one only once SurfaceInitInstance has run), and
-		// MainFrame points to the freed frame: SetDisplayMode's calls would fault. Tibia.exe makes them (under
-		// cdb its CWnd::ModifyStyle faults on the freed frame, 0xfeeefeee), and its catch (...) (MSVC 7.1: an
-		// access violation as well) goes on to the box; under /EHsc it does not, so the step is skipped.
+		// After a failed InitControl (CMainFrame's constructor) there is no main window and, on x64, no surface
+		// (GetSurface makes one only once SurfaceInitInstance has run), and MainFrame points to the freed frame:
+		// SetDisplayMode's calls would fault. Tibia.exe makes them (under cdb its CWnd::ModifyStyle faults on the freed
+		// frame, 0xfeeefeee), and its catch (...) (MSVC 7.1: an access violation as well) goes on to the box; under
+		// /EHsc it does not, so the step is skipped.
 		if (GetViewMode() != 1 && patella::bridge::GUI().MainWindow != nullptr && GetSurface() != nullptr)
-			patella::sdlframe::SetDisplayMode(1); // issue #122: the SDL3 window's
+			patella::sdlframe::SetDisplayMode(1); // the SDL3 window's
 	} catch (...) {                               // NOLINT(bugprone-empty-catch): as above
 	}
 	try {
-		// Patella-Modern issue #83: before InitInstance sets m_pMainWnd (a fatal error in its first Redraw: a
-		// failing first present) there is no main window. Tibia.exe calls CWnd::ShowWindow on null there too, and
-		// its catch (...) (MSVC 7.1: an access violation as well) goes on to the box; under /EHsc it does not.
-		patella::sdlframe::Hide(); // issue #122: the SDL3 window's ShowWindow(SW_HIDE)
+		// Before InitInstance sets m_pMainWnd (a fatal error in its first Redraw: a failing first present) there is no
+		// main window. Tibia.exe calls CWnd::ShowWindow on null there too, and its catch (...) (MSVC 7.1: an access
+		// violation as well) goes on to the box; under /EHsc it does not.
+		patella::sdlframe::Hide(); // the SDL3 window's ShowWindow(SW_HIDE)
 	} catch (...) {                // NOLINT(bugprone-empty-catch): as above
 	}
-	// MessageBoxA with MB_ICONHAND (issue #119: the platform's IWindow).
+	// MessageBoxA with MB_ICONHAND (the platform's IWindow).
 	patella::platform::Platform().Window.ShowMessageBox(nullptr, Text, Caption, patella::platform::TMessageBoxIcon::Error);
-	// Issue #108: the main window stays as the original's global did, allocated and not closed. TGUI owns it, and
-	// TClient's static destruction after exit(1) would destroy it and close its children (packets, preferences).
+	// The main window stays as the original's global did, allocated and not closed. TGUI owns it, and TClient's static
+	// destruction after exit(1) would destroy it and close its children (packets, preferences).
 	patella::bridge::GUI().AbandonWindows();
 	exit(1);
 }
@@ -201,8 +198,8 @@ void GetWindowClassName(char *Text)
 namespace {
 
 // EnumWindows callback: counts the windows whose title or class matches the
-// client's (caseless), this one included. Since Patella-Modern issue #119 the
-// platform's IWindow::VisitWindows calls it with the window's title and class
+// client's (caseless), this one included. The platform's
+// IWindow::VisitWindows calls it with the window's title and class
 // (TWin32Window: the original's GetWindowTextA and GetClassNameA with 30,
 // platform/Win32Platform.cpp).
 void CountTibiaWindows(const char *WindowText, int TextLength, const char *WindowClass, int ClassLength)
@@ -226,7 +223,7 @@ void CPlayerApp::HandleProgramError(PROGRAM_ERROR Error)
 		Terminating = true;
 		return;
 	}
-	const int Code = static_cast<int>(Error); // an enum class since issue #80
+	const int Code = static_cast<int>(Error); // an enum class
 	std::stringstream Message;
 	Message << GetErrorText(Code) << " (Error Code " << Code << ")\r\n\r\n"
 			<< GetErrorHint(Code);
@@ -237,12 +234,11 @@ void CPlayerApp::HandleProgramError(PROGRAM_ERROR Error)
 // to error.txt first (the client version, the exception's origin, the time, the
 // Windows version, the engine, the last packets, the player's position and the
 // message), which ReadErrorFile read back at the next start for the error report
-// dialog and Control.cpp sent to the server as packet 0xe8. That report is gone
-// (Patella-Modern issue #74, decision D2): the exception's message goes to
-// stderr, then FatalError's box (whose text, TextCriticalError, no longer
-// mentions the error file) ends the client. Since issue #77 (D16) the message
-// goes through the developer log at the error level, and the report's other
-// lines at the debug level (LogDiagnostics).
+// dialog and Control.cpp sent to the server as packet 0xe8. That report is gone:
+// the exception's message goes to the developer log at the error level and the
+// report's other lines at the debug level (LogDiagnostics), then FatalError's
+// box (whose text, TextCriticalError, does not mention the error file) ends the
+// client.
 void CPlayerApp::HandleException(TMyException &Exception)
 {
 	if (Terminating) {
@@ -259,10 +255,10 @@ void CPlayerApp::HandleException(TMyException &Exception)
 
 namespace {
 
-// Not in the original (Patella-Modern issue #122): InitInstance's steps after the command line on the SDL3 window
-// (SdlFrame.h), in the same order as the original's: the frame (CMainFrame's constructor and Create), the surfaces, the
-// count of the Tibia windows and its two boxes, the first Redraw, the window shown, the first mouse position. Its
-// exceptions go to InitInstance's handlers. The icon is the window class's (SDL_RegisterApp with resource 128).
+// Not in the original: InitInstance's steps after the command line on the SDL3 window (SdlFrame.h), in the same order
+// as the original's: the frame (CMainFrame's constructor and Create), the surfaces, the count of the Tibia windows and
+// its two boxes, the first Redraw, the window shown, the first mouse position. Its exceptions go to InitInstance's
+// handlers. The icon is the window class's (SDL_RegisterApp with resource 128).
 BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 {
 	TFixedString<56> Title;
@@ -278,7 +274,7 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 	}
 	if (!Gamemaster) {
 		NumberOfTibiaWindows = 0;
-		patella::platform::Platform().Window.VisitWindows(CountTibiaWindows); // EnumWindows (issue #119)
+		patella::platform::Platform().Window.VisitWindows(CountTibiaWindows); // EnumWindows
 		if (NumberOfTibiaWindows == 0) {
 			patella::platform::Platform().Window.ShowMessageBox(nullptr, "Application is corrupted! Please re-install Tibia.",
 				"Tibia - Error", patella::platform::TMessageBoxIcon::Warning); // MB_ICONEXCLAMATION
@@ -299,7 +295,7 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 	patella::sdlframe::Show(Maximized);
 	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastMousePosition); // GetCursorPos
 	if (GetViewMode() == 1)
-		SdlScreenToClient(LastMousePosition); // issue #123: the SDL window's coordinates
+		SdlScreenToClient(LastMousePosition); // the SDL window's coordinates
 	MouseMove(LastMousePosition.x, LastMousePosition.y);
 	return TRUE;
 }
@@ -316,14 +312,14 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 // issue #74.
 BOOL CPlayerApp::InitInstance()
 {
-	// Not in the original (Patella-Modern issue #130, D14): the data folder and Patella.ini's folder (the working
-	// folder where it has Tibia.dat, as the original's files were).
+	// Not in the original: the data folder and Patella.ini's folder (the working folder where it has Tibia.dat, as the
+	// original's files were).
 	patella::platform::ConfigureDataFiles();
-	// Not in the original (Patella-Modern issue #77, D16): the developer log's level and file from Patella.ini.
-	patella::log::LoadSettings(patella::platform::Platform().FileSystem); // issue #119: through the platform's files
+	// Not in the original: the developer log's level and file from Patella.ini.
+	patella::log::LoadSettings(patella::platform::Platform().FileSystem); // through the platform's files
 	patella::platform::LogDataFiles();
 #if defined(PATELLA_PLACEHOLDER_RESOURCES)
-	// Issue #127: the build-without-Tibia.exe's neutral pictures (cmake/WindowsX64.cmake); never a release's.
+	// The build-without-Tibia.exe's neutral pictures (cmake/WindowsX64.cmake); never a release's.
 	patella::log::Warn("this build has placeholder cursors and icon, not the original's (hosted CI's build)");
 #endif
 	try {
@@ -332,7 +328,7 @@ BOOL CPlayerApp::InitInstance()
 			GetWindowClassName(ClassName);
 
 			TFixedString<1024> Arguments;
-			strncpy(Arguments, CommandLine, sizeof(Arguments) - 1); // the last byte is set next (GCC's -Wstringop-truncation, issue #131)
+			strncpy(Arguments, CommandLine, sizeof(Arguments) - 1); // the last byte is set next (GCC's -Wstringop-truncation)
 			Arguments[sizeof(Arguments) - 1] = 0;
 			const char *Token = strtok(Arguments, " \t\n");
 			int Expected = 0;
@@ -377,14 +373,13 @@ BOOL CPlayerApp::InitInstance()
 	return TRUE;
 }
 
-// The same handlers as InitInstance around the message loop. Tibia.exe's Run then started patch.exe (_execl) when
-// CloseProgram had set RunPatch: gone with the patcher since Patella-Modern issue #75 (decision D9).
+// The same handlers as InitInstance around the message loop.
 int CPlayerApp::Run()
 {
 	const int Result = 0;
 	try {
 		try {
-			// Issue #122: the SDL3 window's loop (SdlFrame.cpp), whose end is the end of the program (exit code 0, as
+			// The SDL3 window's loop (SdlFrame.cpp), whose end is the end of the program (exit code 0, as
 			// CWinApp::ExitInstance's result was after MFC's own loop had stopped).
 			patella::sdlframe::Run([] { theApp.OnIdle(); });
 		} catch (const TProgramError &Error) {
@@ -398,18 +393,17 @@ int CPlayerApp::Run()
 	return Result;
 }
 
-// Forwards mouse moves and cursor changes, then handles the event queue (Control.cpp).
-// The original's returned TRUE (MFC's idle count argument and CWinApp::OnIdle's own
-// housekeeping went with MFC, issue #127).
+// Forwards mouse moves and cursor changes, then handles the event queue (Control.cpp). The original's returned TRUE
+// (MFC's idle count argument and CWinApp::OnIdle's own housekeeping went with MFC).
 void CPlayerApp::OnIdle()
 {
-	// Issue #125: the socket's events and lookups, where the message loop had just dispatched WinSock's messages.
+	// The socket's events and lookups, where the message loop had just dispatched WinSock's messages.
 	patella::platform::Platform().Socket.Poll();
-	patella::platform::Platform().Input.BeginIdle();                                                // issue #119: the test mode's driver step
-	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastCursorPosition); // GetCursorPos (issue #119)
+	patella::platform::Platform().Input.BeginIdle();                                                // the test mode's driver step
+	patella::platform::ReadCursorPosition(patella::platform::Platform().Input, LastCursorPosition); // GetCursorPos
 	POINT Point = LastCursorPosition;
 	if (GetViewMode() == 1)
-		SdlScreenToClient(Point); // issue #123: the SDL window's coordinates
+		SdlScreenToClient(Point); // the SDL window's coordinates
 	if (LastMousePosition.x != Point.x || LastMousePosition.y != Point.y) {
 		LastMousePosition.x = Point.x;
 		LastMousePosition.y = Point.y;
@@ -417,7 +411,7 @@ void CPlayerApp::OnIdle()
 	}
 	const int Cursor = GetMouseCursor();
 	if (Cursor != LastMouseCursor) {
-		patella::sdlframe::UpdateMouseCursor(); // issue #122: the SDL3 window's
+		patella::sdlframe::UpdateMouseCursor(); // the SDL3 window's
 		LastMouseCursor = Cursor;
 	}
 	ProcessEvents();

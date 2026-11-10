@@ -61,9 +61,8 @@ const char *TextReportRuleViolation = "Report Rule Violation"; // 146
 
 } // namespace
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory is off for the file, for the original's raw owners: the window tree owns its
+// children, the message queue its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
 // ParseInput's error names its value "(Word) MessageSeparator": the char
@@ -575,7 +574,7 @@ bool TTextWindow::GetPosition(int x, int y, int *Line, int *Offset, int *Length)
 				x = 0;
 			}
 			// The position in the text is a value of its own: in a register): the original's catch
-			// wrapper prints x without the indent (issue #34).
+			// wrapper prints x without the indent.
 			int TextX;
 			if (x < Format->Indent)
 				TextX = 0;
@@ -704,8 +703,7 @@ TTab::TTab(const char *_Caption, TTalkBuffer *_TextBuffer, TCallback _Callback)
 	SetSize(SkinProperties().Tab.Width, SkinProperties().Tab.Height);
 }
 
-// The destructor frees the captions; the rest of its work is the close (issue
-// #108).
+// The destructor frees the captions; the close (OnClose) does the rest.
 TTab::~TTab()
 {
 	CheckClosed("TTab");
@@ -717,7 +715,6 @@ TTab::~TTab()
 static_assert(std::is_nothrow_destructible_v<TTab> && std::is_nothrow_destructible_v<TConsoleWindow>,
 	"issue #108: the console's destructors are noexcept");
 
-// The destructor's work until issue #108 (after the captions are freed).
 // Leaves the channel on the server: the player's own request is cancelled, a
 // gamemaster's open request closed, a public channel left; the player's own
 // private channel only when it was closed by the server (Locked) and private
@@ -1041,10 +1038,10 @@ void TTabBar::ShowTab(TTab *Tab)
 	}
 }
 
-// The original's ~TTabBar (issue #108): deletes the left window, then the right
-// one (each closes its tabs, ~TWindow's order), then ~TWindow the bar's own
-// tabs. An exception out of the left window's tabs leaves the right one (the
-// original's delete of it did not run) and closes the bar's own tabs first.
+// Closes the left window, then the right one (each closes its tabs), then the
+// bar's own tabs. An exception out of the left window's tabs leaves the right
+// one (the original's delete of it did not run) and closes the bar's own tabs
+// first.
 void TTabBar::OnClose()
 {
 	try {
@@ -1089,8 +1086,8 @@ void TTabBar::StoreOpenChannels()
 void TTabBar::Rearrange(TTab *_Moved)
 {
 	// The constructor's Arrange calls this before it sets Busy, as the original's does: Busy's byte as the original
-	// reads it (not 0: busy), whatever the memory held (Patella-Modern issue #91: a bool that is neither false nor
-	// true is undefined, and GCC and Clang may test one bit of it; UBSan reports it).
+	// reads it (not 0: busy), whatever the memory held (a bool that is neither false nor true is undefined, and GCC and
+	// Clang may test one bit of it; UBSan reports it).
 	uint8 BusyByte = 0;
 	std::memcpy(&BusyByte, &Busy, sizeof(BusyByte));
 	if (BusyByte == 0) {
@@ -1119,8 +1116,8 @@ void TTabBar::Rearrange(TTab *_Moved)
 			TComponent *Next = Child->GetNext();
 			if (Moved != Child)
 				Child->SetPosition(x, Child->OffsetY);
-			// MSVC's analysis (C6011, issue #111): Child is not null inside the loop (its condition); the path it
-			// reports takes the assertion's loop above as leaving Next null and Child with it.
+			// MSVC's analysis (C6011): Child is not null inside the loop (its condition); the path it reports takes the
+			// assertion's loop above as leaving Next null and Child with it.
 			PATELLA_MSVC_WARNING(suppress : 6011)
 			x += Child->Width;
 			if (x > Width) {
@@ -1201,8 +1198,7 @@ TConsoleWindow::TConsoleWindow()
 }
 
 // Frees the history and deletes the buttons that are not children (the close
-// closed them); the rest of the original's destructor is the close (issue
-// #108).
+// closed them); the close (OnClose) does the rest.
 TConsoleWindow::~TConsoleWindow()
 {
 	CheckClosed("TConsoleWindow");
@@ -1219,12 +1215,10 @@ TConsoleWindow::~TConsoleWindow()
 		delete MoveLeftButton;
 }
 
-// The destructor's work until issue #108, in its order: stores the open
-// channels and the console height, closes the buttons that are not children
-// where it deleted them, removes the hotkeys; then the children (~TWindow's:
-// the tab bar with its tabs). An exception of the calls passes out of the
-// close after the children's closes, as the original's ~TWindow ran while it
-// passed.
+// Stores the open channels and the console height, closes the buttons that
+// are not children, removes the hotkeys; then the children (the tab bar with
+// its tabs). An exception of the calls passes out of the close after the
+// children's closes, as the original's ~TWindow ran while it passed.
 void TConsoleWindow::OnClose()
 {
 	try {
@@ -1906,8 +1900,8 @@ bool TConsoleWindow::SaveChannel() const
 	const TTalkBuffer *TextBuffer = GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
 	const std::int64_t Now = patella::platform::Platform().Clock.WallSeconds();
-	// ctime's text, the day as MSVC 7.1 writes it, of the 64-bit time (issue #62: after 2038 too, where the
-	// original's 32-bit time had none); where there is none (before 1970), printf wrote "(null)"
+	// ctime's text, the day as MSVC 7.1 writes it, of the 64-bit time (after 2038 too, where the original's 32-bit time
+	// had none); where there is none (before 1970), printf wrote "(null)"
 	TCRT71TimeText Stamp;
 	const char *Saved = FormatCRT71Time(Stamp, Now);
 	File.Print("\nChannel saved at {}", Saved != nullptr ? Saved : "(null)");

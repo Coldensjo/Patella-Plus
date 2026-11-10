@@ -1,4 +1,4 @@
-// SurfaceVulkan.cpp: the Vulkan engine's surface on the client's window (SurfaceVulkan.h; notes/vulkan.md).
+// SurfaceVulkan.cpp: the Vulkan engine's surface on the client's window (SurfaceVulkan.h).
 //
 // Every function follows its counterpart in surfaceDX9.cpp (the comments name it), with the Direct3D 9
 // calls replaced: ColorFill by TRenderer::Fill, the dynamic vertex buffer by TRenderer::Draw, LockRect by
@@ -8,13 +8,14 @@
 // object as there. Not new code paths for the error reports: no PATELLA_ASSERT (an index out of range is
 // ignored), and the Vulkan back end's failures become PROGRAM_ERROR 12, as Direct3D's device failures.
 //
-// The window system (issue #126; vulkan/WindowSystem.h): the main window's client area, the screen's size and each
-// device's surface come from SDL3 (SDL_Vulkan_CreateSurface). Still Win32: the devices' own windows (PresentWindow.h,
-// issue #52). The fullscreen display mode is the platform's IWindow::SetFullscreenMode since issue #124 (SDL3's
-// SDL_SetWindowFullscreenMode on every system since issue #152).
+// The window system (vulkan/WindowSystem.h): the main window's client area, the screen's size and each device's
+// surface come from SDL3 (SDL_Vulkan_CreateSurface). Still Win32: the devices' own windows (PresentWindow.h). The
+// fullscreen display mode is the platform's IWindow::SetFullscreenMode (SDL3's SDL_SetWindowFullscreenMode on every
+// system).
 //
-// Headless (issue #145; platform/Window.h IWindow::Headless, the test build's --test-headless): the device gets no
-// surface (TRenderer renders into its images and presents nothing), and fullscreen mode does not change the display's mode. The devices' windows are made as always.
+// Headless (platform/Window.h IWindow::Headless, the test build's --test-headless): the device gets no surface
+// (TRenderer renders into its images and presents nothing), and fullscreen mode does not change the display's mode.
+// The devices' windows are made as always.
 
 #include "common.h"
 #include "vulkan/SurfaceVulkan.h"
@@ -58,14 +59,14 @@ int CurrentTexture;
 uint32 FrameCount;
 double LastFPSTime;
 
-// The windows the devices present in (PresentWindow.h; issue #52): one per device, a child of the main
+// The windows the devices present in (PresentWindow.h): one per device, a child of the main
 // window. They outlive the surface object (a device switch deletes it), so the window of the device
 // before a switch keeps its last frame until the next device has shown one.
 patella::vulkan::TPresentWindows PresentWindows;
 
 const int VertexLimit = 9600; // surfaceDX9.cpp's vertex buffer
 
-// The window system of the client's window (WindowSystem.h, issue #126).
+// The window system of the client's window (WindowSystem.h).
 patella::vulkan::IWindowSystem &WindowSystem()
 {
 	return patella::vulkan::SdlWindowSystem();
@@ -109,8 +110,9 @@ const char *TSurfaceVulkan::DeviceName() const
 }
 
 // The device request: the graphics device choice (DeviceSettings.h: the advanced options' buttons,
-// Patella.ini, PATELLA_VULKAN; issue #31), the CPU driver next to the executable, the window the device
-// presents in (Window, a device's window; nullptr, or a headless client (issue #145): no surface) and its surface through the window system (issue #126).
+// Patella.ini, PATELLA_VULKAN), the CPU driver next to the executable, the window the device presents in
+// (Window, a device's window; nullptr, or a headless client: no surface) and its surface through the
+// window system.
 TDeviceRequest TSurfaceVulkan::Request(patella::platform::TWindowHandle Window)
 {
 	TDeviceRequest Result;
@@ -136,8 +138,8 @@ void TSurfaceVulkan::Fail()
 }
 
 // surfaceDX9.cpp TestEngine: a device for the window, released again. Its surface is on a hidden child
-// window of its own (PresentWindow.h, issue #52), so the test leaves nothing bound to the main window or
-// to a window that shows frames.
+// window of its own (PresentWindow.h), so the test leaves nothing bound to the main window or to a window
+// that shows frames.
 bool TSurfaceVulkan::TestEngine()
 {
 	TSurface::TestEngine();
@@ -145,8 +147,8 @@ bool TSurfaceVulkan::TestEngine()
 		return false;
 	try {
 		const patella::vulkan::TTestWindow Window(MainWindow());
-		// Issue #131: a headless run has no window to test on (SDL's dummy driver has no Vulkan windows on Linux); its device
-		// is created without a surface, as the headless client's are.
+		// A headless run has no window to test on (SDL's dummy driver has no Vulkan windows on Linux); its device is
+		// created without a surface, as the headless client's are.
 		if (hWindow != nullptr && Window.Handle() == nullptr && !patella::platform::Platform().Window.Headless())
 			return false;
 		TRenderer Test;
@@ -433,8 +435,8 @@ void TSurfaceVulkan::FinishFrame()
 			const int ShownWidth = Rect[SCREEN_SURFACE].right - x;
 			const int ShownHeight = Rect[SCREEN_SURFACE].bottom - y;
 			try {
-				// The device's window covers the main window's client area, which the surface had before
-				// issue #52; once it shows a frame, the window of the device before it goes.
+				// The device's window covers the main window's client area; once it shows a frame, the
+				// window of the device before it goes.
 				PresentWindows.Fit();
 				if (Renderer->Present(Image[SCREEN_SURFACE], x, y, ShownWidth, ShownHeight,
 						(uint32_t)(WindowRect.right - WindowRect.left), (uint32_t)(WindowRect.bottom - WindowRect.top)))
@@ -466,7 +468,7 @@ void TSurfaceVulkan::ExitDisplay()
 	CurrentTarget = -1;
 	CacheSurfaces = 0;
 	if (DisplayModeSet) {
-		// The original's ChangeDisplaySettingsA(nullptr, 0); since issue #124 the platform's IWindow::SetFullscreenMode.
+		// The original's ChangeDisplaySettingsA(nullptr, 0): the platform's IWindow::SetFullscreenMode.
 		patella::platform::Platform().Window.SetFullscreenMode(hWindow, nullptr);
 		DisplayModeSet = false;
 	}
@@ -532,13 +534,12 @@ bool TSurfaceVulkan::Init(patella::platform::TWindowHandle *Window, int VMode, T
 }
 
 // The display modes as surfaceDX9.cpp's DirectDraw 4 EnumDisplayModes(0) and its callback (SurfaceDX.obj's
-// copy) gave them (issue #20): the display's modes in the order EnumDisplaySettings lists them,
-// each size and depth once (without DDEDM_REFRESHRATES DirectDraw folds the refresh rates), at least
-// 640x480 and 16 bits. Frequency is 0: DirectDraw then reports none, and the callback tested the refresh
-// rate's flag in the pixel format's flags, where it is never set. On the machine of issue #20 both lists
-// are the same 24 modes in the same order (notes/vulkan.md). The test build can fix the list
-// (issue #48). Since issue #119 the modes are the platform's IWindow::DisplayMode (platform/Window.h; SDL3's list
-// on every system since issue #152, with the deliberate differences of platform/DisplayModeList.h).
+// copy) gave them: the display's modes in the order EnumDisplaySettings lists them, each size and depth
+// once (without DDEDM_REFRESHRATES DirectDraw folds the refresh rates), at least 640x480 and 16 bits.
+// Frequency is 0: DirectDraw then reports none, and the callback tested the refresh rate's flag in the
+// pixel format's flags, where it is never set. The test build can fix the list. The modes are the
+// platform's IWindow::DisplayMode (platform/Window.h; SDL3's list on every system, with the deliberate
+// differences of platform/DisplayModeList.h).
 int TSurfaceVulkan::GetFullscreenModes(TFullscreenMode **Modes)
 {
 	*Modes = nullptr;
@@ -649,8 +650,7 @@ void TSurfaceVulkan::BlitRectClipped(int ToSurface, int x, int y, int FromSurfac
 
 // InitSurfaces: the start state. surfaceDX9.cpp creates DirectDraw 4 here for the modes and the stretch
 // capabilities; the modes come from EnumDisplaySettings now (GetFullscreenModes), and Vulkan stretches on
-// every device, so CanStretch is set (surfaceDX9.cpp: DirectDraw's four stretch and shrink flags, which
-// the machine of issue #20 reports too).
+// every device, so CanStretch is set (surfaceDX9.cpp: DirectDraw's four stretch and shrink flags).
 void TSurfaceVulkan::InitSurfaces()
 {
 	hWindow = nullptr;
@@ -819,8 +819,8 @@ void TSurfaceVulkan::InitDisplay(int VMode, TFullscreenMode *GMode)
 // desktop, 12 without a Vulkan device.
 void TSurfaceVulkan::CreateSurfaces()
 {
-	// surfaceDX9.cpp: DirectDraw's GetDisplayMode, the desktop's depth (0 before InitSurfaces). Since issue #138 the
-	// platform's IWindow::DesktopMode (platform/Window.h; SDL3's SDL_GetCurrentDisplayMode since issue #152).
+	// surfaceDX9.cpp: DirectDraw's GetDisplayMode, the desktop's depth (0 before InitSurfaces). Here the platform's
+	// IWindow::DesktopMode (platform/Window.h; SDL3's SDL_GetCurrentDisplayMode).
 	patella::platform::TDisplayMode Desktop;
 	if (!Initialized || !patella::platform::Platform().Window.DesktopMode(Desktop))
 		Desktop.Depth = 0;
@@ -828,14 +828,14 @@ void TSurfaceVulkan::CreateSurfaces()
 		throw TProgramError{PROGRAM_ERROR::COLOR_DEPTH};
 	if (ViewMode == FULLSCREEN_MODE) {
 		// Direct3D 9's fullscreen device sets the display mode; the window is already a popup over the
-		// whole screen (MainFrm.cpp SetDisplayMode; SdlFrame.cpp's: SDL's fullscreen window). Since issue #124 the
-		// platform's IWindow::SetFullscreenMode (the width, height and bits per pixel; SDL3's SDL_SetWindowFullscreenMode
-		// on every system since issue #152).
+		// whole screen (MainFrm.cpp SetDisplayMode; SdlFrame.cpp's: SDL's fullscreen window). Here the platform's
+		// IWindow::SetFullscreenMode does (the width, height and bits per pixel; SDL3's SDL_SetWindowFullscreenMode
+		// on every system).
 		patella::platform::TDisplayMode Mode;
 		Mode.Width = Width;
 		Mode.Height = Height;
 		Mode.Depth = Depth;
-		// Issue #145: headless, the display's mode stays the desktop's (the change counts as made).
+		// Headless, the display's mode stays the desktop's (the change counts as made).
 		if (!patella::platform::Platform().Window.Headless()) {
 			if (!patella::platform::Platform().Window.SetFullscreenMode(hWindow, &Mode))
 				throw TProgramError{PROGRAM_ERROR::SURFACE};
@@ -843,7 +843,7 @@ void TSurfaceVulkan::CreateSurfaces()
 		}
 	}
 	try {
-		// A window of its own for the new device (PresentWindow.h, issue #52).
+		// A window of its own for the new device (PresentWindow.h).
 		patella::platform::TWindowHandle Window = nullptr;
 		if (hWindow != nullptr) {
 			Window = PresentWindows.Open(MainWindow());

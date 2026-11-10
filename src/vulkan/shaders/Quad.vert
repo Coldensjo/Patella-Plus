@@ -1,5 +1,5 @@
-// Quad.vert: the vertex shader of every pipeline (notes/vulkan.md). Positions are pixels of the
-// target (Quads.h); Vulkan's y axis points down, as the client's.
+// Quad.vert: the vertex shader of every pipeline. Positions are pixels of the target (Quads.h);
+// Vulkan's y axis points down, as the client's.
 #version 450
 #extension GL_GOOGLE_include_directive : require
 #include "Constants.glsl"

@@ -2,21 +2,20 @@
 //
 // Functions are in original source order, which comes from the assertion and
 // catch line numbers. The binary does not keep that order: CheckSurface,
-// Redraw, ProcessEvents, ReceivePackets and InitControl come
-// after the others. Every function had the original's catch wrappers
-// (common.h), except where noted. Since issue #78 the functions here have none
-// apart from the handlers of their own: CheckSurface's (an error of the surface
-// becomes PROGRAM_ERROR 12), ChangeDevice's (each step's error with its
-// message) and InitControl's (a PROGRAM_ERROR shuts the modules down again).
+// Redraw, ProcessEvents, ReceivePackets and InitControl come after the
+// others. The functions here have no handlers apart from their own:
+// CheckSurface's (an error of the surface becomes PROGRAM_ERROR 12),
+// ChangeDevice's (each step's error with its message) and InitControl's (a
+// PROGRAM_ERROR shuts the modules down again).
 //
-// Patella-Modern issue #118: the functions are TGUI's members (GUI.h), the data
-// they read TGUI's (#107) and, through its constructor references, TNetwork's
-// and TCommunication's (#105); the free functions of the original's names, at
-// the end of the file, forward to them. Their calls of each other are member
-// calls; their calls into the other files (GUI.cpp's hotkeys and timers and
-// MainWindow.cpp's ExitMainWindow included, with :: where a TGUI member of
-// the same name would hide them) stay those files' free functions, which the
-// golden Control and Communication tests fake (commworld.cpp's WorldFakes).
+// The functions are TGUI's members (GUI.h), the data they read TGUI's and,
+// through its constructor references, TNetwork's and TCommunication's; the
+// free functions of the original's names, at the end of the file, forward to
+// them. Their calls of each other are member calls; their calls into the
+// other files (GUI.cpp's hotkeys and timers and MainWindow.cpp's
+// ExitMainWindow included, with :: where a TGUI member of the same name would
+// hide them) stay those files' free functions, which the golden Control and
+// Communication tests fake (commworld.cpp's WorldFakes).
 //
 // The event queue (Status.cpp, AddMessage and FetchMessage) carries a type
 // and two parameters; ProcessEvents turns each event into a dialog, a context
@@ -75,9 +74,9 @@ const char *TextRuleViolations = "Rule Violations"; // 145
 
 } // namespace
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-owning-memory and cppcoreguidelines-pro-type-vararg are off for the file, for the original's raw
+// owners (the window tree owns its children, the message queue its blocks, the lists their entries) and its varargs
+// (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
 // The client area changed size (MainFrm.cpp); in fullscreen mode (view
@@ -164,7 +163,7 @@ void patella::TGUI::Redraw(bool Force)
 {
 	CheckSurface(Force);
 	if (GetSurface()->IsUnavailable()) {
-		patella::platform::Platform().Clock.FrameWait(10); // Sleep(10): the platform's frame wait (issue #109)
+		patella::platform::Platform().Clock.FrameWait(10); // Sleep(10): the platform's frame wait
 		return;
 	}
 	MainWindow->Draw(1, 0, 0);
@@ -212,7 +211,7 @@ void patella::TGUI::Redraw(bool Force)
 		const double FPS = GetSurface()->GetFPS();
 		TFixedString<64> Text;
 		// Stays _snprintf: printf's %f and std::format's differ for NaN ("-nan(ind)"), and a rate with more
-		// than 10 digits fills the 20 characters (no NUL), which the type would cut (issue #64).
+		// than 10 digits fills the 20 characters (no NUL), which the type would cut.
 		MsvcSnprintf(Text, 20, "DX9 %.02f fps", FPS);
 		const TRGBColor Color = {200, 200, 200};
 		PrintText(1, 4, 4, FONT_BORDERED, Color, Text, 0);
@@ -312,7 +311,7 @@ void patella::TGUI::MouseMove(int x, int y)
 		MainWindow->HelpMouseMove(x, y);
 		// The bubble is kept in a local: ModalWindow is read after
 		// HelpMouseMove and written only after Place, so an exception before
-		// that leaves it as it was (issue #36).
+		// that leaves it as it was.
 		THelpBubble *Bubble = static_cast<THelpBubble *>(ModalWindow);
 		if (TakeHelpHandleChanged()) {
 			DeleteComponent(Bubble);
@@ -540,9 +539,9 @@ void patella::TGUI::KeyPress(int Key)
 	SetMouseOverText(nullptr);
 }
 
-// False while a character is in the game; then the logout warning is posted (event 7) unless another window is open. The array is
-// allocated with new[]; ProcessEvents deletes it. GCC's analyzer (issue #111): the message queue owns the block it gets as an integer
-// (AddMessage; the message's handler deletes it).
+// False while a character is in the game; then the logout warning is posted (event 7) unless another window is open.
+// The array is allocated with new[]; ProcessEvents deletes it. GCC's analyzer: the message queue owns the block it gets
+// as an integer (AddMessage; the message's handler deletes it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 bool patella::TGUI::CloseRequest() const
@@ -577,7 +576,7 @@ void patella::TGUI::ConnectionEstablished()
 {
 	if (GetConnectionState() == CONNECTION_CONNECTING_LOGIN_SERVER) {
 		SetConnectionState(CONNECTION_LOGIN_SENT);
-		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
+		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 		const char *Password = GetAccountPassword();
 		SendLogin(GetAccountNumber(), Password);
 		return;
@@ -586,10 +585,10 @@ void patella::TGUI::ConnectionEstablished()
 		const int OldConnectionState = GetConnectionState();
 		SetConnectionState(CONNECTION_GAME_LOGIN_SENT);
 		Communication.OutfitRequested = false;
-		// The original's order: In's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
+		// The original's order: In's arguments right to left (MSVC; GCC and Clang may differ).
 		const int AccountCharacters = GetAccountCharacters();
 		PATELLA_ASSERT_VALUES(In(GetActiveCharacter(),0,AccountCharacters-1), GetActiveCharacter(), OldConnectionState);
-		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
+		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 		const char *Password = GetAccountPassword();
 		const char *Name = GetCharacterName(GetActiveCharacter());
 		SendGameLogin(GetAccountNumber(), Name, Password);
@@ -620,8 +619,7 @@ void patella::TGUI::ReceivePackets()
 			case LOGIN_RECEIVE_MESSAGE_OF_THE_DAY:
 				ReceiveMessageOfTheDay();
 				break;
-			// The patch packets (Tibia.exe: ReceivePatch, ReceiveWholeFile, ReceivePatchBlock) end the login since
-			// Patella-Modern issue #75 (decision D9).
+			// The patch packets (Tibia.exe: ReceivePatch, ReceiveWholeFile, ReceivePatchBlock) end the login.
 			case LOGIN_RECEIVE_PATCH:
 			case LOGIN_RECEIVE_WHOLE_FILE:
 			case LOGIN_RECEIVE_PATCH_BLOCK: ReceiveUpdateRequest(); break;
@@ -722,9 +720,9 @@ void patella::TGUI::ReceivePackets()
 	}
 }
 
-// The close handler for InitNetwork. A pending reconnect (event 0x3f) logs in again: to the game server if the character was in the
-// game and the 5 seconds have not passed, else to the login server. GCC's analyzer (issue #111): the message queue owns the block it
-// gets as an integer (AddMessage; the message's handler deletes it).
+// The close handler for InitNetwork. A pending reconnect (event 0x3f) logs in again: to the game server if the
+// character was in the game and the 5 seconds have not passed, else to the login server. GCC's analyzer: the message
+// queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void patella::TGUI::ConnectionClosed()
@@ -759,7 +757,7 @@ void patella::TGUI::ConnectionClosed()
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
 // The mouse position for the context menus' constructors, the y first: the original's order of their arguments, right
-// to left (MSVC; GCC and Clang may differ, Patella-Modern issue #91).
+// to left (MSVC; GCC and Clang may differ).
 namespace {
 struct TMousePosition {
 	int x, y;
@@ -780,7 +778,7 @@ void patella::TGUI::TimerEvent() const
 {
 	IncrementActionNumber();
 	if (LastMouseMove != 0 && LastMouseMove == GetActionNumber() - 10) {
-		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
+		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 		const int MouseY = GetMouseY();
 		const int MouseX = GetMouseX();
 		if (ModalWindow != nullptr)
@@ -801,7 +799,7 @@ void patella::TGUI::TimerEvent() const
 		if (GetActionNumber() - GetPendingActionNumber() < 7)
 			return;
 		if (GetPendingActionState() == 6) {
-			// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
+			// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 			const int MouseY = GetMouseY();
 			const int MouseX = GetMouseX();
 			if (ModalWindow != nullptr)
@@ -908,7 +906,7 @@ void patella::TGUI::ProcessEvents()
 			ModalWindow = CreateBugReportDialog();
 			break;
 		case MESSAGE_NEW_CHANNEL_DIALOG: {
-			// ReceiveChannelList's int[]: the count, then the channel IDs (Patella-Modern issue #30).
+			// ReceiveChannelList's int[]: the count, then the channel IDs.
 			int *Data = reinterpret_cast<int *>(Param1);
 			ModalWindow = CreateNewChannelDialog(Data[0], &Data[1], reinterpret_cast<const char (*)[30]>(Param2)); // NOLINT(modernize-avoid-c-arrays): CreateNewChannelDialog's parameter (Dialogs.h)
 			delete[] Data;
@@ -988,7 +986,6 @@ void patella::TGUI::ProcessEvents()
 		case MESSAGE_MESSAGE_OF_THE_DAY:
 			ModalWindow = CreateMessageDialog("Message of the Day", GetMessageOfTheDay());
 			break;
-		// 0x29, the update dialog (ReceivePatch and ReceiveWholeFile posted it), is gone since issue #75.
 		case MESSAGE_USE_WITH:
 			SetActionState(ACTIONSTATE_USE_WITH);
 			break;
@@ -1090,10 +1087,6 @@ void patella::TGUI::ProcessEvents()
 				AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 			}
 			break;
-		// 0x40 (wait until the login connection is closed), 0x41-0x44 (InstallPatch: Tibia.dat, .spr, .pic,
-		// Patch.exe), 0x45-0x47 (Tibia.dat, .spr and .pic loaded again after a patch) and 0x48 (CloseCallback:
-		// the client closes and runs patch.exe) were posted only by ReceivePatchBlock; they are gone with it since
-		// Patella-Modern issue #75 (decision D9), and with 0x40 the shared exit block it jumped to (#42).
 		default:
 			TERROR1("unknown message type", Type);
 		}
@@ -1113,8 +1106,7 @@ void patella::TGUI::ProcessEvents()
 	Redraw(false);
 }
 
-// Called when the main frame window is created. Tibia.exe's third parameter, CloseProgram (event 0x48's
-// callback), is gone with the patcher since issue #75.
+// Called when the main frame window is created.
 void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL))
 {
 	WindowHandle = Window;
@@ -1157,15 +1149,15 @@ void patella::TGUI::InitControl(bool Gamemaster)
 	}
 }
 
-// Called from the main frame's destructor, and from InitControl after a failed
-// step. GetSurface creates a surface first if there is none, so one may be
-// created only to be deleted. Patella-Modern issue #90: the x64 GetSurface
-// makes one only once SurfaceInitInstance has run (after
-// InitControl), so after a failed InitControl there is none and the surface
-// step is skipped. Tibia.exe's GetSurface made a DirectX 5 surface there whose
-// ExitSurfaces faulted on its uninitialised members (seen under cdb); its
-// catch wrapper and InitControl's catch (...) (MSVC 7.1: an access violation
-// as well) swallowed that, and the PROGRAM_ERROR went on to the box.
+// Called from the main frame's destructor, and from InitControl after a
+// failed step. GetSurface creates a surface first if there is none, so one
+// may be created only to be deleted. GetSurface makes one only once
+// SurfaceInitInstance has run (after InitControl), so after a failed
+// InitControl there is none and the surface step is skipped. Tibia.exe's
+// GetSurface made a DirectX 5 surface there whose ExitSurfaces faulted on its
+// uninitialised members (seen under cdb); its catch wrapper and InitControl's
+// catch (...) (MSVC 7.1: an access violation as well) swallowed that, and the
+// PROGRAM_ERROR went on to the box.
 // Which module each of the five empty Exit functions belongs to follows InitControl's order in reverse (names ours).
 void patella::TGUI::ExitControl()
 {
@@ -1190,8 +1182,7 @@ void patella::TGUI::ExitControl()
 	ExitSysinc();
 }
 
-// Not in the original (Patella-Modern issue #77): LastPacketTypes in the order error.txt listed them until issue #74
-// (OutputControlErrorInformations), the newest first: the slot before LastPacketIndex, then back round the ring.
+// LastPacketTypes, the newest first: the slot before LastPacketIndex, then back round the ring.
 std::array<uint8, 10> patella::TGUI::GetLastPacketTypes() const
 {
 	std::array<uint8, 10> Types{};
@@ -1200,11 +1191,11 @@ std::array<uint8, 10> patella::TGUI::GetLastPacketTypes() const
 	return Types;
 }
 
-// --- The free functions of the original's names (issue #118) ------------------------
+// --- The free functions of the original's names -------------------------------------
 
-// Each forwards to its TGUI member (above): MainFrm.cpp, Player.cpp, Communication.cpp and the test mode call them, InitControl
-// passes four of them as callbacks (InitStatus's, InitNetwork's), and the golden tests call and fake them by name
-// (notes/decisions.md, "#104: TClient and the subsystem objects", rule 4).
+// Each forwards to its TGUI member (above): MainFrm.cpp, Player.cpp, Communication.cpp and the test mode call them,
+// InitControl passes four of them as callbacks (InitStatus's, InitNetwork's), and the golden tests call and fake them
+// by name.
 
 void Resize(int Width, int Height)
 {

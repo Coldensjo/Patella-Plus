@@ -1,12 +1,11 @@
-// Win32Platform.h: the Win32 implementations of the platform's interfaces (Patella-Modern issue #109, plan M7;
-// platform/Platform.h, notes/decisions.md, "#109: the platform interfaces"). Not part of the original source.
+// Win32Platform.h: the Win32 implementations of the platform's interfaces (platform/Platform.h). Not part of the
+// original source.
 //
-// The code behind each is what the client called before #109, call for call: timeGetTime, time and Sleep (the
-// clock). The file system is the portable TDataFileSystem (platform/FileSystem.h; issue #130); the network (MFC's CAsyncSocket
-// and WinSock until issue #125) is NetworkSocket(), below. Since issue #119 also the clipboard (sysinc.cpp's until then),
-// the input (GetCursorPos, SetTimer, KillTimer: MainFrm.cpp's and Player.cpp's) and the desktop's windows and display
-// (MessageBoxA, EnumWindows: Player.cpp's). Since issue #124 the SDL3 window's clipboard and desktop are SDL3's
-// (platform/SdlPlatform.h), and these the golden runner's; the display's modes are SDL3's alone since issue #152.
+// The code behind each is what the client called itself before, call for call: timeGetTime, time and Sleep (the
+// clock). The file system is the portable TDataFileSystem (platform/FileSystem.h); the network is NetworkSocket(),
+// below. Also the input (GetCursorPos, SetTimer, KillTimer: MainFrm.cpp's and Player.cpp's) and the desktop's windows
+// (MessageBoxA, EnumWindows: Player.cpp's). The SDL3 window's clipboard and desktop are SDL3's
+// (platform/SdlPlatform.h), and these the golden runner's; the display's modes are SDL3's alone.
 
 #pragma once
 
@@ -37,7 +36,7 @@ public:
 	[[nodiscard]] bool IgnoreDesktopInput() override { return false; }
 };
 
-// MessageBoxA, EnumWindows (GetWindowTextA, GetClassNameA). No display modes (issue #152): the golden runner asks none.
+// MessageBoxA, EnumWindows (GetWindowTextA, GetClassNameA). No display modes: the golden runner asks none.
 class TWin32Window final : public IWindow {
 public:
 	void ShowMessageBox(TWindowHandle Owner, const char *Text, const char *Caption, TMessageBoxIcon Icon) override;

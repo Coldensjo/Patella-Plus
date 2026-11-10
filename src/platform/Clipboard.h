@@ -1,15 +1,14 @@
-// Clipboard.h: IClipboard, the platform's clipboard (Patella-Modern issue #119, plan M7; notes/decisions.md, "#119:
-// the platform interfaces, part 2"). Not part of the original source. Portable: the standard library only.
+// Clipboard.h: IClipboard, the platform's clipboard. Not part of the original source. Portable: the standard library
+// only.
 //
 // sysinc.cpp's IsClipboardEmpty, GetClipboardText and SetClipboardText (the paste, CopyToClipboard,
 // CheckClipboardText, CopyTaintedClipboardText) ask the process's IClipboard (platform/Platform.h). The text is the
-// client's (Windows-1252, issue #112) on both sides; the implementation converts it to and from the platform's:
+// client's (Windows-1252) on both sides; the implementation converts it to and from the platform's:
 //
-//	TSdlClipboard     SDL3's clipboard text, UTF-8 (issue #112: '?' for a character Windows-1252 does not have;
-//	                  SdlPlatform.h): the client's on every system
+//	TSdlClipboard     SDL3's clipboard text, UTF-8 ('?' for a character Windows-1252 does not have; SdlPlatform.h):
+//	                  the client's on every system
 //
-// sysinc.cpp keeps its buffer and the original's odd CR removal; only the clipboard's own calls are here. M8: SDL3's
-// clipboard (UTF-8, through types/Cp1252.h).
+// sysinc.cpp keeps its buffer and the original's odd CR removal; only the clipboard's own calls are here.
 
 #pragma once
 

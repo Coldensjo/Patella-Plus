@@ -6,10 +6,9 @@
 // inferred (see Surface.h). No function has line evidence, so they are in
 // binary order.
 
-// The Windows x64 client (PATELLA_VULKAN, cmake/WindowsX64.cmake) has one engine since Patella-Modern
-// issue #20: the Vulkan engine (src/vulkan/SurfaceVulkan.h), without SurfaceDX.cpp,
-// SurfaceGL.cpp and surfaceDX9.cpp; GetSurface and SurfaceInitInstance have their own versions for it
-// below. The original's versions and the three engines left the fork with the 32-bit oracle (issue #94).
+// The Windows x64 client (PATELLA_VULKAN, cmake/WindowsX64.cmake) has one engine: the Vulkan engine
+// (src/vulkan/SurfaceVulkan.h), without SurfaceDX.cpp, SurfaceGL.cpp and surfaceDX9.cpp; GetSurface and
+// SurfaceInitInstance have their own versions for it below.
 #include "Surface.h"
 #include "types/GraphicsTypes.h"
 #include "Preferences.h"
@@ -20,7 +19,7 @@
 bool IsVulkanInstalled();
 TSurface *CreateSurfaceVulkan(patella::platform::TSurfaceShared &Shared);
 
-// Data: TGraphicsEngine's members since issue #116 (Surface.h), in the original's .data and .bss order.
+// Data: TGraphicsEngine's members (Surface.h), in the original's .data and .bss order.
 
 // The surface is made on the first call after SurfaceInitInstance, which names its window and loads the device
 // choice. Before that there is none: Control.cpp's ExitControl relies on it after a failed InitControl.
@@ -38,14 +37,14 @@ void patella::TGraphicsEngine::SurfaceExitInstance()
 	Surface = nullptr;
 }
 
-// The default test only takes the main window (the engine's shared data since issue #138).
+// The default test only takes the main window (the engine's shared data).
 bool TSurface::TestEngine()
 {
 	hWindow = Shared.SurfaceWindow;
 	return true;
 }
 
-// Shared: issue #138's (platform/Surface.h).
+// Shared: the data the engines share (platform/Surface.h).
 TSurface::TSurface(patella::platform::TSurfaceShared &Shared) : Shared(Shared)
 {
 	NumberOfModes = 0;
@@ -101,8 +100,8 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	SetEngine(Engine);
 }
 
-// The original's free functions (issue #116): each calls its member on the one TClient's TGraphicsEngine. The other
-// files call them, and the golden tests fake GetSurface and SurfaceExitInstance by these symbols.
+// The original's free functions: each calls its member on the one TClient's TGraphicsEngine. The other files call them,
+// and the golden tests fake GetSurface and SurfaceExitInstance by these symbols.
 TSurface *GetSurface()
 {
 	return patella::bridge::GraphicsEngine().GetSurface();

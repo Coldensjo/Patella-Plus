@@ -1,8 +1,8 @@
-// DataLocationLinux.cpp: where the Linux client's files are (Patella-Modern issue #131; notes/decisions.md, "#131"; the
-// rules are settings::ChooseLocations', issue #130). The counterpart of DataLocationWin32.cpp: the inputs from the
-// process, with Linux's own: the executable's folder from /proc/self/exe, the original names found without regard to
-// ASCII case (platform::FindNoCase, the data files of a Windows install on an ext4 disk), and the XDG option, the
-// command line's word --xdg-config (Patella.ini in $XDG_CONFIG_HOME/patella, else $HOME/.config/patella).
+// DataLocationLinux.cpp: where the Linux client's files are (the rules are settings::ChooseLocations'). The
+// counterpart of DataLocationWin32.cpp: the inputs from the process, with Linux's own: the executable's folder from
+// /proc/self/exe, the original names found without regard to ASCII case (platform::FindNoCase, the data files of a
+// Windows install on an ext4 disk), and the XDG option, the command line's word --xdg-config (Patella.ini in
+// $XDG_CONFIG_HOME/patella, else $HOME/.config/patella).
 
 #include "platform/FileSystem.h"
 #include "platform/Process.h"

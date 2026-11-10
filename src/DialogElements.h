@@ -15,7 +15,7 @@
 // _FocusGroup, Position, insertlength, start, length, _Min, _Max, _Value,
 // _ButtonRange, Number, Key, Code, Event, Surface, x, y, Width, Height).
 // TCheckBox is named after SkinProperties.CheckBox. The other class, member
-// and function names are ours; see notes/decisions.md, "DialogElements.cpp".
+// and function names are ours.
 
 #pragma once
 
@@ -31,9 +31,8 @@
 #include <cstring>
 #include <memory>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory is off for the file, for the original's raw owners: the window tree owns its
+// children, the message queue its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
 // --- Separator, resizer and frame -----------------------------------------------
@@ -136,11 +135,11 @@ public:
 	void MouseHover(int x, int y) override;
 	virtual void SetText(const char *_Text, bool Shorten);
 
-	std::unique_ptr<char[]> Text;     // the lines, each terminated (issue #58)
-	std::unique_ptr<char[]> FullText; // the text as given (the tooltip of a shortened text; issue #58)
+	std::unique_ptr<char[]> Text;     // the lines, each terminated
+	std::unique_ptr<char[]> FullText; // the text as given (the tooltip of a shortened text)
 	TFont Font;
 	int Lines;
-	std::unique_ptr<char *[]> Line; // the start of each line in Text (owns the table, not the lines; #58)
+	std::unique_ptr<char *[]> Line; // the start of each line in Text (owns the table, not the lines)
 	bool Shortened;                 // a line was cut to the width
 };
 
@@ -164,8 +163,8 @@ public:
 	virtual void SetText(const char *_Text, bool Rearrange);
 	int GetToken(const char *Text, int &TokenType, int &TokenData);
 
-	std::unique_ptr<char[]> Text; // issue #58
-	std::unique_ptr<char[]> Line; // the piece being laid out, a buffer as large as Text (issue #58)
+	std::unique_ptr<char[]> Text;
+	std::unique_ptr<char[]> Line; // the piece being laid out, a buffer as large as Text
 	bool AutoWidth;
 };
 
@@ -187,8 +186,8 @@ public:
 	void HandleEvent(int Event) override;
 
 	void (*OpenURL)(const char *URL);
-	std::unique_ptr<char[]> Destination; // issue #58
-	TTextButton *Button;                 // event 1
+	std::unique_ptr<char[]> Destination;
+	TTextButton *Button; // event 1
 	TLabel *Label;
 };
 
@@ -412,7 +411,7 @@ public:
 
 	int State;
 	int States;
-	std::unique_ptr<int[]> ButtonUps; // issue #58
+	std::unique_ptr<int[]> ButtonUps;
 	std::unique_ptr<int[]> ButtonDowns;
 	std::unique_ptr<TCallback[]> Callbacks;
 };
@@ -494,7 +493,7 @@ public:
 		SelectionStart = Position;
 	}
 
-	std::unique_ptr<char[]> Text; // issue #81
+	std::unique_ptr<char[]> Text;
 	int MaxLength;
 	int Cursor;
 	bool SingleLine; // a paste stops at the first line break
@@ -539,7 +538,7 @@ public:
 	bool RightButtonUp(int x, int y, int Flags) override { return TWindow::RightButtonUp(x, y, Flags); } // no menu
 	void HandleEvent(int Event) override;
 
-	std::unique_ptr<char[]> Stars; // issue #81
+	std::unique_ptr<char[]> Stars;
 };
 
 // A multi-line edit field with a scroll bar. LineStart holds the first
@@ -558,7 +557,7 @@ public:
 	// NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method): the original's virtual over TEditLine's plain one
 	virtual void SetActive(bool _Active);
 	virtual void SetText(const char *_Text, bool KeepPosition);
-	using TEditLine::SetText; // TEditLine's SetText(Text) too (GCC's -Woverloaded-virtual, issue #111)
+	using TEditLine::SetText; // TEditLine's SetText(Text) too (GCC's -Woverloaded-virtual)
 	void FormatText();
 
 	TIndexedVector<int> LineStart;

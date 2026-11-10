@@ -15,7 +15,7 @@
 #include <cstring>
 
 
-// The data is THelp's (Help.h, issue #107).
+// The data is THelp's (Help.h).
 
 void patella::THelp::SetHelpPosition(int x, int y)
 {
@@ -91,10 +91,9 @@ int patella::THelp::PopEventHelp()
 
 // The help bubble text of a handle: 10-23 parts of the screen, 1000+ things
 // in the game world. The SKIN arguments are the skins of the buttons drawn
-// inside the text. Texts without arguments are also passed as the format. _snprintf
-// until issue #64, now std::format's language ("%d" is "{}"): no text has a
-// brace or another conversion, and the longest (1297 characters) fits
-// HelpText, so the bytes are the same.
+// inside the text. Texts without arguments are also passed as the format, in
+// std::format's language: no text has a brace, and the longest (1297
+// characters) fits HelpText.
 const char *patella::THelp::GetHelpText(int Handle)
 {
 	switch (Handle) {
@@ -344,7 +343,7 @@ const char *patella::THelp::GetEventHelpTitle(int Number)
 
 namespace {
 
-// The first hint names the site (BuildConfig.h, issue #169): the original's text with SiteName in place of its site.
+// The first hint names the site (BuildConfig.h): the original's text with SiteName in place of its site.
 constexpr const char *WelcomeBeforeSite = "<b>Welcome to Tibia!\n<br=7><n>Greetings wanderer! You are about to enter the mysterious world of Tibia. Fight fearsome monsters, find untold treasures and make your character a true hero of the land! There are many different ways to play Tibia, but keep in mind that there are many others players out there who want to enjoy the game just like you, so please play fair and follow the Tibia Rules at all times.\n<br=7>To move your character use the cursor keys or click on a spot on the game window or in the automap. Right-clicking on items, monsters, characters or simply on the map will open context menus in which you can select appropriate actions such as attacking or using things. Items can be moved around by using drag&drop.\n<br=7>If you need assistance, click on the \'Help\' button to the right. There are several help options to choose from. For instance, the \'Client Help\' will provide you with information on important objects on the map or parts of the client program. Also, a flashing exclamation mark will appear in the top right corner from time to time to inform you that further hints like this one you are reading right now are available. To review previous hints click on \'Help\', then \'Hints\'. For detailed information please read the manual and the \'FAQ\' on our offical website ";
 constexpr const char *WelcomeAfterSite = ".";
 constexpr auto WelcomeHelpText = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(WelcomeBeforeSite,
@@ -401,7 +400,7 @@ void patella::THelp::ExitHelp()
 {
 }
 
-// The functions of the original (issue #107): each calls its member on the one TClient's THelp.
+// The functions of the original: each calls its member on the one TClient's THelp.
 
 void SetHelpPosition(int x, int y)
 {

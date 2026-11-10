@@ -9,7 +9,7 @@
 // parameter names in the assertions and catch blocks (Step, NewCreatureID,
 // AvailablePhases, Flag, Progress, SkillNumber, Value, Number, Position,
 // CharacterID, Name, Description, Method, NewDirection, i, j). The rest is
-// ours (notes/decisions.md, "Creatures.cpp").
+// ours.
 
 #pragma once
 
@@ -68,8 +68,8 @@ public:
 	void StartMovement(int dx, int dy, int Waypoints);
 	void SetMark(int Value);
 	[[nodiscard]] int GetAnimationPhase(int AvailablePhases) const;
-	// Ours (issue #62): the skull SetSkull kept (Delay) is still shown at Now, the wall clock's 64-bit time:
-	// SkullTime is set, and Now is from it to four seconds after it.
+	// Ours: the skull SetSkull kept (Delay) is still shown at Now, the wall clock's 64-bit time: SkullTime is set, and
+	// Now is from it to four seconds after it.
 	[[nodiscard]] bool SkullKept(std::int64_t Now) const
 	{
 		if (SkullTime == 0)
@@ -123,12 +123,11 @@ namespace patella {
 class TMap;
 class TObjectTypes;
 
-// What TCreatures asks of the player's state (Patella-Modern issue #106; rule 5 of notes/decisions.md, "#104"):
-// TPlayerState is made after TCreatures (it reads the creature table), so TCreatures reaches it only through this
-// interface, which TMapState implements (MapState.h). GetPlayerID is the original's (IsOpponent, CheckMonsterHint and
-// MoveCreatures call it); ContinuePlayerWalk is MoveCreatures' step of the walk once the player's step animation is
-// over, ResetPlayer ResetCreatures' writes of the player's state (both ours: the original's code of those two
-// functions, moved into TPlayerState).
+// What TCreatures asks of the player's state: TPlayerState is made after TCreatures (it reads the creature table), so
+// TCreatures reaches it only through this interface, which TMapState implements (MapState.h). GetPlayerID is the
+// original's (IsOpponent, CheckMonsterHint and MoveCreatures call it); ContinuePlayerWalk is MoveCreatures' step of the
+// walk once the player's step animation is over, ResetPlayer ResetCreatures' writes of the player's state (both ours:
+// the original's code of those two functions, moved into TPlayerState).
 class TCreaturesPlayer {
 public:
 	TCreaturesPlayer() = default;
@@ -144,11 +143,10 @@ protected:
 	~TCreaturesPlayer() = default;
 };
 
-// What TCreatures and TPlayerState ask of the GUI (Patella-Modern issue #118; rule 5 of notes/decisions.md, "#104"):
-// Talk.cpp's status message, Help.cpp's hints, Status.cpp's message queue and action number, all TGUI's, a later
-// subsystem than TMapState, so they reach them only through this interface. Client.cpp implements it with those
-// files' free functions (the golden tests fake them by their symbols). Each member is the original's call of the same
-// name and parameters.
+// What TCreatures and TPlayerState ask of the GUI: Talk.cpp's status message, Help.cpp's hints, Status.cpp's message
+// queue and action number, all TGUI's, a later subsystem than TMapState, so they reach them only through this
+// interface. Client.cpp implements it with those files' free functions (the golden tests fake them by their symbols).
+// Each member is the original's call of the same name and parameters.
 class TCreaturesGUI {
 public:
 	TCreaturesGUI() = default;
@@ -166,10 +164,9 @@ protected:
 	~TCreaturesGUI() = default;
 };
 
-// Creatures.cpp's creature table, battle list and VIP list (Patella-Modern issue #106, M7; notes/decisions.md, "#104:
-// TClient and the subsystem objects" and "#106"): Creatures, FirstOpponent, LastOpponent, Beat, the attack, follow and
-// highlight targets and the buddy window's list, in the original's .bss order, every member 0 at the start; the
-// functions that use them are the members of the same names. The data is private, as the file-local statics were;
+// Creatures.cpp's creature table, battle list and VIP list: Creatures, FirstOpponent, LastOpponent, Beat, the attack,
+// follow and highlight targets and the buddy window's list, in the original's .bss order, every member 0 at the start;
+// the functions that use them are the members of the same names. The data is private, as the file-local statics were;
 // TCreature's StartMovement reads Beat (a friend). TMapState owns it (MapState.h), after TMap.
 class TCreatures {
 public:
@@ -235,7 +232,7 @@ private:
 	friend class ::TCreature;
 
 	TCreaturesPlayer &PlayerState;
-	TCreaturesGUI &GUI; // issue #118
+	TCreaturesGUI &GUI;
 
 	// Data, in .bss order.
 	std::array<int, 3> BuddySortMethods{}; // 0 name, 1 icon, 2 online; most significant first
@@ -254,12 +251,11 @@ private:
 	static_assert(sizeof(Creatures) == CREATURES * sizeof(TCreature), "Creatures");
 };
 
-// Creatures.cpp's player state (Patella-Modern issue #106; notes/decisions.md, "#104" and "#106"): PlayerID, the
-// statistics and skills, the state icons and the walk (the steps, the destination, the step not confirmed yet), in the
-// original's .bss order, every member 0 at the start; the functions that use them are the members of the same names.
-// The data is private; TCreature's members read and
-// write the step not confirmed yet (a friend). TMapState owns it, after TCreatures, whose creature table it reads; it
-// reads the map and the object types too.
+// Creatures.cpp's player state: PlayerID, the statistics and skills, the state icons and the walk (the steps, the
+// destination, the step not confirmed yet), in the original's .bss order, every member 0 at the start; the functions
+// that use them are the members of the same names. The data is private; TCreature's members read and write the step not
+// confirmed yet (a friend). TMapState owns it, after TCreatures, whose creature table it reads; it reads the map and
+// the object types too.
 class TPlayerState {
 public:
 	TPlayerState(TObjectTypes &ObjectTypes, TMap &Map, TCreatures &Creatures, TCreaturesGUI &GUI);
@@ -326,7 +322,7 @@ private:
 	TObjectTypes &ObjectTypes;
 	TMap &Map;
 	TCreatures &Creatures;
-	TCreaturesGUI &GUI; // issue #118
+	TCreaturesGUI &GUI;
 
 	// Data, in .bss order.
 	int PlayerState{}; // the state icons, one bit each
@@ -361,8 +357,8 @@ private:
 	static_assert(sizeof(PlayerSteps) == 10 * sizeof(int), "PlayerSteps");
 };
 
-// The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the
-// creatures and the player's state of the one TClient (Client.cpp). They go when no free function needs them.
+// The transition's access path: the creatures and the player's state of the one TClient (Client.cpp). They go when no
+// free function needs them.
 namespace bridge {
 TCreatures &Creatures();
 TPlayerState &PlayerState();

@@ -1,5 +1,4 @@
-// Socket.h: ISocket, the platform's network (Patella-Modern issue #109, plan M7; notes/decisions.md, "#109: the
-// platform interfaces"). Not part of the original source. Portable: no platform header.
+// Socket.h: ISocket, the platform's network. Not part of the original source. Portable: no platform header.
 //
 // TNetwork (Network.cpp) has one connection at a time, to the login server or the game server, and resolves the
 // login servers' names. What it asked of WinSock and of MFC's CAsyncSocket it asks of the process's ISocket
@@ -7,10 +6,10 @@
 // Network test's fakes of WinSock and CAsyncSocket see what they saw.
 //
 //	TPortableSocket   Winsock or POSIX sockets, non-blocking, polled from the loop, the name lookup on a std::jthread
-//	                  (platform/PortableSocket.h, issue #125): Patella.exe's, and the test build's live runs'
-//	TPipeSocketWin32  the test build's server replay inside the process (PipeSocketWin32.h, issue #120)
+//	                  (platform/PortableSocket.h): Patella.exe's, and the test build's live runs'
+//	TPipeSocketWin32  the test build's server replay inside the process (PipeSocketWin32.h)
 //	TMfcSocket        MFC's CAsyncSocket and WinSock, the original's calls (tests/golden/network/MfcSocket.h): the
-//	                  golden runner's, whose Network test fakes those calls (Patella.exe's too until issue #125)
+//	                  golden runner's, whose Network test fakes those calls
 //
 // A connection is a TSocket, which each executable defines once (PortableSocket.h's in Patella.exe and the test build,
 // a CAsyncSocket in the golden runner); TNetwork holds it as the original held its CAsyncSocket, and the golden Network
@@ -20,9 +19,9 @@
 
 namespace patella::platform {
 
-// The numbers the interface carries (issue #110): WinSock's, which every implementation reports and TNetwork's error
-// messages name (GetErrorMessage's table; the protocol's numbers here, whatever the system's own are). PortableSocket.cpp
-// asserts on Windows that they are WinSock's, and gives them for POSIX's errno and getaddrinfo's codes (issue #125).
+// The numbers the interface carries: WinSock's, which every implementation reports and TNetwork's error messages name
+// (GetErrorMessage's table; the protocol's numbers here, whatever the system's own are). PortableSocket.cpp asserts on
+// Windows that they are WinSock's, and gives them for POSIX's errno and getaddrinfo's codes.
 namespace socket_error {
 inline constexpr int Interrupted = 10004;         // WSAEINTR
 inline constexpr int AccessDenied = 10013;        // WSAEACCES
@@ -123,10 +122,10 @@ public:
 	// call.
 	[[nodiscard]] virtual const char *ResolvedAddress(const char *Buffer) = 0;
 
-	// The loop's turn (issue #125): the connections' events (OnConnect, OnReceive, OnClose) and the finished name
-	// lookups, on the calling thread (the client's), where the message loop dispatched WinSock's messages. The client
-	// calls it at the start of every idle step (Player.cpp's OnIdle, on both window paths). Nothing where the events
-	// come otherwise (the golden runner's fakes, the replay's window messages).
+	// The loop's turn: the connections' events (OnConnect, OnReceive, OnClose) and the finished name lookups, on the
+	// calling thread (the client's), where the message loop dispatched WinSock's messages. The client calls it at the
+	// start of every idle step (Player.cpp's OnIdle, on both window paths). Nothing where the events come otherwise
+	// (the golden runner's fakes, the replay's window messages).
 	virtual void Poll() = 0;
 
 protected:

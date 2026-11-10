@@ -21,7 +21,7 @@
 // names TStatusWindow and TPlayerStates), BuddylistWindow, RadioButtonGroup
 // (DialogElements.cpp's assertion) and the catch-block parameters (Surface, x,
 // y, Width, Height, Event, Direction, Code). The class, member and function
-// names are ours; see notes/decisions.md, "ContentWindows.cpp".
+// names are ours.
 
 #pragma once
 
@@ -107,7 +107,7 @@ public:
 	int Zoom; // 1, 2, 4 or 8 (Preferences.cpp's AutomapZoom)
 
 protected:
-	void OnClose() override; // the destructor's zoom and hotkeys (issue #108)
+	void OnClose() override; // the zoom and the hotkeys
 };
 
 // The capacity and the soul points of the inventory (CapacityLabel, SoulLabel).
@@ -179,7 +179,7 @@ public:
 	void HandleEvent(int Event) override;
 
 	bool IsLarge;
-	std::unique_ptr<TRadioButtonGroup> AttackModes; // offensive, balanced, defensive (issue #58)
+	std::unique_ptr<TRadioButtonGroup> AttackModes; // offensive, balanced, defensive
 	std::unique_ptr<TRadioButtonGroup> ChaseModes;  // stand, chase
 	TSkinButton *StandButton;
 	TSkinButton *ChaseButton;
@@ -197,7 +197,7 @@ public:
 
 // --- The bodies of the sub-windows ------------------------------------------------
 
-// TSubWindowBody, the content of a TSubWindow, is DialogWindow.h's since issue #118.
+// TSubWindowBody, the content of a TSubWindow, is DialogWindow.h's.
 
 // The objects of a container in rows of SkinProperties.ContainerSlotsPerRow slots, with
 // a scroll bar.
@@ -241,7 +241,7 @@ public:
 	bool HasParent; // the "up" button is shown
 
 protected:
-	void OnClose() override; // the destructor's SendCloseContainer (issue #108)
+	void OnClose() override; // SendCloseContainer
 };
 
 // The player's skills, one per line (Lines, 15), with a progress bar for
@@ -273,7 +273,7 @@ public:
 class TBattleWindowBody final : public TSubWindowBody {
 public:
 	TBattleWindowBody();
-	// Its SetHighlightID(0) is the close since issue #108.
+	// Its SetHighlightID(0) is the close's (OnClose).
 	~TBattleWindowBody() override { CheckClosed("TBattleWindowBody"); }
 	void Draw(int Surface, int x, int y) override;
 	void SetSize(int Width, int Height) override;
@@ -294,7 +294,7 @@ public:
 	TFixedString<32> MouseOverText; // a shortened name in full
 
 protected:
-	void OnClose() override; // the destructor's SetHighlightID(0) (issue #108)
+	void OnClose() override; // SetHighlightID(0)
 };
 // The parts of the trade body: the two offers (TTradeOffers), the names
 // above them (TTradeNames) and the buttons below (TTradeButtons).
@@ -368,7 +368,7 @@ public:
 	TTradeNames *Names;
 
 protected:
-	void OnClose() override; // the destructor's SendRejectTrade and ClearOffers (issue #108)
+	void OnClose() override; // SendRejectTrade and ClearOffers
 };
 
 // The VIP list (Creatures.cpp's buddies) with icon, name and online state.
@@ -398,15 +398,14 @@ public:
 
 	TScrollBar *ScrollBar;
 	int NumberOfBuddies;                   // at the last Draw; -1 at first
-	std::unique_ptr<char[]> MouseOverText; // a shortened name in full (new char[36]; issue #58)
+	std::unique_ptr<char[]> MouseOverText; // a shortened name in full (new char[36])
 };
 
 // --- The creators ------------------------------------------------------------------
 
 // The inventory windows' Receiver (and TButtonsWindow's, TInventoryView's, TCombatControls'), the main window
-// (MainWindow.cpp passes this): only their buttons' TCallback receiver, so a TWindow since issue #118 (the original's
-// TMainWindow; ContentWindows.cpp then does not include MainWindow.h, which made ContentWindows and MainWindow a
-// cycle).
+// (MainWindow.cpp passes this): only their buttons' TCallback receiver, so a TWindow (ContentWindows.cpp then does not
+// include MainWindow.h, which would make ContentWindows and MainWindow a cycle).
 
 TContentWindow *CreateInventoryWindow(TWindow *Receiver);
 TContentWindow *CreateSmallInventoryWindow(TWindow *Receiver);

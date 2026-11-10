@@ -32,9 +32,9 @@
 #include <cstdint>
 #include <cstring>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-owning-memory and cppcoreguidelines-pro-type-vararg are off for the file, for the original's raw
+// owners (the window tree owns its children, the message queue its blocks, the lists their entries) and its varargs
+// (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
 // The skill window forgets the menu.
@@ -264,7 +264,7 @@ bool TContextMenuEntry::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] in
 // The last entry loses the space below the font.
 void TContextMenuEntry::SetLast()
 {
-	// The original's order: the left operand first (MSVC; GCC and Clang may differ, issue #91).
+	// The original's order: the left operand first (MSVC; GCC and Clang may differ).
 	const int LineHeight = GetFontLineHeight(SkinProperties().MenuFont.FontNumber);
 	SetSize(Width, Height - (LineHeight - GetFontHeight(SkinProperties().MenuFont.FontNumber)));
 }

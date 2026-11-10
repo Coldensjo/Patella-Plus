@@ -1,11 +1,9 @@
 // Skins.cpp: rectangles of the GUI graphics (file name inferred), and SkinProperties, the window graphics' positions,
 // sizes, colours and fonts (GUI.cpp's global, which InitSkinProperties fills).
 //
-// TSkins (Patella-Modern issue #116, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#116"):
-// Skins.cpp's data and SkinProperties, a part of TGraphics (graphics.h), declared here and defined in Skins.cpp, as
-// TSession is Status.cpp's inside TCommunication. SkinProperties' types moved here from GUI.h with it. Portable
-// (patella_core): the bridge accessor and the original's free functions are the client's (graphics.cpp), since
-// patella_core has no TClient.
+// TSkins: Skins.cpp's data and SkinProperties, a part of TGraphics (graphics.h), declared here and defined in
+// Skins.cpp, as TSession is Status.cpp's inside TCommunication. Portable (patella_core): the bridge accessor and the
+// original's free functions are the client's (graphics.cpp), since patella_core has no TClient.
 
 #pragma once
 
@@ -337,7 +335,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	SKIN_PROGRESS_FILLED_RIGHT = 261,
 };
 
-// --- Skin properties (GUI.h's until issue #116) ---------------------------
+// --- Skin properties ------------------------------------------------------
 
 struct TGUIPoint {
 	TGUIPoint() : x(0), y(0) {}
@@ -907,8 +905,8 @@ struct TSkinProperties {
 
 namespace patella {
 
-// Skins.cpp's data and GUI.cpp's SkinProperties (issue #116), TGraphics' member Skins. Public, as the globals were:
-// the window files read them through the accessors below.
+// Skins.cpp's data and GUI.cpp's SkinProperties, TGraphics' member Skins. Public, as the globals were: the window files
+// read them through the accessors below.
 class TSkins {
 public:
 	TSkins() = default;
@@ -923,22 +921,21 @@ public:
 
 	// Data, in .bss order (Skins.cpp's), then GUI.cpp's.
 	int NumberOfSkins{};
-	std::unique_ptr<TSkin[]> Skins;   // issue #58: the table's only owner, a pointer as the original's
+	std::unique_ptr<TSkin[]> Skins;   // the table's only owner
 	TSkinProperties SkinProperties{}; // GUI.cpp's; filled by InitSkinProperties
 };
 
-// The transition's access path (notes/decisions.md, "#104: TClient and the subsystem objects"): the one TClient's
-// TSkins (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the one TClient's TSkins (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 TSkins &Skins();
 } // namespace bridge
 
 } // namespace patella
 
-// The original's globals' names for their about 2,400 readers in the window files (issue #116): SkinProperties() and
-// Skins() are the one TClient's, so a use reads `SkinProperties().TooltipBorder` where it read
-// `SkinProperties.TooltipBorder`. Not the design's `bridge::Skins().SkinProperties` at each use: the same object,
-// without rewriting every expression of the windows (notes/decisions.md, "#116").
+// The original's globals' names for their about 2,400 readers in the window files: SkinProperties() and Skins() are the
+// one TClient's, so a use reads `SkinProperties().TooltipBorder` where it read `SkinProperties.TooltipBorder`. Not the
+// design's `bridge::Skins().SkinProperties` at each use: the same object, without rewriting every expression of the
+// windows.
 inline TSkinProperties &SkinProperties()
 {
 	return patella::bridge::Skins().SkinProperties;
@@ -949,7 +946,7 @@ inline std::unique_ptr<TSkin[]> &Skins()
 	return patella::bridge::Skins().Skins;
 }
 
-// The original's free functions (graphics.cpp's since issue #116: they call the bridge, which patella_core does not
-// have), forwarding to TSkins' members.
+// The original's free functions (graphics.cpp's: they call the bridge, which patella_core does not have), forwarding to
+// TSkins' members.
 void InitSkins();
 void ExitSkins();

@@ -1,17 +1,15 @@
 // Status.cpp: the client's shared state. Account, character list and
 // connection state; the message queue that the network code and the GUI use
 // to talk to the main loop; mouse and drag state; the player's rights; the
-// clipboard link check. (The error reports read from error.txt are gone
-// since Patella-Modern issue #74, decision D2.)
+// clipboard link check.
 //
 // Names are ours unless a comment says they come from the binary.
 //
-// Patella-Modern issue #105 (M7, notes/decisions.md, "#104: TClient and the subsystem objects" and "#105"): the
-// session (the connection state, the account, the character list, the rights) is TSession's, which TCommunication
+// The session (the connection state, the account, the character list, the rights) is TSession's, which TCommunication
 // owns (Communication.h); the free functions of the original's names are the bridge that the callers use until they
-// hold the object (bridge::Session(), defined in Client.cpp). Issue #107: the rest of the file's data, the user
-// interaction (the action, drag, trade and use state, the mouse, the message queue, the blink, the mouse-over text, the
-// clipboard's link check), is TInteraction's, which TGUI owns (GUI.h); bridge::Interaction() the same way.
+// hold the object (bridge::Session(), defined in Client.cpp). The rest of the file's data, the user interaction (the
+// action, drag, trade and use state, the mouse, the message queue, the blink, the mouse-over text, the clipboard's link
+// check), is TInteraction's, which TGUI owns (GUI.h); bridge::Interaction() the same way.
 
 #pragma once
 
@@ -54,10 +52,10 @@ struct TCharacter {
 
 namespace patella {
 
-// Status.cpp's session (issue #105): the globals of the original are the members, in its order
-// with the same initial values (0, as the original's .bss), and the functions that read and write only them the
-// members of the same names. InitSession and ExitSession are InitStatus's and ExitStatus's part of them (not functions
-// of the original: InitStatus inlined ClearRights).
+// Status.cpp's session: the globals of the original are the members, in its order with the same initial values (0, as
+// the original's .bss), and the functions that read and write only them the members of the same names. InitSession and
+// ExitSession are InitStatus's and ExitStatus's part of them (not functions of the original: InitStatus inlined
+// ClearRights).
 class TSession {
 public:
 	TSession() = default;
@@ -98,8 +96,8 @@ private:
 	bool Gamemaster{}; // sent in the game login packet
 	int PremiumDays{};
 	int ActiveCharacter{};
-	std::unique_ptr<TCharacter[]> Characters; // issue #58
-	int AccountCharacters{};                  // name from an assertion
+	std::unique_ptr<TCharacter[]> Characters;
+	int AccountCharacters{}; // name from an assertion
 	TFixedString<30> AccountPassword{};
 	TFixedString<12> AccountNumberString{};
 	int AccountNumber{};
@@ -109,10 +107,9 @@ private:
 	static_assert(sizeof(AccountPassword) == 30 && sizeof(AccountNumberString) == 12, "SetAccount's buffers");
 };
 
-// Status.cpp's user interaction (issue #107): the globals that are not the session's are the
-// members, in the original's .bss order with the same initial values (0, as its .bss), and the functions that read and
-// write them the members of the same names. TGUI owns it (GUI.h). GetRightName and GetActionName read no data and
-// stay free functions.
+// Status.cpp's user interaction: the globals that are not the session's are the members, in the original's .bss order
+// with the same initial values (0, as its .bss), and the functions that read and write them the members of the same
+// names. TGUI owns it (GUI.h). GetRightName and GetActionName read no data and stay free functions.
 class TInteraction {
 public:
 	TInteraction() = default;
@@ -168,7 +165,7 @@ public:
 
 private:
 	// Data, in the original's .bss order.
-	TRegexp LinkRegexp;                  // LinkPattern compiled (issue #129: owned, TRegexp)
+	TRegexp LinkRegexp;                  // LinkPattern compiled (owned)
 	char *TaintedClipboardText{};        // name from an assertion
 	void (*LinkWarningEventHandler)(){}; // from "linkwarningeventhandler!=NULL"
 	bool BlinkState{};                   // toggled every 300 ms
@@ -201,9 +198,8 @@ private:
 	int MouseCursor{};
 	int ActionState{}; // from "GetActionState()" in Control.cpp
 	int ActionNumber{};
-	// NumberOfMessages and the original's vector<TMessage>(0, 9, 10): a
-	// queue that appends at its count (AddMessage), inserts at 0 (AddMessageFirst), pops at 0 and reads below the
-	// count only, so a std::vector, its size the count (issue #100; notes/decisions.md, "#100").
+	// NumberOfMessages and the original's vector<TMessage>(0, 9, 10): a queue that appends at its count (AddMessage),
+	// inserts at 0 (AddMessageFirst), pops at 0 and reads below the count only, so a std::vector, its size the count.
 	std::vector<TMessage> Messages;
 	int MouseX{};
 	int MouseY{};
@@ -212,17 +208,17 @@ private:
 	TObject UseObject{};   // "SrcObj" in MapWindow.cpp
 };
 
-// The transition's access path (issue #105; notes/decisions.md, "#104: TClient and the subsystem objects"): the
-// session of the one TClient's TCommunication (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the session of the one TClient's TCommunication (Client.cpp). It goes when no free
+// function needs it.
 namespace bridge {
 TSession &Session();
-TInteraction &Interaction(); // issue #107: the one TClient's TGUI's
+TInteraction &Interaction(); // the one TClient's TGUI's
 } // namespace bridge
 
 } // namespace patella
 
-// The session's functions (issue #105): each calls TSession's member of the same name on bridge::Session(); the
-// others are Status.cpp's own.
+// The session's functions: each calls TSession's member of the same name on bridge::Session(); the others are
+// Status.cpp's own.
 bool CheckAnyRight();
 int GetActionNumber();
 void IncrementActionNumber();

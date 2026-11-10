@@ -35,8 +35,7 @@ namespace patella {
 
 class TObjectTypes;
 
-// Inventory.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the
-// subsystem objects" and "#106"): the body slots, the open containers and the two offers, in the original's .bss
+// Inventory.cpp's data and functions: the body slots, the open containers and the two offers, in the original's .bss
 // order, every member 0 at the start; the functions are the members of the same names. TMapState owns it (MapState.h),
 // last; it reads TObjectTypes' NoObject. The data is private, as the file-local statics were.
 class TInventory {
@@ -91,8 +90,7 @@ private:
 	TOffer CounterOffer{};
 };
 
-// The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the
-// inventory of the one TClient (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the inventory of the one TClient (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 TInventory &Inventory();
 } // namespace bridge

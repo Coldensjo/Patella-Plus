@@ -1,4 +1,4 @@
-// Renderer.h: the Vulkan 1.3 back end of the Vulkan engine (issue #19; notes/vulkan.md; plan 6.2).
+// Renderer.h: the Vulkan 1.3 back end of the Vulkan engine.
 //
 // A small 2D compositor without any window system: images (the engine's surfaces), colour fills,
 // textured quads in Direct3D 9's pixel rules (Quads.h), uploads, the colour key pass,
@@ -36,7 +36,7 @@ public:
 	explicit TVulkanError(const std::string &Message) : std::runtime_error(Message) {}
 };
 
-// The device the engine runs on (plan 6.3: "Automatic", a GPU, "CPU (compatibility)"; TDeviceKind is
+// The device the engine runs on ("Automatic", a GPU, "CPU (compatibility)"; TDeviceKind is
 // DeviceChoice.h's).
 struct TDeviceRequest {
 	TDeviceKind Kind = TDeviceKind::Automatic;
@@ -53,7 +53,7 @@ struct TDeviceRequest {
 };
 
 struct TDeviceInfo {
-	std::string Name; // the driver's UTF-8 name in the client's code page (issue #112: the options show it)
+	std::string Name; // the driver's UTF-8 name in the client's code page (the options show it)
 	VkPhysicalDeviceType Type = VK_PHYSICAL_DEVICE_TYPE_OTHER;
 };
 
@@ -62,10 +62,10 @@ bool LoaderAvailable();
 
 // The GPUs the engine can use (Vulkan 1.3 with dynamic rendering and synchronization2, and
 // VK_KHR_swapchain), in the loader's order: the list TDeviceRequest::GpuIndex and the advanced options'
-// GPU button count in (issue #31). Headless: an instance of its own, without a window, gone again on
-// return; the system's drivers only (no CPU driver). Throws TVulkanError without a loader. Its instance
-// enables the same instance extensions as every other (Renderer.cpp NewInstanceBuilder: vk-bootstrap
-// keeps the functions of the first instance of the process).
+// GPU button count in. Headless: an instance of its own, without a window, gone again on return; the
+// system's drivers only (no CPU driver). Throws TVulkanError without a loader. Its instance enables the
+// same instance extensions as every other (Renderer.cpp NewInstanceBuilder: vk-bootstrap keeps the
+// functions of the first instance of the process).
 std::vector<TDeviceInfo> ListGpus();
 
 // The index in ListGpus' list of the GPU "the best GPU" means (TDeviceRequest::GpuIndex -1): the first

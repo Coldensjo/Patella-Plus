@@ -16,8 +16,7 @@
 // _Active, Tab, Container ("failed to get composite"), Search, Question,
 // Addressee, ChannelID, TalkMode, MessageSeparator and the catch-block
 // parameters (Surface, x, y, Width, Height, Code, Event, Key, LineNumber,
-// Active, RecvMode, SendMode). The class names and the other names are ours;
-// see notes/decisions.md, "ConsoleWindow.cpp".
+// Active, RecvMode, SendMode). The class names and the other names are ours.
 
 #pragma once
 
@@ -139,7 +138,7 @@ public:
 	int SelectionEndLine;
 	int SelectionEndOffset;
 	bool Selecting;                       // the left button is down
-	std::unique_ptr<char[]> SelectedText; // GetSelectedText's result (issue #58)
+	std::unique_ptr<char[]> SelectedText; // GetSelectedText's result
 	bool AtEnd;                           // the last line is shown
 };
 
@@ -186,9 +185,9 @@ public:
 	void SetActive(bool _Active);
 	[[nodiscard]] const char *GetCaption() const { return Shortened ? FullCaption.get() : Caption.get(); }
 
-	TTalkBuffer *TextBuffer;         // with the console's filter list: not one owner, notes/ownership.md 7
-	int LineCount;                   // the buffer's lines when the tab last looked
-	std::unique_ptr<char[]> Caption; // issue #58
+	TTalkBuffer *TextBuffer; // with the console's filter list: not one owner
+	int LineCount;           // the buffer's lines when the tab last looked
+	std::unique_ptr<char[]> Caption;
 	std::unique_ptr<char[]> FullCaption;
 	int Dragging;
 	int DragX;
@@ -199,7 +198,7 @@ public:
 	bool Shortened;
 
 protected:
-	void OnClose() override; // the destructor's sends and DeleteTextBuffer (issue #108)
+	void OnClose() override; // the sends and DeleteTextBuffer
 };
 
 // The tab bar: its own tabs and the two hidden windows with the tabs that do
@@ -240,13 +239,13 @@ public:
 
 	TTab *Moved;
 	TTab *CurrentTab;
-	std::unique_ptr<TWindow> LeftTabs; // issue #108: the bar is their only owner, they are not its children
+	std::unique_ptr<TWindow> LeftTabs; // the bar is their only owner, they are not its children
 	std::unique_ptr<TWindow> RightTabs;
 	bool Busy;    // Rearrange is running
 	bool Changed; // the console updates its buttons when it is set
 
 protected:
-	void OnClose() override; // the two windows' tabs, then the bar's own (issue #108)
+	void OnClose() override; // the two windows' tabs, then the bar's own
 };
 
 // The console. TalkMode is the volume of the default channel (1 say,
@@ -289,10 +288,9 @@ public:
 	TEditLine *Input;
 	int SwitchTime; // new channels become current only from this action number on
 	int HistoryPosition;
-	// The input history, a plain TTalkBuffer (issue #81). TTalkBuffer's destructor is not virtual (the
-	// original's; Talk.cpp's DeleteTextBuffer destroys the derived buffers through it), so the deleter calls it
-	// as a delete would, by its qualified name, which Clang's -Wdelete-non-abstract-non-virtual-dtor does not take for
-	// a virtual call (issue #111).
+	// The input history, a plain TTalkBuffer. TTalkBuffer's destructor is not virtual (the original's; Talk.cpp's
+	// DeleteTextBuffer destroys the derived buffers through it), so the deleter calls it as a delete would, by its
+	// qualified name, which Clang's -Wdelete-non-abstract-non-virtual-dtor does not take for a virtual call.
 	struct THistoryDelete {
 		void operator()(TTalkBuffer *Buffer) const noexcept
 		{
@@ -301,8 +299,8 @@ public:
 		}
 	};
 	std::unique_ptr<TTalkBuffer, THistoryDelete> History;
-	// The buttons shown by need (UpdateButtons) are owned by the child list while they are children and by the
-	// member while they are not, so they stay raw (notes/ownership.md, section 7; issue #108).
+	// The buttons shown by need (UpdateButtons) are owned by the child list while they are children and by the member
+	// while they are not, so they stay raw.
 	TMultiStateButton *VolumeButton;     // events 206-208
 	TSkinButton *CloseButton;            // event 202
 	TToggleButton *ServerMessagesButton; // event 203
@@ -313,5 +311,5 @@ public:
 	int TalkMode;
 
 protected:
-	void OnClose() override; // the destructor's preferences and hotkeys, the buttons that are not children (issue #108)
+	void OnClose() override; // the preferences and hotkeys, the buttons that are not children
 };

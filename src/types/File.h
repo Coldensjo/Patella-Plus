@@ -1,5 +1,4 @@
-// File.h: TFile, the client's open files (the C library's FILE *) with an owner. Patella-Modern issue #64
-// (notes/modernization-plan.md, section 7, M4: "an RAII TFile instead of FILE *"). Not part of the original source.
+// File.h: TFile, the client's open files (the C library's FILE *) with an owner. Not part of the original source.
 //
 // TFile holds a FILE *, its only member. It closes its file when it is destroyed, it
 // moves but does not copy, and it compares with nullptr (and NULL) as the pointer did, so the conditions the
@@ -9,9 +8,8 @@
 // returned NULL, errno set by the library), Close is fclose (its result; nothing to do on a closed TFile),
 // Read/Write are fread/fwrite (the number of whole items), Seek is fseek, Flush is fflush, and
 // Descriptor is _fileno/fileno (the descriptor under the FILE, for _eof). Nothing throws, nothing reports: the
-// callers check the results and raise their own errors (TERROR texts, frozen until M5), as they did. Print
-// writes a text formatted with std::format's language (fprintf with the client's conversions, which give the same
-// characters: notes/decisions.md, issue #64).
+// callers check the results and raise their own errors (TERROR texts), as they did. Print writes a text formatted
+// with std::format's language (fprintf with the client's conversions, which give the same characters).
 //
 // The bytes on the disk are the original's on every platform:
 //	- TContent::Binary ("b"): the bytes as written.
@@ -23,7 +21,7 @@
 //	  Reading in text mode is refused (false, errno EINVAL): the client reads only binary files.
 // Open is fopen with the original's sharing on Windows (_fsopen with _SH_DENYNO, which is what fopen calls);
 // the UTF-16 name overload of the Windows-only test mode is _wfopen_s, as its callers had (not shared).
-// The name is the client's text, Windows-1252 (issue #112, plan D4; types/Cp1252.h): on Windows it is opened by its
+// The name is the client's text, Windows-1252 (types/Cp1252.h): on Windows it is opened by its
 // UTF-16 name (_wfsopen, the same sharing), so it no longer depends on the system's ANSI code page (where that is
 // 1252 the file is the same); elsewhere by its UTF-8 name. An ASCII name is the same file everywhere.
 
@@ -104,7 +102,7 @@ public:
 #else
 	using TSystemChar = char;
 #endif
-	// Open of a name in the system's own form (std::filesystem::path's c_str(); issue #130: the data folder's files,
+	// Open of a name in the system's own form (std::filesystem::path's c_str(): the data folder's files,
 	// platform/FileSystem.h): UTF-16 on Windows, opened as Open opens it (_wfsopen, _SH_DENYNO), the bytes elsewhere.
 	bool OpenSystemName(const TSystemChar *Name, TAccess Access, TContent Content = TContent::Binary) noexcept
 	{

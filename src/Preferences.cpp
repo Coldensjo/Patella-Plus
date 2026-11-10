@@ -5,15 +5,15 @@
 //
 // The Tibia.cfg loader and ExitPreferences end the file, in binary order.
 //
-// Patella-Modern issue #45: Patella.ini is the x64 client's only settings file.
-// The original's loader is ReadTibiaCfg, which imports an existing Tibia.cfg
-// once; the client never writes Tibia.cfg. InitPreferences, SavePreferences and
-// ExitPreferences, the names the client calls, read and write Patella.ini
+// Patella.ini is the x64 client's only settings file. The original's loader is
+// ReadTibiaCfg, which imports an existing Tibia.cfg once; the client never
+// writes Tibia.cfg. InitPreferences, SavePreferences and ExitPreferences, the
+// names the client calls, read and write Patella.ini
 // (settings/PreferenceKeys.h) and come last.
 //
-// Patella-Modern issue #104: the data and the functions are TPreferences' (Preferences.h), which TClient owns; the
-// free functions at the end, the original's names, call them on bridge::Preferences(). Talk's lists (White, Ignore)
-// are reached through TTalkLists, so this file no longer includes Talk.h.
+// The data and the functions are TPreferences' (Preferences.h), which TClient owns; the free functions at the end, the
+// original's names, call them on bridge::Preferences(). Talk's lists (White, Ignore) are reached through TTalkLists, so
+// this file does not include Talk.h.
 
 #include "Preferences.h"
 #include "BuildConfig.h"
@@ -36,13 +36,13 @@
 #include <string_view>
 #include <vector>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
-// the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):
-// the window tree owns its children, the message queue its blocks, the lists their entries
+// cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file: the original's malloc'd entries and
+// texts, freed by their lists; the original's raw owners: the window tree owns its children, the message queue its
+// blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
 
-// Patella.ini's keys have the same numbers of hotkeys and skills (issue #45).
+// Patella.ini's keys have the same numbers of hotkeys and skills.
 static_assert(HOTKEYS == patella::settings::PreferenceHotkeys && SKILLS == patella::settings::PreferenceSkills
 		&& HOTKEY_LENGTH - 1 == patella::settings::PreferenceHotkeyLength,
 	"Preferences.h and settings/PreferenceKeys.h");
@@ -718,7 +718,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 				AutomapZoom = Script.readNumber();
 			if (strcmp(Identifier, "contentwindow") == 0) {
 				// Appended when it is complete; the original wrote the entry in place and counted it then (an error on
-				// the way resets the options, SetDefaultPreferences, so a partial entry was never read; issue #100).
+				// the way resets the options, SetDefaultPreferences, so a partial entry was never read).
 				TContentWindowSize Entry{};
 				Script.readSymbol('(');
 				Entry.ID = Script.readNumber();
@@ -785,10 +785,9 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 			if (strcmp(Identifier, "securemode") == 0)
 				SecureMode = Script.readNumber() == 1;
 			if (strcmp(Identifier, "buddy") == 0) {
-				// The description is copied without a length limit: a description of 128 characters is kept
-				// whole, its NUL in Notify, set below; one of 132 or more wrote past the entry in the original
-				// (undefined), cut to 131 characters here (issues #57, #85).
-				// Appended when it is complete, as a ContentWindow's entry.
+				// The description is copied without a length limit: a description of 128 characters is kept whole, its
+				// NUL in Notify, set below; one of 132 or more wrote past the entry in the original (undefined), cut to
+				// 131 characters here. Appended when it is complete, as a ContentWindow's entry.
 				TBuddy Buddy{};
 				Script.readSymbol('(');
 				Buddy.CharacterID = Script.readNumber();
@@ -859,11 +858,11 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 	PreferencesLoaded = true;
 }
 
-// The options as they are saved: the hotkeys with a text, the windowed
-// mode, the lists up to their counts, the buddies without the deleted ones, the
+// The options as they are saved: the hotkeys with a text, the windowed mode,
+// the lists up to their counts, the buddies without the deleted ones, the
 // permanent entries of the Talk lists, NoStretching's "not set yet" as no, no
-// fourth FullscreenMode value. A description is read up to its NUL, at most
-// its 128 characters (issue #86).
+// fourth FullscreenMode value. A description is read up to its NUL, at most its
+// 128 characters.
 patella::settings::TPreferenceValues TPreferences::GetPreferenceValues(TTalkLists &Lists)
 {
 	patella::settings::TPreferenceValues Values;
@@ -1017,10 +1016,10 @@ void TPreferences::SetPreferenceValues(const patella::settings::TPreferenceValue
 		SkillBars[i] = Values.SkillBars[i];
 }
 
-// Patella-Modern issue #45. Loads the options from Patella.ini; when it has
-// none (no PreferencesVersion key), imports Tibia.cfg once: the original's
-// reader (ReadTibiaCfg; the defaults without a Tibia.cfg or with one it cannot
-// read), then the options go into Patella.ini at once. Tibia.cfg is left as it is.
+// Loads the options from Patella.ini; when it has none (no PreferencesVersion
+// key), imports Tibia.cfg once: the original's reader (ReadTibiaCfg; the
+// defaults without a Tibia.cfg or with one it cannot read), then the options
+// go into Patella.ini at once. Tibia.cfg is left as it is.
 void TPreferences::InitPreferences(TTalkLists &Lists)
 {
 	using namespace patella::settings;
@@ -1036,7 +1035,7 @@ void TPreferences::InitPreferences(TTalkLists &Lists)
 		TPreferenceValues Values = GetPreferenceValues(Lists);
 		for (const std::string &Problem : ReadPreferences(*File, Values))
 			patella::log::Warn("{}: {}", FileName, Problem);
-		// Issue #117: a file of version 1 (Windows-1252) is written as version 2 (UTF-8) at the next save.
+		// A file of version 1 (Windows-1252) is written as version 2 (UTF-8) at the next save.
 		if (EncodingOf(*File) == TEncoding::Cp1252)
 			patella::log::Info("{}: PreferencesVersion 1 (Windows-1252) read; written as version 2 (UTF-8) at the next save", FileName);
 		SetPreferenceValues(Values, Lists);
@@ -1052,9 +1051,8 @@ void TPreferences::InitPreferences(TTalkLists &Lists)
 	SavePreferences(Lists);
 }
 
-// Patella-Modern issue #45. Writes the options into Patella.ini (its other keys
-// and lines stay), only after InitPreferences loaded them; a failure is
-// reported in the log.
+// Writes the options into Patella.ini (its other keys and lines stay), only after InitPreferences loaded them; a
+// failure is reported in the log.
 void TPreferences::SavePreferences(TTalkLists &Lists)
 {
 	using namespace patella::settings;
@@ -1070,8 +1068,7 @@ void TPreferences::SavePreferences(TTalkLists &Lists)
 		patella::log::Warn("{} cannot be written: the options are not saved", FileName);
 }
 
-// Frees the message of the day and saves the options (Patella.ini since
-// issue #45; Tibia.cfg in the original).
+// Frees the message of the day and saves the options (Patella.ini; Tibia.cfg in the original).
 void TPreferences::ExitPreferences(TTalkLists &Lists)
 {
 	if (MotD != nullptr)
@@ -1082,8 +1079,7 @@ void TPreferences::ExitPreferences(TTalkLists &Lists)
 
 } // namespace patella
 
-// The original's functions, the bridge of issue #104 (Preferences.h): each calls its member on the one TClient's
-// TPreferences.
+// The original's functions, the bridge (Preferences.h): each calls its member on the one TClient's TPreferences.
 
 bool GetTestServerLogin()
 {

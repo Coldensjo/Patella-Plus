@@ -15,8 +15,7 @@
 // Control.cpp), DialogWindow ("DialogWindow!=NULL"), GetBody, OldWindow,
 // TRADE_WINDOW, ACTIONSTATE_NONE and the parameter names in the catch blocks
 // (Width, Height, Surface, Key, Event, ConsoleHeight, dx, dy, Container,
-// Identifier, x, y). The class names and the other names are ours
-// (notes/decisions.md, "MainWindow.cpp").
+// Identifier, x, y). The class names and the other names are ours.
 
 #pragma once
 
@@ -29,7 +28,7 @@ class TConsoleWindow; // ConsoleWindow.h
 class TStartWindow;
 class TSplitter;
 
-// TRADE_WINDOW is DialogWindow.h's since issue #118 (ContentWindows.cpp no longer includes this header).
+// TRADE_WINDOW is DialogWindow.h's (ContentWindows.cpp does not include this header).
 
 class TMainWindow : public TWindow {
 public:
@@ -63,7 +62,7 @@ public:
 	bool InGame;
 
 protected:
-	void OnClose() override; // the destructor's preferences (issue #108)
+	void OnClose() override; // the preferences
 };
 
 // The window behind the start dialogs.
@@ -97,7 +96,7 @@ public:
 	int DragY;
 };
 
-// ModalWindow and MainWindow are TGUI's members (GUI.h, issue #107):
+// ModalWindow and MainWindow are TGUI's members (GUI.h):
 // patella::bridge::GUI().ModalWindow and .MainWindow.
 
 void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),

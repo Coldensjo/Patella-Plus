@@ -7,8 +7,7 @@
 // DrawingList (and DrawingListLength, skin, srcx, srcy from an error text),
 // Parent, FirstChild, Capture, GetWidth, GetHeight, OffsetX/OffsetY (from
 // the parameters _OffsetX/_OffsetY), Width, Height and the parameter names.
-// The class names and the other member names are ours; see
-// notes/decisions.md "GUI.cpp".
+// The class names and the other member names are ours.
 
 #pragma once
 
@@ -17,14 +16,14 @@
 // The graphics types TRect, TRGBColor and TFont are graphics.h's; the window
 // classes and SkinProperties need them complete.
 #include "graphics.h"
-// TGUI (below) owns Talk.cpp's, Help.cpp's and Status.cpp's objects (issue #107).
+// TGUI (below) owns Talk.cpp's, Help.cpp's and Status.cpp's objects.
 #include "Help.h"
-// SkinProperties (and its types) and the skin table, which the windows read: Skins.h's since issue #116.
+// SkinProperties (and its types) and the skin table, which the windows read.
 #include "Skins.h" // IWYU pragma: export
 #include "Status.h"
 #include "Talk.h"
 #include "platform/Window.h"
-#include "types/Callback.h" // IWYU pragma: export (TCallback, GUI.h's until issue #110)
+#include "types/Callback.h" // IWYU pragma: export (TCallback)
 #include "types/FixedString.h"
 #include "vulkan/DeviceChoice.h"
 #include <array>
@@ -40,7 +39,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 
 class TComponent;
 
-// TCallback: types/Callback.h (issue #110), exported above.
+// TCallback: types/Callback.h, exported above.
 
 // One entry of a component's drawing list: a skin drawn at an
 // offset in the component, tiled to width x height when they are not 0. The
@@ -69,7 +68,7 @@ public:
 	// Inlined into the constructors of TWindow and TElement.
 	TComponent() : DrawingList(nullptr), DrawingListLength(0), Parent(nullptr), Next(nullptr), OffsetX(0),
 				   OffsetY(0), Width(0), Height(0) {}
-	virtual ~TComponent(); // noexcept (issue #108)
+	virtual ~TComponent();
 	virtual void InsertChild(TComponent *Child);
 	virtual void AppendChild(TComponent *Child);
 	virtual void RemoveChild(TComponent *Child);
@@ -103,23 +102,23 @@ public:
 	virtual void ReleaseCapture(TComponent *Component) = 0;
 	virtual void StopDragging() = 0;
 
-	// The work of the original's destructors that can fail or acts outside the component (issue #108): the Send
-	// functions, the preferences, the hotkeys, the assertions, DeleteTextBuffer. Close does it, once, in the order the
-	// original's destructors did (a class's own part first, then its bases', a window's children in the order of its
-	// list, an owned part that is not a child where the original's destructor deleted it); the destructors free the
-	// memory only and are noexcept. Each delete of a component closes it first (DeleteComponent, below; TWindow's
-	// DeleteChild). An exception of a close passes to the caller as the original's destructor's did, and the component
-	// is left allocated and marked closed (the original had freed it): see notes/ownership.md, section 7.
+	// The work of the original's destructors that can fail or acts outside the component: the Send functions, the
+	// preferences, the hotkeys, the assertions, DeleteTextBuffer. Close does it, once, in the order the original's
+	// destructors did (a class's own part first, then its bases', a window's children in the order of its list, an
+	// owned part that is not a child where the original's destructor deleted it); the destructors free the memory only
+	// and are noexcept. Each delete of a component closes it first (DeleteComponent, below; TWindow's DeleteChild). An
+	// exception of a close passes to the caller as the original's destructor's did, and the component is left allocated
+	// and marked closed (the original had freed it).
 	void Close();
 
 	[[nodiscard]] int GetWidth() const { return Width; }   // "Child->GetWidth()"
 	[[nodiscard]] int GetHeight() const { return Height; } // "Child->GetHeight()"
 
-	std::unique_ptr<TDrawing[]> DrawingList; // allocated by the subclasses (issue #58: the list's only owner)
+	std::unique_ptr<TDrawing[]> DrawingList; // allocated by the subclasses (the list's only owner)
 	int DrawingListLength;
 
 private:
-	// Close has run (issue #108).
+	// Close has run.
 	bool Closed = false;
 
 public:
@@ -131,8 +130,8 @@ public:
 	int Height;
 
 protected:
-	// A class's own part of the close (issue #108), overridden by the classes whose destructors did such work; each
-	// override ends with its base's, as a destructor ends with its base's. Not one of the original's virtual functions.
+	// A class's own part of the close, overridden by the classes whose destructors did such work; each override ends
+	// with its base's, as a destructor ends with its base's. Not one of the original's virtual functions.
 	virtual void OnClose() {}
 	// The rest of a close after an exception of a class's own part: the original's destructor went on with its bases'
 	// destructors while the exception passed, and a second exception there ended the program (std::terminate), which
@@ -143,8 +142,8 @@ protected:
 	void CheckClosed(const char *Class) const noexcept;
 };
 
-// Closes the component and deletes it (issue #108): the original's `delete Component`. Nothing for NULL. When the
-// close throws, the component is not deleted and the exception passes on.
+// Closes the component and deletes it. Nothing for NULL. When the close throws, the component is not deleted and the
+// exception passes on.
 void DeleteComponent(TComponent *Component);
 
 // A component without children. It takes every mouse event; a double
@@ -202,7 +201,7 @@ public:
 	virtual TComponent *GetCapture() { return Capture; }
 	virtual void SetChildPosition(TComponent *Child, int x, int y);
 	// The area is a 16-byte block passed by value (every caller builds it
-	// with sub esp,0x10 and four stores, issue #27).
+	// with sub esp,0x10 and four stores).
 	virtual void SetChildArea(TComponent *Child, TRect Area);
 	virtual void Fit(bool Notify) { FitToChildren(TRect(0, 0, 0, 0), Notify); }
 	// The margins are one 16-byte block passed by value (the callers, Fit and
@@ -217,7 +216,7 @@ public:
 	TComponent *Capture;
 
 protected:
-	void OnClose() override; // the children, first to last (~TWindow's order; issue #108)
+	void OnClose() override; // the children, first to last
 };
 
 // --- Modifier flags -------------------------------------------------------
@@ -311,8 +310,7 @@ bool CheckHotkey(int Key);
 
 // --- Skin properties ------------------------------------------------------
 
-// SkinProperties and its types are Skins.h's since issue #116 (TGraphics' TSkins); InitSkinProperties, which fills it,
-// stays GUI.cpp's.
+// SkinProperties and its types are Skins.h's (TGraphics' TSkins); InitSkinProperties, which fills it, is GUI.cpp's.
 
 void InitSkinProperties();
 
@@ -323,23 +321,21 @@ namespace patella {
 class TNetwork;       // Network.h
 class TCommunication; // Communication.h
 
-// The GUI's state (issue #107, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#107"), the
-// sixth of TClient's subsystems: Talk.cpp's TTalk, Help.cpp's THelp and Status.cpp's TInteraction, and the data of
-// GUI.cpp (the timers and hotkeys), ContentWindows.cpp (the two mouse-over texts), Control.cpp (the window, the
-// callbacks, the mouse's last move, the frame counter's switch) and MainWindow.cpp (ModalWindow, MainWindow and the
-// callbacks), in the original's address order with the same initial values. GUI.cpp's timer and hotkey functions,
-// Control.cpp's and MainWindow.cpp's functions (issue #118) are its members of the same names; the free functions
-// forward to them. SkinProperties is TGraphics' since issue #116 (with Skins.cpp's table, TSkins: Skins.h).
+// The GUI's state, the sixth of TClient's subsystems: Talk.cpp's TTalk, Help.cpp's THelp and Status.cpp's TInteraction,
+// and the data of GUI.cpp (the timers and hotkeys), ContentWindows.cpp (the two mouse-over texts), Control.cpp (the
+// window, the callbacks, the mouse's last move, the frame counter's switch) and MainWindow.cpp (ModalWindow, MainWindow
+// and the callbacks), in the original's address order with the same initial values. GUI.cpp's timer and hotkey
+// functions, Control.cpp's and MainWindow.cpp's functions are its members of the same names; the free functions forward
+// to them. SkinProperties is TGraphics' (with Skins.cpp's table, TSkins: Skins.h).
 //
-// Control.cpp, the controller above the windows, is TGUI's since issue #118: the windows' calls into it (the device
-// buttons of the main window's options, MainWindow.cpp, and the graphics options' fullscreen switch, Dialogs.cpp) are
-// calls of TGUI's members, and TGUI takes the earlier subsystems Control.cpp reads (TNetwork's reconnect, TCommunication's
-// packet ring and outfit request) by constructor reference.
+// Control.cpp, the controller above the windows, is TGUI's: the windows' calls into it (the device buttons of the main
+// window's options, MainWindow.cpp, and the graphics options' fullscreen switch, Dialogs.cpp) are calls of TGUI's
+// members, and TGUI takes the earlier subsystems Control.cpp reads (TNetwork's reconnect, TCommunication's packet ring
+// and outfit request) by constructor reference.
 //
-// MainWindow owns the main window (issue #108; raw until then): InitMainWindow makes it, ExitMainWindow closes and
-// frees it, at the original's new and delete; CPlayerApp::FatalError abandons it before exit(1) (AbandonWindows), so
-// TClient's static destruction never destroys it. ModalWindow keeps the original's raw pointer (below): Control.cpp
-// makes each dialog into it and closes and deletes the one it ends (DeleteComponent). notes/decisions.md, "#108".
+// MainWindow owns the main window: InitMainWindow makes it, ExitMainWindow closes and frees it; CPlayerApp::FatalError
+// abandons it before exit(1) (AbandonWindows), so TClient's static destruction never destroys it. ModalWindow is a raw
+// pointer (below): Control.cpp makes each dialog into it and closes and deletes the one it ends (DeleteComponent).
 class TGUI {
 public:
 	TGUI(TNetwork &Network, TCommunication &Communication); // MainWindow.cpp (TMainWindow is complete there)
@@ -354,14 +350,14 @@ public:
 	void RemoveTimer(TTimer *Timer);
 	void UpdateTimers();
 	void InitHotkeys();
-	static void ExitHotkeys(); // empty (as TCommunication::ExitCommunication, issue #105)
+	static void ExitHotkeys(); // empty (as TCommunication::ExitCommunication)
 	void AddHotkey(int Key, TCallback Callback);
 	void RemoveHotkey(int Key);
 	bool CheckHotkey(int Key);
 
-	// Control.cpp's (issue #118; Control.h has the free functions of the same names, which forward here). Their calls
-	// into the other files (GUI.cpp's and MainWindow.cpp's included) are those files' free functions, which the golden
-	// Control and Communication tests fake (commworld.cpp's WorldFakes); their calls of each other are member calls.
+	// Control.cpp's (Control.h has the free functions of the same names, which forward here). Their calls into the
+	// other files (GUI.cpp's and MainWindow.cpp's included) are those files' free functions, which the golden Control
+	// and Communication tests fake (commworld.cpp's WorldFakes); their calls of each other are member calls.
 	void Resize(int Width, int Height);
 	void CheckSurface(bool Force);
 	static void ChangeDevice(vulkan::TDeviceButton Button);
@@ -388,12 +384,12 @@ public:
 	static void ExitControl();
 	[[nodiscard]] std::array<uint8, 10> GetLastPacketTypes() const;
 
-	// MainWindow.cpp's (issue #118; MainWindow.h has the free functions).
+	// MainWindow.cpp's (MainWindow.h has the free functions).
 	void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
 		void (*OpenURL)(const char *URL));
 	void ExitMainWindow();
 
-	// The earlier subsystems Control.cpp reads (issue #118).
+	// The earlier subsystems Control.cpp reads.
 	TNetwork &Network;
 	TCommunication &Communication;
 
@@ -415,15 +411,11 @@ private:
 	platform::TWindowHandle WindowHandle{};
 	bool ShowFPS{}; // toggled by key 0x907
 
-	// GUI.cpp's (SkinProperties is TGraphics' since issue #116: Skins.h).
-	// NumberOfHotkeys, the used entries of Hotkeys: Hotkeys.size() (issue #100).
-	// The original's vector<TTimer *>(0, 0, 2, NULL): AddTimer takes the first
-	// NULL entry from 0 or appends, RemoveTimer sets the entry to NULL, UpdateTimers goes through the entries in
-	// order. Its min stays 0 and max + 1 is the size, so a std::vector (issue #100; notes/decisions.md, "#100").
+	// GUI.cpp's (SkinProperties is TGraphics': Skins.h).
+	// AddTimer takes the first NULL entry from 0 or appends, RemoveTimer sets the entry to NULL, UpdateTimers goes
+	// through the entries in order.
 	std::vector<TTimer *> Timers;
-	// The original's vector<THotkey>(0, 50, 10) with NumberOfHotkeys: a lookup by
-	// key, each key at most once (AddHotkey replaces its callback), the order never read (RemoveHotkey moves the
-	// last entry into the gap). A std::flat_map from the key to the callback (issue #100).
+	// A lookup by key, each key at most once (AddHotkey replaces its callback); the order is never read.
 	std::flat_map<int, TCallback> Hotkeys;
 	int LastTime{};     // UpdateTimers' static
 	bool LastTimeSet{}; // its guard
@@ -433,21 +425,20 @@ public:
 	void (*OpenURLCallback)(const char *URL){};
 	void (*SetDisplayModeCallback)(int Mode){};
 	void (*ExitProgramCallback)(){};
-	// The dialog on top. Raw (one owner, but not a std::unique_ptr; issue #108): MouseMove's help bubble leaves it
-	// pointing to the bubble it deleted when the new bubble or its Place throws (issue #36), and an owner cannot hold
-	// a freed window. Never destroyed at exit (a raw pointer).
+	// The dialog on top. Raw (one owner, but not a std::unique_ptr): MouseMove's help bubble leaves it pointing to the
+	// bubble it deleted when the new bubble or its Place throws, and an owner cannot hold a freed window. Never
+	// destroyed at exit (a raw pointer).
 	TWindow *ModalWindow{};
-	std::unique_ptr<TMainWindow> MainWindow; // issue #108: its owner
+	std::unique_ptr<TMainWindow> MainWindow;
 
-	// Issue #108: leaves the main window allocated, neither closed nor freed, and MainWindow empty: what the
-	// original's global was at exit(1). Called by CPlayerApp::FatalError before it, so that TClient's static
-	// destruction does not run the window's destructors (nor, through ~TWindow, close its children: the leave-channel
-	// and close-container packets and the preferences the original never sent or wrote on a fatal error).
+	// Leaves the main window allocated, neither closed nor freed, and MainWindow empty: what the original's global was
+	// at exit(1). Called by CPlayerApp::FatalError before it, so that TClient's static destruction does not run the
+	// window's destructors (nor, through ~TWindow, close its children: the leave-channel and close-container packets
+	// and the preferences the original never sent or wrote on a fatal error).
 	void AbandonWindows() noexcept;
 };
 
-// The transition's access path (issue #107; notes/decisions.md, "#104: TClient and the subsystem objects"): the one
-// TClient's TGUI (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the one TClient's TGUI (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 TGUI &GUI();
 } // namespace bridge

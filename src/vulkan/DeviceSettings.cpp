@@ -1,4 +1,4 @@
-// DeviceSettings.cpp: the x64 client's graphics device choice (DeviceSettings.h; issue #31).
+// DeviceSettings.cpp: the x64 client's graphics device choice (DeviceSettings.h).
 
 #include "vulkan/DeviceSettings.h"
 
@@ -49,8 +49,8 @@ std::optional<std::string> Environment(const char *Name)
 }
 
 #if !defined(_WIN32)
-// Linux (issue #131): Mesa's lavapipe as the system has it (the distribution's mesa-vulkan-drivers package; Windows has
-// its copy next to the executable, cmake/Vulkan.cmake). Empty where it is not installed.
+// Linux: Mesa's lavapipe as the system has it (the distribution's mesa-vulkan-drivers package; Windows has its copy
+// next to the executable, cmake/Vulkan.cmake). Empty where it is not installed.
 std::string FindCpuDriverManifest()
 {
 	for (const char *Folder : {"/usr/share/vulkan/icd.d", "/etc/vulkan/icd.d", "/usr/local/share/vulkan/icd.d"}) {
@@ -85,7 +85,7 @@ void LoadDeviceChoice()
 {
 	Choice = TDeviceChoice{};
 	if (std::optional<std::string> Override = Environment("PATELLA_VULKAN")) {
-		// As before issue #31: a value it does not know (off, dx9 ...) is automatic.
+		// A value it does not know (off, dx9 ...) is automatic.
 		Choice = patella::vulkan::ParseDeviceChoice(*Override).value_or(TDeviceChoice{});
 	} else if (std::optional<patella::settings::TSettingsFile> File = patella::settings::Load(patella::platform::Platform().FileSystem, patella::settings::FileName)) {
 		if (std::optional<std::string> Value = File->Get(DeviceKey))

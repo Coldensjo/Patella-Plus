@@ -1,6 +1,5 @@
 // SlotTable.h: TSlotTable<T, N>, a table of at most N entries whose numbers stay theirs, an entry with Status 0 being
-// free (Patella-Modern issue #102, plan M7's fixed-capacity lists). Not part of the original source. Its one user is
-// Map.cpp's effect table (TSlotTable<TEffect, EFFECTS>).
+// free. Not part of the original source. Its one user is Map.cpp's effect table (TSlotTable<TEffect, EFFECTS>).
 //
 // The original's effect table is an array of EFFECTS entries; an entry's number is its index, which the map points and the
 // entries' links hold, and NewEffect takes the first entry with Status 0, or none (-1) when all are taken, which drops the
@@ -11,10 +10,10 @@
 // value-initialised (Get). A freed entry keeps its other members until it is taken again, as the original's did.
 //
 // T: an implicit-lifetime aggregate with an int Status, value-initialised by T{} (TEffect). Key: the entries' numbers,
-// int or an enumeration over int (MapPoint.h's TEffectId, issue #103), its value the number; New() gives Key(-1) when full.
+// int or an enumeration over int (MapPoint.h's TEffectId), its value the number; New() gives Key(-1) when full.
 // Chain(First): the entries linked from First by their Next members (a Key, Key(-1) for the last), as a range of
-// numbers (issue #103: a map point's effects). Its step reads the Next of the entry it leaves after the loop's body, so
-// the body may free that entry if freeing keeps its Next (Map.cpp's DeleteEffect does).
+// numbers (a map point's effects). Its step reads the Next of the entry it leaves after the loop's body, so the body
+// may free that entry if freeing keeps its Next (Map.cpp's DeleteEffect does).
 
 #pragma once
 

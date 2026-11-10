@@ -2,9 +2,8 @@
 // Function names are ours; parameter names come from the binary's assertion
 // and catch strings.
 //
-// Patella-Modern issue #105 (M7, notes/decisions.md, "#104: TClient and the subsystem objects" and "#105"): the data
-// is TNetwork's, which TClient owns (Client.h); the free functions of the original's names are the bridge that the
-// callers use until they hold the object (bridge::Network(), defined in Client.cpp).
+// The data is TNetwork's, which TClient owns (Client.h); the free functions of the original's names are the bridge that
+// the callers use until they hold the object (bridge::Network(), defined in Client.cpp).
 
 #pragma once
 
@@ -27,7 +26,7 @@ inline constexpr int ERROR_LOGINSERVER_OVERLOADED = 200001;
 inline constexpr int ERROR_DISCONNECTED = 200002;
 
 // The message NetworkWindow gets when ResolveHostname's lookup is done (WM_USER + 1; MainFrm.cpp's OnHostResolved,
-// which asserts it): a number, so that Network.cpp needs no Windows header (issue #110).
+// which asserts it): a number, so that Network.cpp needs no Windows header.
 inline constexpr unsigned int HOSTNAME_RESOLVED_MESSAGE = 0x0400 + 1;
 
 // The size of the buffer GetErrorMessage writes into: every caller passes new char[1024].
@@ -45,10 +44,10 @@ namespace patella {
 
 class TPreferences;
 
-// What Network.cpp calls in the files above it (issue #105): Status.cpp's connection state and the active
-// character's address (TCommunication's session), and the message queue (TGUI's). TNetwork reaches them only
-// through this, so that it does not depend on those files; the functions are Status.h's of the same names. Until
-// their objects implement it, Client.cpp's adapter calls Status.cpp's functions.
+// What Network.cpp calls in the files above it: Status.cpp's connection state and the active character's address
+// (TCommunication's session), and the message queue (TGUI's). TNetwork reaches them only through this, so that it does
+// not depend on those files; the functions are Status.h's of the same names. Until their objects implement it,
+// Client.cpp's adapter calls Status.cpp's functions.
 class TNetworkSession {
 public:
 	TNetworkSession() = default;
@@ -67,14 +66,13 @@ protected:
 	~TNetworkSession() = default;
 };
 
-// Network.cpp's data and functions (issue #105): the globals of the original, with Control.cpp's ReconnectTimeout and
-// Reconnect and MainFrm.cpp's PacketHeader, are the members, with the same initial values (the others 0, as the
-// original's .bss), and the functions the members of the same names. Of the data three members are public: Control.cpp
-// reads and writes Reconnect and ReconnectTimeout, SdlFrame.cpp and Player.cpp PacketHeader.
+// Network.cpp's data and functions: the globals of the original, with Control.cpp's ReconnectTimeout and Reconnect and
+// MainFrm.cpp's PacketHeader, are the members, with the same initial values (the others 0, as the original's .bss), and
+// the functions the members of the same names. Of the data three members are public: Control.cpp reads and writes
+// Reconnect and ReconnectTimeout, SdlFrame.cpp and Player.cpp PacketHeader.
 //
-// Issue #109: the socket and the name resolution are the platform's ISocket (platform/Socket.h), which TNetwork takes
-// in its constructor and calls where it called WinSock and CAsyncSocket; the connection's events come to it as
-// ISocketEvents (OnConnect, OnReceive, OnClose: the TSocket's of Network.cpp until then).
+// The socket and the name resolution are the platform's ISocket (platform/Socket.h), which TNetwork takes in its
+// constructor; the connection's events come to it as ISocketEvents (OnConnect, OnReceive, OnClose).
 class TNetwork final : public platform::ISocketEvents {
 public:
 	TNetwork(TPreferences &PreferencesRef, TNetworkSession &SessionRef, platform::ISocket &SocketsRef);
@@ -148,15 +146,15 @@ private:
 	int ReceiveDataSize{};         // bytes in ReceiveData
 	int ReceivePacketEnd{};        // end of the complete packets
 	int ReceiveRead{};             // start of the next unread packet
-	// A frame whose inner length runs past it is dropped in PrepareNextPacket (issues #72 and #139), so
-	// ReceiveBuffer's reads stay inside the frame: Tibia.exe read on past ReceiveData, into SendData.
+	// A frame whose inner length runs past it is dropped in PrepareNextPacket, so ReceiveBuffer's reads stay inside the
+	// frame: Tibia.exe read on past ReceiveData, into SendData.
 	std::array<uint8, 0x4000> ReceiveData{};
 	std::array<uint8, 0x800> SendData{};
 	platform::TWindowHandle NetworkWindow{}; // receives WM_USER+1 when a name is resolved
 	void (*CloseCallback)(){};
 	void (*ReceiveCallback)(){};
 	void (*ConnectCallback)(){};
-	platform::TSocket *Socket{}; // the platform's connection (issue #109)
+	platform::TSocket *Socket{}; // the platform's connection
 	int TimeoutCounter{};
 	int TimeoutLimit{}; // in CheckConnectionTimeout calls
 	TWriteBuffer SendBuffer{SendData};
@@ -164,10 +162,9 @@ private:
 	TXTEA SymmetricKey;
 	int RecursionProtection{};
 
-	// Not the original's (issues #72 and #139, deliberate differences; notes/decisions.md, "#139"): a server frame
-	// the client cannot use is dropped, a warn line goes to the developer log, and the connection goes on with the
-	// next frame. ReceiveSkip: the bytes still to come of a frame too large for ReceiveData (OnReceive reads and
-	// drops them).
+	// Not the original's (deliberate differences): a server frame the client cannot use is dropped, a warn line goes to
+	// the developer log, and the connection goes on with the next frame. ReceiveSkip: the bytes still to come of a
+	// frame too large for ReceiveData (OnReceive reads and drops them).
 	int ReceiveSkip{};
 
 	void DropFrame(int FrameEnd);
@@ -184,8 +181,7 @@ private:
 		"Network.cpp's arrays");
 };
 
-// The transition's access path (issue #105; notes/decisions.md, "#104: TClient and the subsystem objects"): the
-// network of the one TClient (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the network of the one TClient (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 TNetwork &Network();
 } // namespace bridge
@@ -204,7 +200,7 @@ void SetServerIPAddress(const char *ipaddress);
 int GetNextCommand();
 
 void CheckConnectionTimeout();
-// Message is the caller's new char[ERROR_MESSAGE_SIZE]: a fixed extent, passed as the pointer was (issue #69).
+// Message is the caller's new char[ERROR_MESSAGE_SIZE]: a fixed extent, passed as the pointer was.
 void GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int ErrorCode, int ErrorType);
 const char *GetResolvedIPAddress();
 void Disconnect(bool force);

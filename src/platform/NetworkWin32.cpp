@@ -1,7 +1,6 @@
 // NetworkWin32.cpp: the Windows client's network, TPortableSocket (platform/PortableSocket.h) with what the client's
-// window needs of it (Patella-Modern issue #125; notes/decisions.md, "#125"). Not part of the original source.
-// Patella.exe and the test build compile it; the golden runner has its own NetworkSocket()
-// (tests/golden/network/MfcSocket.cpp).
+// window needs of it. Not part of the original source. Patella.exe and the test build compile it; the golden runner
+// has its own NetworkSocket() (tests/golden/network/MfcSocket.cpp).
 //
 // - A finished lookup goes to the window as WSAAsyncGetHostByName's reply did: to SdlFrame.cpp's OnHostResolved
 //   (HostResolved: no window message).

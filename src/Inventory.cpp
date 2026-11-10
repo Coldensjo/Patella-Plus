@@ -5,9 +5,8 @@
 // ResetInventory. The others are in line order; the compiler placed
 // InsertContainerObject last.
 //
-// Most functions assert before doing anything and have no try block; the
-// original's catch wrappers (common.h) around the calls to other functions of this file
-// are gone (issue #78).
+// Most functions assert before doing anything and have no try block; the original's catch wrappers (common.h) around
+// the calls to other functions of this file are gone.
 
 #include "Inventory.h"
 #include "Objects.h"
@@ -18,7 +17,7 @@
 #include <cstring>
 
 
-// The data is TInventory's (Inventory.h, issue #106).
+// The data is TInventory's (Inventory.h).
 
 patella::TInventory::TInventory(TObjectTypes &ObjectTypesRef) : ObjectTypes(ObjectTypesRef) {}
 
@@ -274,7 +273,7 @@ void patella::TInventory::ExitInventory()
 {
 }
 
-// The original's functions (issue #106): each calls its member on the one TClient's TInventory.
+// The original's functions: each calls its member on the one TClient's TInventory.
 
 void ClearOffers()
 {

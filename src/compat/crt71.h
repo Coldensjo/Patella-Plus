@@ -2,18 +2,16 @@
 // (the UCRT, or glibc) does differently and that reaches a file the client writes. Not part of the original
 // source.
 //
-// ctime/asctime: the client writes ctime's text into saved channels (ConsoleWindow.cpp SaveChannel; error.txt
-// too, Player.cpp HandleException, until Patella-Modern issue #74). MSVC 7.1's asctime
-// writes every number with two digits, the day of the month too (tm_mday / 10 + '0', tm_mday % 10 + '0'):
-// "Mon Nov 02 12:14:46 2026\n". The UCRT and glibc pad the day with a space, "Mon Nov  2 12:14:46 2026\n", as the C standard asks (found by
-// tools/compare_files.py, issue #21). FormatCRT71Time writes MSVC 7.1's text itself (Patella-Modern issue #61;
-// before it, the client patched the 9th character of ctime's buffer).
+// ctime/asctime: the client writes ctime's text into saved channels (ConsoleWindow.cpp SaveChannel). MSVC 7.1's
+// asctime writes every number with two digits, the day of the month too (tm_mday / 10 + '0', tm_mday % 10 + '0'):
+// "Mon Nov 02 12:14:46 2026\n". The UCRT and glibc pad the day with a space, "Mon Nov  2 12:14:46 2026\n", as
+// the C standard asks. FormatCRT71Time writes MSVC 7.1's text itself.
 //
 // Local time is the C library's localtime (_localtime64_s on Windows, localtime_r elsewhere), not std::chrono's
 // time zone database: MSVC 7.1's localtime takes the zone from the TZ variable or from Windows'
 // GetTimeZoneInformation and applies its rules to every year, and the UCRT does the same, so the UCRT's fields are
 // the original's (std::chrono::current_zone() reads ICU's zones with their history and ignores TZ). On Linux it is
-// glibc's localtime: TZ, else /etc/localtime. notes/decisions.md, issue #61.
+// glibc's localtime: TZ, else /etc/localtime.
 
 #pragma once
 
@@ -39,9 +37,7 @@ namespace patella::compat {
 inline constexpr std::int64_t CRT71LastTime = 32'535'215'999;
 
 // The local time of Time (seconds since 1970-01-01 00:00 UTC) as the C library's localtime gives it. False where
-// it gives none. On Windows _localtime64_s for every time (issue #62; from issue #61 to it, _localtime32_s up to
-// 2038-01-18 23:59:59 UTC, what _ctime32 gave the client before: tests/unit/crt71_test.cpp holds the two equal on
-// every hour of 32 bits and every 61st second of their last four days, in four zones), elsewhere localtime_r.
+// it gives none. On Windows _localtime64_s for every time, elsewhere localtime_r.
 inline bool CRT71LocalTime(std::int64_t Time, std::tm &Local)
 {
 #if defined(_WIN32)

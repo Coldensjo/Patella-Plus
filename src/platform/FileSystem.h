@@ -1,21 +1,21 @@
-// FileSystem.h: IFileSystem, the platform's files (Patella-Modern issue #109, plan M7; notes/decisions.md, "#109: the
-// platform interfaces"). Not part of the original source. Portable: the C library and std::filesystem only.
+// FileSystem.h: IFileSystem, the platform's files. Not part of the original source. Portable: the C library and
+// std::filesystem only.
 //
-// The client's files are opened by name, a name in the client's text (Windows-1252, issue #112; types/File.h): the
-// script and binary files of Script.cpp (Tibia.dat, Tibia.spr, Tibia.pic, Tibia.cfg, the automap, the options), the
-// saved channels of ConsoleWindow.cpp, and Preferences.cpp's test whether Tibia.cfg is there. Each goes through the
+// The client's files are opened by name, a name in the client's text (Windows-1252; types/File.h): the script and
+// binary files of Script.cpp (Tibia.dat, Tibia.spr, Tibia.pic, Tibia.cfg, the automap, the options), the saved
+// channels of ConsoleWindow.cpp, and Preferences.cpp's test whether Tibia.cfg is there. Each goes through the
 // process's IFileSystem (platform/Platform.h):
 //
-//	TDataFileSystem    issue #130 (plan M8, D14): the files of the data folder (Patella.ini of the settings folder),
-//	                   with the original names found without regard to ASCII case where asked (Linux): Patella.exe's,
-//	                   the test build's and the golden runner's (platform/Win32Platform.h SystemFileSystem). Until
-//	                   the client's start-up sets its folders (settings::ChooseLocations, Player.cpp InitInstance), and
-//	                   wherever the data folder is the working folder, it opens the working folder's files as the
-//	                   original did (TFile::Open, std::filesystem).
+//	TDataFileSystem    the files of the data folder (Patella.ini of the settings folder), with the original names
+//	                   found without regard to ASCII case where asked (Linux): Patella.exe's, the test build's and
+//	                   the golden runner's (platform/Win32Platform.h SystemFileSystem). Until the client's start-up
+//	                   sets its folders (settings::ChooseLocations, Player.cpp InitInstance), and wherever the data
+//	                   folder is the working folder, it opens the working folder's files as the original did
+//	                   (TFile::Open, std::filesystem).
 //
 // Both are portable, so the platform's file system is the same code on every platform; what is Windows' is TFile's
 // (its UTF-16 names, _wfsopen). Settings.cpp's Patella.ini and the developer log's LogFile are the fork's own files
-// and open themselves (std::fstream, TFile): not the original's, and part of patella_core (#109's "Found, not done").
+// and open themselves (std::fstream, TFile): not the original's, and part of patella_core.
 
 #pragma once
 
@@ -61,8 +61,8 @@ inline std::filesystem::path PathOfName(std::string_view Name)
 #endif
 }
 
-// Issue #130: the fork's settings file (settings/Settings.h's FileName), which TDataFileSystem opens in its settings
-// folder; every other name is the data folder's.
+// The fork's settings file (settings/Settings.h's FileName), which TDataFileSystem opens in its settings folder; every
+// other name is the data folder's.
 inline constexpr const char *SettingsFileName = "Patella.ini";
 
 // Equal without regard to ASCII case (A-Z and a-z only: the original names are ASCII, and a byte or unit outside ASCII
@@ -86,8 +86,8 @@ template <class Char>
 // first in name order, where there are several), else the part as written (a file to create, or one that is not there:
 // opening it fails as it did). An absolute Relative is looked up from its root. Throws what std::filesystem::path
 // throws (std::bad_alloc); a folder that cannot be read has no other entries.
-// GCC's analyzer (-fanalyzer, issue #130) follows a std::filesystem::path copy whose string throws length_error into
-// "use of uninitialized value" after the throw: a false positive of its exception paths through libstdc++.
+// GCC's analyzer (-fanalyzer) follows a std::filesystem::path copy whose string throws length_error into "use of
+// uninitialized value" after the throw: a false positive of its exception paths through libstdc++.
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-use-of-uninitialized-value\"")
 inline std::filesystem::path FindNoCase(const std::filesystem::path &Folder, const std::filesystem::path &Relative)
@@ -114,7 +114,7 @@ inline std::filesystem::path FindNoCase(const std::filesystem::path &Folder, con
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// Issue #130: where TDataFileSystem opens the client's files.
+// Where TDataFileSystem opens the client's files.
 struct TFileLocations {
 	std::filesystem::path Data;     // Tibia.dat, .spr, .pic, Tibia.cfg, the automap, the channels; empty: the working folder
 	std::filesystem::path Settings; // Patella.ini (SettingsFileName); empty: the data folder

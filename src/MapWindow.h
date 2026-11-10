@@ -14,7 +14,7 @@
 // Brightness, Player, Talkbox, Creatures[i], EffectNumber and the parameter
 // names in the catch blocks (Width, Height, x, y, Event, Surface, posx, posy,
 // FieldX, FieldY, SpriteNumber). The class names and everything else are
-// ours (notes/decisions.md, "MapWindow.cpp").
+// ours.
 
 #pragma once
 
@@ -65,7 +65,7 @@ struct TCacheField {
 class TMapWindow : public TWindow {
 public:
 	TMapWindow();
-	// Its two RemoveHotkey calls are the close since issue #108.
+	// Its two RemoveHotkey calls are the close's (OnClose).
 	~TMapWindow() override { CheckClosed("TMapWindow"); }
 	void SetSize(int Width, int Height) override;
 	int GetMinimumWidth() override { return 240; }
@@ -130,7 +130,7 @@ public:
 	TComponent *HintButton; // "Receive hint"
 
 protected:
-	// The destructor's work until issue #108, then the children.
+	// The two hotkeys, then the children.
 	void OnClose() override
 	{
 		try {

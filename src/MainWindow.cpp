@@ -18,9 +18,8 @@
 // sub-windows of both columns in the preferences; entering the game opens
 // them again.
 //
-// The original's catch wrappers (common.h) are gone since issue #78; the
-// functions here have no handlers apart from Draw's, which turns an error of
-// the start window into PROGRAM_ERROR 12.
+// The functions here have no handlers apart from Draw's, which turns an error
+// of the start window into PROGRAM_ERROR 12.
 
 #include "MainWindow.h"
 #include "ContentWindows.h"
@@ -57,13 +56,12 @@ const char *TextAccountURL = patella::buildconfig::LinkAccount;                 
 
 } // namespace
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
-// the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):
-// the window tree owns its children, the message queue its blocks, the lists their entries
+// cppcoreguidelines-no-malloc and cppcoreguidelines-owning-memory are off for the file, for the original's malloc'd
+// entries and texts, which their lists free, and its raw owners: the window tree owns its children, the message queue
+// its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
-// OpenURLCallback, SetDisplayModeCallback, ExitProgramCallback, ModalWindow and MainWindow are TGUI's (GUI.h,
-// issue #107).
+// OpenURLCallback, SetDisplayModeCallback, ExitProgramCallback, ModalWindow and MainWindow are TGUI's (GUI.h).
 
 // --- TMainWindow -----------------------------------------------------------
 
@@ -78,14 +76,14 @@ TMainWindow::TMainWindow(int Width, int Height)
 	AddHotkey(KEY_ALT | KEY_RETURN, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
 }
 
-// Its work is the close since issue #108.
+// Its work is the close's (OnClose).
 TMainWindow::~TMainWindow()
 {
 	CheckClosed("TMainWindow");
 }
 
-// The destructor's work until issue #108 (ChangeMode starts with the same
-// code): the open sub-windows go into the preferences; then the children.
+// The open sub-windows go into the preferences (ChangeMode starts with the
+// same code); then the children.
 void TMainWindow::OnClose()
 {
 	try {
@@ -103,7 +101,7 @@ void TMainWindow::OnClose()
 	TWindow::OnClose();
 }
 
-// TGUI's constructor and destructor (GUI.h, issue #108): here, where TMainWindow is complete for its owner.
+// TGUI's constructor and destructor (GUI.h): here, where TMainWindow is complete for its owner.
 patella::TGUI::TGUI(TNetwork &Network, TCommunication &Communication) : Network(Network), Communication(Communication)
 {
 }
@@ -115,9 +113,9 @@ void patella::TGUI::AbandonWindows() noexcept
 	(void)MainWindow.release(); // NOLINT(bugprone-unused-return-value): left allocated on purpose (GUI.h)
 }
 
-// Called by Control.cpp's ExitControl. Each window is closed and then freed
-// where the original deleted it (issue #108); a close that throws leaves its
-// window allocated (the main window in its owner).
+// Called by Control.cpp's ExitControl. Each window is closed and then freed;
+// a close that throws leaves its window allocated (the main window in its
+// owner).
 void patella::TGUI::ExitMainWindow()
 {
 	if (MainWindow != nullptr)
@@ -130,8 +128,8 @@ void patella::TGUI::ExitMainWindow()
 	ModalWindow = nullptr;
 }
 
-// The free function of the original's name (issue #118): Control.cpp's ExitControl and the golden MainWindow test call
-// it, the golden Control and Communication tests fake it (commworld.cpp).
+// The free function of the original's name: Control.cpp's ExitControl and the golden MainWindow test call it, the
+// golden Control and Communication tests fake it (commworld.cpp).
 void ExitMainWindow()
 {
 	patella::bridge::GUI().ExitMainWindow();
@@ -222,10 +220,10 @@ void TMainWindow::KeyPress(int Key)
 	}
 }
 
-// The events of the hotkeys, the buttons of the side-bar windows and the menus. 0x17 and 0x18 swap the two inventory windows; 0xe,
-// 0xf and 0x16 open or close the skill, battle and VIP windows; 0x1d gives up a connection; 0x1f8 switches between windowed and
-// fullscreen mode (a fullscreen mode below 640x480 is raised to it first). GCC's analyzer (issue #111): the message queue owns the
-// block it gets as an integer (AddMessage; the message's handler deletes it).
+// The events of the hotkeys, the buttons of the side-bar windows and the menus. 0x17 and 0x18 swap the two inventory
+// windows; 0xe, 0xf and 0x16 open or close the skill, battle and VIP windows; 0x1d gives up a connection; 0x1f8
+// switches between windowed and fullscreen mode (a fullscreen mode below 640x480 is raised to it first). GCC's
+// analyzer: the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMainWindow::HandleEvent(int Event)
@@ -353,13 +351,13 @@ void TMainWindow::HandleEvent(int Event)
 			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 		break;
 	case EVENT_DEVICE_AUTOMATIC:
-		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Automatic); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Automatic); // Control.cpp's
 		break;
 	case EVENT_DEVICE_GPU:
-		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Gpu); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Gpu); // Control.cpp's
 		break;
 	case EVENT_DEVICE_CPU:
-		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Cpu); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(patella::vulkan::TDeviceButton::Cpu); // Control.cpp's
 		break;
 	default:
 		break;
@@ -521,7 +519,7 @@ void TMainWindow::ChangeMode(bool InGame)
 // window again.
 void TMainWindow::ResizeConsole(int ConsoleHeight) const
 {
-	// One call of GetMinimumHeight (issue #34).
+	// One call of GetMinimumHeight.
 	const int MinimumHeight = Console->GetMinimumHeight();
 	if (ConsoleHeight < MinimumHeight)
 		ConsoleHeight = MinimumHeight;
@@ -551,11 +549,11 @@ void TMainWindow::Walk(int dx, int dy, bool Diagonal)
 	}
 }
 
-// An open container window is filled again: the body is updated (scrolled to the top, its counts, icon, title and
-// "up" button; ContentWindows.cpp) and, while it is minimized, the window gets the name and the object of the
-// container and the "up" state of a container that has a parent here. GCC's analyzer (Debug, issue #111) takes
-// SkinProperties()' styles, set by InitSkinProperties, as uninitialized, and the title and icon SetTitle and
-// SetIcon take as leaks (the window owns them).
+// An open container window is filled again: the body is updated (scrolled to the top, its counts, icon, title and "up"
+// button; ContentWindows.cpp) and, while it is minimized, the window gets the name and the object of the container and
+// the "up" state of a container that has a parent here. GCC's analyzer (Debug) takes SkinProperties()' styles, set by
+// InitSkinProperties, as uninitialized, and the title and icon SetTitle and SetIcon take as leaks (the window owns
+// them).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-use-of-uninitialized-value\"")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
@@ -787,7 +785,7 @@ void patella::TGUI::InitMainWindow(int Width, int Height, void (*ExitProgram)(),
 	OpenURLCallback = OpenURL;
 }
 
-// The free function of the original's name (issue #118): src/SdlFrame.cpp and the golden MainWindow test call it.
+// The free function of the original's name: src/SdlFrame.cpp and the golden MainWindow test call it.
 void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),
 	void (*OpenURL)(const char *URL))
 {

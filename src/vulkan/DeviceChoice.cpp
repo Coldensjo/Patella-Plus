@@ -1,4 +1,4 @@
-// DeviceChoice.cpp: the graphics device choice (DeviceChoice.h; Patella-Modern issue #31).
+// DeviceChoice.cpp: the graphics device choice (DeviceChoice.h).
 
 #include "vulkan/DeviceChoice.h"
 

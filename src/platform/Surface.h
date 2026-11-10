@@ -1,5 +1,4 @@
-// Surface.h: TSurface, the platform's drawing surface (Patella-Modern issue #138, plan M7; notes/decisions.md,
-// "#138: TSurface as a platform interface"). Portable: no platform header.
+// Surface.h: TSurface, the platform's drawing surface. Portable: no platform header.
 //
 // TSurface is the original's base class of the graphics engines (Surface.cpp): the client draws
 // through it (graphics.cpp, the window files, Control.cpp) and the engine implements it. It moved here from
@@ -7,13 +6,13 @@
 // so that the engine is a platform implementation behind it:
 //
 // 	TSurfaceVulkan   the Vulkan engine (vulkan/SurfaceVulkan.h): Patella.exe's and the test build's; its surfaces are
-// 	                 SDL_Vulkan_CreateSurface's since M8's #126 (vulkan/WindowSystem.h)
+// 	                 SDL_Vulkan_CreateSurface's (vulkan/WindowSystem.h)
 // 	the golden tests' recording surfaces (tests/golden: testsurface.h, commworld.cpp's)
 //
 // No Win32 type in it: the window is a TWindowHandle (platform/Window.h), ClipRect's rectangles a TEdgeRect (RECT's
 // four edges). What the engine shares with the client (the cache surfaces' size, the main window) is a TSurfaceShared
 // that the surface's creator passes to its constructor (TGraphicsEngine, src/Surface.h), instead of the client's
-// accessor (bridge::GraphicsEngine(), until issue #138).
+// accessor (bridge::GraphicsEngine()).
 //
 // The names from the binary: hWindow, ViewMode, the surface and mode constants (SurfaceDX.cpp's and surfaceDX9.cpp's
 // assertions), TestEngine, InitSurfaces and ExitSurfaces (the original ChangeEngine's error messages); the rest are ours.
@@ -28,7 +27,7 @@ struct TFullscreenMode;
 class TSurface;
 
 // View modes (TSurface::ViewMode, Init); 0 is none (not initialised). The int constants of the int members and
-// parameters, unscoped as the other unnamed ones (notes/decisions.md, "The other ten stay unscoped").
+// parameters, unscoped as the other unnamed ones.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	WINDOWED_MODE = 1,
 	FULLSCREEN_MODE = 2,
@@ -60,9 +59,9 @@ struct TEdgeRect {
 	int bottom = 0;
 };
 
-// The data the engines share with the client: Surface.cpp's (TGraphicsEngine's since issue #116, which derives from
-// this since issue #138). The engine sets the cache surfaces' size. The main window is Surface.cpp's file-local
-// value: TGraphicsEngine sets it (SurfaceInitInstance), TSurface reads it (TestEngine).
+// The data the engines share with the client: Surface.cpp's (TGraphicsEngine's, which derives from this). The engine
+// sets the cache surfaces' size. The main window is Surface.cpp's file-local value: TGraphicsEngine sets it
+// (SurfaceInitInstance), TSurface reads it (TestEngine).
 class TSurfaceShared {
 public:
 	TSurfaceShared(const TSurfaceShared &) = delete;
@@ -114,7 +113,7 @@ public:
 	// The blits take the source part as a TRect FromRect (and StretchBlit the
 	// target as ToRect): the assertions name FromRect.width/height and
 	// ToRect.width/height, and every caller builds the 16-byte block on the
-	// stack (issue #29).
+	// stack.
 	virtual void BlitRect(int ToSurface, int x, int y, int FromSurface, TRect FromRect) = 0;
 	virtual void Blit(int ToSurface, int x, int y, int FromSurface, TRect FromRect,
 		TRGBColor ColorKey) = 0;
@@ -178,7 +177,6 @@ public:
 	int Framerate;     // the frame limit; 0xffff is none
 
 protected:
-	// The engine's shared data (issue #138: the client's bridge::GraphicsEngine() until then). After the original's
-	// members, so their order is the original's.
+	// The engine's shared data. After the original's members, so their order is the original's.
 	patella::platform::TSurfaceShared &Shared;
 };

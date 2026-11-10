@@ -29,9 +29,9 @@
 #include <cstddef>
 #include <memory>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-owning-memory and cppcoreguidelines-pro-type-vararg are off for the file, for the original's raw
+// owners (the window tree owns its children, the message queue its blocks, the lists their entries) and its varargs
+// (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
 
@@ -812,8 +812,7 @@ bool TSkinButton::IsPressed()
 	return Pressed && MouseInside;
 }
 
-// The assertions print the skin only (the binary's messages,
-// issue #34).
+// The assertions print the skin only (the binary's messages).
 void TSkinButton::SetSkins(int _ButtonUp, int _ButtonDown)
 {
 	PATELLA_ASSERT_VALUES(_ButtonUp<patella::bridge::Skins().NumberOfSkins, _ButtonUp);
@@ -916,8 +915,8 @@ void TTextButton::Draw(int Surface, int x, int y)
 }
 
 // The base gets the button's own Tooltip, which is not set yet: the original's read of the memory's value, which
-// TSkinButton stores back, and which nothing reads (MouseHover shows
-// Tooltip1 or Tooltip2). GCC's and Clang's -Wuninitialized name the read: allowed here (issue #111).
+// TSkinButton stores back, and which nothing reads (MouseHover shows Tooltip1 or Tooltip2). GCC's and Clang's
+// -Wuninitialized name the read: allowed here.
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuninitialized"
@@ -1014,7 +1013,7 @@ TMultiStateButton::TMultiStateButton(int x, int y, const char *_Tooltip, int _St
 		ButtonUps[i] = va_arg(Arguments, int);
 		ButtonDowns[i] = va_arg(Arguments, int);
 		// TCallback is trivially copyable (passed through ... as the caller's copy), but not a POD (its constructors),
-		// which Clang's va_arg refuses by default (-Wnon-pod-varargs, issue #111).
+		// which Clang's va_arg refuses by default (-Wnon-pod-varargs).
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-pod-varargs"
@@ -1516,8 +1515,6 @@ void TPasswordEditLine::Draw(int Surface, int x, int y)
 	for (i = 0; i < (int)strlen(Text.get()); i++)
 		Stars[i] = '*';
 	Stars[strlen(Text.get())] = 0;
-	// The original swapped the two pointers through a local (issue #81: the
-	// owners swap their blocks).
 	Text.swap(Stars);
 	TEditLine::Draw(Surface, x, y);
 	Text.swap(Stars);

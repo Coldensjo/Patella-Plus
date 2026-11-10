@@ -1,9 +1,7 @@
-// Win32Platform.cpp: the Win32 implementations of the platform's interfaces (Patella-Modern issue #109;
-// platform/Win32Platform.h). Not part of the original source: each function is the call the client made itself
-// before #109 (sysinc.cpp's timeGetTime, the wall clock's time, the frame timer's Sleep; Network.cpp's CAsyncSocket
-// and WinSock calls until issue #125, now platform/PortableSocket.cpp's and, in the golden runner,
-// tests/golden/network/MfcSocket.cpp's) or before #119 (sysinc.cpp's clipboard, MainFrm.cpp's and Player.cpp's GetCursorPos, SetTimer,
-// KillTimer, MessageBoxA and EnumWindows), with the same arguments.
+// Win32Platform.cpp: the Win32 implementations of the platform's interfaces (platform/Win32Platform.h). Not part of
+// the original source: each function is the call the client made itself before (sysinc.cpp's timeGetTime, the wall
+// clock's time, the frame timer's Sleep; MainFrm.cpp's and Player.cpp's GetCursorPos, SetTimer, KillTimer, MessageBoxA
+// and EnumWindows), with the same arguments.
 
 #include "platform/Win32Platform.h"
 
@@ -59,9 +57,9 @@ void TWin32Input::StopTimer(TWindowHandle Window, unsigned int Id)
 	::KillTimer(static_cast<HWND>(Window), Id);
 }
 
-// Win32's GetCursorPos (the owner's decision on #123): where Windows cannot read the cursor (another
-// desktop: the lock screen, UAC's secure desktop) it fails and the point stays the last one, as the original's;
-// SDL_GetGlobalMouseState would report (0, 0) there.
+// Win32's GetCursorPos (the owner's decision): where Windows cannot read the cursor (another desktop: the lock
+// screen, UAC's secure desktop) it fails and the point stays the last one, as the original's; SDL_GetGlobalMouseState
+// would report (0, 0) there.
 bool TSdlLoopInput::CursorPosition(TPoint &Point)
 {
 	return Win32Input().CursorPosition(Point);
@@ -85,7 +83,7 @@ void TWin32Window::ShowMessageBox(TWindowHandle Owner, const char *Text, const c
 
 namespace {
 
-// Player.cpp's CountTibiaWindows until issue #119, its first half: the window's title and class as it read them.
+// The window's title and class for Player.cpp's CountTibiaWindows, read as the original read them.
 BOOL CALLBACK VisitWindow(HWND Window, LPARAM Parameter)
 {
 	const auto Visit = reinterpret_cast<TWindowVisitor>(Parameter);
@@ -104,8 +102,8 @@ void TWin32Window::VisitWindows(TWindowVisitor Visit)
 	EnumWindows(VisitWindow, reinterpret_cast<LPARAM>(Visit));
 }
 
-// The display's modes are SDL3's on every system since issue #152 (TSdlWindow, platform/SdlPlatform.cpp). TWin32Window
-// is the golden runner's, whose code asks nothing of the display.
+// The display's modes are SDL3's on every system (TSdlWindow, platform/SdlPlatform.cpp). TWin32Window is the golden
+// runner's, whose code asks nothing of the display.
 bool TWin32Window::DisplayMode(unsigned int, TDisplayMode &)
 {
 	return false;
@@ -130,9 +128,9 @@ constinit TWin32Window Win32WindowInstance;
 constinit TSdlLoopInput SdlLoopInputInstance;
 } // namespace
 
-// Issue #130: the data folder's files (platform/FileSystem.h), set by ConfigureDataFiles (DataLocationWin32.cpp); until
-// then, and in the golden runner, the working folder's. Its folders are not constant-initialised: made on first use,
-// never destroyed (the files are open to the very end, as the clock is read).
+// The data folder's files (platform/FileSystem.h), set by ConfigureDataFiles (DataLocationWin32.cpp); until then, and
+// in the golden runner, the working folder's. Its folders are not constant-initialised: made on first use, never
+// destroyed (the files are open to the very end, as the clock is read).
 TDataFileSystem &SystemFileSystem()
 {
 	static TDataFileSystem &Instance = *new TDataFileSystem; // NOLINT(cppcoreguidelines-owning-memory): never destroyed
@@ -169,8 +167,8 @@ IWindow &WindowDesktop()
 	return SdlWindow();
 }
 
-// Patella.exe's and the golden runner's platform (Platform.h). Issue #122: the
-// input is the window's (WindowInput); issue #124: the clipboard and the desktop too.
+// Patella.exe's and the golden runner's platform (Platform.h). The input is the window's (WindowInput), the clipboard
+// and the desktop too.
 TPlatform &Platform()
 {
 	static TPlatform Instance{Win32ClockInstance, SystemFileSystem(), NetworkSocket(), WindowClipboard(),

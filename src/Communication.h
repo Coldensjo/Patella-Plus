@@ -1,17 +1,15 @@
 // Communication.cpp: Tibia 7.72 protocol senders and receive handlers.
 // Parameter names and assertion identifiers follow the binary; remaining names are inferred.
 //
-// Patella-Modern issue #105 (M7, notes/decisions.md, "#104: TClient and the subsystem objects" and "#105"): the data
-// is TCommunication's, which TClient owns (Client.h); the free functions of the original's names are the bridge that
-// the callers use until they hold the object (bridge::Communication(), defined in Client.cpp).
+// The data is TCommunication's, which TClient owns (Client.h); the free functions of the original's names are the
+// bridge that the callers use until they hold the object (bridge::Communication(), defined in Client.cpp).
 
 #pragma once
 
 #include "common.h"
-// Nothing of Talk.h is used here, but without it the objects that include this header declare its names
-// later, and MSVC, which orders an object's globals by the names its translation unit declares (issue #43),
-// emits Communication.obj's .bss in another order (OutfitRequested after the ATL statics): the images' .data
-// moves (measured on x64, issue #49).
+// Nothing of Talk.h is used here, but without it the objects that include this header declare its names later, and
+// MSVC, which orders an object's globals by the names its translation unit declares, emits Communication.obj's .bss in
+// another order (OutfitRequested after the ATL statics): the images' .data moves (measured on x64).
 #include "Talk.h" // IWYU pragma: keep
 #include "Status.h"
 #include "Protocol.h" // the packet types of the Send functions and of ReceivePackets (Control.cpp), named
@@ -27,10 +25,10 @@ class TNetwork;
 class TObjectTypes;
 class TPlayerState;
 
-// The signatures of Tibia.spr and Tibia.pic that the login packet sends (SendLogin; issue #110): TGraphics' data
-// (graphics.h), and TGraphics is made after TCommunication, so an interface this header declares (notes/decisions.md,
-// "#104", rule 5), which Client.cpp's adapter implements by reading the one TClient's TGraphics. Communication.cpp
-// does not include graphics.h (whose engine part is the platform's surface): patella_core compiles it.
+// The signatures of Tibia.spr and Tibia.pic that the login packet sends (SendLogin): TGraphics' data (graphics.h), and
+// TGraphics is made after TCommunication, so an interface this header declares, which Client.cpp's adapter implements
+// by reading the one TClient's TGraphics. Communication.cpp does not include graphics.h (whose engine part is the
+// platform's surface): patella_core compiles it.
 class TLoginSignatures {
 public:
 	TLoginSignatures() = default;
@@ -46,11 +44,10 @@ protected:
 	~TLoginSignatures() = default;
 };
 
-// Communication.cpp's data and functions (issue #105): the globals of the original, with Control.cpp's
-// LastPacketIndex and LastPacketTypes, are the members, with the same initial values, and the
-// functions the members of the same names; Status.cpp's session is its TSession (Status.h). It sends and reads
-// through its TNetwork; the packet handlers write the game state through TMapState's five objects (issue #106) and
-// call the windows through those files' functions until TGUI (#107) is an object.
+// Communication.cpp's data and functions: the globals of the original, with Control.cpp's LastPacketIndex and
+// LastPacketTypes, are the members, with the same initial values, and the functions the members of the same names;
+// Status.cpp's session is its TSession (Status.h). It sends and reads through its TNetwork; the packet handlers write
+// the game state through TMapState's five objects and call the windows through those files' functions.
 class TCommunication {
 public:
 	TCommunication(TNetwork &NetworkRef, TMapState &MapState, TLoginSignatures &SignaturesRef);
@@ -121,7 +118,7 @@ public:
 	void ReceiveLoginError();
 	void ReceiveLoginMessage();
 	void ReceiveMessageOfTheDay();
-	void ReceiveUpdateRequest(); // packets 0x1e, 0x1f and 0x20 (the patcher removed: issue #75)
+	void ReceiveUpdateRequest(); // packets 0x1e, 0x1f and 0x20 (the patcher removed)
 	void ReceiveCharacterList();
 	void ReceiveLoginServerOverloaded();
 	void ReceiveGameLogin();
@@ -199,28 +196,26 @@ public:
 
 private:
 	int SkipFields{};
-	// The patch transfer's state (PatchData, PatchWholeFile, PatchDataCount, PatchDataSize,
-	// PatchFileNumber) is gone with the patcher since Patella-Modern issue #75 (decision D9).
 	int CancelCount{};
 	int LastCancelZ{};
 	int LastCancelY{};
 	int LastCancelX{};
 
 	TNetwork &Network;
-	// TMapState's objects (issue #106).
+	// TMapState's objects.
 	TObjectTypes &ObjectTypes;
 	TMap &Map;
 	TCreatures &Creatures;
 	TPlayerState &PlayerState;
 	TInventory &Inventory;
-	TLoginSignatures &Signatures; // issue #110
+	TLoginSignatures &Signatures;
 
 	// Control.cpp clears LastPacketTypes with a memset over its size.
 	static_assert(sizeof(LastPacketTypes) == 10, "LastPacketTypes");
 };
 
-// The transition's access path (issue #105; notes/decisions.md, "#104: TClient and the subsystem objects"): the
-// communication of the one TClient (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the communication of the one TClient (Client.cpp). It goes when no free function needs
+// it.
 namespace bridge {
 TCommunication &Communication();
 } // namespace bridge
@@ -285,7 +280,7 @@ void SendRuleViolationReport(const char *Name, uint8 Reason, uint8 Action, const
 void ReceiveLoginError();
 void ReceiveLoginMessage();
 void ReceiveMessageOfTheDay();
-void ReceiveUpdateRequest(); // packets 0x1e, 0x1f and 0x20 (the patcher removed: issue #75)
+void ReceiveUpdateRequest(); // packets 0x1e, 0x1f and 0x20 (the patcher removed)
 void ReceiveCharacterList();
 void ReceiveLoginServerOverloaded();
 void ReceiveGameLogin();

@@ -1,8 +1,8 @@
-// DeviceChoice.h: the graphics device choice of the Vulkan engine (Patella-Modern issue #31; plan 6.3).
+// DeviceChoice.h: the graphics device choice of the Vulkan engine.
 //
-// Plan 6.3 turns the advanced graphics options' three engine buttons into a graphics device choice:
-// "Automatic", "GPU" (one entry per Vulkan GPU; the button goes on to the next GPU when there are
-// several) and "CPU (compatibility)". The choice is Patella.ini's Device (src/settings/Settings.h) and
+// The advanced graphics options' three engine buttons are a graphics device choice: "Automatic", "GPU"
+// (one entry per Vulkan GPU; the button goes on to the next GPU when there are several) and "CPU
+// (compatibility)". The choice is Patella.ini's Device (src/settings/Settings.h) and
 // PATELLA_VULKAN's value, in the same words: auto, gpu (the best GPU), gpuN or gpu:N (the n-th GPU, from
 // 0, in the loader's order: TRenderer's ListGpus), cpu (the CPU driver). No Vulkan here, no platform
 // header: tests_render checks it on every preset.

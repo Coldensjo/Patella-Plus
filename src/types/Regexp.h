@@ -1,6 +1,5 @@
 // Regexp.h: TRegexp, a compiled expression of Henry Spencer's regexp (src/Extern/regexp, the client's of 1986,
-// compiled as C17) that owns what regcomp returned. Patella-Modern issue #129 (notes/modernization-plan.md, section
-// 7, M8; notes/decisions.md, "The regexp behind TRegexp"). Not part of the original source.
+// compiled as C17) that owns what regcomp returned. Not part of the original source.
 //
 // regcomp mallocs the program and the caller frees it; the client's one user (Status.cpp's link check of copied
 // text) did that by hand, with free. A TRegexp frees it when it is reset, assigned or destroyed, so no caller does.

@@ -80,9 +80,8 @@ enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 
 namespace patella {
 
-// Help.cpp's state (issue #107, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#107"): the
-// globals of the original are the members, in its .bss order with the same initial values, and the file's functions
-// the members of the same names. TGUI owns it (GUI.h).
+// Help.cpp's state: the globals of the original are the members, in its .bss order with the same initial values, and
+// the file's functions the members of the same names. TGUI owns it (GUI.h).
 class THelp {
 public:
 	THelp() = default;
@@ -114,28 +113,25 @@ public:
 
 private:
 	// Data, in the original's .bss order.
-	// NumberOfEventHelps: EventHelps.size() (issue #100).
 	bool HelpHandleChanged{};
 	int HelpHandle{}; // what the help bubble explains
 	int HelpHeight{};
 	int HelpWidth{};
 	int HelpY{};
 	int HelpX{};
-	// The original's vector<int>(0, 9, 10) with NumberOfEventHelps: a queue that
-	// appends at its count and pops at 0, read below the count only, so a std::vector (issue #100).
+	// A queue that appends at its end and pops at 0.
 	std::vector<int> EventHelps;
 	TFixedString<2048> HelpText{};
 };
 
-// The transition's access path (issue #107; notes/decisions.md, "#104: TClient and the subsystem objects"): the one
-// TClient's THelp (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the one TClient's THelp (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 THelp &Help();
 } // namespace bridge
 
 } // namespace patella
 
-// Help.cpp's functions (issue #107): each calls THelp's member of the same name on bridge::Help().
+// Help.cpp's functions: each calls THelp's member of the same name on bridge::Help().
 void SetHelpPosition(int x, int y);
 void MoveHelpPosition(int dx, int dy);
 void SetHelpSize(int Width, int Height);

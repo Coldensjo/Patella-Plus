@@ -1,4 +1,4 @@
-// Log.h: the developer log (Patella-Modern issue #77; plan D16). Not part of the original source.
+// Log.h: the developer log. Not part of the original source.
 //
 // A small log of our own, no library: four levels, each line written to stderr (through TConsole: the unit tests
 // capture the lines there) and, when one is open, to a log file, as "[<level>] <message>\n" (a message may hold line breaks of its own). Nothing is sent anywhere.
@@ -7,8 +7,8 @@
 //	if (patella::log::Enabled(patella::log::TLevel::Debug)) ... // work done only for a debug line
 //
 // The levels, most severe first: error (the fatal path: FatalError's box text, HandleException's message), warn
-// (a setting that could not be used), info (the default level) and debug (the diagnostics error.txt held until issue
-// #74: the engine, the last packet types, the last packet's first bytes and the player's position). A line is
+// (a setting that could not be used), info (the default level) and debug (the diagnostics the original's error.txt
+// held: the engine, the last packet types, the last packet's first bytes and the player's position). A line is
 // written when its level is the log's level or a more severe one. The level and the file come from Patella.ini
 // (log/LogSettings.h, the x64 client: LogLevel, LogFile); without them, or where nothing reads them (the tests),
 // the log is at info and writes to stderr only.
@@ -19,9 +19,9 @@
 // binary ('\n' line ends on every platform); stderr's own mode does the rest (the Microsoft C runtime writes "\r\n").
 // Each line is flushed at once: the next thing the fatal path does may be the end of the process.
 //
-// The messages are the client's text, Windows-1252 (plan D4); the lines go out in UTF-8 (issue #112,
-// types/Cp1252.h), to stderr and to the file alike, so that a terminal, an editor and M8's Linux console show them as
-// they are. An ASCII message is written unchanged. LogFile's name is the client's text too (TFile::Open).
+// The messages are the client's text, Windows-1252; the lines go out in UTF-8 (types/Cp1252.h), to stderr and to the
+// file alike, so that a terminal, an editor and the Linux console show them as they are. An ASCII message is written
+// unchanged. LogFile's name is the client's text too (TFile::Open).
 //
 // The fatal path's extras for Debug builds (Player.cpp FatalError), here so that every compiler tests them:
 // CurrentStacktrace (std::stacktrace's text where the standard library has it: MSVC's, and libstdc++'s with
@@ -107,7 +107,7 @@ inline std::optional<TLevel> ParseLevel(std::string_view Name) noexcept
 	return std::nullopt;
 }
 
-// The line written for a message (the client's text, Windows-1252): "[<level>] <message>\n", in UTF-8 (issue #112).
+// The line written for a message (the client's text, Windows-1252): "[<level>] <message>\n", in UTF-8.
 inline std::string FormatLine(TLevel Level, std::string_view Message)
 {
 	const std::string_view Name = LevelName(Level);
@@ -147,8 +147,8 @@ public:
 	// Whether a line of this level is written.
 	[[nodiscard]] bool Enabled(TLevel LineLevel) const noexcept { return LineLevel <= GetLevel(); }
 
-	// Opens Path for appending (created where it does not exist) through Files (the platform's IFileSystem, issue
-	// #119), instead of an open one. False (and no file) where that fails.
+	// Opens Path for appending (created where it does not exist) through Files (the platform's IFileSystem), instead
+	// of an open one. False (and no file) where that fails.
 	bool OpenFile(patella::platform::IFileSystem &Files, const std::string &Path) noexcept
 	{
 		const std::lock_guard<std::mutex> Lock(Mutex);

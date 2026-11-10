@@ -28,9 +28,8 @@
 #include "GUI.h"
 #include "common.h"
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory is off for the file, for the original's raw owners: the window tree owns its
+// children, the message queue its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
 // A column is as wide as the side bar.
@@ -74,10 +73,9 @@ TSubWindow::~TSubWindow()
 		delete Resizer2;
 }
 
-// The destructor's work until issue #108, in its order: the skill, battle and
-// VIP windows store their body's height in the preferences ("ContentWindow"),
-// the parts that are not children are closed where it deleted them (a
-// minimized container's body sends its close); then the children.
+// The skill, battle and VIP windows store their body's height in the
+// preferences ("ContentWindow"), the parts that are not children are closed
+// (a minimized container's body sends its close); then the children.
 void TSubWindow::OnClose()
 {
 	try {
@@ -137,14 +135,13 @@ TDialogWindow::TDialogWindow()
 
 // The catch blocks name no parameter.
 //
-// Issue #65: a sub-window's SetSize ends with the column's Rearrange(8)
-// (FitChildren), which can delete the child being sized. The original then
-// reads the deleted child's Next (a use after free); RemoveChild had set it
-// to NULL before the delete, so its loop ends there. Ours ends there too,
-// without the read: a child that is no longer in the column was deleted
-// (strategies 2, 4, 8 and 32 delete children but never insert one, so the
-// pointer compared is not a new child's). A child still in it goes on to its
-// Next, as before.
+// A sub-window's SetSize ends with the column's Rearrange(8) (FitChildren),
+// which can delete the child being sized. The original then read the deleted
+// child's Next (a use after free); RemoveChild had set it to NULL before the
+// delete, so its loop ended there. This loop ends there too, without the
+// read: a child that is no longer in the column was deleted (strategies 2, 4,
+// 8 and 32 delete children but never insert one, so the pointer compared is
+// not a new child's). A child still in it goes on to its Next.
 void TDialogWindow::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);

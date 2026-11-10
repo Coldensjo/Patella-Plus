@@ -1,5 +1,4 @@
-// DeviceSettings.h: the x64 client's graphics device choice (Patella-Modern issue #31; plan 6.3, D12;
-// notes/vulkan.md, "Choosing the device").
+// DeviceSettings.h: the x64 client's graphics device choice.
 //
 // The advanced graphics options' three buttons choose the Vulkan engine's device: "Automatic", "GPU"
 // (the next GPU on every click when there are several) and "CPU" (the shipped CPU driver). The choice is

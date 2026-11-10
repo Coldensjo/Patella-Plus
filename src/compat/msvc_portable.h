@@ -1,8 +1,7 @@
 // msvc_portable.h: the Microsoft CRT's semantics of compat/msvc.h written with the C library, for the platforms
-// without the Microsoft CRT (Patella-Modern issue #43). Not part of the original source. compat/msvc.h includes
-// it off Windows, where its Msvc* functions are these; tests/unit/core_msvc_test.cpp includes it everywhere and
-// holds it against the Microsoft functions on Windows. The client's Windows translation units do not include it
-// (compat/msvc.h says why).
+// without the Microsoft CRT. Not part of the original source. compat/msvc.h includes it off Windows, where its
+// Msvc* functions are these; tests/unit/core_msvc_test.cpp includes it everywhere and holds it against the
+// Microsoft functions on Windows. The client's Windows translation units do not include it (compat/msvc.h says why).
 
 #pragma once
 
@@ -91,8 +90,7 @@ inline char *PortableStrdup(const char *Text)
 
 #if !defined(_WIN32)
 
-// The Msvc* names of compat/msvc.h off Windows (on Windows they are the Microsoft functions themselves; issue
-// #49 moved them here from compat/msvc.h).
+// The Msvc* names of compat/msvc.h off Windows (on Windows they are the Microsoft functions themselves).
 
 // _snprintf: PortableVsnprintf's semantics.
 PATELLA_PRINTF_FORMAT(3, 4)

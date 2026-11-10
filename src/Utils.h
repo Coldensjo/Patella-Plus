@@ -25,7 +25,7 @@ void TrimString(char *Destination, const char *Source);
 bool ShortenString(char *Text, int MaxLength);
 void FormatNumber(int Number, patella::TSpan<char> BufferBytes); // "1,234,567"
 // CompareStrings and ShortenString keep the original's parameters: Count limits the comparison of two C strings (-1:
-// none) and MaxLength is the length Text is cut to, not the size of a buffer (issue #69).
+// none) and MaxLength is the length Text is cut to, not the size of a buffer.
 
 class TBuffer {
 public:

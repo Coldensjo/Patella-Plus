@@ -157,8 +157,7 @@ int CompareStrings(const char *s1, const char *s2, int Count)
 }
 
 // The original's parameters (Destination, Size) are the span's pointer and its size as an int, the names of the
-// assertions' text: a null pointer still fails 124, a size above INT_MAX is the original's negative Size (issue #69, as
-// #59).
+// assertions' text: a null pointer still fails 124, a size above INT_MAX is the original's negative Size.
 void CopyString(patella::TSpan<char> DestinationBytes, const char *Source)
 {
 	char *const Destination = DestinationBytes.data();
@@ -199,7 +198,7 @@ bool ShortenString(char *Text, int MaxLength)
 }
 
 // The original's parameters (data, size) are the span's pointer and its size as an int, the names of the assertions'
-// text: a null pointer, or a size above INT_MAX (the original's negative size), still fails them (issue #59).
+// text: a null pointer, or a size above INT_MAX (the original's negative size), still fails them.
 TReadBuffer::TReadBuffer(patella::TSpan<uint8> Bytes)
 {
 	uint8 *const data = Bytes.data();
@@ -234,9 +233,8 @@ uint32 TReadBuffer::GetQuad()
 	return Result;
 }
 
-// Reads at most MaxLength-1 characters; skips the rest. Text is the original's (Buffer, MaxLength): its size as
-// an int is MaxLength, so a size above INT_MAX is the original's negative MaxLength, no limit (only the tests
-// pass one; issue #59).
+// Reads at most MaxLength-1 characters; skips the rest. Text is the original's (Buffer, MaxLength): its size as an int
+// is MaxLength, so a size above INT_MAX is the original's negative MaxLength, no limit (only the tests pass one).
 void TReadBuffer::GetString(patella::TSpan<char> Text)
 {
 	char *const Buffer = Text.data();
@@ -257,9 +255,9 @@ void TReadBuffer::GetString(patella::TSpan<char> Text)
 	Position += Length;
 }
 
-// The caller owns the result. Patella-Modern issue #139, item 4, a deliberate difference (notes/decisions.md,
-// "#139"): the check comes before the allocation, so a text that does not fit throws with nothing allocated.
-// The binary allocated first and lost the text when the check threw.
+// The caller owns the result. A deliberate difference from the original: the check comes before the allocation, so a
+// text that does not fit throws with nothing allocated. The original allocated first and lost the text when the check
+// threw.
 char *TReadBuffer::GetString()
 {
 	const int Length = GetWord();
@@ -307,8 +305,8 @@ void TWriteBuffer::PutQuad(uint32 Data)
 	Position += 4;
 }
 
-// It stays a C string (issue #59): a std::string_view could not carry the null pointer that the assertion reports
-// (its construction from a null C string faults before the assertion).
+// It stays a C string: a std::string_view could not carry the null pointer that the assertion reports (its construction
+// from a null C string faults before the assertion).
 void TWriteBuffer::PutString(const char *s)
 {
 	PATELLA_ASSERT(s!=nullptr);
@@ -331,10 +329,10 @@ void TWriteBuffer::PutBytes(patella::TSpan<const uint8> Bytes)
 		PutByte(Buffer[i]);
 }
 
-// Buffer is the span's pointer, the name of the assertion's text (issue #69). The text is built where the original
-// built it in the caller's buffer, in Text: at most 10 digits and 3 commas ("2,147,483,647") and the NUL. Copied into
-// the caller's buffer it is the original's bytes (it wrote nothing after the final NUL), cut at the buffer's size
-// where the original wrote past it (#57's contract; every caller's buffer holds 14).
+// Buffer is the span's pointer, the name of the assertion's text. The text is built where the original built it in the
+// caller's buffer, in Text: at most 10 digits and 3 commas ("2,147,483,647") and the NUL. Copied into the caller's
+// buffer it is the original's bytes (it wrote nothing after the final NUL), cut at the buffer's size where the original
+// wrote past it (every caller's buffer holds 14).
 void FormatNumber(int Number, patella::TSpan<char> BufferBytes)
 {
 	char *const Buffer = BufferBytes.data();

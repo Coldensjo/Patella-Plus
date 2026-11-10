@@ -93,9 +93,9 @@ const char *TextWaitForPartner = "Please wait for \nyour partner to accept.";   
 
 } // namespace
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-owning-memory and cppcoreguidelines-pro-type-vararg are off for the file, for the original's raw
+// owners (the window tree owns its children, the message queue its blocks, the lists their entries) and its varargs
+// (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
 
@@ -332,14 +332,14 @@ TAutomapWindow::TAutomapWindow()
 	AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
 }
 
-// Its work is the close since issue #108.
+// Its work is the close's (OnClose).
 TAutomapWindow::~TAutomapWindow()
 {
 	CheckClosed("TAutomapWindow");
 }
 
-// The destructor's work until issue #108: the zoom goes back into the
-// preferences, the hotkeys are removed; then the children.
+// The zoom goes back into the preferences, the hotkeys are removed; then the
+// children.
 void TAutomapWindow::OnClose()
 {
 	try {
@@ -570,7 +570,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 		const int Top = CentreY - 106 / Window->Zoom;
 		for (int BlockX = Left / 256; BlockX < Left / 256 + 2; BlockX++) {
 			for (int BlockY = Top / 256; BlockY < Top / 256 + 2; BlockY++) {
-				std::vector<TMark> Marks; // the original's vector<TMark>(0, 0, 10) (issue #100)
+				std::vector<TMark> Marks;
 				int Count;
 				GetAutomapMarks(BlockX, BlockY, PosZ, &Marks, &Count);
 				for (int i = 0; i < Count; i++) {
@@ -635,7 +635,7 @@ TMark TAutomapView::GetMark(int x, int y)
 	const int Top = Window->ViewY - 106 / Window->Zoom;
 	for (int BlockX = Left / 256; BlockX < Left / 256 + 2; BlockX++) {
 		for (int BlockY = Top / 256; BlockY < Top / 256 + 2; BlockY++) {
-			std::vector<TMark> Marks; // the original's vector<TMark>(0, 0, 10) (issue #100)
+			std::vector<TMark> Marks;
 			int Count;
 			GetAutomapMarks(BlockX, BlockY, Window->ViewZ, &Marks, &Count);
 			for (int i = Count - 1; i >= 0; i--) {
@@ -858,10 +858,10 @@ int TPlayerStates::GetIconAt(int x, int y) const
 
 // The skin of the Position'th state that is on; 0 when fewer states are on.
 // State 9 has no icon. The original's default, never reached (i is 0-9), was
-// TERROR1(1063, "index out of range", i); it does nothing here (issue #79):
-// MSVC x86 removed its code but kept the function's exception frame, without
-// the frame's handler in the SafeSEH table, so an exception of a callee ended
-// the program (notes/decisions.md, issue #79).
+// TERROR1(1063, "index out of range", i); it does nothing here: MSVC x86
+// removed its code but kept the function's exception frame, without the
+// frame's handler in the SafeSEH table, so an exception of a callee ended the
+// program.
 int TPlayerStates::GetIcon(int Position)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,SkinProperties().PlayerStates.NumberOfIcons-1), Position,
@@ -1412,14 +1412,13 @@ TContainerWindowBody::TContainerWindowBody(int _Container)
 	Arrange();
 }
 
-// Its work is the close since issue #108.
+// Its work is the close's (OnClose).
 TContainerWindowBody::~TContainerWindowBody()
 {
 	CheckClosed("TContainerWindowBody");
 }
 
-// The destructor's work until issue #108: closing the window closes the
-// container; then the children.
+// Closing the window closes the container; then the children.
 void TContainerWindowBody::OnClose()
 {
 	try {
@@ -1667,7 +1666,7 @@ void TContainerWindowBody::Update()
 int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 {
 	// x and y become positions in the slot grid in their own variables: the
-	// original's catch wrapper printed them (issue #34).
+	// original's catch wrapper printed them.
 	x -= SkinProperties().ContainerFirstSlot.x;
 	y += ScrollBar->Range->Value - SkinProperties().ContainerFirstSlot.y;
 	const int Column = x / SkinProperties().ContainerColumnWidth;
@@ -1716,8 +1715,8 @@ TSkillsWindowBody::~TSkillsWindowBody()
 		ContextMenu->SkillsWindow = nullptr;
 }
 
-// Not in the original (issue #118; ContextMenus.h): TSkillContextMenu's stores into the window and its call of the
-// window's Arrange, here where the class is complete.
+// TSkillContextMenu's stores into the window and its call of the window's Arrange (ContextMenus.h), here where the
+// class is complete.
 void SetSkillsWindowMenu(TSkillsWindowBody *Window, TSkillContextMenu *Menu) noexcept
 {
 	Window->ContextMenu = Menu;
@@ -1728,7 +1727,7 @@ void ArrangeSkillsWindow(TSkillsWindowBody *Window)
 	Window->Arrange();
 }
 
-// Not in the original (issue #118; DialogWindow.h): TSubWindow::Arrange's call for a container's window.
+// TSubWindow::Arrange's call for a container's window (DialogWindow.h).
 void UpdateContainerUpButton(TSubWindowBody *Body)
 {
 	(static_cast<TContainerWindowBody *>(Body))->UpdateUpButton();
@@ -1899,7 +1898,7 @@ void TSkillsWindowBody::Arrange()
 // At least one line.
 int TSkillsWindowBody::GetMinimumHeight()
 {
-	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
+	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
 	return (std::max)(ScrollBar->GetMinimumHeight(), LineHeight);
 }
@@ -2022,8 +2021,7 @@ TBattleWindowBody::TBattleWindowBody()
 	Arrange();
 }
 
-// The inline destructor's work until issue #108: no creature is
-// highlighted any more; then the children.
+// No creature is highlighted any more; then the children.
 void TBattleWindowBody::OnClose()
 {
 	try {
@@ -2077,8 +2075,7 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 			ClipY += y;
 			bool Framed = false;
 			TRGBColor Color = SkinProperties().BattleWindow.NameFont.Color;
-			// GetOpponentAt's arguments in the original's order, right to left (MSVC; GCC and Clang may differ, issue
-			// #91).
+			// GetOpponentAt's arguments in the original's order, right to left (MSVC; GCC and Clang may differ).
 			const auto OpponentAtMouse = [&] {
 				const int MouseY = GetMouseY();
 				return GetOpponentAt(GetMouseX() - x, MouseY - y);
@@ -2644,14 +2641,13 @@ TTradeWindowBody::TTradeWindowBody()
 	SetSize(170, 100);
 }
 
-// Its work is the close since issue #108.
+// Its work is the close's (OnClose).
 TTradeWindowBody::~TTradeWindowBody()
 {
 	CheckClosed("TTradeWindowBody");
 }
 
-// The destructor's work until issue #108: closing the window rejects an
-// open offer; then the children.
+// Closing the window rejects an open offer; then the children.
 void TTradeWindowBody::OnClose()
 {
 	try {
@@ -2674,7 +2670,7 @@ int TTradeWindowBody::GetContentHeight()
 // height (both read twice, in either order). The calls go in the binary's
 // order (maximum, minimum, for the lower bound, then again for the upper
 // one) in their own variables: in one expression our compiler called them
-// in another order (issue #34).
+// in another order.
 void TTradeWindowBody::SetSize(int Width, int Height)
 {
 	int Maximum = GetMaximumHeight();

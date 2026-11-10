@@ -1,5 +1,4 @@
-// MapState.h: TMapState, the game state as five objects (Patella-Modern issue #106, plan M7; notes/decisions.md,
-// "#104: TClient and the subsystem objects" and "#106"). Not part of the original source.
+// MapState.h: TMapState, the game state as five objects. Not part of the original source.
 //
 // TClient owns it (Client.h), after TNetwork and before TCommunication, whose packet handlers write it. Its five
 // objects are made in this order, each given the earlier ones it reads (references, never owners):
@@ -23,7 +22,7 @@ namespace patella {
 
 class TMapState final : private TCreaturesPlayer {
 public:
-	// Console and GUI: the calls up into TGUI (issue #118), which TClient passes (Client.cpp's adapters).
+	// Console and GUI: the calls up into TGUI, which TClient passes (Client.cpp's adapters).
 	TMapState(TMapConsole &Console, TCreaturesGUI &GUI)
 		: Map(ObjectTypes, Console), Creatures(*this, GUI), PlayerState(ObjectTypes, Map, Creatures, GUI), Inventory(ObjectTypes)
 	{

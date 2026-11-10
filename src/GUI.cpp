@@ -24,18 +24,17 @@
 #include <cstdlib>
 #include <type_traits>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory is off for the file, for the original's raw owners: the window tree owns its
+// children, the message queue its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-// TComponent::DrawingList is a std::unique_ptr<TDrawing[]> (issue #58). The
-// subclasses' constructors allocate it with reset(new TDrawing[n]) (each list is the first: TComponent's constructor
-// leaves it null, and no class allocates over a base's), ~TComponent frees it with reset() where the original had
-// delete[]; TDrawing's destructor is trivial, so the reset cannot throw.
+// TComponent::DrawingList is a std::unique_ptr<TDrawing[]>. The subclasses' constructors allocate it with reset(new
+// TDrawing[n]) (each list is the first: TComponent's constructor leaves it null, and no class allocates over a base's),
+// ~TComponent frees it with reset() where the original had delete[]; TDrawing's destructor is trivial, so the reset
+// cannot throw.
 
-// The data of .bss (NumberOfHotkeys, Timers, Hotkeys, UpdateTimers' static LastTime) is TGUI's (GUI.h, issue #107);
-// SkinProperties is TGraphics' TSkins' (Skins.h, issue #116), which InitSkinProperties below fills.
+// The data of .bss (NumberOfHotkeys, Timers, Hotkeys, UpdateTimers' static LastTime) is TGUI's (GUI.h); SkinProperties
+// is TGraphics' TSkins' (Skins.h), which InitSkinProperties below fills.
 
 int TTimer::GetTime() const
 {
@@ -47,11 +46,9 @@ bool TTimer::IsExpired() const
 	return !(Active && Remaining != 0);
 }
 
-// noexcept since issue #108: the work of the window classes' destructors that
-// could throw (TTab's assertion, the Send functions, the preferences,
-// DeleteTextBuffer) is their Close (OnClose), which every delete of a component
-// runs first; it was noexcept(false) from issue #34 to #108 (VC7.1's
-// destructors let exceptions out; notes/ownership.md, section 7).
+// noexcept: the work of the window classes that could throw (TTab's
+// assertion, the Send functions, the preferences, DeleteTextBuffer) is their
+// Close (OnClose), which every delete of a component runs first.
 TComponent::~TComponent()
 {
 	if (DrawingList != nullptr)
@@ -61,8 +58,8 @@ TComponent::~TComponent()
 static_assert(std::is_nothrow_destructible_v<TComponent> && std::is_nothrow_destructible_v<TWindow>,
 	"issue #108: the window classes' destructors are noexcept");
 
-// Issue #108 (not in the original). Closed is set first: a close that throws is
-// not run again, as the original's destructor was not.
+// Closed is set first: a close that throws is not run again, as the
+// original's destructor was not.
 void TComponent::Close()
 {
 	if (Closed)
@@ -71,14 +68,12 @@ void TComponent::Close()
 	OnClose();
 }
 
-// Issue #108.
 void TComponent::CheckClosed(const char *Class) const noexcept
 {
 	if (!Closed)
 		patella::log::Error("{} destroyed without Close: its close was not done (issue #108)", Class);
 }
 
-// Issue #108: the original's `delete Component`.
 void DeleteComponent(TComponent *Component)
 {
 	if (Component == nullptr)
@@ -1562,7 +1557,7 @@ void patella::TGUI::RemoveTimer(TTimer *Timer)
 // Called by ProcessEvents. The first call only starts the clock.
 void patella::TGUI::UpdateTimers()
 {
-	if (!LastTimeSet) { // the original's function-local static, initialised on the first call (issue #107)
+	if (!LastTimeSet) { // the original's function-local static, initialised on the first call
 		LastTime = GetMilliseconds();
 		LastTimeSet = true;
 	}
@@ -1731,8 +1726,8 @@ void TWindow::AppendChild(TComponent *Child)
 	Child->Parent = this;
 }
 
-// The child is closed after it is removed, where the original's delete
-// ran its destructor (issue #108).
+// The child is closed after it is removed, where the original's delete ran
+// its destructor.
 void TWindow::DeleteChild(TComponent *Child)
 {
 	RemoveChild(Child);
@@ -1842,21 +1837,20 @@ void TWindow::SetPosition(int _OffsetX, int _OffsetY)
 		Child->PositionChanged();
 }
 
-// Deletes the children. After the window's Close (issue #108) its children are
-// closed and DeleteChild only removes and frees them. A window destroyed
-// without a close is one whose constructor threw (its fully made bases are
-// destroyed): then DeleteChild closes each child, as the original's destructors
-// did their work there, and an exception of it ends the program, as the
-// original's second exception during the unwinding did.
+// Deletes the children. After the window's Close its children are closed and
+// DeleteChild only removes and frees them. A window destroyed without a close
+// is one whose constructor threw (its fully made bases are destroyed): then
+// DeleteChild closes each child, as the original's destructors did their work
+// there, and an exception of it ends the program, as the original's second
+// exception during the unwinding did.
 TWindow::~TWindow()
 {
 	while (FirstChild != nullptr)
 		DeleteChild(FirstChild);
 }
 
-// Issue #108: ~TWindow's order, the first child first. The next child is taken
-// before the close (a close does not change the list; the original's
-// destructors ran on children already removed from it).
+// The children, the first child first. The next child is taken before the
+// close (a close does not change the list).
 void TWindow::OnClose()
 {
 	TComponent *Child = FirstChild;
@@ -2213,7 +2207,7 @@ bool patella::TGUI::CheckHotkey(int Key)
 	return true;
 }
 
-// The functions of the original (issue #107): each calls its member on the one TClient's TGUI.
+// The functions of the original: each calls its member on the one TClient's TGUI.
 
 void AddTimer(TTimer *Timer)
 {

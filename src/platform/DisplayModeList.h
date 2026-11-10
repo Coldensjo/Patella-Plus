@@ -1,17 +1,16 @@
-// DisplayModeList.h: the display's modes over SDL3 as the client lists and sets them (Patella-Modern issues #124 and
-// #152, plan M8; notes/decisions.md, "#124: display modes, clipboard, URLs and message boxes over SDL3" and "#152").
-// Not part of the original source. Portable: no platform header.
+// DisplayModeList.h: the display's modes over SDL3 as the client lists and sets them. Not part of the original
+// source. Portable: no platform header.
 //
 // The client reads the display's modes as the original's EnumDisplaySettingsA(nullptr, Index) gave them
 // (IWindow::DisplayMode: the Graphics Options dialog's list, vulkan/SurfaceVulkan.cpp GetFullscreenModes) and sets one
 // by width, height and bits per pixel, without a refresh rate (IWindow::SetFullscreenMode), on every system through
-// SDL3 since issue #152. SDL3's list (SDL_GetFullscreenDisplayModes) has the modes in the other order: largest first
-// (width, then height, then bits per pixel, then refresh rate, each falling), where Windows lists them roughly smallest
-// first; its four-byte formats count 24 bits (SDL_PIXELFORMAT_XRGB8888), where Windows says 32. SDL's TSdlWindow
+// SDL3. SDL3's list (SDL_GetFullscreenDisplayModes) has the modes in the other order: largest first (width, then
+// height, then bits per pixel, then refresh rate, each falling), where Windows lists them roughly smallest first; its
+// four-byte formats count 24 bits (SDL_PIXELFORMAT_XRGB8888), where Windows says 32. SDL's TSdlWindow
 // (platform/SdlPlatform.cpp) maps them with these rules, which the unit tests check
-// (tests/unit/core_display_modes_test.cpp). Two deliberate differences from the original (issue #152): the list is
-// SDL's, so it has the desktop's mode also where Windows does not enumerate it (a custom mode: one more line in Graphics
-// Options) and its order is SDL's sorted sizes where Windows' own list is not sorted.
+// (tests/unit/core_display_modes_test.cpp). Two deliberate differences from the original: the list is SDL's, so it has
+// the desktop's mode also where Windows does not enumerate it (a custom mode: one more line in Graphics Options) and
+// its order is SDL's sorted sizes where Windows' own list is not sorted.
 
 #pragma once
 

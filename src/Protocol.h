@@ -32,7 +32,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	LOGIN_RECEIVE_MESSAGE = 0x0b,
 	LOGIN_RECEIVE_MESSAGE_OF_THE_DAY = 0x14,
 	// The patch packets, named after the original's handlers (ReceivePatch, ReceiveWholeFile, ReceivePatchBlock):
-	// ReceiveUpdateRequest takes all three since Patella-Modern issue #75.
+	// ReceiveUpdateRequest takes all three.
 	LOGIN_RECEIVE_PATCH = 0x1e,
 	LOGIN_RECEIVE_WHOLE_FILE = 0x1f,
 	LOGIN_RECEIVE_PATCH_BLOCK = 0x20,
@@ -102,7 +102,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	GAME_SEND_REMOVE_BUDDY = 0xdd,
 	GAME_SEND_BUG_REPORT = 0xe6,
 	GAME_SEND_RULE_VIOLATION_REPORT = 0xe7,
-	// 0xe8, the original's SendDebugReport, is gone since Patella-Modern issue #74.
+	// 0xe8, the original's SendDebugReport, is not sent.
 };
 
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants

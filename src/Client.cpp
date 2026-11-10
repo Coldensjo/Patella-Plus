@@ -1,5 +1,4 @@
-// Client.cpp: the one TClient of the transition and the subsystems' bridge accessors (Patella-Modern issue #104;
-// Client.h, notes/decisions.md, "#104: TClient and the subsystem objects").
+// Client.cpp: the one TClient of the transition and the subsystems' bridge accessors (Client.h).
 
 #include "Client.h"
 
@@ -26,14 +25,13 @@ namespace patella {
 
 namespace {
 
-// Status.cpp's session and message queue for TNetwork (TNetworkSession, issue #105). TSession (TCommunication's) and
-// TGUI's TInteraction are made after TNetwork, so it stays an adapter (issue #107: a reference to them would point up).
-// Issue #118 kept it rather than an interface TClient wires into TNetwork after construction: that would be a pointer
-// TNetwork holds unset between its construction and TClient's (a two-phase start the golden runner, the unit tests
-// and the test mode would each have to reach), and the golden Network test fakes Status.cpp's free functions, which
-// this adapter calls. It goes with the bridge (#111) or with #109's ISocket events (notes/decisions.md, "#118").
-// Stateless: each member calls Status.cpp's function of its name (from another object file than Network.cpp's, so the
-// golden Network test's fakes of those functions are reached as before).
+// Status.cpp's session and message queue for TNetwork (TNetworkSession). TSession (TCommunication's) and TGUI's
+// TInteraction are made after TNetwork, so it stays an adapter (a reference to them would point up). It was kept rather
+// than an interface TClient wires into TNetwork after construction: that would be a pointer TNetwork holds unset
+// between its construction and TClient's (a two-phase start the golden runner, the unit tests and the test mode would
+// each have to reach), and the golden Network test fakes Status.cpp's free functions, which this adapter calls. It goes
+// with the bridge or with the ISocket events. Stateless: each member calls Status.cpp's function of its name (from
+// another object file than Network.cpp's, so the golden Network test's fakes of those functions are reached as before).
 class TNetworkSessionAdapter final : public TNetworkSession {
 public:
 	void SetConnectionState(int State) override { ::SetConnectionState(State); }
@@ -51,8 +49,8 @@ TNetworkSession &NetworkSessionAdapter()
 	return Session;
 }
 
-// Talk.cpp's default console for TMap (TMapConsole, issue #118) and Talk.cpp's, Help.cpp's and Status.cpp's functions
-// for TCreatures and TPlayerState (TCreaturesGUI): TGUI's, made after TMapState, so adapters as TNetworkSessionAdapter is.
+// Talk.cpp's default console for TMap (TMapConsole) and Talk.cpp's, Help.cpp's and Status.cpp's functions for
+// TCreatures and TPlayerState (TCreaturesGUI): TGUI's, made after TMapState, so adapters as TNetworkSessionAdapter is.
 // Stateless: each member calls the free functions of the original's code (from another object file than Map.cpp's and
 // Creatures.cpp's, so the golden tests' fakes of those functions are reached as before).
 class TMapConsoleAdapter final : public TMapConsole {
@@ -74,8 +72,8 @@ public:
 	int GetActionNumber() override { return ::GetActionNumber(); }
 };
 
-// TGraphics' signatures for TCommunication's login packet (TLoginSignatures, issue #110): TGraphics is made after
-// TCommunication, so an adapter as the ones above. Stateless: it reads the one TClient's TGraphics.
+// TGraphics' signatures for TCommunication's login packet (TLoginSignatures): TGraphics is made after TCommunication,
+// so an adapter as the ones above. Stateless: it reads the one TClient's TGraphics.
 class TGraphicsSignatures final : public TLoginSignatures {
 public:
 	uint32 SpriteSignature() override { return bridge::Graphics().SpriteSignature; }
@@ -174,8 +172,7 @@ TSkins &bridge::Skins()
 	return Client().Graphics.Skins;
 }
 
-// TPreferences' TTalkLists is TGUI's TTalk since issue #107 (Client.cpp's adapter over Talk.cpp's functions until
-// then).
+// TPreferences' TTalkLists is TGUI's TTalk.
 TTalkLists &bridge::TalkLists()
 {
 	return Client().GUI.Talk;

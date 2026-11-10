@@ -16,7 +16,7 @@ class flex_unit {
 public:
 	unsigned n; // units in use
 private:
-	std::unique_ptr<unsigned[]> a; // the units (issue #58: their only owner)
+	std::unique_ptr<unsigned[]> a; // the units (their only owner)
 	unsigned z;                    // units allocated
 public:
 	flex_unit()
@@ -80,8 +80,7 @@ public:
 	friend inline int operator>(const vlong &x, const vlong &y) { return x.cf(y) > 0; }
 	friend inline int operator<(const vlong &x, const vlong &y) { return x.cf(y) < 0; }
 
-	// CipSoft additions. The
-	// casts are the conversions the 32-bit build does implicitly; long has 8 bytes on Linux (issue #7).
+	// CipSoft additions. The casts are the conversions the 32-bit build does implicitly; long has 8 bytes on Linux.
 	friend vlong operator+(const vlong &x, const long &y) { return x + vlong((unsigned)y); }
 	friend vlong operator*(const vlong &x, const long &y) { return x * vlong((unsigned)y); }
 	friend int operator<(const vlong &x, const long &y) { return x.cf(vlong((unsigned)y)) < 0; }
@@ -104,7 +103,7 @@ private:
 vlong modexp(const vlong &x, const vlong &e, const vlong &m); // m must be odd
 vlong modinv(const vlong &a, const vlong &m);
 
-// CipSoft additions. Byte arrays are big-endian. The original's pointer and uint16 size are a span (issue #60).
+// CipSoft additions. Byte arrays are big-endian. The original's pointer and uint16 size are a span.
 void ByteArrayToVlong(patella::TSpan<const uint8> Data, vlong &Number);
 void VlongToByteArray(vlong Number, patella::TSpan<uint8> Data);
 void DecimalToVlong(const char *pDecimal, vlong &Number);

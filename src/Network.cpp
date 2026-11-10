@@ -2,8 +2,8 @@
 //
 // Functions are in original source order, which comes from the assertion and
 // catch line numbers. The functions without line evidence come first, as in
-// the binary. The original's catch wrappers (common.h) are gone since issue
-// #78; the functions here have no handlers apart from the encryption failures'
+// the binary. The original's catch wrappers (common.h) are gone; the
+// functions here have no handlers apart from the encryption failures'
 // (SendCommand, PrepareNextPacket, SetSymmetricKey).
 // Wire format, from SendCommand and PrepareNextPacket:
 //   unencrypted: [u16 length][payload]
@@ -25,16 +25,16 @@
 #include <cstdlib>
 #include <cstring>
 
-// The data is TNetwork's (Network.h, issue #105), in the original's order with its addresses. The socket is the
-// platform's (issue #109: ISocket, platform/Socket.h; the original's CAsyncSocket class of this file is Win32's
-// TSocket, platform/Win32Platform.h), and its events come to TNetwork's OnConnect, OnReceive and OnClose.
+// The data is TNetwork's (Network.h), in the original's order with its addresses. The socket is the platform's
+// (ISocket, platform/Socket.h; the original's CAsyncSocket class of this file is Win32's TSocket,
+// platform/Win32Platform.h), and its events come to TNetwork's OnConnect, OnReceive and OnClose.
 
 patella::TNetwork::TNetwork(TPreferences &PreferencesRef, TNetworkSession &SessionRef, platform::ISocket &SocketsRef)
 	: Preferences(PreferencesRef), Session(SessionRef), Sockets(SocketsRef)
 {
 }
 
-// BuildConfig.h's values fit the fields they go into (issue #169).
+// BuildConfig.h's values fit the fields they go into.
 static_assert(patella::buildconfig::LoginServers.size() == NUMBEROFSERVER, "NUMBEROFSERVER and LoginServers");
 static_assert(sizeof(TServer::Address) == patella::buildconfig::MaxHostName + 1, "TServer::Address and MaxHostName");
 
@@ -42,7 +42,7 @@ void patella::TNetwork::InitServerList()
 {
 	memset(Servers.data(), 0, sizeof(Servers));
 	// One statement each, with each name a constant here, as the original's: tools/patch_client.py finds this function
-	// by the code's reference to the first name's text (issue #169).
+	// by the code's reference to the first name's text.
 	constexpr const char *ServerName0 = patella::buildconfig::LoginServers[0];
 	constexpr const char *ServerName1 = patella::buildconfig::LoginServers[1];
 	constexpr const char *ServerName2 = patella::buildconfig::LoginServers[2];
@@ -215,7 +215,7 @@ void patella::TNetwork::SendString(const char *Text)
 	SendBuffer.PutString(Text);
 }
 
-// Buffer is the span's pointer, the name of the assertion's text (issue #59).
+// Buffer is the span's pointer, the name of the assertion's text.
 void patella::TNetwork::SendBytes(patella::TSpan<const uint8> Bytes)
 {
 	const uint8 *const Buffer = Bytes.data();
@@ -255,19 +255,17 @@ void patella::TNetwork::SendCommand(bool Encrypt)
 // Drops the packet already read, then decrypts the next complete packet in place
 // and points ReceiveBuffer at its payload.
 //
-// Patella-Modern issues #72 and #139, deliberate differences (notes/decisions.md, "#139"): a frame the client cannot
-// use is dropped (DropFrame), a warn line goes to the developer log, and the next complete frame is prepared in its
-// place, so the connection goes on. Two such frames:
-// - #139, item 7: a size that is no multiple of 8 (XTEA's block). Tibia.exe threw "packet size does not fit to
-//   symmetric encryption" before it dropped the frame, so every later call threw the same; the frame is not decrypted.
-// - #72: the payload, [u16 length][length bytes], must lie inside the frame, its PacketSize bytes after the size (a
-//   length that runs into the XTEA padding is still inside it and read as before). A frame of size 0 (no length in
-//   it) or one whose length runs past it is dropped. Tibia.exe read the length past an empty frame and set the read
-//   buffer's size from it as it was, so its reads went on past the frame: into the next frames, and past ReceiveData
-//   into SendData. Until the owner's change of November 7 (#139) such a frame threw "packet length exceeds the
-//   received data" and ended the client.
-// - #142: a packet of inner length 0 (nothing in it) is not a bad frame and is not dropped or logged, but nothing of
-//   it is left to read, so the next frame is prepared in its place too, in the same call. Tibia.exe returned it as the
+// Deliberate differences from the original: a frame the client cannot use is dropped (DropFrame), a warn line goes to
+// the developer log, and the next complete frame is prepared in its place, so the connection goes on. Two such frames:
+// - A size that is no multiple of 8 (XTEA's block). Tibia.exe threw "packet size does not fit to symmetric
+//   encryption" before it dropped the frame, so every later call threw the same; the frame is not decrypted.
+// - The payload, [u16 length][length bytes], must lie inside the frame, its PacketSize bytes after the size (a length
+//   that runs into the XTEA padding is still inside it and read as before). A frame of size 0 (no length in it) or
+//   one whose length runs past it is dropped. Tibia.exe read the length past an empty frame and set the read buffer's
+//   size from it as it was, so its reads went on past the frame: into the next frames, and past ReceiveData into
+//   SendData.
+// - A packet of inner length 0 (nothing in it) is not a bad frame and is not dropped or logged, but nothing of it is
+//   left to read, so the next frame is prepared in its place too, in the same call. Tibia.exe returned it as the
 //   prepared packet: GetNextCommand returned -1 with complete frames behind it, and the empty packet's frame stayed in
 //   ReceiveData until the next PrepareNextPacket, so a following frame that fits only without it never completed and
 //   the connection stalled.
@@ -310,7 +308,7 @@ void patella::TNetwork::PrepareNextPacket()
 			DropFrame(FrameEnd);
 			continue;
 		}
-		// Issue #142: an empty packet (inner length 0) has no command; the next frame is prepared in its place.
+		// An empty packet (inner length 0) has no command; the next frame is prepared in its place.
 		if (Size == 4)
 			continue;
 		ReceiveBuffer.SetSize(Size);
@@ -318,8 +316,8 @@ void patella::TNetwork::PrepareNextPacket()
 	}
 }
 
-// Not the original's (issues #72 and #139): the frame up to FrameEnd is dropped (the next PrepareNextPacket moves the
-// data after it down) and the read buffer is empty. The caller has written the log line.
+// Not the original's: the frame up to FrameEnd is dropped (the next PrepareNextPacket moves the data after it down) and
+// the read buffer is empty. The caller has written the log line.
 void patella::TNetwork::DropFrame(int FrameEnd)
 {
 	ReceiveRead = FrameEnd;
@@ -352,8 +350,8 @@ uint32 patella::TNetwork::GetQuad()
 	return ReceiveBuffer.GetQuad();
 }
 
-// Buffer and MaxLength are the span's pointer and size, the names of the macros' text (issue #59;
-// TReadBuffer::GetString); MaxLength only the original's catch wrapper named (issue #78).
+// Buffer and MaxLength are the span's pointer and size, the names of the macros' text (TReadBuffer::GetString);
+// MaxLength only the original's catch wrapper named.
 void patella::TNetwork::GetString(patella::TSpan<char> Text)
 {
 	const char *const Buffer = Text.data();
@@ -481,7 +479,7 @@ bool patella::TNetwork::ResolveHostname(const char *Hostname)
 	HostnameRequest = Sockets.ResolveHostname(NetworkWindow, HOSTNAME_RESOLVED_MESSAGE, Hostname, HostnameResolveBuffer,
 		HostnameResolveBufferSize);
 	if (HostnameRequest == nullptr) {
-		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), Sockets.LastError(), 1);
 		Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
@@ -580,7 +578,7 @@ void patella::TNetwork::ConnectToLoginServer()
 	PATELLA_ASSERT_VALUES(RecursionProtection<=NUMBEROFSERVER+1, RecursionProtection);
 	TServer *Server;
 	if (!GetCurrentServer(&Server)) {
-		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), GetServerErrorCode(), 1);
 		Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
@@ -614,7 +612,7 @@ void patella::TNetwork::ConnectToGameServer()
 	Session.GetCharacterPort(Character); // result unused in the binary
 	int Error = CreateSocket();
 	if (Error != 0) {
-		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), Error, 2);
 		Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
@@ -622,7 +620,7 @@ void patella::TNetwork::ConnectToGameServer()
 	}
 	Error = ConnectSocket(IPAddress, Session.GetCharacterPort(Character), false);
 	if (Error != 0) {
-		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 		char *Message = new char[1024];
 		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), Error, 2);
 		Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
@@ -650,7 +648,7 @@ void patella::TNetwork::OnConnect(int ErrorCode)
 		ConnectToLoginServer();
 		return;
 	}
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char *Message = new char[1024];
 	GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ErrorCode, 2);
 	Session.AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
@@ -665,16 +663,16 @@ void patella::TNetwork::OnReceive(platform::TSocket &Receiver, int ErrorCode)
 {
 	if (ErrorCode != 0)
 		return;
-	// The free part's start as a pointer: with ReceiveData full (frames the handler has not read yet) it is the
-	// array's end, which the hardened library's operator[] refuses (issue #139; Receive then gets no room).
+	// The free part's start as a pointer: with ReceiveData full (frames the handler has not read yet) it is the array's
+	// end, which the hardened library's operator[] refuses (Receive then gets no room).
 	const int Count =
 		Sockets.Receive(&Receiver, ReceiveData.data() + ReceiveDataSize, sizeof(ReceiveData) - ReceiveDataSize);
 	if (Count == 0 || Count == platform::SocketFailed)
 		return;
-	// Patella-Modern issue #139, item 6, a deliberate difference (notes/decisions.md, "#139"): a frame larger than
-	// ReceiveData can never be complete there. Tibia.exe kept its first bytes and waited: ReceiveData filled up,
-	// Receive got no room, and no later frame came through, forever. Now its bytes are dropped as they come
-	// (ReceiveSkip: those still to come), a warn line goes to the developer log, and the frames after it are read.
+	// A deliberate difference from the original: a frame larger than ReceiveData can never be complete there. Tibia.exe
+	// kept its first bytes and waited: ReceiveData filled up, Receive got no room, and no later frame came through,
+	// forever. Now its bytes are dropped as they come (ReceiveSkip: those still to come), a warn line goes to the
+	// developer log, and the frames after it are read.
 	int Kept = Count;
 	if (ReceiveSkip > 0) {
 		const int Skipped = Count < ReceiveSkip ? Count : ReceiveSkip;
@@ -747,7 +745,7 @@ void patella::TNetwork::ExitNetwork()
 	HostnameResolveBuffer = nullptr;
 }
 
-// The original's functions (issue #105): each calls its member on the one TClient's TNetwork.
+// The original's functions: each calls its member on the one TClient's TNetwork.
 
 void SetTestServerPort(int Port)
 {

@@ -1,6 +1,5 @@
-// WindowSystem.h: what the Vulkan engine asks of the window system (Patella-Modern issue #126, plan M8; notes/vulkan.md,
-// "The window system"; notes/decisions.md, "#126"). Not part of the original source. No platform header: the window is
-// a TWindowHandle (platform/Window.h), the surface Vulkan's.
+// WindowSystem.h: what the Vulkan engine asks of the window system. Not part of the original source. No platform
+// header: the window is a TWindowHandle (platform/Window.h), the surface Vulkan's.
 //
 // TSurfaceVulkan (SurfaceVulkan.cpp) reads the main window's client area and the screen's size, and creates each
 // device's surface, through the window system of the client's window:
@@ -8,8 +7,8 @@
 //	SdlWindowSystem()    the SDL3 window's (WindowSystemSdl.cpp): SDL_GetWindowSizeInPixels, the primary
 //	                     display's bounds, SDL_Vulkan_GetInstanceExtensions and SDL_Vulkan_CreateSurface
 //
-// The surface goes on the device's own window (PresentWindow.h, issue #52: a child window per device, never the main
-// window), which TPresentWindows makes and destroys.
+// The surface goes on the device's own window (PresentWindow.h: a child window per device, never the main window),
+// which TPresentWindows makes and destroys.
 
 #pragma once
 

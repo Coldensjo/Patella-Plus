@@ -1,7 +1,6 @@
-// LinuxPlatform.cpp: the Linux client's platform services (Patella-Modern issue #131, plan M8; notes/decisions.md,
-// "#131"). The counterpart of Win32Platform.cpp, for the Linux Patella and the test build (cmake/LinuxX64.cmake): the system
-// clock over std::chrono, the file system with the original names found without regard to ASCII case, the SDL3 window's
-// input, and the process's Platform().
+// LinuxPlatform.cpp: the Linux client's platform services. The counterpart of Win32Platform.cpp, for the Linux Patella
+// and the test build (cmake/LinuxX64.cmake): the system clock over std::chrono, the file system with the original
+// names found without regard to ASCII case, the SDL3 window's input, and the process's Platform().
 
 #include "platform/LoopTimer.h"
 #include "platform/Platform.h"

@@ -1,12 +1,11 @@
-// Communication.cpp: reconstructed from Tibia.exe 7.72.
-// The client-to-server packets (Send*) and the handlers of the server's
-// packets (Receive*), which ReceivePackets in Control.cpp dispatches.
-// Functions are in original source order from the assertion and catch line
-// numbers; see notes/Communication.md for the details of this file.
+// Communication.cpp: reconstructed from Tibia.exe 7.72. The
+// client-to-server packets (Send*) and the handlers of the server's packets
+// (Receive*), which ReceivePackets in Control.cpp dispatches. Functions are
+// in original source order from the assertion and catch line numbers.
 //
-// The original's catch wrappers (common.h) are gone since issue #78; the
-// functions here have no handlers apart from their own: the encryption
-// failures of SendLogin and SendGameLogin (TRSA's const char *) and
+// The original's catch wrappers (common.h) are gone; the functions here
+// have no handlers apart from their own: the encryption failures of
+// SendLogin and SendGameLogin (TRSA's const char *) and
 // ReceiveMoveCreature's cylinder loop (an error while listing the fields
 // goes into the message).
 
@@ -44,12 +43,12 @@ const char *TextChannelClosed = "The channel has been closed. You need to re-joi
 
 } // namespace
 
-// The data is TCommunication's (Communication.h, issue #105), in the original's order with its addresses.
+// The data is TCommunication's (Communication.h), in the original's order with its addresses.
 
 namespace {
 
-// The login server's request to update the client (issue #75): the patch packets end the login with this text in the
-// login error dialog.
+// The login server's request to update the client: the patch packets end the login with this text in the login error
+// dialog.
 constexpr std::string_view TextUpdateRefused = "This server wants to update the client";
 
 } // namespace
@@ -60,8 +59,8 @@ patella::TCommunication::TCommunication(TNetwork &NetworkRef, TMapState &MapStat
 {
 }
 
-// Called by InitControl. The original cleared the patch transfer's buffer; since issue #75 (the patcher
-// removed) there is nothing left to set up.
+// Called by InitControl. The original cleared the patch transfer's buffer; with the patcher removed there is nothing
+// left to set up.
 void patella::TCommunication::InitCommunication()
 {
 }
@@ -81,8 +80,8 @@ void patella::TCommunication::SendLogin(uint32 AccountID, const char *Password)
 	Buffer.PutBytes(Key);
 	Buffer.PutQuad(AccountID);
 	Buffer.PutString(Password);
-	// Raw RSA, no padding: the protocol's block is the plain text (a zero byte, the XTEA key, the login data,
-	// rand()'s filler) raised to 65537 modulo the key, as the server expects (notes/decisions.md, "#128").
+	// Raw RSA, no padding: the protocol's block is the plain text (a zero byte, the XTEA key, the login data, rand()'s
+	// filler) raised to 65537 modulo the key, as the server expects.
 	try {
 		TRSA RSA;
 		RSA.SetPublicKey(GetRsaModulus());
@@ -110,7 +109,7 @@ void patella::TCommunication::SendLogin(uint32 AccountID, const char *Password)
 			Text << Byte.View();
 		}
 		// No std::endl after the bytes here, unlike the first catch block (the
-		// binary goes from the loop to str(), issue #36).
+		// binary goes from the loop to str()).
 		TERROR(Text.str().c_str());
 	}
 	Network.BeginCommand(LOGIN_SEND_LOGIN);
@@ -141,7 +140,7 @@ void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, 
 	Buffer.PutQuad(AccountID);
 	Buffer.PutString(Name);
 	Buffer.PutString(Password);
-	// Raw RSA, no padding, as in SendLogin (notes/decisions.md, "#128").
+	// Raw RSA, no padding, as in SendLogin.
 	try {
 		TRSA RSA;
 		RSA.SetPublicKey(GetRsaModulus());
@@ -169,7 +168,7 @@ void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, 
 			Text << Byte.View();
 		}
 		// No std::endl after the bytes here, unlike the first catch block (the
-		// binary goes from the loop to str(), issue #36).
+		// binary goes from the loop to str()).
 		TERROR(Text.str().c_str());
 	}
 	Network.BeginCommand(GAME_SEND_LOGIN);
@@ -223,7 +222,7 @@ void patella::TCommunication::SendWalk()
 		case STEP_SOUTHWEST: Network.BeginCommand(GAME_SEND_WALK_SOUTH_WEST); break;
 		case STEP_SOUTH: Network.BeginCommand(GAME_SEND_WALK_SOUTH); break;
 		case STEP_SOUTHEAST: Network.BeginCommand(GAME_SEND_WALK_SOUTH_EAST); break;
-		default: break; // another step sends nothing, as without it (bugprone-switch-missing-default-case, issue #110)
+		default: break; // another step sends nothing, as without it (bugprone-switch-missing-default-case)
 		}
 	} else {
 		Network.BeginCommand(GAME_SEND_WALK);
@@ -663,9 +662,6 @@ void patella::TCommunication::SendRuleViolationReport(const char *Name, uint8 Re
 	Network.SendCommand(true);
 }
 
-// SendDebugReport (client packet 0xe8: an error report of error.txt) is gone since Patella-Modern
-// issue #74 (decision D2).
-
 void patella::TCommunication::ReceiveLoginError()
 {
 	const char *Text = Network.GetString();
@@ -685,22 +681,21 @@ void patella::TCommunication::ReceiveMessageOfTheDay()
 	const char *Text = Network.GetString();
 	if (SetMessageOfTheDay(Text))
 		AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): GetString's text, the caller's (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): GetString's text, the caller's
 	delete[] Text;
 }
 
-// ReceivePatch (packet 0x1e: a difference patch of a file), ReceiveWholeFile (0x1f: a whole file) and
-// ReceivePatchBlock (0x20: a block of either) are gone since Patella-Modern issue #75 (decision D9): with them a
-// login server could rewrite Tibia.exe (as Tibia.bak), Tibia.dat, Tibia.spr, Tibia.pic and Patch.exe, and have
-// Patch.exe run. ReceiveUpdateRequest takes all three: the login ends as a login error does, in the same dialog
-// ("Sorry"), with TextUpdateRefused. The rest of what the server sent (the patch's header or block, the packets after
-// it in this frame and in the frames already received) is read and dropped, so that nothing of it reaches the game
-// server's table once the connection state is 0.
+// The login server's patch packets (0x1e: a difference patch of a file, 0x1f: a whole file, 0x20: a block of either)
+// are not carried out: with them a login server could rewrite Tibia.exe (as Tibia.bak), Tibia.dat, Tibia.spr, Tibia.pic
+// and Patch.exe, and have Patch.exe run. ReceiveUpdateRequest takes all three: the login ends as a login error does, in
+// the same dialog ("Sorry"), with TextUpdateRefused. The rest of what the server sent (the patch's header or block, the
+// packets after it in this frame and in the frames already received) is read and dropped, so that nothing of it reaches
+// the game server's table once the connection state is 0.
 void patella::TCommunication::ReceiveUpdateRequest()
 {
 	while (Network.GetNextCommand() != -1) {
 	}
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char *Text = new char[TextUpdateRefused.size() + 1];
 	memcpy(Text, TextUpdateRefused.data(), TextUpdateRefused.size());
 	Text[TextUpdateRefused.size()] = 0;
@@ -729,9 +724,6 @@ void patella::TCommunication::ReceiveCharacterList()
 	Session.SetPremiumDays(PremiumDays);
 	AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 }
-
-// CancelPatch (the update dialog's Cancel, the transfer dropped and the connection closed), is gone with
-// the update dialog since Patella-Modern issue #75.
 
 void patella::TCommunication::ReceiveLoginServerOverloaded()
 {
@@ -879,7 +871,7 @@ uint32 patella::TCommunication::ReadCreature(int Type, int x, int y, int z)
 	return CreatureID;
 }
 
-// OldType only the original's catch wrapper read (issue #78).
+// OldType only the original's catch wrapper read.
 void patella::TCommunication::ReadField(int rx, int ry, int rz)
 {
 	uint16 Type = 0;
@@ -1298,7 +1290,7 @@ void patella::TCommunication::ReceiveOpenContainer(int &Container)
 	Inventory.OpenContainer(Container, TObject{Type, 0, 0}, Name, Capacity, HasParent);
 	const int Count = Network.GetByte();
 	for (int i = 0; i < Count; i++) {
-		const int ObjectType = Network.GetWord(); // Type until issue #110 (GCC's -Wshadow in patella_core)
+		const int ObjectType = Network.GetWord();
 		int Data = 0;
 		if (ObjectTypes.GetObjectFlag(ObjectType, 5))
 			Data = Network.GetByte();
@@ -1593,14 +1585,14 @@ void patella::TCommunication::ReceiveCreatureShield()
 
 void patella::TCommunication::ReceiveEditText()
 {
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	uint32 *Info = new uint32[3];
 	Info[0] = Network.GetQuad();
 	Info[1] = Network.GetWord();
 	Info[2] = Network.GetWord();
 	char *Text = Network.GetString();
 	char *Writer = Network.GetString();
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char **Strings = new char *[2];
 	Strings[0] = Writer;
 	Strings[1] = Text;
@@ -1609,7 +1601,7 @@ void patella::TCommunication::ReceiveEditText()
 
 void patella::TCommunication::ReceiveEditHouseText()
 {
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	uint32 *Info = new uint32[2];
 	Info[0] = Network.GetByte();
 	Info[1] = Network.GetQuad();
@@ -1738,11 +1730,11 @@ void patella::TCommunication::ReceiveChannelList()
 {
 	int Count = 0;
 	Count = Network.GetByte();
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	int *Channels = new int[Count + 1];
 	char *Names = nullptr;
 	if (Count != 0)
-		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+		// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 		Names = new char[Count * 30];
 	Channels[0] = Count;
 	for (int i = 0; i < Count; i++) {
@@ -1756,7 +1748,7 @@ void patella::TCommunication::ReceiveOpenChannel()
 {
 	int ChannelID = 0;
 	ChannelID = Network.GetWord();
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char *Name = new char[30];
 	Network.GetString(patella::TSpan<char>(Name, 30));
 	AddMessage(MESSAGE_OPEN_CHANNEL, ChannelID, reinterpret_cast<std::intptr_t>(Name));
@@ -1764,7 +1756,7 @@ void patella::TCommunication::ReceiveOpenChannel()
 
 void patella::TCommunication::ReceiveOpenPrivateConversation()
 {
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char *Name = new char[30];
 	Network.GetString(patella::TSpan<char>(Name, 30));
 	AddMessage(MESSAGE_OPEN_PRIVATE_CONVERSATION, 0, reinterpret_cast<std::intptr_t>(Name));
@@ -1826,7 +1818,7 @@ void patella::TCommunication::ReceiveOwnChannel()
 {
 	int ChannelID = 0;
 	ChannelID = Network.GetWord();
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	char *Name = new char[40];
 	Network.GetString(patella::TSpan<char>(Name, 40));
 	AddMessage(MESSAGE_OPEN_OWN_CHANNEL, ChannelID, reinterpret_cast<std::intptr_t>(Name));
@@ -1957,7 +1949,7 @@ void patella::TCommunication::ReceiveFloorDown()
 
 void patella::TCommunication::ReceiveOutfit()
 {
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue (AddMessage), freed by its reader
 	int *Outfit = new int[7];
 	Outfit[0] = Network.GetWord();
 	Outfit[1] = Network.GetByte();
@@ -2002,7 +1994,7 @@ void patella::TCommunication::ExitCommunication()
 {
 }
 
-// The original's functions (issue #105): each calls its member on the one TClient's TCommunication.
+// The original's functions: each calls its member on the one TClient's TCommunication.
 
 void InitCommunication()
 {

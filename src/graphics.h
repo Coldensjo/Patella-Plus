@@ -10,13 +10,13 @@
 // are LRU lists with a hash table of HASH_TABLE_SIZE chains.
 //
 // Names from the binary (assertion and catch strings): FileName, PATH_MAX,
-// SpriteNumber, NumberOfSprites, MaskNumber, PictureNumber,
-// NumberOfPictures, TileX, TileY, Picture.TilesX, Picture.TilesY, Buffer,
-// Position, MemoryCacheSize, VideoCacheSize, Item.Type, EMPTY_ITEM, HashValue,
+// SpriteNumber, NumberOfSprites, MaskNumber, PictureNumber, NumberOfPictures,
+// TileX, TileY, Picture.TilesX, Picture.TilesY, Buffer, Position,
+// MemoryCacheSize, VideoCacheSize, Item.Type, EMPTY_ITEM, HashValue,
 // HASH_TABLE_SIZE, FontNumber, NumberOfFonts, FontName, CharsPerLine,
 // CharWidth, CharHeight, Surface, Width, Height, Text, Length, Alignment,
 // LEFT_ALIGN, CENTER_ALIGN, RIGHT_ALIGN, Format.Alignment, MemoryCacheBytes.
-// Everything else is ours (notes/decisions.md, "graphics.cpp").
+// Everything else is ours.
 
 #pragma once
 
@@ -25,19 +25,19 @@
 #include "common.h"
 #include "compat/span.h"
 #include "types/FixedString.h"
-#include "types/GraphicsTypes.h" // IWYU pragma: export (TRect, TRGBColor, TFont: graphics.h's until issue #116)
+#include "types/GraphicsTypes.h" // IWYU pragma: export (TRect, TRGBColor, TFont)
 #include <array>
 #include <memory>
 
 struct TObject; // Objects.h, passed to DrawObject
 
-// The original's PATH_MAX (its assertions' name); GRAPHICS_PATH_MAX since issue #111: mingw-w64's and the Linux
-// headers define PATH_MAX as a macro.
+// The original's PATH_MAX (its assertions' name), renamed: mingw-w64's and the Linux headers define PATH_MAX as a
+// macro.
 inline constexpr int GRAPHICS_PATH_MAX = 1024;
 inline constexpr int HASH_TABLE_SIZE = 100;
 
 // Kinds of cache items. Pictures and font characters are both PICTURE_ITEM. An unscoped int enum: the items' Type is an
-// int (as Objects.h's flags and Talk.h's modes, #110).
+// int (as Objects.h's flags and Talk.h's modes).
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class)
 	EMPTY_ITEM = 0,
 	SPRITE_ITEM = 1,
@@ -86,11 +86,10 @@ struct TMemoryCacheItem {
 	int HashValue;
 };
 
-// A tile on a cache surface. Masked sprites (outfits) keep the
-// mask and four colours, pictures the tile, font characters the tile and the
-// text colour, in the same place. Tile's type is unnamed inside an anonymous union, an extension of every compiler
-// here that Clang's -Wpedantic names (-Wnested-anon-types): allowed for this structure alone since patella_core
-// compiles graphics.h (issue #111), as Map.h's TEffect.
+// A tile on a cache surface. Masked sprites (outfits) keep the mask and four colours, pictures the tile, font
+// characters the tile and the text colour, in the same place. Tile's type is unnamed inside an anonymous union, an
+// extension of every compiler here that Clang's -Wpedantic names (-Wnested-anon-types): allowed for this structure
+// alone, as Map.h's TEffect.
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnested-anon-types"
@@ -108,8 +107,7 @@ struct TVideoCacheItem {
 	};
 	union {
 		std::array<TRGBColor, 4> Colors; // masked sprites
-		// A named member (Patella-Modern issue #91): GCC and Clang allow no member with a constructor (Color) in an
-		// anonymous struct.
+		// A named member: GCC and Clang allow no member with a constructor (Color) in an anonymous struct.
 		struct {
 			int TileY;       // pictures
 			TRGBColor Color; // font characters; 0,0,0 for pictures
@@ -125,10 +123,10 @@ struct TVideoCacheItem {
 #pragma clang diagnostic pop
 #endif
 
-// TGraphics (issue #116, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#116"), the fifth of
-// TClient's subsystems: graphics.cpp's data and functions (its members of the same names; the free functions below
-// forward to them), Surface.cpp's TGraphicsEngine (Surface.h) and Skins.cpp's TSkins with GUI.cpp's SkinProperties
-// (Skins.h). Of graphics.cpp's data the two signatures are public: the login packets send them.
+// TGraphics, the fifth of TClient's subsystems: graphics.cpp's data and functions (its members of the same names; the
+// free functions below forward to them), Surface.cpp's TGraphicsEngine (Surface.h) and Skins.cpp's TSkins with
+// GUI.cpp's SkinProperties (Skins.h). Of graphics.cpp's data the two signatures are public: the login packets send
+// them.
 namespace patella {
 
 class TGraphics {
@@ -189,7 +187,7 @@ public:
 		int MaskNumber, TRGBColor *Colors, TRGBColor Highlight, TRect Clip);
 	void DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip,
 		TFont Font, bool ShowCount);
-	// Colors: the four outfit colours (TCreature::Colors); a fixed extent, passed as the pointer was (issue #69).
+	// Colors: the four outfit colours (TCreature::Colors); a fixed extent, passed as the pointer was.
 	void DrawOutfit(int Surface, int x, int y, int Size, int OutfitNumber, patella::TSpan<const int, 4> Colors,
 		TRGBColor Highlight, TRect Clip, TFont Font);
 
@@ -256,15 +254,14 @@ private:
 	std::unique_ptr<TFontInfo[]> Fonts{};
 };
 
-// The transition's access path (notes/decisions.md, "#104: TClient and the subsystem objects"): the one TClient's
-// TGraphics (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the one TClient's TGraphics (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 TGraphics &Graphics();
 } // namespace bridge
 
 } // namespace patella
 
-// The original's free functions (issue #116: each forwards to its TGraphics member on the bridge).
+// The original's free functions (each forwards to its TGraphics member on the bridge).
 
 // Start-up and shut-down.
 void InitGraphics(int MemoryCacheBytes);
@@ -279,7 +276,7 @@ void DrawSpriteClipped(int Surface, int x, int y, int SpriteNumber, TRect Clip);
 void DrawMaskedSprite(int Surface, int x, int y, int SpriteNumber, int MaskNumber, TRGBColor *Colors);
 void DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip,
 	TFont Font, bool ShowCount);
-// Colors: the four outfit colours (TCreature::Colors); a fixed extent, passed as the pointer was (issue #69).
+// Colors: the four outfit colours (TCreature::Colors); a fixed extent, passed as the pointer was.
 void DrawOutfit(int Surface, int x, int y, int Size, int OutfitNumber, patella::TSpan<const int, 4> Colors,
 	TRGBColor Highlight, TRect Clip, TFont Font);
 

@@ -7,8 +7,7 @@
 // InitCreatures at line 1366 and SetPosition at line 108) come after
 // ResetCreatures (line 1414) in the binary. The functions without exception
 // frame have no line evidence; they come first in the binary, before the
-// line-142 function, and keep that place and order here
-// (notes/decisions.md).
+// line-142 function, and keep that place and order here.
 
 #include "Creatures.h"
 #include "types/GraphicsTypes.h" // TRGBColor
@@ -24,7 +23,7 @@
 #include <cstdlib>
 #include <cstring>
 
-// The data is TCreatures' and TPlayerState's (Creatures.h, issue #106).
+// The data is TCreatures' and TPlayerState's (Creatures.h).
 
 patella::TCreatures::TCreatures(TCreaturesPlayer &PlayerStateRef, TCreaturesGUI &GUIRef)
 	: PlayerState(PlayerStateRef), GUI(GUIRef)
@@ -387,7 +386,7 @@ void TCreature::StartMovement(int dx, int dy, int Waypoints)
 	else
 		Duration = 1000;
 	// Beat is the game login's word (Communication.cpp ReceiveGameLogin): 0 from the server trapped here in the
-	// original, whose catch wrapper made it a TMyException (issue #67).
+	// original, whose catch wrapper made it a TMyException.
 	const int Beat = patella::bridge::Creatures().Beat;
 	Duration = (Beat - 1 + Duration) / PATELLA_DIVISOR(Beat) * Beat;
 	DeltaX = -dx * 32;
@@ -462,7 +461,7 @@ void patella::TPlayerState::StartPlayerStep()
 	case STEP_SOUTHWEST: dx = -1; dy = 1; break;
 	case STEP_SOUTH: dx = 0; dy = 1; break;
 	case STEP_SOUTHEAST: dx = 1; dy = 1; break;
-	default: break; // no step: dx and dy stay 0, as without it (bugprone-switch-missing-default-case, issue #110)
+	default: break; // no step: dx and dy stay 0, as without it (bugprone-switch-missing-default-case)
 		// clang-format on
 	}
 	const TObject Bank = Map.GetFirstObject(dx + 8, dy + 6, Map.GetMapLevel());
@@ -527,7 +526,7 @@ int patella::TPlayerState::FindPlayerPath()
 	case -1:
 		GUI.SetStatusMessage("First go upstairs.", false);
 		return 0;
-	default: // the 0 below, as without it (bugprone-switch-missing-default-case, issue #110)
+	default: // the 0 below, as without it (bugprone-switch-missing-default-case)
 		break;
 	}
 	return 0;
@@ -715,7 +714,7 @@ void patella::TCreatures::CheckMonsterHint(TCreature *Creature)
 				GUI.CheckEventHelpName(Opponent->Name);
 		}
 	} else if (!IsPlayer(Creature->CreatureID) && IsOpponent(Creature)
-		// IsOpponent asserts the player creature (a null Player throws there; MSVC /analyze's C6011, issue #110).
+		// IsOpponent asserts the player creature (a null Player throws there; MSVC /analyze's C6011).
 		PATELLA_MSVC_WARNING(suppress : 6011)
 		&& abs(Creature->RealX - Player->RealX) <= 2 && abs(Creature->RealY - Player->RealY) <= 2) {
 		GUI.CheckEventHelpName(Creature->Name);
@@ -904,7 +903,7 @@ bool patella::TCreatures::CompareBuddies(int i, int j) const
 			if (!Buddies[i].Online && Buddies[j].Online)
 				return false;
 			break;
-		default: // another method compares nothing, as without it (bugprone-switch-missing-default-case, issue #110)
+		default: // another method compares nothing, as without it (bugprone-switch-missing-default-case)
 			break;
 		}
 	}
@@ -1137,8 +1136,8 @@ void patella::TCreatures::ResetCreatures()
 	}
 }
 
-// Ours (issue #106; TCreaturesPlayer): ResetCreatures' writes of the player's state, in its order (it wrote
-// AttackID and FollowID between PlayerCapacity and PlayerState; nothing reads between the writes).
+// Ours (TCreaturesPlayer): ResetCreatures' writes of the player's state, in its order (it wrote AttackID and FollowID
+// between PlayerCapacity and PlayerState; nothing reads between the writes).
 void patella::TPlayerState::ResetPlayer()
 {
 	PlayerStepDX = 0;
@@ -1165,8 +1164,8 @@ void patella::TPlayerState::ResetPlayer()
 	}
 }
 
-// Ours (issue #106; TCreaturesPlayer): MoveCreatures' code for the player's creature once its step is over: the
-// next step of the walk, or the path again; true if a new walk is to be sent.
+// Ours (TCreaturesPlayer): MoveCreatures' code for the player's creature once its step is over: the next step of the
+// walk, or the path again; true if a new walk is to be sent.
 bool patella::TPlayerState::ContinuePlayerWalk()
 {
 	if (CurrentPlayerStep < NumberOfPlayerSteps) {
@@ -1182,7 +1181,7 @@ void patella::TCreatures::ExitCreatures()
 {
 }
 
-// The original's functions (issue #106): each calls its member on the one TClient's TPlayerState or TCreatures.
+// The original's functions: each calls its member on the one TClient's TPlayerState or TCreatures.
 
 void GetPlayerPosition(int *x, int *y, int *z)
 {

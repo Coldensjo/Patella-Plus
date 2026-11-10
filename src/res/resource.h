@@ -2,7 +2,6 @@
 // The names are ours; the original resource.h is not known. Only the client's own
 // resources are named here: the MFC resources in Patella.rc keep their numbers (their
 // afxres.h names are in comments there), so this header never clashes with afxres.h.
-// See notes/resources.md for every entry and its users.
 
 #ifndef PATELLA_RESOURCE_H
 #define PATELLA_RESOURCE_H

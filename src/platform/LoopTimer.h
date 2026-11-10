@@ -1,6 +1,5 @@
-// LoopTimer.h: TLoopTimer, the main frame's timer as a check of the event loop (Patella-Modern issue #122, plan M8;
-// notes/decisions.md, "#122: the SDL3 window and its event loop"). Not part of the original source. Portable: no
-// platform header.
+// LoopTimer.h: TLoopTimer, the main frame's timer as a check of the event loop. Not part of the original source.
+// Portable: no platform header.
 //
 // The MFC frame's 100 ms timer is Windows' SetTimer: a WM_TIMER message, made by the message queue only when it is
 // otherwise empty, and at most one at a time (ticks that come due while one waits are not queued: no backlog). The

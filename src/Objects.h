@@ -7,7 +7,7 @@
 // LIQUIDPOOL, HANG, LIGHT, SHIFT, HEIGHT, AUTOMAP and LENSHELP, CREATURE
 // (MapWindow.cpp), and the parameter names Entry, Type, Number, Flag,
 // Direction, Obj, X, Y, Layer, PatternX/Y/Z, Phase and FileName. The rest is
-// ours (notes/decisions.md, "Objects.cpp").
+// ours.
 
 #pragma once
 
@@ -106,7 +106,7 @@ struct TProperties {
 	int PatternDepth;
 	int Phases;
 	uint16 *Sprites;  // Width*Height*Layers*PatternWidth*PatternHeight*PatternDepth*Phases
-	uint8 Flags[4];   // bit Flag%8 of Flags[Flag/8]; NOLINT(modernize-avoid-c-arrays): an assertion reads *(int*)Entry.Flags, frozen until M5 (issue #60)
+	uint8 Flags[4];   // bit Flag%8 of Flags[Flag/8]; NOLINT(modernize-avoid-c-arrays): an assertion reads *(int*)Entry.Flags
 	int Waypoints;    // BANK
 	int MaxLength;    // WRITE and WRITEONCE
 	int Brightness;   // LIGHT
@@ -119,9 +119,8 @@ struct TProperties {
 };
 
 // The byte of Flag's bit, Flags[Flag / 8], for every flag up to 0xff as the original indexes it: a flag above 31 is a
-// bit of the members after Flags (inside TProperties). Through the entry's bytes
-// (Patella-Modern issue #91): Flags indexed past its four elements is undefined behaviour, which UBSan's bounds check
-// reports.
+// bit of the members after Flags (inside TProperties). Through the entry's bytes: Flags indexed past its four elements
+// is undefined behaviour, which UBSan's bounds check reports.
 inline uint8 &FlagByte(TProperties &Entry, int Flag)
 {
 	static_assert(offsetof(TProperties, Flags) + 0xff / 8 < sizeof(TProperties), "every flag's byte is in TProperties");
@@ -134,11 +133,10 @@ inline uint8 FlagByte(const TProperties &Entry, int Flag)
 
 namespace patella {
 
-// Objects.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the
-// subsystem objects" and "#106"): Tibia.dat's four tables, read once, then read-only, and the functions of the same
+// Objects.cpp's data and functions: Tibia.dat's four tables, read once, then read-only, and the functions of the same
 // names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. Of the data (.bss:
-// every member starts empty) DatSignature and NoObject are public: Communication.cpp sends
-// DatSignature and compares with NoObject, Inventory.cpp and Map.cpp return NoObject.
+// every member starts empty) DatSignature and NoObject are public: Communication.cpp sends DatSignature and compares
+// with NoObject, Inventory.cpp and Map.cpp return NoObject.
 class TObjectTypes {
 public:
 	TObjectTypes() = default;
@@ -213,8 +211,8 @@ public:
 	void ExitObjects();
 
 private:
-	// Data, in .bss order. The four tables own their arrays (std::unique_ptr since issue #58; the entries' Sprites
-	// stay raw, freed by ReleaseObjects).
+	// Data, in .bss order. The four tables own their arrays (std::unique_ptr; the entries' Sprites stay raw, freed by
+	// ReleaseObjects).
 	std::unique_ptr<array<TProperties>> MissileProperties;
 	std::unique_ptr<array<TProperties>> EffectProperties;
 	std::unique_ptr<array<TProperties>> OutfitProperties;
@@ -225,8 +223,8 @@ public:
 	TObject NoObject;      // never written; owner inferred from the address
 };
 
-// The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the object
-// types of the one TClient (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the object types of the one TClient (Client.cpp). It goes when no free function needs
+// it.
 namespace bridge {
 TObjectTypes &ObjectTypes();
 } // namespace bridge

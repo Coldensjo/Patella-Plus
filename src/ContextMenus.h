@@ -20,7 +20,7 @@
 // Surface, Width, Height, x, y, Key, CreatureID, _CharacterID, _TextWindow,
 // _LineNumber, _ConsoleWindow, _Edit, _Data, _SkillsWindow, TextBuffer). The
 // class names (those of Control.cpp's earlier sketches) and the other names
-// are ours; see notes/decisions.md, "ContextMenus.cpp".
+// are ours.
 
 #pragma once
 
@@ -200,10 +200,10 @@ public:
 	TSkillsWindowBody *SkillsWindow; // its ContextMenu points back
 };
 
-// The skill window's side of the link between it and its menu (issue #118), defined in ContentWindows.cpp where
-// TSkillsWindowBody is complete, so that ContextMenus.cpp does not include ContentWindows.h (the content windows make
-// the menus, the menus called back into them: the two modules were a cycle). The menu's constructor and destructor
-// set and clear the window's ContextMenu with SetSkillsWindowMenu, its HandleEvent
-// lays the window out again with ArrangeSkillsWindow (the window's virtual Arrange, as the original's call).
+// The skill window's side of the link between it and its menu, defined in ContentWindows.cpp where TSkillsWindowBody is
+// complete, so that ContextMenus.cpp does not include ContentWindows.h (the content windows make the menus, the menus
+// call back into them: the two modules would be a cycle). The menu's constructor and destructor set and clear the
+// window's ContextMenu with SetSkillsWindowMenu, its HandleEvent lays the window out again with ArrangeSkillsWindow
+// (the window's virtual Arrange, as the original's call).
 void SetSkillsWindowMenu(TSkillsWindowBody *Window, TSkillContextMenu *Menu) noexcept;
 void ArrangeSkillsWindow(TSkillsWindowBody *Window);

@@ -1,6 +1,6 @@
 // cxx26.h: the C++26 features Patella-Modern uses, each the real feature where the compiler and its
-// library have it and a C++23 stand-in elsewhere, selected by the feature's test macro
-// (notes/modernization-plan.md, sections 1.1 and 8; issue #9). Not part of the original source.
+// library have it and a C++23 stand-in elsewhere, selected by the feature's test macro. Not part of the
+// original source.
 //
 // The code reaches a C++26 feature only through this header. Today GCC 16 has both features below
 // (with -std=c++26, which cmake/Warnings.cmake gives GCC and Clang); MSVC 19.51 and Clang 23 (with
@@ -32,7 +32,7 @@
 //   returns std::optional<T &> (use only `if (auto Element = V.try_push_back(X))`, `*Element` and
 //   `Element->`); N == 0 is not an empty type; the preconditions of operator[], front, back,
 //   pop_back, the unchecked_ functions and the positions are CONTRACT_ASSERTs; sizeof differs (never
-//   in a frozen layout, plan 1.2).
+//   in a frozen layout).
 
 #pragma once
 
@@ -44,10 +44,10 @@
 #define PATELLA_HAS_CONTRACTS 0
 #endif
 
-// Not Clang with libstdc++ (linux-x64-clang since issue #121: Clang 23 with GCC 16's library, which says
-// 202603): libstdc++ 16's inplace_vector is GCC's. Under Clang 23 its _M_init names is_trivial_v, deprecated in
-// C++26, in a template the code instantiates (-Wdeprecated-declarations, an error under -Werror), and its constexpr
-// copy is not a constant expression ("subobject '_M_elems' is not initialized"). Clang keeps the stand-in.
+// Not Clang with libstdc++ (linux-x64-clang: Clang 23 with GCC 16's library, which says 202603): libstdc++ 16's
+// inplace_vector is GCC's. Under Clang 23 its _M_init names is_trivial_v, deprecated in C++26, in a template the code
+// instantiates (-Wdeprecated-declarations, an error under -Werror), and its constexpr copy is not a constant
+// expression ("subobject '_M_elems' is not initialized"). Clang keeps the stand-in.
 #if defined(__clang__) && defined(__GLIBCXX__)
 #define PATELLA_HAS_INPLACE_VECTOR 0
 #elif defined(__cpp_lib_inplace_vector) && __cpp_lib_inplace_vector >= 202603L && !defined(PATELLA_CXX26_STANDIN)
@@ -565,7 +565,7 @@ private:
 
 	// Destroys the elements from Count on. During constant evaluation the slot of a trivial T gets
 	// a value again (as in Init): Clang does not copy an array with a destroyed element (the trivial
-	// copy constructor of a TStaticVector<int, N>; issue #7).
+	// copy constructor of a TStaticVector<int, N>).
 	constexpr void DestroyFrom(size_type Count) noexcept
 	{
 		while (Length > Count) {

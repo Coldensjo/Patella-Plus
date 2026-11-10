@@ -3,8 +3,8 @@
 // The assertion texts and line numbers come from the binary's
 // instances; member names other than space and block are ours.
 //
-// The original file's growable vector<T> is TIndexedVector<T> of src/types/IndexedVector.h since
-// Patella-Modern issue #99, the same semantics over a std::vector.
+// The original file's growable vector<T> is TIndexedVector<T> of src/types/IndexedVector.h, the same semantics over a
+// std::vector.
 
 #pragma once
 
@@ -13,10 +13,10 @@
 #include <memory>
 #include <sstream>
 
-// Each container owns its entries as a std::unique_ptr<T[]> (issue #58), freed
-// with reset() where the original had delete[] (the destructors), allocated with reset(new T[n])
-// (the same new-expression: entries of a type without a constructor stay uninitialised). The element types'
-// destructors cannot throw (scalars, pointers and plain structures), so neither can the reset.
+// Each container owns its entries as a std::unique_ptr<T[]>, freed with reset() where the original had delete[] (the
+// destructors), allocated with reset(new T[n]) (the same new-expression: entries of a type without a constructor stay
+// uninitialised). The element types' destructors cannot throw (scalars, pointers and plain structures), so neither can
+// the reset.
 
 // array<T> is a fixed array indexed from min to min+d-1. The class name is
 // ours; min, d, i, low() and high() are named in the assertions and in the
@@ -63,9 +63,8 @@ template <class T> T &array<T>::operator()(int i)
 // The class names are ours; xmin, ymin, zmin, dx, dy, dz, x, y and z are named in the assertions and error messages.
 // x is the fastest index. The destructors free the entries.
 //
-// The entries are indexed through a std::mdspan view over the owned storage since Patella-Modern issue #101
-// (src/compat/mdspan.h; notes/decisions.md, "#101: the matrices and the automap layers as mdspan views"): view()
-// makes one from entry and the extents, layout_left, so view()[x, y] is entry[y * dx + x] and view()[x, y, z]
+// The entries are indexed through a std::mdspan view over the owned storage (src/compat/mdspan.h): view() makes one
+// from entry and the extents, layout_left, so view()[x, y] is entry[y * dx + x] and view()[x, y, z]
 // entry[(z * dy + y) * dx + x] as in the original. operator() checks the indices first; a view does not.
 template <class T> class matrix {
 public:

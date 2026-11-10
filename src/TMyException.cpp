@@ -1,5 +1,4 @@
-// TMyException.cpp: reconstructed from Tibia.exe 7.72. Since Patella-Modern
-// issue #80 the constructors' formatting is ErrorText's (TMyException.h).
+// TMyException.cpp: reconstructed from Tibia.exe 7.72. The constructors' formatting is ErrorText's (TMyException.h).
 
 #include "TMyException.h"
 #include "compat/assertion.h"
@@ -116,8 +115,8 @@ TError MakeFailure(const TSourceLocation &Location, std::string_view Kind, std::
 	return TError{ErrorText(Location.file_name(), GetLine(Location), Kind, Name1, Value1, Name2, Value2, Reason)};
 }
 
-// The failures of PATELLA_ASSERT and PATELLA_ASSERT_VALUES (compat/assertion.h, issue #79): the TMyException of
-// common.h's assertion macros before it, with the assertion's own file and line.
+// The failures of PATELLA_ASSERT and PATELLA_ASSERT_VALUES (compat/assertion.h): the TMyException of the original's
+// assertion macros, with the assertion's own file and line.
 void AssertionFailed(const char *Expression, const TSourceLocation &Location)
 {
 	throw MakeError(Location, "assertion failed", "", 0, "", 0, Expression);
@@ -134,7 +133,7 @@ void AssertionFailed(const char *Expression, const TSourceLocation &Location, co
 		Expression);
 }
 
-// PATELLA_DIVISOR's failure (compat/assertion.h, issue #67): a divisor from input that is zero.
+// PATELLA_DIVISOR's failure (compat/assertion.h): a divisor from input that is zero.
 void DivisionByZero(const char *Expression, const TSourceLocation &Location)
 {
 	throw MakeError(Location, "integer division by zero", "", 0, "", 0, Expression);

@@ -1,7 +1,7 @@
-// SdlPlatform.cpp: the SDL3 implementations of the platform's desktop and, since #159 in SdlClipboard.cpp, clipboard
-// (Patella-Modern issue #124; platform/SdlPlatform.h). Not part of the original source: each function does with SDL3
-// what Win32Platform.cpp's TWin32Window does with Win32's calls, for the SDL3 window's client (SdlFrame.cpp). The
-// display's modes are SDL3's on every system since issue #152 (TSdlWindow, below).
+// SdlPlatform.cpp: the SDL3 implementations of the platform's desktop and, in SdlClipboard.cpp, clipboard
+// (platform/SdlPlatform.h). Not part of the original source: each function does with SDL3 what Win32Platform.cpp's
+// TWin32Window does with Win32's calls, for the SDL3 window's client (SdlFrame.cpp). The display's modes are SDL3's
+// on every system (TSdlWindow, below).
 
 #include "platform/SdlPlatform.h"
 
@@ -82,7 +82,7 @@ void TSdlWindow::ShowMessageBox(TWindowHandle Owner, const char *Text, const cha
 #if !defined(_WIN32)
 namespace {
 
-// Issue #131: the start's count of the Tibia windows (Player.cpp CountTibiaWindows, "A Tibia client is already running!"):
+// The start's count of the Tibia windows (Player.cpp CountTibiaWindows, "A Tibia client is already running!"):
 // no call of SDL3 lists another process's windows, so another client of this user is told by a lock. Taken at the first
 // count (the client's own, before its window shows) and held to the end of the process (exit releases it).
 bool AnotherClientRuns()
@@ -190,7 +190,7 @@ namespace {
 // the display needs changing from its own record of the current mode, and a display change that reaches SDL outside its
 // own mode change (a monitor plugged in during the fullscreen mode) resets that record to the desktop's mode
 // (SDL_windowsmodes.c WIN_AddDisplay: SDL_ResetFullscreenDisplayModes), after which SDL would leave the display in the
-// fullscreen mode. Issue #152: with the window still in a mode of its own and SDL's record the desktop's, SDL is given
+// fullscreen mode. So with the window still in a mode of its own and SDL's record the desktop's, SDL is given
 // the desktop's own entry of its list first, so that the change back really happens (SDL_SetDisplayModeForDisplay with
 // that entry, then with none: ChangeDisplaySettingsExW with the desktop's mode, then with no mode, Windows' own return
 // to the saved mode, the same as the original's ChangeDisplaySettingsA(nullptr, 0)).
@@ -225,7 +225,7 @@ bool ReturnToDesktopMode(SDL_Window *Window)
 // ChooseFullscreenMode), which makes it an exclusive fullscreen window and SDL switch the display; null back to the
 // fullscreen desktop window and the desktop's mode. False where SDL has no window of that handle (with a mode), no such
 // mode, or the display did not take it. SDL's refresh_rate is only compared here: on Windows the mode set is the entry's
-// own Windows DEVMODE (notes/decisions.md, "#152").
+// own Windows DEVMODE.
 bool SdlSetFullscreenMode(TWindowHandle Window, const TDisplayMode *Mode)
 {
 	SDL_Window *const Found = SdlWindowOf(Window);
@@ -262,7 +262,7 @@ bool SdlSetFullscreenMode(TWindowHandle Window, const TDisplayMode *Mode)
 	return Done;
 }
 
-// The display's modes are SDL3's on every system since issue #152 (notes/decisions.md, "#152").
+// The display's modes are SDL3's on every system.
 bool TSdlWindow::DisplayMode(unsigned int Index, TDisplayMode &Mode)
 {
 	return SdlDisplayMode(Index, Mode);

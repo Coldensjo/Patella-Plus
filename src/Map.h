@@ -14,19 +14,18 @@
 // EffectIteratorField, EffectIteratorCount and AmbienteActualBrightness, the
 // fields ObjectCount, EffectNumber, Status, Type, Next, Previous, bx, by, bz,
 // x, y, the parameter names in the assertions and catch blocks, and FindPath's
-// StartX ... ForceDiagonal (its error message). Everything else is ours
-// (notes/decisions.md, "Map.cpp").
+// StartX ... ForceDiagonal (its error message). Everything else is ours.
 
 #pragma once
 
 #include "common.h"
-#include "AutomapLayer.h" // TAutomapLayer (issue #101)
+#include "AutomapLayer.h" // TAutomapLayer
 #include "types/FixedString.h"
 #include "types/IndexedVector.h"
 #include "types/SlotTable.h"
 #include "Container.h"
 #include "types/GraphicsTypes.h" // TRGBColor
-#include "MapPoint.h"            // TMapPoint, OBJECTS_PER_POINT (issue #102)
+#include "MapPoint.h"            // TMapPoint, OBJECTS_PER_POINT
 #include "Objects.h"             // TObject
 #include <array>
 #include <cstddef>
@@ -38,11 +37,10 @@ inline constexpr int MAPSIZE_Y = 14;
 inline constexpr int MAPSIZE_Z = 8;
 inline constexpr int EFFECTS = 200;
 
-// An effect. Status 0 is a free entry, 1 a graphical effect, 2 an
-// animated text, 3 a missile. The three kinds share the space after Type.
-// Its anonymous structs are a Microsoft extension (GCC and Clang have it too), which MFC's headers switched on for
-// their includers (C4201) and -Wpedantic names: allowed for TEffect alone since patella_core compiles Map.h without
-// MFC (issue #110; their members are TEffect's own names, Text, Direction..., throughout Map.cpp and the windows).
+// An effect. Status 0 is a free entry, 1 a graphical effect, 2 an animated text, 3 a missile. The three kinds share the
+// space after Type. Its anonymous structs are a Microsoft extension (GCC and Clang have it too), which MFC's headers
+// switched on for their includers (C4201) and -Wpedantic names: allowed for TEffect alone since patella_core compiles
+// Map.h without MFC (their members are TEffect's own names, Text, Direction..., throughout Map.cpp and the windows).
 PATELLA_MSVC_WARNING(push)
 PATELLA_MSVC_WARNING(disable : 4201)
 #if defined(__GNUC__)
@@ -105,11 +103,10 @@ struct TCoordinate {
 	int z;
 };
 
-// One automap block: 256x256 fields of one floor. The
-// compiler-generated destructor frees Marks. Color and Speed were uint8
-// [256][256], indexed [x][y]; since Patella-Modern issue #101 they are
-// TAutomapLayer (AutomapLayer.h), the same bytes in the same order, indexed
-// through Color.view()[x, y].
+// One automap block: 256x256 fields of one floor. The compiler-generated
+// destructor frees Marks. Color and Speed are TAutomapLayer
+// (AutomapLayer.h): the bytes of the original's uint8 [256][256] in the
+// same order, indexed through Color.view()[x, y].
 struct TAutomapBlock {
 	TAutomapBlock() : Marks(0, 0, 10) { MarkCount = 0; }
 
@@ -121,9 +118,9 @@ struct TAutomapBlock {
 	TAutomapLayer Color; // [x, y], palette colour
 	TAutomapLayer Speed; // [x, y], ground speed, 250 unknown, 255 blocked
 	bool Changed;
-	// The marks from 0 to MarkCount - 1. A TIndexedVector (issue #100): MarkCount comes from the block's file
-	// (LoadAutomapBlock) and may be negative, and AddAutomapMark then indexes below 0, which grows the vector
-	// downwards; the reload clears min to max.
+	// The marks from 0 to MarkCount - 1. A TIndexedVector: MarkCount comes from the block's file (LoadAutomapBlock) and
+	// may be negative, and AddAutomapMark then indexes below 0, which grows the vector downwards; the reload clears min
+	// to max.
 	TIndexedVector<TMark> Marks;
 	int MarkCount;
 };
@@ -166,23 +163,23 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 
 inline constexpr int AUTOMAP_BLOCKS = 10;
 
-// The effect table: EFFECTS entries, numbered by TEffectId (issue #103; notes/decisions.md, "#102").
+// The effect table: EFFECTS entries, numbered by TEffectId.
 using TEffectTable = TSlotTable<TEffect, EFFECTS, TEffectId>;
 
-// The effects of one map point, first to last, by their Next links (issue #103): TEffectTable::Chain from the point's
-// EffectNumber (TMap::PointEffects), the range Map.cpp's loops walk. A loop's body may delete the effect it is given
-// (ClearField does): DeleteEffect keeps the deleted entry's Next, which the step reads.
+// The effects of one map point, first to last, by their Next links: TEffectTable::Chain from the point's EffectNumber
+// (TMap::PointEffects), the range Map.cpp's loops walk. A loop's body may delete the effect it is given (ClearField
+// does): DeleteEffect keeps the deleted entry's Next, which the step reads.
 using TPointEffects = TEffectTable::TChain;
 
 namespace patella {
 
 class TObjectTypes;
 
-// The default console, where TMap reports an automap file it could not read or save (Patella-Modern issue #118; rule 5
-// of notes/decisions.md, "#104"): Talk.cpp's, TGUI's, a later subsystem than TMapState, so TMap reaches it only through
-// this interface; Client.cpp implements it with Talk.cpp's free functions (the golden tests fake them by their
-// symbols). HasDefaultConsole is the original's check of DefaultTextBuffer before the message is made,
-// AddDefaultConsoleLine its AddTextBufferLine(DefaultTextBuffer, 0, Message, 20, NULL, 0) and SetConsoleChanged.
+// The default console, where TMap reports an automap file it could not read or save: Talk.cpp's, TGUI's, a later
+// subsystem than TMapState, so TMap reaches it only through this interface; Client.cpp implements it with Talk.cpp's
+// free functions (the golden tests fake them by their symbols). HasDefaultConsole is the original's check of
+// DefaultTextBuffer before the message is made, AddDefaultConsoleLine its AddTextBufferLine(DefaultTextBuffer, 0,
+// Message, 20, NULL, 0) and SetConsoleChanged.
 class TMapConsole {
 public:
 	TMapConsole() = default;
@@ -197,9 +194,8 @@ protected:
 	~TMapConsole() = default;
 };
 
-// Map.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the subsystem
-// objects" and "#106"): the map points and their position, the effect table and the two iterators, the automap blocks
-// and their cache list, the ambient light, private as the file-local statics were, with the same initial values
+// Map.cpp's data and functions: the map points and their position, the effect table and the two iterators, the automap
+// blocks and their cache list, the ambient light, private as the file-local statics were, with the same initial values
 // (Fields and FieldNumber as their initialisers made them, the others 0). The functions are the members of the same
 // names, the file-local ones private. TMapState owns it (MapState.h), after TObjectTypes, which it reads.
 class TMap {
@@ -303,7 +299,7 @@ private:
 	int GetAutomapSpeed(int x, int y, int z);
 
 	TObjectTypes &ObjectTypes;
-	TMapConsole &Console; // issue #118
+	TMapConsole &Console;
 
 	// Data, in the original's .data/.bss order.
 	void (*CreatureCallback)(int CreatureID){}; // called for every creature ClearField removes
@@ -319,7 +315,7 @@ private:
 	int MapZ{}; // world position of the map's centre
 	int MapY{};
 	int MapX{};
-	TEffectTable Effects; // an array of EFFECTS until issue #102
+	TEffectTable Effects;
 	array<TMapPoint> Fields{0, MAPSIZE_X * MAPSIZE_Y * MAPSIZE_Z - 1};
 	matrix3d<int> FieldNumber{0, MAPSIZE_X - 1, 0, MAPSIZE_Y - 1, 0, MAPSIZE_Z - 1};
 	std::array<TAutomapBlock, AUTOMAP_BLOCKS> AutomapBlocks;
@@ -327,8 +323,7 @@ private:
 	TRGBColor AmbienteActualColor;
 };
 
-// The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the map
-// of the one TClient (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the map of the one TClient (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 TMap &Map();
 } // namespace bridge
@@ -374,7 +369,7 @@ int GetMissileEffectY(int EffectNumber);
 void ProcessEffects();
 void ProcessMissileEffects();
 
-// The effects of map point rx, ry, rz by GetFirstEffect and GetNextEffect, as the original's numbers (issue #103):
+// The effects of map point rx, ry, rz by GetFirstEffect and GetNextEffect, as the original's numbers:
 // TMapWindow::DrawField's effect loop. begin() calls GetFirstEffect, each step GetNextEffect, in the original loop's
 // order; the range ends at the first -1, and gives any other number as it comes (the loop checks the range itself).
 class TMapEffects {

@@ -4,12 +4,12 @@
 // TReadScriptFile has the same tokenizer (the binary names its state variable
 // "State", as the server does). The client's version reads a single file (no
 // #include) and has a smaller string buffer. The names are not in the client
-// binary; see notes/decisions.md.
+// binary.
 //
 // The constructors, destructors and close() functions are defined here. The
-// FILE * members are TFiles (types/File.h, Patella-Modern issue #64): fopen,
-// fclose and the reads and writes with an owner, the same bytes. Each class's
-// TryOpen returns open's failures (Patella-Modern issue #80).
+// FILE * members are TFiles (types/File.h): fopen, fclose and the reads and
+// writes with an owner, the same bytes. Each class's TryOpen returns open's
+// failures.
 
 #pragma once
 
@@ -23,8 +23,7 @@
 inline constexpr int MAX_IDENT_LENGTH = 20;    // "identifier too long"
 inline constexpr int MAX_STRING_LENGTH = 1000; // "string too long" at 999 characters
 
-// The kind of the current token (TReadScriptFile::Token). Only assigned and
-// compared, so it is scoped (issue #37).
+// The kind of the current token (TReadScriptFile::Token). Only assigned and compared, so it is scoped.
 enum class TOKEN : int {
 	ENDOFFILE,
 	IDENTIFIER,
@@ -67,8 +66,8 @@ public:
 		Special = '#';
 	}
 
-	// open's failures ("file still open", "failed to open file") returned instead of thrown (issue #80); open throws
-	// them, as the original.
+	// open's failures ("file still open", "failed to open file") returned instead of thrown; open throws them, as the
+	// original.
 	[[nodiscard]] patella::TExpected<void, TError> TryOpen(const char *FileName);
 	void open(const char *FileName);
 	void error(const char *Text);
@@ -84,7 +83,7 @@ public:
 
 	TOKEN Token;
 	TFile File;
-	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason (a std::string), frozen until M5 (issue #60)
+	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason (a std::string)
 	int Line;
 	TFixedString<MAX_STRING_LENGTH> String; // identifier or string
 	uint8 *Bytes;                           // points to String
@@ -112,8 +111,8 @@ public:
 		File.Close();
 	}
 
-	// open's failures ("file still open", "failed to open file") returned instead of thrown (issue #80); open throws
-	// them, as the original.
+	// open's failures ("file still open", "failed to open file") returned instead of thrown; open throws them, as the
+	// original.
 	[[nodiscard]] patella::TExpected<void, TError> TryOpen(const char *FileName);
 	void open(const char *FileName);
 	void seek(int Offset);
@@ -125,7 +124,7 @@ public:
 	void readBytes(patella::TSpan<uint8> Bytes);
 
 	TFile File;
-	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason, frozen until M5 (issue #60)
+	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason
 };
 
 class TWriteBinaryFile {
@@ -147,7 +146,7 @@ public:
 		File.Close();
 	}
 
-	// Opens the file; a failure ("file still open", "failed to open file") is returned, not thrown (issue #80).
+	// Opens the file; a failure ("file still open", "failed to open file") is returned, not thrown.
 	[[nodiscard]] patella::TExpected<void, TError> TryOpen(const char *FileName);
 	void writeByte(uint8 Byte);
 	void writeWord(uint16 Word);
@@ -156,5 +155,5 @@ public:
 	void writeString(const char *Text);
 
 	TFile File;
-	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason, frozen until M5 (issue #60)
+	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason
 };

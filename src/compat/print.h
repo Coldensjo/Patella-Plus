@@ -1,5 +1,5 @@
 // print.h: printf on stdout with std::format's language, for the client's one diagnostic line on stdout
-// (ContentWindows.cpp's MouseHover). Patella-Modern issue #64. Not part of the original source.
+// (ContentWindows.cpp's MouseHover). Not part of the original source.
 //
 // patella::compat::PrintLine(Format, Values...) writes the text formatted with std::format's language and a '\n'
 // to stdout, with printf's semantics: the conversions the client used give the same characters (%s: {}, %d: {}),

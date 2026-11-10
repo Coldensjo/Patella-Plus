@@ -1,6 +1,5 @@
-// SdlClipboard.cpp: TSdlClipboard, the platform's clipboard over SDL3 (Patella-Modern issue #124, its own file since
-// issue #159: tests_sdl_clipboard compiles it alone; platform/SdlPlatform.h). Not part of the original source: each
-// function does with SDL3 what the client did with Win32's clipboard calls.
+// SdlClipboard.cpp: TSdlClipboard, the platform's clipboard over SDL3 (platform/SdlPlatform.h). Not part of the
+// original source: each function does with SDL3 what the client did with Win32's clipboard calls.
 
 #include "platform/SdlPlatform.h"
 
@@ -25,9 +24,9 @@ bool VideoStarted()
 	return SDL_WasInit(SDL_INIT_VIDEO) != 0;
 }
 
-// An empty text's data (issue #159, notes/decisions.md): one NUL byte. The size must be 1, not 0, for the text to exist:
-// Windows' driver writes no CF_UNICODETEXT for size 0 and X11's says it has no text. The driver stores it as an empty
-// text there: a lone terminator, as the original's CF_TEXT had.
+// An empty text's data: one NUL byte. The size must be 1, not 0, for the text to exist: Windows' driver writes no
+// CF_UNICODETEXT for size 0 and X11's says it has no text. The driver stores it as an empty text there: a lone
+// terminator, as the original's CF_TEXT had.
 const void *SDLCALL EmptyTextData(void * /*Userdata*/, const char * /*MimeType*/, std::size_t *Size)
 {
 	*Size = 1;
@@ -57,10 +56,9 @@ std::optional<std::string> TSdlClipboard::Text()
 	return patella::text::Utf8ToCp1252(Utf8.get());
 }
 
-// Puts the text on the clipboard. One difference of SDL's, kept by the owner's choice (notes/decisions.md, "#124"): on Windows
-// each line feed without a carriage return before it is written as CR LF (the console's selection of several lines).
-// An empty text is put there as the original did (sysinc.cpp's SetClipboardText, issue #159): SDL_SetClipboardText("")
-// would empty the clipboard.
+// Puts the text on the clipboard. One difference of SDL's, kept by the owner's choice: on Windows each line feed
+// without a carriage return before it is written as CR LF (the console's selection of several lines). An empty text is
+// put there as the original did (sysinc.cpp's SetClipboardText): SDL_SetClipboardText("") would empty the clipboard.
 bool TSdlClipboard::SetText(const char *Text)
 {
 	if (!VideoStarted())

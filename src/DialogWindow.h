@@ -19,8 +19,7 @@
 // class name TContentWindow and GetContentWindow), GetBody, Body, _Body,
 // _Identifier, IsMinimized, Search, Work, DeltaHeight, Strategy and the
 // parameter names in the catch blocks (Surface, Identifier, x, y, Width,
-// Height, Event). The other names are ours (notes/decisions.md,
-// "DialogWindow.cpp").
+// Height, Event). The other names are ours.
 
 #pragma once
 
@@ -31,10 +30,9 @@
 class TResizer;    // DialogElements.h
 class TSkinButton; // DialogElements.h
 
-// The dialog window's identifier of the trade window ("HasContentWindow(
-// TRADE_WINDOW)", MainWindow.cpp). The skill, battle and VIP windows are 6, 7 and 9, a
-// container's window is 0x40 plus the container number. MainWindow.h's until issue #118: here, where both of its
-// users (MainWindow.cpp and ContentWindows.cpp's CreateTradeWindow) find it without ContentWindows.cpp including
+// The dialog window's identifier of the trade window ("HasContentWindow(TRADE_WINDOW)", MainWindow.cpp). The skill,
+// battle and VIP windows are 6, 7 and 9, a container's window is 0x40 plus the container number. Here, where both of
+// its users (MainWindow.cpp and ContentWindows.cpp's CreateTradeWindow) find it without ContentWindows.cpp including
 // MainWindow.h.
 inline constexpr int TRADE_WINDOW = 8;
 // A container's window: this plus the container number. An enumerator for the reason in GUI.h.
@@ -75,10 +73,9 @@ public:
 	int DragY;
 };
 
-// The content of a TSubWindow (ContentWindows.h's bodies derive from it; here since issue #118, so that
-// DialogWindow.cpp, which calls its virtual functions, does not include ContentWindows.h). Its constructor and its virtual functions
-// are inline; no vtable of its own is left (the constructors of the
-// subclasses store theirs right after Minimized).
+// The content of a TSubWindow (ContentWindows.h's bodies derive from it; here, so that DialogWindow.cpp, which calls
+// its virtual functions, does not include ContentWindows.h). Its constructor and its virtual functions are inline; no
+// vtable of its own is left (the constructors of the subclasses store theirs right after Minimized).
 class TSubWindowBody : public TWindow {
 public:
 	TSubWindowBody() { Minimized = false; }
@@ -95,8 +92,8 @@ public:
 	bool Minimized;
 };
 
-// Not in the original (issue #118): TSubWindow::Arrange's call of a container body's UpdateUpButton
-// (TContainerWindowBody, ContentWindows.h), defined in ContentWindows.cpp where that class is complete.
+// TSubWindow::Arrange's call of a container body's UpdateUpButton (TContainerWindowBody, ContentWindows.h), defined in
+// ContentWindows.cpp where that class is complete.
 void UpdateContainerUpButton(TSubWindowBody *Body);
 
 // A content window with a body and a frame (MainWindow.cpp's containers and
@@ -128,7 +125,7 @@ public:
 	[[nodiscard]] TSubWindowBody *GetBody() const { return Body; }
 
 	// The parts are owned by the child list while they are children and by the member while they are not (a minimized
-	// window's, a hidden "up" button), so they stay raw (notes/ownership.md, section 7; issue #108).
+	// window's, a hidden "up" button), so they stay raw.
 	TSubWindowBody *Body;
 	TResizer *Resizer1;          // area SubWindow.Resizer1
 	TResizer *Resizer2;          // area SubWindow.Resizer2
@@ -141,7 +138,7 @@ public:
 	int RestoreHeight; // the height before Minimize
 
 protected:
-	void OnClose() override; // the destructor's preferences and the parts that are not children (issue #108)
+	void OnClose() override; // the preferences and the parts that are not children
 };
 
 // A column of content windows.

@@ -1,4 +1,4 @@
-// Renderer.cpp: the Vulkan 1.3 back end of the Vulkan engine (Renderer.h; notes/vulkan.md).
+// Renderer.cpp: the Vulkan 1.3 back end of the Vulkan engine (Renderer.h).
 
 #include "vulkan/Renderer.h"
 
@@ -159,9 +159,9 @@ int TypeRank(VkPhysicalDeviceType Type)
 
 // The devices of one side (the CPU driver's or the system's GPUs) the engine can use: Vulkan 1.3 with
 // dynamic rendering and synchronization2, in the loader's order (vk-bootstrap's select_devices).
-// Listed: the list a GPU index counts in (ListGpus, issue #31), the same with or without a window, so
-// any surface is left out and VK_KHR_swapchain is required instead. Otherwise, with a surface, the
-// devices that can present to it.
+// Listed: the list a GPU index counts in (ListGpus), the same with or without a window, so any surface
+// is left out and VK_KHR_swapchain is required instead. Otherwise, with a surface, the devices that can
+// present to it.
 std::vector<vkb::PhysicalDevice> FindDevices(const vkb::Instance &Instance, VkSurfaceKHR Surface, bool Cpu, bool Listed)
 {
 	VkPhysicalDeviceVulkan13Features Features13{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES};
@@ -196,8 +196,8 @@ TDeviceInfo InfoOf(const vkb::PhysicalDevice &Physical)
 }
 
 // The window system's surface extension of the platform (the one the client's TDeviceRequest names).
-// Every system's surface extension the loader offers is enabled on every instance (issue-31-fix, below): on Linux the
-// X11 and the Wayland one of SDL3's video drivers (issue #131); which of them the window's device names is SDL's choice.
+// Every system's surface extension the loader offers is enabled on every instance (NewInstanceBuilder, below): on
+// Linux the X11 and the Wayland one of SDL3's video drivers; which of them the window's device names is SDL's choice.
 #if defined(_WIN32)
 constexpr std::array<const char *, 1> PlatformSurfaceExtensions = {"VK_KHR_win32_surface"};
 #else
@@ -205,18 +205,17 @@ constexpr std::array<const char *, 3> PlatformSurfaceExtensions = {"VK_KHR_xlib_
 	"VK_KHR_wayland_surface"};
 #endif
 
-// The builder of every instance the back end creates (issue-31-fix). vk-bootstrap loads its instance
-// functions (the surface queries of the device selection and the swapchain, the debug messenger's) into a
-// table of its own once per process, from the first instance it builds (VkBootstrap.cpp
-// init_instance_funcs), and keeps them for every later instance. The loader gives such a function only
-// for an instance with its extension enabled, so the first instance decides for the whole process: the
-// device list's headless instance, the first at the client's start since issue #31, left the surface
-// functions null, and the window's device selection then called a null pointer (get_present_queue_index;
-// the start-up crash 0xC0000409). So every instance enables the same instance extensions, whatever it is
-// for: VK_KHR_surface with the platform's surface extension, and VK_EXT_debug_utils, each where the loader
-// offers it (they cost nothing without a window or a messenger), and the one a request names. The functions
-// the loader gives are its trampolines, the same for every instance, so the table stays valid after its
-// instance is destroyed (as it did before issue #31: the start-up test's instance was destroyed too).
+// The builder of every instance the back end creates. vk-bootstrap loads its instance functions (the
+// surface queries of the device selection and the swapchain, the debug messenger's) into a table of its
+// own once per process, from the first instance it builds (VkBootstrap.cpp init_instance_funcs), and keeps
+// them for every later instance. The loader gives such a function only for an instance with its extension
+// enabled, so the first instance decides for the whole process: the device list's headless instance, the
+// first at the client's start, would leave the surface functions null, and the window's device selection
+// would then call a null pointer (get_present_queue_index: a start-up crash, 0xC0000409). So every
+// instance enables the same instance extensions, whatever it is for: VK_KHR_surface with the platform's
+// surface extension, and VK_EXT_debug_utils, each where the loader offers it (they cost nothing without a
+// window or a messenger), and the one a request names. The functions the loader gives are its trampolines,
+// the same for every instance, so the table stays valid after its instance is destroyed.
 vkb::InstanceBuilder NewInstanceBuilder(const std::string &SurfaceExtension)
 {
 	vkb::InstanceBuilder Builder(vkGetInstanceProcAddr);
@@ -318,8 +317,8 @@ struct TRenderer::TState {
 	VkBuffer BoundVertices = VK_NULL_HANDLE;
 
 
-	// TRenderer::Draw's working copies of the quads (issue #155): they keep their capacity, so a draw allocates only when
-	// its batch is the largest so far. Draw empties and refills both before it reads them.
+	// TRenderer::Draw's working copies of the quads: they keep their capacity, so a draw allocates only when its batch
+	// is the largest so far. Draw empties and refills both before it reads them.
 	std::vector<TVertex> QuadVertices;
 	std::vector<uint32_t> QuadSamplers; // the descriptor set per quad
 
@@ -800,7 +799,7 @@ struct TRenderer::TState {
 		// The window's surface given here: a device chosen by its index was selected without it (FindDevices).
 		vkb::SwapchainBuilder Builder(Device, Surface);
 		// The original engines show frames without waiting for the display (D3DPRESENT_INTERVAL_IMMEDIATE);
-		// MAILBOX and FIFO only where IMMEDIATE is missing. D13's vsync comes with the settings file (D12).
+		// MAILBOX and FIFO only where IMMEDIATE is missing.
 		Builder.set_desired_format({VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
 			.add_fallback_format({VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
 			.set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR)
@@ -839,7 +838,7 @@ struct TRenderer::TState {
 		if (Request.Validation)
 			Builder.request_validation_layers(true).use_default_debug_messenger();
 		auto Built = Builder.build();
-		// A loader with no system driver at all (issue #163: GitHub's runner, measured: failed_create_instance headless,
+		// A loader with no system driver at all (measured on GitHub's runner: failed_create_instance headless,
 		// requested_extensions_not_present for a window, the loader listing no surface extension) has no device of a
 		// system driver to offer, which is no error: the caller goes on to the CPU driver, as ListDevices' empty list.
 		if (!Cpu && !Built
@@ -851,8 +850,8 @@ struct TRenderer::TState {
 		if (Request.CreateSurface)
 			Surface = Request.CreateSurface(Instance.instance);
 
-		// The n-th GPU counts in ListGpus' list (the advanced options' GPU button, issue #31), which does
-		// not depend on the window; whether it can present to it is checked below.
+		// The n-th GPU counts in ListGpus' list (the advanced options' GPU button), which does not depend
+		// on the window; whether it can present to it is checked below.
 		const bool Indexed = !Cpu && GpuIndex >= 0;
 		std::vector<vkb::PhysicalDevice> Candidates = FindDevices(Instance, Surface, Cpu, Indexed);
 		const vkb::PhysicalDevice *Chosen = nullptr;

@@ -5,9 +5,9 @@
 // Function names are ours; parameter names come from the binary's catch
 // strings ("Force", "x", "y", "Key").
 //
-// Since Patella-Modern issue #118 the functions are TGUI's members (GUI.h), defined in Control.cpp; these free
-// functions of the original's names forward to them for the callers outside TGUI (MainFrm.cpp, Player.cpp, the test
-// mode), InitControl's callbacks and the golden tests, which call and fake them by name.
+// The functions are TGUI's members (GUI.h), defined in Control.cpp; these free functions of the original's names
+// forward to them for the callers outside TGUI (MainFrm.cpp, Player.cpp, the test mode), InitControl's callbacks and
+// the golden tests, which call and fake them by name.
 
 #pragma once
 
@@ -41,6 +41,6 @@ void InitWindow(patella::platform::TWindowHandle Window, void (*ExitProgram)(), 
 void InitControl(bool Gamemaster);
 void ExitControl();
 
-// Not in the original (Patella-Modern issue #77): the last ten packet types received, the newest first (0 for none),
-// for the developer log's diagnostics (Player.cpp HandleException; error.txt's "Last Packet Types" until issue #74).
+// The last ten packet types received, the newest first (0 for none), for the developer log's diagnostics (Player.cpp
+// HandleException).
 std::array<uint8, 10> GetLastPacketTypes();

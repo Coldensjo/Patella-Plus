@@ -1,11 +1,11 @@
-// span.h: C++20's std::span for the parameters that took a pointer and a length (the packet buffers, TXTEA and TRSA;
-// Patella-Modern issue #59), under the names the code uses. Not part of the original source.
+// span.h: C++20's std::span for the parameters that took a pointer and a length (the packet buffers, TXTEA and TRSA),
+// under the names the code uses. Not part of the original source.
 //
 // patella::TSpan<T, Extent> is std::span<T, Extent>, and patella::DynamicExtent is std::dynamic_extent.
 //
 // The size is std::span's in MSVC's, libstdc++'s and libc++'s library: a pointer for a fixed extent, a pointer and a
 // std::size_t for the dynamic one, with a pointer's alignment, trivially copyable (asserted below). A TSpan is a
-// parameter or a local only, never a member of a frozen structure (plan, section 1.2).
+// parameter or a local only, never a member of a frozen structure.
 
 #pragma once
 
