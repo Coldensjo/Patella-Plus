@@ -1347,41 +1347,41 @@ bool TEditLine::RightButtonUp(int x, int y, int Flags)
 void TEditLine::KeyPress(int Key)
 {
 	if (FocusGroup != nullptr) {
-		if (Key == 9)
+		if (Key == KEY_TAB)
 			FocusGroup->Next();
-		if (Key == 0x209)
+		if (Key == (KEY_SHIFT | KEY_TAB))
 			FocusGroup->Previous();
 	}
 	if (!IsDisabled()) {
-		const int Code = Key & 0x1ff;
-		if (Code == 0x10d && Cursor > 0) {
+		const int Code = Key & KEY_CODE_MASK;
+		if (Code == KEY_LEFT && Cursor > 0) {
 			SetCursor(Cursor - 1);
 			SelectionLength = 0;
 		}
-		if (Code == 0x10e && Cursor < (int)strlen(Text.get())) {
+		if (Code == KEY_RIGHT && Cursor < (int)strlen(Text.get())) {
 			SetCursor(Cursor + 1);
 			SelectionLength = 0;
 		}
-		if (Code == 0x112) {
+		if (Code == KEY_HOME) {
 			SetCursor(0);
 			SelectionLength = 0;
 		}
-		if (Code == 0x113) {
+		if (Code == KEY_END) {
 			SetCursor((int)strlen(Text.get()));
 			SelectionLength = 0;
 		}
 		if (!ReadOnly) {
-			if (Key == 0x310 || Key == 0x476)
+			if (Key == (KEY_SHIFT | KEY_INSERT) || Key == (KEY_CONTROL | 'v'))
 				HandleEvent(EVENT_PASTE);
-			if (Key == 0x510 || Key == 0x463)
+			if (Key == (KEY_CONTROL | KEY_INSERT) || Key == (KEY_CONTROL | 'c'))
 				HandleEvent(EVENT_COPY);
-			if (Key == 0x311 || Key == 0x478)
+			if (Key == (KEY_SHIFT | KEY_DELETE) || Key == (KEY_CONTROL | 'x'))
 				HandleEvent(EVENT_CUT);
-			if (Key == 0x511)
+			if (Key == (KEY_CONTROL | KEY_DELETE))
 				HandleEvent(EVENT_DELETE);
-			if (Key == 0x461)
+			if (Key == (KEY_CONTROL | 'a'))
 				HandleEvent(EVENT_SELECT_ALL);
-			if (Code == 8) {
+			if (Code == KEY_BACKSPACE) {
 				if (SelectionStart == -1 || SelectionLength == 0) {
 					if (Cursor > 0) {
 						SetCursor(Cursor - 1);
@@ -1392,7 +1392,7 @@ void TEditLine::KeyPress(int Key)
 					HandleEvent(EVENT_DELETE);
 				}
 			}
-			if (Key == 0x111 && Cursor <= (int)strlen(Text.get())) {
+			if (Key == KEY_DELETE && Cursor <= (int)strlen(Text.get())) {
 				if (SelectionStart == -1 || SelectionLength == 0)
 					DeleteChar(Cursor);
 				else
@@ -1402,7 +1402,7 @@ void TEditLine::KeyPress(int Key)
 			// (0x4682b2-0x4682b8): the original's catch wrapper then prints the code.
 			if ((Key & KEY_CONTROL) == 0 || (Key & KEY_ALT) != 0) {
 				Key = Code;
-				if (Key > 0x1f && Key < 0x100 && (int)strlen(Text.get()) < MaxLength) {
+				if (Key > 0x1f && Key < KEY_F1 && (int)strlen(Text.get()) < MaxLength) {
 					if (HasSelection())
 						HandleEvent(EVENT_DELETE);
 					InsertChar(Cursor, (char)Key);
@@ -1701,21 +1701,21 @@ void TEditText::KeyPress(int Key)
 {
 	if (ReadOnly) {
 		int Value = ScrollBar->Range->Value;
-		if (Key == 0x510 || Key == 0x463)
+		if (Key == (KEY_CONTROL | KEY_INSERT) || Key == (KEY_CONTROL | 'c'))
 			HandleEvent(EVENT_COPY);
-		if (Key == 0x461)
+		if (Key == (KEY_CONTROL | 'a'))
 			HandleEvent(EVENT_SELECT_ALL);
-		switch (Key & 0x1ff) {
-		case 0x10c:
+		switch (Key & KEY_CODE_MASK) {
+		case KEY_UP:
 			Value--;
 			break;
-		case 0x10f:
+		case KEY_DOWN:
 			Value++;
 			break;
-		case 0x114:
+		case KEY_PAGE_UP:
 			Value -= VisibleLines;
 			break;
-		case 0x115:
+		case KEY_PAGE_DOWN:
 			Value += VisibleLines;
 			break;
 		default:
@@ -1728,15 +1728,15 @@ void TEditText::KeyPress(int Key)
 		ScrollBar->Range->SetValue(Value);
 		return;
 	}
-	if (Key == 0x0d && (int)strlen(Text.get()) < MaxLength) {
+	if (Key == KEY_RETURN && (int)strlen(Text.get()) < MaxLength) {
 		if (SelectionStart != -1 && SelectionLength != 0)
 			HandleEvent(EVENT_DELETE);
 		InsertChar(Cursor, '\n');
 		SetCursor(Cursor + 1);
 	}
-	const int Code = Key & 0x1ff;
-	if ((Code != 0x112 && Code != 0x113 && Code != 0x10c && Code != 0x10f && Code != 0x114 && Code != 0x115)
-		|| (Key & 0xe00) != 0) {
+	const int Code = Key & KEY_CODE_MASK;
+	if ((Code != KEY_HOME && Code != KEY_END && Code != KEY_UP && Code != KEY_DOWN && Code != KEY_PAGE_UP && Code != KEY_PAGE_DOWN)
+		|| (Key & (KEY_SHIFT | KEY_CONTROL | KEY_ALT)) != 0) {
 		TEditLine::KeyPress(Key);
 	} else {
 		int Line = 0;
@@ -1745,7 +1745,7 @@ void TEditText::KeyPress(int Key)
 		SelectionLength = 0;
 		int PixelX, Next, MaxPosition, Fitting, Start;
 		switch (Code) {
-		case 0x10c:
+		case KEY_UP:
 			if (Line == 0)
 				break;
 			PixelX = GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line), Cursor - LineStart(Line));
@@ -1756,7 +1756,7 @@ void TEditText::KeyPress(int Key)
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
-		case 0x10f:
+		case KEY_DOWN:
 			if (Line == Lines - 1)
 				break;
 			PixelX = GetTextPartWidth(Font.FontNumber, Text.get() + LineStart(Line), Cursor - LineStart(Line));
@@ -1767,10 +1767,10 @@ void TEditText::KeyPress(int Key)
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
-		case 0x112:
+		case KEY_HOME:
 			Cursor = LineStart(Line);
 			break;
-		case 0x113:
+		case KEY_END:
 			if (Line == Lines - 1) {
 				Cursor = (int)strlen(Text.get());
 			} else {
@@ -1778,7 +1778,7 @@ void TEditText::KeyPress(int Key)
 				Cursor = LineStart(Line) <= Next - 1 ? Next - 1 : LineStart(Line);
 			}
 			break;
-		case 0x114:
+		case KEY_PAGE_UP:
 			Line -= VisibleLines;
 			if (Line < 0) {
 				Line = 0;
@@ -1792,7 +1792,7 @@ void TEditText::KeyPress(int Key)
 			Start = LineStart(Line);
 			Cursor = MaxPosition <= Start + Fitting ? MaxPosition : Start + Fitting;
 			break;
-		case 0x115:
+		case KEY_PAGE_DOWN:
 			Line += VisibleLines;
 			if (Line >= Lines) {
 				Line = Lines - 1;
@@ -2137,9 +2137,9 @@ bool THorizontalScrollBarRange::MouseWheel(int x, int y, int Code)
 void THorizontalScrollBarRange::KeyPress(int Key)
 {
 	if (Enabled) {
-		if (Key == 0x10d)
+		if (Key == KEY_LEFT)
 			Value -= ButtonRange;
-		else if (Key == 0x10e)
+		else if (Key == KEY_RIGHT)
 			Value += ButtonRange;
 		Callback.Send();
 		Limit(&Value, Min, Max);
@@ -2371,9 +2371,9 @@ bool TScrollBarRange::MouseWheel(int x, int y, int Code)
 void TScrollBarRange::KeyPress(int Key)
 {
 	if (Enabled) {
-		if (Key == 0x10c)
+		if (Key == KEY_UP)
 			Value -= ButtonRange;
-		else if (Key == 0x10f)
+		else if (Key == KEY_DOWN)
 			Value += ButtonRange;
 		Limit(&Value, Min, Max);
 		Arrange();
@@ -2568,12 +2568,12 @@ bool TListBox::MouseWheel(int x, int y, int Code)
 // the edit and the other keys go to the edit line.
 void TListBox::KeyPress(int _Key)
 {
-	const int Code = _Key & 0x1ff;
-	if (Code == 0x10c) {
+	const int Code = _Key & KEY_CODE_MASK;
+	if (Code == KEY_UP) {
 		if (Editing)
 			StopEdit();
 		Selected = Selected - 1;
-	} else if (Code == 0x10f) {
+	} else if (Code == KEY_DOWN) {
 		if (Editing)
 			StopEdit();
 		Selected = Selected + 1;
@@ -2587,7 +2587,7 @@ void TListBox::KeyPress(int _Key)
 				}
 			}
 		}
-	} else if (Code == 0x0d) {
+	} else if (Code == KEY_RETURN) {
 		StopEdit();
 	} else {
 		EditLine->KeyPress(_Key);

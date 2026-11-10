@@ -611,13 +611,13 @@ void TDialog::Arrange()
 // 0x46d220, line 831
 void TDialog::KeyPress(int Key)
 {
-	if (Key == 13) {
+	if (Key == KEY_RETURN) {
 		if (OkButton != nullptr
 			&& !(OkCallback.Event == NoCallback.Event && OkCallback.Receiver == NoCallback.Receiver)) {
 			OkCallback.Send();
 			return;
 		}
-	} else if (Key == 27) {
+	} else if (Key == KEY_ESCAPE) {
 		CancelCallback.Send();
 		return;
 	}
@@ -672,22 +672,22 @@ void TDialog::HandleEvent([[maybe_unused]] int Event)
 // 0x46db80, line 915
 void TQuestionLabel::KeyPress(int Key)
 {
-	if (Key == 13 || Key == 'y' || Key == 'Y')
+	if (Key == KEY_RETURN || Key == 'y' || Key == 'Y')
 		YesCallback.Send();
-	if (Key == 27 || Key == 'n' || Key == 'N')
+	if (Key == KEY_ESCAPE || Key == 'n' || Key == 'N')
 		NoAnswerCallback.Send();
 }
 
 // 0x46dd40, line 952
 void TLogoutLabel::KeyPress(int Key)
 {
-	if (Key == 13 || Key == 'l' || Key == 'L') {
+	if (Key == KEY_RETURN || Key == 'l' || Key == 'L') {
 		LogoutCallback.Send();
 		SetActionState(ACTIONSTATE_NONE);
 	}
 	if (Key == 'e' || Key == 'E')
 		ExitCallback.Send();
-	if (Key == 27 || Key == 'c' || Key == 'C')
+	if (Key == KEY_ESCAPE || Key == 'c' || Key == 'C')
 		SetActionState(ACTIONSTATE_NONE);
 }
 
@@ -821,9 +821,9 @@ TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 // 0x46f160, lines 1183-1187
 void TLoginDialog::KeyPress(int Key)
 {
-	if (Key == 13) {
+	if (Key == KEY_RETURN) {
 		HandleEvent(1);
-	} else if (Key == 27) {
+	} else if (Key == KEY_ESCAPE) {
 		HandleEvent(EVENT_CANCEL);
 	} else {
 		TEditLine *FocusEdit = FocusGroup->Active;
@@ -927,9 +927,9 @@ void TCharacterListDialog::PositionChanged()
 // SetTimeout starts it again.
 void TCharacterListDialog::KeyPress(int Key)
 {
-	if (Key == 13) {
+	if (Key == KEY_RETURN) {
 		HandleEvent(1);
-	} else if (Key == 27) {
+	} else if (Key == KEY_ESCAPE) {
 		HandleEvent(EVENT_CANCEL);
 	} else {
 		Timer.reset();
@@ -1009,24 +1009,24 @@ void TMoveObjectsDialog::Draw(int Surface, int x, int y)
 // in a list.
 void TMoveObjectsDialog::KeyPress(int Key)
 {
-	if (Key == 13) {
+	if (Key == KEY_RETURN) {
 		HandleEvent(1);
-	} else if (Key == 27) {
+	} else if (Key == KEY_ESCAPE) {
 		HandleEvent(EVENT_CANCEL);
 	} else if (Key >= '0' && Key <= '9') {
 		ScrollBar->Range->SetValue(LastDigit * 10 + Key - '0');
 		LastDigit = Key - '0';
-	} else if (Key == 0x114) {
+	} else if (Key == KEY_PAGE_UP) {
 		ScrollBar->Range->SetValue(ScrollBar->Range->Value + 10);
-	} else if (Key == 0x115) {
+	} else if (Key == KEY_PAGE_DOWN) {
 		ScrollBar->Range->SetValue(ScrollBar->Range->Value - 10);
-	} else if (Key == 0x112) {
+	} else if (Key == KEY_HOME) {
 		ScrollBar->Range->SetValue(ScrollBar->Range->Max);
-	} else if (Key == 0x113) {
+	} else if (Key == KEY_END) {
 		ScrollBar->Range->SetValue(1);
-	} else if (Key == 0x10c) {
+	} else if (Key == KEY_UP) {
 		ScrollBar->Range->SetValue(ScrollBar->Range->Value + 1);
-	} else if (Key == 0x10f) {
+	} else if (Key == KEY_DOWN) {
 		ScrollBar->Range->SetValue(ScrollBar->Range->Value - 1);
 	} else {
 		ScrollBar->KeyPress(Key);
@@ -1630,12 +1630,12 @@ TNewChannelDialog::TNewChannelDialog(int _NumberOfChannels, const int *_ChannelI
 // button takes Return first.
 void TNewChannelDialog::KeyPress(int Key)
 {
-	if (Key == 13) {
+	if (Key == KEY_RETURN) {
 		if (strlen(NameEdit->Text.get()) != 0)
 			HandleEvent(EVENT_NEW_CHANNEL_CLOSE);
 		else
 			HandleEvent(EVENT_NEW_CHANNEL_JOIN);
-	} else if (Key == 27) {
+	} else if (Key == KEY_ESCAPE) {
 		HandleEvent(EVENT_CANCEL);
 	} else {
 		NameEdit->KeyPress(Key);
@@ -1693,9 +1693,9 @@ TPrivateChannelDialog::TPrivateChannelDialog(bool _Exclude)
 // 0x474110, line 2392
 void TPrivateChannelDialog::KeyPress(int Key)
 {
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		HandleEvent(1);
-	else if (Key == 27)
+	else if (Key == KEY_ESCAPE)
 		HandleEvent(EVENT_CANCEL);
 	else
 		NameEdit->KeyPress(Key);
@@ -1735,9 +1735,9 @@ TReportDialog::TReportDialog()
 // 0x474760, line 2565
 void TReportDialog::KeyPress(int Key)
 {
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		HandleEvent(1);
-	else if (Key == 27)
+	else if (Key == KEY_ESCAPE)
 		HandleEvent(EVENT_CANCEL);
 	else
 		TextEdit->KeyPress(Key);
@@ -1775,9 +1775,9 @@ TAddBuddyDialog::TAddBuddyDialog()
 // 0x474dd0, line 2621
 void TAddBuddyDialog::KeyPress(int Key)
 {
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		HandleEvent(1);
-	else if (Key == 27)
+	else if (Key == KEY_ESCAPE)
 		HandleEvent(EVENT_CANCEL);
 	else
 		NameEdit->KeyPress(Key);
@@ -1912,9 +1912,9 @@ THelpDialog::THelpDialog(void (*_OpenURL)(const char *URL))
 // 0x476770, line 2882
 void THelpDialog::KeyPress(int Key)
 {
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		HandleEvent(1);
-	else if (Key == 27)
+	else if (Key == KEY_ESCAPE)
 		HandleEvent(EVENT_CANCEL);
 }
 
@@ -1979,9 +1979,9 @@ THintsDialog::THintsDialog()
 // 0x476fb0, line 2959
 void THintsDialog::KeyPress(int Key)
 {
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		HandleEvent(1);
-	else if (Key == 27)
+	else if (Key == KEY_ESCAPE)
 		HandleEvent(EVENT_CANCEL);
 	else
 		ListBox->KeyPress(Key);
@@ -2082,9 +2082,9 @@ TRuleViolationDialog::TRuleViolationDialog(const char *Name, TTalkLine *Statemen
 // 0x4774d0, line 3080
 void TRuleViolationDialog::KeyPress(int Key)
 {
-	if (Key == 13) {
+	if (Key == KEY_RETURN) {
 		HandleEvent(1);
-	} else if (Key == 27) {
+	} else if (Key == KEY_ESCAPE) {
 		HandleEvent(EVENT_CANCEL);
 	} else if (FocusGroup->Active != nullptr) {
 		FocusGroup->Active->KeyPress(Key);
@@ -2228,9 +2228,9 @@ TEditMarkDialog::TEditMarkDialog(TCoordinate *_Coordinate, TMark *_Mark)
 // 0x478200, line 3268
 void TEditMarkDialog::KeyPress(int Key)
 {
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		HandleEvent(1);
-	else if (Key == 27)
+	else if (Key == KEY_ESCAPE)
 		HandleEvent(EVENT_CANCEL);
 	else
 		TextEdit->KeyPress(Key);
@@ -2313,9 +2313,9 @@ TOptionsDialog::TOptionsDialog()
 // 0x478e50, line 3380
 void TOptionsDialog::KeyPress(int Key)
 {
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		HandleEvent(1);
-	else if (Key == 27)
+	else if (Key == KEY_ESCAPE)
 		HandleEvent(EVENT_CANCEL);
 }
 
@@ -2474,17 +2474,17 @@ TGraphicsOptionsDialog::TGraphicsOptionsDialog(void (*_OpenURL)(const char *URL)
 void TGraphicsOptionsDialog::KeyPress(int Key)
 {
 	switch (Key) {
-	case 13:
+	case KEY_RETURN:
 		HandleEvent(1);
 		break;
-	case 27:
+	case KEY_ESCAPE:
 		HandleEvent(EVENT_CANCEL);
 		break;
-	case 0x10c:
-		ResolutionList->KeyPress(0x10c);
+	case KEY_UP:
+		ResolutionList->KeyPress(KEY_UP);
 		break;
-	case 0x10f:
-		ResolutionList->KeyPress(0x10f);
+	case KEY_DOWN:
+		ResolutionList->KeyPress(KEY_DOWN);
 		break;
 	default:
 		break;
@@ -2815,17 +2815,17 @@ void THotkeyDialog::UpdateLine(int Number)
 void THotkeyDialog::KeyPress(int Key)
 {
 	switch (Key) {
-	case 13:
+	case KEY_RETURN:
 		HandleEvent(1);
 		break;
-	case 27:
+	case KEY_ESCAPE:
 		HandleEvent(EVENT_CANCEL);
 		break;
-	case 0x10c:
-		ListBox->KeyPress(0x10c);
+	case KEY_UP:
+		ListBox->KeyPress(KEY_UP);
 		break;
-	case 0x10f:
-		ListBox->KeyPress(0x10f);
+	case KEY_DOWN:
+		ListBox->KeyPress(KEY_DOWN);
 		break;
 	default:
 		if (Selected != -1) {

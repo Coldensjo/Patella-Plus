@@ -137,8 +137,8 @@ protected:
 	void OnClose() override
 	{
 		try {
-			RemoveHotkey(0x44e);
-			RemoveHotkey(0x457);
+			RemoveHotkey(KEY_CONTROL | 'N');
+			RemoveHotkey(KEY_CONTROL | 'W');
 		} catch (...) {
 			CloseWhileUnwinding([this] { TWindow::OnClose(); });
 			throw;

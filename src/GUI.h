@@ -239,6 +239,49 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, as Obje
 	// The shared bit where a test cannot tell the two meanings apart: a window's LeftButtonUp, and the RightButtonUp such
 	// a LeftButtonUp passes a release with flags on to, act alike for Shift held and for both buttons released.
 	SHIFT_OR_BOTH_BUTTONS = KEY_SHIFT | BOTH_BUTTONS_RELEASED,
+
+	// The key codes. Below the modifier flags a Key holds a character of the client's code page (written as the
+	// character: Control with I is KEY_CONTROL | 'I') or one of these codes. The values are platform/KeyInput.h's, whose
+	// TranslateKey and KeyCharacter make them; the original's names of them are not known, these are the keys' names. A
+	// hotkey's letter is upper case (CheckHotkey makes it so before it looks), a letter compared with KeyPress's Key is
+	// the case the key gave: with Control and without Alt lower case (CMainFrame::OnChar). In the flags' enumeration,
+	// because C++26 does not allow a bitwise operation between the enumerators of two (GCC refuses KEY_SHIFT | KEY_TAB).
+	// The control characters of their keys:
+	KEY_BACKSPACE = patella::platform::KeyCodeBackspace,
+	KEY_TAB = patella::platform::KeyCodeTab,
+	KEY_RETURN = patella::platform::KeyCodeReturn, // also the keypad's Enter
+	KEY_ESCAPE = patella::platform::KeyCodeEscape,
+	// The keys without a character. Every code is KEY_F1 or above, every character below it.
+	KEY_F1 = patella::platform::KeyCodeF1,
+	KEY_F2 = patella::platform::KeyCodeF2,
+	KEY_F3 = patella::platform::KeyCodeF3,
+	KEY_F4 = patella::platform::KeyCodeF4,
+	KEY_F5 = patella::platform::KeyCodeF5,
+	KEY_F6 = patella::platform::KeyCodeF6,
+	KEY_F7 = patella::platform::KeyCodeF7,
+	KEY_F8 = patella::platform::KeyCodeF8,
+	KEY_F9 = patella::platform::KeyCodeF9,
+	KEY_F10 = patella::platform::KeyCodeF10,
+	KEY_F11 = patella::platform::KeyCodeF11,
+	KEY_F12 = patella::platform::KeyCodeF12,
+	// The navigation keys, the keypad's too where it has no code of its own.
+	KEY_UP = patella::platform::KeyCodeUp,
+	KEY_LEFT = patella::platform::KeyCodeLeft,
+	KEY_RIGHT = patella::platform::KeyCodeRight,
+	KEY_DOWN = patella::platform::KeyCodeDown,
+	KEY_INSERT = patella::platform::KeyCodeInsert,
+	KEY_DELETE = patella::platform::KeyCodeDelete,
+	KEY_HOME = patella::platform::KeyCodeHome,
+	KEY_END = patella::platform::KeyCodeEnd,
+	KEY_PAGE_UP = patella::platform::KeyCodePageUp,
+	KEY_PAGE_DOWN = patella::platform::KeyCodePageDown,
+	// The keypad's diagonal keys, which TMainWindow::KeyPress walks diagonally with.
+	KEY_PAD_END = patella::platform::KeyCodePadEnd,            // keypad 1
+	KEY_PAD_PAGE_DOWN = patella::platform::KeyCodePadPageDown, // keypad 3
+	KEY_PAD_HOME = patella::platform::KeyCodePadHome,          // keypad 7
+	KEY_PAD_PAGE_UP = patella::platform::KeyCodePadPageUp,     // keypad 9
+	// The mask of a Key's character or code, without the modifier flags.
+	KEY_CODE_MASK = 0x1ff,
 };
 
 // --- Timers ---------------------------------------------------------------

@@ -350,7 +350,7 @@ bool TContextMenu::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y,
 // 0x43f030, line 460. Escape closes the menu.
 void TContextMenu::KeyPress(int Key)
 {
-	if (Key == 27)
+	if (Key == KEY_ESCAPE)
 		SetActionState(ACTIONSTATE_NONE);
 }
 

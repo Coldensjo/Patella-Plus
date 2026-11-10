@@ -74,8 +74,8 @@ TMainWindow::TMainWindow(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
 	ChangeMode(false);
-	AddHotkey(0x446, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
-	AddHotkey(0x80d, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	AddHotkey(KEY_CONTROL | 'F', TCallback(this, EVENT_TOGGLE_FULLSCREEN));
+	AddHotkey(KEY_ALT | KEY_RETURN, TCallback(this, EVENT_TOGGLE_FULLSCREEN));
 }
 
 // 0x4ac010. Its work is the close since issue #108.
@@ -205,18 +205,18 @@ void TMainWindow::KeyPress(int Key)
 	if (GetConnectionState() != CONNECTION_IN_GAME)
 		return;
 	switch (Key) {
-	case 0x10c: Walk(0, -1, false); break;
-	case 0x10d: Walk(-1, 0, false); break;
-	case 0x10e: Walk(1, 0, false); break;
-	case 0x10f: Walk(0, 1, false); break;
-	case 0x116: Walk(-1, 1, true); break;
-	case 0x117: Walk(1, 1, true); break;
-	case 0x118: Walk(-1, -1, true); break;
-	case 0x119: Walk(1, -1, true); break;
-	case 0x50c: SendTurnNorth(); break;
-	case 0x50d: SendTurnWest(); break;
-	case 0x50e: SendTurnEast(); break;
-	case 0x50f: SendTurnSouth(); break;
+	case KEY_UP: Walk(0, -1, false); break;
+	case KEY_LEFT: Walk(-1, 0, false); break;
+	case KEY_RIGHT: Walk(1, 0, false); break;
+	case KEY_DOWN: Walk(0, 1, false); break;
+	case KEY_PAD_END: Walk(-1, 1, true); break;
+	case KEY_PAD_PAGE_DOWN: Walk(1, 1, true); break;
+	case KEY_PAD_HOME: Walk(-1, -1, true); break;
+	case KEY_PAD_PAGE_UP: Walk(1, -1, true); break;
+	case KEY_CONTROL | KEY_UP: SendTurnNorth(); break;
+	case KEY_CONTROL | KEY_LEFT: SendTurnWest(); break;
+	case KEY_CONTROL | KEY_RIGHT: SendTurnEast(); break;
+	case KEY_CONTROL | KEY_DOWN: SendTurnSouth(); break;
 	default:
 		Console->KeyPress(Key);
 		break;
@@ -488,33 +488,33 @@ void TMainWindow::ChangeMode(bool InGame)
 		// Ctrl+Z reports a bug, Ctrl+R a rule violation, Ctrl+Y opens the
 		// gamemaster dialog, Ctrl+H the hints, Ctrl+T the channel 7 and
 		// Escape cancels the attack and the walk.
-		AddHotkey(0x44c, TCallback(this, EVENT_LOGOUT));
-		AddHotkey(0x451, TCallback(this, EVENT_LOGOUT));
-		AddHotkey(0x447, TCallback(this, EVENT_CHARACTER_LIST));
-		AddHotkey(0x453, TCallback(this, EVENT_TOGGLE_SKILLS));
-		AddHotkey(0x442, TCallback(this, EVENT_TOGGLE_BATTLE));
-		AddHotkey(0x450, TCallback(this, EVENT_TOGGLE_VIP));
-		AddHotkey(0x45a, TCallback(this, EVENT_BUG_REPORT));
-		AddHotkey(0x452, TCallback(this, EVENT_REPORT));
-		AddHotkey(0x459, TCallback(this, EVENT_RULE_VIOLATION));
-		AddHotkey(0x448, TCallback(this, EVENT_HELP_MODE));
-		AddHotkey(0x454, TCallback(this, EVENT_TUTOR_HELP));
-		AddHotkey(0x1b, TCallback(this, EVENT_STOP));
+		AddHotkey(KEY_CONTROL | 'L', TCallback(this, EVENT_LOGOUT));
+		AddHotkey(KEY_CONTROL | 'Q', TCallback(this, EVENT_LOGOUT));
+		AddHotkey(KEY_CONTROL | 'G', TCallback(this, EVENT_CHARACTER_LIST));
+		AddHotkey(KEY_CONTROL | 'S', TCallback(this, EVENT_TOGGLE_SKILLS));
+		AddHotkey(KEY_CONTROL | 'B', TCallback(this, EVENT_TOGGLE_BATTLE));
+		AddHotkey(KEY_CONTROL | 'P', TCallback(this, EVENT_TOGGLE_VIP));
+		AddHotkey(KEY_CONTROL | 'Z', TCallback(this, EVENT_BUG_REPORT));
+		AddHotkey(KEY_CONTROL | 'R', TCallback(this, EVENT_REPORT));
+		AddHotkey(KEY_CONTROL | 'Y', TCallback(this, EVENT_RULE_VIOLATION));
+		AddHotkey(KEY_CONTROL | 'H', TCallback(this, EVENT_HELP_MODE));
+		AddHotkey(KEY_CONTROL | 'T', TCallback(this, EVENT_TUTOR_HELP));
+		AddHotkey(KEY_ESCAPE, TCallback(this, EVENT_STOP));
 	} else {
 		StartWindow = new TStartWindow;
 		InsertChild(StartWindow);
-		RemoveHotkey(0x44c);
-		RemoveHotkey(0x451);
-		RemoveHotkey(0x447);
-		RemoveHotkey(0x453);
-		RemoveHotkey(0x442);
-		RemoveHotkey(0x450);
-		RemoveHotkey(0x45a);
-		RemoveHotkey(0x452);
-		RemoveHotkey(0x459);
-		RemoveHotkey(0x448);
-		RemoveHotkey(0x454);
-		RemoveHotkey(0x1b);
+		RemoveHotkey(KEY_CONTROL | 'L');
+		RemoveHotkey(KEY_CONTROL | 'Q');
+		RemoveHotkey(KEY_CONTROL | 'G');
+		RemoveHotkey(KEY_CONTROL | 'S');
+		RemoveHotkey(KEY_CONTROL | 'B');
+		RemoveHotkey(KEY_CONTROL | 'P');
+		RemoveHotkey(KEY_CONTROL | 'Z');
+		RemoveHotkey(KEY_CONTROL | 'R');
+		RemoveHotkey(KEY_CONTROL | 'Y');
+		RemoveHotkey(KEY_CONTROL | 'H');
+		RemoveHotkey(KEY_CONTROL | 'T');
+		RemoveHotkey(KEY_ESCAPE);
 	}
 	SetSize(Width, Height);
 	SetConsoleActive(patella::bridge::GUI().ModalWindow == nullptr);

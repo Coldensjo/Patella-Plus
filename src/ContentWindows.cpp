@@ -289,14 +289,14 @@ TAutomapWindow::TAutomapWindow()
 	SetChildPosition(CompassRose, SkinProperties().AutomapCentreButtonAndCompassRose.width, SkinProperties().AutomapCentreButtonAndCompassRose.height);
 	CompassRose->SetSize(Skins()[SKIN_COMPASS_ROSE].width, Skins()[SKIN_COMPASS_ROSE].height);
 	Arrange();
-	AddHotkey(0x912, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
-	AddHotkey(0x913, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
-	AddHotkey(0x914, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
-	AddHotkey(0x915, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
-	AddHotkey(0x90c, TCallback(this, EVENT_AUTOMAP_NORTH));
-	AddHotkey(0x90d, TCallback(this, EVENT_AUTOMAP_WEST));
-	AddHotkey(0x90e, TCallback(this, EVENT_AUTOMAP_EAST));
-	AddHotkey(0x90f, TCallback(this, EVENT_AUTOMAP_SOUTH));
+	AddHotkey(KEY_ALT | KEY_HOME, TCallback(this, EVENT_AUTOMAP_ZOOM_OUT));
+	AddHotkey(KEY_ALT | KEY_END, TCallback(this, EVENT_AUTOMAP_ZOOM_IN));
+	AddHotkey(KEY_ALT | KEY_PAGE_UP, TCallback(this, EVENT_AUTOMAP_FLOOR_UP));
+	AddHotkey(KEY_ALT | KEY_PAGE_DOWN, TCallback(this, EVENT_AUTOMAP_FLOOR_DOWN));
+	AddHotkey(KEY_ALT | KEY_UP, TCallback(this, EVENT_AUTOMAP_NORTH));
+	AddHotkey(KEY_ALT | KEY_LEFT, TCallback(this, EVENT_AUTOMAP_WEST));
+	AddHotkey(KEY_ALT | KEY_RIGHT, TCallback(this, EVENT_AUTOMAP_EAST));
+	AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
 }
 
 // 0x426c40, line 406 (deleting destructor 0x436e80). Its work is the close
@@ -312,14 +312,14 @@ void TAutomapWindow::OnClose()
 {
 	try {
 		SetAutomapZoom(Zoom);
-		RemoveHotkey(0x912);
-		RemoveHotkey(0x913);
-		RemoveHotkey(0x914);
-		RemoveHotkey(0x915);
-		RemoveHotkey(0x90c);
-		RemoveHotkey(0x90d);
-		RemoveHotkey(0x90e);
-		RemoveHotkey(0x90f);
+		RemoveHotkey(KEY_ALT | KEY_HOME);
+		RemoveHotkey(KEY_ALT | KEY_END);
+		RemoveHotkey(KEY_ALT | KEY_PAGE_UP);
+		RemoveHotkey(KEY_ALT | KEY_PAGE_DOWN);
+		RemoveHotkey(KEY_ALT | KEY_UP);
+		RemoveHotkey(KEY_ALT | KEY_LEFT);
+		RemoveHotkey(KEY_ALT | KEY_RIGHT);
+		RemoveHotkey(KEY_ALT | KEY_DOWN);
 	} catch (...) {
 		CloseWhileUnwinding([this] { TContentWindow::OnClose(); });
 		throw;

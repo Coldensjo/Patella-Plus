@@ -1228,12 +1228,12 @@ TConsoleWindow::TConsoleWindow()
 	InsertChild(MoveRightButton);
 	MoveLeftButton = new TSkinButton(0, 0, SKIN_TABS_LEFT_BUTTON_UP, SKIN_TABS_LEFT_BUTTON_DOWN, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
 	InsertChild(MoveLeftButton);
-	AddHotkey(0x449, TCallback(this, EVENT_IGNORE_LIST));
-	AddHotkey(0x44f, TCallback(this, EVENT_REQUEST_CHANNELS));
-	AddHotkey(0x445, TCallback(this, EVENT_CLOSE_CHANNEL));
-	AddHotkey(0x44d, TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
-	AddHotkey(0x44b, TCallback(this, EVENT_OPTIONS_HOTKEYS));
-	AddHotkey(0x444, TCallback(this, EVENT_DEFAULT_CHANNEL));
+	AddHotkey(KEY_CONTROL | 'I', TCallback(this, EVENT_IGNORE_LIST));
+	AddHotkey(KEY_CONTROL | 'O', TCallback(this, EVENT_REQUEST_CHANNELS));
+	AddHotkey(KEY_CONTROL | 'E', TCallback(this, EVENT_CLOSE_CHANNEL));
+	AddHotkey(KEY_CONTROL | 'M', TCallback(this, EVENT_TOGGLE_SERVER_MESSAGES));
+	AddHotkey(KEY_CONTROL | 'K', TCallback(this, EVENT_OPTIONS_HOTKEYS));
+	AddHotkey(KEY_CONTROL | 'D', TCallback(this, EVENT_DEFAULT_CHANNEL));
 	SwitchTime = GetActionNumber() + 50;
 	int *Channels;
 	const int Count = GetOpenChannels(&Channels);
@@ -1283,12 +1283,12 @@ void TConsoleWindow::OnClose()
 			MoveRightButton->Close();
 		if (!IsChild(MoveLeftButton) && MoveLeftButton != nullptr)
 			MoveLeftButton->Close();
-		RemoveHotkey(0x449);
-		RemoveHotkey(0x44f);
-		RemoveHotkey(0x445);
-		RemoveHotkey(0x44d);
-		RemoveHotkey(0x44b);
-		RemoveHotkey(0x444);
+		RemoveHotkey(KEY_CONTROL | 'I');
+		RemoveHotkey(KEY_CONTROL | 'O');
+		RemoveHotkey(KEY_CONTROL | 'E');
+		RemoveHotkey(KEY_CONTROL | 'M');
+		RemoveHotkey(KEY_CONTROL | 'K');
+		RemoveHotkey(KEY_CONTROL | 'D');
 	} catch (...) {
 		CloseWhileUnwinding([this] { TWindow::OnClose(); });
 		throw;
@@ -1393,16 +1393,16 @@ bool TConsoleWindow::HelpMouseMove(int x, int y)
 // through the sent lines (one step below the last stores the edit line).
 void TConsoleWindow::KeyPress(int Key)
 {
-	if (Key == 9)
+	if (Key == KEY_TAB)
 		HandleEvent(EVENT_NEXT_CHANNEL);
-	if (Key == 0x209)
+	if (Key == (KEY_SHIFT | KEY_TAB))
 		HandleEvent(EVENT_PREVIOUS_CHANNEL);
 	TComponent *Selection;
 	if (CurrentConsole->TextWindow->HasSelection())
 		Selection = CurrentConsole->TextWindow;
 	else
 		Selection = Input->HasSelection() ? Input : nullptr;
-	if (Key == 0x461) {
+	if (Key == (KEY_CONTROL | 'a')) {
 		TTextWindow *TextWindow = CurrentConsole->TextWindow;
 		TextWindow->SelectionStartLine = -1;
 		TextWindow->SelectionStartOffset = -1;
@@ -1417,15 +1417,15 @@ void TConsoleWindow::KeyPress(int Key)
 	}
 	if (Selection != nullptr) {
 		bool Done = false;
-		if (Key == 0x510 || Key == 0x463) {
+		if (Key == (KEY_CONTROL | KEY_INSERT) || Key == (KEY_CONTROL | 'c')) {
 			Selection->HandleEvent(EVENT_COPY);
 			Done = true;
 		}
-		if (Key == 0x311 || Key == 0x478) {
+		if (Key == (KEY_SHIFT | KEY_DELETE) || Key == (KEY_CONTROL | 'x')) {
 			Selection->HandleEvent(EVENT_CUT);
 			Done = true;
 		}
-		if (Key == 0x511) {
+		if (Key == (KEY_CONTROL | KEY_DELETE)) {
 			Selection->HandleEvent(EVENT_DELETE);
 			return;
 		}
@@ -1437,30 +1437,30 @@ void TConsoleWindow::KeyPress(int Key)
 	if (!TextBuffer->CanWrite())
 		return;
 	Input->KeyPress(Key);
-	if (Key == 13)
+	if (Key == KEY_RETURN)
 		SendInput();
 	int Number;
-	switch (Key & 0x1ff) {
-	case 0x100: Number = 0; break;
-	case 0x101: Number = 1; break;
-	case 0x102: Number = 2; break;
-	case 0x103: Number = 3; break;
-	case 0x104: Number = 4; break;
-	case 0x105: Number = 5; break;
-	case 0x106: Number = 6; break;
-	case 0x107: Number = 7; break;
-	case 0x108: Number = 8; break;
-	case 0x109: Number = 9; break;
-	case 0x10a: Number = 10; break;
-	case 0x10b: Number = 11; break;
+	switch (Key & KEY_CODE_MASK) {
+	case KEY_F1: Number = 0; break;
+	case KEY_F2: Number = 1; break;
+	case KEY_F3: Number = 2; break;
+	case KEY_F4: Number = 3; break;
+	case KEY_F5: Number = 4; break;
+	case KEY_F6: Number = 5; break;
+	case KEY_F7: Number = 6; break;
+	case KEY_F8: Number = 7; break;
+	case KEY_F9: Number = 8; break;
+	case KEY_F10: Number = 9; break;
+	case KEY_F11: Number = 10; break;
+	case KEY_F12: Number = 11; break;
 	default: {
 		bool Moved = false;
-		const int Code = Key % 0x200;
-		if (Code == 0x10f && HistoryPosition > -2) {
+		const int Code = Key % (KEY_CODE_MASK + 1);
+		if (Code == KEY_DOWN && HistoryPosition > -2) {
 			HistoryPosition--;
 			Moved = true;
 		}
-		if (Code == 0x10c && HistoryPosition < History->lines - 1)
+		if (Code == KEY_UP && HistoryPosition < History->lines - 1)
 			HistoryPosition++;
 		else if (!Moved)
 			return;

@@ -30,6 +30,42 @@ inline constexpr int KeyFlagShift = 0x200;
 inline constexpr int KeyFlagControl = 0x400;
 inline constexpr int KeyFlagAlt = 0x800;
 
+// The client's key codes, which a Key holds below the modifier flags where it is not a printable character. First the
+// control characters Windows' TranslateMessage makes of Back, Tab, Return and Escape (KeyCharacter; TranslateKey gives
+// Return's for Alt+Return), then CMainFrame::TranslateKey's codes of F1-F12 (VK_F1 (0x70) + 0x90 and on) and of the
+// navigation keys. The keypad's 1, 3, 7 and 9 have codes of their own, its other navigation keys the dedicated keys'.
+// The original's names of the codes are not known: these are the keys' names, as TKey's.
+inline constexpr int KeyCodeBackspace = 8;
+inline constexpr int KeyCodeTab = 9;
+inline constexpr int KeyCodeReturn = 13;
+inline constexpr int KeyCodeEscape = 27;
+inline constexpr int KeyCodeF1 = 0x100;
+inline constexpr int KeyCodeF2 = 0x101;
+inline constexpr int KeyCodeF3 = 0x102;
+inline constexpr int KeyCodeF4 = 0x103;
+inline constexpr int KeyCodeF5 = 0x104;
+inline constexpr int KeyCodeF6 = 0x105;
+inline constexpr int KeyCodeF7 = 0x106;
+inline constexpr int KeyCodeF8 = 0x107;
+inline constexpr int KeyCodeF9 = 0x108;
+inline constexpr int KeyCodeF10 = 0x109;
+inline constexpr int KeyCodeF11 = 0x10a;
+inline constexpr int KeyCodeF12 = 0x10b;
+inline constexpr int KeyCodeUp = 0x10c;
+inline constexpr int KeyCodeLeft = 0x10d;
+inline constexpr int KeyCodeRight = 0x10e;
+inline constexpr int KeyCodeDown = 0x10f;
+inline constexpr int KeyCodeInsert = 0x110;
+inline constexpr int KeyCodeDelete = 0x111;
+inline constexpr int KeyCodeHome = 0x112;
+inline constexpr int KeyCodeEnd = 0x113;
+inline constexpr int KeyCodePageUp = 0x114;
+inline constexpr int KeyCodePageDown = 0x115;
+inline constexpr int KeyCodePadEnd = 0x116;      // keypad 1
+inline constexpr int KeyCodePadPageDown = 0x117; // keypad 3
+inline constexpr int KeyCodePadHome = 0x118;     // keypad 7
+inline constexpr int KeyCodePadPageUp = 0x119;   // keypad 9
+
 // The keys the client tells apart: the virtual keys of CMainFrame::TranslateKey and the keys TranslateMessage makes
 // control characters of. The keypad's navigation keys are their own keys (Windows gives them the navigation keys'
 // virtual keys without the extended flag while NumLock is off, the digits' while it is on). Every other key is Other.
@@ -107,32 +143,32 @@ struct TKeyEvent {
 	case TKey::Shift: return KeyFlagShift;
 	case TKey::Control: return KeyFlagControl;
 	case TKey::Alt: return KeyFlagAlt;
-	case TKey::PageUp: return 0x114;
-	case TKey::PageDown: return 0x115;
-	case TKey::End: return 0x113;
-	case TKey::Home: return 0x112;
-	case TKey::Left: return 0x10d;
-	case TKey::Up: return 0x10c;
-	case TKey::Right: return 0x10e;
-	case TKey::Down: return 0x10f;
-	case TKey::Insert: return 0x110;
-	case TKey::Delete: return 0x111;
-	case TKey::PadPageUp: return Pad ? 0x119 : 0;
-	case TKey::PadPageDown: return Pad ? 0x117 : 0;
-	case TKey::PadEnd: return Pad ? 0x116 : 0;
-	case TKey::PadHome: return Pad ? 0x118 : 0;
-	case TKey::PadLeft: return Pad ? 0x10d : 0;
-	case TKey::PadUp: return Pad ? 0x10c : 0;
-	case TKey::PadRight: return Pad ? 0x10e : 0;
-	case TKey::PadDown: return Pad ? 0x10f : 0;
-	case TKey::PadInsert: return Pad ? 0x110 : 0;
-	case TKey::PadDelete: return Pad ? 0x111 : 0;
+	case TKey::PageUp: return KeyCodePageUp;
+	case TKey::PageDown: return KeyCodePageDown;
+	case TKey::End: return KeyCodeEnd;
+	case TKey::Home: return KeyCodeHome;
+	case TKey::Left: return KeyCodeLeft;
+	case TKey::Up: return KeyCodeUp;
+	case TKey::Right: return KeyCodeRight;
+	case TKey::Down: return KeyCodeDown;
+	case TKey::Insert: return KeyCodeInsert;
+	case TKey::Delete: return KeyCodeDelete;
+	case TKey::PadPageUp: return Pad ? KeyCodePadPageUp : 0;
+	case TKey::PadPageDown: return Pad ? KeyCodePadPageDown : 0;
+	case TKey::PadEnd: return Pad ? KeyCodePadEnd : 0;
+	case TKey::PadHome: return Pad ? KeyCodePadHome : 0;
+	case TKey::PadLeft: return Pad ? KeyCodeLeft : 0;
+	case TKey::PadUp: return Pad ? KeyCodeUp : 0;
+	case TKey::PadRight: return Pad ? KeyCodeRight : 0;
+	case TKey::PadDown: return Pad ? KeyCodeDown : 0;
+	case TKey::PadInsert: return Pad ? KeyCodeInsert : 0;
+	case TKey::PadDelete: return Pad ? KeyCodeDelete : 0;
 	case TKey::Return:
-	case TKey::PadEnter: return (KeyFlags & KeyFlagAlt) != 0 ? 13 : 0; // VK_RETURN
+	case TKey::PadEnter: return (KeyFlags & KeyFlagAlt) != 0 ? KeyCodeReturn : 0; // VK_RETURN
 	default: break;
 	}
 	if (Key.Key >= TKey::F1 && Key.Key <= TKey::F12)
-		return 0x100 + (static_cast<int>(Key.Key) - static_cast<int>(TKey::F1)); // VK_F1 (0x70) + 0x90
+		return KeyCodeF1 + (static_cast<int>(Key.Key) - static_cast<int>(TKey::F1)); // VK_F1 (0x70) + 0x90
 	return 0;
 }
 
@@ -147,10 +183,10 @@ struct TKeyEvent {
 	if (!Key.Control) {
 		switch (Key.Key) {
 		case TKey::Return:
-		case TKey::PadEnter: return 13;
-		case TKey::Escape: return 27;
-		case TKey::Tab: return 9;
-		case TKey::Backspace: return 8;
+		case TKey::PadEnter: return KeyCodeReturn;
+		case TKey::Escape: return KeyCodeEscape;
+		case TKey::Tab: return KeyCodeTab;
+		case TKey::Backspace: return KeyCodeBackspace;
 		default: return -1;
 		}
 	}
@@ -187,7 +223,7 @@ public:
 		const int Code = TranslateKey(Key, Value);
 		if (Code == KeyFlagShift || Code == KeyFlagControl || Code == KeyFlagAlt) {
 			Value |= Code;
-		} else if (Code == 0x103) {
+		} else if (Code == KeyCodeF4) {
 			if ((Value & KeyFlagAlt) != 0)
 				return TKeyAction{TKeyAction::TKind::Close, 0};
 		} else if (Code < 1) {
@@ -211,7 +247,7 @@ public:
 		if ((Value & KeyFlagControl) != 0 && (Value & KeyFlagAlt) == 0) {
 			if (Char == 0 || Char > 26)
 				return -1;
-			Char += 0x60;
+			Char += 'a' - 1;
 		} else if (Char > 255) {
 			return -1;
 		}

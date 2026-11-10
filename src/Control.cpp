@@ -551,7 +551,7 @@ void patella::TGUI::MouseWheel(int x, int y, int Direction)
 // 0x447e60, line 1086. Key 0x907 switches the frame rate display.
 void patella::TGUI::KeyPress(int Key)
 {
-	if (Key == 0x907) {
+	if (Key == (KEY_ALT | KEY_F8)) {
 		ShowFPS = !ShowFPS;
 		return;
 	}
