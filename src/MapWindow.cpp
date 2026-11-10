@@ -599,16 +599,16 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			int BarY = ny - 4;
 			if (CreatureInfo == 2) {
 				int BarX = nx - 14;
-				const int TextWidth = GetTextWidth(2, Creature->Name);
+				const int TextWidth = GetTextWidth(FONT_BORDERED, Creature->Name);
 				Limit(BarX, 1, Width - 28);
-				Limit(BarY, GetFontHeight(2) + 1, Height - GetFontHeight(2) - 5);
+				Limit(BarY, GetFontHeight(FONT_BORDERED) + 1, Height - GetFontHeight(FONT_BORDERED) - 5);
 				int TextX = BarX - TextWidth / 2 + 14;
-				const int TextY = BarY - GetFontHeight(2);
+				const int TextY = BarY - GetFontHeight(FONT_BORDERED);
 				Limit(TextX, 1, Width - TextWidth - 1);
 				GetSurface()->FillRectangle(Surface, TRect(BarX + x, BarY + y, 27, 4), TRGBColor(0, 0, 0));
 				GetSurface()->FillRectangle(Surface, TRect(BarX + x + 1, BarY + y + 1, Creature->Health / 4, 2),
 					NameColor);
-				PrintText(Surface, TextX + x, TextY + y, 2, NameColor, Creature->Name, 0);
+				PrintText(Surface, TextX + x, TextY + y, FONT_BORDERED, NameColor, Creature->Name, 0);
 			} else {
 				int BarX = nx - 14;
 				Limit(BarX, 1, Width - 28);
@@ -704,13 +704,13 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		TRGBColor Color;
 		GetTalkboxColor(&Color, Talkbox);
 		for (int Line = 0; Line < Lines; Line++)
-			PrintTextClipped(Surface, tx + x, Line * GetFontLineHeight(2) + ty + y, 2, Color,
+			PrintTextClipped(Surface, tx + x, Line * GetFontLineHeight(FONT_BORDERED) + ty + y, FONT_BORDERED, Color,
 				GetTalkboxLine(Talkbox, Line), Alignment, TRect(x, y, ScreenWidth, ScreenHeight));
 	}
 	if (GetStatusMessage() != nullptr) {
 		const int MessageWidth = Width, MessageHeight = Height;
-		const int Length = GetFittingTextLength(2, GetStatusMessage(), MessageWidth);
-		PrintTextPart(Surface, MessageWidth / 2 + x, MessageHeight - GetFontHeight(2) + y, 2,
+		const int Length = GetFittingTextLength(FONT_BORDERED, GetStatusMessage(), MessageWidth);
+		PrintTextPart(Surface, MessageWidth / 2 + x, MessageHeight - GetFontHeight(FONT_BORDERED) + y, FONT_BORDERED,
 			TRGBColor(255, 255, 255), GetStatusMessage(), Length, 1);
 	}
 
@@ -742,9 +742,9 @@ void TMapWindow::Draw(int Surface, int x, int y)
 					tx = tx * Width / 480;
 					ty = ty * Height / 352;
 				}
-				Limit(tx, GetTextWidth(2, Text) / 2, Width - GetTextWidth(2, Text) / 2);
-				Limit(ty, 0, Height - GetFontHeight(2));
-				PrintText(Surface, tx + x, ty + y, 2, TRGBColor(Color), Text, 1);
+				Limit(tx, GetTextWidth(FONT_BORDERED, Text) / 2, Width - GetTextWidth(FONT_BORDERED, Text) / 2);
+				Limit(ty, 0, Height - GetFontHeight(FONT_BORDERED));
+				PrintText(Surface, tx + x, ty + y, FONT_BORDERED, TRGBColor(Color), Text, 1);
 			}
 		}
 	}
@@ -1348,16 +1348,16 @@ void TMapWindow::ArrangeTalkboxes()
 		BoxWidth[Talkbox - 1] = 0;
 		const int Lines = GetTalkboxLines(Talkbox);
 		for (int Line = 0; Line < Lines; Line++) {
-			const int LineWidth = GetTextWidth(2, GetTalkboxLine(Talkbox, Line));
+			const int LineWidth = GetTextWidth(FONT_BORDERED, GetTalkboxLine(Talkbox, Line));
 			BoxWidth[Talkbox - 1] = BoxWidth[Talkbox - 1] > LineWidth ? BoxWidth[Talkbox - 1] : LineWidth;
 		}
-		BoxHeight[Talkbox - 1] = GetFontLineHeight(2) * Lines;
+		BoxHeight[Talkbox - 1] = GetFontLineHeight(FONT_BORDERED) * Lines;
 	}
 	int StatusHeight;
 	if (GetStatusMessage() == nullptr)
 		StatusHeight = 0;
 	else
-		StatusHeight = GetFontHeight(2) + 10;
+		StatusHeight = GetFontHeight(FONT_BORDERED) + 10;
 	const bool NoStretching = GetNoStretching();
 	const int BorderX = (480 - Width) / 2;
 	const int BorderY = (352 - Height) / 2;
@@ -1387,7 +1387,7 @@ void TMapWindow::ArrangeTalkboxes()
 				cy = y * 32 - BorderY - 32;
 			else
 				cy = (y - 1) * Height / 11;
-			cy -= GetTalkboxLines(Talkbox) * GetFontLineHeight(2) / 2;
+			cy -= GetTalkboxLines(Talkbox) * GetFontLineHeight(FONT_BORDERED) / 2;
 			CentreY = cy;
 			const int HalfWidth = BoxWidth[i] / 2;
 			MinX[i] = HalfWidth + 1 > cx - HalfWidth ? HalfWidth + 1 : cx - HalfWidth;

@@ -74,10 +74,20 @@ struct TRGBColor { // passed by value (12 bytes)
 // header (internal linkage). The name is ours.
 constexpr TRGBColor DefaultFontColor(224, 224, 224); // constexpr since issue #116 (constant-initialised as before)
 
+// The numbers of the four fonts (TFont::FontNumber, the FontNumber parameters, InitFont's FontName), 1 to
+// NumberOfFonts. The original's names are not known; these say what graphics.cpp's InitFonts and the fonts' pictures
+// show. Enumerators for the reason in GUI.h.
+enum : int {           // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	FONT_SHARP = 1,    // picture 3, characters of 8x16 with hard edges: the tooltips
+	FONT_BORDERED = 2, // picture 5, 16x16 with a black border: the text on the game window, the menus, the console's tabs
+	FONT_SMALL = 3,    // picture 6, 8x8: the buttons' captions; GetFontLineHeight's font for a number out of range
+	FONT_SMOOTH = 4,   // picture 8, FONT_SHARP's characters with smoothed edges: TFont's default and the console's text
+};
+
 // A text format: font, colour and alignment ("Format.Alignment" in
 // PrintFormattedText's assertion).
 struct TFont { // passed by value (20 bytes)
-	TFont() : FontNumber(4), Color(DefaultFontColor), Alignment(LEFT_ALIGN) {}
+	TFont() : FontNumber(FONT_SMOOTH), Color(DefaultFontColor), Alignment(LEFT_ALIGN) {}
 	int FontNumber;
 	TRGBColor Color;
 	int Alignment; // LEFT_ALIGN, CENTER_ALIGN, RIGHT_ALIGN

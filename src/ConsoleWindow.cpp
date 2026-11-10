@@ -340,7 +340,7 @@ void TTextWindow::FormatLines()
 			int Start = 0;
 			while (!Last) {
 				int Blank = -1;
-				const int End = GetFittingTextLength(4, Text + Start, TextWidth - Indent) + Start;
+				const int End = GetFittingTextLength(FONT_SMOOTH, Text + Start, TextWidth - Indent) + Start;
 				int i;
 				for (i = Start; i < End; i++) {
 					const char c = Text[i];
@@ -363,7 +363,7 @@ void TTextWindow::FormatLines()
 					i = Blank + 1;
 				}
 				if (Length > 0)
-					Lines(Count++) = TLineFormat(TextLine, Text + Start, Length, Start, Indent, 4, Color, LineEnd);
+					Lines(Count++) = TLineFormat(TextLine, Text + Start, Length, Start, Indent, FONT_SMOOTH, Color, LineEnd);
 				Indent = NextIndent;
 				Start = i;
 			}

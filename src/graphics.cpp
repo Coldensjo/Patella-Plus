@@ -84,7 +84,7 @@ TVideoCacheItem::TVideoCacheItem()
 int patella::TGraphics::GetFontLineHeight(int FontNumber) const
 {
 	if (FontNumber < 0 || FontNumber > NumberOfFonts)
-		FontNumber = 3;
+		FontNumber = FONT_SMALL;
 	return Fonts[FontNumber - 1].LineHeight;
 }
 
@@ -337,10 +337,10 @@ void patella::TGraphics::InitFonts()
 	NumberOfFonts = 4;
 	static_cast<void>(Fonts.release()); // NOLINT(bugprone-unused-return-value): a table still held leaks, as in the original
 	Fonts.reset(new TFontInfo[4]);
-	InitFont(1, 3, 32, 8, 16, 1, 12);
-	InitFont(2, 5, 32, 16, 16, -1, 15);
-	InitFont(3, 6, 32, 8, 8, 0, 10);
-	InitFont(4, 8, 32, 8, 16, 1, 14);
+	InitFont(FONT_SHARP, 3, 32, 8, 16, 1, 12);
+	InitFont(FONT_BORDERED, 5, 32, 16, 16, -1, 15);
+	InitFont(FONT_SMALL, 6, 32, 8, 8, 0, 10);
+	InitFont(FONT_SMOOTH, 8, 32, 8, 16, 1, 14);
 }
 
 // --- The memory cache ------------------------------------------------------------

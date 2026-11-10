@@ -243,7 +243,7 @@ void patella::TGUI::Redraw(bool Force)
 		// than 10 digits fills the 20 characters (no NUL), which the type would cut (issue #64).
 		MsvcSnprintf(Text, 20, "%s %.02f fps", Engine.Chars, FPS);
 		const TRGBColor Color = {200, 200, 200};
-		PrintText(1, 4, 4, 2, Color, Text, 0);
+		PrintText(1, 4, 4, FONT_BORDERED, Color, Text, 0);
 	}
 	if (!GetWindowsMousepointer()) {
 		const int Cursor = GetMouseCursor();

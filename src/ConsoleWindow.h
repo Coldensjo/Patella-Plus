@@ -46,7 +46,7 @@ struct TLineFormat {
 	// Inline in Container.h's vector constructor (0x417aa0) and in
 	// FormatLines: the colour is cleared by its own constructor first.
 	TLineFormat()
-		: LineText(nullptr), LineLength(0), OriginalOffset(0), Indent(0), FontNumber(4), TextLine(nullptr),
+		: LineText(nullptr), LineLength(0), OriginalOffset(0), Indent(0), FontNumber(FONT_SMOOTH), TextLine(nullptr),
 		  LineEnd(true)
 	{
 		Color = DefaultFontColor;

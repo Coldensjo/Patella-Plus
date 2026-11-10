@@ -516,7 +516,7 @@ void TFormattedText::Arrange()
 	while (FirstChild != nullptr)
 		DeleteChild(FirstChild);
 	TRGBColor Color(224, 224, 224);
-	int FontNumber = 2;
+	int FontNumber = FONT_BORDERED;
 	int Indent = 0;
 	int X = 0;
 	int Y = 0;
