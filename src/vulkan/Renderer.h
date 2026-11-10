@@ -1,7 +1,7 @@
 // Renderer.h: the Vulkan 1.3 back end of the Vulkan engine (issue #19; notes/vulkan.md; plan 6.2).
 //
 // A small 2D compositor without any window system: images (the engine's surfaces), colour fills,
-// textured quads in Direct3D 9's pixel rules (Quads.h), uploads, the colour key pass, read-back,
+// textured quads in Direct3D 9's pixel rules (Quads.h), uploads, the colour key pass,
 // and the presentation of an image in a swapchain when a surface is given. The engine
 // (SurfaceVulkan.cpp, Windows) maps TSurface's calls onto it; tests_vulkan drives it headless.
 //
@@ -102,9 +102,6 @@ public:
 	void Upload(int Image, int x, int y, int Width, int Height, const uint32_t *Pixels, size_t Pitch);
 	// Every pixel of the rectangle that is exactly Key (alpha included) becomes Replacement.
 	void ReplaceColor(int Image, int x, int y, int Width, int Height, uint32_t Key, uint32_t Replacement);
-	// The pixels of the rectangle (rows top-down, Width apart) after everything recorded so far; waits
-	// for the device.
-	void ReadBack(int Image, int x, int y, int Width, int Height, std::vector<uint32_t> &Pixels);
 
 	// Ends the frame: with a surface, the rectangle of Image is shown in the window (WindowWidth x
 	// WindowHeight; nothing is shown while that is 0, as for a minimised window); without one the

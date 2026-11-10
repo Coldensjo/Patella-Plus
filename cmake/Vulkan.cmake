@@ -5,7 +5,7 @@
 #
 #	patella_vulkan_deps     the libraries' sources: volk, vk-bootstrap, VMA (src/vulkan/Vma.cpp), without
 #	                        the product's warning settings (they are not ours)
-#	patella_render_vulkan   the back end, src/vulkan/Renderer.cpp, Quads.cpp, FilterMask.cpp,
+#	patella_render_vulkan   the back end, src/vulkan/Renderer.cpp, Quads.cpp,
 #	                        DeviceChoice.cpp (the device choice's words, issue #31) and PresentWindow.cpp
 #	                        (one window per device, issue #52), with the product's
 #	                        settings; the shaders of src/vulkan/shaders compiled to SPIR-V by glslang
@@ -135,7 +135,6 @@ endforeach()
 add_library(patella_render_vulkan STATIC
 	"${PROJECT_SOURCE_DIR}/src/vulkan/Renderer.cpp"
 	"${PROJECT_SOURCE_DIR}/src/vulkan/Quads.cpp"
-	"${PROJECT_SOURCE_DIR}/src/vulkan/FilterMask.cpp"
 	"${PROJECT_SOURCE_DIR}/src/vulkan/DeviceChoice.cpp"
 	"${PROJECT_SOURCE_DIR}/src/vulkan/PresentWindow.cpp"
 	${patella_shader_headers})

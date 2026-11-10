@@ -18,7 +18,6 @@
 #include "Surface.h"
 #include "compat/msvc.h"
 #include "graphics.h"
-#include "vulkan/FilterMask.h"
 #include "vulkan/Renderer.h"
 #include <array>
 #include <memory>
@@ -34,16 +33,6 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): an int constant, as in
 };
 static_assert(sizeof(decltype(NUMBER_OF_SURFACES_VULKAN)) == 4);
 static_assert(std::is_same_v<std::underlying_type_t<decltype(NUMBER_OF_SURFACES_VULKAN)>, int>);
-
-// The functions of the frame observer, the test build's frame dump (none in
-// Patella.exe, which looks up no patcap.dll since issue #97): told about the device, asked before each
-// frame is shown whether it wants the frame's pixels.
-using TVulkanDeviceObserver = void(PATELLA_CDECL *)(const char *Name, int Type, int CpuDriver);
-using TVulkanFrameObserver = int(PATELLA_CDECL *)(int Width, int Height);
-using TVulkanPixelsObserver = void(PATELLA_CDECL *)(const void *Bits, int Pitch, int Width, int Height);
-// Before the pixels: a byte per pixel of the picture, 1 where its value comes from the device's filter or
-// interpolation (the bilinear stretches, the light; notes/vulkan.md, "Pixels"), else 0.
-using TVulkanMaskObserver = void(PATELLA_CDECL *)(const unsigned char *Mask, int Width, int Height);
 
 class TSurfaceVulkan final : public TSurface {
 public:
@@ -98,11 +87,6 @@ public:
 	void ExitSurfaces() override;
 	bool TestEngine() override;
 
-	// The read-back of the test mode (issue #22's frame dump): the pixels of SCREEN_SURFACE's
-	// rectangle as the next FinishFrame would show them (D3DCOLOR, rows top-down). False without a
-	// device.
-	bool ReadScreen(std::vector<uint32_t> &Pixels, int &Width, int &Height);
-
 	// The device's name ("" without one; DeviceSettings.h GetDeviceName).
 	[[nodiscard]] const char *DeviceName() const;
 
@@ -123,8 +107,6 @@ private:
 	// since issue #138).
 	[[nodiscard]] HWND MainWindow() const { return static_cast<HWND>(hWindow); }
 	patella::vulkan::TDeviceRequest Request(patella::platform::TWindowHandle Window);
-	bool Masked(int Target);
-	void Track(int Target, int Texture, const patella::vulkan::TQuad *Quads, size_t Count);
 	void Fail();
 
 	bool Ready;                                            // CreateSurfaces has finished (SurfaceRecreated)
@@ -142,11 +124,6 @@ private:
 	patella::vulkan::TFilter Filter;                       // the sampler state (D3DSAMP_MAGFILTER/MINFILTER)
 	std::vector<patella::vulkan::TQuad> Shade;             // ShadeVertices
 	bool DisplayModeSet;                                   // fullscreen changed the display mode
-	TVulkanDeviceObserver DeviceObserver;
-	TVulkanFrameObserver FrameObserver;
-	TVulkanPixelsObserver PixelsObserver;
-	TVulkanMaskObserver MaskObserver;
-	patella::vulkan::TFilterMasks Masks; // the device-filtered pixels, while an observer watches
 };
 
 // Surface.cpp's engine selection.

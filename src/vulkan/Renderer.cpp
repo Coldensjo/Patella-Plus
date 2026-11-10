@@ -318,7 +318,6 @@ struct TRenderer::TState {
 	VkDescriptorSet BoundSet = VK_NULL_HANDLE;
 	VkBuffer BoundVertices = VK_NULL_HANDLE;
 
-	TBuffer ReadBuffer;
 
 	// TRenderer::Draw's working copies of the quads (issue #155): they keep their capacity, so a draw allocates only when
 	// its batch is the largest so far. Draw empties and refills both before it reads them.
@@ -330,7 +329,7 @@ struct TRenderer::TState {
 
 	// --- buffers ---
 
-	[[nodiscard]] TBuffer CreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, bool Readable) const
+	[[nodiscard]] TBuffer CreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage) const
 	{
 		TBuffer Buffer;
 		VkBufferCreateInfo Info{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
@@ -338,9 +337,7 @@ struct TRenderer::TState {
 		Info.usage = Usage;
 		VmaAllocationCreateInfo Allocation{};
 		Allocation.usage = VMA_MEMORY_USAGE_AUTO;
-		Allocation.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT
-			| (Readable ? VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT
-						: VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+		Allocation.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 		VmaAllocationInfo Result{};
 		Check(vmaCreateBuffer(Allocator, &Info, &Allocation, &Buffer.Buffer, &Buffer.Allocation, &Result),
 			"vmaCreateBuffer");
@@ -367,7 +364,7 @@ struct TRenderer::TState {
 				return Chunk;
 			}
 		}
-		Chunks.push_back(CreateBuffer(std::max(ChunkSize, Size), Usage, false));
+		Chunks.push_back(CreateBuffer(std::max(ChunkSize, Size), Usage));
 		Offset = 0;
 		Chunks.back().Used = Size;
 		return Chunks.back();
@@ -960,7 +957,6 @@ struct TRenderer::TState {
 			for (TImage &Image : Images)
 				FreeImage(Image);
 			Images.clear();
-			DestroyBuffer(ReadBuffer);
 			for (TFrame &F : Frames) {
 				for (TBuffer &Chunk : F.Vertices)
 					DestroyBuffer(Chunk);
@@ -1198,40 +1194,6 @@ void TRenderer::ReplaceColor(int Image, int x, int y, int Width, int Height, uin
 	S.BindSet(S.Images[static_cast<size_t>(S.KeyScratch)].Sets[0]);
 	std::array<TVertex, 6> Vertices = FillVertices(x, y, x + Width, y + Height, 0);
 	S.DrawVertices(Vertices.data(), Vertices.size());
-}
-
-void TRenderer::ReadBack(int Image, int x, int y, int Width, int Height, std::vector<uint32_t> &Pixels)
-{
-	TState &S = *State;
-	Pixels.assign(static_cast<size_t>(std::max(Width, 0)) * static_cast<size_t>(std::max(Height, 0)), 0);
-	if (Width <= 0 || Height <= 0)
-		return;
-	S.EndPass();
-	const VkDeviceSize Size = static_cast<VkDeviceSize>(Width) * static_cast<VkDeviceSize>(Height) * 4;
-	if (S.ReadBuffer.Size < Size) {
-		// Only ReadBack uses it, and it waits until the copy is done: nothing uses the old one now.
-		S.DestroyBuffer(S.ReadBuffer);
-		S.ReadBuffer = S.CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_DST_BIT, true);
-	}
-	VkBufferImageCopy Region{};
-	Region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
-	Region.imageOffset = {x, y, 0};
-	Region.imageExtent = {ToUint(Width), ToUint(Height), 1};
-	vkCmdCopyImageToBuffer(S.Commands(), S.Images[static_cast<size_t>(Image)].Image, VK_IMAGE_LAYOUT_GENERAL,
-		S.ReadBuffer.Buffer, 1, &Region);
-	VkMemoryBarrier2 Memory{VK_STRUCTURE_TYPE_MEMORY_BARRIER_2};
-	Memory.srcStageMask = VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT;
-	Memory.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-	Memory.dstStageMask = VK_PIPELINE_STAGE_2_HOST_BIT;
-	Memory.dstAccessMask = VK_ACCESS_2_HOST_READ_BIT;
-	VkDependencyInfo Dependency{VK_STRUCTURE_TYPE_DEPENDENCY_INFO};
-	Dependency.memoryBarrierCount = 1;
-	Dependency.pMemoryBarriers = &Memory;
-	vkCmdPipelineBarrier2(S.Commands(), &Dependency);
-	S.Barrier();
-	S.SubmitAndWait();
-	Check(vmaInvalidateAllocation(S.Allocator, S.ReadBuffer.Allocation, 0, Size), "vmaInvalidateAllocation");
-	std::memcpy(Pixels.data(), S.ReadBuffer.Mapped, static_cast<size_t>(Size));
 }
 
 bool TRenderer::Present(int Image, int x, int y, int Width, int Height, uint32_t WindowWidth, uint32_t WindowHeight)
