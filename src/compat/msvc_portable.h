@@ -37,7 +37,13 @@ inline int PortableVsnprintf(char *Buffer, std::size_t Count, const char *Format
 	if (Length >= 0 && Buffer != nullptr && static_cast<std::size_t>(Length) >= Count) {
 		// vsnprintf ended the text with a NUL at Buffer[Count - 1]; _vsnprintf has a character there.
 		if (Count != 0) {
-			std::string Text(static_cast<std::size_t>(Length), '\0');
+			std::string Text;
+			try {
+				Text.assign(static_cast<std::size_t>(Length), '\0');
+			} catch (...) {
+				va_end(Again); // the copy is ended on every way out, also when the memory is not there
+				throw;
+			}
 			std::vsnprintf(Text.data(), Text.size() + 1, Format, Again); // its NUL goes to Text.data()[Length]
 			std::memcpy(Buffer, Text.data(), Count);
 		}
