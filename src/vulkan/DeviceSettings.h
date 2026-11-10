@@ -5,7 +5,7 @@
 // (the next GPU on every click when there are several) and "CPU" (the shipped CPU driver). The choice is
 // Patella.ini's Device (src/settings/Settings.h), next to Tibia.cfg; the environment variable
 // PATELLA_VULKAN (the same words: auto, gpu, gpuN, cpu) overrides it at start-up, for the comparisons and
-// the tests, and is never written. Surface.cpp (SurfaceInitInstance), Control.cpp (ChangeEngine),
+// the tests, and is never written. Surface.cpp (SurfaceInitInstance), Control.cpp (ChangeDevice),
 // Dialogs.cpp (TAdvancedGraphicsDialog) and SurfaceVulkan.cpp use it. Windows x64 client only; no Vulkan
 // header.
 

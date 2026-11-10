@@ -6,7 +6,7 @@
 // after the others. Every function had the original's catch wrappers
 // (common.h), except where noted. Since issue #78 the functions here have none
 // apart from the handlers of their own: CheckSurface's (an error of the surface
-// becomes PROGRAM_ERROR 12), ChangeEngine's (each step's error with its
+// becomes PROGRAM_ERROR 12), ChangeDevice's (each step's error with its
 // message) and InitControl's (a PROGRAM_ERROR shuts the modules down again).
 //
 // Patella-Modern issue #118: the functions are TGUI's members (GUI.h), the data
@@ -120,14 +120,14 @@ void patella::TGUI::CheckSurface(bool Force)
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
 	if (!Success)
-		ChangeEngine(ENGINE_DIRECTX5);
+		ChangeDevice(ENGINE_AUTOMATIC);
 	if (GetSurface()->SurfaceRecreated(1))
 		ResetVideoCache();
 }
 
 // The engine test runs on a new surface; when it fails, the old engine is
 // set again.
-void patella::TGUI::ChangeEngine(int engine)
+void patella::TGUI::ChangeDevice(int engine)
 {
 	// The x64 client (Patella-Modern issues #20 and #31; Surface.cpp SurfaceInitInstance): one engine, and
 	// the advanced options' three buttons choose its graphics device (plan 6.3; vulkan/DeviceSettings.h).
@@ -1215,9 +1215,9 @@ void Resize(int Width, int Height)
 	patella::bridge::GUI().Resize(Width, Height);
 }
 
-void ChangeEngine(int engine)
+void ChangeDevice(int engine)
 {
-	patella::TGUI::ChangeEngine(engine);
+	patella::TGUI::ChangeDevice(engine);
 }
 
 void Redraw(bool Force)

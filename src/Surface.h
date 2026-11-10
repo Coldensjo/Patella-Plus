@@ -16,16 +16,16 @@
 // The numbers of the original's three engines: 0 DirectX 5 (SurfaceDX.cpp), 1 OpenGL (SurfaceGL.cpp), 2 DirectX 9
 // (surfaceDX9.cpp).
 //
-// This client's one engine is the Vulkan engine (vulkan/SurfaceVulkan.h). The numbers are what ChangeEngine's
+// This client's one engine is the Vulkan engine (vulkan/SurfaceVulkan.h). The numbers are what ChangeDevice's
 // argument, the command line's "engine N" and the preferences' Engine (Patella.ini's, and Tibia.cfg's on its one
-// import) still hold. As ChangeEngine's argument they come from the advanced options' three buttons, which stand in
+// import) still hold. As ChangeDevice's argument they come from the advanced options' three buttons, which stand in
 // the original's places and choose the Vulkan engine's device (vulkan/DeviceSettings.h's DeviceButtonOfEngine):
-// ENGINE_DIRECTX5 the automatic choice, ENGINE_DIRECTX9 a GPU, ENGINE_OPENGL the CPU driver. Enumerators for the
+// ENGINE_AUTOMATIC the automatic choice, ENGINE_GPU a GPU, ENGINE_CPU the CPU driver. Enumerators for the
 // reason in GUI.h.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
-	ENGINE_DIRECTX5 = 0,
-	ENGINE_OPENGL = 1,
-	ENGINE_DIRECTX9 = 2,
+	ENGINE_AUTOMATIC = 0,
+	ENGINE_CPU = 1,
+	ENGINE_GPU = 2,
 };
 
 namespace patella {

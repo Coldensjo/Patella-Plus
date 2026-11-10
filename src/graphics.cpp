@@ -1156,7 +1156,7 @@ void patella::TGraphics::GetTextPosition(int *TextX, int *TextY, int x, int y, i
 // --- Start-up and shut-down ----------------------------------------------------
 
 // Empties the video cache and builds it again for the current surface
-// (ChangeEngine calls it after a new surface is set up).
+// (ChangeDevice calls it after a new surface is set up).
 void patella::TGraphics::ResetVideoCache()
 {
 	if (VideoCache != nullptr) {

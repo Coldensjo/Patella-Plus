@@ -66,7 +66,7 @@ TSurface::~TSurface() = default;
 // number (-1) or one out of range becomes 2, the original's choice on a machine with Direct3D 9. As in
 // the original, the command line's number skips the test. The engine's device is the graphics device choice
 // (issue #31; vulkan/DeviceSettings.h: PATELLA_VULKAN, else Patella.ini, else automatic), read first;
-// the advanced options' buttons choose it (Control.cpp ChangeEngine). When the chosen device fails the
+// the advanced options' buttons choose it (Control.cpp ChangeDevice). When the chosen device fails the
 // test (a GPU that is gone, a CPU driver that is missing), the engine runs on the automatic choice, as
 // the original falls back to another engine; Patella.ini keeps the choice. The automatic choice is
 // tested too, though nothing asks how that ends: without a Vulkan device there is no engine to fall
@@ -83,7 +83,7 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	}
 	int Engine = GetEngine();
 	if (Engine < 0 || Engine >= 3)
-		Engine = ENGINE_DIRECTX9;
+		Engine = ENGINE_GPU;
 	try {
 		if (IsVulkanInstalled()) {
 			GetSurface()->hWindow = Window;

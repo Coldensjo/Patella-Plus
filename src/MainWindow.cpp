@@ -352,13 +352,13 @@ void TMainWindow::HandleEvent(int Event)
 			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 		break;
 	case EVENT_DEVICE_AUTOMATIC:
-		patella::TGUI::ChangeEngine(ENGINE_DIRECTX5); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(ENGINE_AUTOMATIC); // Control.cpp's (issue #118)
 		break;
 	case EVENT_DEVICE_GPU:
-		patella::TGUI::ChangeEngine(ENGINE_DIRECTX9); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(ENGINE_GPU); // Control.cpp's (issue #118)
 		break;
 	case EVENT_DEVICE_CPU:
-		patella::TGUI::ChangeEngine(ENGINE_OPENGL); // Control.cpp's (issue #118)
+		patella::TGUI::ChangeDevice(ENGINE_CPU); // Control.cpp's (issue #118)
 		break;
 	default:
 		break;

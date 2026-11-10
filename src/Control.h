@@ -18,7 +18,7 @@
 
 void Resize(int Width, int Height);
 
-void ChangeEngine(int engine);
+void ChangeDevice(int engine);
 void Redraw(bool Force);
 
 void MouseMove(int x, int y);

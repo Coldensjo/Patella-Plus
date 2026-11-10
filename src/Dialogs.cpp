@@ -2542,7 +2542,7 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	WindowsMousepointer = new TCheckBox("Windows Mouse Pointer");
 	Framerate = new THorizontalScrollBar(10, 201, 10, 11, 1, TCallback(this, EVENT_FRAMERATE));
 	// The x64 client (issue #31): the graphics device choice in the engine buttons' places, with the
-	// original's events (MainWindow.cpp: 800, 801, 802; Control.cpp ChangeEngine). The buttons are 58
+	// original's events (MainWindow.cpp: 800, 801, 802; Control.cpp ChangeDevice). The buttons are 58
 	// pixels wide (skin 16), which "CPU (compatibility)" does not fit: its help text says it. The line
 	// above them is as wide as the dialog; a longer device name is shortened, the whole one is its help.
 	DeviceLabelName[0] = 0;

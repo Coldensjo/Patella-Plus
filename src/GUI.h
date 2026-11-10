@@ -363,7 +363,7 @@ public:
 	// Control and Communication tests fake (commworld.cpp's WorldFakes); their calls of each other are member calls.
 	void Resize(int Width, int Height);
 	void CheckSurface(bool Force);
-	static void ChangeEngine(int engine);
+	static void ChangeDevice(int engine);
 	void Redraw(bool Force);
 	void EnterGame() const;
 	void LeaveGame();
