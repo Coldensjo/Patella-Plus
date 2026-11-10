@@ -52,15 +52,8 @@
 // the window tree owns its children, the message queue its blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
-// The .bss before NoCallback (OpenURLCallback, SetDisplayModeCallback, ExitProgramCallback, ModalWindow, MainWindow)
-// is TGUI's (GUI.h, issue #107).
-
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
+// OpenURLCallback, SetDisplayModeCallback, ExitProgramCallback, ModalWindow and MainWindow are TGUI's (GUI.h,
+// issue #107).
 
 // --- TMainWindow -----------------------------------------------------------
 

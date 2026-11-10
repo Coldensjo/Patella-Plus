@@ -11,7 +11,6 @@
 // (notes/decisions.md).
 
 #include "Creatures.h"
-#include "types/Callback.h"      // TCallback (NoCallback)
 #include "types/GraphicsTypes.h" // TRGBColor
 #include "Map.h"
 #include "Objects.h"
@@ -29,13 +28,6 @@
 #include <cstring>
 
 // The data is TCreatures' and TPlayerState's (Creatures.h, issue #106).
-
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
 
 static_assert(sizeof(TCreature) == 0x9c, "TCreature is 0x9c bytes");
 static_assert(offsetof(TCreature, SkullTime) == 0x98 && sizeof(TCreature::SkullTime) == 4, "TCreature's 4-byte skull time (Time32, issue #62)");

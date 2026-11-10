@@ -61,14 +61,6 @@
 // the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
-
-
 // The client area changed size (MainFrm.cpp); in fullscreen mode (view
 // mode 2) the screen size counts. An open context menu (action state 11)
 // is closed, a dialog (10) is centred again and a help bubble (9)

@@ -52,9 +52,6 @@
 
 namespace {
 
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
 // Limits Value to the range between Bound1 and Bound2, which may come in
 // either order. The binary has no copy: it is inlined everywhere (with
 // constant bounds only the first branch is left).

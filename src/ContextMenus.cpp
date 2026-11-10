@@ -38,14 +38,6 @@
 // the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
-
-
 // The skill window forgets the menu.
 TSkillContextMenu::~TSkillContextMenu()
 {

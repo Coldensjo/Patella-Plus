@@ -42,14 +42,6 @@
 // the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
-
 // ParseInput's error names its value "(Word) MessageSeparator": the char
 // converted to an unsigned 16-bit value (movsx, movzx).
 using Word = uint16;

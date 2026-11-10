@@ -34,13 +34,6 @@
 // the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
-
 // A column is as wide as the side bar.
 int TDialogWindow::getMinimumWidth()
 {

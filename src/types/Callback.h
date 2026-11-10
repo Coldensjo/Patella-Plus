@@ -1,7 +1,5 @@
-// types/Callback.h: TCallback, a receiver and an event number (GUI.h's until Patella-Modern issue #110). Here so that
-// Creatures.cpp's NoCallback needs no GUI.h, which brings the windows and the drawing: patella_core compiles
-// Creatures.cpp (notes/decisions.md, "#110"). GUI.h exports it, so the window files see it as before. Its two
-// functions are still GUI.cpp's.
+// types/Callback.h: TCallback, a receiver and an event number (GUI.h's until Patella-Modern issue #110). GUI.h
+// exports it, so the window files see it as before. Its two functions are still GUI.cpp's.
 
 #pragma once
 
