@@ -14,10 +14,10 @@
 
 class flex_unit {
 public:
-	unsigned n; // +0x0, units in use
+	unsigned n; // units in use
 private:
-	std::unique_ptr<unsigned[]> a; // +0x4, the units (issue #58: their only owner)
-	unsigned z;                    // +0x8, units allocated
+	std::unique_ptr<unsigned[]> a; // the units (issue #58: their only owner)
+	unsigned z;                    // units allocated
 public:
 	flex_unit()
 	{
@@ -41,7 +41,7 @@ public:
 
 class vlong_value : public flex_unit {
 public:
-	unsigned share; // +0xc, number of extra vlongs sharing this value
+	unsigned share; // number of extra vlongs sharing this value
 
 	vlong_value() { share = 0; }
 	[[nodiscard]] int is_zero() const { return n == 0; }
@@ -92,8 +92,8 @@ public:
 	vlong &operator=(const vlong &x);
 
 private:
-	vlong_value *value; // +0x4
-	int negative;       // +0x8
+	vlong_value *value;
+	int negative;
 	[[nodiscard]] int cf(const vlong x) const;
 	void docopy();
 	friend class monty;

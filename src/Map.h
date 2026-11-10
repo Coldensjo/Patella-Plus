@@ -38,7 +38,7 @@ inline constexpr int MAPSIZE_Y = 14;
 inline constexpr int MAPSIZE_Z = 8;
 inline constexpr int EFFECTS = 200;
 
-// An effect (0x44 bytes). Status 0 is a free entry, 1 a graphical effect, 2 an
+// An effect. Status 0 is a free entry, 1 a graphical effect, 2 an
 // animated text, 3 a missile. The three kinds share the space after Type.
 // Its anonymous structs are a Microsoft extension (GCC and Clang have it too), which MFC's headers switched on for
 // their includers (C4201) and -Wpedantic names: allowed for TEffect alone since patella_core compiles Map.h without
@@ -50,32 +50,32 @@ PATELLA_MSVC_WARNING(disable : 4201)
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 struct TEffect {
-	int Status; // +0x00
-	int Type;   // +0x04, the colour of a text
+	int Status;
+	int Type; // the colour of a text
 	union {
-		int Phase;                 // +0x08, graphical effect
+		int Phase;                 // graphical effect
 		struct {                   // animated text
-			TFixedString<12> Text; // +0x08, at most 9 characters
-			int TextPhase;         // +0x14
+			TFixedString<12> Text; // at most 9 characters
+			int TextPhase;
 		};
 		struct {           // missile; world coordinates
-			int Direction; // +0x08, 0 north, clockwise, 4 south
-			int DestX;     // +0x0c
-			int DestY;     // +0x10
-			int DestZ;     // +0x14
-			int x;         // +0x18, the field it is linked to
-			int y;         // +0x1c
-			int OffsetX;   // +0x20, pixels from the destination
-			int OffsetY;   // +0x24
-			int EndTime;   // +0x28
-			int DistanceX; // +0x2c, abs(start - destination) * 32
-			int DistanceY; // +0x30
-			int Duration;  // +0x34, milliseconds
+			int Direction; // 0 north, clockwise, 4 south
+			int DestX;
+			int DestY;
+			int DestZ;
+			int x; // the field it is linked to
+			int y;
+			int OffsetX; // pixels from the destination
+			int OffsetY;
+			int EndTime;
+			int DistanceX; // abs(start - destination) * 32
+			int DistanceY;
+			int Duration; // milliseconds
 		};
 	};
-	int Field;          // +0x38, the map point (index into the point table, not an effect)
-	TEffectId Previous; // +0x3c, effects of the same point; None for the first
-	TEffectId Next;     // +0x40, None for the last
+	int Field;          // the map point (index into the point table, not an effect)
+	TEffectId Previous; // effects of the same point; None for the first
+	TEffectId Next;     // None for the last
 };
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
@@ -86,7 +86,7 @@ static_assert(sizeof(TEffect) == 0x44 && offsetof(TEffect, Text) == 0x08 && offs
 		&& offsetof(TEffect, Field) == 0x38,
 	"TEffect's layout");
 
-// An automap mark (0x70 bytes). The constructor clears it.
+// An automap mark. The constructor clears it.
 struct TMark {
 	TMark()
 	{
@@ -96,10 +96,10 @@ struct TMark {
 		Text[0] = 0;
 	}
 
-	int x;                  // +0x00, world coordinates; 0,0 is a deleted mark
-	int y;                  // +0x04
-	int Type;               // +0x08, the mark symbol
-	TFixedString<100> Text; // +0x0c
+	int x; // world coordinates; 0,0 is a deleted mark
+	int y;
+	int Type; // the mark symbol
+	TFixedString<100> Text;
 };
 
 // A world position, as passed to AddAutomapMark ("Coordinate.x").
@@ -109,7 +109,7 @@ struct TCoordinate {
 	int z;
 };
 
-// One automap block: 256x256 fields of one floor (0x200a8 bytes). The
+// One automap block: 256x256 fields of one floor. The
 // compiler-generated destructor frees Marks. Color and Speed were uint8
 // [256][256], indexed [x][y]; since Patella-Modern issue #101 they are
 // TAutomapLayer (AutomapLayer.h), the same bytes in the same order, indexed
@@ -117,22 +117,22 @@ struct TCoordinate {
 struct TAutomapBlock {
 	TAutomapBlock() : Marks(0, 0, 10) { MarkCount = 0; }
 
-	int bx;              // +0x00, -1 for an unused block
-	int by;              // +0x04
-	int bz;              // +0x08
-	int Previous;        // +0x0c, the cache's LRU list, toward the most recent
-	int Next;            // +0x10, toward the least recent
-	TAutomapLayer Color; // +0x14, [x, y], palette colour
-	TAutomapLayer Speed; // +0x10014, [x, y], ground speed, 250 unknown, 255 blocked
-	bool Changed;        // +0x20014
+	int bx; // -1 for an unused block
+	int by;
+	int bz;
+	int Previous;        // the cache's LRU list, toward the most recent
+	int Next;            // toward the least recent
+	TAutomapLayer Color; // [x, y], palette colour
+	TAutomapLayer Speed; // [x, y], ground speed, 250 unknown, 255 blocked
+	bool Changed;
 	// The marks from 0 to MarkCount - 1. A TIndexedVector (issue #100): MarkCount comes from the block's file
 	// (LoadAutomapBlock) and may be negative, and AddAutomapMark then indexes below 0, which grows the vector
 	// downwards; the reload clears min to max.
-	TIndexedVector<TMark> Marks; // +0x20018
-	int MarkCount;               // +0x200a4
+	TIndexedVector<TMark> Marks;
+	int MarkCount;
 };
 
-// A node of FindPath's search (0x20 bytes).
+// A node of FindPath's search.
 struct TPathNode {
 	TPathNode()
 	{
@@ -142,14 +142,14 @@ struct TPathNode {
 		Next = nullptr;
 	}
 
-	int x;                  // +0x00, relative to the start
-	int y;                  // +0x04
-	bool Blocked;           // +0x08
-	int Cost;               // +0x0c, from the destination
-	int Speed;              // +0x10
-	int Estimate;           // +0x14, cost plus the estimate to the start
-	TPathNode *Predecessor; // +0x18, toward the destination
-	TPathNode *Next;        // +0x1c, the open list, sorted by Estimate
+	int x; // relative to the start
+	int y;
+	bool Blocked;
+	int Cost; // from the destination
+	int Speed;
+	int Estimate;           // cost plus the estimate to the start
+	TPathNode *Predecessor; // toward the destination
+	TPathNode *Next;        // the open list, sorted by Estimate
 };
 
 // The steps of a path: FindPath's Directions, the player's PlayerSteps (Creatures.h) and the bytes of SendWalk's

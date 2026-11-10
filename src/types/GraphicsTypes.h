@@ -32,7 +32,7 @@ static_assert(std::is_same_v<std::underlying_type_t<decltype(LEFT_ALIGN)>, int>)
 // SkinProperties that GUI.cpp's assertions name with .x and .y
 // (StatusWindow.HitpointsBar.x, BuddylistWindow.Logo.y); TSkin (Skins.h) and
 // TDrawing (GUI.h) have the same lower-case names (issue #29).
-struct TRect { // passed by value (16 bytes)
+struct TRect { // passed by value
 	constexpr TRect() : x(0), y(0), width(0), height(0) {}
 	// The parameters are not named as the members (Patella-Modern issue #116): patella_core's GCC -Wshadow, since
 	// Skins.h includes this header.
@@ -40,7 +40,7 @@ struct TRect { // passed by value (16 bytes)
 	int x, y, width, height;
 };
 
-struct TRGBColor { // passed by value (12 bytes)
+struct TRGBColor { // passed by value
 	constexpr TRGBColor() : R(0), G(0), B(0) {}
 	constexpr TRGBColor(int Red, int Green, int Blue) : R(Red), G(Green), B(Blue) {}
 	// A colour of the 6x6x6 palette, Color = R*36 + G*6 + B with steps of 51.
@@ -81,7 +81,7 @@ enum : int {           // NOLINT(cppcoreguidelines-use-enum-class): int constant
 
 // A text format: font, colour and alignment ("Format.Alignment" in
 // PrintFormattedText's assertion).
-struct TFont { // passed by value (20 bytes)
+struct TFont { // passed by value
 	TFont() : FontNumber(FONT_SMOOTH), Color(DefaultFontColor), Alignment(LEFT_ALIGN) {}
 	int FontNumber;
 	TRGBColor Color;

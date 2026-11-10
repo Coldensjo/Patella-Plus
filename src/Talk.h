@@ -104,9 +104,6 @@ public:
 	virtual bool SetWriteEnabled([[maybe_unused]] bool Value) { return true; }
 	virtual void Append(TTalkLine *line);
 	virtual void AddText(int Mode, const char *text, int DiffTime);
-	// The binary's vtable has Remove(int) at +0x1c and Remove(TTalkLine *) at
-	// +0x20; MSVC puts overloaded virtuals in reverse order of declaration, so
-	// Remove(TTalkLine *) is declared first (issue #36).
 	virtual void Remove(TTalkLine *line);
 	virtual void Remove(int lineNumber);
 	virtual void Clear();

@@ -17,7 +17,7 @@
 #include <memory>
 #include <type_traits>
 
-// A reference to an object (12 bytes, passed by value). Type is named in
+// A reference to an object (passed by value). Type is named in
 // MapWindow.cpp's "SrcObj.Type!=CREATURE" (CREATURE is 99), Data in Dialogs.cpp's
 // "In(DraggedObject.Data,1,100)" (the count); Data2 is ours. The default constructor
 // clears the object: Map.cpp's TMapPoint, ten TObjects and plain ints, has a
@@ -97,32 +97,32 @@ enum : int {  // NOLINT(cppcoreguidelines-use-enum-class): int constants ("The o
 static_assert(sizeof(decltype(BANK)) == 4);
 static_assert(std::is_same_v<std::underlying_type_t<decltype(BANK)>, int>);
 
-// One Tibia.dat entry (0x4c bytes); the same layout serves objects, outfits,
+// One Tibia.dat entry; the same layout serves objects, outfits,
 // effects and missiles.
 struct TProperties {
-	int Width;         // +0x00
-	int Height;        // +0x04
-	int ExactSize;     // +0x08, 32 unless Width or Height is above 1
-	int Layers;        // +0x0c
-	int PatternWidth;  // +0x10
-	int PatternHeight; // +0x14
-	int PatternDepth;  // +0x18
-	int Phases;        // +0x1c
-	uint16 *Sprites;   // +0x20, Width*Height*Layers*PatternWidth*PatternHeight*PatternDepth*Phases
-	uint8 Flags[4];    // +0x24, bit Flag%8 of Flags[Flag/8]; NOLINT(modernize-avoid-c-arrays): an assertion reads *(int*)Entry.Flags, frozen until M5 (issue #60)
-	int Waypoints;     // +0x28, BANK
-	int MaxLength;     // +0x2c, WRITE and WRITEONCE
-	int Brightness;    // +0x30, LIGHT
-	int LightColor;    // +0x34, LIGHT
-	int ShiftX;        // +0x38, SHIFT
-	int ShiftY;        // +0x3c, SHIFT
-	int Elevation;     // +0x40, HEIGHT
-	int AutomapColor;  // +0x44, AUTOMAP
-	int LensHelp;      // +0x48, LENSHELP
+	int Width;
+	int Height;
+	int ExactSize; // 32 unless Width or Height is above 1
+	int Layers;
+	int PatternWidth;
+	int PatternHeight;
+	int PatternDepth;
+	int Phases;
+	uint16 *Sprites;  // Width*Height*Layers*PatternWidth*PatternHeight*PatternDepth*Phases
+	uint8 Flags[4];   // bit Flag%8 of Flags[Flag/8]; NOLINT(modernize-avoid-c-arrays): an assertion reads *(int*)Entry.Flags, frozen until M5 (issue #60)
+	int Waypoints;    // BANK
+	int MaxLength;    // WRITE and WRITEONCE
+	int Brightness;   // LIGHT
+	int LightColor;   // LIGHT
+	int ShiftX;       // SHIFT
+	int ShiftY;       // SHIFT
+	int Elevation;    // HEIGHT
+	int AutomapColor; // AUTOMAP
+	int LensHelp;     // LENSHELP
 };
 
 // The byte of Flag's bit, Flags[Flag / 8], for every flag up to 0xff as the original indexes it: a flag above 31 is a
-// bit of the members after Flags (inside TProperties, up to +0x43; on x64 +0x47). Through the entry's bytes
+// bit of the members after Flags (inside TProperties). Through the entry's bytes
 // (Patella-Modern issue #91): Flags indexed past its four elements is undefined behaviour, which UBSan's bounds check
 // reports.
 inline uint8 &FlagByte(TProperties &Entry, int Flag)

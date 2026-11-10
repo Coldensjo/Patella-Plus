@@ -24,5 +24,5 @@ public:
 	void DecryptBlock(TBlock Block);
 
 private:
-	std::array<uint32, 4> Key; // +0x4
+	std::array<uint32, 4> Key;
 };

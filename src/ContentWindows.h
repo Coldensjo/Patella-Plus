@@ -47,11 +47,11 @@ public:
 	void Draw(int Surface, int x, int y) override;
 	bool HelpMouseMove(int x, int y) override;
 
-	TDialogWindow *CheckObject;      // +0x44
-	TTextToggleButton *SkillsButton; // +0x48
-	TTextToggleButton *BattleButton; // +0x4c
-	TTextToggleButton *BuddyButton;  // +0x50
-	TTextButton *LogoutButton;       // +0x54
+	TDialogWindow *CheckObject;
+	TTextToggleButton *SkillsButton;
+	TTextToggleButton *BattleButton;
+	TTextToggleButton *BuddyButton;
+	TTextButton *LogoutButton;
 };
 
 // The map of the automap window: 106x106 pixels around ViewX/ViewY/ViewZ of
@@ -73,7 +73,7 @@ public:
 	bool LeftButtonUp(int x, int y, int Flags) override;
 	void MouseHover(int x, int y) override;
 
-	int RoseSkin; // +0x24
+	int RoseSkin;
 };
 
 // Identifier 3: the automap with its view, the compass rose and the buttons
@@ -89,22 +89,22 @@ public:
 	void HandleEvent(int Event) override;
 	void Scroll(int Direction);
 
-	TAutomapView *View;           // +0x44
-	TTextButton *CentreButton;    // +0x48, event 106
-	TSkinButton *FloorUpButton;   // +0x4c, event 3
-	TSkinButton *FloorDownButton; // +0x50, event 4
-	TSkinButton *ZoomInButton;    // +0x54, event 107
-	TSkinButton *ZoomOutButton;   // +0x58, event 108
-	TCompassRose *CompassRose;    // +0x5c
-	bool Changed;                 // +0x60, the view must be redrawn
-	bool Centred;                 // +0x61, the view follows the player
-	int ViewX;                    // +0x64, the centre of the view
-	int ViewY;                    // +0x68
-	int ViewZ;                    // +0x6c
-	int PlayerX;                  // +0x70, the player's position when the view was scrolled
-	int PlayerY;                  // +0x74
-	int PlayerZ;                  // +0x78
-	int Zoom;                     // +0x7c, 1, 2, 4 or 8 (Preferences.cpp's AutomapZoom)
+	TAutomapView *View;
+	TTextButton *CentreButton;    // event 106
+	TSkinButton *FloorUpButton;   // event 3
+	TSkinButton *FloorDownButton; // event 4
+	TSkinButton *ZoomInButton;    // event 107
+	TSkinButton *ZoomOutButton;   // event 108
+	TCompassRose *CompassRose;
+	bool Changed; // the view must be redrawn
+	bool Centred; // the view follows the player
+	int ViewX;    // the centre of the view
+	int ViewY;
+	int ViewZ;
+	int PlayerX; // the player's position when the view was scrolled
+	int PlayerY;
+	int PlayerZ;
+	int Zoom; // 1, 2, 4 or 8 (Preferences.cpp's AutomapZoom)
 
 protected:
 	void OnClose() override; // the destructor's zoom and hotkeys (issue #108)
@@ -133,8 +133,8 @@ public:
 	[[nodiscard]] int GetIconAt(int x, int y) const;
 	int GetIcon(int Position);
 
-	bool IsLarge; // +0x24
-	int MaxIcons; // +0x28, 10 or 9
+	bool IsLarge;
+	int MaxIcons; // 10 or 9
 };
 
 // Identifier 2: the small inventory, a drop area for the body slots (skin
@@ -178,12 +178,12 @@ public:
 	bool HelpMouseMove(int x, int y) override;
 	void HandleEvent(int Event) override;
 
-	bool IsLarge;                                   // +0x2c
-	std::unique_ptr<TRadioButtonGroup> AttackModes; // +0x30, offensive, balanced, defensive (issue #58)
-	std::unique_ptr<TRadioButtonGroup> ChaseModes;  // +0x34, stand, chase
-	TSkinButton *StandButton;                       // +0x38
-	TSkinButton *ChaseButton;                       // +0x3c
-	TToggleButton *SecureButton;                    // +0x40, State: attacks on unmarked players allowed
+	bool IsLarge;
+	std::unique_ptr<TRadioButtonGroup> AttackModes; // offensive, balanced, defensive (issue #58)
+	std::unique_ptr<TRadioButtonGroup> ChaseModes;  // stand, chase
+	TSkinButton *StandButton;
+	TSkinButton *ChaseButton;
+	TToggleButton *SecureButton; // State: attacks on unmarked players allowed
 };
 
 // Identifier 4: the hit point and mana bars with their values.
@@ -234,11 +234,11 @@ public:
 			+ SkinProperties().ContainerFirstSlot.x;
 	}
 
-	TScrollBar *ScrollBar; // +0x30
-	int Container;         // +0x34
-	int ObjectCount;       // +0x38, at the last Arrange
-	int Capacity;          // +0x3c
-	bool HasParent;        // +0x40, the "up" button is shown
+	TScrollBar *ScrollBar;
+	int Container;
+	int ObjectCount; // at the last Arrange
+	int Capacity;
+	bool HasParent; // the "up" button is shown
 
 protected:
 	void OnClose() override; // the destructor's SendCloseContainer (issue #108)
@@ -263,9 +263,9 @@ public:
 	int GetContentHeight() override;
 	bool GetLine(int NumberOfLine, char *Text, int &Value, int &Progress) const;
 
-	TSkillContextMenu *ContextMenu; // +0x30, while the skill menu (ContextMenus.cpp) is open
-	TScrollBar *ScrollBar;          // +0x34
-	int Lines;                      // +0x38, 15
+	TSkillContextMenu *ContextMenu; // while the skill menu (ContextMenus.cpp) is open
+	TScrollBar *ScrollBar;
+	int Lines; // 15
 };
 
 // The battle list: the opponents (Creatures.cpp) with outfit, name, health
@@ -289,9 +289,9 @@ public:
 	int GetContentHeight() override;
 	int GetOpponentAt(int x, int y);
 
-	TScrollBar *ScrollBar;          // +0x30
-	int NumberOfOpponents;          // +0x34, at the last Draw; -1 at first
-	TFixedString<32> MouseOverText; // +0x38, a shortened name in full
+	TScrollBar *ScrollBar;
+	int NumberOfOpponents;          // at the last Draw; -1 at first
+	TFixedString<32> MouseOverText; // a shortened name in full
 
 protected:
 	void OnClose() override; // the destructor's SetHighlightID(0) (issue #108)
@@ -312,8 +312,8 @@ public:
 	bool MouseWheel(int x, int y, int Code) override;
 	void GetOfferAt(int x, int y, int *Side, int *Position) const;
 
-	TScrollBar *ScrollBar; // +0x2c
-	TSeparator *Separator; // +0x30
+	TScrollBar *ScrollBar;
+	TSeparator *Separator;
 };
 
 class TTradeNames final : public TWindow {
@@ -323,9 +323,9 @@ public:
 	void SetSize(int Width, int Height) override;
 	void Arrange() override;
 
-	TLabel *OwnName;       // +0x2c
-	TLabel *CounterName;   // +0x30
-	TSeparator *Separator; // +0x34
+	TLabel *OwnName;
+	TLabel *CounterName;
+	TSeparator *Separator;
 };
 
 class TTradeButtons final : public TWindow {
@@ -337,11 +337,11 @@ public:
 	void ShowAcceptButton(TComponent *EventComponent);
 	void Wait();
 
-	TTextButton *CancelButton; // +0x34, "Cancel" or "Reject" (Callback)
-	TTextButton *AcceptButton; // +0x38, "Accept" (event 1 of the body)
-	TLabel *WaitLabel;         // +0x3c
-	TSeparator *Separator;     // +0x40
-	TCallback Callback;        // +0x44, closes the window (CreateTradeWindow)
+	TTextButton *CancelButton; // "Cancel" or "Reject" (Callback)
+	TTextButton *AcceptButton; // "Accept" (event 1 of the body)
+	TLabel *WaitLabel;
+	TSeparator *Separator;
+	TCallback Callback; // closes the window (CreateTradeWindow)
 };
 
 // The trade: both offers, the names and the buttons. Event 21 (MainWindow.cpp's
@@ -363,9 +363,9 @@ public:
 	int GetMaximumHeight() override;
 	void HandleEvent(int Event) override;
 
-	TTradeButtons *Buttons; // +0x30
-	TTradeOffers *Offers;   // +0x34
-	TTradeNames *Names;     // +0x38
+	TTradeButtons *Buttons;
+	TTradeOffers *Offers;
+	TTradeNames *Names;
 
 protected:
 	void OnClose() override; // the destructor's SendRejectTrade and ClearOffers (issue #108)
@@ -396,9 +396,9 @@ public:
 	int GetContentHeight() override;
 	int GetBuddyAt(int x, int y);
 
-	TScrollBar *ScrollBar;                 // +0x30
-	int NumberOfBuddies;                   // +0x34, at the last Draw; -1 at first
-	std::unique_ptr<char[]> MouseOverText; // +0x38, a shortened name in full (new char[36]; issue #58)
+	TScrollBar *ScrollBar;
+	int NumberOfBuddies;                   // at the last Draw; -1 at first
+	std::unique_ptr<char[]> MouseOverText; // a shortened name in full (new char[36]; issue #58)
 };
 
 // --- The creators ------------------------------------------------------------------

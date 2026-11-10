@@ -420,9 +420,9 @@ vlong operator%(const vlong &x, const vlong &y)
 
 // Montgomery modular exponentiation.
 class monty {
-	vlong R, R1, m, n1; // +0x00, +0x0c, +0x18, +0x24
-	vlong T, k;         // +0x30, +0x3c, work registers
-	unsigned N;         // +0x48, bits for R
+	vlong R, R1, m, n1;
+	vlong T, k; // work registers
+	unsigned N; // bits for R
 	void mul(vlong &x, const vlong &y);
 
 public:

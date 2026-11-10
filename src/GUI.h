@@ -41,7 +41,7 @@ class TComponent;
 
 // TCallback: types/Callback.h (issue #110), exported above.
 
-// One entry of a component's drawing list (0x1c bytes): a skin drawn at an
+// One entry of a component's drawing list: a skin drawn at an
 // offset in the component, tiled to width x height when they are not 0. The
 // constructors are inlined: new TDrawing[8] zeroes the entries
 // (MapWindow.cpp), and the subclasses assign whole entries.
@@ -49,13 +49,13 @@ struct TDrawing {
 	TDrawing() : skin(0), x(0), y(0), width(0), height(0), srcx(0), srcy(0) {}
 	TDrawing(int _skin, int _x, int _y, int _width, int _height, int _srcx, int _srcy)
 		: skin(_skin), x(_x), y(_y), width(_width), height(_height), srcx(_srcx), srcy(_srcy) {}
-	int skin;   // +0x00
-	int x;      // +0x04
-	int y;      // +0x08
-	int width;  // +0x0c
-	int height; // +0x10
-	int srcx;   // +0x14
-	int srcy;   // +0x18
+	int skin;
+	int x;
+	int y;
+	int width;
+	int height;
+	int srcx;
+	int srcy;
 };
 
 // The abstract base class of every window element. Slots with _purecall in
@@ -114,8 +114,8 @@ public:
 	[[nodiscard]] int GetWidth() const { return Width; }   // "Child->GetWidth()"
 	[[nodiscard]] int GetHeight() const { return Height; } // "Child->GetHeight()"
 
-	std::unique_ptr<TDrawing[]> DrawingList; // +0x04, allocated by the subclasses (issue #58: the list's only owner)
-	int DrawingListLength;                   // +0x08
+	std::unique_ptr<TDrawing[]> DrawingList; // allocated by the subclasses (issue #58: the list's only owner)
+	int DrawingListLength;
 
 private:
 	// Close has run (issue #108; not in the original's layout). Here, in the padding after DrawingListLength on x64,
@@ -124,12 +124,12 @@ private:
 	bool Closed = false;
 
 public:
-	TComponent *Parent; // +0x0c
-	TComponent *Next;   // +0x10, the next child of Parent
-	int OffsetX;        // +0x14, relative to Parent
-	int OffsetY;        // +0x18
-	int Width;          // +0x1c
-	int Height;         // +0x20
+	TComponent *Parent;
+	TComponent *Next; // the next child of Parent
+	int OffsetX;      // relative to Parent
+	int OffsetY;
+	int Width;
+	int Height;
 
 protected:
 	// A class's own part of the close (issue #108), overridden by the classes whose destructors did such work; each
@@ -214,8 +214,8 @@ public:
 	virtual void FitToChild(TComponent *Child, TRect Area, bool Notify);
 	virtual void ClipChildren(bool Strict);
 
-	TComponent *FirstChild; // +0x24
-	TComponent *Capture;    // +0x28
+	TComponent *FirstChild;
+	TComponent *Capture;
 
 protected:
 	void OnClose() override; // the children, first to last (~TWindow's order; issue #108)
@@ -293,9 +293,9 @@ public:
 	[[nodiscard]] int GetTime() const; // tenths of a second left
 	[[nodiscard]] bool IsExpired() const;
 	void Update(int elapsed);
-	int Remaining;      // +0x04, milliseconds
-	bool Active;        // +0x08
-	TCallback Callback; // +0x0c
+	int Remaining; // milliseconds
+	bool Active;
+	TCallback Callback;
 };
 
 void AddTimer(TTimer *Timer);

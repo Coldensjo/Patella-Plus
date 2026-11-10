@@ -56,7 +56,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumera
 	PARTY_LEADER = 4, // the player: may invite, revoke an invitation and pass the leadership
 };
 
-// One entry of the creature table (0x9c bytes).
+// One entry of the creature table.
 class TCreature {
 public:
 	[[nodiscard]] TRGBColor GetHealthColor() const;
@@ -81,45 +81,45 @@ public:
 		return Now >= Removed && Now <= Removed + 4;
 	}
 
-	uint32 CreatureID;         // +0x00, 0 marks a free slot; players have IDs below 0x40000000
-	TFixedString<32> Name;     // +0x04
-	int RealX;                 // +0x24, map position
-	int RealY;                 // +0x28
-	int RealZ;                 // +0x2c
-	int DeltaX;                // +0x30, pixel offset of the walk animation, counts down to 0
-	int DeltaY;                // +0x34
-	int StepEnd;               // +0x38, GetMilliseconds() time the step animation ends
-	int NextStep;              // +0x3c, time the next step may start (three steps' time after a diagonal one)
-	int StepX;                 // +0x40, abs(dx)*32
-	int StepY;                 // +0x44, abs(dy)*32
-	int StepDuration;          // +0x48, milliseconds, a multiple of Beat
-	bool Moving;               // +0x4c
-	int Direction;             // +0x50, 0 north, 1 east, 2 south, 3 west (DIRECTION_*, Objects.h)
-	int MoveDirection;         // +0x54, Direction when the current step started
-	int PrevOpponent;          // +0x58, battle list links (slot numbers, -1 at the ends)
-	int NextOpponent;          // +0x5c, NOT_AN_OPPONENT when not in the list
-	int OutfitType;            // +0x60
-	std::array<int, 4> Colors; // +0x64, head, body, legs, feet; Colors[0] is the object type when OutfitType is 0
-	int LightStrength;         // +0x74
-	int LightColor;            // +0x78
-	int Mark;                  // +0x7c, colour of the square around the creature
-	int MarkTime;              // +0x80, shown up to this GetMilliseconds() time
-	int Health;                // +0x84, percent
-	int Speed;                 // +0x88
-	bool Visible;              // +0x8c
-	int PKFlag;                // +0x90, the skull (PK_*); name from "Creature->PKFlag" (MapWindow.cpp)
-	int PARTYFlag;             // +0x94, the party shield (PARTY_*); "Creature->PARTYFlag" (MapWindow.cpp)
-	Time32 SkullTime;          // +0x98, time a skull was removed (StoreTime32, 0: none); it stays four seconds longer
+	uint32 CreatureID; // 0 marks a free slot; players have IDs below 0x40000000
+	TFixedString<32> Name;
+	int RealX; // map position
+	int RealY;
+	int RealZ;
+	int DeltaX; // pixel offset of the walk animation, counts down to 0
+	int DeltaY;
+	int StepEnd;      // GetMilliseconds() time the step animation ends
+	int NextStep;     // time the next step may start (three steps' time after a diagonal one)
+	int StepX;        // abs(dx)*32
+	int StepY;        // abs(dy)*32
+	int StepDuration; // milliseconds, a multiple of Beat
+	bool Moving;
+	int Direction;     // 0 north, 1 east, 2 south, 3 west (DIRECTION_*, Objects.h)
+	int MoveDirection; // Direction when the current step started
+	int PrevOpponent;  // battle list links (slot numbers, -1 at the ends)
+	int NextOpponent;  // NOT_AN_OPPONENT when not in the list
+	int OutfitType;
+	std::array<int, 4> Colors; // head, body, legs, feet; Colors[0] is the object type when OutfitType is 0
+	int LightStrength;
+	int LightColor;
+	int Mark;     // colour of the square around the creature
+	int MarkTime; // shown up to this GetMilliseconds() time
+	int Health;   // percent
+	int Speed;
+	bool Visible;
+	int PKFlag;       // the skull (PK_*); name from "Creature->PKFlag" (MapWindow.cpp)
+	int PARTYFlag;    // the party shield (PARTY_*); "Creature->PARTYFlag" (MapWindow.cpp)
+	Time32 SkullTime; // time a skull was removed (StoreTime32, 0: none); it stays four seconds longer
 };
 
-// A VIP list entry (0x2c bytes). Preferences.h has the stored data
+// A VIP list entry. Preferences.h has the stored data
 // (icon, description, notification) as TBuddy.
 struct TBuddyEntry {
-	uint32 CharacterID;    // +0x00
-	TFixedString<30> Name; // +0x04, "strlen(Name)<30"
-	bool Online;           // +0x22
-	int LoginAction;       // +0x24, GetActionNumber() at the last change of Online
-	int Icon;              // +0x28
+	uint32 CharacterID;
+	TFixedString<30> Name; // "strlen(Name)<30"
+	bool Online;
+	int LoginAction; // GetActionNumber() at the last change of Online
+	int Icon;
 };
 
 namespace patella {

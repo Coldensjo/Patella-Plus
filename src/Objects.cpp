@@ -6,7 +6,7 @@
 // after GetEntrySpriteNumber.
 //
 // The source has unreferenced functions the linker dropped: the line gaps
-// 70-91 and 281-303 fit an accessor of MaxLength (+0x2c) at each level, and
+// 70-91 and 281-303 fit an accessor of MaxLength at each level, and
 // lines 166-238 had room for more.
 
 #include "Objects.h"

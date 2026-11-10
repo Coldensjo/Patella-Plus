@@ -16,23 +16,20 @@ inline constexpr int OPEN_CONTAINERS = 16;
 inline constexpr int CONTAINER_OBJECTS = 36; // our name
 inline constexpr int OBJECTS_PER_OFFER = 100;
 
-// 0x1ec bytes.
 struct TContainer {
-	bool IsOpen;                                    // +0x00
-	TObject Object;                                 // +0x04, the container itself
-	TFixedString<30> Name;                          // +0x10
-	int Capacity;                                   // +0x30
-	bool HasParent;                                 // +0x34, can move up
-	int Count;                                      // +0x38
-	std::array<TObject, CONTAINER_OBJECTS> Objects; // +0x3c
+	bool IsOpen;
+	TObject Object; // the container itself
+	TFixedString<30> Name;
+	int Capacity;
+	bool HasParent; // can move up
+	int Count;
+	std::array<TObject, CONTAINER_OBJECTS> Objects;
 };
 
-// 0x4d4 bytes. CounterOffer starts 0x4d8 after OwnOffer: nothing refers to the four bytes between them
-// (issue #24).
 struct TOffer {
-	TFixedString<30> Name;                          // +0x00, the trading partner
-	int Count;                                      // +0x20
-	std::array<TObject, OBJECTS_PER_OFFER> Objects; // +0x24
+	TFixedString<30> Name; // the trading partner
+	int Count;
+	std::array<TObject, OBJECTS_PER_OFFER> Objects;
 };
 namespace patella {
 

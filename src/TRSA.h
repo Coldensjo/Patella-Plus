@@ -19,5 +19,5 @@ public:
 	void Encrypt(patella::TSpan<uint8, 128> Data); // in place, exponent 65537; a null pointer is an error
 
 private:
-	vlong m_ModulusM; // +0x4
+	vlong m_ModulusM;
 };

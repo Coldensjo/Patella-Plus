@@ -35,9 +35,9 @@ public:
 	int low() { return min; }
 	int high() { return min + d - 1; }
 
-	int min;                    // +0x00
-	int d;                      // +0x04, number of entries
-	std::unique_ptr<T[]> entry; // +0x08
+	int min;
+	int d; // number of entries
+	std::unique_ptr<T[]> entry;
 };
 
 template <class T> array<T>::array(int Min, int Max)
@@ -84,11 +84,11 @@ public:
 	TView view() { return TView(entry.get(), dx, dy); }
 	[[nodiscard]] TConstView view() const { return TConstView(entry.get(), dx, dy); }
 
-	int xmin;                   // +0x00
-	int ymin;                   // +0x04
-	int dx;                     // +0x08
-	int dy;                     // +0x0c
-	std::unique_ptr<T[]> entry; // +0x10
+	int xmin;
+	int ymin;
+	int dx;
+	int dy;
+	std::unique_ptr<T[]> entry;
 };
 
 template <class T> matrix<T>::matrix(int XMin, int XMax, int YMin, int YMax)
@@ -130,13 +130,13 @@ public:
 	TView view() { return TView(entry.get(), dx, dy, dz); }
 	[[nodiscard]] TConstView view() const { return TConstView(entry.get(), dx, dy, dz); }
 
-	int xmin;                   // +0x00
-	int ymin;                   // +0x04
-	int zmin;                   // +0x08
-	int dx;                     // +0x0c
-	int dy;                     // +0x10
-	int dz;                     // +0x14
-	std::unique_ptr<T[]> entry; // +0x18
+	int xmin;
+	int ymin;
+	int zmin;
+	int dx;
+	int dy;
+	int dz;
+	std::unique_ptr<T[]> entry;
 };
 
 template <class T> matrix3d<T>::matrix3d(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax)

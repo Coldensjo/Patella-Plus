@@ -67,12 +67,12 @@ public:
 	bool LeftButtonUp(int x, int y, int Flags) override;
 	void ReleaseCapture(TComponent *Component) override;
 
-	int Identifier;  // +0x2c
-	int BackgroundY; // +0x30, the background skin's row at the top edge
-	bool Background; // +0x34, draw the tiled skin 7 behind the children
-	bool Dragging;   // +0x35
-	int DragX;       // +0x38, where the drag started (window coordinates)
-	int DragY;       // +0x3c
+	int Identifier;
+	int BackgroundY; // the background skin's row at the top edge
+	bool Background; // draw the tiled skin 7 behind the children
+	bool Dragging;
+	int DragX; // where the drag started (window coordinates)
+	int DragY;
 };
 
 // The content of a TSubWindow (ContentWindows.h's bodies derive from it; here since issue #118, so that
@@ -92,7 +92,7 @@ public:
 	virtual int GetMaximumHeight() { return INT_MAX; }
 	virtual int GetContentHeight() = 0;
 
-	bool Minimized; // +0x2c
+	bool Minimized;
 };
 
 // Not in the original (issue #118): TSubWindow::Arrange's call of a container body's UpdateUpButton
@@ -129,16 +129,16 @@ public:
 
 	// The parts are owned by the child list while they are children and by the member while they are not (a minimized
 	// window's, a hidden "up" button), so they stay raw (notes/ownership.md, section 7; issue #108).
-	TSubWindowBody *Body;        // +0x44
-	TResizer *Resizer1;          // +0x48, area SubWindow.Resizer1
-	TResizer *Resizer2;          // +0x4c, area SubWindow.Resizer2
-	TComponent *UpButton;        // +0x50, a container's "up" button, shown while it has a parent
-	TComponent *CloseButton;     // +0x54, event 10
-	TSkinButton *MinimizeButton; // +0x58, event 9
-	TComponent *Icon;            // +0x5c
-	TComponent *Title;           // +0x60
-	bool IsMinimized;            // +0x64
-	int RestoreHeight;           // +0x6c, the height before Minimize
+	TSubWindowBody *Body;
+	TResizer *Resizer1;          // area SubWindow.Resizer1
+	TResizer *Resizer2;          // area SubWindow.Resizer2
+	TComponent *UpButton;        // a container's "up" button, shown while it has a parent
+	TComponent *CloseButton;     // event 10
+	TSkinButton *MinimizeButton; // event 9
+	TComponent *Icon;
+	TComponent *Title;
+	bool IsMinimized;
+	int RestoreHeight; // the height before Minimize
 
 protected:
 	void OnClose() override; // the destructor's preferences and the parts that are not children (issue #108)
@@ -173,9 +173,9 @@ public:
 	void Grow(TComponent *Work);
 	int GetFreeHeight();
 
-	TRect Area;            // +0x2c, where the children go (x, y, width, height)
-	TComponent *Dragged;   // +0x3c
-	bool Busy;             // +0x40, Rearrange is running
-	int FreeHeight;        // +0x44, GetFreeHeight's last result while UpdateFreeHeight
-	bool UpdateFreeHeight; // +0x48
+	TRect Area; // where the children go (x, y, width, height)
+	TComponent *Dragged;
+	bool Busy;      // Rearrange is running
+	int FreeHeight; // GetFreeHeight's last result while UpdateFreeHeight
+	bool UpdateFreeHeight;
 };

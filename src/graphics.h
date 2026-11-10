@@ -47,49 +47,49 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class)
 static_assert(sizeof(decltype(EMPTY_ITEM)) == 4);
 static_assert(std::is_same_v<std::underlying_type_t<decltype(EMPTY_ITEM)>, int>);
 
-// A sprite of Tibia.spr (0x10 bytes). Offset 0 is an empty sprite.
+// A sprite of Tibia.spr. Offset 0 is an empty sprite.
 struct TSprite {
-	int Offset;         // +0x00, in Tibia.spr
-	TRGBColor ColorKey; // +0x04, the transparent colour, from the sprite's first three bytes
+	int Offset;         // in Tibia.spr
+	TRGBColor ColorKey; // the transparent colour, from the sprite's first three bytes
 };
 
-// A picture of Tibia.pic (0x18 bytes); "Picture" in the assertions.
+// A picture of Tibia.pic; "Picture" in the assertions.
 struct TPicture {
-	int TilesX;         // +0x00
-	int TilesY;         // +0x04
-	int *Offsets;       // +0x08, TilesX*TilesY offsets in Tibia.pic, row by row
-	TRGBColor ColorKey; // +0x0c
+	int TilesX;
+	int TilesY;
+	int *Offsets; // TilesX*TilesY offsets in Tibia.pic, row by row
+	TRGBColor ColorKey;
 };
 
-// A font cut from a picture (0x71c bytes). Characters 33-127 have the
+// A font cut from a picture. Characters 33-127 have the
 // indices 1-95, characters 128-255 the indices 96-223.
 struct TFontInfo {
-	int PictureNumber;            // +0x000
-	int CharsPerLine;             // +0x004
-	int CharWidth;                // +0x008
-	int CharHeight;               // +0x00c
-	std::array<int, 224> Widths;  // +0x010, the visible width of each character
-	std::array<int, 224> Heights; // +0x390, the visible height of each character
-	int Spacing;                  // +0x710, added after every character
-	int Height;                   // +0x714, the highest visible height
-	int LineHeight;               // +0x718
+	int PictureNumber;
+	int CharsPerLine;
+	int CharWidth;
+	int CharHeight;
+	std::array<int, 224> Widths;  // the visible width of each character
+	std::array<int, 224> Heights; // the visible height of each character
+	int Spacing;                  // added after every character
+	int Height;                   // the highest visible height
+	int LineHeight;
 };
 
-// A decoded tile in the memory cache (0x28 bytes); "Item" in the assertions.
+// A decoded tile in the memory cache; "Item" in the assertions.
 struct TMemoryCacheItem {
-	uint8 *Data;      // +0x00, 32*32 RGB
-	int Type;         // +0x04
-	int Number;       // +0x08, sprite or picture number
-	int TileX;        // +0x0c
-	int TileY;        // +0x10
-	int Previous;     // +0x14, LRU list: towards the most recent item
-	int Next;         // +0x18
-	int HashPrevious; // +0x1c
-	int HashNext;     // +0x20
-	int HashValue;    // +0x24
+	uint8 *Data; // 32*32 RGB
+	int Type;
+	int Number; // sprite or picture number
+	int TileX;
+	int TileY;
+	int Previous; // LRU list: towards the most recent item
+	int Next;
+	int HashPrevious;
+	int HashNext;
+	int HashValue;
 };
 
-// A tile on a cache surface (0x5c bytes). Masked sprites (outfits) keep the
+// A tile on a cache surface. Masked sprites (outfits) keep the
 // mask and four colours, pictures the tile, font characters the tile and the
 // text colour, in the same place. Tile's type is unnamed inside an anonymous union, an extension of every compiler
 // here that Clang's -Wpedantic names (-Wnested-anon-types): allowed for this structure alone since patella_core
@@ -100,29 +100,29 @@ struct TMemoryCacheItem {
 #endif
 struct TVideoCacheItem {
 	TVideoCacheItem();
-	int Surface; // +0x00, cache surface; the engine's surface number is Surface+6
-	int x;       // +0x04
-	int y;       // +0x08
-	int Type;    // +0x0c
-	int Number;  // +0x10, sprite or picture number
+	int Surface; // cache surface; the engine's surface number is Surface+6
+	int x;
+	int y;
+	int Type;
+	int Number; // sprite or picture number
 	union {
-		int MaskNumber; // +0x14, sprites; 0 without mask
-		int TileX;      // +0x14, pictures
+		int MaskNumber; // sprites; 0 without mask
+		int TileX;      // pictures
 	};
 	union {
-		std::array<TRGBColor, 4> Colors; // +0x18, masked sprites
+		std::array<TRGBColor, 4> Colors; // masked sprites
 		// A named member (Patella-Modern issue #91): GCC and Clang allow no member with a constructor (Color) in an
 		// anonymous struct.
 		struct {
-			int TileY;       // +0x18, pictures
-			TRGBColor Color; // +0x1c, font characters; 0,0,0 for pictures
+			int TileY;       // pictures
+			TRGBColor Color; // font characters; 0,0,0 for pictures
 		} Tile;
 	};
-	int Previous;     // +0x48
-	int Next;         // +0x4c
-	int HashPrevious; // +0x50
-	int HashNext;     // +0x54
-	int HashValue;    // +0x58
+	int Previous;
+	int Next;
+	int HashPrevious;
+	int HashNext;
+	int HashValue;
 };
 #if defined(__clang__)
 #pragma clang diagnostic pop

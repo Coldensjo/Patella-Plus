@@ -3,7 +3,7 @@
 // the GetTop*Object functions make of it. Not part of the original source; TMapPoint, ObjectCount and EffectNumber are
 // the original's names (Map.h before #102).
 //
-// The original's point (0xac bytes) held ObjectCount and an array of OBJECTS_PER_POINT objects; here the objects are a
+// The original's point held ObjectCount and an array of OBJECTS_PER_POINT objects; here the objects are a
 // TStaticVector<TObject, OBJECTS_PER_POINT> (compat/cxx26.h: std::inplace_vector where the library has it), its size
 // the count. What happens when the stack is full is the original's (notes/decisions.md, "#102b"):
 // 	- InsertObject shifts the objects from Position up by one, but from index 9 at most: on a full point the

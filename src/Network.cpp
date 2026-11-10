@@ -659,7 +659,7 @@ void patella::TNetwork::OnConnect(int ErrorCode)
 	Session.SetConnectionState(CONNECTION_OFFLINE);
 }
 
-// Vtable +0x1c. Appends received bytes and calls the receive handler
+// Appends received bytes and calls the receive handler
 // once at least one complete packet is buffered.
 void patella::TNetwork::OnReceive(platform::TSocket &Receiver, int ErrorCode)
 {
@@ -704,7 +704,6 @@ void patella::TNetwork::OnReceive(platform::TSocket &Receiver, int ErrorCode)
 		ReceiveCallback();
 }
 
-// Vtable +0x30.
 void patella::TNetwork::OnClose()
 {
 	Disconnect(false);

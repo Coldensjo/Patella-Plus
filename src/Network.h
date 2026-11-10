@@ -34,11 +34,11 @@ inline constexpr unsigned int HOSTNAME_RESOLVED_MESSAGE = 0x0400 + 1;
 inline constexpr std::size_t ERROR_MESSAGE_SIZE = 1024;
 
 struct TServer {
-	TFixedString<100> Address; // +0x00
-	int Port;                  // +0x64
-	bool Available;            // +0x68, false after a failed attempt
-	bool Resolved;             // +0x69, Address is a numeric IP address
-	int ErrorCode;             // +0x6c, last error for this server
+	TFixedString<100> Address;
+	int Port;
+	bool Available; // false after a failed attempt
+	bool Resolved;  // Address is a numeric IP address
+	int ErrorCode;  // last error for this server
 };
 // The original's layout (no pointers: the same on x64), with Address a TFixedString (issue #57).
 static_assert(IsFixedStringLayout<100>);

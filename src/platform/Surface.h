@@ -108,88 +108,84 @@ public:
 	TSurface &operator=(const TSurface &) = delete;
 	TSurface(TSurface &&) = delete;
 	TSurface &operator=(TSurface &&) = delete;
-	virtual ~TSurface();                                                                         // +0x00
-	virtual void SetPixel(int Surface, int x, int y, TRGBColor Color) = 0;                       // +0x0c, ContentWindows.cpp's automap cross
-	virtual void FillRectangleClipped(int Surface, TRect Rect, TRGBColor Color, TRect Clip) = 0; // +0x10, ContentWindows.cpp's bars
-	virtual void FillRectangle(int Surface, TRect Rect, TRGBColor Color) = 0;                    // +0x14
-	virtual void DrawHorizontalLine(int Surface, int x, int y, int Width, TRGBColor Color) = 0;  // +0x18, ContentWindows.cpp's separator line
-	virtual void DrawVerticalLine(int Surface, int x, int y, int Height, TRGBColor Color) = 0;   // +0x1c, DialogElements.cpp's edit line cursor
+	virtual ~TSurface();
+	virtual void SetPixel(int Surface, int x, int y, TRGBColor Color) = 0;                       // ContentWindows.cpp's automap cross
+	virtual void FillRectangleClipped(int Surface, TRect Rect, TRGBColor Color, TRect Clip) = 0; // ContentWindows.cpp's bars
+	virtual void FillRectangle(int Surface, TRect Rect, TRGBColor Color) = 0;
+	virtual void DrawHorizontalLine(int Surface, int x, int y, int Width, TRGBColor Color) = 0; // ContentWindows.cpp's separator line
+	virtual void DrawVerticalLine(int Surface, int x, int y, int Height, TRGBColor Color) = 0;  // DialogElements.cpp's edit line cursor
 	virtual void DrawFrameClipped(int Surface, TRect Rect, int LineWidth, TRGBColor Color,
-		TRect Clip) = 0;                                                                                 // +0x20
-	virtual void DrawFrame(int Surface, TRect Rect, int LineWidth, TRGBColor Color) = 0;                 // +0x24
-	virtual void WriteImage(int ToSurface, int x, int y, int Width, int Height, std::uint8_t *Data) = 0; // +0x28
+		TRect Clip) = 0;
+	virtual void DrawFrame(int Surface, TRect Rect, int LineWidth, TRGBColor Color) = 0;
+	virtual void WriteImage(int ToSurface, int x, int y, int Width, int Height, std::uint8_t *Data) = 0;
 	virtual void WriteMaskedImage(int ToSurface, int x, int y, int Width, int Height, std::uint8_t *Data,
-		std::uint8_t *Mask, TRGBColor *Colors) = 0; // +0x2c
+		std::uint8_t *Mask, TRGBColor *Colors) = 0;
 	// The blits take the source part as a TRect FromRect (and StretchBlit the
 	// target as ToRect): the assertions name FromRect.width/height and
 	// ToRect.width/height, and every caller builds the 16-byte block on the
 	// stack (issue #29).
-	virtual void BlitRect(int ToSurface, int x, int y, int FromSurface, TRect FromRect) = 0; // +0x30
+	virtual void BlitRect(int ToSurface, int x, int y, int FromSurface, TRect FromRect) = 0;
 	virtual void Blit(int ToSurface, int x, int y, int FromSurface, TRect FromRect,
-		TRGBColor ColorKey) = 0; // +0x34
-	// +0x38: BlitRect's worker, a copy without colour key, clipped.
+		TRGBColor ColorKey) = 0;
+	// BlitRect's worker, a copy without colour key, clipped.
 	virtual void BlitRectClipped(int ToSurface, int x, int y, int FromSurface, TRect FromRect,
 		TRect Clip) = 0;
 	virtual void BlitClipped(int ToSurface, int x, int y, int FromSurface, TRect FromRect,
-		TRGBColor ColorKey, TRect Clip) = 0; // +0x3c
+		TRGBColor ColorKey, TRect Clip) = 0;
 	virtual void StretchBlitRect(int ToSurface, TRect Destination, int FromSurface,
-		TRect Source) = 0; // +0x40
+		TRect Source) = 0;
 	virtual void StretchBlit(int ToSurface, TRect ToRect, int FromSurface, TRect FromRect,
-		TRGBColor ColorKey, TRGBColor Highlight, TRect Clip) = 0; // +0x48
-	// +0x4c: shades Count rectangles with the colours of their four corners
+		TRGBColor ColorKey, TRGBColor Highlight, TRect Clip) = 0;
+	// Shades Count rectangles with the colours of their four corners
 	// (top left, top right, bottom left, bottom right); MapWindow.cpp's light.
 	virtual void ShadeRectangles(int Surface, int Count, TRect *Rects, TRGBColor *Colors) = 0;
-	virtual void SetColorKey(int Surface, TRGBColor ColorKey);           // +0x50, calls +0x54; graphics.cpp sets a cache surface's colour key
-	virtual void SetSourceColorKey(int Surface, TRGBColor ColorKey) = 0; // +0x54
-	// +0x58: clips Destination to Clip and moves the edges of Source by as
+	virtual void SetColorKey(int Surface, TRGBColor ColorKey); // calls SetSourceColorKey; graphics.cpp sets a cache surface's colour key
+	virtual void SetSourceColorKey(int Surface, TRGBColor ColorKey) = 0;
+	// Clips Destination to Clip and moves the edges of Source by as
 	// much; false when nothing is left.
 	virtual bool ClipRect(TRect Clip, patella::platform::TEdgeRect *Destination, patella::platform::TEdgeRect *Source) = 0;
-	virtual void ResetFrameTimer() = 0;                                    // +0x5c
-	virtual void WaitForNextFrame() = 0;                                   // +0x60, the frame limiter and the FPS count
-	virtual void UpdateWindowRect() = 0;                                   // +0x68
-	virtual void InitDisplay(int VMode, TFullscreenMode *GMode) = 0;       // +0x6c
-	virtual void ExitDisplay() = 0;                                        // +0x70
-	virtual void CreateSurfaces() = 0;                                     // +0x74
-	virtual void ResetDisplay(int VMode, TFullscreenMode *GMode) = 0;      // +0x78
-	virtual void RestoreSurfaces(int ViewMode, TFullscreenMode *Mode) = 0; // +0x7c
-	virtual void FinishFrame() = 0;                                        // +0x84
-	// +0x88: Window is the main window (TGUI's WindowHandle), read during the call.
+	virtual void ResetFrameTimer() = 0;
+	virtual void WaitForNextFrame() = 0; // the frame limiter and the FPS count
+	virtual void UpdateWindowRect() = 0;
+	virtual void InitDisplay(int VMode, TFullscreenMode *GMode) = 0;
+	virtual void ExitDisplay() = 0;
+	virtual void CreateSurfaces() = 0;
+	virtual void ResetDisplay(int VMode, TFullscreenMode *GMode) = 0;
+	virtual void RestoreSurfaces(int ViewMode, TFullscreenMode *Mode) = 0;
+	virtual void FinishFrame() = 0;
+	// Window is the main window (TGUI's WindowHandle), read during the call.
 	virtual bool Init(patella::platform::TWindowHandle *Window, int ViewMode, TFullscreenMode *Resolution, bool Force) = 0;
-	virtual int GetFullscreenModes(TFullscreenMode **Modes) = 0; // +0x8c, a new[] list; the number of modes
-	virtual int GetCacheSurfaces() = 0;                          // +0x90, the number of video cache surfaces
-	virtual void GetSurfaceRect(int Surface, TRect *Rect) = 0;   // +0x94
-	// +0x9c: the surfaces were created again since the last Init (their
+	virtual int GetFullscreenModes(TFullscreenMode **Modes) = 0; // a new[] list; the number of modes
+	virtual int GetCacheSurfaces() = 0;                          // the number of video cache surfaces
+	virtual void GetSurfaceRect(int Surface, TRect *Rect) = 0;
+	// The surfaces were created again since the last Init (their
 	// contents are gone); MapWindow.cpp forgets its tile cache then.
 	virtual bool SurfaceRecreated(int Surface) = 0;
-	virtual bool IsUnavailable() = 0;                  // +0xa0
-	virtual bool CanShadeRectangles() = 0;             // +0xa4, MapWindow.cpp draws the light with +0x4c only when true
-	virtual void SetFramerateLimit(int Framerate) = 0; // +0xac
-	virtual double GetFPS() = 0;                       // +0xb0
-	virtual void InitSurfaces() = 0;                   // +0xb4
-	virtual void ExitSurfaces() = 0;                   // +0xb8
-	virtual bool TestEngine();                         // +0xbc
-	std::uint8_t GetAvailableEngines();                // the engines found at start-up (bit 0 OpenGL, bit 1 DirectX 9)
+	virtual bool IsUnavailable() = 0;
+	virtual bool CanShadeRectangles() = 0; // MapWindow.cpp draws the light with ShadeRectangles only when true
+	virtual void SetFramerateLimit(int Framerate) = 0;
+	virtual double GetFPS() = 0;
+	virtual void InitSurfaces() = 0;
+	virtual void ExitSurfaces() = 0;
+	virtual bool TestEngine();
+	std::uint8_t GetAvailableEngines(); // the engines found at start-up (bit 0 OpenGL, bit 1 DirectX 9)
 
-	// The members the engines share: the engines' identical copies of
-	// GetCacheSurfaces, IsUnavailable, GetFPS and the frame timer use the same
-	// offsets (SurfaceDX.cpp's vtable has SurfaceGL.cpp's and
-	// surfaceDX9.cpp's copies). The doubles align the class to 8 bytes, so
-	// +0x04 is padding after the vtable pointer.
-	patella::platform::TWindowHandle hWindow; // +0x08, the main window (TestEngine, SurfaceInitInstance)
-	int ViewMode;                             // +0x10, 0 none, WINDOWED_MODE, FULLSCREEN_MODE
-	int Width;                                // +0x14, the fullscreen mode
-	int Height;                               // +0x18
-	int Depth;                                // +0x1c
-	bool Unavailable;                         // +0x24, no exclusive mode (another application has it)
-	bool CanStretch;                          // +0x25, the hardware stretches blits
-	bool Flag26;                              // +0x26, cleared by the constructor
-	int NumberOfModes;                        // +0x38, cleared by the constructor; GetFullscreenModes' count
-	int CacheSurfaces;                        // +0x40, cleared by the constructor
-	double StartTime;                         // +0x48, timeGetTime at ResetFrameTimer
-	double NextFrame;                         // +0x50, the time the next frame is due
-	double FrameTime;                         // +0x58, 1000 / Framerate
-	double FPS;                               // +0x60, frames per second, counted each second
-	int Framerate;                            // +0x68, the frame limit; 0xffff is none
+	// The members the engines share.
+	patella::platform::TWindowHandle hWindow; // the main window (TestEngine, SurfaceInitInstance)
+	int ViewMode;                             // 0 none, WINDOWED_MODE, FULLSCREEN_MODE
+	int Width;                                // the fullscreen mode
+	int Height;
+	int Depth;
+	bool Unavailable;  // no exclusive mode (another application has it)
+	bool CanStretch;   // the hardware stretches blits
+	bool Flag26;       // cleared by the constructor
+	int NumberOfModes; // cleared by the constructor; GetFullscreenModes' count
+	int CacheSurfaces; // cleared by the constructor
+	double StartTime;  // timeGetTime at ResetFrameTimer
+	double NextFrame;  // the time the next frame is due
+	double FrameTime;  // 1000 / Framerate
+	double FPS;        // frames per second, counted each second
+	int Framerate;     // the frame limit; 0xffff is none
 
 protected:
 	// The engine's shared data (issue #138: the client's bridge::GraphicsEngine() until then). After the original's

@@ -51,7 +51,7 @@ public:
 	void SetSize(int Width, int Height) override;
 	void Arrange() override;
 
-	bool Horizontal; // +0x24
+	bool Horizontal;
 };
 
 // The resize handle of a window: dragging it changes ToResize's width
@@ -70,13 +70,13 @@ public:
 		TElement::ReleaseCapture(Component);
 	}
 
-	TComponent *ToResize; // +0x24
-	bool Dragging;        // +0x28
-	int StartX;           // +0x2c, where the drag started
-	int StartY;           // +0x30
-	bool ResizeWidth;     // +0x34
-	bool ResizeHeight;    // +0x35
-	bool Invisible;       // +0x36, no skin
+	TComponent *ToResize;
+	bool Dragging;
+	int StartX; // where the drag started
+	int StartY;
+	bool ResizeWidth;
+	bool ResizeHeight;
+	bool Invisible; // no skin
 };
 
 // A frame of nine skins (corners, edges and an optional background) around one
@@ -94,18 +94,18 @@ public:
 	void Arrange() override;
 	void FitToWindow();
 
-	TComponent *Window; // +0x2c, a window or an element (the outfit dialog frames its icon)
-	int TopLeft;        // +0x30, skins
-	int Top;            // +0x34
-	int TopRight;       // +0x38
-	int Left;           // +0x3c
-	int Right;          // +0x40
-	int BottomLeft;     // +0x44
-	int Bottom;         // +0x48
-	int BottomRight;    // +0x4c
-	int Background;     // +0x50, 0 for none
-	TRect WindowArea;   // +0x54, Window's area, set by Arrange
-	int Border;         // +0x64, space between the frame and the window
+	TComponent *Window; // a window or an element (the outfit dialog frames its icon)
+	int TopLeft;        // skins
+	int Top;
+	int TopRight;
+	int Left;
+	int Right;
+	int BottomLeft;
+	int Bottom;
+	int BottomRight;
+	int Background;   // 0 for none
+	TRect WindowArea; // Window's area, set by Arrange
+	int Border;       // space between the frame and the window
 };
 
 // --- Texts ------------------------------------------------------------------------
@@ -136,12 +136,12 @@ public:
 	void MouseHover(int x, int y) override;
 	virtual void SetText(const char *_Text, bool Shorten);
 
-	std::unique_ptr<char[]> Text;     // +0x24, the lines, each terminated (issue #58)
-	std::unique_ptr<char[]> FullText; // +0x28, the text as given (the tooltip of a shortened text; issue #58)
-	TFont Font;                       // +0x2c
-	int Lines;                        // +0x40
-	std::unique_ptr<char *[]> Line;   // +0x44, the start of each line in Text (owns the table, not the lines; #58)
-	bool Shortened;                   // +0x48, a line was cut to the width
+	std::unique_ptr<char[]> Text;     // the lines, each terminated (issue #58)
+	std::unique_ptr<char[]> FullText; // the text as given (the tooltip of a shortened text; issue #58)
+	TFont Font;
+	int Lines;
+	std::unique_ptr<char *[]> Line; // the start of each line in Text (owns the table, not the lines; #58)
+	bool Shortened;                 // a line was cut to the width
 };
 
 // A text with formatting tokens (<br>, <p>, <hr>, <vspace=n>, <hspace=n>,
@@ -164,9 +164,9 @@ public:
 	virtual void SetText(const char *_Text, bool Rearrange);
 	int GetToken(const char *Text, int &TokenType, int &TokenData);
 
-	std::unique_ptr<char[]> Text; // +0x2c (issue #58)
-	std::unique_ptr<char[]> Line; // +0x30, the piece being laid out, a buffer as large as Text (issue #58)
-	bool AutoWidth;               // +0x34
+	std::unique_ptr<char[]> Text; // issue #58
+	std::unique_ptr<char[]> Line; // the piece being laid out, a buffer as large as Text (issue #58)
+	bool AutoWidth;
 };
 
 class TTextButton;
@@ -186,10 +186,10 @@ public:
 	void Arrange() override;
 	void HandleEvent(int Event) override;
 
-	void (*OpenURL)(const char *URL);    // +0x2c
-	std::unique_ptr<char[]> Destination; // +0x30 (issue #58)
-	TTextButton *Button;                 // +0x34, event 1
-	TLabel *Label;                       // +0x38
+	void (*OpenURL)(const char *URL);
+	std::unique_ptr<char[]> Destination; // issue #58
+	TTextButton *Button;                 // event 1
+	TLabel *Label;
 };
 
 // --- Icons ------------------------------------------------------------------------
@@ -207,10 +207,10 @@ public:
 	void SetColor(int Mask, int Color);
 	void SetColors(const int *ColorData);
 
-	int Outfit;                // +0x24
-	std::array<int, 4> Colors; // +0x28, head, body, legs, feet
-	int Direction;             // +0x38, kept, not drawn
-	TRGBColor Highlight;       // +0x3c
+	int Outfit;
+	std::array<int, 4> Colors; // head, body, legs, feet
+	int Direction;             // kept, not drawn
+	TRGBColor Highlight;
 };
 
 // One skin, sized to it.
@@ -224,7 +224,7 @@ public:
 	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
 	bool MouseWheel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Direction) override { return false; }
 
-	int Skin; // +0x24
+	int Skin;
 };
 
 // An object, optionally in a frame (skin 102).
@@ -237,9 +237,9 @@ public:
 	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
 	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
 
-	bool Framed;         // +0x34
-	TRGBColor Highlight; // +0x38
-	TObject Obj;         // +0x44
+	bool Framed;
+	TRGBColor Highlight;
+	TObject Obj;
 };
 
 // --- Buttons ----------------------------------------------------------------------
@@ -270,24 +270,24 @@ public:
 	void SetRadioButtonGroup(TRadioButtonGroup *Group);
 	void SetEnabled(bool _Enabled) { Enabled = _Enabled; }
 
-	int ButtonUp;                        // +0x24
-	int ButtonDown;                      // +0x28
-	bool Pressed;                        // +0x2c, the mouse went down on the button
-	bool MouseInside;                    // +0x2d
-	bool Repeat;                         // +0x2e
-	TCallback Callback;                  // +0x30
-	TRadioButtonGroup *RadioButtonGroup; // +0x38
-	const char *Tooltip;                 // +0x3c
-	bool Enabled;                        // +0x40
+	int ButtonUp;
+	int ButtonDown;
+	bool Pressed; // the mouse went down on the button
+	bool MouseInside;
+	bool Repeat;
+	TCallback Callback;
+	TRadioButtonGroup *RadioButtonGroup;
+	const char *Tooltip;
+	bool Enabled;
 };
 
-// The buttons of a radio group (0x28 bytes; the type name is ours). Selected
+// The buttons of a radio group (the type name is ours). Selected
 // is left uninitialised.
 struct TRadioButtonGroup {
 	TRadioButtonGroup() : Buttons(0, 0, 10, nullptr) { Count = 0; }
-	TSkinButton *Selected;                 // +0x00
-	TIndexedVector<TSkinButton *> Buttons; // +0x04
-	int Count;                             // +0x24
+	TSkinButton *Selected;
+	TIndexedVector<TSkinButton *> Buttons;
+	int Count;
 };
 
 // A button on a coloured background.
@@ -297,7 +297,7 @@ public:
 		const char *_Tooltip);
 	void Draw(int Surface, int x, int y) override;
 
-	TRGBColor Color; // +0x44
+	TRGBColor Color;
 };
 
 // A button with an icon skin on it.
@@ -307,7 +307,7 @@ public:
 		const char *_Tooltip);
 	void Draw(int Surface, int x, int y) override;
 
-	int Icon; // +0x44
+	int Icon;
 };
 
 // A button that alternates between two pairs of skins: MapWindow.cpp's hint
@@ -318,12 +318,12 @@ public:
 		TCallback _Callback, const char *_Tooltip);
 	void Draw(int Surface, int x, int y) override;
 
-	int NextChange;  // +0x44, GetMilliseconds() time
-	int Phase;       // +0x48, 1 or 2
-	int ButtonUp1;   // +0x4c
-	int ButtonUp2;   // +0x50
-	int ButtonDown1; // +0x54
-	int ButtonDown2; // +0x58
+	int NextChange; // GetMilliseconds() time
+	int Phase;      // 1 or 2
+	int ButtonUp1;
+	int ButtonUp2;
+	int ButtonDown1;
+	int ButtonDown2;
 };
 
 // A button with a text.
@@ -335,7 +335,7 @@ public:
 	void Draw(int Surface, int x, int y) override;
 	virtual void SetText(const char *_Text) { Text.Assign(_Text); }
 
-	TFixedString<50> Text; // +0x44
+	TFixedString<50> Text;
 };
 inline TObjectIcon::TObjectIcon(TObject _Obj, const TRGBColor *_Highlight, bool _Framed)
 {
@@ -364,9 +364,9 @@ public:
 	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(State ? Tooltip2 : Tooltip1); }
 	bool IsPressed() override;
 
-	bool State;           // +0x44
-	const char *Tooltip1; // +0x48
-	const char *Tooltip2; // +0x4c
+	bool State;
+	const char *Tooltip1;
+	const char *Tooltip2;
 };
 
 // A text button with a state: ContentWindows.cpp's TButtonsWindow sets State
@@ -379,9 +379,9 @@ public:
 	void MouseHover([[maybe_unused]] int x, [[maybe_unused]] int y) override { SetMouseOverText(State ? Tooltip2 : Tooltip1); }
 	bool IsPressed() override;
 
-	bool State;           // +0x78
-	const char *Tooltip1; // +0x7c
-	const char *Tooltip2; // +0x80
+	bool State;
+	const char *Tooltip1;
+	const char *Tooltip2;
 };
 
 // A button that steps through States states, each with its skins and
@@ -410,11 +410,11 @@ public:
 		ButtonDown = ButtonDowns[State];
 	}
 
-	int State;                              // +0x44
-	int States;                             // +0x48
-	std::unique_ptr<int[]> ButtonUps;       // +0x4c (issue #58)
-	std::unique_ptr<int[]> ButtonDowns;     // +0x50
-	std::unique_ptr<TCallback[]> Callbacks; // +0x54
+	int State;
+	int States;
+	std::unique_ptr<int[]> ButtonUps; // issue #58
+	std::unique_ptr<int[]> ButtonDowns;
+	std::unique_ptr<TCallback[]> Callbacks;
 };
 
 // A check box with a text.
@@ -433,9 +433,9 @@ public:
 	virtual bool IsChecked() { return Checked; }
 	void SetEnabled(bool _Enabled);
 
-	TLabel *Label; // +0x2c
-	bool Checked;  // +0x30
-	bool Enabled;  // +0x31
+	TLabel *Label;
+	bool Checked;
+	bool Enabled;
 };
 
 // --- Edit lines -------------------------------------------------------------------
@@ -494,19 +494,19 @@ public:
 		SelectionStart = Position;
 	}
 
-	std::unique_ptr<char[]> Text; // +0x2c (issue #81)
-	int MaxLength;                // +0x30
-	int Cursor;                   // +0x34
-	bool SingleLine;              // +0x38, a paste stops at the first line break
-	TFocusGroup *FocusGroup;      // +0x3c
-	TFont Font;                   // +0x40
-	int FirstVisible;             // +0x54, the first character shown
-	bool Active;                  // +0x58, shows the cursor
-	int SelectionStart;           // +0x5c, -1 without a selection
-	int SelectionLength;          // +0x60, negative when selected to the left
-	bool Selecting;               // +0x64, a mouse drag
-	bool Disabled;                // +0x65
-	bool ReadOnly;                // +0x66
+	std::unique_ptr<char[]> Text; // issue #81
+	int MaxLength;
+	int Cursor;
+	bool SingleLine; // a paste stops at the first line break
+	TFocusGroup *FocusGroup;
+	TFont Font;
+	int FirstVisible;    // the first character shown
+	bool Active;         // shows the cursor
+	int SelectionStart;  // -1 without a selection
+	int SelectionLength; // negative when selected to the left
+	bool Selecting;      // a mouse drag
+	bool Disabled;
+	bool ReadOnly;
 };
 
 // The character under (x, y): the first visible one left of the text, the
@@ -539,7 +539,7 @@ public:
 	bool RightButtonUp(int x, int y, int Flags) override { return TWindow::RightButtonUp(x, y, Flags); } // no menu
 	void HandleEvent(int Event) override;
 
-	std::unique_ptr<char[]> Stars; // +0x68 (issue #81)
+	std::unique_ptr<char[]> Stars; // issue #81
 };
 
 // A multi-line edit field with a scroll bar. LineStart holds the first
@@ -561,16 +561,15 @@ public:
 	using TEditLine::SetText; // TEditLine's SetText(Text) too (GCC's -Woverloaded-virtual, issue #111)
 	void FormatText();
 
-	TIndexedVector<int> LineStart; // +0x68
-	TScrollBar *ScrollBar;         // +0x88
-	int Lines;                     // +0x8c
-	int FieldWidth;                // +0x90
-	int FieldHeight;               // +0x94
-	int VisibleLines;              // +0x98
+	TIndexedVector<int> LineStart;
+	TScrollBar *ScrollBar;
+	int Lines;
+	int FieldWidth;
+	int FieldHeight;
+	int VisibleLines;
 };
 
-// The edit lines of a dialog between which Tab and Shift+Tab move the input
-// (0x28 bytes).
+// The edit lines of a dialog between which Tab and Shift+Tab move the input.
 class TFocusGroup {
 public:
 	TFocusGroup();
@@ -579,9 +578,9 @@ public:
 	void Next();
 	void Previous();
 
-	TEditLine *Active;                      // +0x00
-	TIndexedVector<TEditLine *> MemberList; // +0x04
-	int Members;                            // +0x24
+	TEditLine *Active;
+	TIndexedVector<TEditLine *> MemberList;
+	int Members;
 };
 
 // --- Scroll bars ------------------------------------------------------------------
@@ -607,19 +606,19 @@ public:
 	}
 	void SetValue(int _Value);
 
-	int ButtonRange;    // +0x24, the step of a button or wheel
-	int Min;            // +0x28
-	int Max;            // +0x2c
-	int Value;          // +0x30
-	int Visible;        // +0x34, the part shown at once (the slider's share)
-	bool Dragging;      // +0x38, the slider
-	bool Pressed;       // +0x39
-	int DragOffset;     // +0x3c
-	int SliderWidth;    // +0x40
-	int SliderPosition; // +0x44
-	bool PageScroll;    // +0x48, a click beside the slider moves by Visible-1
-	bool Enabled;       // +0x49, Min!=Max
-	TCallback Callback; // +0x4c
+	int ButtonRange; // the step of a button or wheel
+	int Min;
+	int Max;
+	int Value;
+	int Visible;   // the part shown at once (the slider's share)
+	bool Dragging; // the slider
+	bool Pressed;
+	int DragOffset;
+	int SliderWidth;
+	int SliderPosition;
+	bool PageScroll; // a click beside the slider moves by Visible-1
+	bool Enabled;    // Min!=Max
+	TCallback Callback;
 };
 
 // A horizontal scroll bar: two buttons and the range. The height is always
@@ -634,9 +633,9 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	THorizontalScrollBarRange *Range; // +0x2c
-	TSkinButton *LeftButton;          // +0x30, event 5
-	TSkinButton *RightButton;         // +0x34, event 6
+	THorizontalScrollBarRange *Range;
+	TSkinButton *LeftButton;  // event 5
+	TSkinButton *RightButton; // event 6
 };
 
 inline void THorizontalScrollBar::KeyPress(int Key)
@@ -665,18 +664,18 @@ public:
 	void SetRange(int _Min, int _Max, int _Value, int _Visible);
 	void SetValue(int _Value);
 
-	int ButtonRange;    // +0x24
-	int Min;            // +0x28
-	int Max;            // +0x2c
-	int Value;          // +0x30
-	int Visible;        // +0x34
-	bool Pressed;       // +0x38
-	bool Dragging;      // +0x39
-	int DragOffset;     // +0x3c
-	int SliderHeight;   // +0x40
-	int SliderPosition; // +0x44
-	bool PageScroll;    // +0x48
-	bool Enabled;       // +0x49
+	int ButtonRange;
+	int Min;
+	int Max;
+	int Value;
+	int Visible;
+	bool Pressed;
+	bool Dragging;
+	int DragOffset;
+	int SliderHeight;
+	int SliderPosition;
+	bool PageScroll;
+	bool Enabled;
 };
 
 // A vertical scroll bar: two buttons and the range. The width is always
@@ -691,9 +690,9 @@ public:
 	void KeyPress(int Key) override { Range->KeyPress(Key); }
 	void HandleEvent(int Event) override;
 
-	TScrollBarRange *Range;  // +0x2c
-	TSkinButton *UpButton;   // +0x30, event 3
-	TSkinButton *DownButton; // +0x34, event 4
+	TScrollBarRange *Range;
+	TSkinButton *UpButton;   // event 3
+	TSkinButton *DownButton; // event 4
 };
 
 inline int TEditText::GetMinimumWidth()
@@ -749,25 +748,25 @@ public:
 	void SetEditable(bool _Editable) { Editable = _Editable; }
 	[[nodiscard]] int GetNumberOfLines() const { return Lines; }
 
-	int Lines;                       // +0x2c
-	int TextWidth;                   // +0x30
-	TIndexedVector<char *> LineText; // +0x34
-	int Selected;                    // +0x54, -1 for none
-	TCallback SelectCallback;        // +0x58
-	TCallback ActionCallback;        // +0x60
-	TScrollBar *ScrollBar;           // +0x68
-	int VisibleLines;                // +0x6c
-	bool Editable;                   // +0x70
-	bool Editing;                    // +0x71
-	TEditLine *EditLine;             // +0x74
-	int EditScroll;                  // +0x78, the scroll position when the edit started
+	int Lines;
+	int TextWidth;
+	TIndexedVector<char *> LineText;
+	int Selected; // -1 for none
+	TCallback SelectCallback;
+	TCallback ActionCallback;
+	TScrollBar *ScrollBar;
+	int VisibleLines;
+	bool Editable;
+	bool Editing;
+	TEditLine *EditLine;
+	int EditScroll; // the scroll position when the edit started
 };
 
-// A line of a TFontListBox (0x18 bytes; the type name is ours). The
+// A line of a TFontListBox (the type name is ours). The
 // constructor is implicit (TFont's defaults; Text is left as it is).
 struct TListBoxLine {
-	char *Text; // +0x00
-	TFont Font; // +0x04
+	char *Text;
+	TFont Font;
 };
 
 // A list box whose lines have their own fonts. It keeps its lines in
@@ -793,7 +792,7 @@ public:
 	void Clear();
 	char *GetLine(int Number, TFont *Font);
 
-	TIndexedVector<TListBoxLine> FontLines; // +0x7c
+	TIndexedVector<TListBoxLine> FontLines;
 };
 
 // --- Progress bar -----------------------------------------------------------------
@@ -814,7 +813,7 @@ public:
 	void SetMaximum(int maximum);
 	void SetCurrent(int current);
 
-	int Maximum; // +0x24
-	int Current; // +0x28
+	int Maximum;
+	int Current;
 };
 // NOLINTEND(cppcoreguidelines-owning-memory)

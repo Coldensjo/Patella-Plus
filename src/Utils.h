@@ -35,9 +35,9 @@ public:
 		Size = NewSize;
 	}
 
-	uint8 *Data;  // +0x0
-	int Size;     // +0x4
-	int Position; // +0x8
+	uint8 *Data;
+	int Size;
+	int Position;
 };
 
 // Little-endian reads; strings are a u16 length followed by the characters.

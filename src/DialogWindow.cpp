@@ -709,7 +709,7 @@ void TSubWindow::HandleEvent(int Event)
 	}
 }
 
-// The body is told first (+0xa0, without a NULL check) and leaves the
+// The body is told first (without a NULL check) and leaves the
 // window with the resizers.
 void TSubWindow::Minimize()
 {

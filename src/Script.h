@@ -38,7 +38,6 @@ enum class TOKEN : int {
 static_assert(sizeof(TOKEN) == 4);
 static_assert(std::is_same_v<std::underlying_type_t<TOKEN>, int>);
 
-// 0x80c bytes.
 class TReadScriptFile {
 public:
 	TReadScriptFile(const TReadScriptFile &) = delete;
@@ -86,17 +85,17 @@ public:
 	char *readString();
 	void readSymbol(char Symbol);
 
-	TOKEN Token;                            // +0x000
-	TFile File;                             // +0x004
-	char Filename[1024];                    // +0x008; NOLINT(modernize-avoid-c-arrays): the file errors' reason (a std::string), frozen until M5 (issue #60)
-	int Line;                               // +0x408
-	TFixedString<MAX_STRING_LENGTH> String; // +0x40c, identifier or string
-	uint8 *Bytes;                           // +0x7f4, points to String
-	int Number;                             // +0x7f8
-	char Special;                           // +0x808
+	TOKEN Token;
+	TFile File;
+	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason (a std::string), frozen until M5 (issue #60)
+	int Line;
+	TFixedString<MAX_STRING_LENGTH> String; // identifier or string
+	uint8 *Bytes;                           // points to String
+	int Number;
+	char Special;
 };
 
-// 0x404 bytes. The destructor is close().
+// The destructor is close().
 class TReadBinaryFile {
 public:
 	TReadBinaryFile(const TReadBinaryFile &) = delete;
@@ -128,8 +127,8 @@ public:
 	char *readString();
 	void readBytes(patella::TSpan<uint8> Bytes);
 
-	TFile File;          // +0x000
-	char Filename[1024]; // +0x004; NOLINT(modernize-avoid-c-arrays): the file errors' reason, frozen until M5 (issue #60)
+	TFile File;
+	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason, frozen until M5 (issue #60)
 };
 
 class TWriteBinaryFile {
@@ -159,8 +158,8 @@ public:
 	void writeBytes(patella::TSpan<const uint8> Bytes);
 	void writeString(const char *Text);
 
-	TFile File;          // +0x000
-	char Filename[1024]; // +0x004; NOLINT(modernize-avoid-c-arrays): the file errors' reason, frozen until M5 (issue #60)
+	TFile File;
+	char Filename[1024]; // NOLINT(modernize-avoid-c-arrays): the file errors' reason, frozen until M5 (issue #60)
 };
 
 // The FILE * members are TFiles (issue #64): the same 4 bytes in the original's layout.

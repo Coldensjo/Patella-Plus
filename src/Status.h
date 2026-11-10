@@ -36,21 +36,21 @@ inline constexpr int RIGHT_ANY = 50;
 inline constexpr int MESSAGE_NONE = 0;
 inline constexpr int MESSAGE_STARTPATCHER = 72;
 
-// One queued message (12 bytes). Type is named in the assertions.
+// One queued message. Type is named in the assertions.
 struct TMessage {
 	int Type;
 	std::intptr_t Param1;
 	std::intptr_t Param2;
 };
 
-// One entry of the character list (0x54 bytes). The 30-byte limits come
+// One entry of the character list. The 30-byte limits come
 // from "strlen(Name)<30" and "strlen(World)<30".
 struct TCharacter {
-	TFixedString<30> Name;      // +0x00
-	TFixedString<30> World;     // +0x1e
-	uint32 IP;                  // +0x3c, as received
-	TFixedString<16> IPAddress; // +0x40, dotted text
-	int Port;                   // +0x50
+	TFixedString<30> Name;
+	TFixedString<30> World;
+	uint32 IP;                  // as received
+	TFixedString<16> IPAddress; // dotted text
+	int Port;
 };
 // The original's layout (no pointers: the same on x64), with the names TFixedStrings (issue #57).
 static_assert(sizeof(TCharacter) == 0x54 && offsetof(TCharacter, World) == 0x1e && offsetof(TCharacter, IP) == 0x3c

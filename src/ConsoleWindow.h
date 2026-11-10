@@ -63,13 +63,13 @@ struct TLineFormat {
 		FontNumber = _FontNumber;
 	}
 
-	const char *LineText; // +0x00, points into the talk line's text
-	int LineLength;       // +0x04
-	int Indent;           // +0x0c
-	TRGBColor Color;      // +0x10
-	int FontNumber;       // +0x1c
-	TTalkLine *TextLine;  // +0x20
-	bool LineEnd;         // +0x24
+	const char *LineText; // points into the talk line's text
+	int LineLength;
+	int Indent;
+	TRGBColor Color;
+	int FontNumber;
+	TTalkLine *TextLine;
+	bool LineEnd;
 };
 
 // The text of a channel (ContextMenus.cpp's _TextWindow). Lines are numbered
@@ -129,18 +129,18 @@ public:
 			&& (SelectionStartLine != SelectionEndLine || SelectionStartOffset != SelectionEndOffset);
 	}
 
-	TTalkBuffer *TextBuffer;              // +0x24
-	TIndexedVector<TLineFormat> Lines;    // +0x28 (entry +0x68)
-	int CurrentLineNumber;                // +0x6c
-	int InvisibleLines;                   // +0x70, lines above the window when the last one is at the bottom
-	int LastLineNumber;                   // +0x74
-	int SelectionStartLine;               // +0x78
-	int SelectionStartOffset;             // +0x7c
-	int SelectionEndLine;                 // +0x80
-	int SelectionEndOffset;               // +0x84
-	bool Selecting;                       // +0x88, the left button is down
-	std::unique_ptr<char[]> SelectedText; // +0x8c, GetSelectedText's result (issue #58)
-	bool AtEnd;                           // +0x90, the last line is shown
+	TTalkBuffer *TextBuffer;
+	TIndexedVector<TLineFormat> Lines;
+	int CurrentLineNumber;
+	int InvisibleLines; // lines above the window when the last one is at the bottom
+	int LastLineNumber;
+	int SelectionStartLine;
+	int SelectionStartOffset;
+	int SelectionEndLine;
+	int SelectionEndOffset;
+	bool Selecting;                       // the left button is down
+	std::unique_ptr<char[]> SelectedText; // GetSelectedText's result (issue #58)
+	bool AtEnd;                           // the last line is shown
 };
 
 // The view of the current channel: the text window with a scroll bar on its
@@ -154,9 +154,9 @@ public:
 	bool MouseWheel(int x, int y, int Code) override;
 	[[nodiscard]] TTalkBuffer *GetTextBuffer() const { return TextWindow->TextBuffer; }
 
-	TTextWindow *TextWindow; // +0x2c
-	TScrollBar *ScrollBar;   // +0x30
-	bool ScrollToEnd;        // +0x34
+	TTextWindow *TextWindow;
+	TScrollBar *ScrollBar;
+	bool ScrollToEnd;
 };
 
 // The tab of a channel. Caption is the trimmed and, where it is too wide,
@@ -186,17 +186,17 @@ public:
 	void SetActive(bool _Active);
 	[[nodiscard]] const char *GetCaption() const { return Shortened ? FullCaption.get() : Caption.get(); }
 
-	TTalkBuffer *TextBuffer;             // +0x24 (with the console's filter list: not one owner, notes/ownership.md 7)
-	int LineCount;                       // +0x28, the buffer's lines when the tab last looked
-	std::unique_ptr<char[]> Caption;     // +0x2c (issue #58)
-	std::unique_ptr<char[]> FullCaption; // +0x30
-	int Dragging;                        // +0x34
-	int DragX;                           // +0x38
-	bool Active;                         // +0x44
-	bool Unread;                         // +0x45
-	int BlinkEnd;                        // +0x48, action number; 0 = not blinking
-	TCallback Callback;                  // +0x4c, sent when the tab is pressed
-	bool Shortened;                      // +0x54
+	TTalkBuffer *TextBuffer;         // with the console's filter list: not one owner, notes/ownership.md 7
+	int LineCount;                   // the buffer's lines when the tab last looked
+	std::unique_ptr<char[]> Caption; // issue #58
+	std::unique_ptr<char[]> FullCaption;
+	int Dragging;
+	int DragX;
+	bool Active;
+	bool Unread;
+	int BlinkEnd;       // action number; 0 = not blinking
+	TCallback Callback; // sent when the tab is pressed
+	bool Shortened;
 
 protected:
 	void OnClose() override; // the destructor's sends and DeleteTextBuffer (issue #108)
@@ -238,12 +238,12 @@ public:
 	void ShowTab(TTab *Tab);
 	void StoreOpenChannels();
 
-	TTab *Moved;                        // +0x2c
-	TTab *CurrentTab;                   // +0x30
-	std::unique_ptr<TWindow> LeftTabs;  // +0x34 (issue #108: the bar is their only owner, they are not its children)
-	std::unique_ptr<TWindow> RightTabs; // +0x38
-	bool Busy;                          // +0x3c, Rearrange is running
-	bool Changed;                       // +0x3d, the console updates its buttons when it is set
+	TTab *Moved;
+	TTab *CurrentTab;
+	std::unique_ptr<TWindow> LeftTabs; // issue #108: the bar is their only owner, they are not its children
+	std::unique_ptr<TWindow> RightTabs;
+	bool Busy;    // Rearrange is running
+	bool Changed; // the console updates its buttons when it is set
 
 protected:
 	void OnClose() override; // the two windows' tabs, then the bar's own (issue #108)
@@ -283,13 +283,13 @@ public:
 	void ParseInput(char **Text, char **Addressee, int *TalkMode, char *MessageSeparator) const;
 	[[nodiscard]] bool SaveChannel() const;
 
-	TTabBar *TabBar;          // +0x2c
-	TConsole *CurrentConsole; // +0x34
-	TTab *DefaultTab;         // +0x38
-	TEditLine *Input;         // +0x3c
-	int SwitchTime;           // +0x40, new channels become current only from this action number on
-	int HistoryPosition;      // +0x44
-	// The input history, a plain TTalkBuffer (+0x48, issue #81). TTalkBuffer's destructor is not virtual (the
+	TTabBar *TabBar;
+	TConsole *CurrentConsole;
+	TTab *DefaultTab;
+	TEditLine *Input;
+	int SwitchTime; // new channels become current only from this action number on
+	int HistoryPosition;
+	// The input history, a plain TTalkBuffer (issue #81). TTalkBuffer's destructor is not virtual (the
 	// original's; Talk.cpp's DeleteTextBuffer destroys the derived buffers through it), so the deleter calls it
 	// as a delete would, by its qualified name, which Clang's -Wdelete-non-abstract-non-virtual-dtor does not take for
 	// a virtual call (issue #111).
@@ -303,14 +303,14 @@ public:
 	std::unique_ptr<TTalkBuffer, THistoryDelete> History;
 	// The buttons shown by need (UpdateButtons) are owned by the child list while they are children and by the
 	// member while they are not, so they stay raw (notes/ownership.md, section 7; issue #108).
-	TMultiStateButton *VolumeButton;     // +0x4c, events 206-208
-	TSkinButton *CloseButton;            // +0x50, event 202
-	TToggleButton *ServerMessagesButton; // +0x54, event 203
-	TSkinButton *IgnoreButton;           // +0x58, event 204
-	TSkinButton *NewChannelButton;       // +0x5c, event 205
-	TSkinButton *MoveRightButton;        // +0x60, the tab bar's event 5
-	TSkinButton *MoveLeftButton;         // +0x64, the tab bar's event 6
-	int TalkMode;                        // +0x68
+	TMultiStateButton *VolumeButton;     // events 206-208
+	TSkinButton *CloseButton;            // event 202
+	TToggleButton *ServerMessagesButton; // event 203
+	TSkinButton *IgnoreButton;           // event 204
+	TSkinButton *NewChannelButton;       // event 205
+	TSkinButton *MoveRightButton;        // the tab bar's event 5
+	TSkinButton *MoveLeftButton;         // the tab bar's event 6
+	int TalkMode;
 
 protected:
 	void OnClose() override; // the destructor's preferences and hotkeys, the buttons that are not children (issue #108)

@@ -104,18 +104,18 @@ public:
 	void SetCancelButton(const char *Text, TCallback Callback);
 	void SetExtraButton(const char *Text, TCallback Callback);
 
-	TComponent *Dialog;        // +0x2c, the body (a window or a label)
-	TTextButton *OkButton;     // +0x30
-	TTextButton *CancelButton; // +0x34
-	TTextButton *ExtraButton;  // +0x38
-	TLabel *CaptionLabel;      // +0x3c
-	TSeparator *Separator;     // +0x40
-	bool Dragging;             // +0x44
-	int DragX;                 // +0x48, where the drag started
-	int DragY;                 // +0x4c
-	TFixedString<100> Caption; // +0x50
-	TCallback OkCallback;      // +0xb4, Return
-	TCallback CancelCallback;  // +0xbc, Escape
+	TComponent *Dialog; // the body (a window or a label)
+	TTextButton *OkButton;
+	TTextButton *CancelButton;
+	TTextButton *ExtraButton;
+	TLabel *CaptionLabel;
+	TSeparator *Separator;
+	bool Dragging;
+	int DragX; // where the drag started
+	int DragY;
+	TFixedString<100> Caption;
+	TCallback OkCallback;     // Return
+	TCallback CancelCallback; // Escape
 };
 
 // --- Question labels -------------------------------------------------------------
@@ -132,8 +132,8 @@ public:
 	}
 	void KeyPress(int Key) override;
 
-	TCallback YesCallback;      // +0x4c
-	TCallback NoAnswerCallback; // +0x54
+	TCallback YesCallback;
+	TCallback NoAnswerCallback;
 };
 
 // The logout question: Return, l and L send LogoutCallback and close the
@@ -148,8 +148,8 @@ public:
 	}
 	void KeyPress(int Key) override;
 
-	TCallback LogoutCallback; // +0x4c
-	TCallback ExitCallback;   // +0x54
+	TCallback LogoutCallback;
+	TCallback ExitCallback;
 };
 
 // A message to wait on: the "Connecting" dialogs. Event 31 is its
@@ -172,9 +172,9 @@ public:
 	void HandleEvent(int Event) override;
 	virtual void SetTimer(int Time, TCallback Callback);
 
-	std::unique_ptr<TTimer> Timer; // +0x4c (issue #58)
-	bool CloseOnMessage;           // +0x50
-	bool ClearOnAbort;             // +0x51
+	std::unique_ptr<TTimer> Timer; // issue #58
+	bool CloseOnMessage;
+	bool ClearOnAbort;
 };
 
 // --- Connecting -----------------------------------------------------------------
@@ -192,11 +192,11 @@ public:
 	// Time in tenths of a second.
 	void SetTime(int Time);
 
-	int Timeout;                   // +0x2c, tenths of a second
-	TFixedString<512> Text;        // +0x30, the time left
-	std::unique_ptr<TTimer> Timer; // +0x230, event 31 (issue #58)
-	TProgressBar *ProgressBar;     // +0x234
-	TLabel *TimeLabel;             // +0x238
+	int Timeout;                   // tenths of a second
+	TFixedString<512> Text;        // the time left
+	std::unique_ptr<TTimer> Timer; // event 31 (issue #58)
+	TProgressBar *ProgressBar;
+	TLabel *TimeLabel;
 };
 
 // --- Login and character list ------------------------------------------------
@@ -212,9 +212,9 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TPasswordEditLine *Account;              // +0x2c
-	TPasswordEditLine *Password;             // +0x30
-	std::unique_ptr<TFocusGroup> FocusGroup; // +0x34 (issue #58)
+	TPasswordEditLine *Account;
+	TPasswordEditLine *Password;
+	std::unique_ptr<TFocusGroup> FocusGroup; // issue #58
 };
 
 // "Select Character": the account's characters and its premium state. With a
@@ -238,9 +238,9 @@ public:
 	void PositionChanged() override;
 	virtual void SetTimeout(int seconds);
 
-	TListBox *ListBox;             // +0x2c
-	std::unique_ptr<TTimer> Timer; // +0x30, event 31 (issue #58)
-	int Seconds;                   // +0x34
+	TListBox *ListBox;
+	std::unique_ptr<TTimer> Timer; // event 31 (issue #58)
+	int Seconds;
 };
 
 // --- Moving objects -------------------------------------------------------------
@@ -254,16 +254,16 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TObject DraggedObject;           // +0x2c
-	int SourceIndex;                 // +0x38, GetDragObject's Index
-	int SourceX;                     // +0x3c
-	int SourceY;                     // +0x40
-	int SourceZ;                     // +0x44
-	int DestinationX;                // +0x48
-	int DestinationY;                // +0x4c
-	int DestinationZ;                // +0x50
-	THorizontalScrollBar *ScrollBar; // +0x54
-	int LastDigit;                   // +0x5c, the digit typed before
+	TObject DraggedObject;
+	int SourceIndex; // GetDragObject's Index
+	int SourceX;
+	int SourceY;
+	int SourceZ;
+	int DestinationX;
+	int DestinationY;
+	int DestinationZ;
+	THorizontalScrollBar *ScrollBar;
+	int LastDigit; // the digit typed before
 };
 
 // --- Outfit -------------------------------------------------------------------
@@ -284,16 +284,16 @@ public:
 	}
 	void HandleEvent(int Event) override;
 
-	TOutfitIcon *OutfitIcon;                       // +0x2c
-	std::array<TTextButton *, 4> PartButtons;      // +0x30, events 1000-1003
-	std::unique_ptr<TRadioButtonGroup> PartGroup;  // +0x40 (issue #58)
-	std::array<TColorButton *, 133> ColorButtons;  // +0x44, events 2000-2132
-	std::unique_ptr<TRadioButtonGroup> ColorGroup; // +0x258 (issue #58)
-	std::array<int, 4> Colors;                     // +0x25c
-	int Outfit;                                    // +0x26c
-	int FirstOutfit;                               // +0x270
-	int LastOutfit;                                // +0x274
-	int Part;                                      // +0x278, the part whose colour the buttons show
+	TOutfitIcon *OutfitIcon;
+	std::array<TTextButton *, 4> PartButtons;      // events 1000-1003
+	std::unique_ptr<TRadioButtonGroup> PartGroup;  // issue #58
+	std::array<TColorButton *, 133> ColorButtons;  // events 2000-2132
+	std::unique_ptr<TRadioButtonGroup> ColorGroup; // issue #58
+	std::array<int, 4> Colors;
+	int Outfit;
+	int FirstOutfit;
+	int LastOutfit;
+	int Part; // the part whose colour the buttons show
 };
 
 // --- Texts --------------------------------------------------------------------
@@ -308,10 +308,10 @@ public:
 	void KeyPress(int Key) override { EditText->KeyPress(Key); }
 	void HandleEvent(int Event) override;
 
-	uint32 ObjectNumber;     // +0x2c, the server's number for SendEditText
-	TObject Obj;             // +0x30
-	TObjectIcon *ObjectIcon; // +0x3c
-	TEditText *EditText;     // +0x40
+	uint32 ObjectNumber; // the server's number for SendEditText
+	TObject Obj;
+	TObjectIcon *ObjectIcon;
+	TEditText *EditText;
 };
 
 // "Edit List": a house list, one name per line.
@@ -323,9 +323,9 @@ public:
 	void KeyPress(int Key) override { EditText->KeyPress(Key); }
 	void HandleEvent(int Event) override;
 
-	int Type;            // +0x2c, for SendEditHouseText
-	uint32 Identifier;   // +0x30
-	TEditText *EditText; // +0x34
+	int Type; // for SendEditHouseText
+	uint32 Identifier;
+	TEditText *EditText;
 };
 
 // --- Ignore list --------------------------------------------------------------
@@ -357,8 +357,8 @@ struct TIgnoreEntry {
 		return Text;
 	}
 
-	TFixedString<30> Name; // +0x00
-	bool Permanent;        // +0x1e
+	TFixedString<30> Name;
+	bool Permanent;
 };
 // The original's layout (no pointers: the same on x64), with Name a TFixedString (issue #57).
 static_assert(sizeof(TIgnoreEntry) == 0x1f && offsetof(TIgnoreEntry, Name) == 0 && offsetof(TIgnoreEntry, Permanent) == 0x1e,
@@ -376,21 +376,21 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TCheckBox *IgnoreListCheckBox;              // +0x2c, "Activate Ignore List"
-	TFontListBox *IgnoreList;                   // +0x30, event 11
-	TTextButton *AddIgnoreButton;               // +0x34, event 709
-	TTextButton *DeleteIgnoreButton;            // +0x38, event 710
-	TCheckBox *IgnorePermanently;               // +0x3c
-	TCheckBox *IgnoreYelling;                   // +0x40
-	TCheckBox *IgnorePrivate;                   // +0x44
-	TCheckBox *WhiteListCheckBox;               // +0x48, "Activate White List"
-	TFontListBox *WhiteList;                    // +0x4c, event 11
-	TTextButton *AddWhiteButton;                // +0x50, event 712
-	TTextButton *DeleteWhiteButton;             // +0x54, event 713
-	TCheckBox *AllowPermanently;                // +0x58
-	TCheckBox *AllowBuddies;                    // +0x5c, "Allow VIPs to message you"
-	TIndexedVector<TIgnoreEntry> IgnoreEntries; // +0x60
-	TIndexedVector<TIgnoreEntry> WhiteEntries;  // +0x98
+	TCheckBox *IgnoreListCheckBox;   // "Activate Ignore List"
+	TFontListBox *IgnoreList;        // event 11
+	TTextButton *AddIgnoreButton;    // event 709
+	TTextButton *DeleteIgnoreButton; // event 710
+	TCheckBox *IgnorePermanently;
+	TCheckBox *IgnoreYelling;
+	TCheckBox *IgnorePrivate;
+	TCheckBox *WhiteListCheckBox;   // "Activate White List"
+	TFontListBox *WhiteList;        // event 11
+	TTextButton *AddWhiteButton;    // event 712
+	TTextButton *DeleteWhiteButton; // event 713
+	TCheckBox *AllowPermanently;
+	TCheckBox *AllowBuddies; // "Allow VIPs to message you"
+	TIndexedVector<TIgnoreEntry> IgnoreEntries;
+	TIndexedVector<TIgnoreEntry> WhiteEntries;
 };
 
 // The qsort order of the names (an inline function: its address is
@@ -409,7 +409,7 @@ public:
 	void KeyPress(int Key) override { EditText->KeyPress(Key); }
 	void HandleEvent(int Event) override;
 
-	TEditText *EditText; // +0x2c
+	TEditText *EditText;
 };
 
 // The channel ID of the offer that opens an own private channel, and the premium days of a gratis premium account.
@@ -430,10 +430,10 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TListBox *ListBox;                 // +0x2c, double click 301
-	TEditLine *NameEdit;               // +0x30
-	int NumberOfChannels;              // +0x3c
-	std::unique_ptr<int[]> ChannelIDs; // +0x40 (issue #58)
+	TListBox *ListBox; // double click 301
+	TEditLine *NameEdit;
+	int NumberOfChannels;
+	std::unique_ptr<int[]> ChannelIDs; // issue #58
 };
 
 // "Invite player to private chat channel" and "Exclude player from private
@@ -444,8 +444,8 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	bool Exclude;        // +0x2c
-	TEditLine *NameEdit; // +0x30
+	bool Exclude;
+	TEditLine *NameEdit;
 };
 
 // "Report Rule Violation": a player's request to the gamemasters, one
@@ -456,7 +456,7 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TEditLine *TextEdit; // +0x2c
+	TEditLine *TextEdit;
 };
 
 // --- VIP list -----------------------------------------------------------------
@@ -468,7 +468,7 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TEditLine *NameEdit; // +0x2c
+	TEditLine *NameEdit;
 };
 
 // "Change player in VIP list": the icon, the description and the login
@@ -482,11 +482,11 @@ public:
 	void KeyPress(int Key) override { Description->KeyPress(Key); }
 	void HandleEvent(int Event) override;
 
-	int CharacterID;                              // +0x2c
-	std::unique_ptr<TRadioButtonGroup> IconGroup; // +0x30 (issue #58)
-	TCheckBox *Notify;                            // +0x34
-	TEditText *Description;                       // +0x38
-	std::array<TIconButton *, 11> IconButtons;    // +0x3c
+	int CharacterID;
+	std::unique_ptr<TRadioButtonGroup> IconGroup; // issue #58
+	TCheckBox *Notify;
+	TEditText *Description;
+	std::array<TIconButton *, 11> IconButtons;
 };
 
 // --- Updates, help and hints ----------------------------------------------------
@@ -500,7 +500,7 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	void (*OpenURL)(const char *URL); // +0x2c
+	void (*OpenURL)(const char *URL);
 };
 
 // "Hints for Tibia": the hints shown so far.
@@ -510,7 +510,7 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TListBox *ListBox; // +0x2c, double click 1
+	TListBox *ListBox; // double click 1
 };
 
 // --- Rule violations (gamemasters) ----------------------------------------------
@@ -530,15 +530,15 @@ public:
 	int GetReason();
 	[[nodiscard]] int GetAction() const;
 
-	std::unique_ptr<TFocusGroup> FocusGroup; // +0x2c (issue #58)
-	TEditLine *NameEdit;                     // +0x30
-	TListBox *ReasonList;                    // +0x34, event 21
-	TListBox *ActionList;                    // +0x38
-	TEditLine *CommentEdit;                  // +0x3c
-	TEditLine *StatementEdit;                // +0x40
-	TCheckBox *IPBanishment;                 // +0x44
-	uint32 StatementID;                      // +0x48
-	std::array<int, 50> Reasons;             // +0x4c, the right of each reason line, -1 after the last
+	std::unique_ptr<TFocusGroup> FocusGroup; // issue #58
+	TEditLine *NameEdit;
+	TListBox *ReasonList; // event 21
+	TListBox *ActionList;
+	TEditLine *CommentEdit;
+	TEditLine *StatementEdit;
+	TCheckBox *IPBanishment;
+	uint32 StatementID;
+	std::array<int, 50> Reasons; // the right of each reason line, -1 after the last
 };
 
 // --- Automap marks ---------------------------------------------------------------
@@ -554,11 +554,11 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TCoordinate Coordinate;                       // +0x2c
-	TMark Mark;                                   // +0x38
-	TEditLine *TextEdit;                          // +0xa8
-	std::unique_ptr<TRadioButtonGroup> TypeGroup; // +0xac (issue #58)
-	std::array<TIconButton *, 14> TypeButtons;    // +0xb0
+	TCoordinate Coordinate;
+	TMark Mark;
+	TEditLine *TextEdit;
+	std::unique_ptr<TRadioButtonGroup> TypeGroup; // issue #58
+	std::array<TIconButton *, 14> TypeButtons;
 };
 
 // --- Options -----------------------------------------------------------------------
@@ -578,12 +578,12 @@ public:
 	TGeneralOptionsDialog(void (*_OpenURL)(const char *URL));
 	void HandleEvent(int Event) override;
 
-	TCheckBox *TextualEffects;        // +0x2c
-	TCheckBox *CreatureNames;         // +0x30
-	TCheckBox *ShowHints;             // +0x34
-	TCheckBox *ClassicControl;        // +0x38
-	TCheckBox *AutoChaseOff;          // +0x3c
-	void (*OpenURL)(const char *URL); // +0x40, the Help button (701)
+	TCheckBox *TextualEffects;
+	TCheckBox *CreatureNames;
+	TCheckBox *ShowHints;
+	TCheckBox *ClassicControl;
+	TCheckBox *AutoChaseOff;
+	void (*OpenURL)(const char *URL); // the Help button (701)
 	TCheckBox *DragFullStacks;        // Patella-Plus, not in the original
 };
 
@@ -599,14 +599,14 @@ public:
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
 
-	TCheckBox *Fullscreen;                    // +0x2c
-	TListBox *ResolutionList;                 // +0x30
-	int NumberOfModes;                        // +0x34
-	std::unique_ptr<TFullscreenMode[]> Modes; // +0x38, the surface's list (issue #58)
-	void (*SetDisplayMode)(int Mode);         // +0x3c, 1 windowed, 2 fullscreen
-	TWindow *Parent;                          // +0x40, passed on to the advanced options
-	TTextButton *AdvancedButton;              // +0x44
-	void (*OpenURL)(const char *URL);         // +0x48
+	TCheckBox *Fullscreen;
+	TListBox *ResolutionList;
+	int NumberOfModes;
+	std::unique_ptr<TFullscreenMode[]> Modes; // the surface's list (issue #58)
+	void (*SetDisplayMode)(int Mode);         // 1 windowed, 2 fullscreen
+	TWindow *Parent;                          // passed on to the advanced options
+	TTextButton *AdvancedButton;
+	void (*OpenURL)(const char *URL);
 };
 
 // "Advanced Graphics Options": light, stretching, the mouse pointer, the
@@ -621,16 +621,16 @@ public:
 	void Draw(int Surface, int x, int y) override;
 	void HandleEvent(int Event) override;
 
-	TComponent *Receiver;                           // +0x2c
-	TCheckBox *LightEffects;                        // +0x30
-	TCheckBox *NoStretching;                        // +0x34
-	TCheckBox *WindowsMousepointer;                 // +0x38
-	THorizontalScrollBar *Framerate;                // +0x3c, 10-201 (201 is no limit), event 30
-	void (*OpenURL)(const char *URL);               // +0x40
-	TTextButton *DirectX5Button;                    // +0x44
-	TTextButton *DirectX9Button;                    // +0x48
-	TTextButton *OpenGLButton;                      // +0x4c
-	std::unique_ptr<TRadioButtonGroup> EngineGroup; // +0x50 (issue #58)
+	TComponent *Receiver;
+	TCheckBox *LightEffects;
+	TCheckBox *NoStretching;
+	TCheckBox *WindowsMousepointer;
+	THorizontalScrollBar *Framerate; // 10-201 (201 is no limit), event 30
+	void (*OpenURL)(const char *URL);
+	TTextButton *DirectX5Button;
+	TTextButton *DirectX9Button;
+	TTextButton *OpenGLButton;
+	std::unique_ptr<TRadioButtonGroup> EngineGroup; // issue #58
 	// The x64 client (Patella-Modern issue #31, plan 6.3): the three buttons choose the graphics device
 	// ("Automatic", "GPU", "CPU" in the places of DirectX5Button, DirectX9Button, OpenGLButton), and the
 	// line above them names the device in use. Since issue #111 without PATELLA_VULKAN's guard (the oracle,
@@ -646,12 +646,12 @@ public:
 	TConsoleOptionsDialog(void (*_OpenURL)(const char *URL));
 	void HandleEvent(int Event) override;
 
-	TCheckBox *InfoMessages;          // +0x2c
-	TCheckBox *EventMessages;         // +0x30
-	TCheckBox *StatusMessages;        // +0x34
-	TCheckBox *TimeStamps;            // +0x38
-	TCheckBox *PrivateMessages;       // +0x3c
-	void (*OpenURL)(const char *URL); // +0x40
+	TCheckBox *InfoMessages;
+	TCheckBox *EventMessages;
+	TCheckBox *StatusMessages;
+	TCheckBox *TimeStamps;
+	TCheckBox *PrivateMessages;
+	void (*OpenURL)(const char *URL);
 };
 
 // "Network Options".
@@ -660,8 +660,8 @@ public:
 	TNetworkOptionsDialog(void (*_OpenURL)(const char *URL));
 	void HandleEvent(int Event) override;
 
-	TCheckBox *TestServerLogin;       // +0x2c
-	void (*OpenURL)(const char *URL); // +0x30
+	TCheckBox *TestServerLogin;
+	void (*OpenURL)(const char *URL);
 };
 
 // "Hotkey Options": the texts of the 36 hotkeys (F1-F12 with Shift and
@@ -674,11 +674,11 @@ public:
 	void HandleEvent(int Event) override;
 	void UpdateLine(int Number);
 
-	std::array<TFixedString<256>, HOTKEYS> Texts; // +0x2c
-	std::array<bool, HOTKEYS> AutoSend;           // +0x242c
-	TFontListBox *ListBox;                        // +0x2450, event 11
-	TEditLine *TextEdit;                          // +0x2454
-	TCheckBox *AutoSendCheckBox;                  // +0x2458
-	int Selected;                                 // +0x245c, -1 for none
+	std::array<TFixedString<256>, HOTKEYS> Texts;
+	std::array<bool, HOTKEYS> AutoSend;
+	TFontListBox *ListBox; // event 11
+	TEditLine *TextEdit;
+	TCheckBox *AutoSendCheckBox;
+	int Selected; // -1 for none
 };
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)
