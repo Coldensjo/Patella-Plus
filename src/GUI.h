@@ -417,6 +417,6 @@ patella::TGUI &GUI();
 
 inline bool TElement::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	Help().SetHelpHandle(HELP_NONE);
+	Help().SetHandle(HELP_NONE);
 	return false;
 }

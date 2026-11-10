@@ -127,7 +127,7 @@ void THelpBubble::Place(TWindow *Window)
 {
 	const int Margin = SkinProperties().HelpBubbleMargin;
 	int HelpX, HelpY, HelpWidth, HelpHeight;
-	Help().GetHelpArea(&HelpX, &HelpY, &HelpWidth, &HelpHeight);
+	Help().GetArea(&HelpX, &HelpY, &HelpWidth, &HelpHeight);
 	int w = Width;
 	int h = Height;
 	int newX = HelpX - w - Margin;

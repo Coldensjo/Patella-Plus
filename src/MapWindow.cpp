@@ -353,15 +353,15 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	if (Preferences().GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
 		y = FieldY * 32 - (352 - Height) / 2 - Player->GetDeltaY() - 32;
-		Help().MoveHelpPosition(x, y);
-		Help().SetHelpSize(32, 32);
+		Help().MovePosition(x, y);
+		Help().SetSize(32, 32);
 	} else {
 		x = (FieldX * 32 - Player->GetDeltaX() - 32) * Width / 480;
 		y = (FieldY * 32 - Player->GetDeltaY() - 32) * Height / 352;
-		Help().MoveHelpPosition(x, y);
-		Help().SetHelpSize(Width * 32 / 480, Height * 32 / 352);
+		Help().MovePosition(x, y);
+		Help().SetSize(Width * 32 / 480, Height * 32 / 352);
 	}
-	Help().SetHelpHandle(Handle);
+	Help().SetHandle(Handle);
 	return true;
 }
 

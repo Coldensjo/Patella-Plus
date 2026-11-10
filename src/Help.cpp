@@ -13,25 +13,25 @@
 
 // The data is THelp's (Help.h).
 
-void patella::THelp::SetHelpPosition(int x, int y)
+void patella::THelp::SetPosition(int x, int y)
 {
 	HelpX = x;
 	HelpY = y;
 }
 
-void patella::THelp::MoveHelpPosition(int dx, int dy)
+void patella::THelp::MovePosition(int dx, int dy)
 {
 	HelpX += dx;
 	HelpY += dy;
 }
 
-void patella::THelp::SetHelpSize(int Width, int Height)
+void patella::THelp::SetSize(int Width, int Height)
 {
 	HelpWidth = Width;
 	HelpHeight = Height;
 }
 
-void patella::THelp::SetHelpHandle(int Handle)
+void patella::THelp::SetHandle(int Handle)
 {
 	const bool Changed = HelpHandle != Handle;
 	HelpHandle = Handle;
@@ -39,7 +39,7 @@ void patella::THelp::SetHelpHandle(int Handle)
 		HelpHandleChanged = true;
 }
 
-void patella::THelp::GetHelpArea(int *x, int *y, int *Width, int *Height) const
+void patella::THelp::GetArea(int *x, int *y, int *Width, int *Height) const
 {
 	*x = HelpX;
 	*y = HelpY;
@@ -47,20 +47,20 @@ void patella::THelp::GetHelpArea(int *x, int *y, int *Width, int *Height) const
 	*Height = HelpHeight;
 }
 
-int patella::THelp::GetHelpHandle() const
+int patella::THelp::GetHandle() const
 {
 	return HelpHandle;
 }
 
 // Reports a change of the handle once.
-bool patella::THelp::TakeHelpHandleChanged()
+bool patella::THelp::TakeHandleChanged()
 {
 	const bool Changed = HelpHandleChanged;
 	HelpHandleChanged = false;
 	return Changed;
 }
 
-void patella::THelp::InitHelp()
+void patella::THelp::Init()
 {
 	HelpHandle = HELP_UNSET;
 	HelpHandleChanged = false;
@@ -90,7 +90,7 @@ int patella::THelp::PopEventHelp()
 // inside the text. Texts without arguments are also passed as the format, in
 // std::format's language: no text has a brace, and the longest (1297
 // characters) fits HelpText.
-const char *patella::THelp::GetHelpText(int Handle)
+const char *patella::THelp::GetText(int Handle)
 {
 	switch (Handle) {
 	case HELP_AUTOMAP:
@@ -383,13 +383,13 @@ const char *patella::THelp::GetEventHelpText(int Number)
 }
 
 // The text for the current help handle.
-const char *patella::THelp::GetCurrentHelpText()
+const char *patella::THelp::GetCurrentText()
 {
-	return GetHelpText(HelpHandle);
+	return GetText(HelpHandle);
 }
 
 // Empty. ExitControl calls it where Help.cpp's exit belongs in the reverse
 // order of InitControl.
-void patella::THelp::ExitHelp()
+void patella::THelp::Exit()
 {
 }

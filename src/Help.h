@@ -10,14 +10,14 @@ inline constexpr int EVENTHELPS = 14;
 // The help numbers, named. Enumerators for the reason GUI.h gives at the modifier flags. No names of the original are
 // known; each is taken from the title of the text Help.cpp returns for the number, or from the code that passes it.
 //
-// HELP_* are the Handle of SetHelpHandle, GetHelpHandle and GetHelpText: what the help bubble of the help mode
+// HELP_* are the Handle of THelp::SetHandle, THelp::GetHandle and THelp::GetText: what the help bubble of the help mode
 // explains. 10-23 are parts of the screen, which the windows' HelpMouseMove set. 1000-1002 are things on the map,
 // which TMapWindow::HelpMouseMove sets. 1100-1112 are the lens help of an object type, read from Tibia.dat (LENSHELP,
-// Objects.h), so only GetHelpText's case labels have them; a type without one has HELP_NONE (Objects.cpp).
+// Objects.h), so only THelp::GetText's case labels have them; a type without one has HELP_NONE (Objects.cpp).
 enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	HELP_NONE = 0, // no bubble: an element that explains nothing, a field with nothing to explain
-	// InitHelp's, until the first SetHelpHandle. Nothing sets it and it has no text, so that first call is always a
-	// change, also when it sets HELP_NONE.
+	// THelp::Init's, until the first THelp::SetHandle. Nothing sets it and it has no text, so that first call is always
+	// a change, also when it sets HELP_NONE.
 	HELP_UNSET = 1,
 	HELP_AUTOMAP = 10,
 	HELP_STATUS_BARS = 11,
@@ -88,25 +88,25 @@ public:
 	THelp &operator=(THelp &&) = delete;
 	~THelp() = default;
 
-	void SetHelpPosition(int x, int y);
-	void MoveHelpPosition(int dx, int dy);
-	void SetHelpSize(int Width, int Height);
-	void SetHelpHandle(int Handle);
-	void GetHelpArea(int *x, int *y, int *Width, int *Height) const;
-	[[nodiscard]] int GetHelpHandle() const;
-	bool TakeHelpHandleChanged();
-	void InitHelp();
+	void SetPosition(int x, int y);
+	void MovePosition(int dx, int dy);
+	void SetSize(int Width, int Height);
+	void SetHandle(int Handle);
+	void GetArea(int *x, int *y, int *Width, int *Height) const;
+	[[nodiscard]] int GetHandle() const;
+	bool TakeHandleChanged();
+	void Init();
 	// Empty, so static (as TCommunication::ExitCommunication).
-	static void ExitHelp();
+	static void Exit();
 	int GetEventHelp();
 	int PopEventHelp();
-	const char *GetHelpText(int Handle);
+	const char *GetText(int Handle);
 	void AddEventHelp(int Number);
 	void CheckEventHelpName(const char *Name);
 	void CheckEventHelpPosition(int x, int y, int z);
 	const char *GetEventHelpTitle(int Number);
 	const char *GetEventHelpText(int Number);
-	const char *GetCurrentHelpText();
+	const char *GetCurrentText();
 
 private:
 	bool HelpHandleChanged{};

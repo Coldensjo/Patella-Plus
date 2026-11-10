@@ -298,18 +298,18 @@ void patella::TGUI::MouseMove(int x, int y)
 		ModalWindow->MouseMove(x - ModalWindow->OffsetX, y - ModalWindow->OffsetY);
 		break;
 	case ACTIONSTATE_HELP: {
-		Help.SetHelpPosition(0, 0);
-		Help.SetHelpSize(0, 0);
+		Help.SetPosition(0, 0);
+		Help.SetSize(0, 0);
 		MainWindow->HelpMouseMove(x, y);
 		// The bubble is kept in a local: ModalWindow is read after
 		// HelpMouseMove and written only after Place, so an exception before
 		// that leaves it as it was.
 		THelpBubble *Bubble = static_cast<THelpBubble *>(ModalWindow);
-		if (Help.TakeHelpHandleChanged()) {
+		if (Help.TakeHandleChanged()) {
 			DeleteComponent(Bubble);
 			Bubble = nullptr;
-			if (Help.GetHelpHandle() != HELP_NONE)
-				Bubble = new THelpBubble(Help.GetCurrentHelpText());
+			if (Help.GetHandle() != HELP_NONE)
+				Bubble = new THelpBubble(Help.GetCurrentText());
 		}
 		if (Bubble != nullptr)
 			Bubble->Place(MainWindow.get());
@@ -990,7 +990,7 @@ void patella::TGUI::ProcessEvents()
 			break;
 		case MESSAGE_HELP_MODE:
 			Interaction.SetActionState(ACTIONSTATE_HELP);
-			Help.SetHelpHandle(HELP_NONE);
+			Help.SetHandle(HELP_NONE);
 			break;
 		case MESSAGE_OPEN_PRIVATE_CONVERSATION:
 			MainWindow->Console->OpenChannel(TALK_PRIVATE_MESSAGE, TALK_PRIVATE_MESSAGE, reinterpret_cast<const char *>(Param2), -1, reinterpret_cast<const char *>(Param2));
@@ -1127,7 +1127,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		Inventory().ResetInventory();
 		Creatures().InitCreatures();
 		::Interaction().InitStatus(Gamemaster, LinkCopyWarning);
-		::Help().InitHelp();
+		::Help().Init();
 		Preferences().InitPreferences(::Talk());
 		::Talk().InitTalk();
 		Graphics().InitGraphics(0xa00000);
@@ -1164,7 +1164,7 @@ void patella::TGUI::ExitControl()
 	GraphicsEngine().SurfaceExitInstance();
 	Preferences().ExitPreferences(::Talk());
 	::Talk().ExitTalk();
-	::Help().ExitHelp();
+	::Help().Exit();
 	::Interaction().ExitStatus();
 	Creatures().ExitCreatures();
 	Inventory().ExitInventory();

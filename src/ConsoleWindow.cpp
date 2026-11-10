@@ -963,11 +963,11 @@ TWindow *TTabBar::GetContainer(TComponent *Child)
 // The help of the console (handle 23) for the whole parent.
 bool TTabBar::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] int y)
 {
-	Help().SetHelpHandle(HELP_CONSOLE_CHANNELS);
+	Help().SetHandle(HELP_CONSOLE_CHANNELS);
 	const TComponent *Parent = GetParent();
 	PATELLA_ASSERT(Parent!=nullptr);
-	Help().SetHelpSize(Parent->Width, Parent->Height);
-	Help().MoveHelpPosition(-OffsetX, -OffsetY);
+	Help().SetSize(Parent->Width, Parent->Height);
+	Help().MovePosition(-OffsetX, -OffsetY);
 	return true;
 }
 
@@ -1322,8 +1322,8 @@ bool TConsoleWindow::LeftButtonDown(int x, int y, int Flags)
 bool TConsoleWindow::HelpMouseMove(int x, int y)
 {
 	if (!TWindow::HelpMouseMove(x, y)) {
-		Help().SetHelpHandle(HELP_CONSOLE);
-		Help().SetHelpSize(Width, Height);
+		Help().SetHandle(HELP_CONSOLE);
+		Help().SetSize(Width, Height);
 	}
 	return true;
 }
