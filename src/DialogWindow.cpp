@@ -301,7 +301,7 @@ TContentWindow *TDialogWindow::GetContentWindow(int Identifier)
 void TDialogWindow::StoreOpenDialogs()
 {
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext()) {
-		if ((static_cast<TContentWindow *>(Child))->Identifier < 0x40)
+		if ((static_cast<TContentWindow *>(Child))->Identifier < CONTAINER_WINDOW)
 			AddOpenDialog((static_cast<TContentWindow *>(Child))->Identifier);
 	}
 }
@@ -672,7 +672,7 @@ void TSubWindow::SetSize(int Width, int Height)
 void TSubWindow::Arrange()
 {
 	TContentWindow::Arrange();
-	if (Identifier >= 0x40) {
+	if (Identifier >= CONTAINER_WINDOW) {
 		PATELLA_ASSERT(Body!=nullptr);
 		UpdateContainerUpButton(Body);
 	}

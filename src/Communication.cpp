@@ -296,7 +296,7 @@ void patella::TCommunication::SendMoveObject(int x, int y, int z, int ObjectType
 		SetStatusMessage("You cannot move this object.", false);
 		return;
 	}
-	if (x != 0xffff)
+	if (x != POSITION_NOT_ON_MAP)
 		PlayerState.ClearPlayerSteps();
 	Network.BeginCommand(0x78);
 	Network.SendWord(x);
@@ -351,7 +351,7 @@ void patella::TCommunication::SendRejectTrade()
 // 0x4056f0, lines 401-401
 void patella::TCommunication::SendUseObject(int x, int y, int z, int ObjectType, int Position, int Container)
 {
-	if (x != 0xffff)
+	if (x != POSITION_NOT_ON_MAP)
 		PlayerState.ClearPlayerSteps();
 	Network.BeginCommand(0x82);
 	Network.SendWord(x);
@@ -366,7 +366,7 @@ void patella::TCommunication::SendUseObject(int x, int y, int z, int ObjectType,
 // 0x4058f0, lines 424-424
 void patella::TCommunication::SendUseObjectWith(int x1, int y1, int z1, int ObjectType1, int Position1, int x2, int y2, int z2, int ObjectType2, int Position2)
 {
-	if (x1 != 0xffff || x2 != 0xffff)
+	if (x1 != POSITION_NOT_ON_MAP || x2 != POSITION_NOT_ON_MAP)
 		PlayerState.ClearPlayerSteps();
 	Network.BeginCommand(0x83);
 	Network.SendWord(x1);

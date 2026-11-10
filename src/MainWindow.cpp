@@ -569,7 +569,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMainWindow::OpenContainer(int Container) const
 {
 	PATELLA_ASSERT(DialogWindow!=nullptr);
-	TSubWindow *Window = static_cast<TSubWindow *>(DialogWindow->GetContentWindow(Container + 0x40));
+	TSubWindow *Window = static_cast<TSubWindow *>(DialogWindow->GetContentWindow(Container + CONTAINER_WINDOW));
 	if (Window == nullptr) {
 		DialogWindow->Rearrange(16, CreateContainerWindow(Container));
 		return;
@@ -592,7 +592,7 @@ PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 void TMainWindow::CloseContainer(int Container) const
 {
 	if (DialogWindow != nullptr) {
-		TContentWindow *Window = DialogWindow->GetContentWindow(Container + 0x40);
+		TContentWindow *Window = DialogWindow->GetContentWindow(Container + CONTAINER_WINDOW);
 		if (Window != nullptr)
 			DialogWindow->DeleteChild(Window);
 	}

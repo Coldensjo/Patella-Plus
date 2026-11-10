@@ -38,6 +38,8 @@ class TSkinButton; // DialogElements.h
 // users (MainWindow.cpp and ContentWindows.cpp's CreateTradeWindow) find it without ContentWindows.cpp including
 // MainWindow.h.
 inline constexpr int TRADE_WINDOW = 8;
+// A container's window: this plus the container number. An enumerator for the reason in GUI.h.
+enum : int { CONTAINER_WINDOW = 0x40 }; // NOLINT(cppcoreguidelines-use-enum-class): an int constant
 
 // A window in a TDialogWindow. Identifier: 1 and 2 the two inventory
 // windows, 3 the automap, 4 the status bars, 5 the buttons, 6 skills, 7 battle, TRADE_WINDOW

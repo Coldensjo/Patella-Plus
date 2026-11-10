@@ -426,7 +426,7 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	AddEntry(EVENT_MENU_LOOK, "Look", ClassicControl ? nullptr : "(Shift)");
 	if (UsedObject != 0) {
 		if (GetObjectFlag(UsedObject, CONTAINER)) {
-			if (UsedObjectX == 0xFFFF && UsedObjectY >= 64) {
+			if (UsedObjectX == POSITION_NOT_ON_MAP && UsedObjectY >= POSITION_CONTAINER_BASE) {
 				AddEntry(EVENT_MENU_OPEN, "Open", ClassicControl ? nullptr : "(Ctrl)");
 				AddEntry(EVENT_MENU_OPEN_NEW_WINDOW, "Open in new window", nullptr);
 			} else {
@@ -443,7 +443,7 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 	Separator = true;
 	if (LookedObject != CREATURE && !GetObjectFlag(LookedObject, UNMOVE) && GetObjectFlag(LookedObject, TAKE))
 		AddEntry(EVENT_MENU_TRADE_WITH, "Trade with ...", nullptr);
-	if (LookedObjectX == 0xFFFF && LookedObjectY >= 64 && GetContainerHasParent(LookedObjectY - 64))
+	if (LookedObjectX == POSITION_NOT_ON_MAP && LookedObjectY >= POSITION_CONTAINER_BASE && GetContainerHasParent(LookedObjectY - POSITION_CONTAINER_BASE))
 		AddEntry(EVENT_MENU_MOVE_UP, "Move up", nullptr);
 	if (CreatureID != 0) {
 		if (CreatureID == GetPlayerID()) {
@@ -562,12 +562,12 @@ void TObjectContextMenu::HandleEvent(int Event)
 		PATELLA_ASSERT_VALUES(LookedObjectX==0xFFFF, LookedObjectX);
 		PATELLA_ASSERT(LookedObject.Type!=CREATURE);
 		SendMoveObject(LookedObjectX, LookedObjectY, LookedObjectZ, LookedObject.Type, LookedObjectIndex,
-			LookedObjectX, LookedObjectY, 0xfe, GetObjectFlag(LookedObject, CUMULATIVE) ? LookedObject.Data : 1);
+			LookedObjectX, LookedObjectY, POSITION_PARENT_CONTAINER, GetObjectFlag(LookedObject, CUMULATIVE) ? LookedObject.Data : 1);
 		break;
 	case EVENT_MENU_OPEN:
 		PATELLA_ASSERT_VALUES(UsedObjectX==0xFFFF, UsedObjectX);
 		PATELLA_ASSERT_VALUES(UsedObjectY>=64, UsedObjectY);
-		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, UsedObjectY - 64);
+		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, UsedObjectY - POSITION_CONTAINER_BASE);
 		break;
 	case EVENT_MENU_OPEN_NEW_WINDOW:
 		SendUseObject(UsedObjectX, UsedObjectY, UsedObjectZ, UsedObject.Type, UsedObjectIndex, GetFreeContainer());

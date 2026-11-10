@@ -874,7 +874,7 @@ TCharacterListDialog::TCharacterListDialog()
 		Status.Format("<font=4><red={}><green={}><blue={}>Account Status:\nFree Account",
 			SkinProperties().StyleB08.Data78.Color.R, SkinProperties().StyleB08.Data78.Color.G,
 			SkinProperties().StyleB08.Data78.Color.B);
-	} else if (PremiumDays == 0xffff) {
+	} else if (PremiumDays == PREMIUM_DAYS_GRATIS) {
 		Status.Format("<font=4><red={}><green={}><blue={}>Account Status:\nGratis Premium Account\n",
 			SkinProperties().StyleB08.Data78.Color.R, SkinProperties().StyleB08.Data78.Color.G,
 			SkinProperties().StyleB08.Data78.Color.B);
@@ -1664,7 +1664,7 @@ void TNewChannelDialog::HandleEvent(int Event)
 		const int Selection = ListBox->GetSelection();
 		if (Selection != -1) {
 			const int ChannelID = ChannelIDs[Selection];
-			if (ChannelID == 0xffff)
+			if (ChannelID == CHANNEL_NEW_PRIVATE)
 				SendOpenPrivateChannel();
 			else
 				SendJoinChannel(ChannelID);
