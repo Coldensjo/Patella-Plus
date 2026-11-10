@@ -1,4 +1,4 @@
-// Script.h: reading and writing script files (Tibia.cfg) and binary files.
+// Script.h: reading script files (Tibia.cfg), reading and writing binary files.
 //
 // The class, member and token names follow CipSoft's game server, whose
 // TReadScriptFile has the same tokenizer (the binary names its state variable
@@ -103,45 +103,6 @@ public:
 	int CoordY;                             // +0x800
 	int CoordZ;                             // +0x804
 	char Special;                           // +0x808
-};
-
-// 0x408 bytes.
-class TWriteScriptFile {
-public:
-	TWriteScriptFile(const TWriteScriptFile &) = delete;
-	TWriteScriptFile &operator=(const TWriteScriptFile &) = delete;
-	TWriteScriptFile()
-	{
-		memset(Filename, 0, sizeof(Filename));
-		Line = 0;
-	}
-
-	// Only closes the file (the Tibia.cfg saver calls close() and then this
-	// destructor).
-	~TWriteScriptFile()
-	{
-		File.Close();
-	}
-
-	void close()
-	{
-		File.Close();
-		memset(Filename, 0, sizeof(Filename));
-		Line = 0;
-	}
-
-	// open's failures ("file still open", "failed to open file") returned instead of thrown (issue #80); open throws
-	// them, as the original.
-	[[nodiscard]] patella::TExpected<void, TError> TryOpen(const char *FileName);
-	void open(const char *FileName);
-	void writeLn();
-	void writeText(const char *Text);
-	void writeString(const char *Text);
-	void writeNumber(int Number);
-
-	TFile File;          // +0x000
-	char Filename[1024]; // +0x004; NOLINT(modernize-avoid-c-arrays): the file errors' reason, frozen until M5 (issue #60)
-	int Line;            // +0x404, set to 0 and never used
 };
 
 // 0x404 bytes. The destructor is close().

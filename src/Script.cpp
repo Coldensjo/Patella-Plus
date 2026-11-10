@@ -1,6 +1,6 @@
 // Script.cpp: reconstructed from Tibia.exe 7.72.
 //
-// The script-file tokenizer and writer and binary file access; the patching of the
+// The script-file tokenizer and binary file access; the patching of the
 // data files with patches from the login server is gone (issue #75). In line order,
 // which is also binary order, except that the compiler placed readString of
 // TReadBinaryFile and the readIdentifier, readNumber, readString and readSymbol
@@ -390,79 +390,6 @@ char TReadScriptFile::getSpecial()
 	if (Token != TOKEN::SPECIAL)
 		error("special-char expected");
 	return Special;
-}
-
-// TryOpen, its failure thrown.
-void TWriteScriptFile::open(const char *FileName)
-{
-	patella::TExpected<void, TError> Result = TryOpen(FileName);
-	if (!Result)
-		throw TMyException(std::move(Result.error()));
-}
-
-// open's code, its two TERROR_REASONs returned (issue #80). Line is reset but never counted.
-patella::TExpected<void, TError> TWriteScriptFile::TryOpen(const char *FileName)
-{
-	if (File != nullptr)
-		return TUNEXPECTED_REASON("file still open", Filename);
-	if (!patella::platform::Platform().FileSystem.Open(File, FileName, TFile::TAccess::Write, TFile::TContent::Binary))
-		return TUNEXPECTED_REASON("failed to open file", FileName);
-	Line = 0;
-	// Filename stays char[1024] until M5: TERROR_REASON's reason (a std::string) names it (issue #57).
-	TStringBuffer(Filename, sizeof(Filename)).Assign(FileName);
-	return {};
-}
-
-// The file is binary, so the line ends in CR LF.
-void TWriteScriptFile::writeLn()
-{
-	if (File == nullptr)
-		TERROR("no file open");
-	File.PutChar('\r');
-	File.PutChar('\n');
-}
-
-void TWriteScriptFile::writeText(const char *Text)
-{
-	if (File == nullptr)
-		TERROR("no file open");
-	if (Text == nullptr)
-		TERROR("no text");
-	while (*Text != 0) {
-		File.PutChar(*Text);
-		Text++;
-	}
-}
-
-// Quotes, escaping '"' and '\\', and writes a line break as "\n".
-void TWriteScriptFile::writeString(const char *Text)
-{
-	if (File == nullptr)
-		TERROR("no file open");
-	if (Text == nullptr)
-		TERROR("no text");
-	File.PutChar('"');
-	while (*Text != 0) {
-		if (*Text == '"' || *Text == '\\')
-			File.PutChar('\\');
-		if (*Text == '\n') {
-			File.PutChar('\\');
-			File.PutChar('n');
-		} else {
-			File.PutChar(*Text);
-		}
-		Text++;
-	}
-	File.PutChar('"');
-}
-
-void TWriteScriptFile::writeNumber(int Number)
-{
-	if (File == nullptr)
-		TERROR("no file open");
-	TFixedString<20> Help;
-	Help.Format("{}", Number);
-	writeText(Help);
 }
 
 // TryOpen, its failure thrown.

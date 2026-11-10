@@ -41,8 +41,7 @@
 // whole file to UTF-8 first (its comments and other keys too) and writes it as version 2: a version-1 file is
 // converted once, at the next save, its options unchanged by value.
 //
-// The reading mirrors the original's Tibia.cfg reader on the file its writer wrote (Preferences.cpp
-// ReadTibiaCfg, WriteTibiaCfg), so the options after a restart are the original's: ChaseMode 2 reads as 0, a
+// The reading mirrors the original's Tibia.cfg reader (Preferences.cpp ReadTibiaCfg), so the options after a restart are the original's: ChaseMode 2 reads as 0, a
 // repeated OpenDialogs number once, a hotkey's line breaks as spaces (a final one: sent at once), its text
 // cut to 255 bytes. Unlike the original's reader, a line it cannot read leaves that option as it was (the
 // client passes the defaults) and is reported, instead of resetting every option. Keys it does not know are

@@ -1,6 +1,6 @@
 // Preferences.cpp: the options stored in Tibia.cfg by the original, in Patella.ini by the x64 client
-// (Patella-Modern issue #45). The option names in the comments are the keys that the Tibia.cfg loader and
-// saver use, which give the names of the globals.
+// (Patella-Modern issue #45). The option names in the comments are the keys that the Tibia.cfg loader
+// uses, which give the names of the globals.
 //
 // Names are ours unless a comment says they come from the binary.
 //
@@ -207,7 +207,6 @@ public:
 	[[nodiscard]] bool GetSkillBar(int SkillNumber) const;
 	void SetSkillBar(int SkillNumber, bool Value);
 	void ReadTibiaCfg(TTalkLists &Lists);
-	void WriteTibiaCfg(TTalkLists &Lists);
 	patella::settings::TPreferenceValues GetPreferenceValues(TTalkLists &Lists);
 	void SetPreferenceValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists);
 	void InitPreferences(TTalkLists &Lists);
@@ -374,11 +373,9 @@ const char *GetBuddyDescription(int CharacterID);
 bool GetBuddyNotify(int CharacterID);
 bool GetSkillBar(int SkillNumber);
 void SetSkillBar(int SkillNumber, bool Value);
-// The original's Tibia.cfg reader and writer (issue #45): the import and the golden
-// corpus's reference. The client calls InitPreferences, SavePreferences and ExitPreferences, which read and
+// The original's Tibia.cfg reader (issue #45): the import. The client calls InitPreferences, SavePreferences and ExitPreferences, which read and
 // write Patella.ini (settings/PreferenceKeys.h); it never writes Tibia.cfg.
 void ReadTibiaCfg();
-void WriteTibiaCfg();
 patella::settings::TPreferenceValues GetPreferenceValues();
 void SetPreferenceValues(const patella::settings::TPreferenceValues &Values);
 void InitPreferences();
