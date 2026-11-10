@@ -11,7 +11,11 @@
 
 struct TRGBColor;
 
+// The talk modes: the mode byte of the talk and text message packets, and the mode of a talk box, a console line, a
+// filter and a text buffer. The names without a comment are the original's, from its assertions. The seven with one
+// are ours, each taken from what the client does with the mode. No code uses mode 26.
 enum TALK_MODE : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, the packets' talk modes ("The other ten stay unscoped")
+	TALK_NONE = 0,     // no mode: a filter with it matches every mode, a buffer with it as send mode sends nothing
 	TALK_SAY = 1,
 	TALK_WHISPER = 2,
 	TALK_YELL = 3,
@@ -23,6 +27,7 @@ enum TALK_MODE : int { // NOLINT(cppcoreguidelines-use-enum-class): int constant
 	TALK_GAMEMASTER_BROADCAST = 9,
 	TALK_GAMEMASTER_CHANNELCALL = 10,
 	TALK_GAMEMASTER_MESSAGE = 11,
+	TALK_ORANGE_CHANNELCALL = 12, // a channel call drawn in orange; like a gamemaster's, no ignore list holds it back
 	TALK_ANONYMOUS_BROADCAST = 13,
 	TALK_ANONYMOUS_CHANNELCALL = 14,
 	TALK_ANONYMOUS_MESSAGE = 15,
@@ -30,7 +35,12 @@ enum TALK_MODE : int { // NOLINT(cppcoreguidelines-use-enum-class): int constant
 	TALK_ANIMAL_LOUD = 17,
 	TALK_ADMIN_MESSAGE = 18,
 	TALK_EVENT_MESSAGE = 19,
+	TALK_EVENT_STATUS_MESSAGE = 20, // on the status line, and in the console where GetEventMessages allows it
+	TALK_STATUS_MESSAGE = 21,       // on the status line, and in the console where GetStatusMessages allows it
 	TALK_INFO_MESSAGE = 22,
+	TALK_STATUS_ONLY_MESSAGE = 23,  // on the status line and never in the console
+	TALK_BLUE_CONSOLE_MESSAGE = 24, // in the console only, in blue; AddChannelNotice's, for what the player sent
+	TALK_RED_CONSOLE_MESSAGE = 25,  // in the console only, in red
 	TALK_MODE_BEYONDLAST = 27
 };
 static_assert(sizeof(TALK_MODE) == 4);
@@ -385,13 +395,3 @@ TTalkBuffer *GetTextBuffer(int Mode, const char *Name, int Channel);
 void ResetTalk();
 void InitTalk();
 void ExitTalk();
-
-// A talk mode that no assertion of the original names, so TALK_MODE above lacks it; the name is ours. A text message
-// (ReceiveTextMessage) of this mode goes to the status line, and to the console where GetStatusMessages allows it, as
-// GetEventMessages decides for TALK_EVENT_MESSAGE and GetInfoMessages for TALK_INFO_MESSAGE. Down here because
-// TRuleViolationChannel::AddText's error stores its line; an enumerator of an unnamed enum for the reason in GUI.h.
-// The modes 12, 20 and 23 to 25 stay numbers: the code does not show what the original called them. So does 0, no
-// mode: a filter's 0 matches every mode, and a buffer whose send mode is 0 sends nothing.
-enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
-	TALK_STATUS_MESSAGE = 21,
-};

@@ -1702,7 +1702,7 @@ void patella::TCommunication::ReceiveTalk()
 		break;
 	case TALK_CHANNEL_CALL:
 	case TALK_GAMEMASTER_CHANNELCALL:
-	case 12:
+	case TALK_ORANGE_CHANNELCALL:
 	case TALK_ANONYMOUS_CHANNELCALL:
 		Channel = Network.GetWord();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
@@ -1851,16 +1851,16 @@ void patella::TCommunication::ReceiveCloseChannel()
 
 void patella::TCommunication::ReceiveTextMessage()
 {
-	int Mode = 0;
+	int Mode = TALK_NONE;
 	Mode = Network.GetByte();
 	PATELLA_ASSERT_VALUES(Mode>=0&&Mode<TALK_MODE_BEYONDLAST, Mode);
 	TFixedString<632> Text;
 	Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
 	if (Mode == TALK_ADMIN_MESSAGE || Mode == TALK_EVENT_MESSAGE || Mode == TALK_INFO_MESSAGE)
 		AddMessageTalkbox(Mode, Text);
-	if (Mode == 23 || Mode == TALK_STATUS_MESSAGE || Mode == 20)
+	if (Mode == TALK_STATUS_ONLY_MESSAGE || Mode == TALK_STATUS_MESSAGE || Mode == TALK_EVENT_STATUS_MESSAGE)
 		SetStatusMessage(Text, false);
-	if (Mode != 23)
+	if (Mode != TALK_STATUS_ONLY_MESSAGE)
 		AddConsoleText(0, Text, Mode, nullptr, -1, 0);
 }
 

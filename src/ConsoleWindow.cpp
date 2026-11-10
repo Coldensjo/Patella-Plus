@@ -317,7 +317,7 @@ void TTextWindow::FormatLines()
 			TRGBColor Color;
 			GetTalkColor(&Color, TextLine->Mode);
 			int NextIndent = 10;
-			if (TextLine->Mode > TALK_ANIMAL_LOUD && TextLine->Mode < 23)
+			if (TextLine->Mode > TALK_ANIMAL_LOUD && TextLine->Mode < TALK_STATUS_ONLY_MESSAGE)
 				NextIndent = 0;
 			const char *Text = TextLine->GetText();
 			int Indent = 0;
@@ -1165,7 +1165,7 @@ TConsoleWindow::TConsoleWindow()
 	TalkMode = TALK_SAY;
 	DefaultTab = nullptr;
 	HistoryPosition = -1;
-	History.reset(new TTalkBuffer(0));
+	History.reset(new TTalkBuffer(TALK_NONE));
 	Input = new TEditLine(TRect(0, 0, 0, 0), 255, false);
 	InsertChild(Input);
 	TabBar = new TTabBar;
@@ -1721,7 +1721,7 @@ void TConsoleWindow::SendInput()
 		TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
 		TalkMode = TextBuffer->GetSendTalkMode();
 		if (!TextBuffer->CanWrite())
-			TalkMode = 0;
+			TalkMode = TALK_NONE;
 		ChannelID = TextBuffer->GetChannelID();
 		Addressee = const_cast<char *>(TextBuffer->GetAddressee());
 	} else {
@@ -1747,7 +1747,7 @@ void TConsoleWindow::SendInput()
 	}
 	if (Text != nullptr) {
 		switch (TalkMode) {
-		case 0:
+		case TALK_NONE:
 			break;
 		case TALK_SAY:
 		case TALK_WHISPER:
@@ -1843,10 +1843,10 @@ void TConsoleWindow::ParseInput(char **Text, char **Addressee, int *TalkMode, ch
 		case 'B': *TalkMode = TALK_GAMEMASTER_BROADCAST; break;
 		case 'C': *TalkMode = TALK_GAMEMASTER_CHANNELCALL; break;
 		case 'D': *TalkMode = TALK_ANONYMOUS_CHANNELCALL; break;
-		case 'I': *TalkMode = 0; break;
+		case 'I': *TalkMode = TALK_NONE; break;
 		case 'S': *TalkMode = TALK_SAY; break;
 		case 'W': *TalkMode = TALK_WHISPER; break;
-		case 'X': *TalkMode = 0; break;
+		case 'X': *TalkMode = TALK_NONE; break;
 		case 'Y': *TalkMode = TALK_YELL; break;
 		default:
 			break;
@@ -1881,7 +1881,7 @@ void TConsoleWindow::ParseInput(char **Text, char **Addressee, int *TalkMode, ch
 		|| (strstr(Line + i, GetAccountPassword()) != nullptr && strlen(GetAccountPassword()) != 0)) {
 		*Text = nullptr;
 		*Addressee = nullptr;
-		*TalkMode = 0;
+		*TalkMode = TALK_NONE;
 		*Separator = 0;
 		AddMessage(MESSAGE_ACCOUNT_DATA_WARNING, reinterpret_cast<std::intptr_t>("Account Data Warning"), 0);
 		return;

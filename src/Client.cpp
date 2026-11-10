@@ -60,7 +60,7 @@ public:
 	bool HasDefaultConsole() override { return bridge::Talk().DefaultTextBuffer != nullptr; }
 	void AddDefaultConsoleLine(const char *Message) override
 	{
-		::AddTextBufferLine(bridge::Talk().DefaultTextBuffer, 0, Message, 20, nullptr, 0);
+		::AddTextBufferLine(bridge::Talk().DefaultTextBuffer, 0, Message, TALK_EVENT_STATUS_MESSAGE, nullptr, 0);
 		::SetConsoleChanged();
 	}
 };

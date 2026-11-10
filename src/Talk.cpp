@@ -87,22 +87,22 @@ TRGBColor *patella::TTalk::GetTalkColor(TRGBColor *Color, int TalkMode)
 {
 	switch (TalkMode) {
 		// clang-format off
-	case 0: TERROR("none is talking");
+	case TALK_NONE: TERROR("none is talking");
 	case TALK_SAY: case TALK_WHISPER: case TALK_YELL: case TALK_CHANNEL_CALL: case TALK_GAMEMASTER_ANSWER: case TALK_PLAYER_ANSWER:
 		Color->R = 240; Color->G = 240; Color->B = 0; break;
 	case TALK_PRIVATE_MESSAGE:
 		Color->R = 96; Color->G = 248; Color->B = 248; break;
-	case TALK_GAMEMASTER_REQUEST: case TALK_EVENT_MESSAGE: case 20: case TALK_STATUS_MESSAGE: case 23:
+	case TALK_GAMEMASTER_REQUEST: case TALK_EVENT_MESSAGE: case TALK_EVENT_STATUS_MESSAGE: case TALK_STATUS_MESSAGE: case TALK_STATUS_ONLY_MESSAGE:
 		Color->R = 240; Color->G = 240; Color->B = 240; break;
-	case TALK_GAMEMASTER_BROADCAST: case TALK_GAMEMASTER_CHANNELCALL: case TALK_GAMEMASTER_MESSAGE: case TALK_ANONYMOUS_BROADCAST: case TALK_ANONYMOUS_CHANNELCALL: case TALK_ANONYMOUS_MESSAGE: case TALK_ADMIN_MESSAGE: case 25:
+	case TALK_GAMEMASTER_BROADCAST: case TALK_GAMEMASTER_CHANNELCALL: case TALK_GAMEMASTER_MESSAGE: case TALK_ANONYMOUS_BROADCAST: case TALK_ANONYMOUS_CHANNELCALL: case TALK_ANONYMOUS_MESSAGE: case TALK_ADMIN_MESSAGE: case TALK_RED_CONSOLE_MESSAGE:
 		Color->R = 248; Color->G = 96; Color->B = 96; break;
-	case 12:
+	case TALK_ORANGE_CHANNELCALL:
 		Color->R = 240; Color->G = 180; Color->B = 0; break;
 	case TALK_ANIMAL_LOW: case TALK_ANIMAL_LOUD:
 		Color->R = 255; Color->G = 102; Color->B = 0; break;
 	case TALK_INFO_MESSAGE:
 		Color->R = 0; Color->G = 240; Color->B = 0; break;
-	case 24:
+	case TALK_BLUE_CONSOLE_MESSAGE:
 		Color->R = 160; Color->G = 160; Color->B = 255; break;
 	default: TERROR1("something unknown is talking", TalkMode);
 		// clang-format on
@@ -383,9 +383,9 @@ void patella::TTalk::UpdateStatusMessage()
 }
 bool TTalkFilter::Matches(int _Mode, const char *_Addressee, int _Channel)
 {
-	if (_Mode == TALK_GAMEMASTER_MESSAGE || _Mode == TALK_GAMEMASTER_BROADCAST || _Mode == TALK_GAMEMASTER_CHANNELCALL || _Mode == 12)
+	if (_Mode == TALK_GAMEMASTER_MESSAGE || _Mode == TALK_GAMEMASTER_BROADCAST || _Mode == TALK_GAMEMASTER_CHANNELCALL || _Mode == TALK_ORANGE_CHANNELCALL)
 		return false;
-	if ((Mode != _Mode && Mode != 0) || (Channel != _Channel && Channel != -1))
+	if ((Mode != _Mode && Mode != TALK_NONE) || (Channel != _Channel && Channel != -1))
 		return false;
 	if (strlen(Addressee) != 0 && _Addressee == nullptr)
 		return false;
@@ -479,16 +479,16 @@ void patella::TTalk::ClearBuddyIgnore()
 
 void patella::TTalk::AddBuddyIgnore(const char *Addressee, bool Permanent)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, BuddyExemptionList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, BuddyExemptionList);
 	if (Filter != -1) {
 		free(BuddyExemptionList(Filter));
 		BuddyExemptionList(Filter) = nullptr;
 	}
-	AddTalkFilter(0, Addressee, -1, nullptr, BuddyExemptionList, Permanent);
+	AddTalkFilter(TALK_NONE, Addressee, -1, nullptr, BuddyExemptionList, Permanent);
 }
 bool patella::TTalk::IsPermanentBuddyIgnore(const char *Addressee)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, BuddyExemptionList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, BuddyExemptionList);
 	return Filter != -1 ? BuddyExemptionList(Filter)->Permanent : false;
 }
 
@@ -503,16 +503,16 @@ void patella::TTalk::ClearTemporaryIgnore()
 
 void patella::TTalk::AddTemporaryIgnore(const char *Addressee)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, TemporaryIgnoreList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, TemporaryIgnoreList);
 	if (Filter != -1) {
 		free(TemporaryIgnoreList(Filter));
 		TemporaryIgnoreList(Filter) = nullptr;
 	}
-	AddTalkFilter(0, Addressee, -1, nullptr, TemporaryIgnoreList, false);
+	AddTalkFilter(TALK_NONE, Addressee, -1, nullptr, TemporaryIgnoreList, false);
 }
 void patella::TTalk::RemoveTemporaryIgnore(const char *Addressee)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, TemporaryIgnoreList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, TemporaryIgnoreList);
 	if (Filter != -1) {
 		free(TemporaryIgnoreList(Filter));
 		TemporaryIgnoreList(Filter) = nullptr;
@@ -567,11 +567,11 @@ void patella::TTalk::IgnoreMode(int Mode)
 }
 void patella::TTalk::IgnoreName(const char *Addressee, bool Permanent)
 {
-	AddIgnoreFilter(0, Addressee, Permanent);
+	AddIgnoreFilter(TALK_NONE, Addressee, Permanent);
 }
 bool patella::TTalk::IsPermanentIgnore(const char *Addressee)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, IgnoreList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, IgnoreList);
 	return Filter != -1 ? IgnoreList(Filter)->Permanent : false;
 }
 void patella::TTalk::RemoveIgnoreFilter(int Mode, const char *Addressee)
@@ -588,7 +588,7 @@ void patella::TTalk::UnignoreMode(int Mode)
 }
 void patella::TTalk::UnignoreName(const char *Addressee)
 {
-	RemoveIgnoreFilter(0, Addressee);
+	RemoveIgnoreFilter(TALK_NONE, Addressee);
 }
 void patella::TTalk::ShowPermanentIgnoreWarning()
 {
@@ -598,7 +598,7 @@ void patella::TTalk::ShowPermanentIgnoreWarning()
 			Counter++;
 	if (Counter > 0) {
 		PATELLA_ASSERT(DefaultTextBuffer!=nullptr);
-		AddTextBufferLine(DefaultTextBuffer, 0, TextPermanentlyIgnoring, 20, nullptr, 0);
+		AddTextBufferLine(DefaultTextBuffer, 0, TextPermanentlyIgnoring, TALK_EVENT_STATUS_MESSAGE, nullptr, 0);
 		ConsoleChanged = true;
 	}
 }
@@ -621,20 +621,20 @@ void patella::TTalk::AddConsoleText(uint32 StatementID, const char *Text, int Ta
 	switch (TalkMode) {
 	case TALK_ADMIN_MESSAGE: Broadcast = true; break;
 	case TALK_EVENT_MESSAGE:
-	case 20: Broadcast = GetEventMessages(); break;
+	case TALK_EVENT_STATUS_MESSAGE: Broadcast = GetEventMessages(); break;
 	case TALK_STATUS_MESSAGE: Broadcast = GetStatusMessages(); break;
 	case TALK_INFO_MESSAGE: Broadcast = GetInfoMessages(); break;
-	case 23: return;
+	case TALK_STATUS_ONLY_MESSAGE: return;
 	default: {
 		TTalkBuffer *TargetBuffer = DefaultTextBuffer;
 		if (TalkMode == TALK_CHANNEL_CALL || TalkMode == TALK_GAMEMASTER_REQUEST || TalkMode == TALK_GAMEMASTER_ANSWER || TalkMode == TALK_PLAYER_ANSWER
-			|| TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == 12)
+			|| TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == TALK_ORANGE_CHANNELCALL)
 			TargetBuffer = nullptr;
 		if (TalkMode == TALK_ANONYMOUS_CHANNELCALL)
 			Name = nullptr;
 		for (int i = ConsoleFilterList.min; i <= ConsoleFilterList.max; i++) {
 			TTalkFilter *Filter = ConsoleFilterList(i);
-			const int Mode = TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == 12 ? TALK_CHANNEL_CALL : TalkMode;
+			const int Mode = TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == TALK_ORANGE_CHANNELCALL ? TALK_CHANNEL_CALL : TalkMode;
 			if (Filter != nullptr && Filter->Matches(Mode, Name, Channel))
 				TargetBuffer = Filter->TextBuffer;
 		}
@@ -667,7 +667,7 @@ void patella::TTalk::AddChannelNotice(const char *Addressee, const char *Text, i
 			TargetBuffer = Filter->TextBuffer;
 	}
 	if (TargetBuffer != nullptr)
-		AddTextBufferLine(TargetBuffer, 0, Text, 24, Addressee, 0);
+		AddTextBufferLine(TargetBuffer, 0, Text, TALK_BLUE_CONSOLE_MESSAGE, Addressee, 0);
 }
 void patella::TTalk::ClearDefaultTextBuffer()
 {
@@ -906,7 +906,7 @@ void TRuleViolationTalkBuffer::Append(TTalkLine *line)
 }
 TRuleViolationChannel::TRuleViolationChannel(int TalkMode, int _ChannelID) : TTalkBuffer(TalkMode)
 {
-	SendTalkMode = 0;
+	SendTalkMode = TALK_NONE;
 	Closed = false;
 	PATELLA_ASSERT(_ChannelID!=-1);
 	ChannelID = _ChannelID;
