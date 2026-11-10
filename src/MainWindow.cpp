@@ -274,7 +274,7 @@ void TMainWindow::HandleEvent(int Event)
 		break;
 	}
 	case EVENT_ABORT:
-		Disconnect(false);
+		Network().Disconnect(false);
 		if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER || GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
 			AddMessage(MESSAGE_WAIT_DIALOG, 20, 0);
 			AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);

@@ -137,7 +137,7 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 	patella::log::BreakIfDebugged();
 #endif
 	try {
-		ShutdownConnection();
+		Network().ShutdownConnection();
 	} catch (...) { // NOLINT(bugprone-empty-catch): every step of the fatal path is guarded on its own, and the box still comes
 	}
 	try {
@@ -316,8 +316,8 @@ BOOL CPlayerApp::InitInstance()
 			const char *Token = strtok(Arguments, " \t\n");
 			int Expected = 0;
 			bool Gamemaster = false;
-			SetTestServerAddress(patella::buildconfig::TestServerHost);
-			SetTestServerPort(patella::buildconfig::TestServerPort);
+			Network().SetTestServerAddress(patella::buildconfig::TestServerHost);
+			Network().SetTestServerPort(patella::buildconfig::TestServerPort);
 			while (Token != nullptr) {
 				if (MsvcStricmp(Token, "gamemaster") == 0) {
 					Gamemaster = true;

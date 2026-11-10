@@ -591,7 +591,7 @@ void patella::TGUI::ConnectionEstablished()
 		return;
 	}
 	SetConnectionState(CONNECTION_OFFLINE);
-	Disconnect(true);
+	Network.Disconnect(true);
 	SetActionState(ACTIONSTATE_NONE);
 }
 
@@ -601,7 +601,7 @@ void patella::TGUI::ConnectionEstablished()
 void patella::TGUI::ReceivePackets()
 {
 	int Type = -1;
-	while ((Type = GetNextCommand()) != -1) {
+	while ((Type = Network.GetNextCommand()) != -1) {
 		Communication.LastPacketTypes[Communication.LastPacketIndex] = (uint8)Type;
 		Communication.LastPacketIndex++;
 		if (Communication.LastPacketIndex >= 10)
@@ -728,12 +728,14 @@ void patella::TGUI::ConnectionClosed()
 		LeaveGame();
 	} else if (GetConnectionState() == CONNECTION_GAME_LOGIN_SENT) {
 		char *Message = new char[1024];
-		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ERROR_DISCONNECTED, 2);
+		Network.GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE),
+			ERROR_DISCONNECTED, 2);
 		AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
 		AddMessage(MESSAGE_CHARACTER_LIST_DIALOG, 300, 0);
 	} else if (GetConnectionState() == CONNECTION_LOGIN_SENT) {
 		char *Message = new char[1024];
-		GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE), ERROR_DISCONNECTED, 1);
+		Network.GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Message, ERROR_MESSAGE_SIZE),
+			ERROR_DISCONNECTED, 1);
 		AddMessage(1, reinterpret_cast<std::intptr_t>("Connection failed"), reinterpret_cast<std::intptr_t>(Message));
 	}
 	SetConnectionState(CONNECTION_OFFLINE);
@@ -804,7 +806,7 @@ void patella::TGUI::TimerEvent() const
 				MainWindow->MouseWheel(MouseX, MouseY, 6);
 		}
 	}
-	CheckConnectionTimeout();
+	Network.CheckConnectionTimeout();
 	::UpdateTimers();
 	UpdateSkulls();
 }
@@ -1068,11 +1070,11 @@ void patella::TGUI::ProcessEvents()
 		}
 		case MESSAGE_CONNECT_LOGIN_SERVER:
 			Redraw(false);
-			ConnectToLoginServer();
+			Network.ConnectToLoginServer();
 			break;
 		case MESSAGE_CONNECT_GAME_SERVER:
 			Redraw(false);
-			ConnectToGameServer();
+			Network.ConnectToGameServer();
 			break;
 		case MESSAGE_RECONNECT:
 			if (GetConnectionState() != CONNECTION_OFFLINE) {
@@ -1106,7 +1108,7 @@ void patella::TGUI::ProcessEvents()
 void patella::TGUI::InitWindow(platform::TWindowHandle Window, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode), void (*OpenURL)(const char *URL))
 {
 	WindowHandle = Window;
-	SetNetworkWindow(Window);
+	Network.SetNetworkWindow(Window);
 	ExitCallback = ExitProgram;
 	DisplayModeCallback = SetDisplayMode;
 	URLCallback = OpenURL;
@@ -1133,7 +1135,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		InitGraphics(0xa00000);
 		SkinData().InitSkins();
 		InitSkinProperties();
-		InitNetwork(::ConnectionEstablished, ::ReceivePackets, ::ConnectionClosed);
+		::Network().InitNetwork(::ConnectionEstablished, ::ReceivePackets, ::ConnectionClosed);
 		InitCommunication();
 		::InitHotkeys();
 	} catch (const TProgramError &Error) {
@@ -1154,7 +1156,7 @@ void patella::TGUI::ExitControl()
 	::ExitMainWindow();
 	::ExitHotkeys();
 	ExitCommunication();
-	ExitNetwork();
+	::Network().ExitNetwork();
 	SkinData().ExitSkins();
 	ExitGraphics();
 	TSurface *const Current = GraphicsEngine().GetSurface();

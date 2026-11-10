@@ -1,7 +1,7 @@
 // Network.h: the login server list, connecting, and the packets' framing and XTEA encryption (Network.cpp).
 //
-// The data is TNetwork's, which TClient owns (Client.h); the free functions of the original's names are the bridge that
-// the callers use until they hold the object (Network(), defined in Client.cpp).
+// The data is TNetwork's, which TClient owns (Client.h); a caller that holds no reference to it calls Network()
+// (Client.cpp).
 
 #pragma once
 
@@ -183,25 +183,3 @@ private:
 
 // The one client's network (Client.cpp).
 patella::TNetwork &Network();
-
-// The original's functions (the callers' names, and the golden tests'): each calls TNetwork's member of the same
-// name on Network().
-void SetTestServerPort(int Port);
-void SetConnectionTimeout(int Timeout);
-void SetNetworkWindow(patella::platform::TWindowHandle Window);
-void SetTestServerAddress(const char *Address);
-void SetServerError(int errorcode);
-void SetServerIPAddress(const char *ipaddress);
-
-int GetNextCommand();
-
-void CheckConnectionTimeout();
-// Message is the caller's new char[ERROR_MESSAGE_SIZE]: a fixed extent, passed as the pointer was.
-void GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE> MessageBuffer, int ErrorCode, int ErrorType);
-const char *GetResolvedIPAddress();
-void Disconnect(bool force);
-void ConnectToLoginServer();
-void ConnectToGameServer();
-void ShutdownConnection();
-void InitNetwork(void (*ConnectHandler)(), void (*ReceiveHandler)(), void (*CloseHandler)());
-void ExitNetwork();

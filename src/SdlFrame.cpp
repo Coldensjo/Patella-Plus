@@ -829,24 +829,24 @@ void OnHostResolved(int Error)
 {
 	if (Error == 0) {
 		if (GetConnectionState() != CONNECTION_RESOLVING_LOGIN_SERVER) {
-			SetConnectionTimeout(0);
+			Network().SetConnectionTimeout(0);
 			SetConnectionState(CONNECTION_OFFLINE);
-			Disconnect(true);
+			Network().Disconnect(true);
 			// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): a block of the message queue, freed with its message
 			char *Text = new char[1024];
-			GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Text, ERROR_MESSAGE_SIZE), -1, 1);
+			Network().GetErrorMessage(patella::TSpan<char, ERROR_MESSAGE_SIZE>(Text, ERROR_MESSAGE_SIZE), -1, 1);
 			AddMessage(1, reinterpret_cast<INT_PTR>("Connection failed"), reinterpret_cast<INT_PTR>(Text));
 			return;
 		}
-		SetConnectionTimeout(0);
-		SetServerIPAddress(GetResolvedIPAddress());
+		Network().SetConnectionTimeout(0);
+		Network().SetServerIPAddress(Network().GetResolvedIPAddress());
 		SetConnectionState(CONNECTION_CONNECTING_LOGIN_SERVER);
 	} else {
-		SetConnectionTimeout(0);
+		Network().SetConnectionTimeout(0);
 		SetConnectionState(CONNECTION_OFFLINE);
-		SetServerError(Error);
+		Network().SetServerError(Error);
 	}
-	ConnectToLoginServer();
+	Network().ConnectToLoginServer();
 }
 
 #if defined(_WIN32)
