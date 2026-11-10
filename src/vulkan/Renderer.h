@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -56,10 +55,6 @@ struct TDeviceRequest {
 struct TDeviceInfo {
 	std::string Name; // the driver's UTF-8 name in the client's code page (issue #112: the options show it)
 	VkPhysicalDeviceType Type = VK_PHYSICAL_DEVICE_TYPE_OTHER;
-	uint32_t VendorId = 0;
-	uint32_t DeviceId = 0;
-	uint32_t ApiVersion = 0;
-	uint32_t DriverVersion = 0;
 	bool CpuDriver = false; // the shipped CPU driver
 };
 
@@ -77,10 +72,6 @@ std::vector<TDeviceInfo> ListGpus();
 // The index in ListGpus' list of the GPU "the best GPU" means (TDeviceRequest::GpuIndex -1): the first
 // of the best kind (discrete, integrated, virtual, other); -1 for an empty list.
 int BestGpu(const std::vector<TDeviceInfo> &Gpus);
-
-// The CPU driver's device from its manifest (TDeviceRequest::CpuDriverManifest), headless as ListGpus;
-// nothing when it offers none. Throws TVulkanError without a loader.
-std::optional<TDeviceInfo> CpuDriverDevice(const std::string &Manifest);
 
 class TRenderer {
 public:
@@ -119,18 +110,6 @@ public:
 	// WindowHeight; nothing is shown while that is 0, as for a minimised window); without one the
 	// frame's work is only submitted. Returns true when a picture was shown.
 	bool Present(int Image, int x, int y, int Width, int Height, uint32_t WindowWidth, uint32_t WindowHeight);
-	// Submits what is recorded and waits until the device is idle.
-	void Finish();
-
-	// The present mode of the swapchain (0 before the first Present).
-	[[nodiscard]] VkPresentModeKHR PresentMode() const;
-
-	// Issue #134, the profiling tool (tools/profiling.py; the test build's only caller): with On every command
-	// buffer of a frame gets two timestamp queries (from the next frame on), and TakeFrameTimes hands out the
-	// device time of each finished frame, the sum over its submissions, in nanoseconds, a frame or two after
-	// it was submitted. False: the device has no timestamps. Off by default: no query pool, no timing commands.
-	bool SetFrameTimestamps(bool On);
-	void TakeFrameTimes(std::vector<uint64_t> &Nanoseconds);
 
 private:
 	struct TState;
