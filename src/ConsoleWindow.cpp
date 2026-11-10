@@ -112,10 +112,10 @@ void TTextWindow::Draw(int Surface, int x, int y)
 
 	int Bottom = Height;
 	bool First = true;
-	for (int CurrentLine = CurrentLineNumber; CurrentLine >= getFirstLineNumber(); CurrentLine--) {
+	for (int CurrentLine = CurrentLineNumber; CurrentLine >= GetFirstLineNumber(); CurrentLine--) {
 		const TLineFormat *Format = GetLineFormat(CurrentLine);
-		PATELLA_ASSERT_VALUES(Format!=nullptr, CurrentLine, getFirstLineNumber());
-		PATELLA_ASSERT_VALUES(Format->LineText!=nullptr, CurrentLine, getFirstLineNumber());
+		PATELLA_ASSERT_VALUES(Format!=nullptr, CurrentLine, GetFirstLineNumber());
+		PATELLA_ASSERT_VALUES(Format->LineText!=nullptr, CurrentLine, GetFirstLineNumber());
 		int LineHeight;
 		if (First) {
 			LineHeight = GetFontHeight(Format->FontNumber);
@@ -172,7 +172,7 @@ void TTextWindow::Arrange()
 	int Rest = Height;
 	bool First = true;
 	int CurrentLine = LastLineNumber;
-	while (CurrentLine >= getFirstLineNumber()) {
+	while (CurrentLine >= GetFirstLineNumber()) {
 		const TLineFormat *Format = GetLineFormat(CurrentLine);
 		if (Format != nullptr) {
 			CurrentLine--;
@@ -391,11 +391,11 @@ TLineFormat *TTextWindow::GetLineFormat(int LineNumber)
 
 void TTextWindow::SetCurrentLineNumber(int _CurrentLineNumber)
 {
-	PATELLA_ASSERT_VALUES(In(_CurrentLineNumber, getFirstLineNumber(), getLastLineNumber()) || _CurrentLineNumber==-1,
-		_CurrentLineNumber, getLastLineNumber());
+	PATELLA_ASSERT_VALUES(In(_CurrentLineNumber, GetFirstLineNumber(), GetLastLineNumber()) || _CurrentLineNumber==-1,
+		_CurrentLineNumber, GetLastLineNumber());
 	CurrentLineNumber = _CurrentLineNumber;
 	if (_CurrentLineNumber != -1)
-		AtEnd = _CurrentLineNumber == getLastLineNumber();
+		AtEnd = _CurrentLineNumber == GetLastLineNumber();
 }
 
 // The earlier end of the selection; a selection that ends beyond its
@@ -548,7 +548,7 @@ bool TTextWindow::GetPosition(int x, int y, int *Line, int *Offset, int *Length)
 			const TLineFormat *Format = nullptr;
 			while (!Found) {
 				LineNumber = CurrentLine;
-				if (LineNumber < getFirstLineNumber())
+				if (LineNumber < GetFirstLineNumber())
 					break;
 				Format = GetLineFormat(LineNumber);
 				CurrentLine = LineNumber - 1;
@@ -568,7 +568,7 @@ bool TTextWindow::GetPosition(int x, int y, int *Line, int *Offset, int *Length)
 				Bottom -= LineHeight;
 			}
 			if (!Found) {
-				LineNumber = getFirstLineNumber();
+				LineNumber = GetFirstLineNumber();
 				Format = GetLineFormat(LineNumber);
 				if (Format == nullptr || Format->LineText == nullptr)
 					return false;
@@ -606,10 +606,10 @@ TConsole::TConsole()
 	InsertChild(TextWindow);
 }
 
-int TConsole::getMinimumHeight()
+int TConsole::GetMinimumHeight()
 {
-	const int ScrollBarHeight = ScrollBar->getMinimumHeight();
-	const int TextHeight = TextWindow->getMinimumHeight();
+	const int ScrollBarHeight = ScrollBar->GetMinimumHeight();
+	const int TextHeight = TextWindow->GetMinimumHeight();
 	return TextHeight > ScrollBarHeight ? TextHeight : ScrollBarHeight;
 }
 
@@ -642,17 +642,17 @@ void TConsole::Arrange()
 	ScrollBar->SetPosition(WindowWidth - RightEdge - LeftEdge - ScrollBar->Width + LeftEdge, Top);
 	SetChildArea(TextWindow, SkinProperties().ConsoleWindow.TextWindow);
 	TWindow::Arrange();
-	const int Visible = TextWindow->getLastLineNumber() - TextWindow->getFirstLineNumber() - TextWindow->InvisibleLines;
-	const int Minimum = TextWindow->getFirstLineNumber() + Visible;
-	const int Maximum = TextWindow->getLastLineNumber() - TextWindow->getFirstLineNumber();
+	const int Visible = TextWindow->GetLastLineNumber() - TextWindow->GetFirstLineNumber() - TextWindow->InvisibleLines;
+	const int Minimum = TextWindow->GetFirstLineNumber() + Visible;
+	const int Maximum = TextWindow->GetLastLineNumber() - TextWindow->GetFirstLineNumber();
 	if (Maximum < Minimum) {
 		std::stringstream Error;
 		Error << "invalid range for console text window scroll bar" << " (minimum: " << Minimum
 			  << ", maximum: " << Maximum << ", visible: " << Visible << ", TotalLines: "
-			  << TextWindow->getLastLineNumber() - TextWindow->getFirstLineNumber() + 1
+			  << TextWindow->GetLastLineNumber() - TextWindow->GetFirstLineNumber() + 1
 			  << ", InvisibleLines: " << TextWindow->InvisibleLines << ", FirstLineNumber: "
-			  << TextWindow->getFirstLineNumber() << ", TotalLines: "
-			  << TextWindow->getLastLineNumber() - TextWindow->getFirstLineNumber() + 1 << ")";
+			  << TextWindow->GetFirstLineNumber() << ", TotalLines: "
+			  << TextWindow->GetLastLineNumber() - TextWindow->GetFirstLineNumber() + 1 << ")";
 		TERROR(Error.str().c_str());
 	}
 	int Value = Maximum;
@@ -1568,7 +1568,7 @@ void TConsoleWindow::UpdateButtons()
 		InsertChild(MoveLeftButton);
 		SetChildPosition(MoveLeftButton, SkinProperties().ConsoleWindow.MoveLeftButton.x, SkinProperties().ConsoleWindow.MoveLeftButton.y);
 	}
-	if (!TextBuffer->isDefault()) {
+	if (!TextBuffer->IsDefault()) {
 		InsertChild(CloseButton);
 		SetChildPosition(CloseButton, SkinProperties().ConsoleWindow.CloseButton.x, SkinProperties().ConsoleWindow.CloseButton.y);
 		InsertChild(ServerMessagesButton);
@@ -1687,14 +1687,14 @@ void TConsoleWindow::ReportRuleViolation(const char *Question)
 bool TConsoleWindow::GetServerMessages() const
 {
 	PATELLA_ASSERT(CurrentConsole->getTextBuffer()!=nullptr);
-	PATELLA_ASSERT(CurrentConsole->getTextBuffer()->isDefault()==false);
+	PATELLA_ASSERT(CurrentConsole->getTextBuffer()->IsDefault()==false);
 	return ServerMessagesButton->State;
 }
 
 void TConsoleWindow::SetServerMessages(bool Show)
 {
 	PATELLA_ASSERT(CurrentConsole->getTextBuffer()!=nullptr);
-	PATELLA_ASSERT(CurrentConsole->getTextBuffer()->isDefault()==false);
+	PATELLA_ASSERT(CurrentConsole->getTextBuffer()->IsDefault()==false);
 	ServerMessagesButton->State = Show;
 	HandleEvent(EVENT_SERVER_MESSAGES);
 }
@@ -1898,9 +1898,9 @@ bool TConsoleWindow::SaveChannel() const
 {
 	const TTab *CurrentTab = TabBar->CurrentTab;
 	PATELLA_ASSERT(CurrentTab!=nullptr);
-	PATELLA_ASSERT(CurrentTab->getCaption()!=nullptr);
+	PATELLA_ASSERT(CurrentTab->GetCaption()!=nullptr);
 	TFixedString<1024> FileName;
-	FileName.Format("{}.txt", CurrentTab->getCaption());
+	FileName.Format("{}.txt", CurrentTab->GetCaption());
 	TFile File;
 	if (!patella::platform::Platform().FileSystem.Open(File, FileName, TFile::TAccess::Append, TFile::TContent::Text))
 		return false;

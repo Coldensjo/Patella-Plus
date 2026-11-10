@@ -15,8 +15,8 @@
 // two resizers (DialogElements.cpp).
 //
 // Names from the binary: TDialogWindow (MainWindow.cpp's
-// "DialogWindow!=NULL" and the file name), hasContentWindow (which gives the
-// class name TContentWindow and GetContentWindow), getBody, Body, _Body,
+// "DialogWindow!=NULL" and the file name), HasContentWindow (which gives the
+// class name TContentWindow and GetContentWindow), GetBody, Body, _Body,
 // _Identifier, IsMinimized, Search, Work, DeltaHeight, Strategy and the
 // parameter names in the catch blocks (Surface, Identifier, x, y, Width,
 // Height, Event). The other names are ours (notes/decisions.md,
@@ -31,7 +31,7 @@
 class TResizer;    // DialogElements.h
 class TSkinButton; // DialogElements.h
 
-// The dialog window's identifier of the trade window ("hasContentWindow(
+// The dialog window's identifier of the trade window ("HasContentWindow(
 // TRADE_WINDOW)", MainWindow.cpp). The skill, battle and VIP windows are 6, 7 and 9, a
 // container's window is 0x40 plus the container number. MainWindow.h's until issue #118: here, where both of its
 // users (MainWindow.cpp and ContentWindows.cpp's CreateTradeWindow) find it without ContentWindows.cpp including
@@ -108,7 +108,7 @@ public:
 	TSubWindow(int _Identifier, TSubWindowBody *_Body, bool _Resizable, bool _Background);
 	~TSubWindow() override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	void Arrange() override;
 	bool MouseMove(int x, int y) override;
 	bool LeftButtonDown(int x, int y, int Flags) override;
@@ -124,8 +124,8 @@ public:
 	void SetIcon(TComponent *_Icon);
 	void SetTitle(TComponent *_Title);
 	static int GetFrameHeight(); // the title bar and the bottom edge
-	// Inline ("Window->getBody()!=NULL", MainWindow.cpp).
-	[[nodiscard]] TSubWindowBody *getBody() const { return Body; }
+	// Inline ("Window->GetBody()!=NULL", MainWindow.cpp).
+	[[nodiscard]] TSubWindowBody *GetBody() const { return Body; }
 
 	// The parts are owned by the child list while they are children and by the member while they are not (a minimized
 	// window's, a hidden "up" button), so they stay raw (notes/ownership.md, section 7; issue #108).
@@ -153,8 +153,8 @@ public:
 	void DeleteChild(TComponent *Child) override;
 	void InsertChildAfter(TComponent *Previous, TComponent *Child) override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override;
-	int getMinimumHeight() override;
+	int GetMinimumWidth() override;
+	int GetMinimumHeight() override;
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	// Strategy: 1 a child is dragged (Work, NULL when the drag ends), 2 a
@@ -163,8 +163,8 @@ public:
 	virtual void Rearrange(int Strategy, TComponent *Work);
 	TContentWindow *GetContentWindow(int Identifier);
 	void StoreOpenDialogs();
-	// Inline ("!DialogWindow->hasContentWindow(TRADE_WINDOW)", MainWindow.cpp).
-	bool hasContentWindow(int Identifier) { return GetContentWindow(Identifier) != nullptr; }
+	// Inline ("!DialogWindow->HasContentWindow(TRADE_WINDOW)", MainWindow.cpp).
+	bool HasContentWindow(int Identifier) { return GetContentWindow(Identifier) != nullptr; }
 	void PositionChildren(bool SkipDragged);
 	void FitChildren();
 	bool Shrink();

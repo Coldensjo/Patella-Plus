@@ -194,8 +194,8 @@ TBorder::TBorder(TComponent *_Window, int _TopLeft, int _Top, int _TopRight, int
 
 void TBorder::SetSize(int Width, int Height)
 {
-	PATELLA_ASSERT_VALUES(Width>=getMinimumWidth(), Width);
-	PATELLA_ASSERT_VALUES(Height>=getMinimumHeight(), Height);
+	PATELLA_ASSERT_VALUES(Width>=GetMinimumWidth(), Width);
+	PATELLA_ASSERT_VALUES(Height>=GetMinimumHeight(), Height);
 	TComponent::SetSize(Width, Height);
 	Arrange();
 	Window->SetPosition(WindowArea.x, WindowArea.y);
@@ -206,7 +206,7 @@ void TBorder::SetSize(int Width, int Height)
 // The frame's size for Window's size.
 void TBorder::FitToWindow()
 {
-	SetSize(getMinimumWidth() + Window->Width, getMinimumHeight() + Window->Height);
+	SetSize(GetMinimumWidth() + Window->Width, GetMinimumHeight() + Window->Height);
 }
 
 void TBorder::Arrange()
@@ -683,7 +683,7 @@ TOutfitIcon::TOutfitIcon(int _Outfit, int _Direction, int *ColorData, const TRGB
 void TOutfitIcon::Draw(int Surface, int x, int y)
 {
 	const int Size = Width;
-	PATELLA_ASSERT_VALUES(getWidth()==getHeight(), getWidth()-getHeight());
+	PATELLA_ASSERT_VALUES(GetWidth()==GetHeight(), GetWidth()-GetHeight());
 	DrawOutfit(Surface, x, y, Size, Outfit, Colors, Highlight, TRect(x, y, Size, Height), SkinProperties().ObjectCountFont);
 }
 
@@ -735,7 +735,7 @@ void TObjectIcon::Draw(int Surface, int x, int y)
 		ClipWidth -= 2 * SkinProperties().ObjectIconFrameWidth;
 		ClipHeight -= 2 * SkinProperties().ObjectIconFrameWidth;
 	}
-	PATELLA_ASSERT_VALUES(getWidth()==getHeight(), getWidth()-getHeight());
+	PATELLA_ASSERT_VALUES(GetWidth()==GetHeight(), GetWidth()-GetHeight());
 	DrawObject(Surface, x, y, Width, Obj, Highlight, TRect(ClipX, ClipY, ClipWidth, ClipHeight),
 		SkinProperties().ObjectCountFont, false);
 }
@@ -2083,8 +2083,8 @@ void THorizontalScrollBar::SetSize(int Width, int Height)
 {
 	Height = SkinProperties().HorizontalScrollBarHeight;
 	Width -= RightButton->Width + LeftButton->Width;
-	if (Width < Range->getMinimumWidth())
-		Width = Range->getMinimumWidth();
+	if (Width < Range->GetMinimumWidth())
+		Width = Range->GetMinimumWidth();
 	Range->SetSize(Width, Height);
 	Range->Arrange();
 	TComponent::SetSize(Width + RightButton->Width + LeftButton->Width, Height);
@@ -2306,8 +2306,8 @@ void TScrollBar::SetSize(int Width, int Height)
 {
 	Width = SkinProperties().ScrollBarWidth;
 	Height -= DownButton->Height + UpButton->Height;
-	if (Height < Range->getMinimumHeight())
-		Height = Range->getMinimumHeight();
+	if (Height < Range->GetMinimumHeight())
+		Height = Range->GetMinimumHeight();
 	Range->SetSize(Width, Height);
 	Range->Arrange();
 	TComponent::SetSize(Width, Height + DownButton->Height + UpButton->Height);

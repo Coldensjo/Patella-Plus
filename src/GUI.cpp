@@ -2132,14 +2132,14 @@ void TWindow::SetChildPosition(TComponent *Child, int x, int y)
 void TWindow::FitToChild(TComponent *Child, TRect Area, bool Notify)
 {
 	PATELLA_ASSERT(Child!=nullptr);
-	PATELLA_ASSERT_VALUES(Child->getWidth()>0, Child->getWidth());
-	PATELLA_ASSERT_VALUES(Child->getHeight()>0, Child->getHeight());
+	PATELLA_ASSERT_VALUES(Child->GetWidth()>0, Child->GetWidth());
+	PATELLA_ASSERT_VALUES(Child->GetHeight()>0, Child->GetHeight());
 	int NewWidth = Child->Width + (Area.x > 0 ? Area.x : 0) + (Area.width < 0 ? -Area.width : 0);
 	int NewHeight = (Area.y > 0 ? Area.y : 0) + Child->Height + (Area.height < 0 ? -Area.height : 0);
-	const int MinimumWidth = getMinimumWidth();
+	const int MinimumWidth = GetMinimumWidth();
 	if (NewWidth < MinimumWidth)
 		NewWidth = MinimumWidth;
-	const int MinimumHeight = getMinimumHeight();
+	const int MinimumHeight = GetMinimumHeight();
 	if (NewHeight < MinimumHeight)
 		NewHeight = MinimumHeight;
 	if (Notify)
@@ -2181,10 +2181,10 @@ void TWindow::FitToChildren(TRect Margin, bool Notify)
 	Height = Height + abs(Margin.height) + abs(Margin.y);
 	for (Child = FirstChild; Child != nullptr; Child = Child->GetNext())
 		Child->SetPosition(Child->OffsetX + dx, Child->OffsetY + dy);
-	const int MinimumWidth = getMinimumWidth();
+	const int MinimumWidth = GetMinimumWidth();
 	if (Width < MinimumWidth)
 		Width = MinimumWidth;
-	const int MinimumHeight = getMinimumHeight();
+	const int MinimumHeight = GetMinimumHeight();
 	if (Height < MinimumHeight)
 		Height = MinimumHeight;
 	if (Notify)

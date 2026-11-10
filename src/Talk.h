@@ -100,9 +100,9 @@ public:
 	virtual void Remove(TTalkLine *line);
 	virtual void Remove(int lineNumber);
 	virtual void Clear();
-	// isDefault: ConsoleWindow.cpp's assertion "getTextBuffer()->isDefault()==false".
-	virtual bool isDefault(); // TTalk's DefaultTextBuffer (below)
-	virtual bool AcceptMessages() { return isDefault(); }
+	// IsDefault: ConsoleWindow.cpp's assertion "getTextBuffer()->IsDefault()==false".
+	virtual bool IsDefault(); // TTalk's DefaultTextBuffer (below)
+	virtual bool AcceptMessages() { return IsDefault(); }
 	virtual bool IsRuleViolation() { return false; }
 	virtual bool IsRuleViolationChannel() { return false; }
 	virtual bool IsPrivateChannel() { return false; }
@@ -297,7 +297,7 @@ private:
 	std::array<TTalkbox, TALKBOXES> Talkboxes{};
 
 public:
-	// Public: MainWindow.cpp, Map.cpp, TTalkBuffer::isDefault, the test mode's state dump and the golden Talk,
+	// Public: MainWindow.cpp, Map.cpp, TTalkBuffer::IsDefault, the test mode's state dump and the golden Talk,
 	// MainWindow and Map tests read it.
 	TTalkBuffer *DefaultTextBuffer{};
 
@@ -322,7 +322,7 @@ TTalk &Talk();
 } // namespace patella
 
 // Talk.h inline in the original (it read the global): whether this is the console's default buffer.
-inline bool TTalkBuffer::isDefault()
+inline bool TTalkBuffer::IsDefault()
 {
 	return this == patella::bridge::Talk().DefaultTextBuffer;
 }

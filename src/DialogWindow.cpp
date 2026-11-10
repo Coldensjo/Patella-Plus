@@ -34,7 +34,7 @@
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
 // A column is as wide as the side bar.
-int TDialogWindow::getMinimumWidth()
+int TDialogWindow::GetMinimumWidth()
 {
 	return SkinProperties().SideBarWidth;
 }
@@ -113,11 +113,11 @@ int TSubWindow::GetFrameHeight()
 }
 
 // A minimized window is its frame only.
-int TSubWindow::getMinimumHeight()
+int TSubWindow::GetMinimumHeight()
 {
 	int Result = GetFrameHeight();
 	if (Body != nullptr && !IsMinimized)
-		Result += Body->getMinimumHeight();
+		Result += Body->GetMinimumHeight();
 	return Result;
 }
 
@@ -159,7 +159,7 @@ void TDialogWindow::SetSize(int Width, int Height)
 }
 
 // The children's heights, whatever their minimum heights.
-int TDialogWindow::getMinimumHeight()
+int TDialogWindow::GetMinimumHeight()
 {
 	int Result = 0;
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext())
@@ -351,7 +351,7 @@ void TDialogWindow::FitChildren()
 	while (Child != nullptr) {
 		if (Space < Child->Height) {
 			TComponent *Delete = nullptr;
-			if (Space < Child->getMinimumHeight()) {
+			if (Space < Child->GetMinimumHeight()) {
 				Delete = Child;
 			} else if (Space < Child->Height) {
 				Child->SetSize(Area.width, Space);
@@ -390,8 +390,8 @@ bool TDialogWindow::Shrink()
 				return false;
 			Shrinking = Child;
 			Child = Child->GetPrevious();
-		} while (Shrinking->Height == Shrinking->getMinimumHeight());
-		int DeltaHeight = Shrinking->Height - Shrinking->getMinimumHeight();
+		} while (Shrinking->Height == Shrinking->GetMinimumHeight());
+		int DeltaHeight = Shrinking->Height - Shrinking->GetMinimumHeight();
 		if (Missing < DeltaHeight)
 			DeltaHeight = Missing;
 		PATELLA_ASSERT_VALUES(DeltaHeight>0, DeltaHeight);
@@ -437,7 +437,7 @@ void TDialogWindow::MakeRoom(TComponent *Work)
 	for (TComponent *Child = GetFirstChild(); Child != nullptr; Child = Child->GetNext())
 		Space -= Child->Height;
 	if (Space < Work->Height) {
-		int Needed = Work->getMinimumHeight();
+		int Needed = Work->GetMinimumHeight();
 		if (Space > Needed)
 			Needed = Space;
 		TComponent *Child = GetLastChild();
@@ -605,8 +605,8 @@ void TSubWindow::SetSize(int Width, int Height)
 			Change = 1;
 		if (Height < this->Height)
 			Change = -1;
-		if (Height < getMinimumHeight())
-			Height = getMinimumHeight();
+		if (Height < GetMinimumHeight())
+			Height = GetMinimumHeight();
 		TWindow::SetSize(Width, Height);
 		SetChildArea(Body, SkinProperties().SubWindow.Body);
 		FitToChild(Body, SkinProperties().SubWindow.Body, false);

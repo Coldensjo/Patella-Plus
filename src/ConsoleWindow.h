@@ -10,8 +10,8 @@
 //
 // Names from the binary: TLineFormat's LineText and its constructor's
 // parameters (_TextLine, _LineText, _LineLength, _OriginalOffset, _Indent),
-// getFirstLineNumber, getLastLineNumber, _CurrentLineNumber, InvisibleLines
-// (an error message), getTextBuffer, isDefault, getCaption, CurrentConsole,
+// GetFirstLineNumber, GetLastLineNumber, _CurrentLineNumber, InvisibleLines
+// (an error message), getTextBuffer, IsDefault, GetCaption, CurrentConsole,
 // CurrentTab, DefaultTab, NewTab, Input, TextBuffer, _Caption, _TextBuffer,
 // _Active, Tab, Container ("failed to get composite"), Search, Question,
 // Addressee, ChannelID, TalkMode, MessageSeparator and the catch-block
@@ -73,7 +73,7 @@ struct TLineFormat {
 };
 
 // The text of a channel (ContextMenus.cpp's _TextWindow). Lines are numbered
-// from getFirstLineNumber() (Lines.min, always 0) to getLastLineNumber();
+// from GetFirstLineNumber() (Lines.min, always 0) to GetLastLineNumber();
 // CurrentLineNumber is the bottom line shown (the scroll bar's value). A
 // selection runs from (SelectionStartLine, SelectionStartOffset) to
 // (SelectionEndLine, SelectionEndOffset) in either order; -1 is none.
@@ -113,8 +113,8 @@ public:
 	bool GetSelectionEnd(int *Line, int *Offset);
 	bool SelectAll();
 	const char *GetSelectedText();
-	[[nodiscard]] int getFirstLineNumber() const { return Lines.min; }
-	[[nodiscard]] int getLastLineNumber() const { return LastLineNumber; }
+	[[nodiscard]] int GetFirstLineNumber() const { return Lines.min; }
+	[[nodiscard]] int GetLastLineNumber() const { return LastLineNumber; }
 	// A selection of at least one character exists.
 	[[nodiscard]] bool HasSelection() const
 	{
@@ -148,7 +148,7 @@ public:
 class TConsole final : public TWindow {
 public:
 	TConsole();
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool MouseWheel(int x, int y, int Code) override;
@@ -169,7 +169,7 @@ public:
 	TTab(const char *_Caption, TTalkBuffer *_TextBuffer, TCallback Callback);
 	~TTab() override;
 	// The tab height.
-	int getMinimumHeight() override { return SkinProperties().Tab.Height; }
+	int GetMinimumHeight() override { return SkinProperties().Tab.Height; }
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool MouseMove(int x, int y) override;
@@ -184,7 +184,7 @@ public:
 		TElement::ReleaseCapture(Component);
 	}
 	void SetActive(bool _Active);
-	[[nodiscard]] const char *getCaption() const { return Shortened ? FullCaption.get() : Caption.get(); }
+	[[nodiscard]] const char *GetCaption() const { return Shortened ? FullCaption.get() : Caption.get(); }
 
 	TTalkBuffer *TextBuffer;             // +0x24 (with the console's filter list: not one owner, notes/ownership.md 7)
 	int LineCount;                       // +0x28, the buffer's lines when the tab last looked
@@ -225,7 +225,7 @@ public:
 	void SwapChildren(TComponent *Child1, TComponent *Child2) override;
 	bool IsChild(TComponent *Child) override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumHeight() override { return SkinProperties().Tab.Height; }
+	int GetMinimumHeight() override { return SkinProperties().Tab.Height; }
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool HelpMouseMove(int x, int y) override;
@@ -259,7 +259,7 @@ public:
 	TConsoleWindow();
 	~TConsoleWindow() override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumHeight() override { return SkinProperties().ConsoleWindow.MinimumHeight; }
+	int GetMinimumHeight() override { return SkinProperties().ConsoleWindow.MinimumHeight; }
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool LeftButtonDown(int x, int y, int Flags) override;

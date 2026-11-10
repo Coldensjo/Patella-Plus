@@ -207,7 +207,7 @@ public:
 	~TContainerWindowBody() override;
 	void Draw(int Surface, int x, int y) override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	int GetMaximumHeight() override;
 	void Arrange() override;
 	bool LeftButtonDown(int x, int y, int Flags) override;
@@ -257,7 +257,7 @@ public:
 	bool RightButtonUp(int x, int y, int Flags) override;
 	void SetSize(int Width, int Height) override;
 	void Arrange() override;
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	int GetInitialHeight() override;
 	int GetMaximumHeight() override;
 	int GetContentHeight() override;
@@ -284,7 +284,7 @@ public:
 	void MouseHover(int x, int y) override;
 	bool MouseWheel(int x, int y, int Code) override;
 	bool HelpMouseMove(int x, int y) override;
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	int GetInitialHeight() override;
 	int GetContentHeight() override;
 	int GetOpponentAt(int x, int y);
@@ -303,7 +303,7 @@ public:
 	TTradeOffers();
 	void Draw(int Surface, int x, int y) override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	int GetContentHeight();
 	void Arrange() override;
 	bool LeftButtonUp(int x, int y, int Flags) override;
@@ -358,7 +358,7 @@ public:
 	int GetContentHeight() override;
 	void SetSize(int Width, int Height) override;
 	bool HelpMouseMove(int x, int y) override;
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	int GetInitialHeight() override;
 	int GetMaximumHeight() override;
 	void HandleEvent(int Event) override;
@@ -391,7 +391,7 @@ public:
 	void MouseHover(int x, int y) override;
 	bool HelpMouseMove(int x, int y) override;
 	void Arrange() override;
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	int GetInitialHeight() override;
 	int GetContentHeight() override;
 	int GetBuddyAt(int x, int y);

@@ -7,7 +7,7 @@
 // directions, list boxes and the progress bar.
 //
 // Names from the binary: SkinProperties.Buttons.Texture and CheckBox.Item,
-// NumberOfSkins, getMinimumWidth/getMinimumHeight, getWidth/getHeight, Text,
+// NumberOfSkins, GetMinimumWidth/GetMinimumHeight, GetWidth/GetHeight, Text,
 // Cursor, MaxLength, FocusGroup, MemberList, Member, Active, Next, FieldWidth,
 // Lines, RadioButtonGroup, ToResize, TokenType/TokenData, maximum/current, and
 // the parameters (_ToResize, _Window, _Text, ButtonText, _Destination,
@@ -89,8 +89,8 @@ public:
 	TBorder(TComponent *_Window, int _TopLeft, int _Top, int _TopRight, int _Left, int _Right, int _BottomLeft,
 		int _Bottom, int _BottomRight, int _Background, int _Border);
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override { return Skins()[Right].width + Skins()[Left].width + 2 * Border; }
-	int getMinimumHeight() override { return Skins()[Bottom].height + Skins()[Top].height + 2 * Border; }
+	int GetMinimumWidth() override { return Skins()[Right].width + Skins()[Left].width + 2 * Border; }
+	int GetMinimumHeight() override { return Skins()[Bottom].height + Skins()[Top].height + 2 * Border; }
 	void Arrange() override;
 	void FitToWindow();
 
@@ -181,8 +181,8 @@ public:
 		TFont Font);
 	~TLink() override { Destination.reset(); }
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override;
-	int getMinimumHeight() override;
+	int GetMinimumWidth() override;
+	int GetMinimumHeight() override;
 	void Arrange() override;
 	void HandleEvent(int Event) override;
 
@@ -344,12 +344,12 @@ inline TObjectIcon::TObjectIcon(TObject _Obj, const TRGBColor *_Highlight, bool 
 	Highlight = *_Highlight;
 }
 
-inline int TLink::getMinimumWidth()
+inline int TLink::GetMinimumWidth()
 {
 	return Button->Width;
 }
 
-inline int TLink::getMinimumHeight()
+inline int TLink::GetMinimumHeight()
 {
 	return Button->Height;
 }
@@ -548,8 +548,8 @@ class TScrollBar;
 class TEditText final : public TEditLine {
 public:
 	TEditText(int MaxLength, bool _ReadOnly);
-	int getMinimumWidth() override;
-	int getMinimumHeight() override;
+	int GetMinimumWidth() override;
+	int GetMinimumHeight() override;
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool MouseWheel(int x, int y, int Code) override;
@@ -592,8 +592,8 @@ class THorizontalScrollBarRange final : public TElement {
 public:
 	THorizontalScrollBarRange(int _Min, int _Max, int _Value, int _Visible, TCallback _Callback);
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override { return SkinProperties().HorizontalScrollBarRangeMinimumWidth; }
-	int getMinimumHeight() override { return SkinProperties().HorizontalScrollBarHeight; }
+	int GetMinimumWidth() override { return SkinProperties().HorizontalScrollBarRangeMinimumWidth; }
+	int GetMinimumHeight() override { return SkinProperties().HorizontalScrollBarHeight; }
 	void Arrange() override;
 	bool MouseMove(int x, int y) override;
 	bool LeftButtonDown(int x, int y, int Flags) override;
@@ -628,8 +628,8 @@ class THorizontalScrollBar final : public TWindow {
 public:
 	THorizontalScrollBar(int Min, int Max, int _Value, int _Visible, int _ButtonRange, TCallback _Callback);
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override { return SkinProperties().HorizontalScrollBarMinimumWidth; }
-	int getMinimumHeight() override { return SkinProperties().HorizontalScrollBarHeight; }
+	int GetMinimumWidth() override { return SkinProperties().HorizontalScrollBarMinimumWidth; }
+	int GetMinimumHeight() override { return SkinProperties().HorizontalScrollBarHeight; }
 	bool MouseWheel(int x, int y, int Code) override;
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
@@ -649,8 +649,8 @@ class TScrollBarRange : public TElement {
 public:
 	TScrollBarRange(int x, int y, int Width, int Height, int _Min, int _Max, int _Value, int _Visible);
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override { return SkinProperties().ScrollBarMinimumWidth; }
-	int getMinimumHeight() override { return SkinProperties().ScrollBarRangeMinimumHeight; }
+	int GetMinimumWidth() override { return SkinProperties().ScrollBarMinimumWidth; }
+	int GetMinimumHeight() override { return SkinProperties().ScrollBarRangeMinimumHeight; }
 	void Arrange() override;
 	bool MouseMove(int x, int y) override;
 	bool LeftButtonDown(int x, int y, int Flags) override;
@@ -685,8 +685,8 @@ class TScrollBar : public TWindow {
 public:
 	TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, int _ButtonRange);
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override { return SkinProperties().ScrollBarMinimumWidth; }
-	int getMinimumHeight() override { return SkinProperties().ScrollBarMinimumHeight; }
+	int GetMinimumWidth() override { return SkinProperties().ScrollBarMinimumWidth; }
+	int GetMinimumHeight() override { return SkinProperties().ScrollBarMinimumHeight; }
 	bool MouseWheel(int x, int y, int Code) override;
 	void KeyPress(int Key) override { Range->KeyPress(Key); }
 	void HandleEvent(int Event) override;
@@ -696,14 +696,14 @@ public:
 	TSkinButton *DownButton; // +0x34, event 4
 };
 
-inline int TEditText::getMinimumWidth()
+inline int TEditText::GetMinimumWidth()
 {
-	return ScrollBar->getMinimumWidth();
+	return ScrollBar->GetMinimumWidth();
 }
 
-inline int TEditText::getMinimumHeight()
+inline int TEditText::GetMinimumHeight()
 {
-	return ScrollBar->getMinimumHeight();
+	return ScrollBar->GetMinimumHeight();
 }
 
 // --- List boxes -------------------------------------------------------------------
@@ -808,8 +808,8 @@ public:
 		Current = 0;
 		Maximum = 100;
 	}
-	int getMinimumWidth() override { return Skins()[SKIN_PROGRESS_LEFT].width + Skins()[SKIN_PROGRESS_RIGHT].width + Skins()[SKIN_PROGRESS_MIDDLE].width; }
-	int getMinimumHeight() override { return Skins()[SKIN_PROGRESS_LEFT].height; }
+	int GetMinimumWidth() override { return Skins()[SKIN_PROGRESS_LEFT].width + Skins()[SKIN_PROGRESS_RIGHT].width + Skins()[SKIN_PROGRESS_MIDDLE].width; }
+	int GetMinimumHeight() override { return Skins()[SKIN_PROGRESS_LEFT].height; }
 	void Arrange() override;
 	void SetMaximum(int maximum);
 	void SetCurrent(int current);

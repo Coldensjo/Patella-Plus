@@ -9,7 +9,7 @@
 // TMapFrame is the window MainWindow.cpp creates: it holds the map view, keeps
 // it at an aspect ratio of 15:11 and draws the border.
 //
-// Names from the binary: MAP_WIDTH and MAP_HEIGHT ("getWidth()<=MAP_WIDTH*32"),
+// Names from the binary: MAP_WIDTH and MAP_HEIGHT ("GetWidth()<=MAP_WIDTH*32"),
 // the creature fields PKFlag and PARTYFlag, Obj, SrcObj, TradeObject, Hint,
 // Brightness, Player, Talkbox, Creatures[i], EffectNumber and the parameter
 // names in the catch blocks (Width, Height, x, y, Event, Surface, posx, posy,
@@ -26,7 +26,7 @@
 #include "graphics.h"
 #include <array>
 
-// The map surface in fields ("getWidth()<=MAP_WIDTH*32"): 480x352 pixels.
+// The map surface in fields ("GetWidth()<=MAP_WIDTH*32"): 480x352 pixels.
 inline constexpr int MAP_WIDTH = 15;
 inline constexpr int MAP_HEIGHT = 11;
 
@@ -68,8 +68,8 @@ public:
 	// Its two RemoveHotkey calls are the close since issue #108.
 	~TMapWindow() override { CheckClosed("TMapWindow"); }
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override { return 240; }
-	int getMinimumHeight() override { return 176; }
+	int GetMinimumWidth() override { return 240; }
+	int GetMinimumHeight() override { return 176; }
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool LeftButtonDown(int x, int y, int Flags) override;
@@ -148,8 +148,8 @@ class TMapFrame : public TWindow {
 public:
 	TMapFrame();
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override;
-	int getMinimumHeight() override;
+	int GetMinimumWidth() override;
+	int GetMinimumHeight() override;
 	void Arrange() override;
 
 	TMapWindow *MapWindow; // +0x2c

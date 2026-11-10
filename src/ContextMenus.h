@@ -43,8 +43,8 @@ class THelpBubble : public TWindow {
 public:
 	THelpBubble(const char *HelpText);
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override { return SkinProperties().HelpBubbleMinimumWidth; }
-	int getMinimumHeight() override { return SkinProperties().HelpBubbleMinimumHeight; }
+	int GetMinimumWidth() override { return SkinProperties().HelpBubbleMinimumWidth; }
+	int GetMinimumHeight() override { return SkinProperties().HelpBubbleMinimumHeight; }
 	void Arrange() override;
 	void Place(TWindow *Window);
 	bool FitsIn(int &x, int &y, int &Width, int &Height, TWindow *Window);

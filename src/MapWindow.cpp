@@ -540,8 +540,8 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	const int ScreenHeight = Height;
 	int BorderX = 0, BorderY = 0;
 	if (GetNoStretching()) {
-		PATELLA_ASSERT_VALUES(getWidth()<=MAP_WIDTH*32, getWidth());
-		PATELLA_ASSERT_VALUES(getHeight()<=MAP_HEIGHT*32, getHeight());
+		PATELLA_ASSERT_VALUES(GetWidth()<=MAP_WIDTH*32, GetWidth());
+		PATELLA_ASSERT_VALUES(GetHeight()<=MAP_HEIGHT*32, GetHeight());
 		if (Width >= 480 && Height >= 352) {
 			GetSurface()->BlitRect(Surface, x, y, 2, TRect(0, 0, 480, 352));
 		} else {
@@ -1598,14 +1598,14 @@ void TMapFrame::SetSize(int Width, int Height)
 	Arrange();
 }
 
-int TMapFrame::getMinimumWidth()
+int TMapFrame::GetMinimumWidth()
 {
-	return MapWindow->getMinimumWidth() + SkinProperties().MapFrameBorder * 2;
+	return MapWindow->GetMinimumWidth() + SkinProperties().MapFrameBorder * 2;
 }
 
-int TMapFrame::getMinimumHeight()
+int TMapFrame::GetMinimumHeight()
 {
-	return MapWindow->getMinimumHeight() + SkinProperties().MapFrameBorder * 2;
+	return MapWindow->GetMinimumHeight() + SkinProperties().MapFrameBorder * 2;
 }
 
 // The border (skins 8-11) and skin 7 tiled over the rest, its pattern

@@ -5,7 +5,7 @@
 // assertions (PlayerStates.NumberOfIcons, BuddylistWindow.Logo,
 // Buttons.Texture, CheckBox.Item, StatusWindow.HitpointsBar/ManaBar),
 // DrawingList (and DrawingListLength, skin, srcx, srcy from an error text),
-// Parent, FirstChild, Capture, getWidth, getHeight, OffsetX/OffsetY (from
+// Parent, FirstChild, Capture, GetWidth, GetHeight, OffsetX/OffsetY (from
 // the parameters _OffsetX/_OffsetY), Width, Height and the parameter names.
 // The class names and the other member names are ours; see
 // notes/decisions.md "GUI.cpp".
@@ -83,8 +83,8 @@ public:
 	virtual TComponent *GetParent() { return Parent; }
 	virtual void SetSize(int _Width, int _Height);
 	virtual void SetPosition(int _OffsetX, int _OffsetY);
-	virtual int getMinimumWidth() { return 0; }
-	virtual int getMinimumHeight() { return 0; }
+	virtual int GetMinimumWidth() { return 0; }
+	virtual int GetMinimumHeight() { return 0; }
 	virtual void Draw(int Surface, int x, int y);
 	virtual void Arrange() {} // rebuilds the drawing list in subclasses
 	virtual bool MouseMove(int x, int y) = 0;
@@ -111,8 +111,8 @@ public:
 	// is left allocated and marked closed (the original had freed it): see notes/ownership.md, section 7.
 	void Close();
 
-	[[nodiscard]] int getWidth() const { return Width; }   // "Child->getWidth()"
-	[[nodiscard]] int getHeight() const { return Height; } // "Child->getHeight()"
+	[[nodiscard]] int GetWidth() const { return Width; }   // "Child->GetWidth()"
+	[[nodiscard]] int GetHeight() const { return Height; } // "Child->GetHeight()"
 
 	std::unique_ptr<TDrawing[]> DrawingList; // +0x04, allocated by the subclasses (issue #58: the list's only owner)
 	int DrawingListLength;                   // +0x08

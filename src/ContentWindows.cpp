@@ -270,9 +270,9 @@ TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
 // A button shows as pressed while its window is open.
 void TButtonsWindow::Draw(int Surface, int x, int y)
 {
-	SkillsButton->State = CheckObject->hasContentWindow(SKILLS_WINDOW);
-	BattleButton->State = CheckObject->hasContentWindow(BATTLE_WINDOW);
-	BuddyButton->State = CheckObject->hasContentWindow(BUDDYLIST_WINDOW);
+	SkillsButton->State = CheckObject->HasContentWindow(SKILLS_WINDOW);
+	BattleButton->State = CheckObject->HasContentWindow(BATTLE_WINDOW);
+	BuddyButton->State = CheckObject->HasContentWindow(BUDDYLIST_WINDOW);
 	TContentWindow::Draw(Surface, x, y);
 }
 
@@ -1498,9 +1498,9 @@ void TContainerWindowBody::SetSize(int Width, int Height)
 	Arrange();
 }
 
-int TContainerWindowBody::getMinimumHeight()
+int TContainerWindowBody::GetMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().ContainerMinimumHeight);
+	return (std::max)(ScrollBar->GetMinimumHeight(), SkinProperties().ContainerMinimumHeight);
 }
 
 int TContainerWindowBody::GetMaximumHeight()
@@ -1897,11 +1897,11 @@ void TSkillsWindowBody::Arrange()
 }
 
 // At least one line.
-int TSkillsWindowBody::getMinimumHeight()
+int TSkillsWindowBody::GetMinimumHeight()
 {
 	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
 	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
-	return (std::max)(ScrollBar->getMinimumHeight(), LineHeight);
+	return (std::max)(ScrollBar->GetMinimumHeight(), LineHeight);
 }
 
 // The stored height ("ContentWindow" 6 in Tibia.cfg) or the full height,
@@ -1911,8 +1911,8 @@ int TSkillsWindowBody::GetInitialHeight()
 	int Height = GetContentWindowSize(SKILLS_WINDOW);
 	if (Height == 0)
 		Height = GetMaximumHeight();
-	if (Height < getMinimumHeight())
-		return getMinimumHeight();
+	if (Height < GetMinimumHeight())
+		return GetMinimumHeight();
 	return Height;
 }
 
@@ -2322,9 +2322,9 @@ bool TBattleWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] i
 }
 
 // At least one row.
-int TBattleWindowBody::getMinimumHeight()
+int TBattleWindowBody::GetMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BattleWindow.RowHeight);
+	return (std::max)(ScrollBar->GetMinimumHeight(), SkinProperties().BattleWindow.RowHeight);
 }
 
 // The stored height ("ContentWindow" 7) or the content.
@@ -2333,8 +2333,8 @@ int TBattleWindowBody::GetInitialHeight()
 	int Height = GetContentWindowSize(BATTLE_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
-	if (Height < getMinimumHeight())
-		Height = getMinimumHeight();
+	if (Height < GetMinimumHeight())
+		Height = GetMinimumHeight();
 	return Height;
 }
 
@@ -2421,9 +2421,9 @@ void TTradeOffers::SetSize(int Width, int Height)
 	Arrange();
 }
 
-int TTradeOffers::getMinimumHeight()
+int TTradeOffers::GetMinimumHeight()
 {
-	return ScrollBar->getMinimumHeight();
+	return ScrollBar->GetMinimumHeight();
 }
 
 // The rows of the longer offer. Odd, kept: the top margin added is
@@ -2436,7 +2436,7 @@ int TTradeOffers::GetContentHeight()
 	const int Result = SkinProperties().TradeWindow.RowHeight
 			* (Count / SkinProperties().TradeWindow.SlotsPerRow + (Count % SkinProperties().TradeWindow.SlotsPerRow > 0))
 		+ 1 + SkinProperties().TradeWindow.OwnOffer.x;
-	return (std::max)(getMinimumHeight(), Result);
+	return (std::max)(GetMinimumHeight(), Result);
 }
 
 void TTradeOffers::Arrange()
@@ -2667,7 +2667,7 @@ void TTradeWindowBody::OnClose()
 
 int TTradeWindowBody::GetContentHeight()
 {
-	return getMinimumHeight();
+	return GetMinimumHeight();
 }
 
 // The height is limited to the range between the minimum and the maximum
@@ -2678,10 +2678,10 @@ int TTradeWindowBody::GetContentHeight()
 void TTradeWindowBody::SetSize(int Width, int Height)
 {
 	int Maximum = GetMaximumHeight();
-	int Minimum = getMinimumHeight();
+	int Minimum = GetMinimumHeight();
 	const int Lower = (std::min)(Maximum, Minimum);
 	Maximum = GetMaximumHeight();
-	Minimum = getMinimumHeight();
+	Minimum = GetMinimumHeight();
 	Limit(&Height, Lower, (std::max)(Maximum, Minimum));
 	TWindow::SetSize(Width, Height);
 	SetChildArea(Buttons, SkinProperties().TradeWindow.Buttons);
@@ -2700,9 +2700,9 @@ bool TTradeWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] in
 	return true;
 }
 
-int TTradeWindowBody::getMinimumHeight()
+int TTradeWindowBody::GetMinimumHeight()
 {
-	return (std::max)(Offers->getMinimumHeight(), SkinProperties().TradeWindow.MinimumHeight);
+	return (std::max)(Offers->GetMinimumHeight(), SkinProperties().TradeWindow.MinimumHeight);
 }
 
 int TTradeWindowBody::GetInitialHeight()
@@ -2876,9 +2876,9 @@ void TBuddylistWindowBody::Arrange()
 }
 
 // At least one row.
-int TBuddylistWindowBody::getMinimumHeight()
+int TBuddylistWindowBody::GetMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BuddylistWindow.RowHeight);
+	return (std::max)(ScrollBar->GetMinimumHeight(), SkinProperties().BuddylistWindow.RowHeight);
 }
 
 // The stored height ("ContentWindow" 9) or the content.
@@ -2887,8 +2887,8 @@ int TBuddylistWindowBody::GetInitialHeight()
 	int Height = GetContentWindowSize(BUDDYLIST_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
-	if (Height < getMinimumHeight())
-		return getMinimumHeight();
+	if (Height < GetMinimumHeight())
+		return GetMinimumHeight();
 	return Height;
 }
 

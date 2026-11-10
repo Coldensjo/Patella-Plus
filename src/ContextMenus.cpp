@@ -70,7 +70,7 @@ void THelpBubble::SetSize(int Width, int Height)
 		Width += SkinProperties().HelpBubbleSizeRemainder - Width % SkinProperties().HelpBubbleSizeStep;
 	if (Height % SkinProperties().HelpBubbleSizeStep != SkinProperties().HelpBubbleSizeRemainder)
 		Height += SkinProperties().HelpBubbleSizeRemainder - Height % SkinProperties().HelpBubbleSizeStep;
-	const int MinWidth = getMinimumWidth();
+	const int MinWidth = GetMinimumWidth();
 	const int MaxHeight = SkinProperties().HelpBubbleMaximumHeight;
 	if (MaxWidth < MinWidth) {
 		if (Width < MaxWidth)
@@ -83,7 +83,7 @@ void THelpBubble::SetSize(int Width, int Height)
 		if (Width > MaxWidth)
 			Width = MaxWidth;
 	}
-	const int MinHeight = getMinimumHeight();
+	const int MinHeight = GetMinimumHeight();
 	if (MaxHeight < MinHeight) {
 		if (Height < MaxHeight)
 			Height = MaxHeight;
@@ -1080,7 +1080,7 @@ TChannelContextMenu::TChannelContextMenu(TConsoleWindow *_ConsoleWindow, int x, 
 	ConsoleWindow = _ConsoleWindow;
 	TTalkBuffer *TextBuffer = ConsoleWindow->GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
-	if (!TextBuffer->isDefault()) {
+	if (!TextBuffer->IsDefault()) {
 		if (TextBuffer->IsSelected() && TextBuffer->IsPrivateChannel()) {
 			AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite player", nullptr);
 			AddEntry(EVENT_MENU_EXCLUDE_PRIVATE, "Exclude player", nullptr);

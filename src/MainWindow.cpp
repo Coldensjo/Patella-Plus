@@ -165,11 +165,11 @@ void TMainWindow::SetSize(int Width, int Height)
 	SetWindowSize(Width, Height);
 	if (InGame) {
 		const int SplitterHeight = Splitter->Height;
-		int MaxMapHeight = MapFrame->getMinimumHeight();
-		const int Rest = Height - Console->getMinimumHeight() - SplitterHeight;
+		int MaxMapHeight = MapFrame->GetMinimumHeight();
+		const int Rest = Height - Console->GetMinimumHeight() - SplitterHeight;
 		if (Rest > MaxMapHeight)
 			MaxMapHeight = Rest;
-		const int MinMapHeight = MapFrame->getMinimumHeight();
+		const int MinMapHeight = MapFrame->GetMinimumHeight();
 		int MapHeight = Height - Console->Height - Splitter->Height;
 		if (MapHeight < MinMapHeight)
 			MapHeight = MinMapHeight;
@@ -270,7 +270,7 @@ void TMainWindow::HandleEvent(int Event)
 		SidePanel->InsertChildAfter(OldWindow, CreateSmallInventoryWindow(this));
 		SidePanel->DeleteChild(OldWindow);
 		SidePanel->Rearrange(32, nullptr);
-		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
+		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->GetMinimumHeight() + SideBar->GetMinimumHeight());
 		SetSize(Width, Height);
 		break;
 	}
@@ -280,7 +280,7 @@ void TMainWindow::HandleEvent(int Event)
 		SidePanel->InsertChildAfter(OldWindow, CreateInventoryWindow(this));
 		SidePanel->DeleteChild(OldWindow);
 		SidePanel->Rearrange(32, nullptr);
-		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
+		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->GetMinimumHeight() + SideBar->GetMinimumHeight());
 		SetSize(Width, Height);
 		break;
 	}
@@ -446,14 +446,14 @@ void TMainWindow::ChangeMode(bool InGame)
 		InsertChild(DialogWindow);
 		// The console keeps its stored height unless the map would get
 		// smaller than its minimum height; then it gets its own minimum.
-		int ConsoleHeight = Console->getMinimumHeight();
+		int ConsoleHeight = Console->GetMinimumHeight();
 		const int StoredHeight = GetConsoleHeight();
 		if (StoredHeight > ConsoleHeight)
 			ConsoleHeight = StoredHeight;
 		int MapWidth = Width - SkinProperties().SideBarWidth;
 		int MapHeight = Height - ConsoleHeight - SkinProperties().SplitterHeight;
-		if (MapHeight < MapFrame->getMinimumHeight()) {
-			ConsoleHeight = Console->getMinimumHeight();
+		if (MapHeight < MapFrame->GetMinimumHeight()) {
+			ConsoleHeight = Console->GetMinimumHeight();
 			MapWidth = Width - SkinProperties().SideBarWidth;
 			MapHeight = Height - ConsoleHeight - SkinProperties().SplitterHeight;
 		}
@@ -467,7 +467,7 @@ void TMainWindow::ChangeMode(bool InGame)
 		Console->OpenDefaultChannel(patella::bridge::Talk().DefaultTextBuffer, "Default");
 		Console->Arrange();
 		SideBar->SetPosition(MapWidth, 0);
-		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->getMinimumHeight() + SideBar->getMinimumHeight());
+		SideBar->SetSize(SkinProperties().SideBarWidth, SidePanel->GetMinimumHeight() + SideBar->GetMinimumHeight());
 		DialogWindow->SetSize(SkinProperties().SideBarWidth, Height - SideBar->Height);
 		DialogWindow->SetPosition(MapWidth, SideBar->Height);
 		for (int i = 0; i < Count; i++) {
@@ -520,8 +520,8 @@ void TMainWindow::ChangeMode(bool InGame)
 // window again.
 void TMainWindow::ResizeConsole(int ConsoleHeight) const
 {
-	// One call of getMinimumHeight (issue #34).
-	const int MinimumHeight = Console->getMinimumHeight();
+	// One call of GetMinimumHeight (issue #34).
+	const int MinimumHeight = Console->GetMinimumHeight();
 	if (ConsoleHeight < MinimumHeight)
 		ConsoleHeight = MinimumHeight;
 	Console->SetSize(Console->Width, ConsoleHeight);
@@ -592,7 +592,7 @@ void TMainWindow::CloseContainer(int Container) const
 void TMainWindow::OpenTrade() const
 {
 	PATELLA_ASSERT(DialogWindow!=nullptr);
-	PATELLA_ASSERT(!DialogWindow->hasContentWindow(TRADE_WINDOW));
+	PATELLA_ASSERT(!DialogWindow->HasContentWindow(TRADE_WINDOW));
 	OpenContentWindow(TRADE_WINDOW);
 }
 
@@ -601,8 +601,8 @@ void TMainWindow::UpdateTrade() const
 {
 	const TSubWindow *Window = static_cast<TSubWindow *>(DialogWindow->GetContentWindow(TRADE_WINDOW));
 	if (Window != nullptr) {
-		PATELLA_ASSERT(Window->getBody()!=nullptr);
-		Window->getBody()->HandleEvent(EVENT_TRADE_COUNTER_OFFER);
+		PATELLA_ASSERT(Window->GetBody()!=nullptr);
+		Window->GetBody()->HandleEvent(EVENT_TRADE_COUNTER_OFFER);
 	}
 }
 

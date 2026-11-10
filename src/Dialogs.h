@@ -89,8 +89,8 @@ TDialog *CreateHotkeyDialog();
 class TDialog : public TWindow {
 public:
 	TDialog(const char *_Caption, TComponent *_Dialog);
-	int getMinimumWidth() override { return SkinProperties().Dialog.MinimumWidth; }
-	int getMinimumHeight() override { return SkinProperties().Dialog.MinimumHeight; }
+	int GetMinimumWidth() override { return SkinProperties().Dialog.MinimumWidth; }
+	int GetMinimumHeight() override { return SkinProperties().Dialog.MinimumHeight; }
 	void Arrange() override;
 	bool MouseMove(int x, int y) override;
 	bool LeftButtonDown(int x, int y, int Flags) override;

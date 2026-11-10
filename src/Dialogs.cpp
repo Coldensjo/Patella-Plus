@@ -771,8 +771,8 @@ TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 	TLabel *TextLabel = new TLabel(SkinProperties().Dialog.Data64, Text);
 	ProgressBar = new TProgressBar();
 	TimeLabel = new TLabel(SkinProperties().Dialog.Data64, this->Text);
-	int FullWidth = TextLabel->Width > ProgressBar->getMinimumWidth() ? TextLabel->Width
-																	  : ProgressBar->getMinimumWidth();
+	int FullWidth = TextLabel->Width > ProgressBar->GetMinimumWidth() ? TextLabel->Width
+																	  : ProgressBar->GetMinimumWidth();
 	FullWidth = FullWidth > TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.Data64.FontNumber, "8888")
 		? FullWidth
 		: TimeLabel->Width + GetTextWidth(SkinProperties().Dialog.Data64.FontNumber, "8888");
@@ -780,8 +780,8 @@ TReconnectWindow::TReconnectWindow(const char *Text, int timeout)
 	InsertChild(TextLabel);
 	const int BarY = TextHeight + SkinProperties().ReconnectWindowSpacing;
 	InsertChild(ProgressBar);
-	const int BarHeight = ProgressBar->getMinimumHeight();
-	const int TimeY = BarY + ProgressBar->getMinimumHeight() + SkinProperties().ReconnectWindowSpacing;
+	const int BarHeight = ProgressBar->GetMinimumHeight();
+	const int TimeY = BarY + ProgressBar->GetMinimumHeight() + SkinProperties().ReconnectWindowSpacing;
 	InsertChild(TimeLabel);
 	const int TimeHeight = TimeLabel->Height;
 	TComponent::SetSize(FullWidth, TimeY + TimeHeight);

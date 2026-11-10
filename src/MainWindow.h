@@ -12,7 +12,7 @@
 // handled here (walking, turning and the Ctrl shortcuts).
 //
 // Names from the binary: MainWindow and ModalWindow (assertions in
-// Control.cpp), DialogWindow ("DialogWindow!=NULL"), getBody, OldWindow,
+// Control.cpp), DialogWindow ("DialogWindow!=NULL"), GetBody, OldWindow,
 // TRADE_WINDOW, ACTIONSTATE_NONE and the parameter names in the catch blocks
 // (Width, Height, Surface, Key, Event, ConsoleHeight, dx, dy, Container,
 // Identifier, x, y). The class names and the other names are ours
