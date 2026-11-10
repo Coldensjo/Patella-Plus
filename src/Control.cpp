@@ -276,9 +276,8 @@ void patella::TGUI::Redraw(bool Force)
 	GetSurface()->FinishFrame();
 }
 
-// Game packet 0x0a, once the connection state is 8. Out of line (PATELLA_NOINLINE): the golden corpus's
-// Communication test replaces it, and ReceivePackets would inline it (issue #78).
-PATELLA_NOINLINE void patella::TGUI::EnterGame() const
+// Game packet 0x0a, once the connection state is 8.
+void patella::TGUI::EnterGame() const
 {
 	MainWindow->ChangeMode(true);
 	if (ModalWindow == nullptr) {

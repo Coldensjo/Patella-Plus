@@ -7,9 +7,6 @@
 #include "compat/span.h"
 #include <array>
 
-// The destructor is "= default" since issue #47: issue #34 kept the empty body because "= default" changed the
-// oracle's image (the x86 .text grew by 0x60 bytes); the oracle left with issue #94. It stays virtual (the vtable
-// pointer first, as in the original).
 class TXTEA {
 public:
 	// The key's 16 bytes and a block's 8 (issue #59: the original took pointers). A span whose pointer is null is
@@ -18,7 +15,6 @@ public:
 	using TBlock = patella::TSpan<uint8, 8>;
 
 	TXTEA();
-	virtual ~TXTEA() = default;
 	void SetKey(TKey Key);
 	void EncryptBlock(TBlock Block); // in place
 	void DecryptBlock(TBlock Block);
