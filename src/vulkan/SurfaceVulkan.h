@@ -122,8 +122,6 @@ private:
 	// The main window as Win32's, for the devices' own windows (PresentWindow.h, issue #52; hWindow, a TWindowHandle
 	// since issue #138).
 	[[nodiscard]] HWND MainWindow() const { return static_cast<HWND>(hWindow); }
-	int TextureWidth(int Surface);
-	int TextureHeight(int Surface);
 	patella::vulkan::TDeviceRequest Request(patella::platform::TWindowHandle Window);
 	bool Masked(int Target);
 	void Track(int Target, int Texture, const patella::vulkan::TQuad *Quads, size_t Count);

@@ -76,8 +76,3 @@ int GetCurrentEngine();
 TSurface *GetSurface();
 void SurfaceExitInstance();
 void SurfaceInitInstance(patella::platform::TWindowHandle Window);
-
-// surfaceDX9.cpp (surfaceDX9.h): declared here because SurfaceDX.h's DirectX 6
-// d3d.h and surfaceDX9.h's d3d9.h cannot be included together.
-bool IsDirect3D9Installed();
-TSurface *CreateSurfaceDX9();
