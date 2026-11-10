@@ -116,12 +116,12 @@ void TMapWindow::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// 0x4bfde0, line 164. The area is the TRect SkinProperties.Data140, copied
+// 0x4bfde0, line 164. The area is the TRect SkinProperties.MapHintButton, copied
 // as one 16-byte block (sub esp,0x10 and four stores).
 void TMapWindow::Arrange()
 {
 	if (HintButton != nullptr)
-		SetChildArea(HintButton, SkinProperties().Data140);
+		SetChildArea(HintButton, SkinProperties().MapHintButton);
 }
 
 // 0x4c24d0, line 196. Starts dragging the top movable object of the field.
@@ -1596,30 +1596,30 @@ TMapFrame::TMapFrame()
 // follows it.
 void TMapFrame::SetSize(int Width, int Height)
 {
-	const int Border = SkinProperties().Data13C;
+	const int Border = SkinProperties().MapFrameBorder;
 	const int MaxWidth = (Height - Border * 2) * 15 / 11 + 2;
 	ViewWidth = Width - Border * 2 < MaxWidth ? Width - Border * 2 : MaxWidth;
 	if (GetNoStretching())
 		ViewWidth = ViewWidth < 480 ? ViewWidth : 480;
 	ViewHeight = (int)floor(ViewWidth * (11.0f / 15.0f));
-	ViewX = (Width - SkinProperties().Data13C * 2 - ViewWidth) / 2 + SkinProperties().Data13C;
-	ViewY = SkinProperties().Data13C;
+	ViewX = (Width - SkinProperties().MapFrameBorder * 2 - ViewWidth) / 2 + SkinProperties().MapFrameBorder;
+	ViewY = SkinProperties().MapFrameBorder;
 	MapWindow->SetSize(ViewWidth, ViewHeight);
 	MapWindow->SetPosition(ViewX, ViewY);
-	TWindow::SetSize(Width, ViewHeight + SkinProperties().Data13C * 2);
+	TWindow::SetSize(Width, ViewHeight + SkinProperties().MapFrameBorder * 2);
 	Arrange();
 }
 
 // 0x4c1ea0, line 1595
 int TMapFrame::getMinimumWidth()
 {
-	return MapWindow->getMinimumWidth() + SkinProperties().Data13C * 2;
+	return MapWindow->getMinimumWidth() + SkinProperties().MapFrameBorder * 2;
 }
 
 // 0x4c2040, line 1606
 int TMapFrame::getMinimumHeight()
 {
-	return MapWindow->getMinimumHeight() + SkinProperties().Data13C * 2;
+	return MapWindow->getMinimumHeight() + SkinProperties().MapFrameBorder * 2;
 }
 
 // 0x4c21e0. No exception frame. The border (skins 8-11) and skin 7 tiled

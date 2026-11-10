@@ -133,8 +133,8 @@ public:
 	// The parts are owned by the child list while they are children and by the member while they are not (a minimized
 	// window's, a hidden "up" button), so they stay raw (notes/ownership.md, section 7; issue #108).
 	TSubWindowBody *Body;        // +0x44
-	TResizer *Resizer1;          // +0x48, area Style194.Data60
-	TResizer *Resizer2;          // +0x4c, area Style194.Data70
+	TResizer *Resizer1;          // +0x48, area SubWindow.Resizer1
+	TResizer *Resizer2;          // +0x4c, area SubWindow.Resizer2
 	TComponent *UpButton;        // +0x50, a container's "up" button, shown while it has a parent
 	TComponent *CloseButton;     // +0x54, event 10
 	TSkinButton *MinimizeButton; // +0x58, event 9

@@ -53,7 +53,7 @@ TCallback NoCallback(nullptr, 0);
 // 0x4854b0. A column is as wide as the side bar.
 int TDialogWindow::getMinimumWidth()
 {
-	return SkinProperties().Data184;
+	return SkinProperties().SideBarWidth;
 }
 
 // 0x4854c0. Also inlined into TSubWindow's constructor.
@@ -187,14 +187,14 @@ int TDialogWindow::getMinimumHeight()
 }
 
 // 0x485b10, line 109. The dragged child's place is a rectangle of
-// SkinProperties.Data188; the child itself is drawn last, over the others.
+// SkinProperties.DraggedWindowPlaceColor; the child itself is drawn last, over the others.
 void TDialogWindow::Draw(int Surface, int x, int y)
 {
 	int Position = 0;
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext()) {
 		if (Child == Dragged) {
 			GetSurface()->FillRectangle(Surface, TRect(x, Position + y, Width, Dragged->Height),
-				SkinProperties().Data188);
+				SkinProperties().DraggedWindowPlaceColor);
 		} else {
 			Child->Draw(Surface, Child->OffsetX + x, Child->OffsetY + y);
 		}
@@ -621,7 +621,7 @@ TSubWindow::TSubWindow(int _Identifier, TSubWindowBody *_Body, bool _Resizable, 
 }
 
 // 0x4881f0, line 861. Not lower than the minimum height; a minimized window
-// keeps its frame height (Style194.Data4C). The column is told whether the
+// keeps its frame height (SubWindow.MinimizedHeight). The column is told whether the
 // window grew (2), shrank (4) or kept its height (32), then fits its
 // children into its height (8).
 void TSubWindow::SetSize(int Width, int Height)
@@ -629,7 +629,7 @@ void TSubWindow::SetSize(int Width, int Height)
 	TDialogWindow *Column = static_cast<TDialogWindow *>(GetParent());
 	int Change = 0;
 	if (IsMinimized) {
-		TWindow::SetSize(Width, SkinProperties().Style194.Data4C);
+		TWindow::SetSize(Width, SkinProperties().SubWindow.MinimizedHeight);
 	} else {
 		if (Height > this->Height)
 			Change = 1;
@@ -638,12 +638,12 @@ void TSubWindow::SetSize(int Width, int Height)
 		if (Height < getMinimumHeight())
 			Height = getMinimumHeight();
 		TWindow::SetSize(Width, Height);
-		SetChildArea(Body, SkinProperties().Style194.Data50);
-		FitToChild(Body, SkinProperties().Style194.Data50, false);
+		SetChildArea(Body, SkinProperties().SubWindow.Body);
+		FitToChild(Body, SkinProperties().SubWindow.Body, false);
 		if (Resizer1 != nullptr)
-			SetChildArea(Resizer1, SkinProperties().Style194.Data60);
+			SetChildArea(Resizer1, SkinProperties().SubWindow.Resizer1);
 		if (Resizer2 != nullptr)
-			SetChildArea(Resizer2, SkinProperties().Style194.Data70);
+			SetChildArea(Resizer2, SkinProperties().SubWindow.Resizer2);
 	}
 	Arrange();
 	if (Column != nullptr) {
@@ -758,7 +758,7 @@ void TSubWindow::Minimize()
 		RemoveChild(Body);
 	if (MinimizeButton != nullptr)
 		MinimizeButton->SetSkins(140, 141);
-	SetSize(Width, SkinProperties().Style194.Data4C);
+	SetSize(Width, SkinProperties().SubWindow.MinimizedHeight);
 }
 
 // 0x489500, lines 1027-1037. The assertion comes before the try block.
@@ -804,7 +804,7 @@ void TSubWindow::SetUpButton(TComponent *Button)
 	}
 	UpButton = Button;
 	InsertChild(Button);
-	SetChildPosition(UpButton, SkinProperties().Style194.Data20.x, SkinProperties().Style194.Data20.y);
+	SetChildPosition(UpButton, SkinProperties().SubWindow.UpButton.x, SkinProperties().SubWindow.UpButton.y);
 }
 
 // 0x489cf0, line 1088
@@ -818,7 +818,7 @@ void TSubWindow::SetCloseButton(TComponent *Button)
 	}
 	CloseButton = Button;
 	InsertChild(Button);
-	SetChildPosition(CloseButton, SkinProperties().Style194.Data10.x, SkinProperties().Style194.Data10.y);
+	SetChildPosition(CloseButton, SkinProperties().SubWindow.CloseButton.x, SkinProperties().SubWindow.CloseButton.y);
 }
 
 // 0x489ed0, line 1101
@@ -832,7 +832,7 @@ void TSubWindow::SetMinimizeButton(TSkinButton *Button)
 	}
 	MinimizeButton = Button;
 	InsertChild(Button);
-	SetChildPosition(MinimizeButton, SkinProperties().Style194.Data18.x, SkinProperties().Style194.Data18.y);
+	SetChildPosition(MinimizeButton, SkinProperties().SubWindow.MinimizeButton.x, SkinProperties().SubWindow.MinimizeButton.y);
 }
 
 // 0x48a0b0, line 1114
@@ -846,7 +846,7 @@ void TSubWindow::SetIcon(TComponent *_Icon)
 	}
 	Icon = _Icon;
 	InsertChild(_Icon);
-	SetChildArea(Icon, SkinProperties().Style194.Data00);
+	SetChildArea(Icon, SkinProperties().SubWindow.Icon);
 }
 
 // 0x48a2a0, line 1127
@@ -860,6 +860,6 @@ void TSubWindow::SetTitle(TComponent *_Title)
 	}
 	Title = _Title;
 	InsertChild(_Title);
-	SetChildArea(Title, SkinProperties().Style194.Data28);
+	SetChildArea(Title, SkinProperties().SubWindow.Title);
 }
 // NOLINTEND(cppcoreguidelines-owning-memory)

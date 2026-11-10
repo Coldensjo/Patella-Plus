@@ -83,24 +83,24 @@ THelpBubble::THelpBubble(const char *HelpText)
 	DrawingList.reset(new TDrawing[9]);
 	Text = new TFormattedText(HelpText);
 	InsertChild(Text);
-	SetSize(SkinProperties().Data158, SkinProperties().Data15C);
-	FitToChild(Text, SkinProperties().Data160, true);
+	SetSize(SkinProperties().HelpBubbleMaximumWidth, SkinProperties().HelpBubbleMaximumHeight);
+	FitToChild(Text, SkinProperties().HelpBubbleTextMargins, true);
 	Text->FitToChildren(TRect(0, 0, 0, 0), true);
-	FitToChild(Text, SkinProperties().Data160, true);
+	FitToChild(Text, SkinProperties().HelpBubbleTextMargins, true);
 }
 
-// 0x43d730, line 142. The size is rounded up to Data174 modulo Data170 and
-// kept between the minimum and Data158/Data15C (the larger of the two wins
+// 0x43d730, line 142. The size is rounded up to HelpBubbleSizeRemainder modulo HelpBubbleSizeStep and
+// kept between the minimum and HelpBubbleMaximumWidth/HelpBubbleMaximumHeight (the larger of the two wins
 // when the minimum is above the maximum).
 void THelpBubble::SetSize(int Width, int Height)
 {
-	const int MaxWidth = SkinProperties().Data158;
-	if (Width % SkinProperties().Data170 != SkinProperties().Data174)
-		Width += SkinProperties().Data174 - Width % SkinProperties().Data170;
-	if (Height % SkinProperties().Data170 != SkinProperties().Data174)
-		Height += SkinProperties().Data174 - Height % SkinProperties().Data170;
+	const int MaxWidth = SkinProperties().HelpBubbleMaximumWidth;
+	if (Width % SkinProperties().HelpBubbleSizeStep != SkinProperties().HelpBubbleSizeRemainder)
+		Width += SkinProperties().HelpBubbleSizeRemainder - Width % SkinProperties().HelpBubbleSizeStep;
+	if (Height % SkinProperties().HelpBubbleSizeStep != SkinProperties().HelpBubbleSizeRemainder)
+		Height += SkinProperties().HelpBubbleSizeRemainder - Height % SkinProperties().HelpBubbleSizeStep;
 	const int MinWidth = getMinimumWidth();
-	const int MaxHeight = SkinProperties().Data15C;
+	const int MaxHeight = SkinProperties().HelpBubbleMaximumHeight;
 	if (MaxWidth < MinWidth) {
 		if (Width < MaxWidth)
 			Width = MaxWidth;
@@ -125,7 +125,7 @@ void THelpBubble::SetSize(int Width, int Height)
 			Height = MaxHeight;
 	}
 	TWindow::SetSize(Width, Height);
-	SetChildArea(Text, SkinProperties().Data160);
+	SetChildArea(Text, SkinProperties().HelpBubbleTextMargins);
 	Arrange();
 }
 
@@ -158,7 +158,7 @@ void THelpBubble::Arrange()
 // that path skips lines 267-268.
 void THelpBubble::Place(TWindow *Window)
 {
-	const int Margin = SkinProperties().Data178;
+	const int Margin = SkinProperties().HelpBubbleMargin;
 	int HelpX, HelpY, HelpWidth, HelpHeight;
 	GetHelpArea(&HelpX, &HelpY, &HelpWidth, &HelpHeight);
 	int w = Width;
@@ -232,7 +232,7 @@ void THelpBubble::Place(TWindow *Window)
 // every edge of the window; a coordinate of 0 becomes the margin first.
 bool THelpBubble::FitsIn(int &x, int &y, int &Width, int &Height, TWindow *Window)
 {
-	const int Margin = SkinProperties().Data178;
+	const int Margin = SkinProperties().HelpBubbleMargin;
 	if (x == 0)
 		x = Margin;
 	if (y == 0)
@@ -259,11 +259,11 @@ TContextMenuEntry::TContextMenuEntry(const char *_Text, const char *_Shortcut, T
 	else
 		CopyString(Shortcut.Chars, _Shortcut);
 	Callback = _Callback;
-	const int h = GetFontLineHeight(SkinProperties().Data0B0.FontNumber) + SkinProperties().Data0D4 * 2;
-	int w = GetTextWidth(SkinProperties().Data0B0.FontNumber, Text) + SkinProperties().Data0D4 * 2
-		+ SkinProperties().Data09C;
+	const int h = GetFontLineHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2;
+	int w = GetTextWidth(SkinProperties().MenuFont.FontNumber, Text) + SkinProperties().MenuTextMargin * 2
+		+ SkinProperties().MenuShortcutGap;
 	if (Shortcut[0] != 0)
-		w += GetTextWidth(SkinProperties().Data0B0.FontNumber, Shortcut);
+		w += GetTextWidth(SkinProperties().MenuFont.FontNumber, Shortcut);
 	SetSize(w, h);
 }
 
@@ -274,15 +274,15 @@ void TContextMenuEntry::Draw(int Surface, int x, int y)
 	if (In(GetMouseX() - x, 0, Width - 1) && In(GetMouseY() - y, 0, Height - 1)) {
 		GetSurface()->FillRectangle(Surface,
 			TRect(x, y, Width,
-				GetFontHeight(SkinProperties().Data0B0.FontNumber) + SkinProperties().Data0D4 * 2),
-			SkinProperties().Data0C8);
+				GetFontHeight(SkinProperties().MenuFont.FontNumber) + SkinProperties().MenuTextMargin * 2),
+			SkinProperties().MenuHighlightBackground);
 	}
-	y += SkinProperties().Data0D4;
-	PrintText(Surface, x + SkinProperties().Data0D4, y, SkinProperties().Data0B0.FontNumber, SkinProperties().Data0B0.Color,
+	y += SkinProperties().MenuTextMargin;
+	PrintText(Surface, x + SkinProperties().MenuTextMargin, y, SkinProperties().MenuFont.FontNumber, SkinProperties().MenuFont.Color,
 		Text, LEFT_ALIGN);
 	if (Shortcut[0] != 0) {
-		PrintText(Surface, x + Width - SkinProperties().Data0D4 - 1, y, SkinProperties().Data0B0.FontNumber,
-			SkinProperties().Data0B0.Color, Shortcut, RIGHT_ALIGN);
+		PrintText(Surface, x + Width - SkinProperties().MenuTextMargin - 1, y, SkinProperties().MenuFont.FontNumber,
+			SkinProperties().MenuFont.Color, Shortcut, RIGHT_ALIGN);
 	}
 }
 
@@ -297,8 +297,8 @@ bool TContextMenuEntry::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] in
 void TContextMenuEntry::SetLast()
 {
 	// The original's order: the left operand first (MSVC; GCC and Clang may differ, issue #91).
-	const int LineHeight = GetFontLineHeight(SkinProperties().Data0B0.FontNumber);
-	SetSize(Width, Height - (LineHeight - GetFontHeight(SkinProperties().Data0B0.FontNumber)));
+	const int LineHeight = GetFontLineHeight(SkinProperties().MenuFont.FontNumber);
+	SetSize(Width, Height - (LineHeight - GetFontHeight(SkinProperties().MenuFont.FontNumber)));
 }
 
 // --- TContextMenu --------------------------------------------------------------
@@ -371,7 +371,7 @@ void TContextMenu::Show(int x, int y, int ParentWidth, int ParentHeight)
 	TContextMenuEntry *LastEntry = static_cast<TContextMenuEntry *>(GetLastChild());
 	PATELLA_ASSERT(LastEntry!=nullptr);
 	LastEntry->SetLast();
-	FitToChildren(SkinProperties().Data0A0, true);
+	FitToChildren(SkinProperties().MenuMargins, true);
 	Arrange();
 	if (x + Width >= ParentWidth)
 		x -= Width;
@@ -407,7 +407,7 @@ void TContextMenu::AddEntry(int Event, const char *Text, const char *Shortcut)
 void TContextMenu::AddSeparator()
 {
 	TSeparator *Line = new TSeparator(true);
-	Line->SetSize(50, SkinProperties().Data0C4);
+	Line->SetSize(50, SkinProperties().MenuSeparatorHeight);
 	AppendChild(Line);
 }
 

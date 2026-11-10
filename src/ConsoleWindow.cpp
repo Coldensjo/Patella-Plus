@@ -16,8 +16,8 @@
 // with ReportRuleViolation's catch blocks at 0x42591f; ContentWindows.obj
 // follows (file-ranges.tsv).
 //
-// The console's skin properties are SkinProperties.Style9E8 (the console),
-// StyleAA4 (the tabs) and Style944.Data24 (the font of the default channel);
+// The console's skin properties are SkinProperties.ConsoleWindow (the console),
+// Tab (the tabs) and EditLine.Font (the font of the default channel);
 // the frames are skins 169-176 (TConsole) and 177-185 (TConsoleWindow). Events
 // (201-213, 403) and AddMessage's numbers are named in Events.h; the comments
 // give events in decimal, as in ContextMenus.cpp, and messages in hex.
@@ -162,7 +162,7 @@ void TTextWindow::Draw(int Surface, int x, int y)
 				SelectionWidth = GetTextPartWidth(Format->FontNumber, Format->LineText, Format->LineLength);
 			}
 			GetSurface()->FillRectangle(Surface, TRect(SelectionX, LineY, SelectionWidth, SelectionHeight),
-				SkinProperties().Style9E8.Data9C);
+				SkinProperties().ConsoleWindow.SelectionColor);
 		}
 		PrintTextPart(Surface, LineX, LineY, Format->FontNumber, Format->Color, Format->LineText,
 			Format->LineLength, 0);
@@ -621,7 +621,7 @@ TConsole::TConsole()
 	DrawingListLength = 8;
 	DrawingList.reset(new TDrawing[8]);
 	TextWindow = new TTextWindow;
-	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().Data878, SkinProperties().Data874), 0, 0, 0, 0, 1);
+	ScrollBar = new TScrollBar(TRect(0, 0, SkinProperties().ScrollBarWidth, SkinProperties().ScrollBarMinimumHeight), 0, 0, 0, 0, 1);
 	InsertChild(ScrollBar);
 	InsertChild(TextWindow);
 }
@@ -661,7 +661,7 @@ void TConsole::Arrange()
 	const int LeftEdge = Skins()[173].width;
 	ScrollBar->SetSize(ScrollBar->Width, Height - Skins()[176].height - Top);
 	ScrollBar->SetPosition(WindowWidth - RightEdge - LeftEdge - ScrollBar->Width + LeftEdge, Top);
-	SetChildArea(TextWindow, SkinProperties().Style9E8.Data8C);
+	SetChildArea(TextWindow, SkinProperties().ConsoleWindow.TextWindow);
 	TWindow::Arrange();
 	const int Visible = TextWindow->getLastLineNumber() - TextWindow->getFirstLineNumber() - TextWindow->InvisibleLines;
 	const int Minimum = TextWindow->getFirstLineNumber() + Visible;
@@ -721,11 +721,11 @@ TTab::TTab(const char *_Caption, TTalkBuffer *_TextBuffer, TCallback _Callback)
 	TStringBuffer(FullCaption.get(), Size).Assign(Caption.get());
 	Callback = _Callback;
 	Shortened = false;
-	const int Length = GetFittingTextLength(SkinProperties().StyleAA4.Data14.FontNumber, Caption.get(),
-		SkinProperties().StyleAA4.Data00 - SkinProperties().StyleAA4.Data10 * 2);
+	const int Length = GetFittingTextLength(SkinProperties().Tab.ActiveFont.FontNumber, Caption.get(),
+		SkinProperties().Tab.Width - SkinProperties().Tab.CaptionMargin * 2);
 	if (ShortenString(Caption.get(), Length))
 		Shortened = true;
-	SetSize(SkinProperties().StyleAA4.Data00, SkinProperties().StyleAA4.Data04);
+	SetSize(SkinProperties().Tab.Width, SkinProperties().Tab.Height);
 }
 
 // 0x41acd0, lines 849-866: the destructor frees the captions; the rest of its
@@ -860,14 +860,14 @@ void TTab::Draw(int Surface, int x, int y)
 	DrawSkin(Surface, x, y, Width, Height, 187 - (Active ? 1 : 0), 0, 0);
 	const TFont *Font;
 	if (Active)
-		Font = &SkinProperties().StyleAA4.Data14;
+		Font = &SkinProperties().Tab.ActiveFont;
 	else if (Unread && BlinkEnd == 0)
-		Font = &SkinProperties().StyleAA4.Data3C;
+		Font = &SkinProperties().Tab.UnreadFont;
 	else if (Unread && BlinkEnd != 0)
-		Font = &SkinProperties().StyleAA4.Data50;
+		Font = &SkinProperties().Tab.BlinkingFont;
 	else
-		Font = &SkinProperties().StyleAA4.Data28;
-	PrintFormattedText(Surface, SkinProperties().StyleAA4.Data08.x + x, SkinProperties().StyleAA4.Data08.y + y, *Font,
+		Font = &SkinProperties().Tab.InactiveFont;
+	PrintFormattedText(Surface, SkinProperties().Tab.Caption.x + x, SkinProperties().Tab.Caption.y + y, *Font,
 		Caption.get());
 	if (BlinkEnd != 0 && BlinkEnd < GetActionNumber())
 		BlinkEnd = 0;
@@ -1300,21 +1300,21 @@ void TConsoleWindow::OnClose()
 void TConsoleWindow::SetSize(int Width, int Height)
 {
 	TComponent::SetSize(Width, Height);
-	SetChildArea(TabBar, SkinProperties().Style9E8.Data04);
-	SetChildArea(Input, SkinProperties().Style9E8.Data24);
-	SetChildArea(CurrentConsole, SkinProperties().Style9E8.Data44);
+	SetChildArea(TabBar, SkinProperties().ConsoleWindow.TabBar);
+	SetChildArea(Input, SkinProperties().ConsoleWindow.Input);
+	SetChildArea(CurrentConsole, SkinProperties().ConsoleWindow.CurrentConsole);
 	if (IsChild(VolumeButton))
-		SetChildPosition(VolumeButton, SkinProperties().Style9E8.Data64.x, SkinProperties().Style9E8.Data64.y);
-	SetChildPosition(IgnoreButton, SkinProperties().Style9E8.Data7C.x, SkinProperties().Style9E8.Data7C.y);
-	SetChildPosition(NewChannelButton, SkinProperties().Style9E8.Data84.x, SkinProperties().Style9E8.Data84.y);
+		SetChildPosition(VolumeButton, SkinProperties().ConsoleWindow.VolumeButton.x, SkinProperties().ConsoleWindow.VolumeButton.y);
+	SetChildPosition(IgnoreButton, SkinProperties().ConsoleWindow.IgnoreButton.x, SkinProperties().ConsoleWindow.IgnoreButton.y);
+	SetChildPosition(NewChannelButton, SkinProperties().ConsoleWindow.NewChannelButton.x, SkinProperties().ConsoleWindow.NewChannelButton.y);
 	if (IsChild(CloseButton))
-		SetChildPosition(CloseButton, SkinProperties().Style9E8.Data6C.x, SkinProperties().Style9E8.Data6C.y);
+		SetChildPosition(CloseButton, SkinProperties().ConsoleWindow.CloseButton.x, SkinProperties().ConsoleWindow.CloseButton.y);
 	if (IsChild(ServerMessagesButton))
-		SetChildPosition(ServerMessagesButton, SkinProperties().Style9E8.Data74.x, SkinProperties().Style9E8.Data74.y);
+		SetChildPosition(ServerMessagesButton, SkinProperties().ConsoleWindow.ServerMessagesButton.x, SkinProperties().ConsoleWindow.ServerMessagesButton.y);
 	if (MoveRightButton != nullptr && IsChild(MoveRightButton))
-		SetChildPosition(MoveRightButton, SkinProperties().Style9E8.Data54.x, SkinProperties().Style9E8.Data54.y);
+		SetChildPosition(MoveRightButton, SkinProperties().ConsoleWindow.MoveRightButton.x, SkinProperties().ConsoleWindow.MoveRightButton.y);
 	if (MoveLeftButton != nullptr && IsChild(MoveLeftButton))
-		SetChildPosition(MoveLeftButton, SkinProperties().Style9E8.Data5C.x, SkinProperties().Style9E8.Data5C.y);
+		SetChildPosition(MoveLeftButton, SkinProperties().ConsoleWindow.MoveLeftButton.x, SkinProperties().ConsoleWindow.MoveLeftButton.y);
 	Arrange();
 }
 
@@ -1606,26 +1606,26 @@ void TConsoleWindow::UpdateButtons()
 		RemoveChild(MoveRightButton);
 	if (!IsChild(MoveRightButton) && TabBar->LeftTabs->GetFirstChild() != nullptr) {
 		InsertChild(MoveRightButton);
-		SetChildPosition(MoveRightButton, SkinProperties().Style9E8.Data54.x, SkinProperties().Style9E8.Data54.y);
+		SetChildPosition(MoveRightButton, SkinProperties().ConsoleWindow.MoveRightButton.x, SkinProperties().ConsoleWindow.MoveRightButton.y);
 	}
 	if (IsChild(MoveLeftButton) && TabBar->RightTabs->GetFirstChild() == nullptr)
 		RemoveChild(MoveLeftButton);
 	if (!IsChild(MoveLeftButton) && TabBar->RightTabs->GetFirstChild() != nullptr) {
 		InsertChild(MoveLeftButton);
-		SetChildPosition(MoveLeftButton, SkinProperties().Style9E8.Data5C.x, SkinProperties().Style9E8.Data5C.y);
+		SetChildPosition(MoveLeftButton, SkinProperties().ConsoleWindow.MoveLeftButton.x, SkinProperties().ConsoleWindow.MoveLeftButton.y);
 	}
 	if (!TextBuffer->isDefault()) {
 		InsertChild(CloseButton);
-		SetChildPosition(CloseButton, SkinProperties().Style9E8.Data6C.x, SkinProperties().Style9E8.Data6C.y);
+		SetChildPosition(CloseButton, SkinProperties().ConsoleWindow.CloseButton.x, SkinProperties().ConsoleWindow.CloseButton.y);
 		InsertChild(ServerMessagesButton);
-		SetChildPosition(ServerMessagesButton, SkinProperties().Style9E8.Data74.x, SkinProperties().Style9E8.Data74.y);
+		SetChildPosition(ServerMessagesButton, SkinProperties().ConsoleWindow.ServerMessagesButton.x, SkinProperties().ConsoleWindow.ServerMessagesButton.y);
 		ServerMessagesButton->State = TextBuffer->ShowMessages;
 	}
-	TFont Font = SkinProperties().Style9E8.DataA8;
+	TFont Font = SkinProperties().ConsoleWindow.InputFont;
 	if (TextBuffer->AcceptMessages()) {
 		InsertChild(VolumeButton);
-		SetChildPosition(VolumeButton, SkinProperties().Style9E8.Data64.x, SkinProperties().Style9E8.Data64.y);
-		Font = SkinProperties().Style944.Data24;
+		SetChildPosition(VolumeButton, SkinProperties().ConsoleWindow.VolumeButton.x, SkinProperties().ConsoleWindow.VolumeButton.y);
+		Font = SkinProperties().EditLine.Font;
 	}
 	Input->SetFont(Font);
 	Input->SetDisabled(!TextBuffer->CanWrite());
