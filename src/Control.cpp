@@ -1135,7 +1135,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 		InitSkinProperties();
 		::Network().Init([] { GUI().ConnectionEstablished(); }, [] { GUI().ReceivePackets(); },
 			[] { GUI().ConnectionClosed(); });
-		::Communication().InitCommunication();
+		::Communication().Init();
 		GUI().InitHotkeys();
 	} catch (const TProgramError &Error) {
 		try {
@@ -1154,7 +1154,7 @@ void patella::TGUI::ExitControl()
 {
 	GUI().ExitMainWindow();
 	ExitHotkeys();
-	::Communication().ExitCommunication();
+	::Communication().Exit();
 	::Network().Exit();
 	SkinData().ExitSkins();
 	Graphics().ExitGraphics();

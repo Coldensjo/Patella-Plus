@@ -321,7 +321,7 @@ public:
 	void RemoveTimer(TTimer *Timer);
 	void UpdateTimers();
 	void InitHotkeys();
-	static void ExitHotkeys(); // empty (as TCommunication::ExitCommunication)
+	static void ExitHotkeys(); // empty (as TCommunication::Exit)
 	void AddHotkey(int Key, TCallback Callback);
 	void RemoveHotkey(int Key);
 	bool CheckHotkey(int Key);

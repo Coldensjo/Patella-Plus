@@ -57,7 +57,7 @@ patella::TCommunication::TCommunication(TNetwork &NetworkRef, TMapState &MapStat
 
 // Called by InitControl. The original cleared the patch transfer's buffer; with the patcher removed there is nothing
 // left to set up.
-void patella::TCommunication::InitCommunication()
+void patella::TCommunication::Init()
 {
 }
 
@@ -1987,6 +1987,6 @@ void patella::TCommunication::ReceiveBuddyLogout()
 }
 
 // Empty. ExitControl calls it where Communication.cpp's exit belongs in the reverse order of InitControl.
-void patella::TCommunication::ExitCommunication()
+void patella::TCommunication::Exit()
 {
 }

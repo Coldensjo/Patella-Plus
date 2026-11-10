@@ -96,7 +96,7 @@ public:
 	[[nodiscard]] int GetHandle() const;
 	bool TakeHandleChanged();
 	void Init();
-	// Empty, so static (as TCommunication::ExitCommunication).
+	// Empty, so static (as TCommunication::Exit).
 	static void Exit();
 	int GetEventHelp();
 	int PopEventHelp();

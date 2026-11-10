@@ -56,8 +56,8 @@ public:
 	~TCommunication() = default;
 
 	// Empty, so static.
-	static void InitCommunication();
-	static void ExitCommunication();
+	static void Init();
+	static void Exit();
 	void SendLogin(uint32 AccountID, const char *Password);
 	void SendGameLogin(uint32 AccountID, const char *Name, const char *Password);
 	void SendLogout();
