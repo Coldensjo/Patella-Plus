@@ -187,12 +187,11 @@ std::vector<vkb::PhysicalDevice> FindDevices(const vkb::Instance &Instance, VkSu
 	return Devices;
 }
 
-TDeviceInfo InfoOf(const vkb::PhysicalDevice &Physical, bool Cpu)
+TDeviceInfo InfoOf(const vkb::PhysicalDevice &Physical)
 {
 	TDeviceInfo Info;
 	Info.Name = patella::text::Utf8ToCp1252(Physical.properties.deviceName); // UTF-8 (Vulkan), shown by the GUI
 	Info.Type = Physical.properties.deviceType;
-	Info.CpuDriver = Cpu;
 	return Info;
 }
 
@@ -253,7 +252,7 @@ std::vector<TDeviceInfo> ListDevices(bool Cpu)
 	const vkb::Instance Instance = Built.value();
 	try {
 		for (const vkb::PhysicalDevice &Physical : FindDevices(Instance, VK_NULL_HANDLE, Cpu, true))
-			Result.push_back(InfoOf(Physical, Cpu));
+			Result.push_back(InfoOf(Physical));
 	} catch (...) {
 		vkb::destroy_instance(Instance);
 		throw;
@@ -890,7 +889,7 @@ struct TRenderer::TState {
 			if (!Supported)
 				throw TVulkanError("the graphics queue of " + Chosen->name + " cannot present to the window");
 		}
-		DeviceInfo = InfoOf(*Chosen, Cpu);
+		DeviceInfo = InfoOf(*Chosen);
 		return true;
 	}
 

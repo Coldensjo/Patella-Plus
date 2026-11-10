@@ -358,7 +358,6 @@ void TLabel::SetText(const char *_Text, bool Shorten)
 TFormattedText::TFormattedText(const char *_Text)
 {
 	AutoWidth = true;
-	AutoHeight = true;
 	Text = nullptr;
 	Line = nullptr;
 	SetText(_Text, false);
@@ -367,15 +366,12 @@ TFormattedText::TFormattedText(const char *_Text)
 void TFormattedText::SetSize(int Width, int Height)
 {
 	AutoWidth = true;
-	AutoHeight = true;
 	if (Width < 1)
 		Width = 0;
 	else
 		AutoWidth = false;
 	if (Height < 1)
 		Height = 0;
-	else
-		AutoHeight = false;
 	TComponent::SetSize(Width, Height);
 	Arrange();
 }

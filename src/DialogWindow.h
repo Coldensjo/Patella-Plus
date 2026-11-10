@@ -73,7 +73,6 @@ public:
 	bool Dragging;   // +0x35
 	int DragX;       // +0x38, where the drag started (window coordinates)
 	int DragY;       // +0x3c
-	int DragBottom;  // +0x40, from the drag start to the bottom edge; set, never read
 };
 
 // The content of a TSubWindow (ContentWindows.h's bodies derive from it; here since issue #118, so that
@@ -139,7 +138,6 @@ public:
 	TComponent *Icon;            // +0x5c
 	TComponent *Title;           // +0x60
 	bool IsMinimized;            // +0x64
-	int Data68;                  // +0x68, cleared by the constructor, not used here
 	int RestoreHeight;           // +0x6c, the height before Minimize
 
 protected:

@@ -239,7 +239,6 @@ void TReadScriptFile::nextToken()
 			if (IsDigit(c)) {
 				Number = Number * 10 + c - '0';
 			} else if (c == ',') {
-				CoordX = Number;
 				State = 13;
 			} else {
 				error("syntax error");
@@ -261,7 +260,6 @@ void TReadScriptFile::nextToken()
 			if (IsDigit(c)) {
 				Number = Number * 10 + c - '0';
 			} else if (c == ',') {
-				CoordY = Number;
 				State = 15;
 			} else {
 				error("syntax error");
@@ -283,7 +281,6 @@ void TReadScriptFile::nextToken()
 			if (IsDigit(c)) {
 				Number = Number * 10 + c - '0';
 			} else if (c == ']') {
-				CoordZ = Number;
 				State = 17;
 			} else {
 				error("syntax error");

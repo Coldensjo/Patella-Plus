@@ -614,7 +614,6 @@ bool TAutomapView::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 {
 	TMarkMenuData *Data = new TMarkMenuData;
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
-	Data->Window = Window;
 	if (Window->Centred)
 		GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
 	Data->Coordinate.x = (x - Width / 2) * 2 / Window->Zoom + Window->ViewX;
@@ -1345,8 +1344,6 @@ TStatusWindow::TStatusWindow()
 {
 	DrawingListLength = 4;
 	DrawingList.reset(new TDrawing[4]);
-	Data44 = 100;
-	Data48 = 100;
 	SetSize(SkinProperties().SideBarWidth, SkinProperties().StatusWindow.Height);
 	Arrange();
 }

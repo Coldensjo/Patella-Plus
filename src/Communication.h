@@ -47,7 +47,7 @@ protected:
 };
 
 // Communication.cpp's data and functions (issue #105): the globals of the original, with Control.cpp's
-// LastPacketType, LastPacketIndex and LastPacketTypes, are the members, with the same initial values, and the
+// LastPacketIndex and LastPacketTypes, are the members, with the same initial values, and the
 // functions the members of the same names; Status.cpp's session is its TSession (Status.h). It sends and reads
 // through its TNetwork; the packet handlers write the game state through TMapState's five objects (issue #106) and
 // call the windows through those files' functions until TGUI (#107) is an object.
@@ -194,7 +194,6 @@ public:
 	// Data, in the original's .data/.bss order. Public: Control.cpp writes OutfitRequested and the packet types
 	// (ReceivePackets, InitWindow), the golden Communication and Control tests set them; Status.cpp's functions reach
 	// Session through bridge::Session().
-	int LastPacketType = -1;                 // Control.cpp's: only written (ReceivePackets)
 	bool OutfitRequested{};                  // also reset by Control.cpp
 	int LastPacketIndex{};                   // Control.cpp's: next slot in LastPacketTypes
 	std::array<uint8, 10> LastPacketTypes{}; // Control.cpp's: the last ten packet types, a ring

@@ -524,9 +524,9 @@ TDialog *CreateNetworkOptionsDialog(void (*OpenURL)(const char *URL))
 	return Dialog;
 }
 
-TDialog *CreateHotkeyDialog(void (*OpenURL)(const char *URL))
+TDialog *CreateHotkeyDialog()
 {
-	THotkeyDialog *Body = new THotkeyDialog(OpenURL);
+	THotkeyDialog *Body = new THotkeyDialog();
 	TDialog *Dialog = new TDialog("Hotkey Options", Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
 	return Dialog;
@@ -2769,9 +2769,8 @@ void TNetworkOptionsDialog::HandleEvent(int Event)
 
 // Every hotkey gets a line (271 characters at most) that UpdateLine
 // fills.
-THotkeyDialog::THotkeyDialog(void (*_OpenURL)(const char *URL))
+THotkeyDialog::THotkeyDialog()
 {
-	OpenURL = _OpenURL;
 	TComponent::SetSize(SkinProperties().HotkeyDialogWidth, SkinProperties().HotkeyDialogHeight);
 	TLabel *Label = new TLabel(0, 0, SkinProperties().Dialog.Data78, TextAvailableHotkeys);
 	InsertChild(Label);

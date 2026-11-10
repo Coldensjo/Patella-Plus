@@ -193,9 +193,6 @@ public:
 	void Draw(int Surface, int x, int y) override;
 	bool HelpMouseMove(int x, int y) override;
 	void Arrange() override;
-
-	int Data44; // +0x44, 100, never read
-	int Data48; // +0x48, 100, never read
 };
 
 // --- The bodies of the sub-windows ------------------------------------------------
@@ -340,8 +337,6 @@ public:
 	void ShowAcceptButton(TComponent *EventComponent);
 	void Wait();
 
-	int Data2C;                // +0x2c, not used
-	int Data30;                // +0x30, not used
 	TTextButton *CancelButton; // +0x34, "Cancel" or "Reject" (Callback)
 	TTextButton *AcceptButton; // +0x38, "Accept" (event 1 of the body)
 	TLabel *WaitLabel;         // +0x3c

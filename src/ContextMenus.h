@@ -179,7 +179,6 @@ struct TMarkMenuData {
 
 	TCoordinate Coordinate; // +0x00, the field
 	TMark Mark;             // +0x0c, the mark there; x and y 0 without one
-	TAutomapWindow *Window; // +0x7c, the automap window (not used here)
 };
 
 // The menu of a point of the automap.

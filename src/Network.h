@@ -74,16 +74,6 @@ protected:
 	~TNetworkSession() = default;
 };
 
-// Why TNetwork dropped a server frame (issues #72 and #139; notes/decisions.md, "#139"). The original had no such
-// outcome: it read on past the frame (Length), ended the client at every later read (Size), or waited for the frame
-// forever (TooLarge).
-enum class TFrameDrop : unsigned char {
-	None,
-	Length,   // #72: a frame of size 0, or one whose inner length runs past it (PrepareNextPacket)
-	Size,     // #139, item 7: a frame size that is no multiple of 8, XTEA's block (PrepareNextPacket)
-	TooLarge, // #139, item 6: a frame larger than ReceiveData, which can never hold it (OnReceive)
-};
-
 // Network.cpp's data and functions (issue #105): the globals of the original, with Control.cpp's ReconnectTimeout and
 // Reconnect and MainFrm.cpp's PacketHeader, are the members, with the same initial values (the others 0, as the
 // original's .bss), and the functions the members of the same names. The data is public: the golden Network test
@@ -180,16 +170,11 @@ public:
 	// Not the original's (issues #72 and #139, deliberate differences; notes/decisions.md, "#139"): a server frame
 	// the client cannot use is dropped, a warn line goes to the developer log, and the connection goes on with the
 	// next frame. ReceiveSkip: the bytes still to come of a frame too large for ReceiveData (OnReceive reads and
-	// drops them). DroppedFrames and LastDrop: how many frames were dropped and why the last one was (the tests').
+	// drops them).
 	int ReceiveSkip{};
-	int DroppedFrames{};
-	TFrameDrop LastDrop{TFrameDrop::None};
-	// Not the original's either (issue #142, a deliberate difference): the empty packets (inner length 0) that
-	// PrepareNextPacket went on past to the next frame, where Tibia.exe stopped at them (the tests').
-	int EmptyPackets{};
 
 private:
-	void DropFrame(TFrameDrop Reason, int FrameEnd);
+	void DropFrame(int FrameEnd);
 	void ApplyServerOverride();
 
 	TPreferences &Preferences;

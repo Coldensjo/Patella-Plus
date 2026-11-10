@@ -46,7 +46,6 @@ TContentWindow::TContentWindow(int _Identifier, bool _Background)
 	Dragging = false;
 	DragX = 0;
 	DragY = 0;
-	DragBottom = 0;
 	BackgroundY = 0;
 	Background = _Background;
 }
@@ -548,7 +547,6 @@ bool TContentWindow::LeftButtonDown(int x, int y, int Flags)
 		SetCapture(nullptr);
 		DragX = x;
 		DragY = y;
-		DragBottom = Height + OffsetY - y;
 	}
 	return true;
 }
@@ -572,7 +570,6 @@ TSubWindow::TSubWindow(int _Identifier, TSubWindowBody *_Body, bool _Resizable, 
 {
 	IsMinimized = false;
 	RestoreHeight = 0;
-	Data68 = 0;
 	DrawingListLength = 8;
 	DrawingList.reset(new TDrawing[8]);
 	UpButton = nullptr;

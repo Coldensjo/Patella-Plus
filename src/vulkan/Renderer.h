@@ -55,7 +55,6 @@ struct TDeviceRequest {
 struct TDeviceInfo {
 	std::string Name; // the driver's UTF-8 name in the client's code page (issue #112: the options show it)
 	VkPhysicalDeviceType Type = VK_PHYSICAL_DEVICE_TYPE_OTHER;
-	bool CpuDriver = false; // the shipped CPU driver
 };
 
 // True when the Vulkan loader can be loaded (vulkan-1.dll, libvulkan.so.1).

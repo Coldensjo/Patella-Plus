@@ -270,7 +270,7 @@ void patella::TNetwork::SendCommand(bool Encrypt)
 //   it is left to read, so the next frame is prepared in its place too, in the same call. Tibia.exe returned it as the
 //   prepared packet: GetNextCommand returned -1 with complete frames behind it, and the empty packet's frame stayed in
 //   ReceiveData until the next PrepareNextPacket, so a following frame that fits only without it never completed and
-//   the connection stalled. EmptyPackets counts them (the tests').
+//   the connection stalled.
 void patella::TNetwork::PrepareNextPacket()
 {
 	while (true) {
@@ -289,7 +289,7 @@ void patella::TNetwork::PrepareNextPacket()
 		const int FrameEnd = PacketSize + 2;
 		if (PacketSize % 8 != 0) {
 			patella::log::Warn("server frame dropped: its size {} is no multiple of 8", PacketSize);
-			DropFrame(TFrameDrop::Size, FrameEnd);
+			DropFrame(FrameEnd);
 			continue;
 		}
 		try {
@@ -307,27 +307,23 @@ void patella::TNetwork::PrepareNextPacket()
 				patella::log::Warn("server frame dropped: it has no length (size {})", PacketSize);
 			else
 				patella::log::Warn("server frame dropped: its length {} runs past its size {}", Size - 4, PacketSize);
-			DropFrame(TFrameDrop::Length, FrameEnd);
+			DropFrame(FrameEnd);
 			continue;
 		}
-		if (Size == 4) {
-			// Issue #142: an empty packet (inner length 0) has no command; the next frame is prepared in its place.
-			EmptyPackets++;
+		// Issue #142: an empty packet (inner length 0) has no command; the next frame is prepared in its place.
+		if (Size == 4)
 			continue;
-		}
 		ReceiveBuffer.SetSize(Size);
 		return;
 	}
 }
 
 // Not the original's (issues #72 and #139): the frame up to FrameEnd is dropped (the next PrepareNextPacket moves the
-// data after it down), the read buffer is empty, and the drop is counted. The caller has written the log line.
-void patella::TNetwork::DropFrame(TFrameDrop Reason, int FrameEnd)
+// data after it down) and the read buffer is empty. The caller has written the log line.
+void patella::TNetwork::DropFrame(int FrameEnd)
 {
 	ReceiveRead = FrameEnd;
 	ReceiveBuffer.SetSize(ReceiveBuffer.Position);
-	DroppedFrames++;
-	LastDrop = Reason;
 }
 
 // Returns the next command byte, or -1 when no packet is complete.
@@ -697,8 +693,6 @@ void patella::TNetwork::OnReceive(platform::TSocket &Receiver, int ErrorCode)
 				ReceiveData.size());
 			ReceiveSkip = Length - (ReceiveDataSize - ReceivePacketEnd);
 			ReceiveDataSize = ReceivePacketEnd;
-			DroppedFrames++;
-			LastDrop = TFrameDrop::TooLarge;
 			break;
 		}
 		if (ReceiveDataSize - ReceivePacketEnd < Length)

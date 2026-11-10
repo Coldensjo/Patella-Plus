@@ -689,8 +689,6 @@ TTab::TTab(const char *_Caption, TTalkBuffer *_TextBuffer, TCallback _Callback)
 	Active = false;
 	Dragging = 0;
 	DragX = 0;
-	DragY = 0;
-	DragRight = 0;
 	Unread = false;
 	const std::size_t Size = strlen(_Caption) + 1;
 	Caption.reset(new char[Size]);
@@ -773,13 +771,11 @@ bool TTab::MouseMove(int x, [[maybe_unused]] int y)
 }
 
 // Makes the tab current and starts dragging it.
-bool TTab::LeftButtonDown(int x, int y, [[maybe_unused]] int Flags)
+bool TTab::LeftButtonDown(int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
 	Dragging = 1;
 	SetCapture(nullptr);
 	DragX = x;
-	DragRight = Width - OffsetX + x;
-	DragY = y;
 	(static_cast<TTabBar *>(GetParent()))->SetCurrentTab(this);
 	Callback.Send();
 	return true;

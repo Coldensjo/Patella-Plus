@@ -75,9 +75,7 @@ TSettingsFile::TLine TSettingsFile::ParseLine(std::string Text, bool First)
 	if (!Trimmed.empty() && Trimmed.front() != '#' && Trimmed.front() != ';') {
 		const size_t Equals = Trimmed.find('=');
 		const std::string_view Key = Equals == std::string_view::npos ? std::string_view() : Trim(Trimmed.substr(0, Equals));
-		if (Key.empty())
-			Line.Bad = true;
-		else {
+		if (!Key.empty()) {
 			Line.Key = std::string(Key);
 			Line.Value = std::string(Trim(Trimmed.substr(Equals + 1)));
 		}

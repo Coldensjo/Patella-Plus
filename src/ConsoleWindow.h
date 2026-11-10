@@ -42,8 +42,7 @@ class TMultiStateButton; // DialogElements.h
 struct TLineFormat {
 	// The colour is cleared by its own constructor first.
 	TLineFormat()
-		: LineText(nullptr), LineLength(0), OriginalOffset(0), Indent(0), FontNumber(FONT_SMOOTH), TextLine(nullptr),
-		  LineEnd(true)
+		: LineText(nullptr), LineLength(0), Indent(0), FontNumber(FONT_SMOOTH), TextLine(nullptr), LineEnd(true)
 	{
 		Color = DefaultFontColor;
 	}
@@ -60,14 +59,12 @@ struct TLineFormat {
 		LineText = _LineText;
 		Indent = _Indent;
 		LineLength = _LineLength;
-		OriginalOffset = _OriginalOffset;
 		LineEnd = _LineEnd;
 		FontNumber = _FontNumber;
 	}
 
 	const char *LineText; // +0x00, points into the talk line's text
 	int LineLength;       // +0x04
-	int OriginalOffset;   // +0x08, offset of LineText in the talk line's text
 	int Indent;           // +0x0c
 	TRGBColor Color;      // +0x10
 	int FontNumber;       // +0x1c
@@ -196,8 +193,6 @@ public:
 	std::unique_ptr<char[]> FullCaption; // +0x30
 	int Dragging;                        // +0x34
 	int DragX;                           // +0x38
-	int DragY;                           // +0x3c, set and never read
-	int DragRight;                       // +0x40, set and never read
 	bool Active;                         // +0x44
 	bool Unread;                         // +0x45
 	int BlinkEnd;                        // +0x48, action number; 0 = not blinking
@@ -290,7 +285,6 @@ public:
 	[[nodiscard]] bool SaveChannel() const;
 
 	TTabBar *TabBar;          // +0x2c
-	int Data30;               // +0x30, not used
 	TConsole *CurrentConsole; // +0x34
 	TTab *DefaultTab;         // +0x38
 	TEditLine *Input;         // +0x3c

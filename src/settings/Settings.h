@@ -90,7 +90,6 @@ private:
 		std::string Text; // as read, without the line end
 		std::string Key;  // empty: no key
 		std::string Value;
-		bool Bad = false;
 	};
 	static TLine ParseLine(std::string Text, bool First);
 

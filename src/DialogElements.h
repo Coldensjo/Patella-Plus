@@ -167,7 +167,6 @@ public:
 	std::unique_ptr<char[]> Text; // +0x2c (issue #58)
 	std::unique_ptr<char[]> Line; // +0x30, the piece being laid out, a buffer as large as Text (issue #58)
 	bool AutoWidth;               // +0x34
-	bool AutoHeight;              // +0x35
 };
 
 class TTextButton;
@@ -238,7 +237,6 @@ public:
 	bool LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
 	bool RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags) override { return false; }
 
-	TRect Unused24;      // +0x24, cleared, never read
 	bool Framed;         // +0x34
 	TRGBColor Highlight; // +0x38
 	TObject Obj;         // +0x44

@@ -51,9 +51,6 @@ public:
 		memset(String, 0, sizeof(String));
 		Bytes = reinterpret_cast<uint8 *>(String.Chars);
 		Number = 0;
-		CoordX = 0;
-		CoordY = 0;
-		CoordZ = 0;
 		Special = '#';
 	}
 
@@ -70,9 +67,6 @@ public:
 		Line = 0;
 		memset(String, 0, sizeof(String));
 		Number = 0;
-		CoordX = 0;
-		CoordY = 0;
-		CoordZ = 0;
 		Bytes = reinterpret_cast<uint8 *>(String.Chars);
 		Special = '#';
 	}
@@ -99,9 +93,6 @@ public:
 	TFixedString<MAX_STRING_LENGTH> String; // +0x40c, identifier or string
 	uint8 *Bytes;                           // +0x7f4, points to String
 	int Number;                             // +0x7f8
-	int CoordX;                             // +0x7fc
-	int CoordY;                             // +0x800
-	int CoordZ;                             // +0x804
 	char Special;                           // +0x808
 };
 

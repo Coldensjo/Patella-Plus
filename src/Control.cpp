@@ -739,7 +739,6 @@ void patella::TGUI::ReceivePackets()
 				TERROR1("unknown packet type during game", Type);
 			}
 		}
-		Communication.LastPacketType = Type;
 	}
 }
 
@@ -1001,7 +1000,7 @@ void patella::TGUI::ProcessEvents()
 			ModalWindow = CreateConsoleOptionsDialog(URLCallback);
 			break;
 		case MESSAGE_HOTKEY_DIALOG:
-			ModalWindow = CreateHotkeyDialog(URLCallback);
+			ModalWindow = CreateHotkeyDialog();
 			break;
 		case MESSAGE_GENERAL_OPTIONS_DIALOG:
 			ModalWindow = CreateGeneralOptionsDialog(URLCallback);

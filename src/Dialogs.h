@@ -77,7 +77,7 @@ TDialog *CreateGraphicsOptionsDialog(void (*OpenURL)(const char *URL), void (*Se
 TDialog *CreateAdvancedGraphicsDialog(void (*OpenURL)(const char *URL), TComponent *Receiver);
 TDialog *CreateConsoleOptionsDialog(void (*OpenURL)(const char *URL));
 TDialog *CreateNetworkOptionsDialog(void (*OpenURL)(const char *URL));
-TDialog *CreateHotkeyDialog(void (*OpenURL)(const char *URL));
+TDialog *CreateHotkeyDialog();
 
 // --- The frame ------------------------------------------------------------------
 
@@ -263,7 +263,6 @@ public:
 	int DestinationY;                // +0x4c
 	int DestinationZ;                // +0x50
 	THorizontalScrollBar *ScrollBar; // +0x54
-	int Unused58;                    // +0x58, never used
 	int LastDigit;                   // +0x5c, the digit typed before
 };
 
@@ -433,8 +432,6 @@ public:
 
 	TListBox *ListBox;                 // +0x2c, double click 301
 	TEditLine *NameEdit;               // +0x30
-	int Unused34;                      // +0x34, never used
-	int Unused38;                      // +0x38, never used
 	int NumberOfChannels;              // +0x3c
 	std::unique_ptr<int[]> ChannelIDs; // +0x40 (issue #58)
 };
@@ -671,7 +668,7 @@ public:
 // Control), edited one at a time.
 class THotkeyDialog final : public TWindow {
 public:
-	THotkeyDialog(void (*_OpenURL)(const char *URL));
+	THotkeyDialog();
 	bool LeftButtonUp(int x, int y, int Flags) override;
 	void KeyPress(int Key) override;
 	void HandleEvent(int Event) override;
@@ -683,6 +680,5 @@ public:
 	TEditLine *TextEdit;                          // +0x2454
 	TCheckBox *AutoSendCheckBox;                  // +0x2458
 	int Selected;                                 // +0x245c, -1 for none
-	void (*OpenURL)(const char *URL);             // +0x2460, kept, not used
 };
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)
