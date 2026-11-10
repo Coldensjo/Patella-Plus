@@ -118,8 +118,8 @@ class TObjectTypes;
 // What TCreatures asks of the player's state: TPlayerState is made after TCreatures (it reads the creature table), so
 // TCreatures reaches it only through this interface, which TMapState implements (MapState.h). GetPlayerID is the
 // original's (IsOpponent, CheckMonsterHint and MoveCreatures call it); ContinuePlayerWalk is MoveCreatures' step of the
-// walk once the player's step animation is over, ResetPlayer ResetCreatures' writes of the player's state (both ours:
-// the original's code of those two functions, moved into TPlayerState).
+// walk once the player's step animation is over, ResetPlayer TCreatures::Reset's writes of the player's state (both
+// ours: the original's code of those two functions, moved into TPlayerState).
 class TCreaturesPlayer {
 public:
 	TCreaturesPlayer() = default;
@@ -170,7 +170,7 @@ public:
 	~TCreatures() = default;
 
 	// The beat, the battle and follow targets and the buddy list's lookups.
-	void HideAllCreatures();
+	void HideAll();
 	void SetBeat(int Value);
 	static bool IsPlayer(uint32 CreatureID);
 	void SetAttackID(uint32 CreatureID);    // clears the follow target
@@ -216,9 +216,9 @@ public:
 	[[nodiscard]] const char *GetBuddyListDescription(int Position) const;
 	[[nodiscard]] bool GetBuddyListNotify(int Position) const;
 
-	void InitCreatures();
-	static void ExitCreatures();
-	void ResetCreatures();
+	void Init();
+	static void Exit();
+	void Reset();
 
 private:
 	friend class ::TCreature;
@@ -238,7 +238,7 @@ private:
 	int FirstOpponent{};
 	std::array<TCreature, CREATURES> Creatures{};
 
-	// ResetCreatures clears the table with a memset over its size.
+	// Reset clears the table with a memset over its size.
 	static_assert(sizeof(Creatures) == CREATURES * sizeof(TCreature), "Creatures");
 };
 
@@ -302,7 +302,7 @@ public:
 	[[nodiscard]] int GetPartyFlag() const;
 
 	// Ours (TCreaturesPlayer): MoveCreatures' continuation of the walk (true if a new walk is to be sent) and
-	// ResetCreatures' writes of the player's state, the original's code of those two functions.
+	// TCreatures::Reset's writes of the player's state, the original's code of those two functions.
 	bool ContinueWalk();
 	void Reset();
 

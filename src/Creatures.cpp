@@ -98,7 +98,7 @@ void patella::TPlayerState::ClearSteps()
 	NewPlayerDestination = false;
 }
 
-void patella::TCreatures::HideAllCreatures()
+void patella::TCreatures::HideAll()
 {
 	for (int i = 0; i < CREATURES; i++)
 		Creatures[i].Visible = false;
@@ -1095,15 +1095,15 @@ bool patella::TCreatures::GetBuddyListNotify(int Position) const
 // --- Initialisation --------------------------------------------------------
 
 // Called by InitControl.
-void patella::TCreatures::InitCreatures()
+void patella::TCreatures::Init()
 {
-	ResetCreatures();
+	Reset();
 }
 
-// Called by InitCreatures and EnterGame. The beat, soul, highlighted
+// Called by TCreatures::Init and EnterGame. The beat, soul, highlighted
 // creature, step direction and the destination's y and z stay; the sort
 // methods come from the preferences when they are valid.
-void patella::TCreatures::ResetCreatures()
+void patella::TCreatures::Reset()
 {
 	memset(Creatures.data(), 0, sizeof(Creatures));
 	for (int i = 0; i < CREATURES; i++)
@@ -1126,8 +1126,8 @@ void patella::TCreatures::ResetCreatures()
 	}
 }
 
-// Ours (TCreaturesPlayer): ResetCreatures' writes of the player's state, in its order (it wrote AttackID and FollowID
-// between PlayerCapacity and PlayerState; nothing reads between the writes).
+// Ours (TCreaturesPlayer): TCreatures::Reset's writes of the player's state, in its order (it wrote AttackID and
+// FollowID between PlayerCapacity and PlayerState; nothing reads between the writes).
 void patella::TPlayerState::Reset()
 {
 	PlayerStepDX = 0;
@@ -1166,6 +1166,6 @@ bool patella::TPlayerState::ContinueWalk()
 }
 
 // Empty. ExitControl calls it where Creatures.cpp's exit belongs in the reverse order of InitControl.
-void patella::TCreatures::ExitCreatures()
+void patella::TCreatures::Exit()
 {
 }

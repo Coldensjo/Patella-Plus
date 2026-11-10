@@ -945,7 +945,7 @@ void patella::TCommunication::ReceiveMap()
 	const int PlayerZ = Network.GetByte();
 	Map.SetPosition(PlayerX, PlayerY, PlayerZ);
 	Map.Clear();
-	Creatures.HideAllCreatures();
+	Creatures.HideAll();
 	ReadMap(0, 0, 17, 13);
 	Talk().SetTalkChanged();
 	PlayerState.Stop();
