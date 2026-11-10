@@ -262,7 +262,7 @@ void patella::TGUI::EnterGame() const
 	}
 	ClearMap();
 	Inventory().InitInventory();
-	ResetCreatures();
+	Creatures().ResetCreatures();
 	ResetTalk();
 	ShowPermanentIgnoreWarning();
 	SetAmbientLight(-1, 0);
@@ -808,7 +808,7 @@ void patella::TGUI::TimerEvent() const
 	}
 	Network.CheckConnectionTimeout();
 	::UpdateTimers();
-	UpdateSkulls();
+	Creatures().UpdateSkulls();
 }
 
 // Handles queued events until a window is open, the main window is dragging
@@ -1099,7 +1099,7 @@ void patella::TGUI::ProcessEvents()
 			MainWindow->SetConsoleActive(false);
 		}
 	}
-	if (GetConnectionState() == CONNECTION_IN_GAME && MoveCreatures())
+	if (GetConnectionState() == CONNECTION_IN_GAME && Creatures().MoveCreatures())
 		SendWalk();
 	Redraw(false);
 }
@@ -1125,9 +1125,9 @@ void patella::TGUI::InitControl(bool Gamemaster)
 	try {
 		InitSysinc();
 		InitObjects();
-		InitMap(HideCreature);
+		InitMap([](int CreatureID) { Creatures().HideCreature(CreatureID); });
 		Inventory().ResetInventory();
-		InitCreatures();
+		Creatures().InitCreatures();
 		InitStatus(Gamemaster, ::LinkCopyWarning);
 		InitHelp();
 		InitPreferences();
@@ -1167,7 +1167,7 @@ void patella::TGUI::ExitControl()
 	ExitTalk();
 	ExitHelp();
 	ExitStatus();
-	ExitCreatures();
+	Creatures().ExitCreatures();
 	Inventory().ExitInventory();
 	ExitMap();
 	ExitObjects();

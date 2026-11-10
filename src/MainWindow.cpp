@@ -284,7 +284,7 @@ void TMainWindow::HandleEvent(int Event)
 		break;
 	case EVENT_STOP:
 		PlayerState().ClearPlayerSteps();
-		SetAttackID(0);
+		Creatures().SetAttackID(0);
 		SendStopAttackAndWalk();
 		break;
 	case EVENT_TOGGLE_FULLSCREEN:

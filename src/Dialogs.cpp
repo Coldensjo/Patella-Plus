@@ -1664,7 +1664,7 @@ void TNewChannelDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const char *Name = NameEdit->Text.get();
 		if (strlen(Name) != 0) {
-			TCreature *Creature = GetCreature(PlayerState().GetPlayerID());
+			TCreature *Creature = Creatures().GetCreature(PlayerState().GetPlayerID());
 			PATELLA_ASSERT(Creature!=nullptr);
 			if (CompareStrings(Creature->Name, Name, -1) == 0)
 				SetStatusMessage(TextNoPrivateChannelWithYourself, false);
@@ -1805,10 +1805,10 @@ void TAddBuddyDialog::HandleEvent(int Event)
 TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 {
 	CharacterID = _CharacterID;
-	const int Position = GetBuddyPosition(_CharacterID);
+	const int Position = Creatures().GetBuddyPosition(_CharacterID);
 	PATELLA_ASSERT_VALUES(Position >= 0, Position, CharacterID);
 	TComponent::SetSize(SkinProperties().EditBuddyDialog.Width, SkinProperties().EditBuddyDialog.Height);
-	TLabel *Label = new TLabel(SkinProperties().Dialog.TextFont, GetBuddyListName(Position));
+	TLabel *Label = new TLabel(SkinProperties().Dialog.TextFont, Creatures().GetBuddyListName(Position));
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().EditBuddyDialog.Name);
 	TSeparator *Separator = new TSeparator(true);
@@ -1827,7 +1827,7 @@ TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 		IconButtons[i] = new TIconButton(0, 0, Icon, SKIN_ICON_BUTTON_UP, SKIN_ICON_BUTTON_DOWN, NoCallback, nullptr);
 		InsertChild(IconButtons[i]);
 		IconButtons[i]->SetRadioButtonGroup(IconGroup.get());
-		if (GetBuddyListIcon(Position) == i)
+		if (Creatures().GetBuddyListIcon(Position) == i)
 			IconGroup->Selected = IconButtons[i];
 		SetChildPosition(IconButtons[i], SkinProperties().EditBuddyDialog.IconButtons[i].x, SkinProperties().EditBuddyDialog.IconButtons[i].y);
 	}
@@ -1837,12 +1837,12 @@ TEditBuddyDialog::TEditBuddyDialog(int _CharacterID)
 	Description = new TEditText(127, false);
 	InsertChild(Description);
 	SetChildArea(Description, SkinProperties().EditBuddyDialog.Description);
-	if (GetBuddyListDescription(Position) != nullptr)
-		Description->SetText(GetBuddyListDescription(Position), false);
+	if (Creatures().GetBuddyListDescription(Position) != nullptr)
+		Description->SetText(Creatures().GetBuddyListDescription(Position), false);
 	Notify = new TCheckBox("Notify at login");
 	InsertChild(Notify);
 	SetChildArea(Notify, SkinProperties().EditBuddyDialog.Notify);
-	Notify->SetChecked(GetBuddyListNotify(Position));
+	Notify->SetChecked(Creatures().GetBuddyListNotify(Position));
 	Description->SetActive(true);
 	Arrange();
 }
@@ -1858,7 +1858,7 @@ void TEditBuddyDialog::HandleEvent(int Event)
 				break;
 			}
 		}
-		EditBuddy(CharacterID, Icon, Description->Text.get(), Notify->IsChecked());
+		Creatures().EditBuddy(CharacterID, Icon, Description->Text.get(), Notify->IsChecked());
 	}
 	SetActionState(ACTIONSTATE_NONE);
 }

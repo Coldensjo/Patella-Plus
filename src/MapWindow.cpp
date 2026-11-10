@@ -143,7 +143,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 			const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 			PATELLA_ASSERT(SrcObj!=0);
 			PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-			if (Obj.Type == CREATURE && !IsPlayer(Obj.Data)) {
+			if (Obj.Type == CREATURE && !Creatures().IsPlayer(Obj.Data)) {
 				SendUseObjectOnCreature(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, Obj.Data);
 				return true;
 			}
@@ -158,7 +158,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		const TObject &TradeObject = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 		PATELLA_ASSERT(TradeObject!=0);
 		const uint32 CreatureID = GetCreatureAt(x, y);
-		if (CreatureID != 0 && CreatureID != PlayerState().GetPlayerID() && IsPlayer(CreatureID)) {
+		if (CreatureID != 0 && CreatureID != PlayerState().GetPlayerID() && Creatures().IsPlayer(CreatureID)) {
 			SendRequestTrade(TradeX, TradeY, TradeZ, TradeObject.Type, TradeIndex, CreatureID);
 			return true;
 		}
@@ -256,8 +256,8 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 		TObject &UseObj = *GetUseObject(&Index, &ox, &oy, &oz);
 		if (Target != 0 && Target != PlayerState().GetPlayerID() && UseObj.Type != 0
 			&& !GetObjectFlag(UseObj, FORCEUSE)) {
-			SetAttackID(Target != GetAttackID() ? Target : 0);
-			SendAttack(GetAttackID());
+			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
+			SendAttack(Creatures().GetAttackID());
 			return true;
 		}
 		if (UseObj.Type == 0)
@@ -274,8 +274,8 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 			const uint32 Target = GetTradeInfo();
 			if (Target == 0 || Target == PlayerState().GetPlayerID())
 				return true;
-			SetAttackID(Target != GetAttackID() ? Target : 0);
-			SendAttack(GetAttackID());
+			Creatures().SetAttackID(Target != Creatures().GetAttackID() ? Target : 0);
+			SendAttack(Creatures().GetAttackID());
 			return true;
 		}
 		if (Flags & SHIFT_OR_BOTH_BUTTONS) {
@@ -348,7 +348,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		Handle = HELP_CONTAINERS;
 	if (Handle == HELP_NONE)
 		return false;
-	const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
 	if (GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
@@ -373,7 +373,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	const bool ShowTexts = GetTextualEffects();
 	const int CreatureInfo = GetCreatureInfo();
 	ProcessMissileEffects();
-	const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
 	ScrollX = Player->GetDeltaX() + 32;
 	ScrollY = Player->GetDeltaY() + 32;
@@ -537,7 +537,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	}
 	if (CreatureInfo != 0) {
 		for (int i = 0; i < NumberOfNames; i++) {
-			TCreature *Creature = GetCreature(Names[i].CreatureID);
+			TCreature *Creature = Creatures().GetCreature(Names[i].CreatureID);
 			if (Creature == nullptr)
 				continue;
 			int cx = Creature->RealX, cy = Creature->RealY, cz = Creature->RealZ;
@@ -801,7 +801,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			for (Obj = GetFirstObject(i, j, FieldZ); Obj.Type != 0; Obj = GetNextObject()) {
 				if (Obj.Type != CREATURE || NumberOfCreatures == 10)
 					continue;
-				TCreature *Creature = GetCreature(Obj.Data);
+				TCreature *Creature = ::Creatures().GetCreature(Obj.Data);
 				if (Creature == nullptr)
 					continue;
 				int sx = 0, sy = 0;
@@ -815,7 +815,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 						sx = GetObjectShiftX(Creature->Colors[0]);
 						sy = GetObjectShiftY(Creature->Colors[0]);
 					}
-				} else if (IsPlayer(Creature->CreatureID)) {
+				} else if (::Creatures().IsPlayer(Creature->CreatureID)) {
 					sx = 8;
 					sy = 8;
 				} else {
@@ -858,14 +858,14 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 	int i;
 	for (i = 0; i < NumberOfCreatures; i++) {
 		TRGBColor Color;
-		if (Creatures[i]->CreatureID == GetHighlightID())
+		if (Creatures[i]->CreatureID == ::Creatures().GetHighlightID())
 			Color = SkinProperties().HighlightColor;
-		if (Creatures[i]->CreatureID == GetAttackID())
-			Color = Creatures[i]->CreatureID == GetHighlightID() ? SkinProperties().HighlightedAttackColor
-																 : SkinProperties().AttackColor;
-		if (Creatures[i]->CreatureID == GetFollowID())
-			Color = Creatures[i]->CreatureID == GetHighlightID() ? SkinProperties().HighlightedFollowColor
-																 : SkinProperties().FollowColor;
+		if (Creatures[i]->CreatureID == ::Creatures().GetAttackID())
+			Color = Creatures[i]->CreatureID == ::Creatures().GetHighlightID() ? SkinProperties().HighlightedAttackColor
+																			   : SkinProperties().AttackColor;
+		if (Creatures[i]->CreatureID == ::Creatures().GetFollowID())
+			Color = Creatures[i]->CreatureID == ::Creatures().GetHighlightID() ? SkinProperties().HighlightedFollowColor
+																			   : SkinProperties().FollowColor;
 		const int ox = OffsetX[i], oy = OffsetY[i];
 		if (Color != TRGBColor(0, 0, 0)) {
 			const int cx = (ScrollX - Elevation + ox + posx) / 32, cy = (ScrollY - Elevation + oy + posy) / 32;
@@ -910,7 +910,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 			DrawCreature(ShiftX[i] - Elevation + ox + posx, ShiftY[i] - Elevation + oy + posy, FieldZ, Creatures[i]);
 		}
 		if (Mode == 0) {
-			if ((IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == PlayerState().GetPlayerID())
+			if ((::Creatures().IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == PlayerState().GetPlayerID())
 				&& FieldZ == GetMapLevel()) {
 				Names[NumberOfNames].CreatureID = Creatures[i]->CreatureID;
 				Names[NumberOfNames].x = ox - Elevation + posx + 16;
@@ -929,7 +929,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (EffectNumber < 0 || EffectNumber >= EFFECTS) {
 			std::stringstream s;
 			s << "EffectNumber: " << EffectNumber << " X: " << FieldX << " Y: " << FieldY << " Z: " << FieldZ;
-			const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
+			const TCreature *Player = ::Creatures().GetCreature(PlayerState().GetPlayerID());
 			if (Player != nullptr)
 				s << " PlayerX: " << Player->RealX << " PlayerY: " << Player->RealY << " PlayerZ: " << Player->RealZ;
 			throw TMYEXCEPTION("effect number out of range [bug0000913]", "", 0, "", 0, s.str());
@@ -1496,7 +1496,7 @@ void TMapWindow::ArrangeTalkboxes()
 // on the field; 0 if there is none.
 void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 {
-	const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
+	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
 	if (GetNoStretching()) {
 		*FieldX = ((480 - Width) / 2 + Player->GetDeltaX() + x) / 32 + 1;
@@ -1525,7 +1525,7 @@ uint32 TMapWindow::GetCreatureAt(int x, int y)
 	const int FieldWidth = Width / 15;
 	const int FieldHeight = Height / 11;
 	for (int i = 0; i < NumberOfNames; i++) {
-		const TCreature *Creature = GetCreature(Names[i].CreatureID);
+		const TCreature *Creature = Creatures().GetCreature(Names[i].CreatureID);
 		if (Creature == nullptr)
 			continue;
 		int cx = Creature->RealX, cy = Creature->RealY, cz = Creature->RealZ;

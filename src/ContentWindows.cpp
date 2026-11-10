@@ -885,7 +885,7 @@ int TPlayerStates::GetIcon(int Position)
 			}
 			break;
 		case 4:
-			switch (GetCreature(PlayerState().GetPlayerID())->PKFlag) {
+			switch (Creatures().GetCreature(PlayerState().GetPlayerID())->PKFlag) {
 			case PK_YELLOW:
 				Found++;
 				Skin = SKIN_STATE_SKULL_1;
@@ -2013,7 +2013,7 @@ TBattleWindowBody::TBattleWindowBody()
 void TBattleWindowBody::OnClose()
 {
 	try {
-		SetHighlightID(0);
+		Creatures().SetHighlightID(0);
 	} catch (...) {
 		CloseWhileUnwinding([this] { TSubWindowBody::OnClose(); });
 		throw;
@@ -2029,8 +2029,8 @@ void TBattleWindowBody::OnClose()
 // children are drawn before the background.
 void TBattleWindowBody::Draw(int Surface, int x, int y)
 {
-	SetHighlightID(0);
-	const int Opponents = GetNumberOfOpponents();
+	Creatures().SetHighlightID(0);
+	const int Opponents = Creatures().GetNumberOfOpponents();
 	if (NumberOfOpponents != Opponents) {
 		NumberOfOpponents = Opponents;
 		Arrange();
@@ -2045,7 +2045,7 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 		DrawSkin(Surface, x, y, Width - ScrollBar->Width, Height, SKIN_BACKGROUND, 0, ScrollY % Skins()[SKIN_BACKGROUND].height);
 		const int ClipWidth = Width - ScrollBar->Width;
 		for (int i = 0; i < Opponents; i++) {
-			TCreature *Creature = GetOpponent(i);
+			TCreature *Creature = Creatures().GetOpponent(i);
 			const int RowY = SkinProperties().BattleWindow.RowHeight * i - ScrollY;
 			int Offset = 0;
 			if (SkinProperties().BattleWindow.RowHeight + RowY <= 0)
@@ -2069,17 +2069,17 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 				return GetOpponentAt(GetMouseX() - x, MouseY - y);
 			};
 			if (In(GetMouseY(), ClipY, ClipY + ClipHeight) && In(GetMouseX(), x, ClipWidth + x) && i == OpponentAtMouse()) {
-				SetHighlightID(Creature->CreatureID);
+				Creatures().SetHighlightID(Creature->CreatureID);
 				Color = SkinProperties().HighlightColor;
 				Framed = true;
 			}
-			if (Creature->CreatureID == GetAttackID()) {
+			if (Creature->CreatureID == Creatures().GetAttackID()) {
 				if (Framed)
 					Color = SkinProperties().HighlightedAttackColor;
 				else
 					Color = SkinProperties().AttackColor;
 				Framed = true;
-			} else if (Creature->CreatureID == GetFollowID()) {
+			} else if (Creature->CreatureID == Creatures().GetFollowID()) {
 				if (Framed)
 					Color = SkinProperties().HighlightedFollowColor;
 				else
@@ -2215,14 +2215,14 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 	if (!TWindow::LeftButtonUp(x, y, Flags)) {
 		const int Position = GetOpponentAt(x, y);
 		if (Position != -1) {
-			const TCreature *Creature = GetOpponent(Position);
+			const TCreature *Creature = Creatures().GetOpponent(Position);
 			if (Creature != nullptr) {
 				if (GetActionState() == ACTIONSTATE_USE_WITH) {
 					int SrcIndex, SrcX, SrcY, SrcZ;
 					const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
 					PATELLA_ASSERT(SrcObj!=0);
 					PATELLA_ASSERT(SrcObj.Type!=CREATURE);
-					if (!IsPlayer(Creature->CreatureID)) {
+					if (!Creatures().IsPlayer(Creature->CreatureID)) {
 						SendUseObjectOnCreature(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, Creature->CreatureID);
 						return true;
 					}
@@ -2231,7 +2231,7 @@ bool TBattleWindowBody::LeftButtonUp(int x, int y, int Flags)
 					int TradeIndex, TradeX, TradeY, TradeZ;
 					const TObject &Obj = *GetTradeObject(&TradeIndex, &TradeX, &TradeY, &TradeZ);
 					PATELLA_ASSERT(Obj!=0);
-					if (IsPlayer(Creature->CreatureID)) {
+					if (Creatures().IsPlayer(Creature->CreatureID)) {
 						SendRequestTrade(TradeX, TradeY, TradeZ, Obj.Type, TradeIndex, Creature->CreatureID);
 						return true;
 					}
@@ -2255,12 +2255,12 @@ bool TBattleWindowBody::RightButtonUp(int x, int y, int Flags)
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
 		const int Position = GetOpponentAt(x, y);
 		if (Position != -1) {
-			const TCreature *Creature = GetOpponent(Position);
+			const TCreature *Creature = Creatures().GetOpponent(Position);
 			if (Creature != nullptr) {
 				if ((Flags & KEY_ALT) != 0) {
-					const uint32 AttackID = GetAttackID();
-					SetAttackID(Creature->CreatureID == AttackID ? 0 : Creature->CreatureID);
-					SendAttack(GetAttackID());
+					const uint32 AttackID = Creatures().GetAttackID();
+					Creatures().SetAttackID(Creature->CreatureID == AttackID ? 0 : Creature->CreatureID);
+					SendAttack(Creatures().GetAttackID());
 				} else if ((Flags & SHIFT_OR_BOTH_BUTTONS) != 0) {
 					SendLook(Creature->RealX, Creature->RealY, Creature->RealZ, CREATURE, 0);
 				} else {
@@ -2277,7 +2277,7 @@ void TBattleWindowBody::MouseHover(int x, int y)
 {
 	const int Position = GetOpponentAt(x, y);
 	if (Position != -1) {
-		TCreature *Creature = GetOpponent(Position);
+		TCreature *Creature = Creatures().GetOpponent(Position);
 		if (Creature != nullptr) {
 			const int MaxLength = GetFittingTextLength(SkinProperties().BattleWindow.NameFont.FontNumber, Creature->Name,
 				SkinProperties().BattleWindow.Name.width);
@@ -2325,7 +2325,7 @@ int TBattleWindowBody::GetInitialHeight()
 
 int TBattleWindowBody::GetContentHeight()
 {
-	return GetNumberOfOpponents() * SkinProperties().BattleWindow.RowHeight + 1;
+	return Creatures().GetNumberOfOpponents() * SkinProperties().BattleWindow.RowHeight + 1;
 }
 
 // The row under x, y; -1 for none.
@@ -2333,7 +2333,7 @@ int TBattleWindowBody::GetOpponentAt(int x, int y)
 {
 	y += ScrollBar->Range->Value;
 	const int Position = y / SkinProperties().BattleWindow.RowHeight;
-	if (y >= 0 && x >= 0 && x <= Width - ScrollBar->Width && Position < GetNumberOfOpponents())
+	if (y >= 0 && x >= 0 && x <= Width - ScrollBar->Width && Position < Creatures().GetNumberOfOpponents())
 		return Position;
 	return -1;
 }
@@ -2732,8 +2732,8 @@ TBuddylistWindowBody::TBuddylistWindowBody()
 // whole window.
 void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 {
-	if (NumberOfBuddies != GetNumberOfBuddies()) {
-		NumberOfBuddies = GetNumberOfBuddies();
+	if (NumberOfBuddies != Creatures().GetNumberOfBuddies()) {
+		NumberOfBuddies = Creatures().GetNumberOfBuddies();
 		Arrange();
 	}
 	if (!IsMinimized()) {
@@ -2746,26 +2746,26 @@ void TBuddylistWindowBody::Draw(int Surface, int x, int y)
 			TWindow::Draw(Surface, x, y);
 		const int ClipHeight = Height;
 		const int ClipWidth = Width - ScrollBar->Width;
-		for (int i = 0; i < GetNumberOfBuddies(); i++) {
+		for (int i = 0; i < Creatures().GetNumberOfBuddies(); i++) {
 			const int ItemX = 0;
 			const int ItemY = SkinProperties().BuddylistWindow.RowHeight * i - ScrollY;
 			if (SkinProperties().BuddylistWindow.RowHeight + ItemY <= 0)
 				continue;
 			if (ItemY > Bottom)
 				return;
-			if (GetBuddyListIcon(i) > 0) {
-				const int Icon = GetBuddyListIcon(i);
+			if (Creatures().GetBuddyListIcon(i) > 0) {
+				const int Icon = Creatures().GetBuddyListIcon(i);
 				PATELLA_ASSERT_VALUES(x+ItemX+SkinProperties().BuddylistWindow.Logo.x>=0, x);
 				PATELLA_ASSERT_VALUES(y+ItemY+SkinProperties().BuddylistWindow.Logo.y>=0, y);
 				DrawSkinClipped(Surface, SkinProperties().BuddylistWindow.Logo.x + x,
 					SkinProperties().BuddylistWindow.Logo.y + ItemY + y, SkinProperties().BuddylistWindow.Logo.width,
 					SkinProperties().BuddylistWindow.Logo.height, Icon + SKIN_BUDDY_ICON_BASE, x, y, ClipWidth, ClipHeight, 0, 0);
 			}
-			TRGBColor Color = IsBuddyOnline(i) ? SkinProperties().BuddylistWindow.OnlineColor
-											   : SkinProperties().BuddylistWindow.OfflineColor;
-			if (IsBuddyNewlyOnline(i))
+			TRGBColor Color = Creatures().IsBuddyOnline(i) ? SkinProperties().BuddylistWindow.OnlineColor
+														   : SkinProperties().BuddylistWindow.OfflineColor;
+			if (Creatures().IsBuddyNewlyOnline(i))
 				Color = SkinProperties().BuddylistWindow.NewColor;
-			const char *Name = GetBuddyListName(i);
+			const char *Name = Creatures().GetBuddyListName(i);
 			const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,
 				SkinProperties().BuddylistWindow.Name.width);
 			TFixedString<40> Shortened;
@@ -2796,7 +2796,7 @@ bool TBuddylistWindowBody::RightButtonUp(int x, int y, int Flags)
 {
 	if (!TWindow::RightButtonUp(x, y, Flags)) {
 		const int Position = GetBuddyAt(x, y);
-		AddMessage(MESSAGE_BUDDY_MENU, Position == -1 ? 0 : GetBuddyListID(Position), 0);
+		AddMessage(MESSAGE_BUDDY_MENU, Position == -1 ? 0 : Creatures().GetBuddyListID(Position), 0);
 	}
 	return true;
 }
@@ -2808,7 +2808,7 @@ bool TBuddylistWindowBody::LeftButtonDoubleClick(int x, int y, int Flags)
 	if (!TWindow::LeftButtonDoubleClick(x, y, Flags)) {
 		const int Position = GetBuddyAt(x, y);
 		if (Position != -1)
-			SendOpenPrivateConversation(GetBuddyListName(Position));
+			SendOpenPrivateConversation(Creatures().GetBuddyListName(Position));
 	}
 	return true;
 }
@@ -2825,7 +2825,7 @@ void TBuddylistWindowBody::MouseHover(int x, int y)
 {
 	const int Position = GetBuddyAt(x, y);
 	if (Position != -1) {
-		const char *Name = GetBuddyListName(Position);
+		const char *Name = Creatures().GetBuddyListName(Position);
 		const int MaxLength = GetFittingTextLength(SkinProperties().BuddylistWindow.NameFont.FontNumber, Name,
 			SkinProperties().BuddylistWindow.Name.width);
 		if (MaxLength < (int)strlen(Name)) {
@@ -2877,7 +2877,7 @@ int TBuddylistWindowBody::GetInitialHeight()
 
 int TBuddylistWindowBody::GetContentHeight()
 {
-	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().BuddylistWindowExtraHeight;
+	return Creatures().GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().BuddylistWindowExtraHeight;
 }
 
 // The row under x, y; -1 for none. Odd, kept: y is not tested against the top. y
@@ -2888,7 +2888,7 @@ int TBuddylistWindowBody::GetBuddyAt(int x, int y)
 	if (!IsMinimized()) {
 		y += ScrollBar->Range->Value;
 		const int Position = y / SkinProperties().BuddylistWindow.RowHeight;
-		if (x >= 0 && x <= Width - ScrollBar->Width && Position < GetNumberOfBuddies())
+		if (x >= 0 && x <= Width - ScrollBar->Width && Position < Creatures().GetNumberOfBuddies())
 			return Position;
 	}
 	return -1;

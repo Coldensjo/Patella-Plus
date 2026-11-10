@@ -97,7 +97,7 @@ void LogDiagnostics() noexcept
 	}
 	try {
 		if (PlayerState().GetPlayerID() != 0) {
-			const TCreature *Player = GetCreature(PlayerState().GetPlayerID());
+			const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
 			if (Player != nullptr)
 				patella::log::Debug("Player position: [{},{},{}]", Player->RealX, Player->RealY, Player->RealZ);
 		}
