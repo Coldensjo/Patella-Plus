@@ -381,7 +381,7 @@ int TCreature::GetDrawDirection() const
 }
 
 // Starts the animation of a step by (dx,dy) onto a ground with the given
-// waypoints. For the player a step that DoPlayerStep predicted only clears
+// waypoints. For the player a step that StartPlayerStep predicted only clears
 // the prediction (the animation runs already); any other step counts as the
 // next one of the walk. A diagonal step blocks the next step for three
 // times the unrounded duration.
@@ -462,7 +462,7 @@ int patella::TPlayerState::GetPlayerStep(int Step) const
 // Starts the current step of the walk at once, before the server confirms
 // it, if the field is free and not more than one level higher. The map
 // functions take screen coordinates; the player stands at (8,6).
-void patella::TPlayerState::DoPlayerStep()
+void patella::TPlayerState::StartPlayerStep()
 {
 	PATELLA_ASSERT_VALUES(CurrentPlayerStep<NumberOfPlayerSteps, CurrentPlayerStep);
 	if (NewPlayerDestination || PlayerHealth == 0)
@@ -535,7 +535,7 @@ int patella::TPlayerState::FindPlayerPath()
 		DestinationX = 0;
 	if (Result > 0) {
 		CurrentPlayerStep = 0;
-		DoPlayerStep();
+		StartPlayerStep();
 		return 1;
 	}
 	switch (Result) {
@@ -574,7 +574,7 @@ int patella::TPlayerState::SetPlayerDestination(int x, int y, int z, bool Exact,
 	DestinationZ = z;
 	DestinationExact = Exact;
 	DestinationDiagonal = Diagonal;
-	Map.AbsoluteToRelative(&x, &y, &z);
+	Map.WorldToMap(&x, &y, &z);
 	if (In(x, 1, 15) && In(y, 1, 11) && z == Map.GetMapLevel() && (x != 8 || y != 6)) {
 		if (!Map.IsFieldPassable(x, y, z, true)) {
 			GUI.SetStatusMessage("Sorry, not possible.", false);
@@ -957,7 +957,7 @@ void patella::TCreatures::SortBuddies()
 
 // Moves buddy i to its place. CompareBuddies is also true for equal
 // buddies, so i first moves up past every equal one.
-void patella::TCreatures::SortBuddy(int i)
+void patella::TCreatures::MoveBuddyToSortedPlace(int i)
 {
 	PATELLA_ASSERT_VALUES(In(i,0,NumberOfBuddies-1), i, NumberOfBuddies-1);
 	while (i > 0 && CompareBuddies(i, i - 1)) {
@@ -993,7 +993,7 @@ void patella::TCreatures::AddBuddy(uint32 CharacterID, const char *Name, bool On
 	Buddy->Online = Online;
 	Buddy->LoginAction = 0;
 	Buddy->Icon = GetBuddyIcon(CharacterID);
-	SortBuddy(Position);
+	MoveBuddyToSortedPlace(Position);
 }
 
 void patella::TCreatures::SetBuddyState(uint32 CharacterID, bool Online)
@@ -1013,7 +1013,7 @@ void patella::TCreatures::SetBuddyState(uint32 CharacterID, bool Online)
 		Text.Format("{} has logged in.", Buddy->Name);
 		GUI.SetStatusMessage(Text, false);
 	}
-	SortBuddy(Position);
+	MoveBuddyToSortedPlace(Position);
 }
 
 // Stores the buddy's data in the preferences (an empty entry deletes it
@@ -1029,7 +1029,7 @@ void patella::TCreatures::EditBuddy(int CharacterID, int Icon, const char *Descr
 	const int Position = GetBuddyPosition(CharacterID);
 	if (Position != -1) {
 		Buddies[Position].Icon = Icon;
-		SortBuddy(Position);
+		MoveBuddyToSortedPlace(Position);
 	}
 }
 
@@ -1194,7 +1194,7 @@ void patella::TPlayerState::ResetPlayer()
 bool patella::TPlayerState::ContinuePlayerWalk()
 {
 	if (CurrentPlayerStep < NumberOfPlayerSteps) {
-		DoPlayerStep();
+		StartPlayerStep();
 		return false;
 	}
 	return FindPlayerPath() == 1;
@@ -1363,9 +1363,9 @@ int GetPlayerStep(int Step)
 	return patella::bridge::PlayerState().GetPlayerStep(Step);
 }
 
-void DoPlayerStep()
+void StartPlayerStep()
 {
-	patella::bridge::PlayerState().DoPlayerStep();
+	patella::bridge::PlayerState().StartPlayerStep();
 }
 
 int FindPlayerPath()
@@ -1548,9 +1548,9 @@ void SortBuddies()
 	patella::bridge::Creatures().SortBuddies();
 }
 
-void SortBuddy(int i)
+void MoveBuddyToSortedPlace(int i)
 {
-	patella::bridge::Creatures().SortBuddy(i);
+	patella::bridge::Creatures().MoveBuddyToSortedPlace(i);
 }
 
 void AddBuddy(uint32 CharacterID, const char *Name, bool Online)

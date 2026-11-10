@@ -588,7 +588,7 @@ void patella::TCommunication::SendRefreshField(int x, int y, int z)
 	Network.SendWord(y);
 	Network.SendByte(z);
 	Network.SendCommand(true);
-	Map.AbsoluteToRelative(&x, &y, &z);
+	Map.WorldToMap(&x, &y, &z);
 	Map.RequestFieldRefresh(x, y, z);
 }
 
@@ -864,7 +864,7 @@ uint32 patella::TCommunication::ReadCreature(int Type, int x, int y, int z)
 			Creature->Direction = Network.GetByte();
 	}
 	if (Creature != nullptr) {
-		Map.RelativeToAbsolute(&x, &y, &z);
+		Map.MapToWorld(&x, &y, &z);
 		Creature->SetPosition(x, y, z);
 		Creature->Visible = true;
 	}
@@ -1012,7 +1012,7 @@ void patella::TCommunication::ReceiveField()
 	rx = Network.GetWord();
 	ry = Network.GetWord();
 	rz = Network.GetByte();
-	Map.AbsoluteToRelative(&rx, &ry, &rz);
+	Map.WorldToMap(&rx, &ry, &rz);
 	Map.ClearField(rx, ry, rz, false);
 	SkipFields = 0;
 	ReadField(rx, ry, rz);
@@ -1028,7 +1028,7 @@ void patella::TCommunication::ReceiveAddObject()
 	rx = Network.GetWord();
 	ry = Network.GetWord();
 	rz = Network.GetByte();
-	Map.AbsoluteToRelative(&rx, &ry, &rz);
+	Map.WorldToMap(&rx, &ry, &rz);
 	const int Type = Network.GetWord();
 	TObject Object;
 	if (Type == UNKNOWNCREATURE || Type == OUTDATEDCREATURE || Type == CREATURE) {
@@ -1061,7 +1061,7 @@ void patella::TCommunication::ReceiveChangeObject()
 	ry = Network.GetWord();
 	rz = Network.GetByte();
 	const int Position = Network.GetByte(); // read before the conversion
-	Map.AbsoluteToRelative(&rx, &ry, &rz);
+	Map.WorldToMap(&rx, &ry, &rz);
 	const TObject OldObject = Map.GetMapObject(rx, ry, rz, Position);
 	if (OldObject.Type == ObjectTypes.NoObject.Type) {
 		PATELLA_ASSERT_VALUES(Map.FieldRefreshRequested(rx,ry,rz), rx, ry);
@@ -1115,7 +1115,7 @@ void patella::TCommunication::ReceiveDeleteObject()
 	ry = Network.GetWord();
 	rz = Network.GetByte();
 	const int Position = Network.GetByte();
-	Map.AbsoluteToRelative(&rx, &ry, &rz);
+	Map.WorldToMap(&rx, &ry, &rz);
 	const TObject Object = Map.GetMapObject(rx, ry, rz, Position);
 	if (Object.Type == ObjectTypes.NoObject.Type) {
 		PATELLA_ASSERT_VALUES(Map.FieldRefreshRequested(rx,ry,rz), rx, ry);
@@ -1128,7 +1128,7 @@ void patella::TCommunication::ReceiveDeleteObject()
 		const bool Refresh = Map.DeleteObject(rx, ry, rz, Position);
 		if (rz == Map.GetMapLevel())
 			Map.UpdateAutomap(rx, ry);
-		Map.RelativeToAbsolute(&rx, &ry, &rz);
+		Map.MapToWorld(&rx, &ry, &rz);
 		if (Refresh)
 			SendRefreshField(rx, ry, rz);
 	}
@@ -1154,14 +1154,14 @@ void patella::TCommunication::ReceiveMoveCreature()
 	const int abs_zy = zy;
 	const int abs_zz = zz;
 	const bool Teleport = dz != 0 || abs(dx) >= 2 || abs(dy) >= 2;
-	Map.AbsoluteToRelative(&sx, &sy, &sz);
-	Map.AbsoluteToRelative(&zx, &zy, &zz);
+	Map.WorldToMap(&sx, &sy, &sz);
+	Map.WorldToMap(&zx, &zy, &zz);
 	const TObject Object = Map.GetMapObject(sx, sy, sz, Position);
 	std::string Error;
 	TCreature *Creature = nullptr;
 	if (Object.Type == ObjectTypes.NoObject.Type || Object.Type != CREATURE) {
 		if (Map.FieldRefreshRequested(sx, sy, sz)) {
-			Map.RelativeToAbsolute(&zx, &zy, &zz);
+			Map.MapToWorld(&zx, &zy, &zz);
 			SendRefreshField(zx, zy, zz);
 			return;
 		}
@@ -1267,7 +1267,7 @@ void patella::TCommunication::ReceiveMoveCreature()
 		int x = sx;
 		int y = sy;
 		int z = sz;
-		Map.RelativeToAbsolute(&x, &y, &z);
+		Map.MapToWorld(&x, &y, &z);
 		SendRefreshField(x, y, z);
 	}
 	if (sz == Map.GetMapLevel())
@@ -1438,7 +1438,7 @@ void patella::TCommunication::ReceiveMagicEffect()
 	rx = Network.GetWord();
 	ry = Network.GetWord();
 	rz = Network.GetByte();
-	Map.AbsoluteToRelative(&rx, &ry, &rz);
+	Map.WorldToMap(&rx, &ry, &rz);
 	const int Effect = Network.GetByte();
 	Map.AddGraphicalEffect(rx, ry, rz, Effect);
 }
@@ -1451,7 +1451,7 @@ void patella::TCommunication::ReceiveAnimatedText()
 	rx = Network.GetWord();
 	ry = Network.GetWord();
 	rz = Network.GetByte();
-	Map.AbsoluteToRelative(&rx, &ry, &rz);
+	Map.WorldToMap(&rx, &ry, &rz);
 	const int Color = Network.GetByte();
 	TFixedString<24> Text;
 	Network.GetString(patella::TSpan<char>(Text.Chars).first(10));
@@ -1466,11 +1466,11 @@ void patella::TCommunication::ReceiveDistanceEffect()
 	sx = Network.GetWord();
 	sy = Network.GetWord();
 	sz = Network.GetByte();
-	Map.AbsoluteToRelative(&sx, &sy, &sz);
+	Map.WorldToMap(&sx, &sy, &sz);
 	int dx = Network.GetWord();
 	int dy = Network.GetWord();
 	int dz = Network.GetByte();
-	Map.AbsoluteToRelative(&dx, &dy, &dz);
+	Map.WorldToMap(&dx, &dy, &dz);
 	const int Effect = Network.GetByte();
 	Map.AddMissileEffect(sx, sy, sz, dx, dy, dz, Effect);
 }
@@ -1671,7 +1671,7 @@ void patella::TCommunication::ReceiveTalk()
 		const int z = Network.GetByte();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
 		if (IsTalkIgnored(Mode, Name, -1)) {
-			SetTalkThrottle();
+			StartTalkThrottle();
 			return;
 		}
 		AddTalkbox(Mode, Name, x, y, z, Text);
@@ -1682,7 +1682,7 @@ void patella::TCommunication::ReceiveTalk()
 	case TALK_GAMEMASTER_MESSAGE:
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
 		if (IsTalkIgnored(Mode, Name, -1)) {
-			SetTalkThrottle();
+			StartTalkThrottle();
 			return;
 		}
 		AddTalkbox(Mode, Name, 0, 0, 0, Text);
@@ -1694,7 +1694,7 @@ void patella::TCommunication::ReceiveTalk()
 		Channel = Network.GetWord();
 		Network.GetString(patella::TSpan<char>(Text.Chars).first(512));
 		if (IsTalkIgnored(Mode, Name, -1)) {
-			SetTalkThrottle();
+			StartTalkThrottle();
 			return;
 		}
 		TargetChannel = Channel;
@@ -1717,7 +1717,7 @@ void patella::TCommunication::ReceiveTalk()
 			AddTalkbox(Mode, Name, x, y, z, Text);
 			return;
 		}
-		SetTalkThrottle();
+		StartTalkThrottle();
 		return;
 	}
 	default:

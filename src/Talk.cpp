@@ -58,7 +58,7 @@ void patella::TTalk::SetBuddyIgnore(bool Value) { BuddyIgnore = Value; }
 bool patella::TTalk::GetBuddyIgnore() const { return BuddyIgnore; }
 void patella::TTalk::SetIgnoreListEnabled(bool Value) { IgnoreListEnabled = Value; }
 bool patella::TTalk::GetIgnoreListEnabled() const { return IgnoreListEnabled; }
-void patella::TTalk::SetTalkThrottle() { TalkThrottle = GetMilliseconds() + 1000; }
+void patella::TTalk::StartTalkThrottle() { TalkThrottle = GetMilliseconds() + 1000; }
 bool patella::TTalk::IsTalkThrottled()
 {
 	if (TalkThrottle != 0) {
@@ -1264,9 +1264,9 @@ void SetTalkChanged()
 	patella::bridge::Talk().SetTalkChanged();
 }
 
-void SetTalkThrottle()
+void StartTalkThrottle()
 {
-	patella::bridge::Talk().SetTalkThrottle();
+	patella::bridge::Talk().StartTalkThrottle();
 }
 
 void SetConsoleChanged()

@@ -153,7 +153,7 @@ struct TPathNode {
 };
 
 // The steps of a path: FindPath's Directions, the player's PlayerSteps (Creatures.h) and the bytes of SendWalk's
-// path. Counter-clockwise from east, with the diagonals, from 1; the names are ours, from FindPath and DoPlayerStep,
+// path. Counter-clockwise from east, with the diagonals, from 1; the names are ours, from FindPath and StartPlayerStep,
 // which turn the differences of x and y into them and back. They are not a creature's DIRECTION_* (Objects.h),
 // four values clockwise from north: a step becomes one in StartMovement, by its dx and dy. Enumerators for the
 // reason in GUI.h.
@@ -219,8 +219,8 @@ public:
 	void SetMapPosition(int x, int y, int z);
 	void GetMapPosition(int *x, int *y, int *z) const;
 	[[nodiscard]] int GetMapLevel() const;
-	void RelativeToAbsolute(int *x, int *y, int *z) const;
-	void AbsoluteToRelative(int *x, int *y, int *z) const;
+	void MapToWorld(int *x, int *y, int *z) const;
+	void WorldToMap(int *x, int *y, int *z) const;
 
 	// Ambient light.
 	void SetAmbientLight(int Brightness, int Color);
@@ -347,8 +347,8 @@ TMap &Map();
 void SetMapPosition(int x, int y, int z);
 void GetMapPosition(int *x, int *y, int *z);
 int GetMapLevel();
-void RelativeToAbsolute(int *x, int *y, int *z);
-void AbsoluteToRelative(int *x, int *y, int *z);
+void MapToWorld(int *x, int *y, int *z);
+void WorldToMap(int *x, int *y, int *z);
 
 // Ambient light.
 void SetAmbientLight(int Brightness, int Color);

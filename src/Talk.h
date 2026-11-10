@@ -263,7 +263,7 @@ public:
 	void DeleteTextBuffer(TTalkBuffer *TextBuffer);
 	TTalkBuffer *CreateTextBuffer(int ReceiveTalkMode, int SendTalkMode, const char *Name, int Channel);
 	void SetTalkChanged();
-	void SetTalkThrottle();
+	void StartTalkThrottle();
 	void SetConsoleChanged();
 	void AddTalkbox(int Mode, const char *Speaker, int x, int y, int z, const char *Text);
 	void AddMessageTalkbox(int Mode, const char *Text);
@@ -378,7 +378,7 @@ void DeleteTextBuffer(TTalkBuffer *TextBuffer);
 TTalkBuffer *CreateTextBuffer(int ReceiveTalkMode, int SendTalkMode, const char *Name, int Channel);
 
 void SetTalkChanged();
-void SetTalkThrottle();
+void StartTalkThrottle();
 void SetConsoleChanged();
 void AddTalkbox(int Mode, const char *Speaker, int x, int y, int z, const char *Text);
 void AddMessageTalkbox(int Mode, const char *Text);

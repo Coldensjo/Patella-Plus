@@ -34,7 +34,7 @@ namespace {
 // this adapter calls. It goes with the bridge (#111) or with #109's ISocket events (notes/decisions.md, "#118").
 // Stateless: each member calls Status.cpp's function of its name (from another object file than Network.cpp's, so the
 // golden Network test's fakes of those functions are reached as before).
-class TStatusCppSession final : public TNetworkSession {
+class TNetworkSessionAdapter final : public TNetworkSession {
 public:
 	void SetConnectionState(int State) override { ::SetConnectionState(State); }
 	int GetConnectionState() override { return ::GetConnectionState(); }
@@ -45,17 +45,17 @@ public:
 };
 
 // Made on first use, as TClient is (a static initialiser of another file may make TClient first).
-TNetworkSession &StatusCppSession()
+TNetworkSession &NetworkSessionAdapter()
 {
-	static TStatusCppSession Session;
+	static TNetworkSessionAdapter Session;
 	return Session;
 }
 
 // Talk.cpp's default console for TMap (TMapConsole, issue #118) and Talk.cpp's, Help.cpp's and Status.cpp's functions
-// for TCreatures and TPlayerState (TCreaturesGUI): TGUI's, made after TMapState, so adapters as TStatusCppSession is.
+// for TCreatures and TPlayerState (TCreaturesGUI): TGUI's, made after TMapState, so adapters as TNetworkSessionAdapter is.
 // Stateless: each member calls the free functions of the original's code (from another object file than Map.cpp's and
 // Creatures.cpp's, so the golden tests' fakes of those functions are reached as before).
-class TTalkCppConsole final : public TMapConsole {
+class TMapConsoleAdapter final : public TMapConsole {
 public:
 	bool HasDefaultConsole() override { return bridge::Talk().DefaultTextBuffer != nullptr; }
 	void AddDefaultConsoleLine(const char *Message) override
@@ -65,7 +65,7 @@ public:
 	}
 };
 
-class TGUICppCreatures final : public TCreaturesGUI {
+class TCreaturesGUIAdapter final : public TCreaturesGUI {
 public:
 	void SetStatusMessage(const char *Message, bool Permanent) override { ::SetStatusMessage(Message, Permanent); }
 	void AddEventHelp(int Number) override { ::AddEventHelp(Number); }
@@ -88,23 +88,23 @@ TLoginSignatures &GraphicsSignatures()
 	return Signatures;
 }
 
-TMapConsole &TalkCppConsole()
+TMapConsole &MapConsoleAdapter()
 {
-	static TTalkCppConsole Console;
+	static TMapConsoleAdapter Console;
 	return Console;
 }
 
-TCreaturesGUI &GUICppCreatures()
+TCreaturesGUI &CreaturesGUIAdapter()
 {
-	static TGUICppCreatures Adapter;
+	static TCreaturesGUIAdapter Adapter;
 	return Adapter;
 }
 
 } // namespace
 
 TClient::TClient(platform::TPlatform &Platform)
-	: Preferences(Platform.FileSystem), Network(Preferences, StatusCppSession(), Platform.Socket),
-	  MapState(TalkCppConsole(), GUICppCreatures()), Communication(Network, MapState, GraphicsSignatures()), GUI(Network, Communication)
+	: Preferences(Platform.FileSystem), Network(Preferences, NetworkSessionAdapter(), Platform.Socket),
+	  MapState(MapConsoleAdapter(), CreaturesGUIAdapter()), Communication(Network, MapState, GraphicsSignatures()), GUI(Network, Communication)
 {
 }
 

@@ -216,7 +216,7 @@ public:
 	[[nodiscard]] bool CompareBuddies(int i, int j) const;
 	void SwapBuddies(int i, int j);
 	void SortBuddies();
-	void SortBuddy(int i);
+	void MoveBuddyToSortedPlace(int i);
 	void AddBuddy(uint32 CharacterID, const char *Name, bool Online);
 	void SetBuddyState(uint32 CharacterID, bool Online);
 	void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
@@ -312,7 +312,7 @@ public:
 	[[nodiscard]] bool IsPlayerHasted() const;       // bit 6
 	[[nodiscard]] bool IsPlayerInFight() const;      // bit 7
 	[[nodiscard]] int GetPlayerStep(int Step) const;
-	void DoPlayerStep();
+	void StartPlayerStep();
 	int FindPlayerPath();
 	int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
 	void StopPlayer();
@@ -432,7 +432,7 @@ uint32 GetHighlightID();
 int GetBuddyPosition(uint32 CharacterID); // position or -1
 bool IsBuddy(const char *Name);
 int GetPlayerStep(int Step);
-void DoPlayerStep();
+void StartPlayerStep();
 int FindPlayerPath();
 int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
 void StopPlayer();
@@ -466,7 +466,7 @@ TCreature *GetOpponent(int Number);
 bool CompareBuddies(int i, int j);
 void SwapBuddies(int i, int j);
 void SortBuddies();
-void SortBuddy(int i);
+void MoveBuddyToSortedPlace(int i);
 void AddBuddy(uint32 CharacterID, const char *Name, bool Online);
 void SetBuddyState(uint32 CharacterID, bool Online);
 void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify);

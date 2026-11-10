@@ -64,7 +64,7 @@ int patella::TMap::GetMapLevel() const
 
 // Map coordinates to world coordinates; every floor above the centre's
 // is shifted by one field to the north-west.
-void patella::TMap::RelativeToAbsolute(int *x, int *y, int *z) const
+void patella::TMap::MapToWorld(int *x, int *y, int *z) const
 {
 	const int dz = *z - GetMapLevel();
 	*x += MapX - 8 + dz;
@@ -72,7 +72,7 @@ void patella::TMap::RelativeToAbsolute(int *x, int *y, int *z) const
 	*z = MapZ - dz;
 }
 
-void patella::TMap::AbsoluteToRelative(int *x, int *y, int *z) const
+void patella::TMap::WorldToMap(int *x, int *y, int *z) const
 {
 	const int dz = MapZ - *z;
 	*x += 8 - MapX - dz;
@@ -546,8 +546,8 @@ void patella::TMap::AddMissileEffect(int sx, int sy, int sz, int dx, int dy, int
 	Effect.DistanceX = abs(DeltaX) * 32;
 	Effect.DistanceY = abs(DeltaY) * 32;
 	Effect.Duration = Steps * 150;
-	RelativeToAbsolute(&sx, &sy, &sz);
-	RelativeToAbsolute(&dx, &dy, &dz);
+	MapToWorld(&sx, &sy, &sz);
+	MapToWorld(&dx, &dy, &dz);
 	Effect.DestX = dx;
 	Effect.DestY = dy;
 	Effect.DestZ = dz;
@@ -642,7 +642,7 @@ void patella::TMap::ProcessMissileEffects()
 				}
 				Effect.x = x;
 				Effect.y = y;
-				AbsoluteToRelative(&x, &y, &z);
+				WorldToMap(&x, &y, &z);
 				if (!In(x, 0, MAPSIZE_X - 1) || !In(y, 0, MAPSIZE_Y - 1) || !In(z, 0, MAPSIZE_Z - 1)) {
 					x = 0;
 					y = 0;
@@ -1127,7 +1127,7 @@ void patella::TMap::UpdateAutomap(int rx, int ry)
 	int x = rx;
 	int y = ry;
 	int z = GetMapLevel();
-	RelativeToAbsolute(&x, &y, &z);
+	MapToWorld(&x, &y, &z);
 	TAutomapBlock *Block = GetAutomapBlock(x / 256, y / 256, z);
 	GetFieldAutomapInfo(rx, ry, GetMapLevel(), &Block->Color.view()[x % 256, y % 256], &Block->Speed.view()[x % 256, y % 256]);
 	Block->Changed = true;
@@ -1456,14 +1456,14 @@ int GetMapLevel()
 	return patella::bridge::Map().GetMapLevel();
 }
 
-void RelativeToAbsolute(int *x, int *y, int *z)
+void MapToWorld(int *x, int *y, int *z)
 {
-	patella::bridge::Map().RelativeToAbsolute(x, y, z);
+	patella::bridge::Map().MapToWorld(x, y, z);
 }
 
-void AbsoluteToRelative(int *x, int *y, int *z)
+void WorldToMap(int *x, int *y, int *z)
 {
-	patella::bridge::Map().AbsoluteToRelative(x, y, z);
+	patella::bridge::Map().WorldToMap(x, y, z);
 }
 
 void SetAmbientLight(int Brightness, int Color)
