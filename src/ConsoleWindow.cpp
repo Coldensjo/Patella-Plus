@@ -1870,8 +1870,9 @@ void TConsoleWindow::ParseInput(char **Text, char **Addressee, int *TalkMode, ch
 			*TalkMode = TALK_GAMEMASTER_MESSAGE;
 		}
 	}
-	if (strstr(Line + i, GetAccountNumberString()) != nullptr
-		|| (strstr(Line + i, GetAccountPassword()) != nullptr && strlen(GetAccountPassword()) != 0)) {
+	if (strstr(Line + i, Session().GetAccountNumberString()) != nullptr
+		|| (strstr(Line + i, Session().GetAccountPassword()) != nullptr
+			&& strlen(Session().GetAccountPassword()) != 0)) {
 		*Text = nullptr;
 		*Addressee = nullptr;
 		*TalkMode = TALK_NONE;

@@ -573,8 +573,8 @@ void patella::TGUI::ConnectionEstablished()
 	if (GetConnectionState() == CONNECTION_CONNECTING_LOGIN_SERVER) {
 		SetConnectionState(CONNECTION_LOGIN_SENT);
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
-		const char *Password = GetAccountPassword();
-		SendLogin(GetAccountNumber(), Password);
+		const char *Password = Session().GetAccountPassword();
+		SendLogin(Session().GetAccountNumber(), Password);
 		return;
 	}
 	if (GetConnectionState() == CONNECTION_CONNECTING_GAME_SERVER) {
@@ -582,12 +582,12 @@ void patella::TGUI::ConnectionEstablished()
 		SetConnectionState(CONNECTION_GAME_LOGIN_SENT);
 		Communication.OutfitRequested = false;
 		// The original's order: In's arguments right to left (MSVC; GCC and Clang may differ).
-		const int AccountCharacters = GetAccountCharacters();
+		const int AccountCharacters = Session().GetAccountCharacters();
 		PATELLA_ASSERT_VALUES(In(GetActiveCharacter(),0,AccountCharacters-1), GetActiveCharacter(), OldConnectionState);
 		// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
-		const char *Password = GetAccountPassword();
-		const char *Name = GetCharacterName(GetActiveCharacter());
-		SendGameLogin(GetAccountNumber(), Name, Password);
+		const char *Password = Session().GetAccountPassword();
+		const char *Name = Session().GetCharacterName(GetActiveCharacter());
+		SendGameLogin(Session().GetAccountNumber(), Name, Password);
 		return;
 	}
 	SetConnectionState(CONNECTION_OFFLINE);

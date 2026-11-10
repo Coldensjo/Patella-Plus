@@ -300,7 +300,7 @@ void TMainWindow::HandleEvent(int Event)
 		}
 		break;
 	case EVENT_BUG_REPORT:
-		if (!CheckRight(40, -1)) {
+		if (!Session().CheckRight(40, -1)) {
 			SetStatusMessage(TextNoBugReportRight, false);
 		} else if (GetConnectionState() == CONNECTION_IN_GAME && GUI.ModalWindow == nullptr) {
 			AddMessage(MESSAGE_BUG_REPORT_DIALOG, 0, 0);
@@ -337,7 +337,7 @@ void TMainWindow::HandleEvent(int Event)
 		AddMessage(MESSAGE_REPORT_DIALOG, 0, 0);
 		break;
 	case EVENT_RULE_VIOLATION:
-		if (CheckAnyRight())
+		if (Session().CheckAnyRight())
 			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 		break;
 	case EVENT_DEVICE_AUTOMATIC:

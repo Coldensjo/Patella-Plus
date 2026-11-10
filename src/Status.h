@@ -211,7 +211,6 @@ patella::TInteraction &Interaction();
 
 // The session's functions: each calls TSession's member of the same name on Session(); the others are
 // Status.cpp's own.
-bool CheckAnyRight();
 int GetActionNumber();
 void IncrementActionNumber();
 // The action states. ACTIONSTATE_NONE, no action, is the original's name
@@ -272,11 +271,6 @@ TObject *GetUseObject(int *Index, int *x, int *y, int *z);
 int GetTradeInfo();
 void SetConnectionState(int State);
 int GetConnectionState();
-int GetAccountNumber();
-const char *GetAccountNumberString();
-const char *GetAccountPassword();
-int GetAccountCharacters();
-int GetPremiumDays();
 int GetActiveCharacter();
 void SetMouseOverText(const char *Text);
 void SetMouseOverTextPosition(int x, int y);
@@ -288,15 +282,10 @@ int PeekMessageType();
 void FetchMessage(int *Type, std::intptr_t *Param1, std::intptr_t *Param2);
 void ClearMessages();
 void ExitStatus();
-bool CheckRight(int rightid, int Bit);
 const char *GetRightName(int rightid);
 const char *GetActionName(int actionid);
 void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2);
 void AddMessageFirst(int Type, std::intptr_t Param1, std::intptr_t Param2);
-void SetAccount(int Number, const char *Password);
-void SetActiveCharacter(int Number);
-const char *GetCharacterName(int Number);
-const char *GetCharacterWorld(int Number);
 const char *GetCharacterIPAddress(int Number);
 int GetCharacterPort(int Number);
 

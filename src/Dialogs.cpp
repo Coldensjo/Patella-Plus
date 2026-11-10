@@ -868,7 +868,7 @@ void TLoginDialog::KeyPress(int Key)
 void TLoginDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		SetAccount(atoi(Account->Text.get()), Password->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
+		Session().SetAccount(atoi(Account->Text.get()), Password->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
 		AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
 		AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 	}
@@ -889,11 +889,11 @@ TCharacterListDialog::TCharacterListDialog()
 	ListBox = new TListBox(NoCallback, TCallback(this, 1));
 	InsertChild(ListBox);
 	SetChildArea(ListBox, SkinProperties().CharacterListDialogList);
-	const int Characters = GetAccountCharacters();
+	const int Characters = Session().GetAccountCharacters();
 	for (int i = 0; i < Characters; i++) {
 		TFixedString<372> Line;
 		Line[0] = 0;
-		Line.Format("{} ({})", GetCharacterName(i), GetCharacterWorld(i));
+		Line.Format("{} ({})", Session().GetCharacterName(i), Session().GetCharacterWorld(i));
 		ListBox->AddLine(Line);
 	}
 	if (GetConnectionState() == CONNECTION_IN_GAME && GetActiveCharacter() < Characters)
@@ -901,7 +901,7 @@ TCharacterListDialog::TCharacterListDialog()
 	else
 		ListBox->SetSelection(0);
 	TFixedString<256> Status;
-	const int PremiumDays = GetPremiumDays();
+	const int PremiumDays = Session().GetPremiumDays();
 	if (PremiumDays == 0) {
 		Status.Format("<font=4><red={}><green={}><blue={}>Account Status:\nFree Account",
 			SkinProperties().Dialog.TextFont.Color.R, SkinProperties().Dialog.TextFont.Color.G,
@@ -975,7 +975,7 @@ void TCharacterListDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const int Selection = ListBox->GetSelection();
 		if (Selection >= 0) {
-			SetActiveCharacter(Selection);
+			Session().SetActiveCharacter(Selection);
 			if (GetConnectionState() == CONNECTION_IN_GAME || GetConnectionState() == CONNECTION_GAME_LOGIN_ANSWERED) {
 				AddMessage(MESSAGE_RECONNECT, 0, 0);
 				SendLogout();
@@ -2064,7 +2064,7 @@ TRuleViolationDialog::TRuleViolationDialog(const char *Name, TTalkLine *Statemen
 	SetChildArea(IPBanishment, SkinProperties().RuleViolationDialog.IPBanishment);
 	int Number = 0;
 	for (int i = 0; i < 32; i++) {
-		if (CheckRight(i, -1)) {
+		if (Session().CheckRight(i, -1)) {
 			ReasonList->AddLine(GetRightName(i));
 			Reasons[Number] = i;
 			Number++;
@@ -2146,13 +2146,14 @@ void TRuleViolationDialog::UpdateActions()
 	if (Reason != -1) {
 		ActionList->Clear();
 		for (int i = 0; i < 7; i++) {
-			if (CheckRight(Reason, i))
+			if (Session().CheckRight(Reason, i))
 				ActionList->AddLine(GetActionName(i));
 		}
-		const bool IPBanishmentAllowed = CheckRight(Reason, 7);
+		const bool IPBanishmentAllowed = Session().CheckRight(Reason, 7);
 		IPBanishment->SetChecked(false);
 		IPBanishment->SetEnabled(IPBanishmentAllowed);
-		StatementEdit->SetDisabled(!(CheckRight(Reason, 0) || CheckRight(Reason, 2) || CheckRight(Reason, 6))
+		StatementEdit->SetDisabled(!(Session().CheckRight(Reason, 0) || Session().CheckRight(Reason, 2)
+									   || Session().CheckRight(Reason, 6))
 			|| ((Reason < 9 || Reason > 27) && Reason != 29));
 	}
 }

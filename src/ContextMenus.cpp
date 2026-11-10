@@ -472,7 +472,8 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 		}
 		Separator = true;
 		AddEntry(EVENT_MENU_COPY, "Copy Name", nullptr);
-		if (Creatures().IsPlayer(CreatureID) && CreatureID != PlayerState().GetPlayerID() && CheckAnyRight()) {
+		if (Creatures().IsPlayer(CreatureID) && CreatureID != PlayerState().GetPlayerID()
+			&& Session().CheckAnyRight()) {
 			Separator = true;
 			AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 			Separator = true;
@@ -601,7 +602,7 @@ void TObjectContextMenu::HandleEvent(int Event)
 		// The rule violation dialog gets a copy of the name (Control.cpp
 		// deletes it).
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
-		if (Creature != nullptr && CheckAnyRight()) {
+		if (Creature != nullptr && Session().CheckAnyRight()) {
 			char *Name = new char[30];
 			TStringBuffer(Name, 30).Assign(Creature->Name);
 			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
@@ -677,7 +678,7 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 		Separator = true;
 	}
 	AddEntry(EVENT_MENU_COPY, "Copy Name", nullptr);
-	if (Creature != nullptr && Creatures().IsPlayer(this->CreatureID) && CheckAnyRight()) {
+	if (Creature != nullptr && Creatures().IsPlayer(this->CreatureID) && Session().CheckAnyRight()) {
 		Separator = true;
 		AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 		Separator = true;
@@ -764,7 +765,7 @@ void TCreatureContextMenu::HandleEvent(int Event)
 	}
 	case EVENT_MENU_RULE_VIOLATION: {
 		TCreature *Creature = Creatures().GetCreature(CreatureID);
-		if (Creature != nullptr && CheckAnyRight()) {
+		if (Creature != nullptr && Session().CheckAnyRight()) {
 			char *Name = new char[30];
 			TStringBuffer(Name, 30).Assign(Creature->Name);
 			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
@@ -808,7 +809,7 @@ TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int Pare
 	Separator = true;
 	if (Position != -1) {
 		AddEntry(EVENT_MENU_COPY_NAME, "Copy Name", nullptr);
-		if (CheckAnyRight()) {
+		if (Session().CheckAnyRight()) {
 			Separator = true;
 			AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 			Separator = true;
@@ -822,7 +823,7 @@ void TBuddyContextMenu::HandleEvent(int Event)
 	switch (Event) {
 	case EVENT_MENU_RULE_VIOLATION: {
 		const int Position = Creatures().GetBuddyPosition(CharacterID);
-		if (Position != -1 && CheckAnyRight()) {
+		if (Position != -1 && Session().CheckAnyRight()) {
 			char *Name = new char[30];
 			TStringBuffer(Name, 30).Assign(Creatures().GetBuddyListName(Position));
 			AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, reinterpret_cast<std::intptr_t>(Name), 0);
@@ -923,7 +924,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 		AddEntry(EVENT_MENU_COPY_MESSAGE, "Copy Message", nullptr);
 	Separator = true;
 	AddEntry(EVENT_MENU_SELECT_ALL, "Select all", nullptr);
-	if (HasSpeaker && CheckAnyRight()) {
+	if (HasSpeaker && Session().CheckAnyRight()) {
 		Separator = true;
 		AddEntry(EVENT_MENU_RULE_VIOLATION, "Rule Violation", nullptr);
 		Separator = true;
@@ -989,7 +990,7 @@ void TTextContextMenu::HandleEvent(int Event)
 		TextWindow->SelectAll();
 		break;
 	case EVENT_MENU_RULE_VIOLATION:
-		if (CheckAnyRight()) {
+		if (Session().CheckAnyRight()) {
 			if (Line == nullptr) {
 				AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, 0);
 			} else {
@@ -1056,7 +1057,7 @@ void TRequestContextMenu::HandleEvent(int Event)
 			CopyToClipboard(Line->GetText());
 			break;
 		case EVENT_MENU_RULE_VIOLATION:
-			if (CheckAnyRight()) {
+			if (Session().CheckAnyRight()) {
 				AddMessage(MESSAGE_RULE_VIOLATION_DIALOG, 0, reinterpret_cast<std::intptr_t>(new TTalkLine(Line->StatementID, Line->Mode, Name, Line->Text, 0)));
 			}
 			break;

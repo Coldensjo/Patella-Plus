@@ -678,11 +678,6 @@ void patella::TSession::ExitSession()
 
 // The session's functions of the original: each calls its member on the one TClient's TSession.
 
-bool CheckAnyRight()
-{
-	return Session().CheckAnyRight();
-}
-
 void SetConnectionState(int State)
 {
 	Session().SetConnectionState(State);
@@ -693,59 +688,9 @@ int GetConnectionState()
 	return Session().GetConnectionState();
 }
 
-int GetAccountNumber()
-{
-	return Session().GetAccountNumber();
-}
-
-const char *GetAccountNumberString()
-{
-	return Session().GetAccountNumberString();
-}
-
-const char *GetAccountPassword()
-{
-	return Session().GetAccountPassword();
-}
-
-int GetAccountCharacters()
-{
-	return Session().GetAccountCharacters();
-}
-
-int GetPremiumDays()
-{
-	return Session().GetPremiumDays();
-}
-
 int GetActiveCharacter()
 {
 	return Session().GetActiveCharacter();
-}
-
-bool CheckRight(int rightid, int Bit)
-{
-	return Session().CheckRight(rightid, Bit);
-}
-
-void SetAccount(int Number, const char *Password)
-{
-	Session().SetAccount(Number, Password);
-}
-
-void SetActiveCharacter(int Number)
-{
-	Session().SetActiveCharacter(Number);
-}
-
-const char *GetCharacterName(int Number)
-{
-	return Session().GetCharacterName(Number);
-}
-
-const char *GetCharacterWorld(int Number)
-{
-	return Session().GetCharacterWorld(Number);
 }
 
 const char *GetCharacterIPAddress(int Number)
