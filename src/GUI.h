@@ -383,7 +383,6 @@ public:
 	void MouseWheel(int x, int y, int Direction);
 	void KeyPress(int Key);
 	[[nodiscard]] bool CloseRequest() const;
-	void HandleEvents();
 	static void LinkCopyWarning();
 	void ConnectionEstablished();
 	void ReceivePackets();
