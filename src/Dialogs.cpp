@@ -2506,7 +2506,7 @@ void TGraphicsOptionsDialog::HandleEvent(int Event)
 		if ((ViewMode == 2) != FullscreenChecked
 			&& (!Fullscreen->IsChecked() || ResolutionList->GetSelection() != -1))
 			SetDisplayMode(Fullscreen->IsChecked() + 1);
-		if (patella::bridge::GraphicsEngine().curEngine == 2 && Fullscreen->IsChecked())
+		if (patella::bridge::GraphicsEngine().curEngine == ENGINE_DIRECTX9 && Fullscreen->IsChecked())
 			patella::bridge::GUI().Resize(0, 0); // Control.cpp's (issues #107, #118)
 	} else if (Event == EVENT_OPTIONS_ADVANCED) {
 		AddMessageFirst(MESSAGE_GRAPHICS_OPTIONS_DIALOG, 0, 0);
@@ -2584,13 +2584,13 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 		if (GetCpuDriverManifest().empty())
 			OpenGLButton->SetEnabled(false);
 		switch (patella::bridge::GraphicsEngine().curEngine) {
-		case 0:
+		case ENGINE_DIRECTX5:
 			EngineGroup->Selected = DirectX5Button;
 			break;
-		case 1:
+		case ENGINE_OPENGL:
 			EngineGroup->Selected = OpenGLButton;
 			break;
-		case 2:
+		case ENGINE_DIRECTX9:
 			EngineGroup->Selected = DirectX9Button;
 			break;
 		default:
@@ -2646,13 +2646,13 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 	PrintFormattedText(Surface, SkinProperties().Style1394.Data70.x + x, SkinProperties().Style1394.Data70.y + y,
 		SkinProperties().StyleB08.Data78, Text);
 	switch (patella::bridge::GraphicsEngine().curEngine) {
-	case 0:
+	case ENGINE_DIRECTX5:
 		EngineGroup->Selected = DirectX5Button;
 		break;
-	case 1:
+	case ENGINE_OPENGL:
 		EngineGroup->Selected = OpenGLButton;
 		break;
-	case 2:
+	case ENGINE_DIRECTX9:
 		EngineGroup->Selected = DirectX9Button;
 		break;
 	default:

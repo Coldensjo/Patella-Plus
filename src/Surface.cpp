@@ -32,7 +32,7 @@ int patella::TGraphicsEngine::GetCurrentEngine() const
 // The x64 client: curEngine is always 2, the Vulkan engine (SurfaceInitInstance).
 TSurface *patella::TGraphicsEngine::GetSurface()
 {
-	if (curEngine == 2 && Surface == nullptr)
+	if (curEngine == ENGINE_DIRECTX9 && Surface == nullptr)
 		Surface = CreateSurfaceVulkan(*this);
 	return Surface;
 }
@@ -120,7 +120,7 @@ void TSurface::AttachWindow()
 void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Window)
 {
 	SurfaceWindow = Window;
-	curEngine = 2;
+	curEngine = ENGINE_DIRECTX9;
 	LoadDeviceChoice();
 	if (CommandLineEngine >= 0 && CommandLineEngine < 3) {
 		SetEngine(CommandLineEngine);
@@ -128,7 +128,7 @@ void patella::TGraphicsEngine::SurfaceInitInstance(platform::TWindowHandle Windo
 	}
 	int Engine = GetEngine();
 	if (Engine < 0 || Engine >= 3)
-		Engine = 2;
+		Engine = ENGINE_DIRECTX9;
 	try {
 		if (IsVulkanInstalled()) {
 			GetSurface()->hWindow = Window;

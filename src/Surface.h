@@ -15,6 +15,19 @@
 
 // Engines (TGraphicsEngine::curEngine, below): 0 DirectX 5 (SurfaceDX.cpp), 1 OpenGL (SurfaceGL.cpp), 2 DirectX 9
 // (surfaceDX9.cpp).
+//
+// The names are the original's engines, whose numbers this client keeps: they are what TGraphicsEngine::curEngine,
+// ChangeEngine's argument, the command line's "engine N" and the preferences' Engine (Tibia.cfg's, shared with
+// Tibia.exe) hold. This client's one engine is the Vulkan engine (vulkan/SurfaceVulkan.h), which runs as
+// ENGINE_DIRECTX9: curEngine is always that (Surface.cpp's SurfaceInitInstance). As ChangeEngine's argument the
+// numbers come from the advanced options' three buttons, which stand in the original's places and choose the Vulkan
+// engine's device instead (vulkan/DeviceSettings.h's DeviceButtonOfEngine): ENGINE_DIRECTX5 the automatic choice,
+// ENGINE_DIRECTX9 a GPU, ENGINE_OPENGL the CPU driver. Enumerators for the reason in GUI.h.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	ENGINE_DIRECTX5 = 0,
+	ENGINE_OPENGL = 1,
+	ENGINE_DIRECTX9 = 2,
+};
 
 namespace patella {
 

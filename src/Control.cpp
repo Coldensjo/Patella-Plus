@@ -128,7 +128,7 @@ void patella::TGUI::CheckSurface(bool Force)
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
 	if (!Success)
-		ChangeEngine(0);
+		ChangeEngine(ENGINE_DIRECTX5);
 	if (GetSurface()->SurfaceRecreated(1))
 		ResetVideoCache();
 }
@@ -224,13 +224,13 @@ void patella::TGUI::Redraw(bool Force)
 	if (ShowFPS) {
 		TFixedString<4> Engine; // _snprintf(Engine, 4, "DX5") until issue #64: three characters and the NUL
 		switch (patella::bridge::GraphicsEngine().curEngine) {
-		case 0:
+		case ENGINE_DIRECTX5:
 			Engine.Assign("DX5");
 			break;
-		case 1:
+		case ENGINE_OPENGL:
 			Engine.Assign("OGL");
 			break;
-		case 2:
+		case ENGINE_DIRECTX9:
 			Engine.Assign("DX9");
 			break;
 		default:

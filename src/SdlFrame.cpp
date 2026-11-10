@@ -1183,7 +1183,7 @@ void SetDisplayMode(int ViewMode)
 		Redraw(false);
 		SDL_SetWindowFullscreen(Window, true);
 		SDL_SyncWindow(Window);
-		if (patella::bridge::GraphicsEngine().curEngine == 2)
+		if (patella::bridge::GraphicsEngine().curEngine == ENGINE_DIRECTX9)
 			Resize(0, 0);
 	} else {
 		SetFrameStyle(0, WS_EX_APPWINDOW | WS_EX_CLIENTEDGE);
