@@ -34,7 +34,7 @@
 #include "platform/FileSystem.h"
 #include "types/Cp1252.h"
 #include "types/File.h"
-#include "types/FixedString.h" // IWYU pragma: keep (std::format's branch: TFormatArgument)
+#include "types/FixedString.h" // TFormatArgument, PassFormatArgument
 
 #include <atomic>
 #include <cstddef>

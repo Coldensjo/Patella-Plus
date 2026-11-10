@@ -32,7 +32,7 @@
 #pragma once
 
 #include "types/Cp1252.h"
-#include "types/FixedString.h" // IWYU pragma: keep (std::format's branch of Print: TFormatArgument)
+#include "types/FixedString.h" // TFormatArgument, PassFormatArgument
 
 #include <array>
 #include <cerrno>
