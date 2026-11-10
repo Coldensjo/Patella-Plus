@@ -996,7 +996,7 @@ void patella::TGUI::ProcessEvents()
 			ModalWindow = CreateGeneralOptionsDialog(URLCallback);
 			break;
 		case MESSAGE_MESSAGE_OF_THE_DAY:
-			ModalWindow = CreateMessageDialog("Message of the Day", GetMotD());
+			ModalWindow = CreateMessageDialog("Message of the Day", GetMessageOfTheDay());
 			break;
 		// 0x29, the update dialog (ReceivePatch and ReceiveWholeFile posted it), is gone since issue #75.
 		case MESSAGE_USE_WITH:

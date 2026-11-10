@@ -723,7 +723,7 @@ void TTab::OnClose()
 	} else if (!TextBuffer->IsPrivateChannel()) {
 		if (TextBuffer->GetChannelID() != -1)
 			SendLeaveChannel(TextBuffer->GetChannelID());
-	} else if (!TextBuffer->GetSelected() || TextBuffer->GetLocked()) {
+	} else if (!TextBuffer->IsSelected() || TextBuffer->IsLocked()) {
 		if (TextBuffer->CanWrite())
 			SendLeaveChannel(TextBuffer->GetChannelID());
 	}

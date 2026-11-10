@@ -570,7 +570,7 @@ void TMainWindow::OpenContainer(int Container) const
 	if (Body->IsMinimized()) {
 		Window->SetTitle(new TLabel(SkinProperties().SubWindow.TitleFont, GetContainerName(Container)));
 		Window->SetIcon(new TObjectIcon(GetContainerObject(Container), &SkinProperties().SubWindow.IconHighlight, false));
-		if (GetContainerHasParent(Container))
+		if (HasContainerParent(Container))
 			Window->ShowUpButton();
 		else
 			Window->HideUpButton();

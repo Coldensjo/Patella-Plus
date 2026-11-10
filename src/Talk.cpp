@@ -730,7 +730,7 @@ bool patella::TTalk::HasOwnPrivateChannel()
 	for (i = ConsoleFilterList.min; i <= ConsoleFilterList.max; i++) {
 		const TTalkFilter *Filter = ConsoleFilterList(i);
 		if (Filter != nullptr && Filter->TextBuffer != nullptr
-			&& Filter->TextBuffer->GetSelected() && Filter->TextBuffer->IsPrivateChannel())
+			&& Filter->TextBuffer->IsSelected() && Filter->TextBuffer->IsPrivateChannel())
 			return true;
 	}
 	return false;

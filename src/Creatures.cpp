@@ -1094,14 +1094,14 @@ const char *patella::TCreatures::GetBuddyListName(int Position) const
 	return Buddies[Position].Name;
 }
 
-bool patella::TCreatures::GetBuddyListOnline(int Position) const
+bool patella::TCreatures::IsBuddyOnline(int Position) const
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,NumberOfBuddies-1), Position, NumberOfBuddies-1);
 	return Buddies[Position].Online;
 }
 
 // Online and logged in less than ten actions ago.
-bool patella::TCreatures::GetBuddyListNew(int Position) const
+bool patella::TCreatures::IsBuddyNewlyOnline(int Position) const
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,NumberOfBuddies-1), Position, NumberOfBuddies-1);
 	if (Buddies[Position].Online && GUI.GetActionNumber() - 10 < Buddies[Position].LoginAction)
@@ -1598,14 +1598,14 @@ const char *GetBuddyListName(int Position)
 	return patella::bridge::Creatures().GetBuddyListName(Position);
 }
 
-bool GetBuddyListOnline(int Position)
+bool IsBuddyOnline(int Position)
 {
-	return patella::bridge::Creatures().GetBuddyListOnline(Position);
+	return patella::bridge::Creatures().IsBuddyOnline(Position);
 }
 
-bool GetBuddyListNew(int Position)
+bool IsBuddyNewlyOnline(int Position)
 {
-	return patella::bridge::Creatures().GetBuddyListNew(Position);
+	return patella::bridge::Creatures().IsBuddyNewlyOnline(Position);
 }
 
 int GetBuddyListIcon(int Position)

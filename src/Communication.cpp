@@ -134,7 +134,7 @@ void patella::TCommunication::SendGameLogin(uint32 AccountID, const char *Name, 
 	TWriteBuffer Buffer(Data);
 	Buffer.PutByte(0);
 	Buffer.PutBytes(Key);
-	Buffer.PutByte(Session.GetGamemaster() != 0);
+	Buffer.PutByte(Session.IsGamemaster() != 0);
 	Buffer.PutQuad(AccountID);
 	Buffer.PutString(Name);
 	Buffer.PutString(Password);
@@ -675,7 +675,7 @@ void patella::TCommunication::ReceiveLoginMessage()
 void patella::TCommunication::ReceiveMessageOfTheDay()
 {
 	const char *Text = Network.GetString();
-	if (SetMotD(Text))
+	if (SetMessageOfTheDay(Text))
 		AddMessage(MESSAGE_MESSAGE_OF_THE_DAY, 0, 0);
 	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): GetString's text, the caller's (notes/ownership.md)
 	delete[] Text;

@@ -226,8 +226,8 @@ public:
 	[[nodiscard]] int GetNumberOfBuddies() const; // only the online ones when they are hidden
 	[[nodiscard]] uint32 GetBuddyListID(int Position) const;
 	[[nodiscard]] const char *GetBuddyListName(int Position) const;
-	[[nodiscard]] bool GetBuddyListOnline(int Position) const;
-	[[nodiscard]] bool GetBuddyListNew(int Position) const;
+	[[nodiscard]] bool IsBuddyOnline(int Position) const;
+	[[nodiscard]] bool IsBuddyNewlyOnline(int Position) const;
 	[[nodiscard]] int GetBuddyListIcon(int Position) const;
 	[[nodiscard]] const char *GetBuddyListDescription(int Position) const;
 	[[nodiscard]] bool GetBuddyListNotify(int Position) const;
@@ -476,8 +476,8 @@ void HideOfflineBuddies(bool Hide);
 int GetNumberOfBuddies(); // only the online ones when they are hidden
 uint32 GetBuddyListID(int Position);
 const char *GetBuddyListName(int Position);
-bool GetBuddyListOnline(int Position);
-bool GetBuddyListNew(int Position);
+bool IsBuddyOnline(int Position);
+bool IsBuddyNewlyOnline(int Position);
 int GetBuddyListIcon(int Position);
 const char *GetBuddyListDescription(int Position);
 bool GetBuddyListNotify(int Position);

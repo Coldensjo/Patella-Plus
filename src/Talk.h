@@ -106,10 +106,10 @@ public:
 	virtual bool IsRuleViolation() { return false; }
 	virtual bool IsRuleViolationChannel() { return false; }
 	virtual bool IsPrivateChannel() { return false; }
-	virtual bool GetSelected() { return Selected; }
+	virtual bool IsSelected() { return Selected; }
 	virtual void SetSelected(bool Value) { Selected = Value; }
 	virtual void SetLocked(bool Value) { Locked = Value; }
-	virtual bool GetLocked() { return Locked; }
+	virtual bool IsLocked() { return Locked; }
 	virtual int GetReceiveTalkMode() { return ReceiveTalkMode; }
 	virtual int GetSendTalkMode() { return SendTalkMode; }
 	virtual const char *GetAddressee() { return nullptr; }

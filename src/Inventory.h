@@ -71,7 +71,7 @@ public:
 	[[nodiscard]] TObject GetContainerContent(int Container, int Position) const;
 	char *GetContainerName(int Container);
 	[[nodiscard]] int GetContainerCapacity(int Container) const;
-	[[nodiscard]] bool GetContainerHasParent(int Container) const;
+	[[nodiscard]] bool HasContainerParent(int Container) const;
 	[[nodiscard]] int GetFreeContainer() const;
 	bool SetOwnOffer(const char *Name);
 	bool SetCounterOffer(const char *Name);
@@ -132,7 +132,7 @@ TObject GetContainerObject(int Container);
 TObject GetContainerContent(int Container, int Position);
 char *GetContainerName(int Container);
 int GetContainerCapacity(int Container);
-bool GetContainerHasParent(int Container);
+bool HasContainerParent(int Container);
 int GetFreeContainer();
 bool SetOwnOffer(const char *Name);
 bool SetCounterOffer(const char *Name);
