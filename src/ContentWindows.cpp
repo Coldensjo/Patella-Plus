@@ -404,8 +404,8 @@ void TAutomapWindow::HandleEvent(int Event)
 		break;
 	case EVENT_AUTOMAP_FLOOR_UP:
 		if (Centred) {
-			GetMapPosition(&ViewX, &ViewY, &ViewZ);
-			GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
+			Map().GetMapPosition(&ViewX, &ViewY, &ViewZ);
+			Map().GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
 			Centred = false;
 		}
 		if (ViewZ > 0)
@@ -414,8 +414,8 @@ void TAutomapWindow::HandleEvent(int Event)
 		break;
 	case EVENT_AUTOMAP_FLOOR_DOWN:
 		if (Centred) {
-			GetMapPosition(&ViewX, &ViewY, &ViewZ);
-			GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
+			Map().GetMapPosition(&ViewX, &ViewY, &ViewZ);
+			Map().GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
 			Centred = false;
 		}
 		if (ViewZ < 15)
@@ -461,8 +461,8 @@ void TAutomapWindow::Scroll(int Direction)
 		return;
 	}
 	if (Centred) {
-		GetMapPosition(&ViewX, &ViewY, &ViewZ);
-		GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
+		Map().GetMapPosition(&ViewX, &ViewY, &ViewZ);
+		Map().GetMapPosition(&PlayerX, &PlayerY, &PlayerZ);
 		Centred = false;
 	}
 	switch (Direction) {
@@ -496,7 +496,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 {
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
 	int PosX, PosY, PosZ;
-	GetMapPosition(&PosX, &PosY, &PosZ);
+	Map().GetMapPosition(&PosX, &PosY, &PosZ);
 	if (!Window->Centred) {
 		if (PosX == Window->PlayerX && PosY == Window->PlayerY && PosZ == Window->PlayerZ) {
 			PosX = Window->ViewX;
@@ -507,7 +507,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 			Window->Changed = true;
 		}
 	}
-	if (TakeAutomapChanged() || Window->Changed || GraphicsEngine().GetSurface()->SurfaceRecreated(0)) {
+	if (Map().TakeAutomapChanged() || Window->Changed || GraphicsEngine().GetSurface()->SurfaceRecreated(0)) {
 		std::array<uint8, 106 * 106 * 3> Pixels;
 		for (int i = 0; i < 106; i++) {
 			for (int j = 0; j < 106; j++) {
@@ -516,7 +516,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 					PosY = PosY / 2 * 2;
 				}
 				const int Zoom = Window->Zoom;
-				const TRGBColor Color = GetAutomapColor((Zoom * PosX + Zoom / 2 - 106 + i * 2) / Zoom,
+				const TRGBColor Color = Map().GetAutomapColor((Zoom * PosX + Zoom / 2 - 106 + i * 2) / Zoom,
 					(Zoom * PosY + Zoom / 2 - 106 + j * 2) / Zoom, PosZ);
 				Pixels[(j * 106 + i) * 3] = (uint8)Color.R;
 				Pixels[(j * 106 + i) * 3 + 1] = (uint8)Color.G;
@@ -529,7 +529,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 		bool SameLevel = true;
 		bool Visible = true;
 		if (!Window->Centred) {
-			GetMapPosition(&PosX, &PosY, &PosZ);
+			Map().GetMapPosition(&PosX, &PosY, &PosZ);
 			CrossX = (PosX - Window->ViewX) * Window->Zoom / 2 + 53;
 			CrossY = (PosY - Window->ViewY) * Window->Zoom / 2 + 53;
 			if (PosZ != Window->ViewZ)
@@ -565,7 +565,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 			for (int BlockY = Top / 256; BlockY < Top / 256 + 2; BlockY++) {
 				std::vector<TMark> Marks;
 				int Count;
-				GetAutomapMarks(BlockX, BlockY, PosZ, &Marks, &Count);
+				Map().GetAutomapMarks(BlockX, BlockY, PosZ, &Marks, &Count);
 				for (int i = 0; i < Count; i++) {
 					const TMark Mark = Marks[static_cast<std::size_t>(i)];
 					if (Mark.x != 0 || Mark.y != 0) {
@@ -588,7 +588,7 @@ bool TAutomapView::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
 	TMark Mark = GetMark(x, y);
 	if (Window->Centred)
-		GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
+		Map().GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
 	if (Mark.x == 0 || Mark.y == 0) {
 		Mark.x = (x - Width / 2) * 2 / Window->Zoom + Window->ViewX;
 		Mark.y = (y - Height / 2) * 2 / Window->Zoom + Window->ViewY;
@@ -608,7 +608,7 @@ bool TAutomapView::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	TMarkMenuData *Data = new TMarkMenuData;
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
 	if (Window->Centred)
-		GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
+		Map().GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
 	Data->Coordinate.x = (x - Width / 2) * 2 / Window->Zoom + Window->ViewX;
 	Data->Coordinate.y = (y - Height / 2) * 2 / Window->Zoom + Window->ViewY;
 	Data->Coordinate.z = Window->ViewZ;
@@ -623,14 +623,14 @@ TMark TAutomapView::GetMark(int x, int y)
 {
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
 	if (Window->Centred)
-		GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
+		Map().GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
 	const int Left = Window->ViewX - 106 / Window->Zoom;
 	const int Top = Window->ViewY - 106 / Window->Zoom;
 	for (int BlockX = Left / 256; BlockX < Left / 256 + 2; BlockX++) {
 		for (int BlockY = Top / 256; BlockY < Top / 256 + 2; BlockY++) {
 			std::vector<TMark> Marks;
 			int Count;
-			GetAutomapMarks(BlockX, BlockY, Window->ViewZ, &Marks, &Count);
+			Map().GetAutomapMarks(BlockX, BlockY, Window->ViewZ, &Marks, &Count);
 			for (int i = Count - 1; i >= 0; i--) {
 				TMark Mark = Marks[static_cast<std::size_t>(i)];
 				if (Mark.x != 0 || Mark.y != 0) {

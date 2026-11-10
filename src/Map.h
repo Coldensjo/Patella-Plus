@@ -318,46 +318,7 @@ private:
 // The one client's map (Client.cpp).
 patella::TMap &Map();
 
-// The original's functions (the callers' names, and the golden tests'): each calls TMap's member of the same name on
-// Map().
-// Position and coordinates (the gap before Map.cpp's first assertion).
-void GetMapPosition(int *x, int *y, int *z);
-int GetMapLevel();
-void MapToWorld(int *x, int *y, int *z);
-void WorldToMap(int *x, int *y, int *z);
-
-// Ambient light.
-void SetAmbientLight(int Brightness, int Color);
-void UpdateAmbientLight();
-TRGBColor GetAmbientColor();
-int GetAmbientBrightness();
-
-// Objects.
-TObject GetFirstObject(int rx, int ry, int rz);
-TObject GetNextObject();
-TObject GetMapObject(int rx, int ry, int rz, int Position);
-TObject GetTopMoveObject(int rx, int ry, int rz, int &Position);
-TObject GetTopLookObject(int rx, int ry, int rz, int &Position);
-TObject GetTopUseObject(int rx, int ry, int rz, int &Position);
-TObject GetTopMultiUseObject(int rx, int ry, int rz, int &Position);
-
-// Effects.
-int GetFirstEffect(int rx, int ry, int rz);
-int GetNextEffect();
-int GetEffectStatus(int EffectNumber);
-int GetGraphicalEffectType(int EffectNumber);
-int GetGraphicalEffectPhase(int EffectNumber);
-int GetTextualEffectColor(int EffectNumber);
-char *GetTextualEffectText(int EffectNumber);
-int GetTextualEffectPhase(int EffectNumber);
-int GetMissileEffectType(int EffectNumber);
-int GetMissileEffectDirection(int EffectNumber);
-int GetMissileEffectX(int EffectNumber);
-int GetMissileEffectY(int EffectNumber);
-void ProcessEffects();
-void ProcessMissileEffects();
-
-// The effects of map point rx, ry, rz by GetFirstEffect and GetNextEffect, as the original's numbers:
+// The effects of map point rx, ry, rz by the map's GetFirstEffect and GetNextEffect, as the original's numbers:
 // TMapWindow::DrawField's effect loop. begin() calls GetFirstEffect, each step GetNextEffect, in the original loop's
 // order; the range ends at the first -1, and gives any other number as it comes (the loop checks the range itself).
 class TMapEffects {
@@ -373,7 +334,7 @@ public:
 		[[nodiscard]] int operator*() const noexcept { return Number; }
 		TIterator &operator++()
 		{
-			Number = GetNextEffect();
+			Number = EffectNumberOf(Map().GetNextEffect());
 			return *this;
 		}
 		TIterator operator++(int)
@@ -390,7 +351,10 @@ public:
 
 	TMapEffects(int rx, int ry, int rz) noexcept : FieldX(rx), FieldY(ry), FieldZ(rz) {}
 
-	[[nodiscard]] TIterator begin() const { return TIterator{GetFirstEffect(FieldX, FieldY, FieldZ)}; }
+	[[nodiscard]] TIterator begin() const
+	{
+		return TIterator{EffectNumberOf(Map().GetFirstEffect(FieldX, FieldY, FieldZ))};
+	}
 	[[nodiscard]] static std::default_sentinel_t end() noexcept { return std::default_sentinel; }
 
 private:
@@ -398,19 +362,3 @@ private:
 	int FieldY;
 	int FieldZ;
 };
-
-// Map points and scrolling.
-void ClearMap();
-bool IsFieldThrowable(int rx, int ry, int rz);
-bool IsFieldTranslucent(int rx, int ry, int rz);
-
-// The automap. The block cache and the file functions are static.
-bool TakeAutomapChanged();
-TRGBColor GetAutomapColor(int x, int y, int z);
-void GetAutomapMarks(int x, int y, int z, std::vector<TMark> *Marks, int *Count);
-void AddAutomapMark(TCoordinate &Coordinate, const char *Text, int Type);
-void DeleteAutomapMark(TMark &Deleted, int z);
-
-// Paths, initialisation.
-void InitMap(void (*Callback)(int CreatureID));
-void ExitMap();

@@ -114,10 +114,10 @@ bool TMapWindow::LeftButtonDown(int x, int y, int Flags)
 		int FieldX, FieldY, FieldZ;
 		GetField(x, y, &FieldX, &FieldY, &FieldZ);
 		int Position;
-		const TObject Obj = GetTopMoveObject(FieldX, FieldY, FieldZ, Position);
+		const TObject Obj = Map().GetTopMoveObject(FieldX, FieldY, FieldZ, Position);
 		if (Obj.Type != 0) {
 			int ax = FieldX, ay = FieldY, az = FieldZ;
-			MapToWorld(&ax, &ay, &az);
+			Map().MapToWorld(&ax, &ay, &az);
 			SetDragObject(Obj, Position, ax, ay, az);
 		}
 	}
@@ -137,7 +137,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 	GetField(x, y, &FieldX, &FieldY, &FieldZ);
 	if (GetActionState() == ACTIONSTATE_USE_WITH) {
 		int Position;
-		const TObject Obj = GetTopMultiUseObject(FieldX, FieldY, FieldZ, Position);
+		const TObject Obj = Map().GetTopMultiUseObject(FieldX, FieldY, FieldZ, Position);
 		if (Obj.Type != 0) {
 			int SrcIndex, SrcX, SrcY, SrcZ;
 			const TObject &SrcObj = *GetUseObject(&SrcIndex, &SrcX, &SrcY, &SrcZ);
@@ -148,7 +148,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 				return true;
 			}
 			int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
-			MapToWorld(&DestX, &DestY, &DestZ);
+			Map().MapToWorld(&DestX, &DestY, &DestZ);
 			SendUseObjectWith(SrcX, SrcY, SrcZ, SrcObj.Type, SrcIndex, DestX, DestY, DestZ, Obj.Type,
 				Position);
 			return true;
@@ -170,7 +170,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 		const int Type = DragObject->Type;
 		const int Count = DragObject->Data;
 		int DestX = FieldX, DestY = FieldY, DestZ = FieldZ;
-		MapToWorld(&DestX, &DestY, &DestZ);
+		Map().MapToWorld(&DestX, &DestY, &DestZ);
 		if (DragX != DestX || DragY != DestY || DragZ != DestZ) {
 			if (GetObjectFlag(Type, CUMULATIVE) && Count > 1 && (Flags & SHIFT_OR_BOTH_BUTTONS) == 0) {
 				// Patella-Plus, the option Drag Full Stacks: with it a pile moves whole without Ctrl and asks for the
@@ -189,8 +189,8 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 	} else {
 		if (Flags != 0)
 			return RightButtonUp(x, y, Flags);
-		int DestX = FieldX, DestY = FieldY, DestZ = GetMapLevel();
-		MapToWorld(&DestX, &DestY, &DestZ);
+		int DestX = FieldX, DestY = FieldY, DestZ = Map().GetMapLevel();
+		Map().MapToWorld(&DestX, &DestY, &DestZ);
 		switch (PlayerState().SetPlayerDestination(DestX, DestY, DestZ, true, false)) {
 		case 1:
 			SendWalk();
@@ -225,16 +225,16 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	SetUseObject(TObject(), 0, 0, 0, 0);
 	SetTradeInfo(0);
 	int Position;
-	TObject Obj = GetTopLookObject(FieldX, FieldY, FieldZ, Position);
+	TObject Obj = Map().GetTopLookObject(FieldX, FieldY, FieldZ, Position);
 	if (Obj.Type != 0) {
 		int ax = FieldX, ay = FieldY, az = FieldZ;
-		MapToWorld(&ax, &ay, &az);
+		Map().MapToWorld(&ax, &ay, &az);
 		SetTradeObject(Obj, Position, ax, ay, az);
 	}
-	Obj = GetTopUseObject(FieldX, FieldY, FieldZ, Position);
+	Obj = Map().GetTopUseObject(FieldX, FieldY, FieldZ, Position);
 	if (Obj.Type != 0) {
 		int ax = FieldX, ay = FieldY, az = FieldZ;
-		MapToWorld(&ax, &ay, &az);
+		Map().MapToWorld(&ax, &ay, &az);
 		SetUseObject(Obj, Position, ax, ay, az);
 	}
 	const uint32 CreatureID = GetCreatureAt(x, y);
@@ -336,7 +336,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	if ((!In(FieldX - 8, -1, 1) || !In(FieldY - 6, -1, 1)) && Light[FieldX][FieldY].R == 0)
 		return false;
 	int Position = 0;
-	TObject Obj = GetTopLookObject(FieldX, FieldY, FieldZ, Position);
+	TObject Obj = Map().GetTopLookObject(FieldX, FieldY, FieldZ, Position);
 	int Handle = HELP_NONE;
 	if (Obj.Type == CREATURE && Obj.Data == (int)PlayerState().GetPlayerID())
 		Handle = HELP_YOUR_CHARACTER;
@@ -372,12 +372,12 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	const bool LightEffects = GetLightEffects() && GraphicsEngine().GetSurface()->CanShadeRectangles();
 	const bool ShowTexts = GetTextualEffects();
 	const int CreatureInfo = GetCreatureInfo();
-	ProcessMissileEffects();
+	Map().ProcessMissileEffects();
 	const TCreature *Player = Creatures().GetCreature(PlayerState().GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
 	ScrollX = Player->GetDeltaX() + 32;
 	ScrollY = Player->GetDeltaY() + 32;
-	const int Level = GetMapLevel();
+	const int Level = Map().GetMapLevel();
 	MaxLevel = 7;
 
 	// The levels drawn end below the first ground above the player's cross
@@ -387,13 +387,13 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		TObject Obj;
 		for (int FieldX = 7; FieldX < 10; FieldX++) {
 			for (int FieldY = 5; FieldY < 8; FieldY++) {
-				if ((FieldX == 8 || FieldY == 6) && IsFieldThrowable(FieldX, FieldY, Level)) {
+				if ((FieldX == 8 || FieldY == 6) && Map().IsFieldThrowable(FieldX, FieldY, Level)) {
 					for (int z = Level + 1; z < 8 && FieldX - z + Level >= 0 && FieldY - z + Level >= 0; z++) {
 						if (z - 1 < MaxLevel) {
-							Obj = GetFirstObject(FieldX - z + Level, FieldY - z + Level, z);
+							Obj = Map().GetFirstObject(FieldX - z + Level, FieldY - z + Level, z);
 							if (Obj.Type != 0 && GetObjectFlag(Obj, BANK) && !GetObjectFlag(Obj, DONTHIDE))
 								MaxLevel = z - 1;
-							Obj = GetFirstObject(FieldX, FieldY, z);
+							Obj = Map().GetFirstObject(FieldX, FieldY, z);
 							if (Obj.Type != 0 && z - 1 < MaxLevel
 								&& (GetObjectFlag(Obj, BANK) || GetObjectFlag(Obj, BOTTOM))
 								&& !GetObjectFlag(Obj, DONTHIDE))
@@ -411,7 +411,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			for (int FieldY = 0; FieldY < MAPSIZE_Y; FieldY++) {
 				CoverLevel[FieldX][FieldY] = 0;
 				for (int z = MaxLevel; z > 0; z--) {
-					Obj = GetFirstObject(FieldX, FieldY, z);
+					Obj = Map().GetFirstObject(FieldX, FieldY, z);
 					if (Obj.Type != 0 && GetObjectFlag(Obj, FULLBANK)) {
 						CoverLevel[FieldX][FieldY] = z;
 						break;
@@ -428,7 +428,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 		TObject Obj;
 		NumberOfNames = 0;
 		NumberOfTextualEffects = 0;
-		GetMapPosition(&PositionX, &PositionY, &PositionZ);
+		Map().GetMapPosition(&PositionX, &PositionY, &PositionZ);
 		if (GraphicsEngine().GetSurface()->SurfaceRecreated(2)) {
 			for (int i = 0; i < 16; i++) {
 				for (int j = 0; j < 12; j++)
@@ -454,11 +454,11 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			}
 			for (int FieldX = 0; FieldX < MAPSIZE_X; FieldX++) {
 				for (int FieldY = 0; FieldY < MAPSIZE_Y; FieldY++) {
-					Obj = GetFirstObject(FieldX, FieldY, z);
+					Obj = Map().GetFirstObject(FieldX, FieldY, z);
 					if (z == 0 || (Obj.Type != 0 && GetObjectFlag(Obj, BANK))) {
 						const TRGBColor Old = Light[FieldX][FieldY];
-						SetLightColor(FieldX, FieldY, PositionZ <= 7 ? GetAmbientBrightness() : 0);
-						if (z > 0 && IsFieldTranslucent(FieldX, FieldY, z)) {
+						SetLightColor(FieldX, FieldY, PositionZ <= 7 ? Map().GetAmbientBrightness() : 0);
+						if (z > 0 && Map().IsFieldTranslucent(FieldX, FieldY, z)) {
 							const int B = Old.B * 4 / 5;
 							const int G = Old.G * 4 / 5;
 							const int R = Old.R * 4 / 5;
@@ -469,8 +469,8 @@ void TMapWindow::Draw(int Surface, int x, int y)
 						}
 					}
 					if (z == PositionZ + Level - 8 && z < 7 && FieldX > 0 && FieldY > 0
-						&& IsFieldTranslucent(FieldX - 1, FieldY - 1, z + 1))
-						SetLightColor(FieldX, FieldY, GetAmbientBrightness() - 1);
+						&& Map().IsFieldTranslucent(FieldX - 1, FieldY - 1, z + 1))
+						SetLightColor(FieldX, FieldY, Map().GetAmbientBrightness() - 1);
 				}
 			}
 			for (int FieldX = 0; FieldX < MAPSIZE_X; FieldX++) {
@@ -541,13 +541,13 @@ void TMapWindow::Draw(int Surface, int x, int y)
 			if (Creature == nullptr)
 				continue;
 			int cx = Creature->RealX, cy = Creature->RealY, cz = Creature->RealZ;
-			WorldToMap(&cx, &cy, &cz);
+			Map().WorldToMap(&cx, &cy, &cz);
 			bool Visible = false;
 			if (In(cx, 0, MAPSIZE_X - 1) && In(cy, 0, MAPSIZE_Y - 1)) {
 				Visible = true;
 				while (++cz <= MaxLevel) {
 					TObject Obj;
-					Obj = GetFirstObject(cx, cy, cz);
+					Obj = Map().GetFirstObject(cx, cy, cz);
 					if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
 						Visible = false;
 				}
@@ -703,15 +703,15 @@ void TMapWindow::Draw(int Surface, int x, int y)
 				if (In(FieldX, 0, MAPSIZE_X - 1) && In(FieldY, 0, MAPSIZE_Y - 1)) {
 					Visible = true;
 					while (++z <= MaxLevel) {
-						Obj = GetFirstObject(FieldX, FieldY, z);
+						Obj = Map().GetFirstObject(FieldX, FieldY, z);
 						if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
 							Visible = false;
 					}
 				}
-				if (!Visible && TextualEffects[i].FieldZ != GetMapLevel())
+				if (!Visible && TextualEffects[i].FieldZ != Map().GetMapLevel())
 					continue;
-				const int Color = GetTextualEffectColor(TextualEffects[i].EffectNumber);
-				const char *Text = GetTextualEffectText(TextualEffects[i].EffectNumber);
+				const int Color = Map().GetTextualEffectColor(EffectIdOf(TextualEffects[i].EffectNumber));
+				const char *Text = Map().GetTextualEffectText(EffectIdOf(TextualEffects[i].EffectNumber));
 				int tx = TextualEffects[i].x, ty = TextualEffects[i].y;
 				if (GetNoStretching()) {
 					tx -= BorderX;
@@ -751,14 +751,14 @@ void TMapWindow::Draw(int Surface, int x, int y)
 void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int FieldZ, int Mode)
 {
 	int x = FieldX, y = FieldY, z = FieldZ;
-	MapToWorld(&x, &y, &z);
-	TObject Obj = GetFirstObject(FieldX, FieldY, FieldZ);
+	Map().MapToWorld(&x, &y, &z);
+	TObject Obj = Map().GetFirstObject(FieldX, FieldY, FieldZ);
 	if (Obj.Type == 0 && FieldZ == 0 && Mode == 0 && IsFieldVisible(FieldX, FieldY, 0))
 		DrawFieldSprite(posx, posy, 0, false, 0, 0, nullptr);
 	bool Lying = false;
 	int Elevation = 0;
 	TObject TopObject;
-	for (Obj = GetFirstObject(FieldX, FieldY, FieldZ); Obj.Type != 0; Obj = GetNextObject()) {
+	for (Obj = Map().GetFirstObject(FieldX, FieldY, FieldZ); Obj.Type != 0; Obj = Map().GetNextObject()) {
 		if (Mode == 0 && Obj.Type != CREATURE && GetObjectFlag(Obj, LIGHT)) {
 			int ShiftX = 0, ShiftY = 0;
 			if (GetObjectFlag(Obj, SHIFT)) {
@@ -798,7 +798,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		for (int j = FieldY - 1; j <= FieldY + 1; j++) {
 			if (i < 0 || j < 0 || i >= MAPSIZE_X || j >= MAPSIZE_Y)
 				continue;
-			for (Obj = GetFirstObject(i, j, FieldZ); Obj.Type != 0; Obj = GetNextObject()) {
+			for (Obj = Map().GetFirstObject(i, j, FieldZ); Obj.Type != 0; Obj = Map().GetNextObject()) {
 				if (Obj.Type != CREATURE || NumberOfCreatures == 10)
 					continue;
 				TCreature *Creature = ::Creatures().GetCreature(Obj.Data);
@@ -911,7 +911,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		}
 		if (Mode == 0) {
 			if ((::Creatures().IsOpponent(Creatures[i]) || Creatures[i]->CreatureID == PlayerState().GetPlayerID())
-				&& FieldZ == GetMapLevel()) {
+				&& FieldZ == Map().GetMapLevel()) {
 				Names[NumberOfNames].CreatureID = Creatures[i]->CreatureID;
 				Names[NumberOfNames].x = ox - Elevation + posx + 16;
 				Names[NumberOfNames].y = oy - Elevation + posy;
@@ -934,10 +934,10 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 				s << " PlayerX: " << Player->RealX << " PlayerY: " << Player->RealY << " PlayerZ: " << Player->RealZ;
 			throw TMYEXCEPTION("effect number out of range [bug0000913]", "", 0, "", 0, s.str());
 		}
-		if (GetEffectStatus(EffectNumber) == 1) {
-			const int Type = GetGraphicalEffectType(EffectNumber);
+		if (Map().GetEffectStatus(EffectIdOf(EffectNumber)) == 1) {
+			const int Type = Map().GetGraphicalEffectType(EffectIdOf(EffectNumber));
 			if (Type != -1) {
-				const int Phase = GetGraphicalEffectPhase(EffectNumber);
+				const int Phase = Map().GetGraphicalEffectPhase(EffectIdOf(EffectNumber));
 				for (int X = 1; X <= GetEffectWidth(Type); X++) {
 					for (int Y = 1; Y <= GetEffectHeight(Type); Y++) {
 						for (int Layer = 1; Layer <= GetEffectLayers(Type); Layer++) {
@@ -963,36 +963,37 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 				}
 			}
 		}
-		if (GetEffectStatus(EffectNumber) == 2) {
+		if (Map().GetEffectStatus(EffectIdOf(EffectNumber)) == 2) {
 			if (Mode != 0)
 				continue;
 			TTextualEffectPosition &Text = TextualEffects[NumberOfTextualEffects];
 			Text.EffectNumber = EffectNumber;
 			Text.x = posx - Elevation + 16;
-			Text.y = posy - GetTextualEffectPhase(EffectNumber) * 2 - Elevation;
+			Text.y = posy - Map().GetTextualEffectPhase(EffectIdOf(EffectNumber)) * 2 - Elevation;
 			Text.FieldX = FieldX;
 			Text.FieldY = FieldY;
 			Text.FieldZ = FieldZ;
 			NumberOfTextualEffects++;
 		}
-		if (GetEffectStatus(EffectNumber) == 3) {
-			const int Type = GetMissileEffectType(EffectNumber);
+		if (Map().GetEffectStatus(EffectIdOf(EffectNumber)) == 3) {
+			const int Type = Map().GetMissileEffectType(EffectIdOf(EffectNumber));
 			if (Type != -1) {
 				for (int X = 1; X <= GetMissileWidth(Type); X++) {
 					for (int Y = 1; Y <= GetMissileHeight(Type); Y++) {
 						for (int Layer = 1; Layer <= GetMissileLayers(Type); Layer++) {
 							const int SpriteNumber = GetMissileSpriteNumber(Type, X, Y, Layer,
-								GetMissileEffectDirection(EffectNumber));
+								Map().GetMissileEffectDirection(EffectIdOf(EffectNumber)));
 							if (SpriteNumber > 0)
-								DrawFieldSprite(GetMissileEffectX(EffectNumber) - X * 32 - Elevation + posx + 32,
-									GetMissileEffectY(EffectNumber) - Y * 32 - Elevation + posy + 32, FieldZ, true,
-									SpriteNumber, 0, nullptr);
+								DrawFieldSprite(
+									Map().GetMissileEffectX(EffectIdOf(EffectNumber)) - X * 32 - Elevation + posx + 32,
+									Map().GetMissileEffectY(EffectIdOf(EffectNumber)) - Y * 32 - Elevation + posy + 32,
+									FieldZ, true, SpriteNumber, 0, nullptr);
 						}
 					}
 				}
 				if (Mode == 0 && GetMissileFlag(Type, LIGHT))
-					AddLightSource(GetMissileEffectX(EffectNumber) - Elevation + posx + 16,
-						GetMissileEffectY(EffectNumber) - Elevation + posy + 16, FieldZ,
+					AddLightSource(Map().GetMissileEffectX(EffectIdOf(EffectNumber)) - Elevation + posx + 16,
+						Map().GetMissileEffectY(EffectIdOf(EffectNumber)) - Elevation + posy + 16, FieldZ,
 						GetMissileBrightness(Type), TRGBColor(GetMissileLightColor(Type)));
 			}
 		}
@@ -1276,7 +1277,7 @@ void TMapWindow::AddLightSource(int posx, int posy, int z, int Brightness, TRGBC
 			int B = Color.B * Intensity / 160;
 			int G = Color.G * Intensity / 160;
 			int R = Color.R * Intensity / 160;
-			TObject Obj = GetMapObject(x, y, z, 0);
+			TObject Obj = Map().GetMapObject(x, y, z, 0);
 			try {
 				if (Obj.Type == 0 || !GetObjectFlag(Obj, BANK)) {
 					B = B * 4 / 5;
@@ -1351,7 +1352,7 @@ void TMapWindow::ArrangeTalkboxes()
 		GetTalkboxPosition(Talkbox, &x, &y, &z);
 		int CentreY;
 		if (x != 0) {
-			WorldToMap(&x, &y, &z);
+			Map().WorldToMap(&x, &y, &z);
 			int cx;
 			if (NoStretching)
 				cx = x * 32 - BorderX - 16;
@@ -1506,11 +1507,11 @@ void TMapWindow::GetField(int x, int y, int *FieldX, int *FieldY, int *FieldZ)
 		*FieldY = (y * 352 / Height + Player->GetDeltaY()) / 32 + 1;
 	}
 	for (*FieldZ = MaxLevel; *FieldZ > 0; (*FieldZ)--) {
-		TObject Obj = GetFirstObject(*FieldX, *FieldY, *FieldZ);
+		TObject Obj = Map().GetFirstObject(*FieldX, *FieldY, *FieldZ);
 		if (Obj.Type != 0) {
 			if (GetObjectFlag(Obj, BANK) || GetObjectFlag(Obj, BOTTOM))
 				return;
-			Obj = GetNextObject();
+			Obj = Map().GetNextObject();
 			if (Obj.Type != 0 && GetObjectFlag(Obj, BOTTOM))
 				return;
 		}
@@ -1529,12 +1530,12 @@ uint32 TMapWindow::GetCreatureAt(int x, int y)
 		if (Creature == nullptr)
 			continue;
 		int cx = Creature->RealX, cy = Creature->RealY, cz = Creature->RealZ;
-		WorldToMap(&cx, &cy, &cz);
+		Map().WorldToMap(&cx, &cy, &cz);
 		if (!In(cx, 0, MAPSIZE_X - 1) || !In(cy, 0, MAPSIZE_Y - 1))
 			continue;
 		bool Visible = true;
 		while (++cz <= MaxLevel) {
-			TObject Obj = GetFirstObject(cx, cy, cz);
+			TObject Obj = Map().GetFirstObject(cx, cy, cz);
 			if (Obj.Type != 0 && GetObjectFlag(Obj, BANK))
 				Visible = false;
 		}

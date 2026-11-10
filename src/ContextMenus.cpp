@@ -1216,7 +1216,7 @@ void TMarkContextMenu::HandleEvent(int Event)
 		}
 		break;
 	case EVENT_MENU_DELETE_MARK:
-		DeleteAutomapMark(Data.Mark, Data.Coordinate.z);
+		Map().DeleteAutomapMark(Data.Mark, Data.Coordinate.z);
 		break;
 	default:
 		TERROR1("unknown event", Event);

@@ -2241,11 +2241,11 @@ void TEditMarkDialog::HandleEvent(int Event)
 			}
 		}
 		if (Mark.x != 0 && Mark.y != 0) {
-			DeleteAutomapMark(Mark, Coordinate.z);
+			Map().DeleteAutomapMark(Mark, Coordinate.z);
 			Coordinate.x = Mark.x;
 			Coordinate.y = Mark.y;
 		}
-		AddAutomapMark(Coordinate, Mark.Text, Type);
+		Map().AddAutomapMark(Coordinate, Mark.Text, Type);
 	} else if (Event != EVENT_CANCEL) {
 		TERROR1("unknown event", Event);
 	}

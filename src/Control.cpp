@@ -260,12 +260,12 @@ void patella::TGUI::EnterGame() const
 		SetActionState(ACTIONSTATE_NONE);
 		MainWindow->SetConsoleActive(true);
 	}
-	ClearMap();
+	Map().ClearMap();
 	Inventory().InitInventory();
 	Creatures().ResetCreatures();
 	ResetTalk();
 	ShowPermanentIgnoreWarning();
-	SetAmbientLight(-1, 0);
+	Map().SetAmbientLight(-1, 0);
 }
 
 // The game connection was closed.
@@ -791,8 +791,8 @@ void patella::TGUI::TimerEvent() const
 	UpdateTalkboxes();
 	UpdateStatusMessage();
 	if (GetActionNumber() % 10 == 0)
-		UpdateAmbientLight();
-	ProcessEffects();
+		Map().UpdateAmbientLight();
+	Map().ProcessEffects();
 	if (GetPendingActionNumber() != 0 && GetPendingActionState() == 6) {
 		if (GetActionNumber() - GetPendingActionNumber() < 7)
 			return;
@@ -1125,7 +1125,7 @@ void patella::TGUI::InitControl(bool Gamemaster)
 	try {
 		InitSysinc();
 		InitObjects();
-		InitMap([](int CreatureID) { Creatures().HideCreature(CreatureID); });
+		Map().InitMap([](int CreatureID) { Creatures().HideCreature(CreatureID); });
 		Inventory().ResetInventory();
 		Creatures().InitCreatures();
 		InitStatus(Gamemaster, ::LinkCopyWarning);
@@ -1169,7 +1169,7 @@ void patella::TGUI::ExitControl()
 	ExitStatus();
 	Creatures().ExitCreatures();
 	Inventory().ExitInventory();
-	ExitMap();
+	Map().ExitMap();
 	ExitObjects();
 	ExitSysinc();
 }
