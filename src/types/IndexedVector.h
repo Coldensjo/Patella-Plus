@@ -9,8 +9,7 @@
 //   values and indices, each swapped into the new storage as the original swaps it (SwapIndexedEntries).
 // - Indexing below min or above max moves min or max to the index; with initialized set (the four-argument
 //   constructor) every entry so taken into the range is set to init first, as is every entry at construction.
-// - New storage is allocated as the original's new T[n]: through operator new[] (the golden corpus's Container test
-//   fills that memory with its pattern and compares every allocated entry), each entry default-initialised (a type
+// - New storage is allocated as the original's new T[n]: through operator new[], each entry default-initialised (a type
 //   without a constructor keeps the memory's bytes, one with a constructor runs it). std::vector's own allocator
 //   value-initialises (zeros an int), so the storage has its own allocator, TArrayNewAllocator.
 //
@@ -64,8 +63,8 @@ public:
 };
 
 // Swaps two entries as the original does when its vector<T> grows: through a copy, each entry copied as a block of
-// bytes with its padding (VC7.1 copies a structure so, and so does MSVC). The golden corpus compares the entries'
-// padding (Patella-Modern issue #91), which GCC and Clang do not copy when they copy a structure member by member; a
+// bytes with its padding (VC7.1 copies a structure so, and so does MSVC; GCC and Clang do not copy the padding when
+// they copy a structure member by member, Patella-Modern issue #91); a
 // type that is not trivially copyable is copied with its assignment.
 template <class T> inline void SwapIndexedEntries(T &A, T &B)
 {

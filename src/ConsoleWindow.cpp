@@ -723,8 +723,7 @@ static_assert(std::is_nothrow_destructible_v<TTab> && std::is_nothrow_destructib
 // private channel only when it was closed by the server (Locked) and private
 // channels only when the player may write. Then the buffer is deleted
 // (Talk.cpp). The original's handlers rethrow out of the destructor; an
-// exception of the calls passes out of the close (the golden ConsoleWindow
-// test's nameless report reaches the assertion below).
+// exception of the calls passes out of the close.
 void TTab::OnClose()
 {
 	if (TextBuffer->IsRuleViolation() && TextBuffer->GetReceiveTalkMode() == TALK_GAMEMASTER_ANSWER) {

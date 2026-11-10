@@ -37,8 +37,8 @@
 // The six tables are std::unique_ptrs (issue #58). Their elements have no
 // destructors that act (a picture's Offsets stays raw: ExitGraphics frees them first), so a table
 // still set when FatalError calls exit(1) is only memory freed during static destruction. Where the original stored a
-// new table over one it may still have held (InitMemoryCache, InitFonts, LoadSprites, LoadPictures, InitVideoCache;
-// the golden tests call them again), release() drops the old one unfreed first: the leak is the original's.
+// new table over one it may still have held (InitMemoryCache, InitFonts, LoadSprites, LoadPictures, InitVideoCache),
+// release() drops the old one unfreed first: the leak is the original's.
 
 // Passed to the eh vector constructor iterator by InitVideoCache. It clears
 // the four colours, then the font colour, which overlaps them (the binary

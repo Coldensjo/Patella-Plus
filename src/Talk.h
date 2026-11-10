@@ -299,8 +299,7 @@ private:
 	std::array<TTalkbox, TALKBOXES> Talkboxes{};
 
 public:
-	// Public: MainWindow.cpp, Map.cpp, TTalkBuffer::IsDefault, the test mode's state dump and the golden Talk,
-	// MainWindow and Map tests read it.
+	// Public: MainWindow.cpp, the map's console (Client.cpp) and TTalkBuffer::IsDefault read it.
 	TTalkBuffer *DefaultTextBuffer{};
 
 private:

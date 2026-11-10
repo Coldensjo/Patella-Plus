@@ -100,7 +100,7 @@ public:
 	[[nodiscard]] int GetHelpHandle() const;
 	bool TakeHelpHandleChanged();
 	void InitHelp();
-	// Static (issue #107, as TCommunication::ExitCommunication): empty, the golden tests' fake takes its place.
+	// Empty, so static (as TCommunication::ExitCommunication).
 	static void ExitHelp();
 	int GetEventHelp();
 	int PopEventHelp();

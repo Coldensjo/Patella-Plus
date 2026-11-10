@@ -129,8 +129,7 @@ struct TVideoCacheItem {
 // TGraphics (issue #116, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#116"), the fifth of
 // TClient's subsystems: graphics.cpp's data and functions (its members of the same names; the free functions below
 // forward to them), Surface.cpp's TGraphicsEngine (Surface.h) and Skins.cpp's TSkins with GUI.cpp's SkinProperties
-// (Skins.h). The data was extern and is public: Communication.cpp sends the two signatures, the golden Graphics and
-// Errors tests read and set the tables and the caches.
+// (Skins.h). Of graphics.cpp's data the two signatures are public: the login packets send them.
 namespace patella {
 
 class TGraphics {
@@ -225,15 +224,24 @@ public:
 	TGraphicsEngine Engine;
 	TSkins Skins;
 
+private:
 	// graphics.cpp's data, in .bss order.
 	std::array<int, HASH_TABLE_SIZE> MemoryHashTable{};
 	std::array<int, HASH_TABLE_SIZE> VideoHashTable{};
 	int NumberOfFonts{};
 	int NumberOfPictures{};
-	uint32 PictureSignature{};
+
+public:
+	uint32 PictureSignature{}; // sent at login
+
+private:
 	TFixedString<GRAPHICS_PATH_MAX> PictureFileName{};
 	int NumberOfSprites{};
-	uint32 SpriteSignature{};
+
+public:
+	uint32 SpriteSignature{}; // sent at login
+
+private:
 	TFixedString<GRAPHICS_PATH_MAX> SpriteFileName{};
 	int LeastRecentMemoryItem{}; // tail of the memory cache's LRU list
 	int MostRecentMemoryItem{};  // head

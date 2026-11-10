@@ -59,7 +59,7 @@ TDialog *CreateTextDialog(const int *ObjectData, const char *Author, const char 
 TDialog *CreateEditListDialog(int *HouseData, const char *Text);
 TDialog *CreateOutfitDialog(int *Data);
 TDialog *CreateBugReportDialog();
-TDialog *CreateNewChannelDialog(int NumberOfChannels, int *ChannelIDs, const char (*ChannelNames)[30]); // NOLINT(modernize-avoid-c-arrays): the tests fake it by address with this signature (issue #60)
+TDialog *CreateNewChannelDialog(int NumberOfChannels, int *ChannelIDs, const char (*ChannelNames)[30]); // NOLINT(modernize-avoid-c-arrays): the names as Communication.cpp allocates them, 30 bytes each (issue #60)
 TDialog *CreateInviteDialog();
 TDialog *CreateExcludeDialog();
 TDialog *CreateIgnoreListDialog();

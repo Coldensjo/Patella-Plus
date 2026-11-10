@@ -137,9 +137,8 @@ namespace patella {
 
 // Objects.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the
 // subsystem objects" and "#106"): Tibia.dat's four tables, read once, then read-only, and the functions of the same
-// names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. The data (.bss:
-// every member starts empty) is public: the golden Objects, Divisions, Errors, Graphics, Map and MapWindow tests read
-// the tables, the Objects test NoObject and DatSignature, the Communication world sets both; Communication.cpp sends
+// names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. Of the data (.bss:
+// every member starts empty) DatSignature and NoObject are public: Communication.cpp sends
 // DatSignature and compares with NoObject, Inventory.cpp and Map.cpp return NoObject.
 class TObjectTypes {
 public:
@@ -214,14 +213,17 @@ public:
 	void InitObjects();
 	void ExitObjects();
 
+private:
 	// Data, in .bss order. The four tables own their arrays (std::unique_ptr since issue #58; the entries' Sprites
 	// stay raw, freed by ReleaseObjects).
 	std::unique_ptr<array<TProperties>> MissileProperties;
 	std::unique_ptr<array<TProperties>> EffectProperties;
 	std::unique_ptr<array<TProperties>> OutfitProperties;
 	std::unique_ptr<array<TProperties>> ObjectProperties; // from 100
-	uint32 DatSignature{};                                // sent at login and when patching
-	TObject NoObject;                                     // never written; owner inferred from the address
+
+public:
+	uint32 DatSignature{}; // sent at login and when patching
+	TObject NoObject;      // never written; owner inferred from the address
 };
 
 // The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the object

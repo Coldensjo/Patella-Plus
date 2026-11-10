@@ -42,9 +42,7 @@ public:
 	TInventory Inventory;
 
 private:
-	// TCreaturesPlayer: TCreatures' calls of the player's state. GetPlayerID calls TPlayerState's member since issue
-	// #118 (the free function until then): the golden tests that fake the free one (the Communication world, the window
-	// tests) fake the member too.
+	// TCreaturesPlayer: TCreatures' calls of the player's state.
 	uint32 GetPlayerID() override { return PlayerState.GetPlayerID(); }
 	bool ContinuePlayerWalk() override { return PlayerState.ContinuePlayerWalk(); }
 	void ResetPlayer() override { PlayerState.ResetPlayer(); }

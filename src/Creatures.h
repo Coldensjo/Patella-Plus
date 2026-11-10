@@ -169,9 +169,8 @@ protected:
 // Creatures.cpp's creature table, battle list and VIP list (Patella-Modern issue #106, M7; notes/decisions.md, "#104:
 // TClient and the subsystem objects" and "#106"): Creatures, FirstOpponent, LastOpponent, Beat, the attack, follow and
 // highlight targets and the buddy window's list, in the original's .bss order, every member 0 at the start; the
-// functions that use them are the members of the same names. NumberOfBuddies is public (the golden Errors test sets
-// it, TestErrorStatics), the others private as the file-local statics were; TCreature's StartMovement reads Beat (a
-// friend). TMapState owns it (MapState.h), after TMap.
+// functions that use them are the members of the same names. The data is private, as the file-local statics were;
+// TCreature's StartMovement reads Beat (a friend). TMapState owns it (MapState.h), after TMap.
 class TCreatures {
 public:
 	TCreatures(TCreaturesPlayer &PlayerState, TCreaturesGUI &GUI);
@@ -242,11 +241,7 @@ private:
 	std::array<int, 3> BuddySortMethods{}; // 0 name, 1 icon, 2 online; most significant first
 	std::array<TBuddyEntry, BUDDIES> Buddies{};
 	int NumberOfOnlineBuddies{};
-
-public:
-	int NumberOfBuddies{}; // public: the golden Errors test
-
-private:
+	int NumberOfBuddies{};
 	uint32 HighlightID{};
 	uint32 FollowID{};
 	uint32 AttackID{};
@@ -262,7 +257,7 @@ private:
 // Creatures.cpp's player state (Patella-Modern issue #106; notes/decisions.md, "#104" and "#106"): PlayerID, the
 // statistics and skills, the state icons and the walk (the steps, the destination, the step not confirmed yet), in the
 // original's .bss order, every member 0 at the start; the functions that use them are the members of the same names.
-// NumberOfPlayerSteps is public (the golden Errors test sets it), the others private; TCreature's members read and
+// The data is private; TCreature's members read and
 // write the step not confirmed yet (a friend). TMapState owns it, after TCreatures, whose creature table it reads; it
 // reads the map and the object types too.
 class TPlayerState {
@@ -351,11 +346,7 @@ private:
 	uint32 PlayerID{};
 	bool NewPlayerDestination{}; // a destination came while the old path was walked
 	int CurrentPlayerStep{};
-
-public:
-	int NumberOfPlayerSteps{}; // public: the golden Errors test
-
-private:
+	int NumberOfPlayerSteps{};
 	std::array<int, 10> PlayerSteps{}; // 1 east, 2 north-east, ..., 8 south-east (STEP_*, Map.h); the path finder stops at 10
 	bool DestinationDiagonal{};        // passed on to the path finder
 	bool DestinationExact{};           // passed on to the path finder

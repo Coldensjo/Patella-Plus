@@ -60,8 +60,7 @@ public:
 	TCommunication &operator=(TCommunication &&) = delete;
 	~TCommunication() = default;
 
-	// Empty, so static: no this (Clang's UBSan would check it, and the golden Communication test reads
-	// ExitCommunication's code as the original's single ret).
+	// Empty, so static.
 	static void InitCommunication();
 	static void ExitCommunication();
 	void SendLogin(uint32 AccountID, const char *Password);
@@ -192,8 +191,7 @@ public:
 	void ReceiveBuddyLogout();
 
 	// Data, in the original's .data/.bss order. Public: Control.cpp writes OutfitRequested and the packet types
-	// (ReceivePackets, InitWindow), the golden Communication and Control tests set them; Status.cpp's functions reach
-	// Session through bridge::Session().
+	// (ReceivePackets, InitWindow); Status.cpp's functions reach Session through bridge::Session().
 	bool OutfitRequested{};                  // also reset by Control.cpp
 	int LastPacketIndex{};                   // Control.cpp's: next slot in LastPacketTypes
 	std::array<uint8, 10> LastPacketTypes{}; // Control.cpp's: the last ten packet types, a ring

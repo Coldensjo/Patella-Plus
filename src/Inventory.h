@@ -38,8 +38,7 @@ class TObjectTypes;
 // Inventory.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the
 // subsystem objects" and "#106"): the body slots, the open containers and the two offers, in the original's .bss
 // order, every member 0 at the start; the functions are the members of the same names. TMapState owns it (MapState.h),
-// last; it reads TObjectTypes' NoObject. OwnOffer and CounterOffer are public: the golden Errors test sets their
-// counts (TestErrorStatics); the others private, as the file-local statics were.
+// last; it reads TObjectTypes' NoObject. The data is private, as the file-local statics were.
 class TInventory {
 public:
 	explicit TInventory(TObjectTypes &ObjectTypes);
@@ -88,10 +87,8 @@ private:
 	// Data, in .bss order.
 	std::array<TObject, BODY_POSITIONS> Body{};
 	std::array<TContainer, OPEN_CONTAINERS> Containers{};
-
-public:
-	TOffer OwnOffer{};     // public: the golden Errors test
-	TOffer CounterOffer{}; // public: the golden Errors test
+	TOffer OwnOffer{};
+	TOffer CounterOffer{};
 };
 
 // The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the

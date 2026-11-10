@@ -29,8 +29,8 @@
 inline constexpr int OBJECTS_PER_POINT = 10;
 
 // An entry of the effect table (Map.h), as the map points and the entries' Previous and Next links hold it (issue
-// #103; ints until then). Its value is the original's effect number, the entry's index (0 to EFFECTS - 1), which the
-// golden corpus records; None is the original's -1: no effect (the end of a point's list, a full table).
+// #103; ints until then). Its value is the original's effect number, the entry's index (0 to EFFECTS - 1);
+// None is the original's -1: no effect (the end of a point's list, a full table).
 enum class TEffectId : int { None = -1 };
 
 // The original's effect number of an id, and the id of a number (the original's functions take and give numbers).

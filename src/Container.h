@@ -66,8 +66,7 @@ template <class T> T &array<T>::operator()(int i)
 // The entries are indexed through a std::mdspan view over the owned storage since Patella-Modern issue #101
 // (src/compat/mdspan.h; notes/decisions.md, "#101: the matrices and the automap layers as mdspan views"): view()
 // makes one from entry and the extents, layout_left, so view()[x, y] is entry[y * dx + x] and view()[x, y, z]
-// entry[(z * dy + y) * dx + x] as in the original. operator() checks the indices first; a view does not. The members
-// before entry and entry itself stay as they were (the golden test compares them with the original's).
+// entry[(z * dy + y) * dx + x] as in the original. operator() checks the indices first; a view does not.
 template <class T> class matrix {
 public:
 	matrix(const matrix &) = delete;

@@ -69,9 +69,8 @@ protected:
 
 // Network.cpp's data and functions (issue #105): the globals of the original, with Control.cpp's ReconnectTimeout and
 // Reconnect and MainFrm.cpp's PacketHeader, are the members, with the same initial values (the others 0, as the
-// original's .bss), and the functions the members of the same names. The data is public: the golden Network test
-// reads and sets every member (network_tests.cpp's views), the MainFrm and Control tests PacketHeader, Reconnect and
-// ReconnectTimeout, Control.cpp the last two, MainFrm.cpp and Player.cpp PacketHeader.
+// original's .bss), and the functions the members of the same names. Of the data three members are public: Control.cpp
+// reads and writes Reconnect and ReconnectTimeout, SdlFrame.cpp and Player.cpp PacketHeader.
 //
 // Issue #109: the socket and the name resolution are the platform's ISocket (platform/Socket.h), which TNetwork takes
 // in its constructor and calls where it called WinSock and CAsyncSocket; the connection's events come to it as
@@ -131,11 +130,16 @@ public:
 	void OnReceive(platform::TSocket &Receiver, int ErrorCode) override;
 	void OnClose() override;
 
+private:
 	// Data, in the original's .data/.bss order.
 	int HostnameResolveBufferSize = platform::HostEntrySize; // initialised to 0x400 (MAXGETHOSTSTRUCT)
-	int ReconnectTimeout{};                                  // Control.cpp's: GetMilliseconds time
-	bool Reconnect{};                                        // Control.cpp's: set by event 0x3f
-	std::array<uint8, 16> PacketHeader{};                    // MainFrm.cpp's: the first bytes of the last packet
+
+public:
+	int ReconnectTimeout{};               // Control.cpp's: GetMilliseconds time
+	bool Reconnect{};                     // Control.cpp's: set by event 0x3f
+	std::array<uint8, 16> PacketHeader{}; // MainFrm.cpp's: the first bytes of the last packet
+
+private:
 	int CurrentServer{};
 	TServer TestServer{};
 	std::array<TServer, NUMBEROFSERVER> Servers{};
@@ -166,7 +170,6 @@ public:
 	// drops them).
 	int ReceiveSkip{};
 
-private:
 	void DropFrame(int FrameEnd);
 	void ApplyServerOverride();
 

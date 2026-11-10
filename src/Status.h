@@ -100,11 +100,7 @@ private:
 	int PremiumDays{};
 	int ActiveCharacter{};
 	std::unique_ptr<TCharacter[]> Characters; // issue #58
-
-public:
-	int AccountCharacters{}; // name from an assertion; public: the golden Errors test sets it (TestErrorStatics)
-
-private:
+	int AccountCharacters{};                  // name from an assertion
 	TFixedString<30> AccountPassword{};
 	TFixedString<12> AccountNumberString{};
 	int AccountNumber{};

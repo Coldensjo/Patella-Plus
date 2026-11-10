@@ -916,7 +916,7 @@ void TTextButton::Draw(int Surface, int x, int y)
 }
 
 // The base gets the button's own Tooltip, which is not set yet: the original's read of the memory's value, which
-// TSkinButton stores back (the golden DialogElements test compares it), and which nothing reads (MouseHover shows
+// TSkinButton stores back, and which nothing reads (MouseHover shows
 // Tooltip1 or Tooltip2). GCC's and Clang's -Wuninitialized name the read: allowed here (issue #111).
 #if defined(__GNUC__)
 #pragma GCC diagnostic push

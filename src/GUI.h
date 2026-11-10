@@ -118,9 +118,7 @@ public:
 	int DrawingListLength;
 
 private:
-	// Close has run (issue #108; not in the original's layout). Here, in the padding after DrawingListLength on x64,
-	// so that no class's size or member offsets change (at the end the Itanium ABI would put derived members into its
-	// tail padding, which the golden tests' fake elements do not mirror).
+	// Close has run (issue #108).
 	bool Closed = false;
 
 public:
@@ -403,10 +401,12 @@ public:
 	THelp Help;               // Help.cpp
 	TInteraction Interaction; // Status.cpp's user interaction
 
-	// Data, in the original's address order; public where another file or a golden test reads it (named).
+	// Data, in the original's address order; public where another file reads it (named).
 	TFixedString<100> AutomapMouseOverText{}; // ContentWindows.cpp: a mark's text (TAutomapWindow::MouseHover)
 	TFixedString<256> SkillMouseOverText{};   // ContentWindows.cpp: "You have %d percent to go"
-	// Control.cpp's; the golden Control test reads and sets them.
+
+private:
+	// Control.cpp's.
 	int LastMouseMove{}; // timer tick of the last mouse move, 0 after a click
 	void (*URLCallback)(const char *URL){};
 	void (*DisplayModeCallback)(int Mode){};
@@ -414,7 +414,6 @@ public:
 	platform::TWindowHandle WindowHandle{};
 	bool ShowFPS{}; // toggled by key 0x907
 
-private:
 	// GUI.cpp's (SkinProperties is TGraphics' since issue #116: Skins.h).
 	// NumberOfHotkeys, the used entries of Hotkeys: Hotkeys.size() (issue #100).
 	// The original's vector<TTimer *>(0, 0, 2, NULL): AddTimer takes the first
@@ -434,8 +433,8 @@ public:
 	void (*SetDisplayModeCallback)(int Mode){};
 	void (*ExitProgramCallback)(){};
 	// The dialog on top. Raw (one owner, but not a std::unique_ptr; issue #108): MouseMove's help bubble leaves it
-	// pointing to the bubble it deleted when the new bubble or its Place throws (issue #36), which the golden Control
-	// test compares ("deleted ..."), and an owner cannot hold a freed window. Never destroyed at exit (a raw pointer).
+	// pointing to the bubble it deleted when the new bubble or its Place throws (issue #36), and an owner cannot hold
+	// a freed window. Never destroyed at exit (a raw pointer).
 	TWindow *ModalWindow{};
 	std::unique_ptr<TMainWindow> MainWindow; // issue #108: its owner
 

@@ -908,8 +908,7 @@ struct TSkinProperties {
 namespace patella {
 
 // Skins.cpp's data and GUI.cpp's SkinProperties (issue #116), TGraphics' member Skins. Public, as the globals were:
-// the window files read them (through the accessors below), the golden tests set them (gui_tests.cpp constructs
-// SkinProperties in place and compares it byte for byte; the window tests pass Skins to the original's side).
+// the window files read them through the accessors below.
 class TSkins {
 public:
 	TSkins() = default;
