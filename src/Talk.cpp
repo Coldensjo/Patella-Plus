@@ -1,7 +1,6 @@
-// Talk.cpp: reconstructed from Tibia.exe 7.72, in assertion/catch line order.
-// Header COMDATs are in Talk.h; Container.h supplies the filter-list vector.
+// Talk.cpp: the talk boxes over the map, the status message, the talk filters and ignore lists, and the console's text
+// buffers.
 #include "Talk.h"
-#include "Text.h"
 #include "Utils.h"
 #include "graphics.h"
 #include "sysinc.h"
@@ -11,7 +10,6 @@
 #include "platform/Platform.h"
 #include "types/File.h"
 #include "types/FixedString.h"
-#include "types/Time32.h"
 #include "compat/crt71.h"
 #include <ctime>
 #include <array>
@@ -22,19 +20,20 @@
 #include <cstdlib>
 #include <cstring>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
-// the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):
-// the window tree owns its children, the message queue its blocks, the lists their entries
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextPermanentlyIgnoring = "You are permanently ignoring players."; // 134
+
+} // namespace
+
+// cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file: the original's malloc'd entries and
+// texts, freed by their lists; the original's raw owners: the window tree owns its children, the message queue its
+// blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
-// The data is TTalk's (Talk.h, issue #107).
-
-static_assert(sizeof(TTalkbox) == 0x1c0, "talkbox layout");
-static_assert(offsetof(TTalkbox, Text) == 0x20 && offsetof(TTalkbox, Left) == 0x1b0, "talkbox lines (TFixedString, issue #57)");
-// No pointers: the same on x64. Text a std::array of TFixedStrings (issue #60).
-static_assert(sizeof(TTalkbox) == 0x1c0 && offsetof(TTalkbox, Text) == 0x20 && sizeof(TTalkbox::Text) == 0x190,
-	"TTalkbox's layout");
-static_assert(sizeof(TTalkLine::Time) == 4, "statement time: the original's 4 bytes (Time32, issue #62)");
+// The data is TTalk's (Talk.h).
 
 bool patella::TTalk::TakeTalkChanged()
 {
@@ -80,22 +79,22 @@ TRGBColor *patella::TTalk::GetTalkColor(TRGBColor *Color, int TalkMode)
 {
 	switch (TalkMode) {
 		// clang-format off
-	case 0: TERROR("none is talking");
+	case TALK_NONE: TERROR("none is talking");
 	case TALK_SAY: case TALK_WHISPER: case TALK_YELL: case TALK_CHANNEL_CALL: case TALK_GAMEMASTER_ANSWER: case TALK_PLAYER_ANSWER:
 		Color->R = 240; Color->G = 240; Color->B = 0; break;
 	case TALK_PRIVATE_MESSAGE:
 		Color->R = 96; Color->G = 248; Color->B = 248; break;
-	case TALK_GAMEMASTER_REQUEST: case TALK_EVENT_MESSAGE: case 20: case TALK_STATUS_MESSAGE: case 23:
+	case TALK_GAMEMASTER_REQUEST: case TALK_EVENT_MESSAGE: case TALK_EVENT_STATUS_MESSAGE: case TALK_STATUS_MESSAGE: case TALK_STATUS_ONLY_MESSAGE:
 		Color->R = 240; Color->G = 240; Color->B = 240; break;
-	case TALK_GAMEMASTER_BROADCAST: case TALK_GAMEMASTER_CHANNELCALL: case TALK_GAMEMASTER_MESSAGE: case TALK_ANONYMOUS_BROADCAST: case TALK_ANONYMOUS_CHANNELCALL: case TALK_ANONYMOUS_MESSAGE: case TALK_ADMIN_MESSAGE: case 25:
+	case TALK_GAMEMASTER_BROADCAST: case TALK_GAMEMASTER_CHANNELCALL: case TALK_GAMEMASTER_MESSAGE: case TALK_ANONYMOUS_BROADCAST: case TALK_ANONYMOUS_CHANNELCALL: case TALK_ANONYMOUS_MESSAGE: case TALK_ADMIN_MESSAGE: case TALK_RED_CONSOLE_MESSAGE:
 		Color->R = 248; Color->G = 96; Color->B = 96; break;
-	case 12:
+	case TALK_ORANGE_CHANNELCALL:
 		Color->R = 240; Color->G = 180; Color->B = 0; break;
 	case TALK_ANIMAL_LOW: case TALK_ANIMAL_LOUD:
 		Color->R = 255; Color->G = 102; Color->B = 0; break;
 	case TALK_INFO_MESSAGE:
 		Color->R = 0; Color->G = 240; Color->B = 0; break;
-	case 24:
+	case TALK_BLUE_CONSOLE_MESSAGE:
 		Color->R = 160; Color->G = 160; Color->B = 255; break;
 	default: TERROR1("something unknown is talking", TalkMode);
 		// clang-format on
@@ -108,8 +107,8 @@ TTalkbox *patella::TTalk::GetTalkbox(int Number)
 	int Position = 0;
 	while (Talkboxes[Position].State != 1 || --Number != 0)
 		Position++;
-	// MSVC's analysis (C28020, issue #111) takes Position as any int: the assertion keeps Number within the open
-	// talkboxes, so the loop stops at one of them.
+	// MSVC's analysis (C28020) takes Position as any int: the assertion keeps Number within the open talkboxes, so the
+	// loop stops at one of them.
 	PATELLA_MSVC_WARNING(suppress : 28020)
 	return &Talkboxes[Position];
 }
@@ -181,7 +180,6 @@ void patella::TTalk::RemoveTalkbox(int Position)
 	Box.State = 0;
 	TalkChanged = true;
 }
-// Returns the free slot in EAX.
 int patella::TTalk::FindFreeTalkbox()
 {
 	int i;
@@ -327,15 +325,14 @@ void patella::TTalk::SetTalkboxRectangle(int Number, int x, int y, int Width, in
 	Box->Width = Width;
 	Box->Height = Height;
 }
-// When GetMilliseconds throws before the loop, the original reports i uninitialised: MSVC's
-// unoptimised build warns (C4701, a code generation warning, which a pragma turns off only
-// outside the function); initialising i would change the oracle's code.
+// i is declared without a value, as in the original: MSVC's unoptimised build warns (C4701, a code generation warning,
+// which a pragma turns off only outside the function).
 PATELLA_MSVC_WARNING(push)
 PATELLA_MSVC_WARNING(disable : 4701)
 void patella::TTalk::UpdateTalkboxes()
 {
 	int i;
-	if (!LastTimeSet) { // the original's function-local static, initialised on the first call (issue #107)
+	if (!LastTimeSet) { // the original's function-local static, initialised on the first call
 		LastTime = GetMilliseconds();
 		LastTimeSet = true;
 	}
@@ -376,9 +373,9 @@ void patella::TTalk::UpdateStatusMessage()
 }
 bool TTalkFilter::Matches(int _Mode, const char *_Addressee, int _Channel)
 {
-	if (_Mode == TALK_GAMEMASTER_MESSAGE || _Mode == TALK_GAMEMASTER_BROADCAST || _Mode == TALK_GAMEMASTER_CHANNELCALL || _Mode == 12)
+	if (_Mode == TALK_GAMEMASTER_MESSAGE || _Mode == TALK_GAMEMASTER_BROADCAST || _Mode == TALK_GAMEMASTER_CHANNELCALL || _Mode == TALK_ORANGE_CHANNELCALL)
 		return false;
-	if ((Mode != _Mode && Mode != 0) || (Channel != _Channel && Channel != -1))
+	if ((Mode != _Mode && Mode != TALK_NONE) || (Channel != _Channel && Channel != -1))
 		return false;
 	if (strlen(Addressee) != 0 && _Addressee == nullptr)
 		return false;
@@ -450,7 +447,7 @@ char *patella::TTalk::GetBuddyIgnoreText()
 	if (Length == 0)
 		return nullptr;
 	char *Text = new (std::nothrow) char[Length + 1];
-	// MSVC's analysis (C28182, issue #111): the original's unchecked allocation (VC7.1's new returned null), kept.
+	// MSVC's analysis (C28182): the original's unchecked allocation (VC7.1's new returned null), kept.
 	PATELLA_MSVC_WARNING(suppress : 28182)
 	Text[0] = 0;
 	// The original wrote each name and its line break at Text + Length, the text's length so far.
@@ -472,16 +469,16 @@ void patella::TTalk::ClearBuddyIgnore()
 
 void patella::TTalk::AddBuddyIgnore(const char *Addressee, bool Permanent)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, BuddyExemptionList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, BuddyExemptionList);
 	if (Filter != -1) {
 		free(BuddyExemptionList(Filter));
 		BuddyExemptionList(Filter) = nullptr;
 	}
-	AddTalkFilter(0, Addressee, -1, nullptr, BuddyExemptionList, Permanent);
+	AddTalkFilter(TALK_NONE, Addressee, -1, nullptr, BuddyExemptionList, Permanent);
 }
 bool patella::TTalk::IsPermanentBuddyIgnore(const char *Addressee)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, BuddyExemptionList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, BuddyExemptionList);
 	return Filter != -1 ? BuddyExemptionList(Filter)->Permanent : false;
 }
 
@@ -496,16 +493,16 @@ void patella::TTalk::ClearTemporaryIgnore()
 
 void patella::TTalk::AddTemporaryIgnore(const char *Addressee)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, TemporaryIgnoreList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, TemporaryIgnoreList);
 	if (Filter != -1) {
 		free(TemporaryIgnoreList(Filter));
 		TemporaryIgnoreList(Filter) = nullptr;
 	}
-	AddTalkFilter(0, Addressee, -1, nullptr, TemporaryIgnoreList, false);
+	AddTalkFilter(TALK_NONE, Addressee, -1, nullptr, TemporaryIgnoreList, false);
 }
 void patella::TTalk::RemoveTemporaryIgnore(const char *Addressee)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, TemporaryIgnoreList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, TemporaryIgnoreList);
 	if (Filter != -1) {
 		free(TemporaryIgnoreList(Filter));
 		TemporaryIgnoreList(Filter) = nullptr;
@@ -520,7 +517,7 @@ char *patella::TTalk::GetIgnoreListText()
 	if (Length == 0)
 		return nullptr;
 	char *Text = new (std::nothrow) char[Length + 1];
-	// MSVC's analysis (C28182, issue #111): the original's unchecked allocation (VC7.1's new returned null), kept.
+	// MSVC's analysis (C28182): the original's unchecked allocation (VC7.1's new returned null), kept.
 	PATELLA_MSVC_WARNING(suppress : 28182)
 	Text[0] = 0;
 	// The original wrote each name and its line break at Text + Length, the text's length so far.
@@ -560,11 +557,11 @@ void patella::TTalk::IgnoreMode(int Mode)
 }
 void patella::TTalk::IgnoreName(const char *Addressee, bool Permanent)
 {
-	AddIgnoreFilter(0, Addressee, Permanent);
+	AddIgnoreFilter(TALK_NONE, Addressee, Permanent);
 }
 bool patella::TTalk::IsPermanentIgnore(const char *Addressee)
 {
-	const int Filter = FindTalkFilter(0, Addressee, -1, IgnoreList);
+	const int Filter = FindTalkFilter(TALK_NONE, Addressee, -1, IgnoreList);
 	return Filter != -1 ? IgnoreList(Filter)->Permanent : false;
 }
 void patella::TTalk::RemoveIgnoreFilter(int Mode, const char *Addressee)
@@ -581,7 +578,7 @@ void patella::TTalk::UnignoreMode(int Mode)
 }
 void patella::TTalk::UnignoreName(const char *Addressee)
 {
-	RemoveIgnoreFilter(0, Addressee);
+	RemoveIgnoreFilter(TALK_NONE, Addressee);
 }
 void patella::TTalk::ShowPermanentIgnoreWarning()
 {
@@ -591,7 +588,7 @@ void patella::TTalk::ShowPermanentIgnoreWarning()
 			Counter++;
 	if (Counter > 0) {
 		PATELLA_ASSERT(DefaultTextBuffer!=nullptr);
-		AddTextBufferLine(DefaultTextBuffer, 0, TextPermanentlyIgnoring, 20, nullptr, 0);
+		AddTextBufferLine(DefaultTextBuffer, 0, TextPermanentlyIgnoring, TALK_EVENT_STATUS_MESSAGE, nullptr, 0);
 		ConsoleChanged = true;
 	}
 }
@@ -614,20 +611,20 @@ void patella::TTalk::AddConsoleText(uint32 StatementID, const char *Text, int Ta
 	switch (TalkMode) {
 	case TALK_ADMIN_MESSAGE: Broadcast = true; break;
 	case TALK_EVENT_MESSAGE:
-	case 20: Broadcast = GetEventMessages(); break;
+	case TALK_EVENT_STATUS_MESSAGE: Broadcast = GetEventMessages(); break;
 	case TALK_STATUS_MESSAGE: Broadcast = GetStatusMessages(); break;
 	case TALK_INFO_MESSAGE: Broadcast = GetInfoMessages(); break;
-	case 23: return;
+	case TALK_STATUS_ONLY_MESSAGE: return;
 	default: {
 		TTalkBuffer *TargetBuffer = DefaultTextBuffer;
 		if (TalkMode == TALK_CHANNEL_CALL || TalkMode == TALK_GAMEMASTER_REQUEST || TalkMode == TALK_GAMEMASTER_ANSWER || TalkMode == TALK_PLAYER_ANSWER
-			|| TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == 12)
+			|| TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == TALK_ORANGE_CHANNELCALL)
 			TargetBuffer = nullptr;
 		if (TalkMode == TALK_ANONYMOUS_CHANNELCALL)
 			Name = nullptr;
 		for (int i = ConsoleFilterList.min; i <= ConsoleFilterList.max; i++) {
 			TTalkFilter *Filter = ConsoleFilterList(i);
-			const int Mode = TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == 12 ? TALK_CHANNEL_CALL : TalkMode;
+			const int Mode = TalkMode == TALK_GAMEMASTER_CHANNELCALL || TalkMode == TALK_ANONYMOUS_CHANNELCALL || TalkMode == TALK_ORANGE_CHANNELCALL ? TALK_CHANNEL_CALL : TalkMode;
 			if (Filter != nullptr && Filter->Matches(Mode, Name, Channel))
 				TargetBuffer = Filter->TextBuffer;
 		}
@@ -660,7 +657,7 @@ void patella::TTalk::AddChannelNotice(const char *Addressee, const char *Text, i
 			TargetBuffer = Filter->TextBuffer;
 	}
 	if (TargetBuffer != nullptr)
-		AddTextBufferLine(TargetBuffer, 0, Text, 24, Addressee, 0);
+		AddTextBufferLine(TargetBuffer, 0, Text, TALK_BLUE_CONSOLE_MESSAGE, Addressee, 0);
 }
 void patella::TTalk::ClearDefaultTextBuffer()
 {
@@ -717,7 +714,7 @@ void patella::TTalk::DeleteTextBuffer(TTalkBuffer *TextBuffer)
 		free(ConsoleFilterList(Filter));
 		ConsoleFilterList(Filter) = nullptr;
 		if (TextBuffer != nullptr) {
-			TextBuffer->TTalkBuffer::~TTalkBuffer(); // non-virtual, by its qualified name (issue #111: Clang's warning)
+			TextBuffer->TTalkBuffer::~TTalkBuffer(); // non-virtual, by its qualified name (Clang's warning)
 			free(TextBuffer);
 		}
 	}
@@ -735,10 +732,10 @@ bool patella::TTalk::HasOwnPrivateChannel()
 	}
 	return false;
 }
-// noexcept (issue #81; noexcept(false) until then): Clear removes the
-// first line until there is none, and Remove of the first line takes its
-// first two branches, never the search with its assertion; free does not
-// throw. In a destructor the virtual calls are TTalkBuffer's own.
+// noexcept: Clear removes the first line until there is none, and Remove of
+// the first line takes its first two branches, never the search with its
+// assertion; free does not throw. In a destructor the virtual calls are
+// TTalkBuffer's own.
 TTalkBuffer::~TTalkBuffer() { Clear(); }
 void TTalkBuffer::Clear()
 {
@@ -752,8 +749,8 @@ void TTalkBuffer::AddText(int Mode, const char *text, int DiffTime)
 		Append(new (std::nothrow) TTalkLine(0, Mode, text, DiffTime));
 	}
 }
-// The original frees with free() what AddText allocates with new (VC7.1's new was malloc; notes/ownership.md): GCC's
-// -Wmismatched-new-delete (mingw-w64, where it inlines AddText here) names it, allowed for this function (issue #111).
+// The original frees with free() what AddText allocates with new (VC7.1's new was malloc): GCC's
+// -Wmismatched-new-delete (mingw-w64, where it inlines AddText here) names it, allowed for this function.
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wmismatched-new-delete\"")
 void TTalkBuffer::Append(TTalkLine *line)
@@ -773,8 +770,8 @@ void TTalkBuffer::Append(TTalkLine *line)
 	} else {
 		line->Next = nullptr;
 		line->Previous = last;
-		// MSVC's analysis (C6011, issue #111): first and last are null together (the list's ends), so last is not
-		// null when first is not.
+		// MSVC's analysis (C6011): first and last are null together (the list's ends), so last is not null when first
+		// is not.
 		PATELLA_MSVC_WARNING(suppress : 6011)
 		last->Next = line;
 		last = line;
@@ -821,7 +818,6 @@ void TTalkBuffer::Remove(TTalkLine *line)
 void TTalkBuffer::Remove(int lineNumber)
 {
 	PATELLA_ASSERT(first!=nullptr);
-	// Not const (issue #39): as a constant the compiler folds i away; the binary keeps it in a stack slot.
 	int i = 0; // NOLINT(misc-const-correctness)
 	TTalkLine *Search = first;
 	while (i != lineNumber) {
@@ -855,9 +851,7 @@ TTalkLine *TTalkBuffer::GetNext()
 	cursor = cursor->Next;
 	return cursor;
 }
-// Bytes is the original catch name for F's slot (the FILE's address; only its
-// catch wrapper named it). One line each, in the file's mode: SaveChannel's
-// text file ends them in CR LF.
+// One line each, in the file's mode: SaveChannel's text file ends them in CR LF.
 int TTalkBuffer::Write(TFile &F) const
 {
 	PATELLA_ASSERT(F!=nullptr);
@@ -899,7 +893,7 @@ void TRuleViolationTalkBuffer::Append(TTalkLine *line)
 }
 TRuleViolationChannel::TRuleViolationChannel(int TalkMode, int _ChannelID) : TTalkBuffer(TalkMode)
 {
-	SendTalkMode = 0;
+	SendTalkMode = TALK_NONE;
 	Closed = false;
 	PATELLA_ASSERT(_ChannelID!=-1);
 	ChannelID = _ChannelID;
@@ -935,10 +929,9 @@ void TRuleViolationChannel::Append(TTalkLine *line)
 }
 namespace {
 
-// Ours (issue #62): the local time of a talk line's 64-bit time, for its stamp: the C library's localtime
-// (compat/crt71.h), which up to 2038 gives the fields _localtime32 gave. Where it gives none (before 1970 or after
-// 3000, which only a time offset from the server reaches) the original read localtime's NULL and crashed; here the
-// stamp is "00:00".
+// Ours: the local time of a talk line's 64-bit time, for its stamp: the C library's localtime (compat/crt71.h), which
+// up to 2038 gives the fields _localtime32 gave. Where it gives none (before 1970 or after 3000, which only a time
+// offset from the server reaches) the original read localtime's NULL and crashed; here the stamp is "00:00".
 std::tm LineLocalTime(std::int64_t Time)
 {
 	std::tm Local{};
@@ -956,7 +949,6 @@ TTalkLine::TTalkLine(uint32 _StatementID, int _Mode, const char *_Line, int Diff
 	Mode = _Mode;
 	StatementID = _StatementID;
 	const std::int64_t LineTime = patella::platform::Platform().Clock.WallSeconds() + DiffTime;
-	Time = StoreTime32(LineTime);
 	const std::tm LocalTime = LineLocalTime(LineTime);
 	TFixedString<8> Stamp;
 	Stamp.Format("{:02}:{:02} ", LocalTime.tm_hour, LocalTime.tm_min);
@@ -975,7 +967,6 @@ TTalkLine::TTalkLine(uint32 _StatementID, int _Mode, const char *_Addressee, con
 	Mode = _Mode;
 	StatementID = _StatementID;
 	const std::int64_t LineTime = patella::platform::Platform().Clock.WallSeconds() + DiffTime;
-	Time = StoreTime32(LineTime);
 	const std::tm LocalTime = LineLocalTime(LineTime);
 	TFixedString<8> Stamp;
 	Stamp.Format("{:02}:{:02} ", LocalTime.tm_hour, LocalTime.tm_min);
@@ -1015,13 +1006,13 @@ void patella::TTalk::ExitTalk()
 	ClearTemporaryIgnore();
 	ClearIgnoreList();
 	if (DefaultTextBuffer != nullptr) {
-		DefaultTextBuffer->TTalkBuffer::~TTalkBuffer(); // non-virtual, by its qualified name (issue #111)
+		DefaultTextBuffer->TTalkBuffer::~TTalkBuffer(); // non-virtual, by its qualified name
 		free(DefaultTextBuffer);
 	}
 	DefaultTextBuffer = nullptr;
 }
 
-// The functions of the original (issue #107): each calls its member on the one TClient's TTalk.
+// The functions of the original: each calls its member on the one TClient's TTalk.
 
 bool TakeTalkChanged()
 {
@@ -1083,11 +1074,6 @@ TRGBColor *GetTalkColor(TRGBColor *Color, int TalkMode)
 	return patella::bridge::Talk().GetTalkColor(Color, TalkMode);
 }
 
-TTalkbox *GetTalkbox(int Number)
-{
-	return patella::bridge::Talk().GetTalkbox(Number);
-}
-
 int GetTalkboxMode(int Number)
 {
 	return patella::bridge::Talk().GetTalkboxMode(Number);
@@ -1118,21 +1104,6 @@ const char *GetTalkboxLine(int Number, int Line)
 	return patella::bridge::Talk().GetTalkboxLine(Number, Line);
 }
 
-void RemoveTalkbox(int Position)
-{
-	patella::bridge::Talk().RemoveTalkbox(Position);
-}
-
-int FindFreeTalkbox()
-{
-	return patella::bridge::Talk().FindFreeTalkbox();
-}
-
-void WrapTalkbox(TTalkbox *Talkbox, const char *Text)
-{
-	patella::bridge::Talk().WrapTalkbox(Talkbox, Text);
-}
-
 void SetTalkboxRectangle(int Number, int x, int y, int Width, int Height)
 {
 	patella::bridge::Talk().SetTalkboxRectangle(Number, x, y, Width, Height);
@@ -1141,22 +1112,6 @@ void SetTalkboxRectangle(int Number, int x, int y, int Width, int Height)
 void RemoveOldestTalkbox()
 {
 	patella::bridge::Talk().RemoveOldestTalkbox();
-}
-
-int FindTalkFilter(int Mode, const char *Addressee, int Channel, TIndexedVector<TTalkFilter *> &List)
-{
-	return patella::bridge::Talk().FindTalkFilter(Mode, Addressee, Channel, List);
-}
-
-int FindTextBuffer(TTalkBuffer *TextBuffer, TIndexedVector<TTalkFilter *> &List)
-{
-	return patella::bridge::Talk().FindTextBuffer(TextBuffer, List);
-}
-
-void AddTalkFilter(int Mode, const char *Addressee, int Channel, TTalkBuffer *TextBuffer,
-	TIndexedVector<TTalkFilter *> &List, bool Permanent)
-{
-	patella::bridge::Talk().AddTalkFilter(Mode, Addressee, Channel, TextBuffer, List, Permanent);
 }
 
 char *GetBuddyIgnoreText()
@@ -1179,11 +1134,6 @@ bool IsPermanentBuddyIgnore(const char *Addressee)
 	return patella::bridge::Talk().IsPermanentBuddyIgnore(Addressee);
 }
 
-void ClearTemporaryIgnore()
-{
-	patella::bridge::Talk().ClearTemporaryIgnore();
-}
-
 char *GetIgnoreListText()
 {
 	return patella::bridge::Talk().GetIgnoreListText();
@@ -1192,11 +1142,6 @@ char *GetIgnoreListText()
 bool IsModeIgnored(int Mode)
 {
 	return patella::bridge::Talk().IsModeIgnored(Mode);
-}
-
-void AddIgnoreFilter(int Mode, const char *Addressee, bool Permanent)
-{
-	patella::bridge::Talk().AddIgnoreFilter(Mode, Addressee, Permanent);
 }
 
 void IgnoreMode(int Mode)
@@ -1214,11 +1159,6 @@ bool IsPermanentIgnore(const char *Addressee)
 	return patella::bridge::Talk().IsPermanentIgnore(Addressee);
 }
 
-void RemoveIgnoreFilter(int Mode, const char *Addressee)
-{
-	patella::bridge::Talk().RemoveIgnoreFilter(Mode, Addressee);
-}
-
 void UnignoreMode(int Mode)
 {
 	patella::bridge::Talk().UnignoreMode(Mode);
@@ -1227,11 +1167,6 @@ void UnignoreMode(int Mode)
 void UnignoreName(const char *Addressee)
 {
 	patella::bridge::Talk().UnignoreName(Addressee);
-}
-
-void ClearDefaultTextBuffer()
-{
-	patella::bridge::Talk().ClearDefaultTextBuffer();
 }
 
 void ClearTextBuffer(TTalkBuffer *TextBuffer)

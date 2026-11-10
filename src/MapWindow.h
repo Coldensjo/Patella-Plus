@@ -8,13 +8,6 @@
 // map surface; the map surface is copied (or stretched) to the screen.
 // TMapFrame is the window MainWindow.cpp creates: it holds the map view, keeps
 // it at an aspect ratio of 15:11 and draws the border.
-//
-// Names from the binary: MAP_WIDTH and MAP_HEIGHT ("getWidth()<=MAP_WIDTH*32"),
-// the creature fields PKFlag and PARTYFlag, Obj, SrcObj, TradeObject, Hint,
-// Brightness, Player, Talkbox, Creatures[i], EffectNumber and the parameter
-// names in the catch blocks (Width, Height, x, y, Event, Surface, posx, posy,
-// FieldX, FieldY, SpriteNumber). The class names and everything else are
-// ours (notes/decisions.md, "MapWindow.cpp").
 
 #pragma once
 
@@ -26,50 +19,50 @@
 #include "graphics.h"
 #include <array>
 
-// The map surface in fields ("getWidth()<=MAP_WIDTH*32"): 480x352 pixels.
+// The map surface in fields: 480x352 pixels.
 inline constexpr int MAP_WIDTH = 15;
 inline constexpr int MAP_HEIGHT = 11;
 
-// A creature whose name and health bar are drawn above it (12 bytes).
+// A creature whose name and health bar are drawn above it.
 struct TCreatureName {
-	uint32 CreatureID; // +0x00
-	int x;             // +0x04, centre of the creature on the map surface
-	int y;             // +0x08, its top
+	uint32 CreatureID;
+	int x; // centre of the creature on the map surface
+	int y; // its top
 };
 
-// An animated text to be drawn after the map (0x18 bytes).
+// An animated text to be drawn after the map.
 struct TTextualEffectPosition {
-	int EffectNumber; // +0x00
-	int x;            // +0x04, centre on the map surface
-	int y;            // +0x08
-	int FieldX;       // +0x0c, the field it is on
-	int FieldY;       // +0x10
-	int FieldZ;       // +0x14
+	int EffectNumber;
+	int x; // centre on the map surface
+	int y;
+	int FieldX; // the field it is on
+	int FieldY;
+	int FieldZ;
 };
 
-// A 32x32 tile of the field cache on surface 4 (0x8c bytes): the sprites that
+// A 32x32 tile of the field cache on surface 4: the sprites that
 // make up a field, each with its offset. Sprite 0 is the empty tile of
 // picture 7. Sprites counts the sprites of the current frame; while they are
 // the same as the first CachedSprites of the tile, nothing is drawn again.
 struct TCacheField {
-	int x;                       // +0x00, position on surface 4
-	int y;                       // +0x04
-	int CachedSprites;           // +0x08, sprites in the tile
-	std::array<int, 10> Sprite;  // +0x0c
-	std::array<int, 10> SpriteX; // +0x34
-	std::array<int, 10> SpriteY; // +0x5c
-	int Sprites;                 // +0x84
-	bool Copied;                 // +0x88, blitted to the map surface in this frame
+	int x; // position on surface 4
+	int y;
+	int CachedSprites; // sprites in the tile
+	std::array<int, 10> Sprite;
+	std::array<int, 10> SpriteX;
+	std::array<int, 10> SpriteY;
+	int Sprites;
+	bool Copied; // blitted to the map surface in this frame
 };
 
 class TMapWindow : public TWindow {
 public:
 	TMapWindow();
-	// Its two RemoveHotkey calls are the close since issue #108.
+	// Its two RemoveHotkey calls are the close's (OnClose).
 	~TMapWindow() override { CheckClosed("TMapWindow"); }
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override { return 240; }
-	int getMinimumHeight() override { return 176; }
+	int GetMinimumWidth() override { return 240; }
+	int GetMinimumHeight() override { return 176; }
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool LeftButtonDown(int x, int y, int Flags) override;
@@ -114,23 +107,23 @@ public:
 		Light[FieldX][FieldY].B = Color.B * Brightness / 255;
 	}
 
-	int NumberOfNames;                                             // +0x002c
-	std::array<TCreatureName, CREATURES> Names;                    // +0x0030
-	int NumberOfTextualEffects;                                    // +0x0738
-	std::array<TTextualEffectPosition, EFFECTS> TextualEffects;    // +0x073c
-	std::array<std::array<TRGBColor, MAPSIZE_Y>, MAPSIZE_X> Light; // +0x19fc, the light on each field
-	int PositionX;                                                 // +0x25cc, GetMapPosition
-	int PositionY;                                                 // +0x25d0
-	int PositionZ;                                                 // +0x25d4
-	int MaxLevel;                                                  // +0x25d8, the highest level drawn
-	std::array<std::array<int, MAPSIZE_Y>, MAPSIZE_X> CoverLevel;  // +0x25dc, the highest level with a full ground, 0 none
-	int ScrollX;                                                   // +0x29cc, the player's walk offset + 32
-	int ScrollY;                                                   // +0x29d0
-	std::array<std::array<TCacheField, 12>, 16> Cache;             // +0x29d4
-	TComponent *HintButton;                                        // +0x92d4, "Receive hint"
+	int NumberOfNames;
+	std::array<TCreatureName, CREATURES> Names;
+	int NumberOfTextualEffects;
+	std::array<TTextualEffectPosition, EFFECTS> TextualEffects;
+	std::array<std::array<TRGBColor, MAPSIZE_Y>, MAPSIZE_X> Light; // the light on each field
+	int PositionX;                                                 // GetMapPosition
+	int PositionY;
+	int PositionZ;
+	int MaxLevel;                                                 // the highest level drawn
+	std::array<std::array<int, MAPSIZE_Y>, MAPSIZE_X> CoverLevel; // the highest level with a full ground, 0 none
+	int ScrollX;                                                  // the player's walk offset + 32
+	int ScrollY;
+	std::array<std::array<TCacheField, 12>, 16> Cache;
+	TComponent *HintButton; // "Receive hint"
 
 protected:
-	// The destructor's work until issue #108, then the children.
+	// The two hotkeys, then the children.
 	void OnClose() override
 	{
 		try {
@@ -148,13 +141,13 @@ class TMapFrame : public TWindow {
 public:
 	TMapFrame();
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override;
-	int getMinimumHeight() override;
+	int GetMinimumWidth() override;
+	int GetMinimumHeight() override;
 	void Arrange() override;
 
-	TMapWindow *MapWindow; // +0x2c
-	int ViewY;             // +0x30, position of the map view
-	int ViewX;             // +0x34
-	int ViewWidth;         // +0x38
-	int ViewHeight;        // +0x3c
+	TMapWindow *MapWindow;
+	int ViewY; // position of the map view
+	int ViewX;
+	int ViewWidth;
+	int ViewHeight;
 };

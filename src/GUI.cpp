@@ -1,18 +1,9 @@
-// GUI.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The window system's base classes (TComponent, TElement, TWindow), skin
-// drawing, the timers, the hotkey table and the skin properties. Functions
-// without line evidence come first, in binary order (the gap before the
-// first asserted function: the compiler-generated constructors of
-// SkinProperties and its blocks, Container.h code and the small functions
-// without exception frame), then the asserted ones in line order. The
-// TComponent functions that the binary has only as inline copies in earlier
-// objects (GetNext, GetParent, ...) are in GUI.h.
+// GUI.cpp: the window system's base classes (TComponent, TElement, TWindow),
+// skin drawing, the timers, the hotkey table and the skin properties' values;
+// see GUI.h.
 
 #include "GUI.h"
 #include "Skins.h"
-#include "Status.h" // IWYU pragma: keep (uses nothing from it, but GUI.obj has its LinkPattern copy)
-#include "Text.h"   // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "sysinc.h"
 #include "Help.h"
 #include "common.h"
@@ -24,36 +15,19 @@
 #include <climits>
 #include <cstddef>
 #include <cstdlib>
-#include <memory>
 #include <type_traits>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory is off for the file, for the original's raw owners: the window tree owns its
+// children, the message queue its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-// TComponent::DrawingList as a std::unique_ptr<TDrawing[]> (issue #58): a pointer at the original's offset. The
-// subclasses' constructors allocate it with reset(new TDrawing[n]) (each list is the first: TComponent's constructor
-// leaves it null, and no class allocates over a base's), ~TComponent frees it with reset() where the original had
-// delete[]; TDrawing's destructor is trivial, so the reset cannot throw.
-static_assert(sizeof(std::unique_ptr<TDrawing[]>) == sizeof(TDrawing *)
-		&& alignof(std::unique_ptr<TDrawing[]>) == alignof(TDrawing *),
-	"std::unique_ptr<TDrawing[]> is a pointer");
+// TComponent::DrawingList is a std::unique_ptr<TDrawing[]>. The subclasses' constructors allocate it with reset(new
+// TDrawing[n]) (each list is the first: TComponent's constructor leaves it null, and no class allocates over a base's),
+// ~TComponent frees it with reset() where the original had delete[]; TDrawing's destructor is trivial, so the reset
+// cannot throw.
 
-// The data of .bss (NumberOfHotkeys, Timers, Hotkeys, UpdateTimers' static LastTime) is TGUI's (GUI.h, issue #107);
-// SkinProperties is TGraphics' TSkins' (Skins.h, issue #116), which InitSkinProperties below fills.
-
-// The skins' arrays std::arrays (issue #60): the original's layouts (no pointers: the same on x64).
-static_assert(sizeof(TInventoryViewProperties) == 0x158 && offsetof(TInventoryViewProperties, Objects) == 0x10
-		&& offsetof(TInventoryViewProperties, Slots) == 0x60 && offsetof(TInventoryViewProperties, EmptySlotSkins) == 0x100,
-	"TInventoryViewProperties's layout");
-static_assert(sizeof(TDialogProperties) == 0x8c && offsetof(TDialogProperties, Buttons) == 0x2c, "TDialogProperties's layout");
-static_assert(sizeof(TEditBuddyDialogProperties) == 0xc0 && offsetof(TEditBuddyDialogProperties, IconButtons) == 0x38, "TEditBuddyDialogProperties's layout");
-static_assert(sizeof(TCombatControlsProperties) == 0x50 && offsetof(TCombatControlsProperties, Buttons) == 0x08,
-	"TCombatControlsProperties' layout");
-static_assert(sizeof(TSkinProperties) == 0x1528 && offsetof(TSkinProperties, OutfitDialogPartButtons) == 0xc88
-		&& offsetof(TSkinProperties, EditMarkDialogTypeButtons) == 0x1204,
-	"TSkinProperties' layout");
+// The timers, the hotkeys and UpdateTimers' LastTime are TGUI's (GUI.h); SkinProperties is TGraphics' TSkins'
+// (Skins.h), which InitSkinProperties below fills.
 
 int TTimer::GetTime() const
 {
@@ -65,11 +39,9 @@ bool TTimer::IsExpired() const
 	return !(Active && Remaining != 0);
 }
 
-// noexcept since issue #108: the work of the window classes' destructors that
-// could throw (TTab's assertion, the Send functions, the preferences,
-// DeleteTextBuffer) is their Close (OnClose), which every delete of a component
-// runs first; it was noexcept(false) from issue #34 to #108 (VC7.1's
-// destructors let exceptions out; notes/ownership.md, section 7).
+// noexcept: the work of the window classes that could throw (TTab's
+// assertion, the Send functions, the preferences, DeleteTextBuffer) is their
+// Close (OnClose), which every delete of a component runs first.
 TComponent::~TComponent()
 {
 	if (DrawingList != nullptr)
@@ -78,20 +50,9 @@ TComponent::~TComponent()
 
 static_assert(std::is_nothrow_destructible_v<TComponent> && std::is_nothrow_destructible_v<TWindow>,
 	"issue #108: the window classes' destructors are noexcept");
-// offsetof of a class with virtual functions: conditionally supported, and supported by every compiler here (GCC's
-// and Clang's -Winvalid-offsetof, issue #111).
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winvalid-offsetof"
-#endif
-static_assert(sizeof(void *) != 8 || (sizeof(TComponent) == 56 && offsetof(TComponent, Parent) == 24),
-	"issue #108: Closed is in the padding after DrawingListLength, TComponent's x64 layout unchanged");
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 
-// Issue #108 (not in the original). Closed is set first: a close that throws is
-// not run again, as the original's destructor was not.
+// Closed is set first: a close that throws is not run again, as the
+// original's destructor was not.
 void TComponent::Close()
 {
 	if (Closed)
@@ -100,14 +61,12 @@ void TComponent::Close()
 	OnClose();
 }
 
-// Issue #108.
 void TComponent::CheckClosed(const char *Class) const noexcept
 {
 	if (!Closed)
 		patella::log::Error("{} destroyed without Close: its close was not done (issue #108)", Class);
 }
 
-// Issue #108: the original's `delete Component`.
 void DeleteComponent(TComponent *Component)
 {
 	if (Component == nullptr)
@@ -149,8 +108,6 @@ TComponent *TWindow::GetLastChild()
 
 TElement::TElement() = default;
 
-// Identical code to any two-member constructor, so the linker may have
-// folded others into it.
 TCallback::TCallback(TComponent *Receiver, int Event)
 {
 	this->Receiver = Receiver;
@@ -163,9 +120,6 @@ void patella::TGUI::InitHotkeys()
 	Hotkeys.clear();
 }
 
-// The one copy the linker kept of many identical empty functions (folded).
-// ExitControl calls this one first; TComponent::Arrange and
-// PositionChanged and TElement::StopDragging have the same body.
 void patella::TGUI::ExitHotkeys()
 {
 }
@@ -280,8 +234,7 @@ void DrawSkinClipped(int Surface, int x, int y, int width, int height, int skin,
 
 // --- Skin properties ------------------------------------------------------
 
-// Called by InitControl after InitSkins. The binary stores the values in
-// another order; they are written here by offset.
+// Called by InitControl after InitSkins.
 void InitSkinProperties()
 {
 	SkinProperties().CursorHotspot1.x = 0;
@@ -789,7 +742,6 @@ void InitSkinProperties()
 	SkinProperties().TradeWindow.WaitFont.Color.G = 255;
 	SkinProperties().TradeWindow.WaitFont.Color.B = 255;
 	SkinProperties().TradeWindow.WaitFont.Alignment = 1;
-	SkinProperties().BuddylistWindow.Data00 = 32;
 	SkinProperties().BuddylistWindow.RowHeight = 16;
 	SkinProperties().BuddylistWindow.Logo.x = 2;
 	SkinProperties().BuddylistWindow.Logo.y = 2;
@@ -813,7 +765,7 @@ void InitSkinProperties()
 	SkinProperties().BuddylistWindow.NewColor.R = 248;
 	SkinProperties().BuddylistWindow.NewColor.G = 248;
 	SkinProperties().BuddylistWindow.NewColor.B = 248;
-	SkinProperties().Data868 = 10;
+	SkinProperties().BuddylistWindowExtraHeight = 10;
 	SkinProperties().ScrollBarRangeMinimumHeight = 14;
 	SkinProperties().ScrollBarMinimumWidth = 12;
 	SkinProperties().ScrollBarMinimumHeight = 38;
@@ -821,7 +773,6 @@ void InitSkinProperties()
 	SkinProperties().HorizontalScrollBarRangeMinimumWidth = 14;
 	SkinProperties().HorizontalScrollBarHeight = 12;
 	SkinProperties().HorizontalScrollBarMinimumWidth = 38;
-	SkinProperties().Data888 = 12;
 	SkinProperties().Buttons.Font.FontNumber = FONT_SMALL;
 	SkinProperties().Buttons.Font.Color.R = 255;
 	SkinProperties().Buttons.Font.Color.G = 255;
@@ -836,21 +787,6 @@ void InitSkinProperties()
 	SkinProperties().Buttons.Texture.x = 2;
 	SkinProperties().Buttons.Texture.y = 2;
 	SkinProperties().BlinkingButtonInterval = 100;
-	SkinProperties().Style8C4.Data00.FontNumber = FONT_SMOOTH;
-	SkinProperties().Style8C4.Data00.Color.R = 224;
-	SkinProperties().Style8C4.Data00.Color.G = 224;
-	SkinProperties().Style8C4.Data00.Color.B = 224;
-	SkinProperties().Style8C4.Data00.Alignment = 0;
-	SkinProperties().Style8C4.Data14.FontNumber = FONT_SMOOTH;
-	SkinProperties().Style8C4.Data14.Color.R = 255;
-	SkinProperties().Style8C4.Data14.Color.G = 255;
-	SkinProperties().Style8C4.Data14.Color.B = 255;
-	SkinProperties().Style8C4.Data14.Alignment = 0;
-	SkinProperties().Style8C4.Data28.FontNumber = FONT_SMOOTH;
-	SkinProperties().Style8C4.Data28.Color.R = 160;
-	SkinProperties().Style8C4.Data28.Color.G = 160;
-	SkinProperties().Style8C4.Data28.Color.B = 255;
-	SkinProperties().Style8C4.Data28.Alignment = 0;
 	SkinProperties().CheckBox.Item.x = 6;
 	SkinProperties().CheckBox.Item.y = 5;
 	SkinProperties().CheckBox.Label.x = 24;
@@ -914,18 +850,10 @@ void InitSkinProperties()
 	SkinProperties().ConsoleWindow.TabBar.y = 0;
 	SkinProperties().ConsoleWindow.TabBar.width = -82;
 	SkinProperties().ConsoleWindow.TabBar.height = 18;
-	SkinProperties().ConsoleWindow.Data14.x = 0;
-	SkinProperties().ConsoleWindow.Data14.y = 0;
-	SkinProperties().ConsoleWindow.Data14.width = 0;
-	SkinProperties().ConsoleWindow.Data14.height = 18;
 	SkinProperties().ConsoleWindow.Input.x = 23;
 	SkinProperties().ConsoleWindow.Input.y = -20;
 	SkinProperties().ConsoleWindow.Input.width = -4;
 	SkinProperties().ConsoleWindow.Input.height = 16;
-	SkinProperties().ConsoleWindow.Data34.x = 55;
-	SkinProperties().ConsoleWindow.Data34.y = -20;
-	SkinProperties().ConsoleWindow.Data34.width = -4;
-	SkinProperties().ConsoleWindow.Data34.height = 16;
 	SkinProperties().ConsoleWindow.CurrentConsole.x = 4;
 	SkinProperties().ConsoleWindow.CurrentConsole.y = 21;
 	SkinProperties().ConsoleWindow.CurrentConsole.width = -4;
@@ -1006,16 +934,11 @@ void InitSkinProperties()
 	SkinProperties().Dialog.Body.y = 32;
 	SkinProperties().Dialog.Body.width = -18;
 	SkinProperties().Dialog.Body.height = -60;
-	SkinProperties().Dialog.Data64.FontNumber = FONT_SMOOTH;
-	SkinProperties().Dialog.Data64.Color.R = 192;
-	SkinProperties().Dialog.Data64.Color.G = 192;
-	SkinProperties().Dialog.Data64.Color.B = 192;
-	SkinProperties().Dialog.Data64.Alignment = 0;
-	SkinProperties().Dialog.Data78.FontNumber = FONT_SMOOTH;
-	SkinProperties().Dialog.Data78.Color.R = 192;
-	SkinProperties().Dialog.Data78.Color.G = 192;
-	SkinProperties().Dialog.Data78.Color.B = 192;
-	SkinProperties().Dialog.Data78.Alignment = 0;
+	SkinProperties().Dialog.TextFont.FontNumber = FONT_SMOOTH;
+	SkinProperties().Dialog.TextFont.Color.R = 192;
+	SkinProperties().Dialog.TextFont.Color.G = 192;
+	SkinProperties().Dialog.TextFont.Color.B = 192;
+	SkinProperties().Dialog.TextFont.Alignment = 0;
 	SkinProperties().LoginDialogWidth = 200;
 	SkinProperties().LoginDialogHeight = 86;
 	SkinProperties().LoginDialogAccountLabel.x = 0;
@@ -1318,16 +1241,6 @@ void InitSkinProperties()
 	SkinProperties().EditBuddyDialog.Notify.y = 152;
 	SkinProperties().EditBuddyDialog.Notify.width = 0;
 	SkinProperties().EditBuddyDialog.Notify.height = 22;
-	SkinProperties().Data104C = 250;
-	SkinProperties().Data1050 = 29;
-	SkinProperties().Data1054.x = 0;
-	SkinProperties().Data1054.y = 0;
-	SkinProperties().Data1054.width = 0;
-	SkinProperties().Data1054.height = 14;
-	SkinProperties().Data1074.x = 0;
-	SkinProperties().Data1074.y = 18;
-	SkinProperties().Data1074.width = 0;
-	SkinProperties().Data1074.height = 11;
 	SkinProperties().HelpDialog.Width = 250;
 	SkinProperties().HelpDialog.Height = 185;
 	SkinProperties().HelpDialog.ClientHelpButton.x = 0;
@@ -1607,24 +1520,6 @@ void InitSkinProperties()
 	SkinProperties().HotkeyDialogAutoSendColor.R = 255;
 	SkinProperties().HotkeyDialogAutoSendColor.G = 255;
 	SkinProperties().HotkeyDialogAutoSendColor.B = 255;
-	SkinProperties().Data14E0 = 475;
-	SkinProperties().Data14E4 = 284;
-	SkinProperties().Data14E8.x = 0;
-	SkinProperties().Data14E8.y = 0;
-	SkinProperties().Data14E8.width = 0;
-	SkinProperties().Data14E8.height = 56;
-	SkinProperties().Data14F8.x = 0;
-	SkinProperties().Data14F8.y = 57;
-	SkinProperties().Data14F8.width = 0;
-	SkinProperties().Data14F8.height = 174;
-	SkinProperties().Data1508.x = 0;
-	SkinProperties().Data1508.y = 253;
-	SkinProperties().Data1508.width = 0;
-	SkinProperties().Data1508.height = 14;
-	SkinProperties().Data1518.x = 0;
-	SkinProperties().Data1518.y = 268;
-	SkinProperties().Data1518.width = 0;
-	SkinProperties().Data1518.height = 16;
 }
 
 // --- Timers ---------------------------------------------------------------
@@ -1649,7 +1544,7 @@ void patella::TGUI::RemoveTimer(TTimer *Timer)
 // Called by ProcessEvents. The first call only starts the clock.
 void patella::TGUI::UpdateTimers()
 {
-	if (!LastTimeSet) { // the original's function-local static, initialised on the first call (issue #107)
+	if (!LastTimeSet) {
 		LastTime = GetMilliseconds();
 		LastTimeSet = true;
 	}
@@ -1675,7 +1570,6 @@ TTimer::TTimer(int Time, TCallback Callback)
 	}
 }
 
-// The deleting destructor; this destructor is inlined into it.
 TTimer::~TTimer()
 {
 	RemoveTimer(this);
@@ -1818,8 +1712,8 @@ void TWindow::AppendChild(TComponent *Child)
 	Child->Parent = this;
 }
 
-// The child is closed after it is removed, where the original's delete
-// ran its destructor (issue #108).
+// The child is closed after it is removed, where the original's delete ran
+// its destructor.
 void TWindow::DeleteChild(TComponent *Child)
 {
 	RemoveChild(Child);
@@ -1929,21 +1823,18 @@ void TWindow::SetPosition(int _OffsetX, int _OffsetY)
 		Child->PositionChanged();
 }
 
-// Deletes the children. After the window's Close (issue #108) its children are
-// closed and DeleteChild only removes and frees them. A window destroyed
-// without a close is one whose constructor threw (its fully made bases are
-// destroyed): then DeleteChild closes each child, as the original's destructors
-// did their work there, and an exception of it ends the program, as the
-// original's second exception during the unwinding did.
+// Deletes the children. After the window's Close its children are closed and
+// DeleteChild only removes and frees them. A window destroyed without a close
+// is one whose constructor threw (its fully made bases are destroyed): then
+// DeleteChild closes each child, and an exception of it ends the program.
 TWindow::~TWindow()
 {
 	while (FirstChild != nullptr)
 		DeleteChild(FirstChild);
 }
 
-// Issue #108: ~TWindow's order, the first child first. The next child is taken
-// before the close (a close does not change the list; the original's
-// destructors ran on children already removed from it).
+// The children, the first child first. The next child is taken before the
+// close (a close does not change the list).
 void TWindow::OnClose()
 {
 	TComponent *Child = FirstChild;
@@ -2095,9 +1986,8 @@ void TWindow::StopDragging()
 	}
 }
 
-// Negative coordinates count from the right and bottom edges, sizes below
-// 1 are relative to the space left. They name the window's Width and
-// Height, not the area (whose name is ours, as FitToChild's).
+// Negative coordinates count from the right and bottom edges, sizes below 1
+// are relative to the space left.
 void TWindow::SetChildArea(TComponent *Child, TRect Area)
 {
 	PATELLA_ASSERT(Child->Parent==this);
@@ -2134,14 +2024,14 @@ void TWindow::SetChildPosition(TComponent *Child, int x, int y)
 void TWindow::FitToChild(TComponent *Child, TRect Area, bool Notify)
 {
 	PATELLA_ASSERT(Child!=nullptr);
-	PATELLA_ASSERT_VALUES(Child->getWidth()>0, Child->getWidth());
-	PATELLA_ASSERT_VALUES(Child->getHeight()>0, Child->getHeight());
+	PATELLA_ASSERT_VALUES(Child->GetWidth()>0, Child->GetWidth());
+	PATELLA_ASSERT_VALUES(Child->GetHeight()>0, Child->GetHeight());
 	int NewWidth = Child->Width + (Area.x > 0 ? Area.x : 0) + (Area.width < 0 ? -Area.width : 0);
 	int NewHeight = (Area.y > 0 ? Area.y : 0) + Child->Height + (Area.height < 0 ? -Area.height : 0);
-	const int MinimumWidth = getMinimumWidth();
+	const int MinimumWidth = GetMinimumWidth();
 	if (NewWidth < MinimumWidth)
 		NewWidth = MinimumWidth;
-	const int MinimumHeight = getMinimumHeight();
+	const int MinimumHeight = GetMinimumHeight();
 	if (NewHeight < MinimumHeight)
 		NewHeight = MinimumHeight;
 	if (Notify)
@@ -2183,10 +2073,10 @@ void TWindow::FitToChildren(TRect Margin, bool Notify)
 	Height = Height + abs(Margin.height) + abs(Margin.y);
 	for (Child = FirstChild; Child != nullptr; Child = Child->GetNext())
 		Child->SetPosition(Child->OffsetX + dx, Child->OffsetY + dy);
-	const int MinimumWidth = getMinimumWidth();
+	const int MinimumWidth = GetMinimumWidth();
 	if (Width < MinimumWidth)
 		Width = MinimumWidth;
-	const int MinimumHeight = getMinimumHeight();
+	const int MinimumHeight = GetMinimumHeight();
 	if (Height < MinimumHeight)
 		Height = MinimumHeight;
 	if (Notify)
@@ -2277,7 +2167,6 @@ void patella::TGUI::AddHotkey(int Key, TCallback Callback)
 	Hotkeys.insert_or_assign(Key, Callback);
 }
 
-// The last entry takes the place of the removed one.
 void patella::TGUI::RemoveHotkey(int Key)
 {
 	Hotkeys.erase(Key);
@@ -2289,7 +2178,7 @@ bool patella::TGUI::CheckHotkey(int Key)
 {
 	if ((Key & KEY_SHIFT) != 0)
 		Key -= KEY_SHIFT;
-	if ((Key & KEY_CODE_MASK) > 0x60 && (Key & KEY_CODE_MASK) < 0x7b)
+	if ((Key & KEY_CODE_MASK) >= 'a' && (Key & KEY_CODE_MASK) <= 'z')
 		Key -= 'a' - 'A';
 	const auto Hotkey = Hotkeys.find(Key);
 	if (Hotkey == Hotkeys.end())
@@ -2300,7 +2189,7 @@ bool patella::TGUI::CheckHotkey(int Key)
 	return true;
 }
 
-// The functions of the original (issue #107): each calls its member on the one TClient's TGUI.
+// The functions of the original: each calls its member on the one TClient's TGUI.
 
 void AddTimer(TTimer *Timer)
 {

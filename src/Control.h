@@ -1,13 +1,9 @@
-// Control.cpp: the client's main control flow. Graphics engine changes,
-// redrawing the screen, mouse and keyboard input, the timer, the event queue
-// that opens dialogs and starts connections, the network callbacks with the
-// packet dispatcher, and start-up and shutdown of all modules.
-// Function names are ours; parameter names come from the binary's catch
-// strings ("engine", "Force", "x", "y", "Key").
+// Control.h: the client's main control flow: graphics device changes, redrawing the screen, mouse and keyboard input,
+// the timer, the event queue that opens dialogs and starts connections, the network callbacks with the packet
+// dispatcher, and start-up and shutdown of all modules.
 //
-// Since Patella-Modern issue #118 the functions are TGUI's members (GUI.h), defined in Control.cpp; these free
-// functions of the original's names forward to them for the callers outside TGUI (MainFrm.cpp, Player.cpp, the test
-// mode), InitControl's callbacks and the golden tests, which call and fake them by name.
+// The functions are TGUI's members (GUI.h), defined in Control.cpp; these free functions of the same names forward to
+// them for the callers outside TGUI (SdlFrame.cpp, Player.cpp) and for InitControl's callbacks.
 
 #pragma once
 
@@ -18,11 +14,7 @@
 
 void Resize(int Width, int Height);
 
-void CheckSurface(bool Force);
-void ChangeEngine(int engine);
 void Redraw(bool Force);
-void EnterGame();
-void LeaveGame();
 
 void MouseMove(int x, int y);
 void LeftButtonDown(int x, int y, int Flags);
@@ -45,6 +37,6 @@ void InitWindow(patella::platform::TWindowHandle Window, void (*ExitProgram)(), 
 void InitControl(bool Gamemaster);
 void ExitControl();
 
-// Not in the original (Patella-Modern issue #77): the last ten packet types received, the newest first (0 for none),
-// for the developer log's diagnostics (Player.cpp HandleException; error.txt's "Last Packet Types" until issue #74).
+// The last ten packet types received, the newest first (0 for none), for the developer log's diagnostics (Player.cpp
+// HandleException).
 std::array<uint8, 10> GetLastPacketTypes();

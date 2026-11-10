@@ -1,10 +1,6 @@
-// Container.h: CipSoft's container templates (c:\mud\tibiaplayer\Container.h).
-//
-// The assertion texts and line numbers come from the binary's
-// instances; member names other than space and block are ours.
-//
-// The original file's growable vector<T> is TIndexedVector<T> of src/types/IndexedVector.h since
-// Patella-Modern issue #99, the same semantics over a std::vector.
+// Container.h: the fixed containers array<T>, matrix<T> and matrix3d<T>, arrays of one, two and three dimensions that
+// are indexed from a minimum and check every index in operator(). The growable vector that belongs with them is
+// TIndexedVector<T> (src/types/IndexedVector.h).
 
 #pragma once
 
@@ -13,31 +9,25 @@
 #include <memory>
 #include <sstream>
 
-// Each container owns its entries as a std::unique_ptr<T[]> (issue #58): a pointer at the original's offset, freed
-// with reset() where the original had delete[] (the destructors), allocated with reset(new T[n])
-// (the same new-expression: entries of a type without a constructor stay uninitialised). The element types'
-// destructors cannot throw (scalars, pointers and plain structures), so neither can the reset.
-static_assert(sizeof(std::unique_ptr<int[]>) == sizeof(int *) && alignof(std::unique_ptr<int[]>) == alignof(int *),
-	"std::unique_ptr<T[]> is a pointer");
+// Each container owns its entries as a std::unique_ptr<T[]>, freed with reset() where the original had delete[] (the
+// destructors), allocated with reset(new T[n]) (the same new-expression: entries of a type without a constructor stay
+// uninitialised). The element types' destructors cannot throw (scalars, pointers and plain structures), so neither can
+// the reset.
 
-// array<T> is a fixed array indexed from min to min+d-1. The class name is
-// ours; min, d, i, low() and high() are named in the assertions and in the
-// error message of operator().
+// array<T> is a fixed array indexed from min to min+d-1.
 template <class T> class array {
 public:
 	array(const array &) = delete;
 	array &operator=(const array &) = delete;
 	array(int Min, int Max);
-	// Inlined into Objects.cpp's ReleaseObjects (delete[] entry, then
-	// operator delete on the array itself).
 	~array() { entry.reset(); }
 	T &operator()(int i);
 	int low() { return min; }
 	int high() { return min + d - 1; }
 
-	int min;                    // +0x00
-	int d;                      // +0x04, number of entries
-	std::unique_ptr<T[]> entry; // +0x08
+	int min;
+	int d; // number of entries
+	std::unique_ptr<T[]> entry;
 };
 
 template <class T> array<T>::array(int Min, int Max)
@@ -61,15 +51,12 @@ template <class T> T &array<T>::operator()(int i)
 	return entry[i];
 }
 
-// matrix<T> is a fixed two-dimensional array indexed from xmin/ymin; matrix3d<T> its three-dimensional counterpart.
-// The class names are ours; xmin, ymin, zmin, dx, dy, dz, x, y and z are named in the assertions and error messages.
-// x is the fastest index. The destructors free the entries.
+// matrix<T> is a fixed two-dimensional array indexed from xmin/ymin; matrix3d<T> its three-dimensional counterpart. x
+// is the fastest index. The destructors free the entries.
 //
-// The entries are indexed through a std::mdspan view over the owned storage since Patella-Modern issue #101
-// (src/compat/mdspan.h; notes/decisions.md, "#101: the matrices and the automap layers as mdspan views"): view()
-// makes one from entry and the extents, layout_left, so view()[x, y] is entry[y * dx + x] and view()[x, y, z]
-// entry[(z * dy + y) * dx + x] as in the original. operator() checks the indices first; a view does not. The members
-// before entry and entry itself stay as they were (the golden test compares them with the original's).
+// The entries are indexed through a std::mdspan view over the owned storage (src/compat/mdspan.h): view() makes one
+// from entry and the extents, layout_left, so view()[x, y] is entry[y * dx + x] and view()[x, y, z]
+// entry[(z * dy + y) * dx + x] as in the original. operator() checks the indices first; a view does not.
 template <class T> class matrix {
 public:
 	matrix(const matrix &) = delete;
@@ -84,11 +71,11 @@ public:
 	TView view() { return TView(entry.get(), dx, dy); }
 	[[nodiscard]] TConstView view() const { return TConstView(entry.get(), dx, dy); }
 
-	int xmin;                   // +0x00
-	int ymin;                   // +0x04
-	int dx;                     // +0x08
-	int dy;                     // +0x0c
-	std::unique_ptr<T[]> entry; // +0x10
+	int xmin;
+	int ymin;
+	int dx;
+	int dy;
+	std::unique_ptr<T[]> entry;
 };
 
 template <class T> matrix<T>::matrix(int XMin, int XMax, int YMin, int YMax)
@@ -130,13 +117,13 @@ public:
 	TView view() { return TView(entry.get(), dx, dy, dz); }
 	[[nodiscard]] TConstView view() const { return TConstView(entry.get(), dx, dy, dz); }
 
-	int xmin;                   // +0x00
-	int ymin;                   // +0x04
-	int zmin;                   // +0x08
-	int dx;                     // +0x0c
-	int dy;                     // +0x10
-	int dz;                     // +0x14
-	std::unique_ptr<T[]> entry; // +0x18
+	int xmin;
+	int ymin;
+	int zmin;
+	int dx;
+	int dy;
+	int dz;
+	std::unique_ptr<T[]> entry;
 };
 
 template <class T> matrix3d<T>::matrix3d(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax)

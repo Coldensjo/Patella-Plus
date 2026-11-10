@@ -1,21 +1,20 @@
-// SurfaceVulkan.cpp: the Vulkan engine's surface on the client's window (SurfaceVulkan.h; notes/vulkan.md).
+// SurfaceVulkan.cpp: the Vulkan engine's surface on the client's window (SurfaceVulkan.h).
 //
-// Every function follows its counterpart in surfaceDX9.cpp (the comments name it), with the Direct3D 9
-// calls replaced: ColorFill by TRenderer::Fill, the dynamic vertex buffer by TRenderer::Draw, LockRect by
-// TRenderer::Upload, ApplyColorKey's read-back by TRenderer::ReplaceColor, Present by TRenderer::Present.
-// The state surfaceDX9.cpp keeps in file statics (the current target and texture numbers, the colour
-// keys, the queued vertices, the frame counter) is kept the same way, so it outlives the surface
-// object as there. Not new code paths for the error reports: no PATELLA_ASSERT (an index out of range is
-// ignored), and the Vulkan back end's failures become PROGRAM_ERROR 12, as Direct3D's device failures.
+// Every function follows its counterpart in the original's Direct3D 9 engine, surfaceDX9.cpp (the comments name it),
+// with the Direct3D 9 calls replaced: ColorFill by TRenderer::Fill, the dynamic vertex buffer by TRenderer::Draw,
+// LockRect by TRenderer::Upload, ApplyColorKey's read-back by TRenderer::ReplaceColor, Present by TRenderer::Present.
+// The state surfaceDX9.cpp keeps in file statics (the current target and texture numbers, the colour keys, the queued
+// vertices, the frame counter) is kept the same way, so it outlives the surface object as there. No PATELLA_ASSERT
+// (an index out of range is ignored), and the Vulkan back end's failures become PROGRAM_ERROR 12, as Direct3D's
+// device failures.
 //
-// The window system (issue #126; vulkan/WindowSystem.h): the main window's client area, the screen's size and each
-// device's surface come from SDL3 (SDL_Vulkan_CreateSurface). Still Win32: the devices' own windows (PresentWindow.h,
-// issue #52). The fullscreen display mode is the platform's IWindow::SetFullscreenMode since issue #124 (SDL3's
-// SDL_SetWindowFullscreenMode on every system since issue #152).
+// The window system (vulkan/WindowSystem.h): the main window's client area, the screen's size and each device's
+// surface come from SDL3 (SDL_Vulkan_CreateSurface). Still Win32: the devices' own windows (PresentWindow.h). The
+// fullscreen display mode is the platform's IWindow::SetFullscreenMode (SDL3's SDL_SetWindowFullscreenMode on every
+// system).
 //
-// Headless (issue #145; platform/Window.h IWindow::Headless, the test build's --test-headless): the device gets no
-// surface (TRenderer renders into its images and presents nothing; the frame observer reads the canvas back before
-// Present as always), and fullscreen mode does not change the display's mode. The devices' windows are made as always.
+// Headless (platform/Window.h IWindow::Headless): the device gets no surface (TRenderer renders into its images and
+// presents nothing), and fullscreen mode does not change the display's mode. The devices' windows are made as always.
 
 #include "common.h"
 #include "vulkan/SurfaceVulkan.h"
@@ -55,19 +54,18 @@ namespace {
 int CurrentTargetNumber = -1;
 std::array<uint32, NUMBER_OF_SURFACES_VULKAN> SurfaceKeys; // surfaceDX9.cpp ColorKey; 0 when the surface has none
 std::vector<TQuad> Vertices;                               // the queued quads (6 vertices each)
-std::array<int, NUMBER_OF_SURFACES_VULKAN> SurfaceCreated;
 int CurrentTexture;
 uint32 FrameCount;
 double LastFPSTime;
 
-// The windows the devices present in (PresentWindow.h; issue #52): one per device, a child of the main
+// The windows the devices present in (PresentWindow.h): one per device, a child of the main
 // window. They outlive the surface object (a device switch deletes it), so the window of the device
 // before a switch keeps its last frame until the next device has shown one.
 patella::vulkan::TPresentWindows PresentWindows;
 
 const int VertexLimit = 9600; // surfaceDX9.cpp's vertex buffer
 
-// The window system of the client's window (WindowSystem.h, issue #126).
+// The window system of the client's window (WindowSystem.h).
 patella::vulkan::IWindowSystem &WindowSystem()
 {
 	return patella::vulkan::SdlWindowSystem();
@@ -111,8 +109,9 @@ const char *TSurfaceVulkan::DeviceName() const
 }
 
 // The device request: the graphics device choice (DeviceSettings.h: the advanced options' buttons,
-// Patella.ini, PATELLA_VULKAN; issue #31), the CPU driver next to the executable, the window the device
-// presents in (Window, a device's window; nullptr, or a headless client (issue #145): no surface) and its surface through the window system (issue #126).
+// Patella.ini, PATELLA_VULKAN), the CPU driver next to the executable, the window the device presents in
+// (Window, a device's window; nullptr, or a headless client: no surface) and its surface through the
+// window system.
 TDeviceRequest TSurfaceVulkan::Request(patella::platform::TWindowHandle Window)
 {
 	TDeviceRequest Result;
@@ -138,8 +137,8 @@ void TSurfaceVulkan::Fail()
 }
 
 // surfaceDX9.cpp TestEngine: a device for the window, released again. Its surface is on a hidden child
-// window of its own (PresentWindow.h, issue #52), so the test leaves nothing bound to the main window or
-// to a window that shows frames.
+// window of its own (PresentWindow.h), so the test leaves nothing bound to the main window or to a window
+// that shows frames.
 bool TSurfaceVulkan::TestEngine()
 {
 	TSurface::TestEngine();
@@ -147,8 +146,8 @@ bool TSurfaceVulkan::TestEngine()
 		return false;
 	try {
 		const patella::vulkan::TTestWindow Window(MainWindow());
-		// Issue #131: a headless run has no window to test on (SDL's dummy driver has no Vulkan windows on Linux); its device
-		// is created without a surface, as the headless client's are.
+		// A headless run has no window to test on (SDL's dummy driver has no Vulkan windows on Linux); its device is
+		// created without a surface, as the headless client's are.
 		if (hWindow != nullptr && Window.Handle() == nullptr && !patella::platform::Platform().Window.Headless())
 			return false;
 		TRenderer Test;
@@ -173,33 +172,11 @@ void TSurfaceVulkan::AddShadeQuad(int Left, int Top, int Right, int Bottom, uint
 		TopRight, BottomRight, BottomLeft});
 }
 
-// --- the device-filtered pixels (only while a frame observer watches) ---
-//
-// compare_rendering.py compares exactly, except the pixels whose values come from the device's filter
-// or interpolation (the user's decision of November 3, 2026: up to 2 per channel there). TFilterMasks
-// (FilterMask.h) follows the engine's fills, uploads and quads to know them.
-
-// True when the masks are kept; makes Target's mask exist with the image's size.
-bool TSurfaceVulkan::Masked(int Target)
-{
-	if (FrameObserver == nullptr || Renderer == nullptr || Target < 0)
-		return false;
-	Masks.Ensure(Target, Renderer->ImageWidth(Target), Renderer->ImageHeight(Target));
-	return true;
-}
-
-void TSurfaceVulkan::Track(int Target, int Texture, const TQuad *Quads, size_t Count)
-{
-	if (Masked(Target) && Masked(Texture))
-		Masks.Draw(Target, Texture, Filter, Quads, Count);
-}
-
 // FlushVertices: the queued quads into the device's target with its texture and sampler.
 void TSurfaceVulkan::FlushVertices()
 {
 	if (!Vertices.empty()) {
 		if (Renderer != nullptr && DeviceTarget >= 0) {
-			Track(DeviceTarget, DeviceTexture >= 0 ? DeviceTexture : WhiteTexture, Vertices.data(), Vertices.size());
 			Renderer->Draw(DeviceTarget, DeviceTexture >= 0 ? DeviceTexture : WhiteTexture, Filter, Vertices.data(),
 				Vertices.size());
 		}
@@ -227,20 +204,13 @@ void TSurfaceVulkan::SetRenderTarget(int Surface)
 	CurrentTarget = Image[Surface];
 }
 
-int TSurfaceVulkan::GetSurfaceMemory(int Surface)
-{
-	return SurfaceCreated[Surface];
-}
-
 // The device goes before its window is retired (PresentWindow.h).
 TSurfaceVulkan::~TSurfaceVulkan()
 {
-	Shared.NumberOfSurfaces = 0;
 	Renderer.reset();
 	PresentWindows.Retire();
 }
 
-// The same code in all engines.
 bool TSurfaceVulkan::ClipRect(TRect Clip, patella::platform::TEdgeRect *Area, patella::platform::TEdgeRect *Source)
 {
 	const int ClipRight = Clip.x + Clip.width;
@@ -324,8 +294,6 @@ void TSurfaceVulkan::ColorFill(int Target, const patella::platform::TEdgeRect *R
 	if (R->left < 0 || R->top < 0 || R->left >= R->right || R->top >= R->bottom
 		|| R->right > Renderer->ImageWidth(Target) || R->bottom > Renderer->ImageHeight(Target))
 		return;
-	if (Masked(Target))
-		Masks.Fill(Target, R->left, R->top, R->right, R->bottom);
 	Renderer->Fill(Target, R->left, R->top, R->right, R->bottom, Color);
 }
 
@@ -344,24 +312,18 @@ void TSurfaceVulkan::FillRectangle(int Surface, TRect Area, TRGBColor Color)
 		SetRenderTarget(Surface);
 		FlushVertices();
 		ColorFill(CurrentTarget, &R, Xrgb(Color.R, Color.G, Color.B));
-		Shared.BlitCount++;
-		Shared.BlitPixels += Area.height * Area.width;
 	}
 }
 
-// FillRectangleClipped: the pixel count uses the size before clipping.
 void TSurfaceVulkan::FillRectangleClipped(int Surface, TRect Area, TRGBColor Color, TRect Clip)
 {
 	patella::platform::TEdgeRect R = {Area.x, Area.y, Area.x + Area.width, Area.y + Area.height};
 	if (R.top != R.bottom && R.left != R.right) {
-		const int Pixels = Area.height * Area.width;
 		patella::platform::TEdgeRect Unused = R;
 		if (ClipRect(Clip, &R, &Unused)) {
 			SetRenderTarget(Surface);
 			FlushVertices();
 			ColorFill(CurrentTarget, &R, Xrgb(Color.R, Color.G, Color.B));
-			Shared.BlitCount++;
-			Shared.BlitPixels += Pixels;
 		}
 	}
 }
@@ -373,8 +335,6 @@ void TSurfaceVulkan::DrawHorizontalLine(int Surface, int x, int y, int Length, T
 		SetRenderTarget(Surface);
 		FlushVertices();
 		ColorFill(CurrentTarget, &R, Xrgb(Color.R, Color.G, Color.B));
-		Shared.BlitCount++;
-		Shared.BlitPixels += Length;
 	}
 }
 
@@ -385,8 +345,6 @@ void TSurfaceVulkan::DrawVerticalLine(int Surface, int x, int y, int Length, TRG
 		SetRenderTarget(Surface);
 		FlushVertices();
 		ColorFill(CurrentTarget, &R, Xrgb(Color.R, Color.G, Color.B));
-		Shared.BlitCount++;
-		Shared.BlitPixels += Length;
 	}
 }
 
@@ -409,8 +367,6 @@ void TSurfaceVulkan::WriteImage(int ToSurface, int x, int y, int PartWidth, int 
 	}
 	if (ToSurface < SPRITE_SURFACE) {
 		if (Renderer != nullptr) {
-			if (Masked(ScreenTexture))
-				Masks.Upload(ScreenTexture, x, y, PartWidth, PartHeight, Pixels.data());
 			Renderer->Upload(ScreenTexture, x, y, PartWidth, PartHeight, Pixels.data(), (size_t)PartWidth);
 		}
 		Filter = TFilter::Point;
@@ -420,8 +376,6 @@ void TSurfaceVulkan::WriteImage(int ToSurface, int x, int y, int PartWidth, int 
 		return;
 	}
 	if (Renderer != nullptr && Image[ToSurface] >= 0) {
-		if (Masked(Image[ToSurface]))
-			Masks.Upload(Image[ToSurface], x, y, PartWidth, PartHeight, Pixels.data());
 		Renderer->Upload(Image[ToSurface], x, y, PartWidth, PartHeight, Pixels.data(), (size_t)PartWidth);
 	}
 }
@@ -443,7 +397,6 @@ void TSurfaceVulkan::FlushShade()
 	SetTexture(PRIMARY_SURFACE);
 	SetRenderTarget(TEMP_SURFACE);
 	if (Renderer != nullptr && DeviceTarget >= 0) {
-		Track(DeviceTarget, DeviceTexture >= 0 ? DeviceTexture : WhiteTexture, Shade.data(), Shade.size());
 		Renderer->Draw(DeviceTarget, DeviceTexture >= 0 ? DeviceTexture : WhiteTexture, Filter, Shade.data(),
 			Shade.size());
 	}
@@ -467,18 +420,11 @@ void TSurfaceVulkan::ShadeRectangles(int Surface, int Count, TRect *Rects, TRGBC
 	}
 }
 
-// FinishFrame. A frame observer (the test build's frame dump) sees the frame before it is shown.
+// FinishFrame.
 void TSurfaceVulkan::FinishFrame()
 {
 	if (ViewMode != 0) {
 		WaitForNextFrame();
-		Shared.ScreenWidth = Rect[SCREEN_SURFACE].right;
-		Shared.ScreenHeight = Rect[SCREEN_SURFACE].bottom;
-		Shared.LastBlitPixels = Shared.BlitPixels;
-		Shared.LastBlitCount = Shared.BlitCount;
-		Shared.Data71D0D8 = 0;
-		Shared.BlitCount = 0;
-		Shared.BlitPixels = 0;
 		FlushVertices();
 		if (Renderer != nullptr && Image[SCREEN_SURFACE] >= 0) {
 			const int x = Rect[SCREEN_SURFACE].left;
@@ -486,21 +432,8 @@ void TSurfaceVulkan::FinishFrame()
 			const int ShownWidth = Rect[SCREEN_SURFACE].right - x;
 			const int ShownHeight = Rect[SCREEN_SURFACE].bottom - y;
 			try {
-				if (FrameObserver != nullptr && FrameObserver(ShownWidth, ShownHeight) && PixelsObserver != nullptr) {
-					if (MaskObserver != nullptr && Masked(Image[SCREEN_SURFACE])) {
-						// The picture's device-filtered pixels: 1, the others 0.
-						std::vector<uint8> Shown((size_t)ShownWidth * (size_t)ShownHeight);
-						for (int i = 0; i < ShownHeight; i++)
-							for (int j = 0; j < ShownWidth; j++)
-								Shown[(size_t)i * (size_t)ShownWidth + (size_t)j] = (uint8)(Masks.At(Image[SCREEN_SURFACE], x + j, y + i) & patella::vulkan::TFilterMasks::Filtered);
-						MaskObserver(Shown.data(), ShownWidth, ShownHeight);
-					}
-					std::vector<uint32_t> Pixels;
-					Renderer->ReadBack(Image[SCREEN_SURFACE], x, y, ShownWidth, ShownHeight, Pixels);
-					PixelsObserver(Pixels.data(), ShownWidth * 4, ShownWidth, ShownHeight);
-				}
-				// The device's window covers the main window's client area, which the surface had before
-				// issue #52; once it shows a frame, the window of the device before it goes.
+				// The device's window covers the main window's client area; once it shows a frame, the
+				// window of the device before it goes.
 				PresentWindows.Fit();
 				if (Renderer->Present(Image[SCREEN_SURFACE], x, y, ShownWidth, ShownHeight,
 						(uint32_t)(WindowRect.right - WindowRect.left), (uint32_t)(WindowRect.bottom - WindowRect.top)))
@@ -509,22 +442,7 @@ void TSurfaceVulkan::FinishFrame()
 				Fail();
 			}
 		}
-		Shared.BlitCount++;
-		Shared.BlitPixels += (WindowRect.bottom - WindowRect.top) * (WindowRect.right - WindowRect.left);
 	}
-}
-
-bool TSurfaceVulkan::ReadScreen(std::vector<uint32_t> &Pixels, int &ShownWidth, int &ShownHeight)
-{
-	if (Renderer == nullptr || Image[SCREEN_SURFACE] < 0)
-		return false;
-	FlushVertices();
-	const int x = Rect[SCREEN_SURFACE].left;
-	const int y = Rect[SCREEN_SURFACE].top;
-	ShownWidth = Rect[SCREEN_SURFACE].right - x;
-	ShownHeight = Rect[SCREEN_SURFACE].bottom - y;
-	Renderer->ReadBack(Image[SCREEN_SURFACE], x, y, ShownWidth, ShownHeight, Pixels);
-	return true;
 }
 
 // ExitDisplay: releases the device and its surfaces (only after InitSurfaces, as surfaceDX9.cpp's only
@@ -536,17 +454,10 @@ void TSurfaceVulkan::ExitDisplay()
 		return;
 	Vertices.clear();
 	Shade.clear();
-	Masks.Clear();
 	Renderer.reset();
 	PresentWindows.Retire();
-	for (int i = 0; i < NUMBER_OF_SURFACES_VULKAN; i++) {
-		// surfaceDX9.cpp clears SurfaceCreated[i] where Surface9[i] exists, which SCREEN_SURFACE's never does.
-		if (Image[i] >= 0) {
-			Image[i] = -1;
-			if (i != SCREEN_SURFACE)
-				SurfaceCreated[i] = 0;
-		}
-	}
+	for (int i = 0; i < NUMBER_OF_SURFACES_VULKAN; i++)
+		Image[i] = -1;
 	ScreenTexture = -1;
 	WhiteTexture = -1;
 	DeviceTarget = -1;
@@ -554,7 +465,7 @@ void TSurfaceVulkan::ExitDisplay()
 	CurrentTarget = -1;
 	CacheSurfaces = 0;
 	if (DisplayModeSet) {
-		// The original's ChangeDisplaySettingsA(nullptr, 0); since issue #124 the platform's IWindow::SetFullscreenMode.
+		// The original's ChangeDisplaySettingsA(nullptr, 0): the platform's IWindow::SetFullscreenMode.
 		patella::platform::Platform().Window.SetFullscreenMode(hWindow, nullptr);
 		DisplayModeSet = false;
 	}
@@ -619,14 +530,12 @@ bool TSurfaceVulkan::Init(patella::platform::TWindowHandle *Window, int VMode, T
 	return true;
 }
 
-// The display modes as surfaceDX9.cpp's DirectDraw 4 EnumDisplayModes(0) and its callback (SurfaceDX.obj's
-// copy) gave them (issue #20): the display's modes in the order EnumDisplaySettings lists them,
-// each size and depth once (without DDEDM_REFRESHRATES DirectDraw folds the refresh rates), at least
-// 640x480 and 16 bits. Frequency is 0: DirectDraw then reports none, and the callback tested the refresh
-// rate's flag in the pixel format's flags, where it is never set. On the machine of issue #20 both lists
-// are the same 24 modes in the same order (notes/vulkan.md). The test build can fix the list
-// (issue #48). Since issue #119 the modes are the platform's IWindow::DisplayMode (platform/Window.h; SDL3's list
-// on every system since issue #152, with the deliberate differences of platform/DisplayModeList.h).
+// The display modes as surfaceDX9.cpp's DirectDraw 4 EnumDisplayModes(0) and its callback gave them: the
+// display's modes in the order EnumDisplaySettings lists them, each size and depth once (without
+// DDEDM_REFRESHRATES DirectDraw folds the refresh rates), at least 640x480 and 16 bits. Frequency is 0:
+// DirectDraw then reports none, and the callback tested the refresh rate's flag in the pixel format's
+// flags, where it is never set. The modes are the platform's IWindow::DisplayMode (platform/Window.h;
+// SDL3's list on every system, with the deliberate differences of platform/DisplayModeList.h).
 int TSurfaceVulkan::GetFullscreenModes(TFullscreenMode **Modes)
 {
 	*Modes = nullptr;
@@ -657,21 +566,6 @@ int TSurfaceVulkan::GetFullscreenModes(TFullscreenMode **Modes)
 	return NumberOfModes;
 }
 
-// SetSurfaceRect: SurfaceArea.left is set only for surface 0, its other members always.
-void TSurfaceVulkan::SetSurfaceRect(int Surface, int x, int y, int PartWidth, int PartHeight)
-{
-	if (Surface != 0) {
-		Rect[Surface].left = x;
-		Rect[Surface].top = y;
-		Rect[Surface].right = x + PartWidth;
-		Rect[Surface].bottom = y + PartHeight;
-	} else
-		SurfaceArea.left = x;
-	SurfaceArea.top = y;
-	SurfaceArea.right = x + PartWidth;
-	SurfaceArea.bottom = y + PartHeight;
-}
-
 bool TSurfaceVulkan::SurfaceRecreated(int)
 {
 	return Ready;
@@ -693,7 +587,6 @@ TSurfaceVulkan::TSurfaceVulkan(patella::platform::TSurfaceShared &Shared) : TSur
 	Ready = false;
 	Rect.fill(patella::platform::TEdgeRect{});
 	WindowRect = patella::platform::TEdgeRect{};
-	SurfaceArea = patella::platform::TEdgeRect{};
 	Initialized = false;
 	for (int i = 0; i < NUMBER_OF_SURFACES_VULKAN; i++)
 		Image[i] = -1;
@@ -704,10 +597,6 @@ TSurfaceVulkan::TSurfaceVulkan(patella::platform::TSurfaceShared &Shared) : TSur
 	CurrentTarget = -1;
 	Filter = TFilter::Linear;
 	DisplayModeSet = false;
-	DeviceObserver = nullptr;
-	FrameObserver = nullptr;
-	PixelsObserver = nullptr;
-	MaskObserver = nullptr;
 }
 
 // AddQuad: six vertices of a textured quad; a full buffer is drawn.
@@ -720,25 +609,6 @@ void TSurfaceVulkan::AddQuad(int Left, int Top, int Right, int Bottom, double Le
 		FlushVertices();
 }
 
-// StretchBlitUnclipped: an unscaled one is a Blit; the colours are not used for a scaled one.
-void TSurfaceVulkan::StretchBlitUnclipped(int ToSurface, TRect ToRect, int FromSurface, TRect FromRect,
-	TRGBColor ColorKey, TRGBColor)
-{
-	if (ToRect.width == FromRect.width && ToRect.height == FromRect.height) {
-		Blit(ToSurface, ToRect.x, ToRect.y, FromSurface, FromRect, ColorKey);
-		return;
-	}
-	const int Right = ToRect.x + ToRect.width;
-	const int Bottom = ToRect.y + ToRect.height;
-	const int FromRight = FromRect.x + FromRect.width;
-	const int FromBottom = FromRect.y + FromRect.height;
-	SetRenderTarget(ToSurface);
-	SetTexture(FromSurface);
-	AddQuad(ToRect.x, ToRect.y, Right, Bottom, (FromRect.x + 0.5) / Rect[FromSurface].right,
-		(FromRight + 0.5) / Rect[FromSurface].right, (FromRect.y + 0.5) / Rect[FromSurface].bottom,
-		(FromBottom + 0.5) / Rect[FromSurface].bottom, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
-}
-
 void TSurfaceVulkan::StretchBlitRect(int ToSurface, TRect Destination, int FromSurface, TRect Source)
 {
 	SetRenderTarget(ToSurface);
@@ -747,8 +617,6 @@ void TSurfaceVulkan::StretchBlitRect(int ToSurface, TRect Destination, int FromS
 		(Source.x + 0.5) / Rect[FromSurface].right, (Source.x + Source.width + 0.5) / Rect[FromSurface].right,
 		(Source.y + 0.5) / Rect[FromSurface].bottom, (Source.y + Source.height + 0.5) / Rect[FromSurface].bottom,
 		0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
-	Shared.BlitCount++;
-	Shared.BlitPixels += Destination.height * Destination.width;
 }
 
 // BlitRectClipped: ScreenTexture (SCREEN_SURFACE) is always mapped as a whole.
@@ -773,15 +641,12 @@ void TSurfaceVulkan::BlitRectClipped(int ToSurface, int x, int y, int FromSurfac
 		}
 		AddQuad(To.left, To.top, To.right, To.bottom, Left_u, Right_u, Top_v, Bottom_v, 0xffffffff, 0xffffffff,
 			0xffffffff, 0xffffffff);
-		Shared.BlitCount++;
-		Shared.BlitPixels += FromRect.height * FromRect.width;
 	}
 }
 
 // InitSurfaces: the start state. surfaceDX9.cpp creates DirectDraw 4 here for the modes and the stretch
-// capabilities; the modes come from EnumDisplaySettings now (GetFullscreenModes), and Vulkan stretches on
-// every device, so CanStretch is set (surfaceDX9.cpp: DirectDraw's four stretch and shrink flags, which
-// the machine of issue #20 reports too).
+// capabilities; the modes come from the platform's list now (GetFullscreenModes), and Vulkan stretches on
+// every device, so CanStretch is set (surfaceDX9.cpp: DirectDraw's four stretch and shrink flags).
 void TSurfaceVulkan::InitSurfaces()
 {
 	hWindow = nullptr;
@@ -794,7 +659,6 @@ void TSurfaceVulkan::InitSurfaces()
 	CurrentTarget = -1;
 	for (int i = 0; i < NUMBER_OF_SURFACES_VULKAN; i++) {
 		Image[i] = -1;
-		SurfaceCreated[i] = 0;
 		SurfaceKeys[i] = 0;
 	}
 	Rect[TEMP_SURFACE] = SizeRect(640, 480);
@@ -869,8 +733,6 @@ void TSurfaceVulkan::WriteMaskedImage(int ToSurface, int x, int y, int PartWidth
 		Pixels[(size_t)i] = (uint32)A << 24 | (uint32)R << 16 | (uint32)G << 8 | B;
 	}
 	if (Renderer != nullptr && Image[ToSurface] >= 0) {
-		if (Masked(Image[ToSurface]))
-			Masks.Upload(Image[ToSurface], x, y, PartWidth, PartHeight, Pixels.data());
 		Renderer->Upload(Image[ToSurface], x, y, PartWidth, PartHeight, Pixels.data(), (size_t)PartWidth);
 	}
 }
@@ -949,14 +811,12 @@ void TSurfaceVulkan::InitDisplay(int VMode, TFullscreenMode *GMode)
 	ViewMode = VMode;
 }
 
-// CreateSurfaces: the device for ViewMode and every surface, in surfaceDX9.cpp's order (SurfaceCreated
-// and NumberOfSurfaces count them the same way). PROGRAM_ERRORs: 8 below 16 bits per pixel on the
+// CreateSurfaces: the device for ViewMode and every surface, in surfaceDX9.cpp's order. PROGRAM_ERRORs: 8 below 16 bits per pixel on the
 // desktop, 12 without a Vulkan device.
 void TSurfaceVulkan::CreateSurfaces()
 {
-	Shared.NumberOfSurfaces = 0;
-	// surfaceDX9.cpp: DirectDraw's GetDisplayMode, the desktop's depth (0 before InitSurfaces). Since issue #138 the
-	// platform's IWindow::DesktopMode (platform/Window.h; SDL3's SDL_GetCurrentDisplayMode since issue #152).
+	// surfaceDX9.cpp: DirectDraw's GetDisplayMode, the desktop's depth (0 before InitSurfaces). Here the platform's
+	// IWindow::DesktopMode (platform/Window.h; SDL3's SDL_GetCurrentDisplayMode).
 	patella::platform::TDisplayMode Desktop;
 	if (!Initialized || !patella::platform::Platform().Window.DesktopMode(Desktop))
 		Desktop.Depth = 0;
@@ -964,24 +824,22 @@ void TSurfaceVulkan::CreateSurfaces()
 		throw TProgramError{PROGRAM_ERROR::COLOR_DEPTH};
 	if (ViewMode == FULLSCREEN_MODE) {
 		// Direct3D 9's fullscreen device sets the display mode; the window is already a popup over the
-		// whole screen (MainFrm.cpp SetDisplayMode; SdlFrame.cpp's: SDL's fullscreen window). Since issue #124 the
-		// platform's IWindow::SetFullscreenMode (the width, height and bits per pixel; SDL3's SDL_SetWindowFullscreenMode
-		// on every system since issue #152).
+		// whole screen (SdlFrame.cpp's SetDisplayMode: SDL's fullscreen window). Here the platform's
+		// IWindow::SetFullscreenMode does (the width, height and bits per pixel; SDL3's SDL_SetWindowFullscreenMode
+		// on every system).
 		patella::platform::TDisplayMode Mode;
 		Mode.Width = Width;
 		Mode.Height = Height;
 		Mode.Depth = Depth;
-		// Issue #145: headless, the display's mode stays the desktop's (the change counts as made).
+		// Headless, the display's mode stays the desktop's (the change counts as made).
 		if (!patella::platform::Platform().Window.Headless()) {
-			if (!patella::platform::Platform().Window.SetFullscreenMode(hWindow, &Mode)) {
-				Shared.InitStep = 1;
+			if (!patella::platform::Platform().Window.SetFullscreenMode(hWindow, &Mode))
 				throw TProgramError{PROGRAM_ERROR::SURFACE};
-			}
 			DisplayModeSet = true;
 		}
 	}
 	try {
-		// A window of its own for the new device (PresentWindow.h, issue #52).
+		// A window of its own for the new device (PresentWindow.h).
 		patella::platform::TWindowHandle Window = nullptr;
 		if (hWindow != nullptr) {
 			Window = PresentWindows.Open(MainWindow());
@@ -1005,37 +863,25 @@ void TSurfaceVulkan::CreateSurfaces()
 		}
 		Image[SCREEN_SURFACE] = Renderer->CreateImage(CanvasWidth, CanvasHeight);
 		WhiteTexture = Renderer->CreateImage(1, 1);
-		if (Masked(WhiteTexture))
-			Masks.Fill(WhiteTexture, 0, 0, 1, 1);
 		Renderer->Fill(WhiteTexture, 0, 0, 1, 1, 0xffffffffu);
 
 		Image[PRIMARY_SURFACE] = Renderer->CreateImage(Rect[TEMP_SURFACE].right, Rect[TEMP_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
-		if (Masked(Image[PRIMARY_SURFACE]))
-			Masks.Fill(Image[PRIMARY_SURFACE], 0, 0, Rect[TEMP_SURFACE].right, Rect[TEMP_SURFACE].bottom);
 		Renderer->Fill(Image[PRIMARY_SURFACE], 0, 0, Rect[TEMP_SURFACE].right, Rect[TEMP_SURFACE].bottom, 0xffff0000u);
 
 		ScreenTexture = Renderer->CreateImage(106, 106);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 
 		Image[TEMP_SURFACE] = Renderer->CreateImage(Rect[TEMP_SURFACE].right, Rect[TEMP_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		Image[STRETCH_SURFACE] = Renderer->CreateImage(Rect[STRETCH_SURFACE].right, Rect[STRETCH_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		Image[CACHE_SURFACE] = Renderer->CreateImage(Rect[CACHE_SURFACE].right, Rect[CACHE_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		Image[AUTOMAP_SURFACE] = Renderer->CreateImage(Rect[AUTOMAP_SURFACE].right, Rect[AUTOMAP_SURFACE].bottom);
-		SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 		for (int i = 0; i < 16; i++) {
 			const int Surface = SPRITE_SURFACE + i;
 			Image[Surface] = Renderer->CreateImage(Rect[Surface].right, Rect[Surface].bottom);
-			SurfaceCreated[Shared.NumberOfSurfaces++] = 1;
 			CacheSurfaces++;
 		}
 	} catch (const TVulkanError &) {
 		Renderer.reset();
 		PresentWindows.Retire();
-		Shared.InitStep = 1;
 		throw TProgramError{PROGRAM_ERROR::SURFACE};
 	}
 	// A new device draws into the back buffer and has no texture; the numbers above stay as they were
@@ -1043,8 +889,6 @@ void TSurfaceVulkan::CreateSurfaces()
 	DeviceTarget = Image[SCREEN_SURFACE];
 	DeviceTexture = -1;
 	Filter = TFilter::Linear;
-	if (DeviceObserver != nullptr)
-		DeviceObserver(Renderer->Device().Name.c_str(), (int)Renderer->Device().Type, Renderer->Device().CpuDriver);
 	Unavailable = false;
 	Ready = true;
 }

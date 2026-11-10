@@ -1,4 +1,4 @@
-// Renderer.cpp: the Vulkan 1.3 back end of the Vulkan engine (Renderer.h; notes/vulkan.md).
+// Renderer.cpp: the Vulkan 1.3 back end of the Vulkan engine (Renderer.h).
 
 #include "vulkan/Renderer.h"
 
@@ -91,12 +91,6 @@ struct TFrame {
 	VkSemaphore Acquired = VK_NULL_HANDLE;
 	std::vector<TBuffer> Vertices;
 	std::vector<TBuffer> Staging;
-	// Issue #134, the frame timings (TRenderer::SetFrameTimestamps): two timestamps around each submission.
-	VkQueryPool Timestamps = VK_NULL_HANDLE;
-	bool TimestampWritten = false; // this command buffer has its first timestamp
-	bool TimestampPending = false; // a submission with both timestamps, its results not read yet
-	bool EndsFrame = false;        // and it was the frame's last
-	uint64_t FrameTicks = 0;       // the frame's submissions so far (device ticks)
 };
 
 uint32_t ToUint(int Value)
@@ -165,9 +159,9 @@ int TypeRank(VkPhysicalDeviceType Type)
 
 // The devices of one side (the CPU driver's or the system's GPUs) the engine can use: Vulkan 1.3 with
 // dynamic rendering and synchronization2, in the loader's order (vk-bootstrap's select_devices).
-// Listed: the list a GPU index counts in (ListGpus, issue #31), the same with or without a window, so
-// any surface is left out and VK_KHR_swapchain is required instead. Otherwise, with a surface, the
-// devices that can present to it.
+// Listed: the list a GPU index counts in (ListGpus), the same with or without a window, so any surface
+// is left out and VK_KHR_swapchain is required instead. Otherwise, with a surface, the devices that can
+// present to it.
 std::vector<vkb::PhysicalDevice> FindDevices(const vkb::Instance &Instance, VkSurfaceKHR Surface, bool Cpu, bool Listed)
 {
 	VkPhysicalDeviceVulkan13Features Features13{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES};
@@ -193,22 +187,17 @@ std::vector<vkb::PhysicalDevice> FindDevices(const vkb::Instance &Instance, VkSu
 	return Devices;
 }
 
-TDeviceInfo InfoOf(const vkb::PhysicalDevice &Physical, bool Cpu)
+TDeviceInfo InfoOf(const vkb::PhysicalDevice &Physical)
 {
 	TDeviceInfo Info;
 	Info.Name = patella::text::Utf8ToCp1252(Physical.properties.deviceName); // UTF-8 (Vulkan), shown by the GUI
 	Info.Type = Physical.properties.deviceType;
-	Info.VendorId = Physical.properties.vendorID;
-	Info.DeviceId = Physical.properties.deviceID;
-	Info.ApiVersion = Physical.properties.apiVersion;
-	Info.DriverVersion = Physical.properties.driverVersion;
-	Info.CpuDriver = Cpu;
 	return Info;
 }
 
 // The window system's surface extension of the platform (the one the client's TDeviceRequest names).
-// Every system's surface extension the loader offers is enabled on every instance (issue-31-fix, below): on Linux the
-// X11 and the Wayland one of SDL3's video drivers (issue #131); which of them the window's device names is SDL's choice.
+// Every system's surface extension the loader offers is enabled on every instance (NewInstanceBuilder, below): on
+// Linux the X11 and the Wayland one of SDL3's video drivers; which of them the window's device names is SDL's choice.
 #if defined(_WIN32)
 constexpr std::array<const char *, 1> PlatformSurfaceExtensions = {"VK_KHR_win32_surface"};
 #else
@@ -216,18 +205,17 @@ constexpr std::array<const char *, 3> PlatformSurfaceExtensions = {"VK_KHR_xlib_
 	"VK_KHR_wayland_surface"};
 #endif
 
-// The builder of every instance the back end creates (issue-31-fix). vk-bootstrap loads its instance
-// functions (the surface queries of the device selection and the swapchain, the debug messenger's) into a
-// table of its own once per process, from the first instance it builds (VkBootstrap.cpp
-// init_instance_funcs), and keeps them for every later instance. The loader gives such a function only
-// for an instance with its extension enabled, so the first instance decides for the whole process: the
-// device list's headless instance, the first at the client's start since issue #31, left the surface
-// functions null, and the window's device selection then called a null pointer (get_present_queue_index;
-// the start-up crash 0xC0000409). So every instance enables the same instance extensions, whatever it is
-// for: VK_KHR_surface with the platform's surface extension, and VK_EXT_debug_utils, each where the loader
-// offers it (they cost nothing without a window or a messenger), and the one a request names. The functions
-// the loader gives are its trampolines, the same for every instance, so the table stays valid after its
-// instance is destroyed (as it did before issue #31: the start-up test's instance was destroyed too).
+// The builder of every instance the back end creates. vk-bootstrap loads its instance functions (the
+// surface queries of the device selection and the swapchain, the debug messenger's) into a table of its
+// own once per process, from the first instance it builds (VkBootstrap.cpp init_instance_funcs), and keeps
+// them for every later instance. The loader gives such a function only for an instance with its extension
+// enabled, so the first instance decides for the whole process: the device list's headless instance, the
+// first at the client's start, would leave the surface functions null, and the window's device selection
+// would then call a null pointer (get_present_queue_index: a start-up crash, 0xC0000409). So every
+// instance enables the same instance extensions, whatever it is for: VK_KHR_surface with the platform's
+// surface extension, and VK_EXT_debug_utils, each where the loader offers it (they cost nothing without a
+// window or a messenger), and the one a request names. The functions the loader gives are its trampolines,
+// the same for every instance, so the table stays valid after its instance is destroyed.
 vkb::InstanceBuilder NewInstanceBuilder(const std::string &SurfaceExtension)
 {
 	vkb::InstanceBuilder Builder(vkGetInstanceProcAddr);
@@ -263,7 +251,7 @@ std::vector<TDeviceInfo> ListDevices(bool Cpu)
 	const vkb::Instance Instance = Built.value();
 	try {
 		for (const vkb::PhysicalDevice &Physical : FindDevices(Instance, VK_NULL_HANDLE, Cpu, true))
-			Result.push_back(InfoOf(Physical, Cpu));
+			Result.push_back(InfoOf(Physical));
 	} catch (...) {
 		vkb::destroy_instance(Instance);
 		throw;
@@ -287,17 +275,6 @@ int BestGpu(const std::vector<TDeviceInfo> &Gpus)
 			Best = static_cast<int>(i);
 	}
 	return Best;
-}
-
-std::optional<TDeviceInfo> CpuDriverDevice(const std::string &Manifest)
-{
-	if (Manifest.empty())
-		return std::nullopt;
-	const TDriverFiles Driver(Manifest);
-	std::vector<TDeviceInfo> Devices = ListDevices(true);
-	if (Devices.empty())
-		return std::nullopt;
-	return Devices.front();
 }
 
 bool LoaderAvailable()
@@ -334,21 +311,14 @@ struct TRenderer::TState {
 	int FrameIndex = 0;
 	bool Recording = false;
 
-	// Issue #134: off unless SetFrameTimestamps asks for them; with them off no timing command is recorded.
-	bool TimestampsOn = false;
-	uint64_t TimestampMask = 0;       // the queue's valid timestamp bits
-	double TimestampPeriod = 0.0;     // nanoseconds per device tick
-	std::vector<uint64_t> FrameTimes; // nanoseconds of finished frames, not taken yet
-
 	int PassTarget = -1;
 	VkPipeline BoundPipeline = VK_NULL_HANDLE;
 	VkDescriptorSet BoundSet = VK_NULL_HANDLE;
 	VkBuffer BoundVertices = VK_NULL_HANDLE;
 
-	TBuffer ReadBuffer;
 
-	// TRenderer::Draw's working copies of the quads (issue #155): they keep their capacity, so a draw allocates only when
-	// its batch is the largest so far. Draw empties and refills both before it reads them.
+	// TRenderer::Draw's working copies of the quads: they keep their capacity, so a draw allocates only when its batch
+	// is the largest so far. Draw empties and refills both before it reads them.
 	std::vector<TVertex> QuadVertices;
 	std::vector<uint32_t> QuadSamplers; // the descriptor set per quad
 
@@ -357,7 +327,7 @@ struct TRenderer::TState {
 
 	// --- buffers ---
 
-	[[nodiscard]] TBuffer CreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, bool Readable) const
+	[[nodiscard]] TBuffer CreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage) const
 	{
 		TBuffer Buffer;
 		VkBufferCreateInfo Info{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
@@ -365,9 +335,7 @@ struct TRenderer::TState {
 		Info.usage = Usage;
 		VmaAllocationCreateInfo Allocation{};
 		Allocation.usage = VMA_MEMORY_USAGE_AUTO;
-		Allocation.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT
-			| (Readable ? VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT
-						: VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+		Allocation.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 		VmaAllocationInfo Result{};
 		Check(vmaCreateBuffer(Allocator, &Info, &Allocation, &Buffer.Buffer, &Buffer.Allocation, &Result),
 			"vmaCreateBuffer");
@@ -394,7 +362,7 @@ struct TRenderer::TState {
 				return Chunk;
 			}
 		}
-		Chunks.push_back(CreateBuffer(std::max(ChunkSize, Size), Usage, false));
+		Chunks.push_back(CreateBuffer(std::max(ChunkSize, Size), Usage));
 		Offset = 0;
 		Chunks.back().Used = Size;
 		return Chunks.back();
@@ -521,8 +489,6 @@ struct TRenderer::TState {
 	{
 		TFrame &F = Frame();
 		Check(vkWaitForFences(Device.device, 1, &F.Fence, VK_TRUE, UINT64_MAX), "vkWaitForFences");
-		if (F.TimestampPending)
-			ReadTimestamps(F);
 		Check(vkResetFences(Device.device, 1, &F.Fence), "vkResetFences");
 		Check(vkResetCommandPool(Device.device, F.Pool, 0), "vkResetCommandPool");
 		for (TBuffer &Chunk : F.Vertices)
@@ -532,12 +498,6 @@ struct TRenderer::TState {
 		VkCommandBufferBeginInfo Begin{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
 		Begin.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 		Check(vkBeginCommandBuffer(F.Commands, &Begin), "vkBeginCommandBuffer");
-		F.TimestampWritten = false;
-		if (TimestampsOn && F.Timestamps != VK_NULL_HANDLE) {
-			vkCmdResetQueryPool(F.Commands, F.Timestamps, 0, 2);
-			vkCmdWriteTimestamp2(F.Commands, VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, F.Timestamps, 0);
-			F.TimestampWritten = true;
-		}
 		Recording = true;
 		PassTarget = -1;
 		BoundPipeline = VK_NULL_HANDLE;
@@ -545,52 +505,11 @@ struct TRenderer::TState {
 		BoundVertices = VK_NULL_HANDLE;
 	}
 
-	// Issue #134: the results of a submission whose fence has signalled; the frame's last one completes a frame.
-	void ReadTimestamps(TFrame &F)
-	{
-		F.TimestampPending = false;
-		std::array<uint64_t, 2> Values{};
-		if (vkGetQueryPoolResults(Device.device, F.Timestamps, 0, 2, sizeof(Values), Values.data(), sizeof(uint64_t),
-				VK_QUERY_RESULT_64_BIT)
-			== VK_SUCCESS)
-			F.FrameTicks += (Values[1] - Values[0]) & TimestampMask;
-		if (F.EndsFrame) {
-			F.EndsFrame = false;
-			FrameTimes.push_back(static_cast<uint64_t>(static_cast<double>(F.FrameTicks) * TimestampPeriod));
-			F.FrameTicks = 0;
-		}
-	}
-
-	bool EnableTimestamps()
-	{
-		if (Frames.front().Timestamps == VK_NULL_HANDLE) {
-			const uint32_t Family = Value(Device.get_queue_index(vkb::QueueType::graphics), "the graphics queue");
-			const uint32_t ValidBits = Device.queue_families[Family].timestampValidBits;
-			TimestampPeriod = static_cast<double>(Device.physical_device.properties.limits.timestampPeriod);
-			if (ValidBits == 0 || TimestampPeriod <= 0.0)
-				return false;
-			TimestampMask = ValidBits >= 64 ? ~uint64_t{0} : (uint64_t{1} << ValidBits) - 1;
-			VkQueryPoolCreateInfo Info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
-			Info.queryType = VK_QUERY_TYPE_TIMESTAMP;
-			Info.queryCount = 2;
-			for (TFrame &F : Frames)
-				Check(vkCreateQueryPool(Device.device, &Info, nullptr, &F.Timestamps), "vkCreateQueryPool");
-			// Room for the frames between two takes: taking them in a frame loop allocates nothing.
-			FrameTimes.reserve(64);
-		}
-		TimestampsOn = true;
-		return true;
-	}
-
 	// Ends and submits the frame's commands (waiting for Wait at the transfer stage, signalling Signal).
 	void Submit(VkSemaphore Wait, VkSemaphore Signal)
 	{
 		EndPass();
 		TFrame &F = Frame();
-		if (F.TimestampWritten) {
-			vkCmdWriteTimestamp2(F.Commands, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT, F.Timestamps, 1);
-			F.TimestampPending = true;
-		}
 		Check(vkEndCommandBuffer(F.Commands), "vkEndCommandBuffer");
 		Recording = false;
 		VkCommandBufferSubmitInfo CommandInfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO};
@@ -620,7 +539,6 @@ struct TRenderer::TState {
 
 	void NextFrame()
 	{
-		Frame().EndsFrame = Frame().TimestampPending;
 		FrameIndex = (FrameIndex + 1) % FramesInFlight;
 		BeginFrame();
 	}
@@ -881,7 +799,7 @@ struct TRenderer::TState {
 		// The window's surface given here: a device chosen by its index was selected without it (FindDevices).
 		vkb::SwapchainBuilder Builder(Device, Surface);
 		// The original engines show frames without waiting for the display (D3DPRESENT_INTERVAL_IMMEDIATE);
-		// MAILBOX and FIFO only where IMMEDIATE is missing. D13's vsync comes with the settings file (D12).
+		// MAILBOX and FIFO only where IMMEDIATE is missing.
 		Builder.set_desired_format({VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
 			.add_fallback_format({VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
 			.set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR)
@@ -920,7 +838,7 @@ struct TRenderer::TState {
 		if (Request.Validation)
 			Builder.request_validation_layers(true).use_default_debug_messenger();
 		auto Built = Builder.build();
-		// A loader with no system driver at all (issue #163: GitHub's runner, measured: failed_create_instance headless,
+		// A loader with no system driver at all (measured on GitHub's runner: failed_create_instance headless,
 		// requested_extensions_not_present for a window, the loader listing no surface extension) has no device of a
 		// system driver to offer, which is no error: the caller goes on to the CPU driver, as ListDevices' empty list.
 		if (!Cpu && !Built
@@ -932,8 +850,8 @@ struct TRenderer::TState {
 		if (Request.CreateSurface)
 			Surface = Request.CreateSurface(Instance.instance);
 
-		// The n-th GPU counts in ListGpus' list (the advanced options' GPU button, issue #31), which does
-		// not depend on the window; whether it can present to it is checked below.
+		// The n-th GPU counts in ListGpus' list (the advanced options' GPU button), which does not depend
+		// on the window; whether it can present to it is checked below.
 		const bool Indexed = !Cpu && GpuIndex >= 0;
 		std::vector<vkb::PhysicalDevice> Candidates = FindDevices(Instance, Surface, Cpu, Indexed);
 		const vkb::PhysicalDevice *Chosen = nullptr;
@@ -970,7 +888,7 @@ struct TRenderer::TState {
 			if (!Supported)
 				throw TVulkanError("the graphics queue of " + Chosen->name + " cannot present to the window");
 		}
-		DeviceInfo = InfoOf(*Chosen, Cpu);
+		DeviceInfo = InfoOf(*Chosen);
 		return true;
 	}
 
@@ -1037,7 +955,6 @@ struct TRenderer::TState {
 			for (TImage &Image : Images)
 				FreeImage(Image);
 			Images.clear();
-			DestroyBuffer(ReadBuffer);
 			for (TFrame &F : Frames) {
 				for (TBuffer &Chunk : F.Vertices)
 					DestroyBuffer(Chunk);
@@ -1051,8 +968,6 @@ struct TRenderer::TState {
 					vkDestroyFence(Device.device, F.Fence, nullptr);
 				if (F.Pool != VK_NULL_HANDLE)
 					vkDestroyCommandPool(Device.device, F.Pool, nullptr);
-				if (F.Timestamps != VK_NULL_HANDLE)
-					vkDestroyQueryPool(Device.device, F.Timestamps, nullptr);
 				F = TFrame{};
 			}
 			DestroySwapchainSemaphores();
@@ -1279,40 +1194,6 @@ void TRenderer::ReplaceColor(int Image, int x, int y, int Width, int Height, uin
 	S.DrawVertices(Vertices.data(), Vertices.size());
 }
 
-void TRenderer::ReadBack(int Image, int x, int y, int Width, int Height, std::vector<uint32_t> &Pixels)
-{
-	TState &S = *State;
-	Pixels.assign(static_cast<size_t>(std::max(Width, 0)) * static_cast<size_t>(std::max(Height, 0)), 0);
-	if (Width <= 0 || Height <= 0)
-		return;
-	S.EndPass();
-	const VkDeviceSize Size = static_cast<VkDeviceSize>(Width) * static_cast<VkDeviceSize>(Height) * 4;
-	if (S.ReadBuffer.Size < Size) {
-		// Only ReadBack uses it, and it waits until the copy is done: nothing uses the old one now.
-		S.DestroyBuffer(S.ReadBuffer);
-		S.ReadBuffer = S.CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_DST_BIT, true);
-	}
-	VkBufferImageCopy Region{};
-	Region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
-	Region.imageOffset = {x, y, 0};
-	Region.imageExtent = {ToUint(Width), ToUint(Height), 1};
-	vkCmdCopyImageToBuffer(S.Commands(), S.Images[static_cast<size_t>(Image)].Image, VK_IMAGE_LAYOUT_GENERAL,
-		S.ReadBuffer.Buffer, 1, &Region);
-	VkMemoryBarrier2 Memory{VK_STRUCTURE_TYPE_MEMORY_BARRIER_2};
-	Memory.srcStageMask = VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT;
-	Memory.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-	Memory.dstStageMask = VK_PIPELINE_STAGE_2_HOST_BIT;
-	Memory.dstAccessMask = VK_ACCESS_2_HOST_READ_BIT;
-	VkDependencyInfo Dependency{VK_STRUCTURE_TYPE_DEPENDENCY_INFO};
-	Dependency.memoryBarrierCount = 1;
-	Dependency.pMemoryBarriers = &Memory;
-	vkCmdPipelineBarrier2(S.Commands(), &Dependency);
-	S.Barrier();
-	S.SubmitAndWait();
-	Check(vmaInvalidateAllocation(S.Allocator, S.ReadBuffer.Allocation, 0, Size), "vmaInvalidateAllocation");
-	std::memcpy(Pixels.data(), S.ReadBuffer.Mapped, static_cast<size_t>(Size));
-}
-
 bool TRenderer::Present(int Image, int x, int y, int Width, int Height, uint32_t WindowWidth, uint32_t WindowHeight)
 {
 	TState &S = *State;
@@ -1379,35 +1260,6 @@ bool TRenderer::Present(int Image, int x, int y, int Width, int Height, uint32_t
 		Check(Presented, "vkQueuePresentKHR");
 	S.NextFrame();
 	return true;
-}
-
-void TRenderer::Finish()
-{
-	TState &S = *State;
-	S.SubmitAndWait();
-	Check(vkDeviceWaitIdle(S.Device.device), "vkDeviceWaitIdle");
-}
-
-bool TRenderer::SetFrameTimestamps(bool On)
-{
-	TState &S = *State;
-	if (!On) {
-		S.TimestampsOn = false;
-		return true;
-	}
-	return S.EnableTimestamps();
-}
-
-void TRenderer::TakeFrameTimes(std::vector<uint64_t> &Nanoseconds)
-{
-	TState &S = *State;
-	Nanoseconds.insert(Nanoseconds.end(), S.FrameTimes.begin(), S.FrameTimes.end());
-	S.FrameTimes.clear();
-}
-
-VkPresentModeKHR TRenderer::PresentMode() const
-{
-	return State->Swapchain.present_mode;
 }
 
 } // namespace patella::vulkan

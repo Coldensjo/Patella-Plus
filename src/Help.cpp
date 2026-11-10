@@ -1,21 +1,17 @@
-// Help.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The help system: the help bubble of the help mode (the area and handle of
-// the window under the magnifying glass, and its text), and the event helps
-// ("hints") shown at certain places and NPCs. The functions without line
-// evidence come first, in binary order, then the asserted functions in line
-// order, then GetCurrentHelpText.
+// Help.cpp: the help system: the help bubble of the help mode (the area and
+// handle of the window under the magnifying glass, and its text), and the
+// event helps ("hints") shown at certain places and NPCs.
 
 #include "Help.h"
 #include "BuildConfig.h"
 #include "Preferences.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
+#include "Skins.h"
 #include "common.h"
 #include "types/FixedString.h"
 #include <cstring>
 
 
-// The data is THelp's (Help.h, issue #107).
+// The data is THelp's (Help.h).
 
 void patella::THelp::SetHelpPosition(int x, int y)
 {
@@ -66,7 +62,7 @@ bool patella::THelp::TakeHelpHandleChanged()
 
 void patella::THelp::InitHelp()
 {
-	HelpHandle = 1;
+	HelpHandle = HELP_UNSET;
 	HelpHandleChanged = false;
 	EventHelps.clear();
 }
@@ -90,31 +86,30 @@ int patella::THelp::PopEventHelp()
 }
 
 // The help bubble text of a handle: 10-23 parts of the screen, 1000+ things
-// in the game world. SKIN numbers are skins of the buttons drawn inside the
-// text. Texts without arguments are also passed as the format. _snprintf
-// until issue #64, now std::format's language ("%d" is "{}"): no text has a
-// brace or another conversion, and the longest (1297 characters) fits
-// HelpText, so the bytes are the same.
+// in the game world. The SKIN arguments are the skins of the buttons drawn
+// inside the text. Texts without arguments are also passed as the format, in
+// std::format's language: no text has a brace, and the longest (1297
+// characters) fits HelpText.
 const char *patella::THelp::GetHelpText(int Handle)
 {
 	switch (Handle) {
 	case HELP_AUTOMAP:
-		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Automap<N>\n<br=5>The automap shows a bird\'s-eye view of your surroundings. Only those areas you have already explored are shown, while areas you have not been to yet are covered by dark fog. Your current position is marked by a white cross. To move your character simply click on any spot on the automap using the left mouse button. Your character will try to walk there automatically.\nIt is possible to mark individual spots on the automap by right-clicking onto them. You can choose from a number of different symbols and add comments.\nBy using the buttons next to the automap window you can scroll the automap in any direction:\n<SKIN={}><INDENT=46>Click on the compass rose to scroll the map into the desired direction.<INDENT=0>\n\n<SKIN={}><hspace=3><SKIN={}><INDENT=46>Switch between floors, i.e. levels of the map.<INDENT=0>\n\n<SKIN={}><hspace=3><SKIN={}><INDENT=46>Zoom in or out. By using these buttons you can set the automap to the zoom level of your choice.<INDENT=0>\n<FONT=3>Centre<FONT=2><INDENT=46>A click on this button will centre the automap around your character.<INDENT=0>\nYour automap is saved locally in the files labelled as *.map on your computer. Your automap will not be available if you play on a different computer or if you re-install Tibia into a different directory.", 65, 70, 72, 66, 68);
+		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Automap<N>\n<br=5>The automap shows a bird\'s-eye view of your surroundings. Only those areas you have already explored are shown, while areas you have not been to yet are covered by dark fog. Your current position is marked by a white cross. To move your character simply click on any spot on the automap using the left mouse button. Your character will try to walk there automatically.\nIt is possible to mark individual spots on the automap by right-clicking onto them. You can choose from a number of different symbols and add comments.\nBy using the buttons next to the automap window you can scroll the automap in any direction:\n<SKIN={}><INDENT=46>Click on the compass rose to scroll the map into the desired direction.<INDENT=0>\n\n<SKIN={}><hspace=3><SKIN={}><INDENT=46>Switch between floors, i.e. levels of the map.<INDENT=0>\n\n<SKIN={}><hspace=3><SKIN={}><INDENT=46>Zoom in or out. By using these buttons you can set the automap to the zoom level of your choice.<INDENT=0>\n<FONT=3>Centre<FONT=2><INDENT=46>A click on this button will centre the automap around your character.<INDENT=0>\nYour automap is saved locally in the files labelled as *.map on your computer. Your automap will not be available if you play on a different computer or if you re-install Tibia into a different directory.", int{SKIN_COMPASS_ROSE}, int{SKIN_HIGHER_FLOOR_BUTTON_UP}, int{SKIN_LOWER_FLOOR_BUTTON_UP}, int{SKIN_ZOOM_IN_BUTTON_UP}, int{SKIN_ZOOM_OUT_BUTTON_UP});
 		break;
 	case HELP_STATUS_BARS:
 		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Status Bars<N>\n<br=5>These two bars show the condition of your characters\' most important attributes: Their health (red) and their mana (blue), i.e. their magical energy. The bars show the current state of these attributes in relation to their respective maximums, while the numbers behind the bars show the actual amount of hit points and mana your character has.\n<br=5>There are different ways to regain health and mana: you can either eat something, drink special potions such as life or mana fluids, or use magic.");
 		break;
 	case HELP_INVENTORY:
-		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Inventory<N>\n<br=5>The inventory shows your equipment. You can see a portrait of your character\'s body split up into a number of individual slots.\nThere are three slots in the left column. From top to bottom, these slots represent:\n<indent=10>Neck, right hand and fingers.<indent=0>\nThe central column contains four slots:\n<indent=10>Head, body, legs and feet.<indent=0>\nFinally, the column to the right comprises:\n<indent=10>Container, left hand, and belt.<indent=0>\n<br=5>Note that items will only be useful if placed in the slots they are designed for. E.g. weapons and shields must be placed in hand slots, while rings must be equipped in the finger slot.\n<br=5>In the bottom left corner you see the amount of soul points (Soul). These are needed to cast rune spells.\n<br=5>In the bottom right corner you see your capacity (Cap). Your character cannot pick up items whose weight exceeds his capacity.\n<br=5>The little field on the bottom shows special character conditions. Their nature is indicated by a corresponding icon. To get further information on these conditions, move the mouse over it and wait. A tooltip will pop up and explain the special condition.\n<br=5>You can minimise your inventory by clicking on the\n<SKIN={}> button.", 138);
+		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Inventory<N>\n<br=5>The inventory shows your equipment. You can see a portrait of your character\'s body split up into a number of individual slots.\nThere are three slots in the left column. From top to bottom, these slots represent:\n<indent=10>Neck, right hand and fingers.<indent=0>\nThe central column contains four slots:\n<indent=10>Head, body, legs and feet.<indent=0>\nFinally, the column to the right comprises:\n<indent=10>Container, left hand, and belt.<indent=0>\n<br=5>Note that items will only be useful if placed in the slots they are designed for. E.g. weapons and shields must be placed in hand slots, while rings must be equipped in the finger slot.\n<br=5>In the bottom left corner you see the amount of soul points (Soul). These are needed to cast rune spells.\n<br=5>In the bottom right corner you see your capacity (Cap). Your character cannot pick up items whose weight exceeds his capacity.\n<br=5>The little field on the bottom shows special character conditions. Their nature is indicated by a corresponding icon. To get further information on these conditions, move the mouse over it and wait. A tooltip will pop up and explain the special condition.\n<br=5>You can minimise your inventory by clicking on the\n<SKIN={}> button.", int{SKIN_MINIMISE_BUTTON_UP});
 		break;
 	case HELP_MINIMISED_INVENTORY:
-		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Minimised Inventory<N>\n<br=5>The little window to the left shows your character\'s remaining capacity (Cap), i.e., the amount of additional weight he can carry. You also see your remaining soul points (Soul). They are needed to cast rune spells. They regenerate for a certain time when you kill a monster that yields XP equal or above your XP level. Also, if your character is affected by a special condition a corresponding icon will be displayed here. Place the mouse-pointer on the icon and wait a second to get a tooltip that will explain the special condition\'s meaning.\n<br=5>Even though you cannot see your character\'s equipment as long as the inventory is minimised, you can still pick up items by dragging them onto this window. They will be placed in a suitable slot automatically.\n<br=5>To see your inventory, click on the <SKIN={}> button.", 140);
+		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Minimised Inventory<N>\n<br=5>The little window to the left shows your character\'s remaining capacity (Cap), i.e., the amount of additional weight he can carry. You also see your remaining soul points (Soul). They are needed to cast rune spells. They regenerate for a certain time when you kill a monster that yields XP equal or above your XP level. Also, if your character is affected by a special condition a corresponding icon will be displayed here. Place the mouse-pointer on the icon and wait a second to get a tooltip that will explain the special condition\'s meaning.\n<br=5>Even though you cannot see your character\'s equipment as long as the inventory is minimised, you can still pick up items by dragging them onto this window. They will be placed in a suitable slot automatically.\n<br=5>To see your inventory, click on the <SKIN={}> button.", int{SKIN_MAXIMISE_BUTTON_UP});
 		break;
 	case HELP_COMBAT_CONTROLS_LARGE:
-		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Combat Controls and Other Buttons<N>\n<br=5>This area contains some buttons to control your combat tactics as well as two buttons with other functions.\n<br=5><SKIN={}><hspace=3><SKIN={}><hspace=3><SKIN={}><INDENT=73>Offensive, balanced and defensive fighting. These buttons determine how aggressively a character engages in combat, which will affect their general performance on the battlefield. E.g. characters who take an offensive stance in combat will hit harder, but they will also suffer more damage.<INDENT=0>\n<SKIN={}><hspace=3><SKIN={}><INDENT=73>Stand still or chase your opponent. If you use a distance fighting weapon, you should probably select \'stand\'. If you prefer melee, \'chase\' may be the right choice.<INDENT=0>\n<SKIN={}><hspace=3><SKIN={}><INDENT=73>Secure/Normal mode. In secure mode you cannot attack unmarked characters. The flat hand indicates secure mode, while the fist indicates normal mode.<INDENT=0>\n<FONT=3>Stop<FONT=2><INDENT=73>Stop fighting, walking, or any object handling at all immediately.<INDENT=0>\n<FONT=3>Options<FONT=2><INDENT=73>This button opens a menu where you can set several options for the program\'s behaviour.<INDENT=0>\n<FONT=3>Help<FONT=2><INDENT=73>This button opens a menu where you can get help in several different ways.<INDENT=0>", 103, 105, 107, 109, 111, 113, 114);
+		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Combat Controls and Other Buttons<N>\n<br=5>This area contains some buttons to control your combat tactics as well as two buttons with other functions.\n<br=5><SKIN={}><hspace=3><SKIN={}><hspace=3><SKIN={}><INDENT=73>Offensive, balanced and defensive fighting. These buttons determine how aggressively a character engages in combat, which will affect their general performance on the battlefield. E.g. characters who take an offensive stance in combat will hit harder, but they will also suffer more damage.<INDENT=0>\n<SKIN={}><hspace=3><SKIN={}><INDENT=73>Stand still or chase your opponent. If you use a distance fighting weapon, you should probably select \'stand\'. If you prefer melee, \'chase\' may be the right choice.<INDENT=0>\n<SKIN={}><hspace=3><SKIN={}><INDENT=73>Secure/Normal mode. In secure mode you cannot attack unmarked characters. The flat hand indicates secure mode, while the fist indicates normal mode.<INDENT=0>\n<FONT=3>Stop<FONT=2><INDENT=73>Stop fighting, walking, or any object handling at all immediately.<INDENT=0>\n<FONT=3>Options<FONT=2><INDENT=73>This button opens a menu where you can set several options for the program\'s behaviour.<INDENT=0>\n<FONT=3>Help<FONT=2><INDENT=73>This button opens a menu where you can get help in several different ways.<INDENT=0>", int{SKIN_OFFENSIVE_BUTTON_UP}, int{SKIN_BALANCED_BUTTON_UP}, int{SKIN_DEFENSIVE_BUTTON_UP}, int{SKIN_STAND_BUTTON_UP}, int{SKIN_CHASE_BUTTON_UP}, int{SKIN_SECURE_BUTTON_UP}, int{SKIN_SECURE_BUTTON_DOWN});
 		break;
 	case HELP_COMBAT_CONTROLS_SMALL:
-		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Combat Controls and Other Buttons<N>\n<br=5>This area contains some buttons to control your combat tactics as well as two buttons with other functions.\n<br=5><SKIN={}><hspace=3><SKIN={}><hspace=3><SKIN={}><INDENT=73>Offensive, balanced and defensive fighting. These buttons determine how aggressively a character engages in combat, which will affect their general performance on the battlefield. E.g. characters who take an offensive stance in combat will hit harder, but they will also suffer more damage.<INDENT=0>\n<SKIN={}><hspace=3><SKIN={}><INDENT=73>Stand still or chase your opponent. If you use a distance fighting weapon, you should probably select \'stand\'. If you prefer melee, \'chase\' may be the right choice.<INDENT=0>\n<SKIN={}><hspace=3><SKIN={}><INDENT=73>Secure/Normal mode. In secure mode you cannot attack unmarked characters. The flat hand indicates secure mode, while the fist indicates normal mode.<INDENT=0>\n<FONT=3>Stop<FONT=2><INDENT=73>Stop fighting, walking, or any object handling at all immediately.<INDENT=0>\n<SKIN={}><INDENT=73>This button opens a menu where you can set several options for the program\'s behaviour.<INDENT=0>\n<SKIN={}><INDENT=73>This button opens a menu where you can get help in several different ways.<INDENT=0>", 103, 105, 107, 109, 111, 113, 114, 115, 117);
+		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Combat Controls and Other Buttons<N>\n<br=5>This area contains some buttons to control your combat tactics as well as two buttons with other functions.\n<br=5><SKIN={}><hspace=3><SKIN={}><hspace=3><SKIN={}><INDENT=73>Offensive, balanced and defensive fighting. These buttons determine how aggressively a character engages in combat, which will affect their general performance on the battlefield. E.g. characters who take an offensive stance in combat will hit harder, but they will also suffer more damage.<INDENT=0>\n<SKIN={}><hspace=3><SKIN={}><INDENT=73>Stand still or chase your opponent. If you use a distance fighting weapon, you should probably select \'stand\'. If you prefer melee, \'chase\' may be the right choice.<INDENT=0>\n<SKIN={}><hspace=3><SKIN={}><INDENT=73>Secure/Normal mode. In secure mode you cannot attack unmarked characters. The flat hand indicates secure mode, while the fist indicates normal mode.<INDENT=0>\n<FONT=3>Stop<FONT=2><INDENT=73>Stop fighting, walking, or any object handling at all immediately.<INDENT=0>\n<SKIN={}><INDENT=73>This button opens a menu where you can set several options for the program\'s behaviour.<INDENT=0>\n<SKIN={}><INDENT=73>This button opens a menu where you can get help in several different ways.<INDENT=0>", int{SKIN_OFFENSIVE_BUTTON_UP}, int{SKIN_BALANCED_BUTTON_UP}, int{SKIN_DEFENSIVE_BUTTON_UP}, int{SKIN_STAND_BUTTON_UP}, int{SKIN_CHASE_BUTTON_UP}, int{SKIN_SECURE_BUTTON_UP}, int{SKIN_SECURE_BUTTON_DOWN}, int{SKIN_OPTIONS_BUTTON_UP}, int{SKIN_HELP_BUTTON_UP});
 		break;
 	case HELP_CONTROL_BUTTONS:
 		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Control Buttons<N>\n<br=5>This section of the screen contains three buttons that serve to open further subwindows as well as the \'Logout\' button. To get further information on any of these subwindows open it and move the magnifying glass onto it.\n<br=5><FONT=3>Skills<FONT=2><INDENT=50>In this subwindow you will find important character values such as experience and skill levels.<INDENT=0>\n<FONT=3>Battle<FONT=2><INDENT=50>The battle window contains a list of all characters and monsters that are currently within battle range. You can use this window to single out enemies for attack.<INDENT=0>\n<FONT=3>VIP<FONT=2><INDENT=50>The VIP list is an editable list of characters that are of special interest to you. Characters that are currently online are highlighted by green writing.<INDENT=0>\n<FONT=3>Logout<FONT=2><INDENT=50>Click on this button to logout. Note that it is not possible to logout in certain places or whenever the character is affected by a logout block.<INDENT=0>");
@@ -129,16 +124,16 @@ const char *patella::THelp::GetHelpText(int Handle)
 		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>VIP<N>\n<br=5>This window contains an editable list of players that are of special interest to you. Character names listed here are highlighted by green writing whenever the respective player is online.\n<br=5>You can add players to your list by using the context menu on the map, in the battle window, or in the VIP window.\n<br=5>By selecting \'Edit ...\' you can add further information on characters. For example, you can sort names by various factors, add notes and icons, or arrange to be notified whenever the marked character logs in.\n<br=5>Context menus can also be used to select additonal actions such as sending private messages to players, to  remove players from the list or to sort the list by various criteria.");
 		break;
 	case HELP_OPEN_CONTAINERS:
-		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Open Containers<N>\n<br=5>Whenever you open a container, its contents are displayed in this window. You can put items into containers or remove them by using drag & drop, i.e. you left-click at the item you want to move and drag it onto the container, keeping the mouse-button pressed. If the item is placed on a container that is stored within the open container, it will be placed in there; otherwise it will simply be moved to the first free slot of the current container.\n<br=5>If a container is stored within another container a <SKIN={}>\nbutton will be displayed. Use this button to switch between containers. To move items from a subordinate to the main container open the context menu and select \'Move up\'.", 126);
+		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Open Containers<N>\n<br=5>Whenever you open a container, its contents are displayed in this window. You can put items into containers or remove them by using drag & drop, i.e. you left-click at the item you want to move and drag it onto the container, keeping the mouse-button pressed. If the item is placed on a container that is stored within the open container, it will be placed in there; otherwise it will simply be moved to the first free slot of the current container.\n<br=5>If a container is stored within another container a <SKIN={}>\nbutton will be displayed. Use this button to switch between containers. To move items from a subordinate to the main container open the context menu and select \'Move up\'.", int{SKIN_HIGHER_CONTAINER_BUTTON_UP});
 		break;
 	case HELP_TRADE:
 		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Trade<N>\n<br=5>If you start a trade with another player, you will see both your own as well as your trading partner\'s offer displayed in this window, provided they have already been submitted.\n<br=5>You can now inspect the items on offer by clicking onto them with either mouse button. Any contents of containers will be extracted to make sure both trading partners can see exactly what they will get if they accept the trade.\n<br=5>If you agree with your partner\'s offer, click on <FONT=3> Accept <FONT=2>. <FONT=3> Reject <FONT=2> will abort the trade.\n<br=5>The trade will be completed if both partners accept, and if both of them possess enough capacity to carry the new items they are about to buy.");
 		break;
 	case HELP_CONSOLE:
-		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Console<N>\n<br=5>This area is reserved for communication with other players. Communication is organised into several different channels. The default channel contains all public communication that is taking place in the immediate vicinity.\n<br=5>Any recent messages on the active channel are displayed in the large box in the centre. You can enter your own messages in the entry field at the bottom of the box. Simply type whatever you wish to say and confirm by pressing Return.\n<br=5>On the default channel, you can modify your character\'s speech volume by using the button in the bottom left corner:\n<SKIN={}> say, <SKIN={}> whisper, <SKIN={}> yell.\n<br=7>Alternatively, you can modify the speech volume by placing #S, #W, or #Y to \'say\', \'whisper\', or \'yell\' in front of your message.\n<br=5>Placing *Name* in front of a message will cause it to be sent directly to the designated player regardless of which channel is active. It is possible to attach tildes (~) to incomplete names in order to have them completed automatically.\n<br=5>For a detailed description of communication in the game please take a look at the manual.", 197, 199, 201);
+		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Console<N>\n<br=5>This area is reserved for communication with other players. Communication is organised into several different channels. The default channel contains all public communication that is taking place in the immediate vicinity.\n<br=5>Any recent messages on the active channel are displayed in the large box in the centre. You can enter your own messages in the entry field at the bottom of the box. Simply type whatever you wish to say and confirm by pressing Return.\n<br=5>On the default channel, you can modify your character\'s speech volume by using the button in the bottom left corner:\n<SKIN={}> say, <SKIN={}> whisper, <SKIN={}> yell.\n<br=7>Alternatively, you can modify the speech volume by placing #S, #W, or #Y to \'say\', \'whisper\', or \'yell\' in front of your message.\n<br=5>Placing *Name* in front of a message will cause it to be sent directly to the designated player regardless of which channel is active. It is possible to attach tildes (~) to incomplete names in order to have them completed automatically.\n<br=5>For a detailed description of communication in the game please take a look at the manual.", int{SKIN_SAY_BUTTON_UP}, int{SKIN_WHISPER_BUTTON_UP}, int{SKIN_YELL_BUTTON_UP});
 		break;
 	case HELP_CONSOLE_CHANNELS:
-		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Console Channels<N>\n<br=5>This section of the screen is reserved for communication with other players. Communication is organised into several different channels. The default channel contains all public communication that is taking place in the immediate vicinity.\n<br=5>In addition to this channel you can open private channels to message other players or join public channels. To switch between channels click on the tab at the top of the respective channel or use the TAB key.\n<br=5>If you wish to open a new channel, click on the\n<SKIN={}> button, then choose an existing channel in the following dialog or open a private channel by entering a character\'s name. \n<br=5>Clicking on the <SKIN={}> button will open a dialog in which you can either ignore characters or allow them to message you while you are ignoring all other private messages.\n<br=5>To close channels click on the <SKIN={}> button. You can also select whether server messages  should be displayed in each channel by clicking on the\n<SKIN={}> button.\n<br=5>For a detailed description of communication please take a look at the manual.", 195, 192, 188, 190);
+		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Console Channels<N>\n<br=5>This section of the screen is reserved for communication with other players. Communication is organised into several different channels. The default channel contains all public communication that is taking place in the immediate vicinity.\n<br=5>In addition to this channel you can open private channels to message other players or join public channels. To switch between channels click on the tab at the top of the respective channel or use the TAB key.\n<br=5>If you wish to open a new channel, click on the\n<SKIN={}> button, then choose an existing channel in the following dialog or open a private channel by entering a character\'s name. \n<br=5>Clicking on the <SKIN={}> button will open a dialog in which you can either ignore characters or allow them to message you while you are ignoring all other private messages.\n<br=5>To close channels click on the <SKIN={}> button. You can also select whether server messages  should be displayed in each channel by clicking on the\n<SKIN={}> button.\n<br=5>For a detailed description of communication please take a look at the manual.", int{SKIN_NEW_CHANNEL_BUTTON_UP}, int{SKIN_IGNORE_BUTTON_UP}, int{SKIN_CLOSE_CHANNEL_BUTTON_UP}, int{SKIN_SERVER_MESSAGES_BUTTON_UP});
 		break;
 	case HELP_CREATURES:
 		TStringBuffer(HelpText, sizeof(HelpText)).Format("<B>Creatures<N>\n<br=5>There are three types of creatures: Player characters, NPCs, and monsters.\n<br=5>NPCs can help you by selling useful items to you or by sending you on exciting quests. To start a conversation with NPCs move close to them and say \'Hello\'.\n<br=5>Monsters are your enemies! Fight them! Whenever you defeat one you will get experience and possibly some loot. But watch out! Initially, many monsters will be much stronger than you!");
@@ -228,11 +223,9 @@ void patella::THelp::CheckEventHelpName(const char *Name)
 }
 
 // Event helps for places: the Rookgaard crossroad (3), the Rookgaard
-// underground (6), the arrival on the mainland (11) and the depots
-// (12). Written as independent tests in an order that gives the
-// binary's results (the compiler merged the tests that share an x and
-// returned early where no later test can match); the bounds are the
-// binary's, exclusive where written with < and >.
+// underground (6), the arrival on the mainland (11) and the depots (12). The
+// tests are independent of each other, in the original's order; a bound is
+// exclusive where it is written with < or >.
 void patella::THelp::CheckEventHelpPosition(int x, int y, int z)
 {
 	if (x > 0x7d5d && x < 0x7d65 && y == 0x7dd5 && z == 7)
@@ -344,7 +337,7 @@ const char *patella::THelp::GetEventHelpTitle(int Number)
 
 namespace {
 
-// The first hint names the site (BuildConfig.h, issue #169): the original's text with SiteName in place of its site.
+// The first hint names the site (BuildConfig.h): the original's text with SiteName in place of its site.
 constexpr const char *WelcomeBeforeSite = "<b>Welcome to Tibia!\n<br=7><n>Greetings wanderer! You are about to enter the mysterious world of Tibia. Fight fearsome monsters, find untold treasures and make your character a true hero of the land! There are many different ways to play Tibia, but keep in mind that there are many others players out there who want to enjoy the game just like you, so please play fair and follow the Tibia Rules at all times.\n<br=7>To move your character use the cursor keys or click on a spot on the game window or in the automap. Right-clicking on items, monsters, characters or simply on the map will open context menus in which you can select appropriate actions such as attacking or using things. Items can be moved around by using drag&drop.\n<br=7>If you need assistance, click on the \'Help\' button to the right. There are several help options to choose from. For instance, the \'Client Help\' will provide you with information on important objects on the map or parts of the client program. Also, a flashing exclamation mark will appear in the top right corner from time to time to inform you that further hints like this one you are reading right now are available. To review previous hints click on \'Help\', then \'Hints\'. For detailed information please read the manual and the \'FAQ\' on our offical website ";
 constexpr const char *WelcomeAfterSite = ".";
 constexpr auto WelcomeHelpText = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(WelcomeBeforeSite,
@@ -396,12 +389,12 @@ const char *patella::THelp::GetCurrentHelpText()
 }
 
 // Empty. ExitControl calls it where Help.cpp's exit belongs in the reverse
-// order of InitControl (name ours, low confidence).
+// order of InitControl.
 void patella::THelp::ExitHelp()
 {
 }
 
-// The functions of the original (issue #107): each calls its member on the one TClient's THelp.
+// The functions of the original: each calls its member on the one TClient's THelp.
 
 void SetHelpPosition(int x, int y)
 {
@@ -456,11 +449,6 @@ int GetEventHelp()
 int PopEventHelp()
 {
 	return patella::bridge::Help().PopEventHelp();
-}
-
-const char *GetHelpText(int Handle)
-{
-	return patella::bridge::Help().GetHelpText(Handle);
 }
 
 void AddEventHelp(int Number)

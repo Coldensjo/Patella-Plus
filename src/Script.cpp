@@ -1,14 +1,6 @@
-// Script.cpp: reconstructed from Tibia.exe 7.72.
+// Script.cpp: the tokenizer of script files (Tibia.cfg) and the reading and writing of binary files.
 //
-// The script-file tokenizer and writer and binary file access; the patching of the
-// data files with patches from the login server is gone (issue #75). In line order,
-// which is also binary order, except that the compiler placed readString of
-// TReadBinaryFile and the readIdentifier, readNumber, readString and readSymbol
-// helpers (no line evidence) after InstallPatch (gone). readString is here in line
-// order; the helpers stay at the end, where the binary has them.
-//
-// Most errors are TERRORs thrown at the start of a function. The original's
-// catch wrappers (common.h) around the calls to other members are gone (issue #78).
+// Most errors are TERRORs thrown at the start of a function.
 
 #include "Script.h"
 #include "compat/msvc_io.h"
@@ -23,9 +15,9 @@
 #include <cstring>
 #include <utility>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file: the original's raw owners: the
+// window tree owns its children, the message queue its blocks, the lists their entries; the original's varargs
+// (TMultiStateButton's constructor, _snprintf)
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
 // TryOpen, its failure thrown.
@@ -36,7 +28,7 @@ void TReadScriptFile::open(const char *FileName)
 		throw TMyException(std::move(Result.error()));
 }
 
-// open's code, its two TERROR_REASONs returned (issue #80).
+// open's code, its two TERROR_REASONs returned.
 patella::TExpected<void, TError> TReadScriptFile::TryOpen(const char *FileName)
 {
 	if (File != nullptr)
@@ -44,7 +36,7 @@ patella::TExpected<void, TError> TReadScriptFile::TryOpen(const char *FileName)
 	if (!patella::platform::Platform().FileSystem.Open(File, FileName, TFile::TAccess::Read, TFile::TContent::Binary))
 		return TUNEXPECTED_REASON("failed to open file", FileName);
 	Line = 1;
-	// Filename stays char[1024] until M5: TERROR_REASON's reason (a std::string) names it (issue #57).
+	// Filename stays char[1024]: TERROR_REASON's reason (a std::string) names it.
 	TStringBuffer(Filename, sizeof(Filename)).Assign(FileName);
 	return {};
 }
@@ -53,14 +45,14 @@ patella::TExpected<void, TError> TReadScriptFile::TryOpen(const char *FileName)
 // reason is Text. The message buffer has 1056 bytes but only 1054 are used.
 void TReadScriptFile::error(const char *Text)
 {
-	char Message[1056] = {}; // NOLINT(modernize-avoid-c-arrays): TMYEXCEPTION(84)'s argument, frozen until M5 (issue #60)
+	char Message[1056] = {}; // NOLINT(modernize-avoid-c-arrays): TMYEXCEPTION(84)'s argument
 	TFixedString<10> Unknown = {"(unknown)"};
 	File.Close();
 	MsvcSnprintf(Message, 1054, "error in script file '%s' in line %d", Filename, Line);
 	if (Text == nullptr)
 		Text = Unknown;
-	// MSVC's analysis (C6053, issue #111): _snprintf leaves the text unterminated when it fills the 1054 bytes;
-	// Message's zeroed last two bytes end it then (the buffer is zeroed since issue #111; the original's was not).
+	// MSVC's analysis (C6053): _snprintf leaves the text unterminated when it fills the 1054 bytes; Message's zeroed
+	// last two bytes end it then (the original's buffer was not zeroed).
 	PATELLA_MSVC_WARNING(suppress : 6053)
 	throw TMYEXCEPTION(Message, "", 0, "", 0, Text);
 }
@@ -69,9 +61,8 @@ void TReadScriptFile::error(const char *Text)
 // strings need no terminator; Bytes shares its buffer. Identifiers start
 // with a letter; '-' before a number is a SPECIAL token (readNumber handles
 // the sign). IsAlpha compares with signed chars, so umlauts from getc (0xe4
-// and so on) are not letters here: they become SPECIAL tokens. The jump
-// table has the 24 cases below; states 9 and 18-21 do not exist and go to
-// the default.
+// and so on) are not letters here: they become SPECIAL tokens. States 9 and
+// 18-21 do not exist and go to the default.
 void TReadScriptFile::nextToken()
 {
 	if (File == nullptr)
@@ -239,7 +230,6 @@ void TReadScriptFile::nextToken()
 			if (IsDigit(c)) {
 				Number = Number * 10 + c - '0';
 			} else if (c == ',') {
-				CoordX = Number;
 				State = 13;
 			} else {
 				error("syntax error");
@@ -261,7 +251,6 @@ void TReadScriptFile::nextToken()
 			if (IsDigit(c)) {
 				Number = Number * 10 + c - '0';
 			} else if (c == ',') {
-				CoordY = Number;
 				State = 15;
 			} else {
 				error("syntax error");
@@ -283,7 +272,6 @@ void TReadScriptFile::nextToken()
 			if (IsDigit(c)) {
 				Number = Number * 10 + c - '0';
 			} else if (c == ']') {
-				CoordZ = Number;
 				State = 17;
 			} else {
 				error("syntax error");
@@ -356,8 +344,6 @@ void TReadScriptFile::nextToken()
 		default:
 			TERROR1("invalid state", State);
 		}
-		// The binary checks this after every state change (the first pass
-		// starts at the switch).
 		if (Size == MAX_STRING_LENGTH - 1)
 			error("string too long");
 	}
@@ -393,79 +379,6 @@ char TReadScriptFile::getSpecial()
 }
 
 // TryOpen, its failure thrown.
-void TWriteScriptFile::open(const char *FileName)
-{
-	patella::TExpected<void, TError> Result = TryOpen(FileName);
-	if (!Result)
-		throw TMyException(std::move(Result.error()));
-}
-
-// open's code, its two TERROR_REASONs returned (issue #80). Line is reset but never counted.
-patella::TExpected<void, TError> TWriteScriptFile::TryOpen(const char *FileName)
-{
-	if (File != nullptr)
-		return TUNEXPECTED_REASON("file still open", Filename);
-	if (!patella::platform::Platform().FileSystem.Open(File, FileName, TFile::TAccess::Write, TFile::TContent::Binary))
-		return TUNEXPECTED_REASON("failed to open file", FileName);
-	Line = 0;
-	// Filename stays char[1024] until M5: TERROR_REASON's reason (a std::string) names it (issue #57).
-	TStringBuffer(Filename, sizeof(Filename)).Assign(FileName);
-	return {};
-}
-
-// The file is binary, so the line ends in CR LF.
-void TWriteScriptFile::writeLn()
-{
-	if (File == nullptr)
-		TERROR("no file open");
-	File.PutChar('\r');
-	File.PutChar('\n');
-}
-
-void TWriteScriptFile::writeText(const char *Text)
-{
-	if (File == nullptr)
-		TERROR("no file open");
-	if (Text == nullptr)
-		TERROR("no text");
-	while (*Text != 0) {
-		File.PutChar(*Text);
-		Text++;
-	}
-}
-
-// Quotes, escaping '"' and '\\', and writes a line break as "\n".
-void TWriteScriptFile::writeString(const char *Text)
-{
-	if (File == nullptr)
-		TERROR("no file open");
-	if (Text == nullptr)
-		TERROR("no text");
-	File.PutChar('"');
-	while (*Text != 0) {
-		if (*Text == '"' || *Text == '\\')
-			File.PutChar('\\');
-		if (*Text == '\n') {
-			File.PutChar('\\');
-			File.PutChar('n');
-		} else {
-			File.PutChar(*Text);
-		}
-		Text++;
-	}
-	File.PutChar('"');
-}
-
-void TWriteScriptFile::writeNumber(int Number)
-{
-	if (File == nullptr)
-		TERROR("no file open");
-	TFixedString<20> Help;
-	Help.Format("{}", Number);
-	writeText(Help);
-}
-
-// TryOpen, its failure thrown.
 void TReadBinaryFile::open(const char *FileName)
 {
 	patella::TExpected<void, TError> Result = TryOpen(FileName);
@@ -473,14 +386,14 @@ void TReadBinaryFile::open(const char *FileName)
 		throw TMyException(std::move(Result.error()));
 }
 
-// open's code, its two TERROR_REASONs returned (issue #80).
+// open's code, its two TERROR_REASONs returned.
 patella::TExpected<void, TError> TReadBinaryFile::TryOpen(const char *FileName)
 {
 	if (File != nullptr)
 		return TUNEXPECTED_REASON("file still open", Filename);
 	if (!patella::platform::Platform().FileSystem.Open(File, FileName, TFile::TAccess::Read, TFile::TContent::Binary))
 		return TUNEXPECTED_REASON("failed to open file", FileName);
-	// The original's copy: unterminated when the name fills the buffer (GCC's -Wstringop-truncation, issue #111).
+	// The original's copy: unterminated when the name fills the buffer (GCC's -Wstringop-truncation).
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wstringop-truncation\"")
 	strncpy(Filename, FileName, sizeof(Filename));
@@ -514,7 +427,7 @@ uint8 TReadBinaryFile::readByte()
 	return Byte;
 }
 
-// Little-endian. Returns a 16-bit value: every caller zero-extends AX.
+// Little-endian.
 uint16 TReadBinaryFile::readWord()
 {
 	const uint8 Low = readByte();
@@ -547,7 +460,7 @@ char *TReadBinaryFile::readString()
 }
 
 // The original's parameters (Buffer, Count) are the span's pointer and its size as an int, the name the "out of data"
-// error's text uses (issue #69, as #59).
+// error's text uses.
 void TReadBinaryFile::readBytes(patella::TSpan<uint8> Bytes)
 {
 	uint8 *const Buffer = Bytes.data();
@@ -560,22 +473,14 @@ void TReadBinaryFile::readBytes(patella::TSpan<uint8> Bytes)
 		TERROR1_REASON("out of data", Count, Filename);
 }
 
-// TryOpen, its failure thrown.
-void TWriteBinaryFile::open(const char *FileName)
-{
-	patella::TExpected<void, TError> Result = TryOpen(FileName);
-	if (!Result)
-		throw TMyException(std::move(Result.error()));
-}
-
-// open's code, its two TERROR_REASONs returned (issue #80).
+// Opens the file; its two failures are returned, not thrown.
 patella::TExpected<void, TError> TWriteBinaryFile::TryOpen(const char *FileName)
 {
 	if (File != nullptr)
 		return TUNEXPECTED_REASON("file still open", Filename);
 	if (!patella::platform::Platform().FileSystem.Open(File, FileName, TFile::TAccess::Write, TFile::TContent::Binary))
 		return TUNEXPECTED_REASON("failed to open file", FileName);
-	// The original's copy: unterminated when the name fills the buffer (GCC's -Wstringop-truncation, issue #111).
+	// The original's copy: unterminated when the name fills the buffer (GCC's -Wstringop-truncation).
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wstringop-truncation\"")
 	strncpy(Filename, FileName, sizeof(Filename));
@@ -609,8 +514,8 @@ void TWriteBinaryFile::writeQuad(uint32 Quad)
 	writeByte((uint8)(Quad >> 24));
 }
 
-// Writes one item of Count bytes, so Count 0 fails (writeString does not call it for an empty string). Buffer and
-// Count are the span's pointer and its size as an int (issue #69).
+// Writes one item of Count bytes, so Count 0 fails (writeString does not call it for an empty string). Buffer and Count
+// are the span's pointer and its size as an int.
 void TWriteBinaryFile::writeBytes(patella::TSpan<const uint8> Bytes)
 {
 	const uint8 *const Buffer = Bytes.data();
@@ -630,10 +535,6 @@ void TWriteBinaryFile::writeString(const char *Text)
 	if ((uint16)Length != 0)
 		writeBytes(patella::TSpan<const uint8>(reinterpret_cast<const uint8 *>(Text), (uint16)Length));
 }
-
-// ApplyPatch (a difference patch of a file), ApplyFullPatch (a whole new file), both written next to the file
-// ("Tibia.exe" as "Tibia.bak", any other name with '_' as its last character), and InstallPatch (the written file
-// moved into place) are gone with the patcher since Patella-Modern issue #75 (decision D9).
 
 // The next token, which must be an identifier, in lower case.
 char *TReadScriptFile::readIdentifier()

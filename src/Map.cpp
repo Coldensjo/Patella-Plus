@@ -1,11 +1,4 @@
-// Map.cpp: the map points and their objects, the effects, the automap and
-// the path finder (c:\mud\tibiaplayer\Map.cpp).
-//
-// Functions in source order (assertion and catch lines). The functions of the
-// MainWindow/Map gap (the map position and the ambient
-// light) have no line evidence and come first, where the binary has them.
-//
-// Names: see Map.h and notes/decisions.md ("Map.cpp").
+// Map.cpp: the map points and their objects, the effects, the automap and the path finder.
 
 #include "Map.h"
 #include "Objects.h"
@@ -28,16 +21,12 @@
 #include <sstream>
 #include <vector>
 
-// The data is TMap's (Map.h, issue #106).
+// The data is TMap's (Map.h).
 
 // The initialisers of Fields, FieldNumber and AutomapBlocks are the members'.
 patella::TMap::TMap(TObjectTypes &ObjectTypesRef, TMapConsole &ConsoleRef) : ObjectTypes(ObjectTypesRef), Console(ConsoleRef) {}
 
-// TMark's arrays std::arrays and its Text a TFixedString (issue #60), no pointers: the same on x64. TMapPoint's layout
-// is free since issue #102 (MapPoint.h: its objects a TStaticVector).
-static_assert(sizeof(TMark) == 0x70 && offsetof(TMark, Text) == 0x0c && sizeof(TMark::Text) == 100, "TMark's layout");
-
-// --- Position (the MainWindow/Map gap) ------------------------------------
+// --- Position --------------------------------------------------------------
 
 void patella::TMap::SetMapPosition(int x, int y, int z)
 {
@@ -594,7 +583,7 @@ void patella::TMap::ProcessEffects()
 			if (Effect.TextPhase > 10)
 				DeleteEffect(EffectIdOf(i));
 			break;
-		default: // nothing, as without it (bugprone-switch-missing-default-case, issue #110)
+		default: // nothing, as without it (bugprone-switch-missing-default-case)
 			break;
 		}
 	}
@@ -668,9 +657,7 @@ void patella::TMap::ProcessMissileEffects()
 
 // --- Map points ----------------------------------------------------------------
 
-// Empties a point; its creatures go to the callback. The binary sets i to -1
-// after the object loop, so an error while deleting the effects reports i =
-// -1.
+// Empties a point; its creatures go to the callback.
 void patella::TMap::ClearField(int rx, int ry, int rz, bool DeleteEffects)
 {
 	PATELLA_ASSERT_VALUES(In(rx,0,MAPSIZE_X-1), rx);
@@ -917,11 +904,10 @@ void patella::TMap::GetFieldAutomapInfo(int rx, int ry, int rz, uint8 *Color, ui
 
 // --- The automap -------------------------------------------------------------
 
-// The automap file's format (<bx><by><bz>.map; notes/written-files.md): 256 x 256 colour bytes, then 256 x 256 speed
-// bytes, each as LoadAutomapBlock and SaveAutomapBlock read and write a block's Color and Speed in one piece, then the
-// marks; in a layer the byte of x, y is at x * 256 + y. A check of the file format (Patella-Modern issue #94), where the
-// oracle's x86 build checked TAutomapBlock's layout until then; since issue #101 also of the view's order (a layer's
-// bytes are TAutomapLayer's, indexed through its mdspan view).
+// The automap file's format (<bx><by><bz>.map): 256 x 256 colour bytes, then 256 x 256 speed bytes, each as
+// LoadAutomapBlock and SaveAutomapBlock read and write a block's Color and Speed in one piece, then the marks; in a
+// layer the byte of x, y is at x * 256 + y. A check of the file format, and of the view's order (a layer's bytes are
+// TAutomapLayer's, indexed through its mdspan view).
 namespace {
 constexpr std::size_t AUTOMAP_FILE_LAYER_BYTES = 256 * 256;
 constexpr int AutomapFileOffset(int x, int y)
@@ -959,7 +945,7 @@ void patella::TMap::LoadAutomapBlock(int Position, int bx, int by, int bz)
 	TFixedString<16> FileName;
 	FileName.Format("{:03}{:03}{:02}.map", bx, by, bz);
 	TReadBinaryFile File;
-	// A file that does not open: TryOpen's failure (issue #80), until then open's TMyException caught here.
+	// A file that does not open: TryOpen's failure.
 	const bool Opened = File.TryOpen(FileName).has_value();
 	if (Opened) {
 		try {
@@ -974,9 +960,9 @@ void patella::TMap::LoadAutomapBlock(int Position, int bx, int by, int bz)
 					Block.MarkCount = 0;
 				else
 					Block.MarkCount = File.readQuad();
-				// Patella-Modern issue #139, item 5, a deliberate difference (notes/decisions.md, "#139"): a negative
-				// count is a corrupted file, as a file that ends early is ("Map file ... was corrupted!", the block
-				// cleared). The binary kept it, and AddAutomapMark then grew the marks down to that index.
+				// A deliberate difference from the original: a negative count is a corrupted file, as a file that ends
+				// early is ("Map file ... was corrupted!", the block cleared). The original kept it, and AddAutomapMark
+				// then grew the marks down to that index.
 				if (Block.MarkCount < 0)
 					TERROR1("negative mark count", Block.MarkCount);
 				for (int i = 0; i < Block.MarkCount; i++) {
@@ -989,7 +975,7 @@ void patella::TMap::LoadAutomapBlock(int Position, int bx, int by, int bz)
 					const char *Text = File.readString();
 					if (Text != nullptr) {
 						CopyString(Block.Marks(i).Text.Chars, Text);
-						// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): readString's text, the caller's (notes/ownership.md)
+						// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): readString's text, the caller's
 						delete[] Text;
 					}
 				}
@@ -1031,7 +1017,7 @@ void patella::TMap::SaveAutomapBlock(int Position)
 	TFixedString<16> FileName;
 	FileName.Format("{:03}{:03}{:02}.map", Block.bx, Block.by, Block.bz);
 	TWriteBinaryFile File;
-	// A file that does not open: TryOpen's failure (issue #80), until then open's TMyException caught here.
+	// A file that does not open: TryOpen's failure.
 	const bool Opened = File.TryOpen(FileName).has_value();
 	if (Opened) {
 		try {
@@ -1081,10 +1067,7 @@ void patella::TMap::SaveAutomapBlock(int Position)
 	Block.Changed = false;
 }
 
-// The cached block, loaded into the least recently used entry if necessary,
-// becomes the most recently used one. (The binary keeps Position in bx's
-// stack slot while the entry is replaced, the only part that can fail; the
-// catch block reads it from there.)
+// The cached block, loaded into the least recently used entry if necessary, becomes the most recently used one.
 TAutomapBlock *patella::TMap::GetAutomapBlock(int bx, int by, int bz)
 {
 	PATELLA_ASSERT_VALUES(bx>=0, bx);
@@ -1116,7 +1099,7 @@ TAutomapBlock *patella::TMap::GetAutomapBlock(int bx, int by, int bz)
 		MostRecentBlock = Position;
 	}
 	// The cache list links all AUTOMAP_BLOCKS entries (InitMap), so Position is one of them, the least recent at worst
-	// (MSVC /analyze's C28020 sees LeastRecentBlock as any int; issue #110).
+	// (MSVC /analyze's C28020 sees LeastRecentBlock as any int).
 	PATELLA_MSVC_WARNING(suppress : 28020)
 	return &AutomapBlocks[Position];
 }
@@ -1148,8 +1131,8 @@ TRGBColor patella::TMap::GetAutomapColor(int x, int y, int z)
 // Copies the marks of a block; x and y are block coordinates here, despite
 // their names.
 //
-// Marks was the caller's vector<TMark>(0, 0, 10), filled from 0 up: a std::vector since issue #100, its entries 0 to
-// the count - 1 set (appended past its size), the others left as they were.
+// Marks is the caller's std::vector, filled from 0 up: its entries 0 to the count - 1 are set (appended past its size),
+// the others left as they were.
 void patella::TMap::GetAutomapMarks(int x, int y, int z, std::vector<TMark> *Marks, int *Count)
 {
 	PATELLA_ASSERT_VALUES(In(z,0,15), z);
@@ -1231,7 +1214,7 @@ void patella::TMap::DeleteAutomapMark(TMark &Deleted, int z)
 // 110 fields away, -4 without a path, 0 for no step, 1 for a complete path
 // and 2 for one cut off after ten steps or at the edge of the visible map.
 // Without MustReach a blocked destination ends the path before it. Errors
-// get the parameters added; there is only this one handler.
+// get the parameters added.
 int patella::TMap::FindPath(int StartX, int StartY, int StartZ, int DestX, int DestY, int DestZ, bool MustReach,
 	int *Steps, int *Directions, bool ForceDiagonal)
 {
@@ -1439,12 +1422,7 @@ void patella::TMap::ExitMap()
 		SaveAutomapBlock(i);
 }
 
-// The original's functions (issue #106): each calls its member on the one TClient's TMap.
-
-void SetMapPosition(int x, int y, int z)
-{
-	patella::bridge::Map().SetMapPosition(x, y, z);
-}
+// The original's functions: each calls its member on the one TClient's TMap.
 
 void GetMapPosition(int *x, int *y, int *z)
 {
@@ -1521,26 +1499,6 @@ TObject GetTopMultiUseObject(int rx, int ry, int rz, int &Position)
 	return patella::bridge::Map().GetTopMultiUseObject(rx, ry, rz, Position);
 }
 
-void AddObject(int rx, int ry, int rz, TObject Obj)
-{
-	patella::bridge::Map().AddObject(rx, ry, rz, Obj);
-}
-
-void AppendObject(int rx, int ry, int rz, TObject Obj)
-{
-	patella::bridge::Map().AppendObject(rx, ry, rz, Obj);
-}
-
-bool DeleteObject(int rx, int ry, int rz, int Position)
-{
-	return patella::bridge::Map().DeleteObject(rx, ry, rz, Position);
-}
-
-void ChangeObject(int rx, int ry, int rz, int Position, TObject Obj)
-{
-	patella::bridge::Map().ChangeObject(rx, ry, rz, Position, Obj);
-}
-
 int GetFirstEffect(int rx, int ry, int rz)
 {
 	return EffectNumberOf(patella::bridge::Map().GetFirstEffect(rx, ry, rz));
@@ -1601,21 +1559,6 @@ int GetMissileEffectY(int EffectNumber)
 	return patella::bridge::Map().GetMissileEffectY(EffectIdOf(EffectNumber));
 }
 
-void AddGraphicalEffect(int rx, int ry, int rz, int Type)
-{
-	patella::bridge::Map().AddGraphicalEffect(rx, ry, rz, Type);
-}
-
-void AddTextualEffect(int rx, int ry, int rz, int Color, const char *Text)
-{
-	patella::bridge::Map().AddTextualEffect(rx, ry, rz, Color, Text);
-}
-
-void AddMissileEffect(int sx, int sy, int sz, int dx, int dy, int dz, int Type)
-{
-	patella::bridge::Map().AddMissileEffect(sx, sy, sz, dx, dy, dz, Type);
-}
-
 void ProcessEffects()
 {
 	patella::bridge::Map().ProcessEffects();
@@ -1626,39 +1569,9 @@ void ProcessMissileEffects()
 	patella::bridge::Map().ProcessMissileEffects();
 }
 
-void ClearField(int rx, int ry, int rz, bool DeleteEffects)
-{
-	patella::bridge::Map().ClearField(rx, ry, rz, DeleteEffects);
-}
-
 void ClearMap()
 {
 	patella::bridge::Map().ClearMap();
-}
-
-void ShiftMap(int dx, int dy)
-{
-	patella::bridge::Map().ShiftMap(dx, dy);
-}
-
-void ShiftMapLevel(int dz)
-{
-	patella::bridge::Map().ShiftMapLevel(dz);
-}
-
-void RequestFieldRefresh(int rx, int ry, int rz)
-{
-	patella::bridge::Map().RequestFieldRefresh(rx, ry, rz);
-}
-
-int GetFieldHeight(int rx, int ry, int rz)
-{
-	return patella::bridge::Map().GetFieldHeight(rx, ry, rz);
-}
-
-bool IsFieldPassable(int rx, int ry, int rz, bool CheckHeight)
-{
-	return patella::bridge::Map().IsFieldPassable(rx, ry, rz, CheckHeight);
 }
 
 bool IsFieldThrowable(int rx, int ry, int rz)
@@ -1671,19 +1584,9 @@ bool IsFieldTranslucent(int rx, int ry, int rz)
 	return patella::bridge::Map().IsFieldTranslucent(rx, ry, rz);
 }
 
-bool FieldRefreshRequested(int rx, int ry, int rz)
-{
-	return patella::bridge::Map().FieldRefreshRequested(rx, ry, rz);
-}
-
 bool TakeAutomapChanged()
 {
 	return patella::bridge::Map().TakeAutomapChanged();
-}
-
-void UpdateAutomap(int rx, int ry)
-{
-	patella::bridge::Map().UpdateAutomap(rx, ry);
 }
 
 TRGBColor GetAutomapColor(int x, int y, int z)
@@ -1704,11 +1607,6 @@ void AddAutomapMark(TCoordinate &Coordinate, const char *Text, int Type)
 void DeleteAutomapMark(TMark &Deleted, int z)
 {
 	patella::bridge::Map().DeleteAutomapMark(Deleted, z);
-}
-
-int FindPath(int StartX, int StartY, int StartZ, int DestX, int DestY, int DestZ, bool MustReach, int *Steps, int *Directions, bool ForceDiagonal)
-{
-	return patella::bridge::Map().FindPath(StartX, StartY, StartZ, DestX, DestY, DestZ, MustReach, Steps, Directions, ForceDiagonal);
 }
 
 void InitMap(void (*Callback)(int CreatureID))

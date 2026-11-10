@@ -1,17 +1,10 @@
-// sysinc.cpp: reconstructed from Tibia.exe 7.72.
-//
-// System helpers: the millisecond clock, file checks, the PROGRAM_ERROR
-// texts, the clipboard with its buffer, and half of the encoded window title
-// and class name. The functions without line evidence come first, in binary
-// order; they use only this file's data. The asserted functions follow in
-// line order.
+// sysinc.cpp: system helpers: the millisecond clock, file checks, the PROGRAM_ERROR texts, the clipboard with its
+// buffer, and half of the encoded window title and class name.
 
 #include "sysinc.h"
 #include "BuildConfig.h"
 #include "common.h"
-#include "compat/msvc_io.h"
 #include "platform/Platform.h"
-#include <cstdio>
 #include <array>
 #include <cstddef>
 #include <cstdlib>
@@ -19,21 +12,18 @@
 #include <optional>
 #include <string>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
-// the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):
-// the window tree owns its children, the message queue its blocks, the lists their entries
+// cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file: the original's malloc'd entries and
+// texts, freed by their lists; the original's raw owners: the window tree owns its children, the message queue its
+// blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
-// The other half of Player.cpp's XOR-encoded window title ("Tibia   ") and
-// class name ("TibiaClient"); the keys are Player.cpp's. First in this
-// object's .rdata, before the PROGRAM_ERROR texts (owner: notes/decisions.md,
-// "Unknown-owner data (issue #12)"; low).
+// The other half of Player.cpp's XOR-encoded window title ("Tibia   ") and class name ("TibiaClient"); the keys are
+// Player.cpp's.
 const std::array<int, 8> TitleCode = {68, 75, 129, 81, 98, 78, 96, 141};
 const std::array<int, 11> ClassNameCode = {57, 193, 225, 58, 140, 118, 195, 214, 239, 244, 137};
 
 namespace {
 
-// Data, in .bss order.
 char *ClipboardBuffer;
 unsigned int ClipboardBufferSize;
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's initialiser reads the clock before main; the platform's clock does not throw
@@ -46,19 +36,9 @@ int GetMilliseconds()
 	return (int)patella::platform::Platform().Clock.Milliseconds() - StartTime;
 }
 
-bool FileExists(const char *FileName)
-{
-	return MsvcAccess(FileName, 0) == 0;
-}
-
-bool RemoveFile(const char *FileName)
-{
-	return std::remove(FileName) == 0;
-}
-
-// True when the clipboard has no text. Since Patella-Modern issue #112 the clipboard's text is its UTF-16 text
-// (CF_UNICODETEXT; Windows makes it from CF_TEXT and CF_TEXT from it, so the one is there when the other is).
-// Since issue #119 the clipboard is the platform's IClipboard (platform/Clipboard.h; Win32's: TWin32Clipboard).
+// True when the clipboard has no text. The clipboard's text is its UTF-16 text (CF_UNICODETEXT; Windows makes it from
+// CF_TEXT and CF_TEXT from it, so the one is there when the other is). The clipboard is the platform's IClipboard
+// (platform/Clipboard.h; TSdlClipboard).
 bool IsClipboardEmpty()
 {
 	return !patella::platform::Platform().Clipboard.HasText();
@@ -103,7 +83,7 @@ const char *GetErrorText(int Error)
 
 namespace {
 
-// The last hint names the bug report address (BuildConfig.h, issue #169).
+// The last hint names the bug report address (BuildConfig.h).
 constexpr const char *BugReportBefore = "Please submit a detailed bugreport including the error code number to ";
 constexpr const char *BugReportAfter = ".";
 constexpr auto BugReportHint = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(BugReportBefore,
@@ -178,7 +158,7 @@ void ResizeClipboardBuffer(unsigned int Size)
 // every system, so the clipboard's UTF-16 text is converted (types/Cp1252.h: '?' for a character the code page
 // does not have). Size is the converted text's with its NUL (the original's was the CF_TEXT memory's, at least
 // that). Since issue #119 the clipboard's calls (OpenClipboard to CloseClipboard, the conversion with them) are
-// the platform's IClipboard::Text (platform/ Clipboard.h; Win32's: TWin32Clipboard, the same calls): the
+// the platform's IClipboard::Text (platform/ Clipboard.h; TSdlClipboard): the
 // clipboard is closed before the buffer is filled, and a clipboard without text gives an empty text, Size 1
 // (the original's Size 0 and a NUL in the buffer: the same buffer). GCC's analyzer (Debug, issue #111): the
 // original's read one byte past the text at a removed CR (above), kept.
@@ -204,11 +184,10 @@ char *GetClipboardText()
 }
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic pop")
 
-// Since Patella-Modern issue #112 the text (the client's, Windows-1252) goes on the
-// clipboard as UTF-16 (CF_UNICODETEXT), instead of the original's CF_TEXT, so that
-// another program reads it as the client shows it whatever the system's ANSI code
-// page and the input language. Since issue #119 the platform's IClipboard::SetText
-// (TWin32Clipboard: the same calls).
+// The text (the client's, Windows-1252) goes on the clipboard as UTF-16
+// (CF_UNICODETEXT), instead of the original's CF_TEXT, so that another program
+// reads it as the client shows it whatever the system's ANSI code page and the
+// input language: the platform's IClipboard::SetText (TSdlClipboard).
 bool SetClipboardText(const char *Text)
 {
 	return patella::platform::Platform().Clipboard.SetText(Text);

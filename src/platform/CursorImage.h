@@ -1,5 +1,4 @@
-// CursorImage.h: a monochrome cursor resource as the bitmaps of a monochrome SDL cursor (Patella-Modern issue #123,
-// plan M8; notes/decisions.md, "#123: input over SDL3"). Not part of the original source. Portable: no platform header.
+// CursorImage.h: a monochrome cursor resource as the bitmaps of a monochrome SDL cursor. Portable: no platform header.
 //
 // The client's own cursors (resources 0x84 and 0x89, the crosshair and the magnifier: cursor_132.cur, cursor_137.cur of
 // the extracted resources) are 32x32 monochrome cursors. An RT_CURSOR resource is the hot spot (two 16-bit numbers)
@@ -43,8 +42,8 @@ constexpr std::uint32_t ReadLittle(std::span<const std::uint8_t> Bytes, std::siz
 } // namespace detail
 
 #if !defined(_WIN32)
-// Issue #131 (cmake/LinuxX64.cmake, tools/embed_cursors.py): the Linux client's built-in copy of a cursor resource (an
-// RT_CURSOR image), or empty when the build has none of that number.
+// The Linux client's built-in copy of a cursor resource (an RT_CURSOR image; cmake/LinuxX64.cmake,
+// tools/embed_cursors.py), or empty when the build has none of that number.
 [[nodiscard]] std::span<const std::uint8_t> EmbeddedCursor(int Id);
 #endif
 

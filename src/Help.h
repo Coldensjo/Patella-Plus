@@ -1,13 +1,11 @@
 // Help.h: the help bubble of the help mode and the event helps (hints).
-// Names are ours except EVENTHELPS, Handle, Number and Name, which are in
-// the assertions and catch strings.
 
 #pragma once
 
 #include "types/FixedString.h"
 #include <vector>
 
-inline constexpr int EVENTHELPS = 14; // "In(Number,1,EVENTHELPS)", "In(Hint,1,EVENTHELPS)" (MapWindow.cpp)
+inline constexpr int EVENTHELPS = 14;
 
 // The help numbers, named. Enumerators for the reason GUI.h gives at the modifier flags. No names of the original are
 // known; each is taken from the title of the text Help.cpp returns for the number, or from the code that passes it.
@@ -15,9 +13,12 @@ inline constexpr int EVENTHELPS = 14; // "In(Number,1,EVENTHELPS)", "In(Hint,1,E
 // HELP_* are the Handle of SetHelpHandle, GetHelpHandle and GetHelpText: what the help bubble of the help mode
 // explains. 10-23 are parts of the screen, which the windows' HelpMouseMove set. 1000-1002 are things on the map,
 // which TMapWindow::HelpMouseMove sets. 1100-1112 are the lens help of an object type, read from Tibia.dat (LENSHELP,
-// Objects.h), so only GetHelpText's case labels have them. InitHelp's handle 1 has no text and stays a number.
+// Objects.h), so only GetHelpText's case labels have them; a type without one has HELP_NONE (Objects.cpp).
 enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	HELP_NONE = 0, // no bubble: an element that explains nothing, a field with nothing to explain
+	// InitHelp's, until the first SetHelpHandle. Nothing sets it and it has no text, so that first call is always a
+	// change, also when it sets HELP_NONE.
+	HELP_UNSET = 1,
 	HELP_AUTOMAP = 10,
 	HELP_STATUS_BARS = 11,
 	HELP_INVENTORY = 12,
@@ -54,7 +55,7 @@ enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 // return and what Preferences.cpp's KnownHints holds: the event helps, 1 to EVENTHELPS. The prefix is the original's
 // other word for them ("unknown hint", the Hint of MapWindow.cpp's assertion), because EVENT_HELP and EVENT_HINTS
 // are event numbers (Events.h). The names follow GetEventHelpTitle's titles. HINT_FIRST and HINT_LAST bound the loops
-// of THintsDialog (Dialogs.cpp), written "i < HINT_LAST + 1" because "i <= HINT_LAST" compiles to other code.
+// of THintsDialog (Dialogs.cpp).
 enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	HINT_NONE = 0, // GetEventHelp and PopEventHelp: the queue is empty
 	HINT_FIRST_LOGIN = 1,
@@ -77,9 +78,7 @@ enum : int {       // NOLINT(cppcoreguidelines-use-enum-class): int constants
 
 namespace patella {
 
-// Help.cpp's state (issue #107, M7; notes/decisions.md, "#104: TClient and the subsystem objects" and "#107"): the
-// globals of the original are the members, in its .bss order with the same initial values, and the file's functions
-// the members of the same names. TGUI owns it (GUI.h).
+// Help.cpp's state, with the file's functions as its members. TGUI owns it (GUI.h).
 class THelp {
 public:
 	THelp() = default;
@@ -97,7 +96,7 @@ public:
 	[[nodiscard]] int GetHelpHandle() const;
 	bool TakeHelpHandleChanged();
 	void InitHelp();
-	// Static (issue #107, as TCommunication::ExitCommunication): empty, the golden tests' fake takes its place.
+	// Empty, so static (as TCommunication::ExitCommunication).
 	static void ExitHelp();
 	int GetEventHelp();
 	int PopEventHelp();
@@ -110,32 +109,25 @@ public:
 	const char *GetCurrentHelpText();
 
 private:
-	// Data, in the original's .bss order.
-	// NumberOfEventHelps: EventHelps.size() (issue #100).
 	bool HelpHandleChanged{};
 	int HelpHandle{}; // what the help bubble explains
 	int HelpHeight{};
 	int HelpWidth{};
 	int HelpY{};
 	int HelpX{};
-	// The original's vector<int>(0, 9, 10) with NumberOfEventHelps: a queue that
-	// appends at its count and pops at 0, read below the count only, so a std::vector (issue #100).
+	// A queue that appends at its end and pops at 0.
 	std::vector<int> EventHelps;
 	TFixedString<2048> HelpText{};
-
-	// HelpText a TFixedString (issue #60).
-	static_assert(sizeof(HelpText) == 2048, "HelpText");
 };
 
-// The transition's access path (issue #107; notes/decisions.md, "#104: TClient and the subsystem objects"): the one
-// TClient's THelp (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the one TClient's THelp (Client.cpp). It goes when no free function needs it.
 namespace bridge {
 THelp &Help();
 } // namespace bridge
 
 } // namespace patella
 
-// Help.cpp's functions (issue #107): each calls THelp's member of the same name on bridge::Help().
+// Help.cpp's functions: each calls THelp's member of the same name on bridge::Help().
 void SetHelpPosition(int x, int y);
 void MoveHelpPosition(int dx, int dy);
 void SetHelpSize(int Width, int Height);
@@ -147,7 +139,6 @@ void InitHelp();
 void ExitHelp();
 int GetEventHelp();
 int PopEventHelp();
-const char *GetHelpText(int Handle);
 void AddEventHelp(int Number);
 void CheckEventHelpName(const char *Name);
 void CheckEventHelpPosition(int x, int y, int z);

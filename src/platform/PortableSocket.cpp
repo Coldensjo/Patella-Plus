@@ -1,5 +1,4 @@
-// PortableSocket.cpp: TPortableSocket, the platform's network over Winsock or POSIX sockets (PortableSocket.h;
-// Patella-Modern issue #125, notes/decisions.md "#125"). Not part of the original source.
+// PortableSocket.cpp: TPortableSocket, the platform's network over Winsock or POSIX sockets (PortableSocket.h).
 
 #include "platform/PortableSocket.h"
 
@@ -49,7 +48,7 @@
 namespace patella::platform {
 
 #if defined(_WIN32)
-// ISocket's numbers are WinSock's (platform/Socket.h, issue #110): the Windows build passes WinSock's on unchanged.
+// ISocket's numbers are WinSock's (platform/Socket.h): the Windows build passes WinSock's on unchanged.
 static_assert(socket_error::Interrupted == WSAEINTR && socket_error::AccessDenied == WSAEACCES
 	&& socket_error::Fault == WSAEFAULT && socket_error::Invalid == WSAEINVAL && socket_error::TooManySockets == WSAEMFILE
 	&& socket_error::WouldBlock == WSAEWOULDBLOCK && socket_error::Already == WSAEALREADY
@@ -590,7 +589,7 @@ void TPortableSocket::Poll()
 {
 	// The connections in the order they were made; an event's handler may close or make any of them. The numbers are
 	// this call's own, because a handler's modal loop can reach Poll again. The client's few connections fit on the
-	// stack, so a turn of the loop does not allocate (issue #155); more than that go in a vector.
+	// stack, so a turn of the loop does not allocate; more than that go in a vector.
 	std::array<std::uint64_t, 8> Inline{};
 	std::vector<std::uint64_t> Many;
 	if (Connections.size() > Inline.size())

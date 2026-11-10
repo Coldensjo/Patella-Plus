@@ -1,19 +1,15 @@
-// File.h: TFile, the client's open files (the C library's FILE *) with an owner. Patella-Modern issue #64
-// (notes/modernization-plan.md, section 7, M4: "an RAII TFile instead of FILE *"). Not part of the original source.
+// File.h: TFile, the client's open files (the C library's FILE *) with an owner.
 //
-// TFile is exactly a FILE *: its only member is the pointer, so it has the pointer's size and alignment and a
-// FILE * member of a frozen structure (Script.h's four file classes) becomes a TFile without moving anything
-// (IsFileLayout below; the classes check it in the oracle build). It closes its file when it is destroyed, it
+// TFile holds a FILE *, its only member. It closes its file when it is destroyed, it
 // moves but does not copy, and it compares with nullptr (and NULL) as the pointer did, so the conditions the
 // original wrote (`File != NULL`, the assertion `F!=NULL`) stay as they were.
 //
 // The functions are the C library's, with their results and their errors: Open is fopen (false where fopen
 // returned NULL, errno set by the library), Close is fclose (its result; nothing to do on a closed TFile),
-// Read/Write are fread/fwrite (the number of whole items), PutChar is fputc, Seek is fseek, Flush is fflush, and
+// Read/Write are fread/fwrite (the number of whole items), Seek is fseek, Flush is fflush, and
 // Descriptor is _fileno/fileno (the descriptor under the FILE, for _eof). Nothing throws, nothing reports: the
-// callers check the results and raise their own errors (TERROR texts, frozen until M5), as they did. Print
-// writes a text formatted with std::format's language (fprintf with the client's conversions, which give the same
-// characters: notes/decisions.md, issue #64); on the oracle's C++17 through the stand-in of compat/format.h.
+// callers check the results and raise their own errors (TERROR texts), as they did. Print writes a text formatted
+// with std::format's language (fprintf with the client's conversions, which give the same characters).
 //
 // The bytes on the disk are the original's on every platform:
 //	- TContent::Binary ("b"): the bytes as written.
@@ -21,28 +17,27 @@
 //	  Microsoft C runtime's text mode wrote it (MSVC 7.1's and the UCRT's lowio _write). On Windows that is the
 //	  runtime's own text mode (the original's fopen "at" itself); elsewhere the stream is a glibc fopencookie
 //	  stream whose write function adds the '\r' and writes to the descriptor (POSIX has no text mode). The FILE
-//	  itself translates, so every write (Write, PutChar, Print) and every flush point is the same as on Windows.
+//	  itself translates, so every write (Write, Print) and every flush point is the same as on Windows.
 //	  Reading in text mode is refused (false, errno EINVAL): the client reads only binary files.
-// Open is fopen with the original's sharing on Windows (_fsopen with _SH_DENYNO, which is what fopen calls);
-// the UTF-16 name overload of the Windows-only test mode is _wfopen_s, as its callers had (not shared).
-// The name is the client's text, Windows-1252 (issue #112, plan D4; types/Cp1252.h): on Windows it is opened by its
-// UTF-16 name (_wfsopen, the same sharing), so it no longer depends on the system's ANSI code page (where that is
-// 1252 the file is the same); elsewhere by its UTF-8 name. An ASCII name is the same file everywhere.
+// Open is fopen with the original's sharing on Windows (_fsopen with _SH_DENYNO, which is what fopen calls); the
+// wchar_t name overload is _wfopen_s (not shared). The name is the client's text, Windows-1252 (types/Cp1252.h): on
+// Windows it is opened by its UTF-16 name (_wfsopen, the same sharing), so it does not depend on the system's ANSI
+// code page (where that is 1252 the file is the same); elsewhere by its UTF-8 name. An ASCII name is the same file
+// everywhere.
 
 #pragma once
 
-#include "compat/format.h"
 #include "types/Cp1252.h"
-#include "types/FixedString.h" // IWYU pragma: keep (std::format's branch of Print: TFormatArgument)
+#include "types/FixedString.h" // TFormatArgument, PassFormatArgument
 
 #include <array>
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
-#include <string> // IWYU pragma: keep (the stand-in's branch of Print)
+#include <format>
+#include <string>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #if defined(_WIN32)
@@ -107,7 +102,7 @@ public:
 #else
 	using TSystemChar = char;
 #endif
-	// Open of a name in the system's own form (std::filesystem::path's c_str(); issue #130: the data folder's files,
+	// Open of a name in the system's own form (std::filesystem::path's c_str(): the data folder's files,
 	// platform/FileSystem.h): UTF-16 on Windows, opened as Open opens it (_wfsopen, _SH_DENYNO), the bytes elsewhere.
 	bool OpenSystemName(const TSystemChar *Name, TAccess Access, TContent Content = TContent::Binary) noexcept
 	{
@@ -121,7 +116,7 @@ public:
 	}
 
 #if defined(_WIN32)
-	// _wfopen_s(&File, Name, Mode): a UTF-16 name, the file not shared while it is open (the test mode's dumps).
+	// _wfopen_s(&File, Name, Mode): a UTF-16 name, the file not shared while it is open.
 	bool Open(const wchar_t *Name, TAccess Access, TContent Content = TContent::Binary) noexcept
 	{
 		if (!Usable(Access, Content))
@@ -134,22 +129,6 @@ public:
 		return Handle != nullptr;
 	}
 #endif
-
-	// tmpfile(): a new binary file for reading and writing ("w+b"), deleted when it is closed.
-	bool OpenTemporary() noexcept
-	{
-		if (Handle != nullptr) {
-			errno = EBUSY;
-			return false;
-		}
-#if defined(_MSC_VER)
-		if (tmpfile_s(&Handle) != 0)
-			Handle = nullptr;
-#else
-		Handle = std::tmpfile(); // NOLINT(cppcoreguidelines-owning-memory): TFile owns it (Close)
-#endif
-		return Handle != nullptr;
-	}
 
 	// fclose: its result, 0 on a closed TFile.
 	int Close() noexcept
@@ -177,29 +156,16 @@ public:
 	{
 		return Text.empty() || std::fwrite(Text.data(), 1, Text.size(), Handle) == Text.size();
 	}
-	// fputc: the character, or EOF.
-	int PutChar(int Character) noexcept { return std::fputc(Character, Handle); }
 	// getc and ungetc: the next byte (0-255) or EOF; the byte back, for the next GetChar.
 	int GetChar() noexcept { return std::getc(Handle); }
 	int UngetChar(int Character) noexcept { return std::ungetc(Character, Handle); }
 
-#if PATELLA_HAS_FORMAT
 	// fprintf with std::format's language: the number of characters, or -1 where they were not all written.
 	template <typename... Arguments>
 	int Print(std::format_string<TFormatArgument<Arguments>...> Format, Arguments &&...Values)
 	{
 		return PutFormatted(std::format(Format, PassFormatArgument(std::forward<Arguments>(Values))...));
 	}
-#else
-	template <typename... Arguments>
-	int Print(std::string_view Format, const Arguments &...Values)
-	{
-		const std::ptrdiff_t Size = patella::compat::FormatToNStandIn(nullptr, 0, Format, Values...).Size;
-		std::string Text(static_cast<std::size_t>(Size), '\0');
-		patella::compat::FormatToNStandIn(Text.data(), Size, Format, Values...);
-		return PutFormatted(Text);
-	}
-#endif
 
 	// fseek (Seek(0, SEEK_SET) for rewind, which reports nothing), fflush.
 	int Seek(long Offset, int Origin) noexcept { return std::fseek(Handle, Offset, Origin); }
@@ -346,8 +312,3 @@ private:
 	}
 #endif
 };
-
-// The layout the frozen structures rely on: exactly a FILE *.
-inline constexpr bool IsFileLayout = sizeof(TFile) == sizeof(std::FILE *) && alignof(TFile) == alignof(std::FILE *)
-	&& std::is_standard_layout_v<TFile>;
-static_assert(IsFileLayout);

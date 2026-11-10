@@ -1,14 +1,12 @@
-// WindowSystem.h: what the Vulkan engine asks of the window system (Patella-Modern issue #126, plan M8; notes/vulkan.md,
-// "The window system"; notes/decisions.md, "#126"). Not part of the original source. No platform header: the window is
-// a TWindowHandle (platform/Window.h), the surface Vulkan's.
+// WindowSystem.h: what the Vulkan engine asks of the window system. No platform header: the window is a TWindowHandle
+// (platform/Window.h), the surface Vulkan's.
 //
 // TSurfaceVulkan (SurfaceVulkan.cpp) reads the main window's client area and the screen's size, and creates each
-// device's surface, through the window system of the client's window:
+// device's surface, through the window system of the client's window, SdlWindowSystem() (WindowSystemSdl.cpp):
+// SDL_GetWindowSizeInPixels, the primary display's bounds, SDL_Vulkan_GetInstanceExtensions and
+// SDL_Vulkan_CreateSurface.
 //
-//	SdlWindowSystem()    the SDL3 window's (WindowSystemSdl.cpp): SDL_GetWindowSizeInPixels, the primary
-//	                     display's bounds, SDL_Vulkan_GetInstanceExtensions and SDL_Vulkan_CreateSurface
-//
-// The surface goes on the device's own window (PresentWindow.h, issue #52: a child window per device, never the main
+// The surface goes on the device's own window (PresentWindow.h: on Windows a child window per device, never the main
 // window), which TPresentWindows makes and destroys.
 
 #pragma once
@@ -54,7 +52,7 @@ protected:
 	~IWindowSystem() = default;
 };
 
-// The SDL3 window's (SDL's video subsystem started: SdlFrame.cpp's Create, tests_vulkan's main).
+// The SDL3 window's (SDL's video subsystem started: SdlFrame.cpp's Create).
 [[nodiscard]] IWindowSystem &SdlWindowSystem();
 
 } // namespace patella::vulkan

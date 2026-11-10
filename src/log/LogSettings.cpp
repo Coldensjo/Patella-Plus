@@ -1,4 +1,4 @@
-// LogSettings.cpp: the developer log's settings in Patella.ini (LogSettings.h; Patella-Modern issue #77).
+// LogSettings.cpp: the developer log's settings in Patella.ini (LogSettings.h).
 
 #include "log/LogSettings.h"
 
@@ -22,7 +22,7 @@ void Configure(TLog &Target, const patella::settings::TSettingsFile &Settings, p
 	}
 	std::string Opened;
 	if (const std::optional<std::string> Value = Settings.Get(FileKey); Value.has_value() && !Value->empty()) {
-		// The client's text, as every name TFile opens (issue #117: converted from the file's UTF-8).
+		// The client's text, as every name TFile opens (converted from the file's UTF-8).
 		const std::string Path = patella::settings::ClientText(Settings, *Value);
 		if (Target.OpenFile(Files, Path))
 			Opened = Path;

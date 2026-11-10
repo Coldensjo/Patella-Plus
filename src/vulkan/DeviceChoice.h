@@ -1,18 +1,16 @@
-// DeviceChoice.h: the graphics device choice of the Vulkan engine (Patella-Modern issue #31; plan 6.3).
+// DeviceChoice.h: the graphics device choice of the Vulkan engine.
 //
-// Plan 6.3 turns the advanced graphics options' three engine buttons into a graphics device choice:
-// "Automatic", "GPU" (one entry per Vulkan GPU; the button goes on to the next GPU when there are
-// several) and "CPU (compatibility)". The choice is Patella.ini's Device (src/settings/Settings.h) and
-// PATELLA_VULKAN's value, in the same words: auto, gpu (the best GPU), gpuN or gpu:N (the n-th GPU, from
-// 0, in the loader's order: TRenderer's ListGpus), cpu (the CPU driver). No Vulkan here, no platform
-// header: tests_render checks it on every preset.
+// The advanced graphics options' three buttons, the original's engine buttons, choose the graphics device:
+// "Automatic", "GPU" (one entry per Vulkan GPU; the button goes on to the next GPU when there are several)
+// and "CPU (compatibility)". The choice is Patella.ini's Device (src/settings/Settings.h) and
+// PATELLA_VULKAN's value, in the same words: auto, gpu (the best GPU), gpuN or gpu:N (the n-th GPU, from 0,
+// in the loader's order: Renderer.h's ListGpus), cpu (the CPU driver). No Vulkan here, no platform header.
 
 #pragma once
 
 #include <optional>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
 namespace patella::vulkan {
 
@@ -22,8 +20,6 @@ enum class TDeviceKind : int {
 	Gpu,       // a GPU only (GpuIndex: the n-th, -1 the best)
 	Cpu,       // the CPU driver only
 };
-static_assert(sizeof(TDeviceKind) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<TDeviceKind>, int>);
 
 struct TDeviceChoice {
 	TDeviceKind Kind = TDeviceKind::Automatic;
@@ -38,8 +34,6 @@ enum class TDeviceButton : int {
 	Gpu,
 	Cpu,
 };
-static_assert(sizeof(TDeviceButton) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<TDeviceButton>, int>);
 
 // "auto", "gpu", "gpu1", "gpu:1", "cpu", without regard to ASCII case or the spaces around it; nothing
 // for anything else (an empty text included).

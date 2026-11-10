@@ -1,5 +1,4 @@
 // Protocol.h: the numbers of the Tibia 7.72 protocol, named, so that a change of the protocol is made in one place.
-// Not part of the original source.
 //
 // A packet starts with one byte, its type. The two servers and the two directions each have their own numbers, so
 // one value can have several names here:
@@ -15,8 +14,8 @@
 // ReceiveAddObject is GAME_RECEIVE_ADD_OBJECT), without the server's name where the prefix says it already; those
 // have their function in a comment.
 //
-// After the packet types come values inside the packets: CLIENT_VERSION, FIELD_END, and the original's
-// UNKNOWNCREATURE and OUTDATEDCREATURE.
+// After the packet types come values inside the packets: CLIENT_OS_WINDOWS, CLIENT_VERSION, FIELD_END, and the
+// original's UNKNOWNCREATURE and OUTDATEDCREATURE.
 //
 // Enumerators for the reason GUI.h gives at the modifier flags.
 
@@ -32,7 +31,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	LOGIN_RECEIVE_MESSAGE = 0x0b,
 	LOGIN_RECEIVE_MESSAGE_OF_THE_DAY = 0x14,
 	// The patch packets, named after the original's handlers (ReceivePatch, ReceiveWholeFile, ReceivePatchBlock):
-	// ReceiveUpdateRequest takes all three since Patella-Modern issue #75.
+	// ReceiveUpdateRequest takes all three.
 	LOGIN_RECEIVE_PATCH = 0x1e,
 	LOGIN_RECEIVE_WHOLE_FILE = 0x1f,
 	LOGIN_RECEIVE_PATCH_BLOCK = 0x20,
@@ -51,7 +50,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	GAME_SEND_WALK_EAST = 0x66,
 	GAME_SEND_WALK_SOUTH = 0x67,
 	GAME_SEND_WALK_WEST = 0x68,
-	GAME_SEND_STOP = 0x69,
+	GAME_SEND_STOP_WALK = 0x69,
 	GAME_SEND_WALK_NORTH_EAST = 0x6a,
 	GAME_SEND_WALK_SOUTH_EAST = 0x6b,
 	GAME_SEND_WALK_SOUTH_WEST = 0x6c,
@@ -93,7 +92,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	GAME_SEND_OPEN_PRIVATE_CHANNEL = 0xaa,
 	GAME_SEND_INVITE_TO_PRIVATE_CHANNEL = 0xab,
 	GAME_SEND_EXCLUDE_FROM_PRIVATE_CHANNEL = 0xac,
-	GAME_SEND_CANCEL = 0xbe,
+	GAME_SEND_STOP_ATTACK_AND_WALK = 0xbe,
 	GAME_SEND_REFRESH_FIELD = 0xc9,
 	GAME_SEND_REFRESH_CONTAINER = 0xca,
 	GAME_SEND_REQUEST_OUTFIT = 0xd2,
@@ -102,7 +101,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	GAME_SEND_REMOVE_BUDDY = 0xdd,
 	GAME_SEND_BUG_REPORT = 0xe6,
 	GAME_SEND_RULE_VIOLATION_REPORT = 0xe7,
-	// 0xe8, the original's SendDebugReport, is gone since Patella-Modern issue #74.
+	// 0xe8, the original's SendDebugReport, is not sent.
 };
 
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
@@ -171,6 +170,10 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 };
 
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	// The word that SendLogin and SendGameLogin send before the version. The code does not show what it is; the name
+	// is from what is publicly known of the 7.72 protocol: the client's operating system, 2 for Windows (1 for
+	// Linux). The Linux build sends 2 as well, so that a server sees the same client.
+	CLIENT_OS_WINDOWS = 2,
 	// The client's version, 7.72, which SendLogin and SendGameLogin send to their servers (name ours).
 	CLIENT_VERSION = 772,
 	// ReadField: a word of this value or above ends the objects of a map field, and what it is above tells how many

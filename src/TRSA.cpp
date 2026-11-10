@@ -1,4 +1,4 @@
-// TRSA.cpp: reconstructed from Tibia.exe 7.72.
+// TRSA.cpp: RSA encryption with a public key, for the login packet (TRSA.h).
 
 #include "TRSA.h"
 #include "common.h"
@@ -8,7 +8,7 @@
 
 namespace {
 
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global (vlong allocates; issue #63)
+// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global (vlong allocates)
 vlong PublicExponent(65537);
 
 } // namespace
@@ -32,8 +32,7 @@ void TRSA::SetPublicKey(const char *ModulusM)
 	}
 }
 
-// Textbook RSA: the 128 bytes are the number, encrypted as they are (no padding, by the protocol;
-// notes/decisions.md, "#128").
+// Textbook RSA: the 128 bytes are the number, encrypted as they are (no padding, by the protocol).
 void TRSA::Encrypt(patella::TSpan<uint8, 128> Data)
 {
 	if (Data.data() == nullptr)

@@ -1,4 +1,4 @@
-// PreferenceKeys.cpp: the options of Tibia.cfg as keys of Patella.ini (PreferenceKeys.h; Patella-Modern issues #45, #117).
+// PreferenceKeys.cpp: the options of Tibia.cfg as keys of Patella.ini (PreferenceKeys.h).
 
 #include "settings/PreferenceKeys.h"
 
@@ -109,9 +109,9 @@ std::vector<std::pair<int, std::string>> Indexed(const TSettingsFile &File, std:
 	return Result;
 }
 
-// Removes the Prefix<n> lines whose n is not in Keep (Keep[n] true), and those whose n is not written as the writer writes
-// it (Buddy01 for Buddy1, Patella-Modern issue #132: Indexed takes the first line of a number, so such a line before the
-// written one would be read in its place, and a renumbered entry lost).
+// Removes the Prefix<n> lines whose n is not in Keep (Keep[n] true), and those whose n is not written as the writer
+// writes it (Buddy01 for Buddy1: Indexed takes the first line of a number, so such a line before the written one would
+// be read in its place, and a renumbered entry lost).
 void RemoveIndexed(TSettingsFile &File, std::string_view Prefix, const std::vector<bool> &Keep)
 {
 	for (const std::string &Key : File.Keys()) {
@@ -538,8 +538,8 @@ std::vector<std::string> ReadPreferences(const TSettingsFile &File, TPreferenceV
 	Read.Flag("DragFullStacks", Values.DragFullStacks);
 	Read.Number("AttackMode", Values.AttackMode);
 	Read.Number("ChaseMode", Values.ChaseMode);
-	if (Values.ChaseMode == 2)
-		Values.ChaseMode = 0; // as the original's reader
+	if (Values.ChaseMode == CHASE_OBSOLETE)
+		Values.ChaseMode = CHASE_STAND; // as the original's reader
 	Read.Flag("SecureMode", Values.SecureMode);
 	if (const auto Entries = Indexed(File, "Buddy"); !Entries.empty()) {
 		Values.Buddies.clear();

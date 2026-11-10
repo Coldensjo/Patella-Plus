@@ -1,4 +1,4 @@
-r"""Configure and build a CMake preset in one command, from any shell (issue #10).
+r"""Configure and build a CMake preset in one command, from any shell.
 
 Usage:
   python -I tools/build.py <workflow preset> [cmake --workflow options, e.g. --fresh]
@@ -19,7 +19,7 @@ newest Visual Studio with the C++ tools) and runs CMake in the environment it se
 already a developer prompt for that architecture is used as it is. The other presets (the Linux presets
 on Linux) run CMake in the shell's own environment.
 
-Docker (issue #7): on Windows, a preset whose condition asks for a Linux host (linux-x64-gcc,
+Docker: on Windows, a preset whose condition asks for a Linux host (linux-x64-gcc,
 package-linux-x64) runs in the image patella-modern/linux-x64:gcc16.2-clang23.1-libstdcxx16-cmake4.4.5-ninja1.13.2-sdl3-mesa25.0.7
 (PATELLA_DOCKER_IMAGE overrides it; `docker build -t patella-modern/linux-x64:gcc16.2-clang23.1-libstdcxx16-cmake4.4.5-ninja1.13.2-sdl3-mesa25.0.7
 docker/linux-x64` builds
@@ -28,7 +28,7 @@ untracked ones that are not ignored: never Tibia.exe or the data files) are copi
 to /work, on the container's own case-sensitive file system, and the command runs there.
 build/<preset> is mounted at /work/build/<preset>, so the build tree and the downloads stay between runs.
 
-Warnings (issue #17): every cmake run (the first form, and the second when the command is cmake) is
+Warnings: every cmake run (the first form, and the second when the command is cmake) is
 checked for compiler, resource compiler, assembler and linker warnings (MSVC's "warning C4101",
 "warning LNK4075", "warning RC4005", "warning A4018", "Command line warning D9025" ...; GCC's and Clang's
 "file:line:col: warning:"). The output is passed through unchanged. A warning makes the script exit 1 after
@@ -36,7 +36,7 @@ the command ends (when the command itself succeeded), with the warnings listed a
 build with /WX or -Werror already. Ninja recompiles only what changed, so a build that is up to date shows no
 warnings: --fresh checks every file.
 
-CMake (issue #141): one version everywhere, 4.4.5. On Windows the script runs cmake, ctest and cpack from the
+CMake: one version everywhere, 4.4.5. On Windows the script runs cmake, ctest and cpack from the
 pinned portable CMake, Kitware's windows-x86_64 release in C:\Servers\Software\cmake (PATELLA_CMAKE_DIR overrides
 the folder; hosted CI unpacks the same zip with --install-cmake and sets it), never the first cmake on PATH:
 the machine PATH (C:\Program Files\CMake) comes before the user PATH, and vcvarsall.bat puts Visual Studio's own
@@ -44,7 +44,7 @@ CMake first. It refuses a missing or other version with a message. The image (do
 on Linux the command's cmake is the one on PATH. `--install-cmake <folder>` downloads that zip, checks it against
 CMAKE_SHA256 (the release's cmake-4.4.5-SHA-256.txt) and unpacks it into <folder>, which must not exist. A timeout or
 a 5xx is retried with a pause, and when GitHub keeps failing the same zip comes from Kitware's own site, under the
-same check (issue #153: download_verified).
+same check (download_verified).
 
 Exit code: the command's, or 1 when it succeeded but warned.
 """
@@ -61,23 +61,23 @@ import tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PRESETS = os.path.join(ROOT, "CMakePresets.json")
 VCVARSALL = r"VC\Auxiliary\Build\vcvarsall.bat"
-# where the .cmd scripts found it before issue #10; vswhere's answer comes first
+# tried after vswhere's answer
 DEFAULT_VS = r"C:\Program Files\Microsoft Visual Studio\18\Community"
 # The Linux build image (docker/linux-x64/Dockerfile).
 DOCKER_IMAGE = "patella-modern/linux-x64:gcc16.2-clang23.1-libstdcxx16-cmake4.4.5-ninja1.13.2-sdl3-mesa25.0.7"
 DOCKER_DIR = "docker/linux-x64"
-# The pinned CMake of the Windows builds (issue #141; the module comment).
+# The pinned CMake of the Windows builds (the module comment).
 CMAKE_VERSION = "4.4.5"
 CMAKE_DEFAULT_DIR = r"C:\Servers\Software\cmake"
 CMAKE_TOOLS = ("cmake", "ctest", "cpack")
 CMAKE_ARCHIVE = "https://github.com/Kitware/CMake/releases/download/v%s/cmake-%s-windows-x86_64.zip" % (
 	CMAKE_VERSION, CMAKE_VERSION)
-# Kitware's own site, the fallback when GitHub keeps failing (issue #153); the same file, the same SHA-256.
+# Kitware's own site, the fallback when GitHub keeps failing; the same file, the same SHA-256.
 CMAKE_ARCHIVES = (CMAKE_ARCHIVE, "https://cmake.org/files/v%s/cmake-%s-windows-x86_64.zip" % (
 	CMAKE_VERSION.rpartition(".")[0], CMAKE_VERSION))
 # cmake-4.4.5-SHA-256.txt of the release: cmake-4.4.5-windows-x86_64.zip
 CMAKE_SHA256 = "326c826486d46a23cf9d5a1c9ee3a567d427bdd02c4a34071937a2a675cff004"
-# download_verified (issue #153), the same numbers as cmake/Download.cmake and docker/linux-x64/fetch.sh.
+# download_verified's numbers, the same as cmake/Download.cmake's and docker/linux-x64/fetch.sh's.
 DOWNLOAD_TRIES = 10
 DOWNLOAD_FIRST_TRIES = 4
 DOWNLOAD_PAUSE = 10
@@ -213,9 +213,9 @@ _checked_cmake = set()
 
 
 def pinned_cmake(command):
-	"""`command` with a bare cmake, ctest or cpack replaced by the pinned CMake's executable (issue #141), on Windows;
-	unchanged elsewhere, or when the command names another program or a path. Raises BuildError when the pinned CMake
-	is missing or reports another version."""
+	"""`command` with a bare cmake, ctest or cpack replaced by the pinned CMake's executable, on Windows; unchanged
+	elsewhere, or when the command names another program or a path. Raises BuildError when the pinned CMake is
+	missing or reports another version."""
 	tool = os.path.splitext(command[0])[0].lower()
 	if os.name != "nt" or tool not in CMAKE_TOOLS or os.path.dirname(command[0]):
 		return command
@@ -263,10 +263,10 @@ def fetch_once(url, path):
 
 
 def download_verified(urls, sha256, path, tries=DOWNLOAD_TRIES, first_tries=DOWNLOAD_FIRST_TRIES, pause=DOWNLOAD_PAUSE):
-	"""Downloads the first of `urls` that answers to `path`, which only exists afterwards with the SHA-256 `sha256`
-	(issue #153). A URL with a fallback after it gets `first_tries` attempts, the last one `tries`, with a pause of
-	`pause` seconds times the attempt (at most six times `pause`) after each failure fetch_once retries. Raises
-	BuildError on anything else, without a retry or a fallback: a 404 is a wrong pin, a wrong SHA-256 a wrong file."""
+	"""Downloads the first of `urls` that answers to `path`, which only exists afterwards with the SHA-256 `sha256`.
+	A URL with a fallback after it gets `first_tries` attempts, the last one `tries`, with a pause of `pause` seconds
+	times the attempt (at most six times `pause`) after each failure fetch_once retries. Raises BuildError on anything
+	else, without a retry or a fallback: a 404 is a wrong pin, a wrong SHA-256 a wrong file."""
 	import hashlib
 	import time
 	part = path + ".part"
@@ -297,8 +297,7 @@ def download_verified(urls, sha256, path, tries=DOWNLOAD_TRIES, first_tries=DOWN
 
 
 def install_cmake(folder):
-	"""Downloads Kitware's CMake zip (CMAKE_ARCHIVES, in order), checks its SHA-256 and unpacks it into `folder`
-	(issues #141, #153)."""
+	"""Downloads Kitware's CMake zip (CMAKE_ARCHIVES, in order), checks its SHA-256 and unpacks it into `folder`."""
 	import zipfile
 	folder = os.path.abspath(folder)
 	if os.path.lexists(folder):
@@ -361,8 +360,8 @@ def docker_command(configure, command):
 	script = ('set -e; mkdir -p /work; (cd /src && tar --null -T - -cf -) | tar -x -C /work; '
 		'cd /work; exec "$@"')
 	mounts = shlex.split(os.environ.get("PATELLA_DOCKER_MOUNTS", ""))
-	# The client's cursors (issue #131, cmake/LinuxX64.cmake): the local Tibia.exe read-only at /tibia, the environment
-	# naming it for the configure. Never copied into the image or the build tree beyond the extracted cursor resources.
+	# The client's cursors (cmake/LinuxX64.cmake): the local Tibia.exe read-only at /tibia, the environment naming it
+	# for the configure. Never copied into the image or the build tree beyond the extracted cursor resources.
 	tibia = os.path.join(ROOT, "Tibia.exe")
 	if os.path.isfile(tibia):
 		mounts += ["-v", "%s:/tibia/Tibia.exe:ro" % tibia, "-e", "PATELLA_TIBIA_EXE=/tibia/Tibia.exe"]

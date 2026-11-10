@@ -1,6 +1,6 @@
-# Reproducible builds (Patella-Modern issue #136, plan M9; notes/decisions.md, "#136"): two Release builds of one commit, in
-# different folders, give byte-identical executables. tools/repro_check.py builds a commit in a second folder and compares
-# it with this checkout's build; this file holds what that took, each item measured against a build without it:
+# Reproducible builds: two Release builds of one commit, in different folders, give byte-identical executables.
+# tools/repro_check.py builds a commit in a second folder and compares it with this checkout's build; this file holds
+# what that took, each item measured against a build without it:
 #
 #	include(cmake/Reproducible.cmake)      in the root CMakeLists.txt, before the first target (FetchContent's included)
 #
@@ -17,7 +17,7 @@
 #   the same file in every byte. Release links are not incremental, so nothing is lost but the time to write the PDB anew.
 # - GCC and Clang: -ffile-prefix-map (the same paths, and those of debug information). Their linkers' build ids are hashes of
 #   the output already.
-# - Clang with AddressSanitizer (linux-x64-clang): cmake/RelativeSource.sh as the compiler launcher, every configuration:
+# - Clang with AddressSanitizer (PATELLA_SANITIZE): cmake/RelativeSource.sh as the compiler launcher, every configuration:
 #   ASan's module name is the source path as given on the command line, which no prefix map reaches. UBSan's check
 #   locations in a header have the header's absolute path, also out of the prefix map's reach:
 #   -fsanitize-undefined-strip-path-components=-1 keeps the file's name, with its line, in the report.
@@ -25,11 +25,10 @@
 # Release only otherwise: Debug keeps absolute paths, which debuggers open without being told where the sources are. The source
 # folder is removed from the paths (MSVC) or replaced by "." (GCC, Clang), so __FILE__ reads "src\Map.cpp" or "./src/Map.cpp"
 # (from the build folder, "../../src/Map.cpp" under the launcher); what shows it to a person takes the file's name alone
-# (patella::ErrorOrigin, src/TMyException.cpp). A build folder outside the source folder gets the same treatment; one inside
+# (patella::ErrorText, src/TMyException.cpp). A build folder outside the source folder gets the same treatment; one inside
 # it (the presets') is covered by the source folder's.
 #
-# The hardening and analysis settings are not touched (cmake/Hardening.cmake, cmake/Core.cmake), and the 32-bit capture
-# DLL never comes here (root CMakeLists.txt returns before it).
+# The hardening and analysis settings are not touched (cmake/Hardening.cmake, cmake/Core.cmake).
 
 cmake_path(IS_PREFIX PROJECT_SOURCE_DIR "${PROJECT_BINARY_DIR}" NORMALIZE patella_binary_dir_inside)
 set(patella_repro_folders "${PROJECT_SOURCE_DIR}")

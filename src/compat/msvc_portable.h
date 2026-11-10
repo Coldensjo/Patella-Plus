@@ -1,8 +1,5 @@
 // msvc_portable.h: the Microsoft CRT's semantics of compat/msvc.h written with the C library, for the platforms
-// without the Microsoft CRT (Patella-Modern issue #43). Not part of the original source. compat/msvc.h includes
-// it off Windows, where its Msvc* functions are these; tests/unit/core_msvc_test.cpp includes it everywhere and
-// holds it against the Microsoft functions on Windows. The client's Windows translation units do not include it
-// (compat/msvc.h says why).
+// without the Microsoft CRT. compat/msvc.h includes it off Windows, where its Msvc* functions are these.
 
 #pragma once
 
@@ -40,7 +37,13 @@ inline int PortableVsnprintf(char *Buffer, std::size_t Count, const char *Format
 	if (Length >= 0 && Buffer != nullptr && static_cast<std::size_t>(Length) >= Count) {
 		// vsnprintf ended the text with a NUL at Buffer[Count - 1]; _vsnprintf has a character there.
 		if (Count != 0) {
-			std::string Text(static_cast<std::size_t>(Length), '\0');
+			std::string Text;
+			try {
+				Text.assign(static_cast<std::size_t>(Length), '\0');
+			} catch (...) {
+				va_end(Again); // the copy is ended on every way out, also when the memory is not there
+				throw;
+			}
 			std::vsnprintf(Text.data(), Text.size() + 1, Format, Again); // its NUL goes to Text.data()[Length]
 			std::memcpy(Buffer, Text.data(), Count);
 		}
@@ -49,17 +52,6 @@ inline int PortableVsnprintf(char *Buffer, std::size_t Count, const char *Format
 	}
 	va_end(Again);
 	return Result < 0 ? -1 : Result;
-}
-
-// _snprintf: PortableVsnprintf's semantics.
-PATELLA_PRINTF_FORMAT(3, 4)
-inline int PortableSnprintf(char *Buffer, std::size_t Count, const char *Format, ...) // NOLINT(cppcoreguidelines-pro-type-vararg): _snprintf's interface
-{
-	std::va_list Arguments;      // NOLINT(cppcoreguidelines-pro-type-vararg): _snprintf's interface
-	va_start(Arguments, Format); // NOLINT(cppcoreguidelines-pro-type-vararg)
-	const int Result = PortableVsnprintf(Buffer, Count, Format, Arguments);
-	va_end(Arguments); // NOLINT(cppcoreguidelines-pro-type-vararg)
-	return Result;
 }
 
 // _stricmp in the "C" locale (the client never calls setlocale): compares the bytes as unsigned char, a pair
@@ -102,8 +94,7 @@ inline char *PortableStrdup(const char *Text)
 
 #if !defined(_WIN32)
 
-// The Msvc* names of compat/msvc.h off Windows (on Windows they are the Microsoft functions themselves; issue
-// #49 moved them here from compat/msvc.h).
+// The Msvc* names of compat/msvc.h off Windows (on Windows they are the Microsoft functions themselves).
 
 // _snprintf: PortableVsnprintf's semantics.
 PATELLA_PRINTF_FORMAT(3, 4)
@@ -114,13 +105,6 @@ inline int MsvcSnprintf(char *Buffer, std::size_t Count, const char *Format, ...
 	const int Result = patella::compat::PortableVsnprintf(Buffer, Count, Format, Values);
 	va_end(Values); // NOLINT(cppcoreguidelines-pro-type-vararg)
 	return Result;
-}
-
-// _vsnprintf.
-PATELLA_PRINTF_FORMAT(3, 0)
-inline int MsvcVsnprintf(char *Buffer, std::size_t Count, const char *Format, std::va_list Values)
-{
-	return patella::compat::PortableVsnprintf(Buffer, Count, Format, Values);
 }
 
 // _stricmp.

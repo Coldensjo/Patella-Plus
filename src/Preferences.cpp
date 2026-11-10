@@ -1,21 +1,10 @@
-// Preferences.cpp: reconstructed from Tibia.exe 7.72.
+// Preferences.cpp: the options. Patella.ini is the client's only settings file: InitPreferences, SavePreferences and
+// ExitPreferences read and write it (settings/PreferenceKeys.h). ReadTibiaCfg, the original's loader, imports an
+// existing Tibia.cfg once; the client never writes Tibia.cfg.
 //
-// The functions without line evidence come first, in binary order. The asserted functions follow in line order,
-// which is also their binary order. None of them has a try block.
-//
-// The Tibia.cfg loader, saver and ExitPreferences end the file, in binary order.
-//
-// Patella-Modern issue #45: Patella.ini is the x64 client's only settings file.
-// The original's loader and saver are ReadTibiaCfg and WriteTibiaCfg: the first
-// imports an existing Tibia.cfg once, the second only the golden corpus calls
-// (the reference its tests read ReadTibiaCfg's results by, byte for byte); the
-// client never writes Tibia.cfg. InitPreferences, SavePreferences and
-// ExitPreferences, the names the client calls, read and write Patella.ini
-// (settings/PreferenceKeys.h) and come last.
-//
-// Patella-Modern issue #104: the data and the functions are TPreferences' (Preferences.h), which TClient owns; the
-// free functions at the end, the original's names, call them on bridge::Preferences(). Talk's lists (White, Ignore)
-// are reached through TTalkLists, so this file no longer includes Talk.h.
+// The data and the functions are TPreferences' (Preferences.h), which TClient owns; the free functions at the end, the
+// original's names, call them on bridge::Preferences(). Talk's lists (White, Ignore) are reached through TTalkLists, so
+// this file does not include Talk.h.
 
 #include "Preferences.h"
 #include "BuildConfig.h"
@@ -38,13 +27,13 @@
 #include <string_view>
 #include <vector>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file:
-// the original's malloc'd entries and texts, freed by their lists; the original's raw owners (notes/ownership.md):
-// the window tree owns its children, the message queue its blocks, the lists their entries
+// cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory off for the file: the original's malloc'd entries and
+// texts, freed by their lists; the original's raw owners: the window tree owns its children, the message queue its
+// blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
 
-// Patella.ini's keys have the same numbers of hotkeys and skills (issue #45).
+// Patella.ini's keys have the same numbers of hotkeys and skills.
 static_assert(HOTKEYS == patella::settings::PreferenceHotkeys && SKILLS == patella::settings::PreferenceSkills
 		&& HOTKEY_LENGTH - 1 == patella::settings::PreferenceHotkeyLength,
 	"Preferences.h and settings/PreferenceKeys.h");
@@ -682,7 +671,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 				// other line breaks become spaces.
 				Script.readSymbol('(');
 				const int Number = Script.readNumber();
-				if (Number < 0 || Number > HOTKEYS - 1)
+				if (Number < 0 || Number >= HOTKEYS)
 					Script.error("Illegal number");
 				Script.readSymbol(',');
 				char *Text = Hotkeys[Number];
@@ -720,7 +709,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 				AutomapZoom = Script.readNumber();
 			if (strcmp(Identifier, "contentwindow") == 0) {
 				// Appended when it is complete; the original wrote the entry in place and counted it then (an error on
-				// the way resets the options, SetDefaultPreferences, so a partial entry was never read; issue #100).
+				// the way resets the options, SetDefaultPreferences, so a partial entry was never read).
 				TContentWindowSize Entry{};
 				Script.readSymbol('(');
 				Entry.ID = Script.readNumber();
@@ -781,16 +770,15 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 				AttackMode = Script.readNumber();
 			if (strcmp(Identifier, "chasemode") == 0) {
 				ChaseMode = Script.readNumber();
-				if (ChaseMode == 2)
+				if (ChaseMode == CHASE_OBSOLETE)
 					ChaseMode = CHASE_STAND;
 			}
 			if (strcmp(Identifier, "securemode") == 0)
 				SecureMode = Script.readNumber() == 1;
 			if (strcmp(Identifier, "buddy") == 0) {
-				// The description is copied without a length limit: a description of 128 characters is kept
-				// whole, its NUL in Notify, set below; one of 132 or more wrote past the entry in the original
-				// (undefined), cut to 131 characters here (issues #57, #85).
-				// Appended when it is complete, as a ContentWindow's entry.
+				// The description is copied without a length limit: a description of 128 characters is kept whole, its
+				// NUL in Notify, set below; one of 132 or more wrote past the entry in the original (undefined), cut to
+				// 131 characters here. Appended when it is complete, as a ContentWindow's entry.
 				TBuddy Buddy{};
 				Script.readSymbol('(');
 				Buddy.CharacterID = Script.readNumber();
@@ -861,247 +849,11 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 	PreferencesLoaded = true;
 }
 
-// SavePreferences in the original. Writes Tibia.cfg, only after the
-// options were loaded (ReadTibiaCfg or InitPreferences); errors are
-// ignored. Odd behaviour kept: one counter serves all loops, and the White
-// list does not reset it, so it starts at the number of buddy entries and writes a
-// ',' before its first entry when there were buddies. SkillBars writes ','
-// before every skill above 0, also when nothing came before it. Deleted
-// buddies (CharacterID 0) are skipped. The fourth FullscreenMode value is
-// not saved.
-void TPreferences::WriteTibiaCfg(TTalkLists &Lists)
-{
-	int i = 0;
-	if (!PreferencesLoaded)
-		return;
-	try {
-		TWriteScriptFile Script;
-		Script.open("Tibia.cfg");
-		Script.writeText("# Tibia - graphical Multi-User-Dungeon");
-		Script.writeLn();
-		Script.writeText("# DO NOT EDIT THIS FILE");
-		Script.writeLn();
-		Script.writeLn();
-		Script.writeText("TestServer = ");
-		Script.writeText(TestServerLogin ? "yes" : "no");
-		Script.writeLn();
-		if (FullscreenMode.Width != 0) {
-			Script.writeText("FullscreenMode = (");
-			Script.writeNumber(FullscreenMode.Width);
-			Script.writeText(",");
-			Script.writeNumber(FullscreenMode.Height);
-			Script.writeText(",");
-			Script.writeNumber(FullscreenMode.Depth);
-			Script.writeText(")");
-			Script.writeLn();
-		}
-		Script.writeText("WindowsMousepointer = ");
-		Script.writeText(WindowsMousepointer ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("LightEffects = ");
-		Script.writeText(LightEffects ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("TextualEffects = ");
-		Script.writeText(TextualEffects ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("CreatureInfo = ");
-		Script.writeNumber(CreatureInfo);
-		Script.writeLn();
-		Script.writeText("NoStretching = ");
-		Script.writeText((NoStretching == 1) ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("ConfineFramerate = ");
-		Script.writeNumber(ConfineFramerate);
-		Script.writeLn();
-		for (; i < HOTKEYS; i++) {
-			const char *Text = Hotkeys[i];
-			if (Text[0] == 0)
-				continue;
-			TFixedString<HOTKEY_LENGTH + 1> Help;
-			Script.writeText("Hotkey = (");
-			Script.writeNumber(i);
-			Script.writeText(",");
-			if (HotkeyAutoSend[i]) {
-				Help.Format("{}\n", Text); // at most HOTKEY_LENGTH - 1 characters and "\n": they fit
-				Text = Help;
-			}
-			Script.writeString(Text);
-			Script.writeText(")");
-			Script.writeLn();
-		}
-		Script.writeText("WindowedMode = (");
-		Script.writeNumber(WindowedX);
-		Script.writeText(",");
-		Script.writeNumber(WindowedY);
-		Script.writeText(",");
-		Script.writeNumber(WindowedWidth);
-		Script.writeText(",");
-		Script.writeNumber(WindowedHeight);
-		Script.writeText(",");
-		Script.writeText(WindowedMaximized ? "yes" : "no");
-		Script.writeText(")");
-		Script.writeLn();
-		Script.writeText("ConsoleHeight = ");
-		Script.writeNumber(ConsoleHeight);
-		Script.writeLn();
-		Script.writeText("AutomapZoom = ");
-		Script.writeNumber(AutomapZoom);
-		Script.writeLn();
-		for (const TContentWindowSize &Entry : ContentWindows) {
-			Script.writeText("ContentWindow = (");
-			Script.writeNumber(Entry.ID);
-			Script.writeText(",");
-			Script.writeNumber(Entry.Size);
-			Script.writeText(")");
-			Script.writeLn();
-		}
-		Script.writeText("BuddySortmethods = (");
-		Script.writeNumber(BuddySortmethods[0]);
-		Script.writeText(",");
-		Script.writeNumber(BuddySortmethods[1]);
-		Script.writeText(",");
-		Script.writeNumber(BuddySortmethods[2]);
-		Script.writeText(")");
-		Script.writeLn();
-		Script.writeText("BuddyHideOffline = ");
-		Script.writeText(BuddyHideOffline ? "yes" : "no");
-		Script.writeLn();
-		for (i = 0; i < NumberOfOpenDialogs; i++) {
-			Script.writeText("OpenDialogs = ");
-			Script.writeNumber(OpenDialogs(i));
-			Script.writeLn();
-		}
-		Script.writeText("LastMotD = ");
-		Script.writeNumber(LastMotD);
-		Script.writeLn();
-		Script.writeText("InfoMessages = ");
-		Script.writeText(InfoMessages ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("EventMessages = ");
-		Script.writeText(EventMessages ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("StatusMessages = ");
-		Script.writeText(StatusMessages ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("TimeStamps = ");
-		Script.writeText(TimeStamps ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("PrivateMessages = ");
-		Script.writeText(PrivateMessages ? "yes" : "no");
-		Script.writeLn();
-		for (const int Channel : OpenChannels) {
-			Script.writeText("OpenChannel = ");
-			Script.writeNumber(Channel);
-			Script.writeLn();
-		}
-		Script.writeText("ClassicControl = ");
-		Script.writeText(ClassicControl ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("AutoChaseOff = ");
-		Script.writeText(AutoChaseOff ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("AttackMode = ");
-		Script.writeNumber(AttackMode);
-		Script.writeLn();
-		Script.writeText("ChaseMode = ");
-		Script.writeNumber(ChaseMode);
-		Script.writeLn();
-		Script.writeText("SecureMode = ");
-		Script.writeNumber(SecureMode);
-		Script.writeLn();
-		// i ends at the number of entries, the deleted ones included: the White list counts on from there.
-		for (i = 0; i < std::ssize(Buddies); i++) {
-			const TBuddy &Buddy = Buddies[static_cast<std::size_t>(i)];
-			if (Buddy.CharacterID == 0)
-				continue;
-			Script.writeText("Buddy = (");
-			Script.writeNumber(Buddy.CharacterID);
-			Script.writeText(",");
-			Script.writeNumber(Buddy.Icon);
-			Script.writeText(",");
-			Script.writeString(Buddy.DescriptionText());
-			Script.writeText(",");
-			Script.writeText(Buddy.Notify ? "yes" : "no");
-			Script.writeText(")");
-			Script.writeLn();
-		}
-		char *List = Lists.GetBuddyIgnoreText();
-		Script.writeText("White = {");
-		if (List != nullptr) {
-			char *Name = List;
-			while ((Name = strtok(Name, "\n")) != nullptr) {
-				const int Length = (int)strlen(Name);
-				if (Length != 0 && Lists.IsPermanentBuddyIgnore(Name)) {
-					if (i > 0)
-						Script.writeText(",");
-					Script.writeString(Name);
-					i++;
-				}
-				Name = nullptr;
-			}
-			free(List);
-		}
-		Script.writeText("}");
-		Script.writeLn();
-		List = Lists.GetIgnoreListText();
-		i = 0;
-		Script.writeText("Ignore = {");
-		if (List != nullptr) {
-			char *Name = List;
-			while ((Name = strtok(Name, "\n")) != nullptr) {
-				const int Length = (int)strlen(Name);
-				if (Length != 0 && Lists.IsPermanentIgnore(Name)) {
-					if (i > 0)
-						Script.writeText(",");
-					Script.writeString(Name);
-					i++;
-				}
-				Name = nullptr;
-			}
-			free(List);
-		}
-		Script.writeText("}");
-		Script.writeLn();
-		Script.writeText("KnownHints = {");
-		for (i = 0; i < std::ssize(KnownHints); i++) {
-			if (i > 0)
-				Script.writeText(",");
-			Script.writeNumber(KnownHints[static_cast<std::size_t>(i)]);
-		}
-		Script.writeText("}");
-		Script.writeLn();
-		Script.writeText("ShowNewHints = ");
-		Script.writeText(ShowNewHints ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("LevelBar = ");
-		Script.writeText(LevelBar ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("MagLevelBar = ");
-		Script.writeText(MagLevelBar ? "yes" : "no");
-		Script.writeLn();
-		Script.writeText("SkillBars = {");
-		for (i = 0; i < SKILLS; i++) {
-			if (GetSkillBar(i)) {
-				if (i > 0)
-					Script.writeText(",");
-				Script.writeNumber(i);
-			}
-		}
-		Script.writeText("}");
-		Script.writeLn();
-		Script.writeText("Engine = ");
-		Script.writeNumber(Engine);
-		Script.writeLn();
-		Script.close();
-	} catch (TMyException &) { // NOLINT(bugprone-empty-catch): the original's; Tibia.cfg not written leaves the old file
-	}
-}
-
-// The options as WriteTibiaCfg writes them: the hotkeys with a text, the windowed
-// mode, the lists up to their counts, the buddies without the deleted ones, the
+// The options as they are saved: the hotkeys with a text, the windowed mode,
+// the lists up to their counts, the buddies without the deleted ones, the
 // permanent entries of the Talk lists, NoStretching's "not set yet" as no, no
-// fourth FullscreenMode value. A description is read as WriteTibiaCfg reads it,
-// up to its NUL, at most its 128 characters (issue #86).
+// fourth FullscreenMode value. A description is read up to its NUL, at most its
+// 128 characters.
 patella::settings::TPreferenceValues TPreferences::GetPreferenceValues(TTalkLists &Lists)
 {
 	patella::settings::TPreferenceValues Values;
@@ -1173,8 +925,8 @@ patella::settings::TPreferenceValues TPreferences::GetPreferenceValues(TTalkList
 	return Values;
 }
 
-// The options as ReadTibiaCfg reads the file WriteTibiaCfg wrote with Values,
-// after SetDefaultPreferences: the lists are appended to. PreferenceKeys.cpp's
+// The options as ReadTibiaCfg reads a Tibia.cfg that holds Values, after
+// SetDefaultPreferences: the lists are appended to. PreferenceKeys.cpp's
 // ReadPreferences already did what the original's reader does to the values
 // (a hotkey's line breaks, ChaseMode 2, a repeated dialog).
 void TPreferences::SetPreferenceValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists)
@@ -1255,10 +1007,10 @@ void TPreferences::SetPreferenceValues(const patella::settings::TPreferenceValue
 		SkillBars[i] = Values.SkillBars[i];
 }
 
-// Patella-Modern issue #45. Loads the options from Patella.ini; when it has
-// none (no PreferencesVersion key), imports Tibia.cfg once: the original's
-// reader (ReadTibiaCfg; the defaults without a Tibia.cfg or with one it cannot
-// read), then the options go into Patella.ini at once. Tibia.cfg is left as it is.
+// Loads the options from Patella.ini; when it has none (no PreferencesVersion
+// key), imports Tibia.cfg once: the original's reader (ReadTibiaCfg; the
+// defaults without a Tibia.cfg or with one it cannot read), then the options
+// go into Patella.ini at once. Tibia.cfg is left as it is.
 void TPreferences::InitPreferences(TTalkLists &Lists)
 {
 	using namespace patella::settings;
@@ -1274,7 +1026,7 @@ void TPreferences::InitPreferences(TTalkLists &Lists)
 		TPreferenceValues Values = GetPreferenceValues(Lists);
 		for (const std::string &Problem : ReadPreferences(*File, Values))
 			patella::log::Warn("{}: {}", FileName, Problem);
-		// Issue #117: a file of version 1 (Windows-1252) is written as version 2 (UTF-8) at the next save.
+		// A file of version 1 (Windows-1252) is written as version 2 (UTF-8) at the next save.
 		if (EncodingOf(*File) == TEncoding::Cp1252)
 			patella::log::Info("{}: PreferencesVersion 1 (Windows-1252) read; written as version 2 (UTF-8) at the next save", FileName);
 		SetPreferenceValues(Values, Lists);
@@ -1290,9 +1042,8 @@ void TPreferences::InitPreferences(TTalkLists &Lists)
 	SavePreferences(Lists);
 }
 
-// Patella-Modern issue #45. Writes the options into Patella.ini (its other keys
-// and lines stay), only after InitPreferences loaded them; a failure is
-// reported in the log.
+// Writes the options into Patella.ini (its other keys and lines stay), only after InitPreferences loaded them; a
+// failure is reported in the log.
 void TPreferences::SavePreferences(TTalkLists &Lists)
 {
 	using namespace patella::settings;
@@ -1308,8 +1059,7 @@ void TPreferences::SavePreferences(TTalkLists &Lists)
 		patella::log::Warn("{} cannot be written: the options are not saved", FileName);
 }
 
-// Frees the message of the day and saves the options (Patella.ini since
-// issue #45; Tibia.cfg in the original).
+// Frees the message of the day and saves the options (Patella.ini; Tibia.cfg in the original).
 void TPreferences::ExitPreferences(TTalkLists &Lists)
 {
 	if (MotD != nullptr)
@@ -1320,8 +1070,7 @@ void TPreferences::ExitPreferences(TTalkLists &Lists)
 
 } // namespace patella
 
-// The original's functions, the bridge of issue #104 (Preferences.h): each calls its member on the one TClient's
-// TPreferences.
+// The original's functions, the bridge (Preferences.h): each calls its member on the one TClient's TPreferences.
 
 bool GetTestServerLogin()
 {
@@ -1638,11 +1387,6 @@ void SetMagLevelBar(bool Value)
 	patella::bridge::Preferences().SetMagLevelBar(Value);
 }
 
-void SetDefaultPreferences()
-{
-	patella::bridge::Preferences().SetDefaultPreferences(patella::bridge::TalkLists());
-}
-
 void SetContentWindowSize(int ID, int Size)
 {
 	patella::bridge::Preferences().SetContentWindowSize(ID, Size);
@@ -1698,11 +1442,6 @@ void AddOpenChannel(int Identifier)
 	patella::bridge::Preferences().AddOpenChannel(Identifier);
 }
 
-int FindBuddy(int CharacterID)
-{
-	return patella::bridge::Preferences().FindBuddy(CharacterID);
-}
-
 void SetBuddy(int CharacterID, int Icon, const char *Description, bool Notify)
 {
 	patella::bridge::Preferences().SetBuddy(CharacterID, Icon, Description, Notify);
@@ -1736,26 +1475,6 @@ bool GetSkillBar(int SkillNumber)
 void SetSkillBar(int SkillNumber, bool Value)
 {
 	patella::bridge::Preferences().SetSkillBar(SkillNumber, Value);
-}
-
-void ReadTibiaCfg()
-{
-	patella::bridge::Preferences().ReadTibiaCfg(patella::bridge::TalkLists());
-}
-
-void WriteTibiaCfg()
-{
-	patella::bridge::Preferences().WriteTibiaCfg(patella::bridge::TalkLists());
-}
-
-patella::settings::TPreferenceValues GetPreferenceValues()
-{
-	return patella::bridge::Preferences().GetPreferenceValues(patella::bridge::TalkLists());
-}
-
-void SetPreferenceValues(const patella::settings::TPreferenceValues &Values)
-{
-	patella::bridge::Preferences().SetPreferenceValues(Values, patella::bridge::TalkLists());
 }
 
 void InitPreferences()

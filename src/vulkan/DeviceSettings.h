@@ -1,13 +1,11 @@
-// DeviceSettings.h: the x64 client's graphics device choice (Patella-Modern issue #31; plan 6.3, D12;
-// notes/vulkan.md, "Choosing the device").
+// DeviceSettings.h: the client's graphics device choice.
 //
 // The advanced graphics options' three buttons choose the Vulkan engine's device: "Automatic", "GPU"
 // (the next GPU on every click when there are several) and "CPU" (the shipped CPU driver). The choice is
-// Patella.ini's Device (src/settings/Settings.h), next to Tibia.cfg; the environment variable
-// PATELLA_VULKAN (the same words: auto, gpu, gpuN, cpu) overrides it at start-up, for the comparisons and
-// the tests, and is never written. Surface.cpp (SurfaceInitInstance), Control.cpp (ChangeEngine),
-// Dialogs.cpp (TAdvancedGraphicsDialog) and SurfaceVulkan.cpp use it. Windows x64 client only; no Vulkan
-// header.
+// Patella.ini's Device (src/settings/Settings.h); the environment variable PATELLA_VULKAN (the same
+// words: auto, gpu, gpuN, cpu) overrides it at start-up and is never written. Surface.cpp
+// (SurfaceInitInstance), Control.cpp (ChangeDevice), Dialogs.cpp (TAdvancedGraphicsDialog) and
+// SurfaceVulkan.cpp use it. No Vulkan header.
 
 #pragma once
 
@@ -37,9 +35,19 @@ const char *GetGpuName(int Index);
 // The CPU driver's manifest next to the executable (lvp_icd.x86_64.json); empty when it is not there.
 const std::string &GetCpuDriverManifest();
 
-// The advanced options' engine buttons send the original's engine numbers (MainWindow.cpp: DirectX5 0,
-// DirectX9 2, OpenGL 1); the button in each of those places.
-patella::vulkan::TDeviceButton DeviceButtonOfEngine(int Engine);
+// The numbers of the preferences' Engine: Patella.ini's Engine, Tibia.cfg's on its one import and the command
+// line's "engine N". They were the original's three engines, 0 DirectX 5, 1 OpenGL and 2 DirectX 9, whose
+// buttons stood where the device buttons stand, and a click on a device button still records its place's
+// number (Control.cpp's ChangeDevice). The number chooses nothing: the device is Patella.ini's Device. A
+// missing number, or one that is none of the three, becomes 2 at start-up (Surface.cpp's SurfaceInitInstance).
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	ENGINE_AUTOMATIC = 0,
+	ENGINE_CPU = 1,
+	ENGINE_GPU = 2,
+};
+
+// The number a click on Button records as the preferences' Engine.
+int EngineNumberOfButton(patella::vulkan::TDeviceButton Button);
 
 // SurfaceVulkan.cpp: the name of the device the engine runs on ("" while it has none).
 const char *GetDeviceName();

@@ -1,26 +1,16 @@
-// Platform.h: TPlatform, the platform's services of the process (Patella-Modern issue #109, plan M7;
-// notes/decisions.md, "#109: the platform interfaces"). Not part of the original source. Portable: no platform header.
+// Platform.h: TPlatform, the platform's services of the process. Portable: no platform header.
 //
-// The interfaces: IClock (Clock.h), IFileSystem (FileSystem.h), ISocket (Socket.h); since issue #119 IClipboard
-// (Clipboard.h), IInput (Input.h) and IWindow (Window.h). The entry point's executable
-// makes one implementation of each and hands them to TClient's constructor (Client.cpp), which passes them on: TNetwork
-// ISocket, TPreferences IFileSystem. The files that are not yet an object's members, or whose objects TClient does
-// not make (sysinc.cpp's clock, Script.cpp's files, the wall clock of Talk.cpp, Creatures.cpp, ConsoleWindow.cpp and
-// ContentWindows.cpp, the Vulkan engine's frame timer), reach them through Platform(), as the subsystems' free
-// functions reach TClient through the bridge (Client.h); when they hold their object, they use its references.
+// The interfaces: IClock (Clock.h), IFileSystem (FileSystem.h), ISocket (Socket.h), IClipboard (Clipboard.h), IInput
+// (Input.h) and IWindow (Window.h). TClient's constructor (Client.cpp) takes the process's TPlatform and passes its
+// parts on: TNetwork ISocket, TPreferences IFileSystem. The files that are not an object's members, or whose objects
+// TClient does not make (sysinc.cpp's clock, Script.cpp's files, the wall clock of Talk.cpp, Creatures.cpp,
+// ConsoleWindow.cpp and ContentWindows.cpp, the Vulkan engine's frame timer), reach them through Platform().
 //
-// Platform() is defined once per executable, by its entry point's side:
-//
-//	Patella.exe, the golden runner     platform/Win32Platform.cpp: TWin32Clock, TDataFileSystem, NetworkSocket()
-//	                                   (issue #125: TPortableSocket, the golden runner's TMfcSocket), TWin32Clipboard,
-//	                                   TWin32Input, TWin32Window
-//	the test build                     TestModeWin32.cpp: the test mode's clock (TVirtualClock with
-//	                                   --test-script, else TWin32Clock), TDataFileSystem, the replay's socket
-//	                                   with --test-replay (issue #120) else TPortableSocket, TMemoryClipboard with a
-//	                                   script else TWin32Clipboard, the test mode's TTestInput and TTestWindow
-//
-// Each is made on first use (a static initialiser, sysinc.cpp's StartTime, reads the clock before main) and never
-// destroyed (the client reads the clocks until its very end, static destructors included).
+// Platform() is defined once per system: platform/Win32Platform.cpp on Windows, platform/LinuxPlatform.cpp on Linux.
+// Each has the system's clock, TDataFileSystem, NetworkSocket() (TPortableSocket) and the SDL3 window's input,
+// clipboard and desktop (Process.h, SdlPlatform.h). Each is made on first use (a static initialiser, sysinc.cpp's
+// StartTime, reads the clock before main) and never destroyed (the client reads the clocks until its very end, static
+// destructors included).
 
 #pragma once
 

@@ -1,9 +1,5 @@
-// MapWindow.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The map view (TMapWindow) and its frame (TMapFrame); see MapWindow.h. The inline
-// members of TMapWindow (destructor, minimum size, IsFieldVisible, SetLightColor)
-// are in the header. The functions follow in line order; TMapFrame::Arrange has no
-// line evidence and stays at the end, where the binary has it.
+// MapWindow.cpp: the map view (TMapWindow) and its frame (TMapFrame); see
+// MapWindow.h.
 //
 // The drawing works on two surfaces: 2 is the map surface (480x352, the
 // visible 15x11 fields of the 18x14 map), 4 the cache of 16x12 field tiles.
@@ -13,10 +9,6 @@
 // animated ones directly onto the map surface after the tiles below them were
 // blitted (FlushField). Light sources add up in Light[][], which is drawn
 // last as shaded rectangles or as darkness tiles of picture 7.
-//
-// The original's catch wrappers (common.h) are gone since issue #78; the functions
-// here have no handlers apart from AddLightSource's, which names the object whose
-// flag could not be read.
 
 #include "MapWindow.h"
 #include "Communication.h"
@@ -31,7 +23,6 @@
 #include "Status.h"
 #include "Surface.h"
 #include "Talk.h"
-#include "Text.h"
 #include "Utils.h"
 #include "graphics.h"
 #include "GUI.h"
@@ -45,19 +36,23 @@
 #include <cstddef>
 #include <cstring>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextReceiveHint = "Receive hint";                           // 51
+const char *TextSelectPlayerToTrade = "Select a player to trade with."; // 125
+
+} // namespace
+
+// cppcoreguidelines-owning-memory is off for the file, for the original's raw owners: the window tree owns its
+// children, the message queue its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
 namespace {
 
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
 // Limits Value to the range between Bound1 and Bound2, which may come in
-// either order. The binary has no copy: it is inlined everywhere (with
-// constant bounds only the first branch is left).
+// either order.
 inline void Limit(int &Value, int Bound1, int Bound2)
 {
 	if (Bound1 > Bound2) {
@@ -74,11 +69,6 @@ inline void Limit(int &Value, int Bound1, int Bound2)
 }
 
 } // namespace
-
-// The arrays std::arrays (issue #60). TCacheField has no pointers (the same on x64); TMapWindow has a vtable.
-static_assert(sizeof(TCacheField) == 0x8c && offsetof(TCacheField, Sprite) == 0x0c && offsetof(TCacheField, SpriteX) == 0x34
-		&& offsetof(TCacheField, SpriteY) == 0x5c,
-	"TCacheField's layout");
 
 // A thrown error whose expression text is a bug number, like Map.cpp's
 // assertions ("unknown creature party flag", "[bug0001106]").
@@ -110,8 +100,6 @@ void TMapWindow::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// The area is the TRect SkinProperties.MapHintButton, copied as one 16-byte
-// block (sub esp,0x10 and four stores).
 void TMapWindow::Arrange()
 {
 	if (HintButton != nullptr)
@@ -208,7 +196,7 @@ bool TMapWindow::LeftButtonUp(int x, int y, int Flags)
 			SendWalk();
 			break;
 		case 2:
-			SendStop();
+			SendStopWalk();
 			return true;
 		default:
 			break;
@@ -313,8 +301,9 @@ bool TMapWindow::RightButtonUp(int x, int y, int Flags)
 	}
 }
 
-// Events 600 and 601 are the hotkeys of the constructor, 27 the hint button: it shows the next event help as a message. GCC's
-// analyzer (issue #111): the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes it).
+// Events 600 and 601 are the hotkeys of the constructor, 27 the hint button: it shows the next event help as a message.
+// GCC's analyzer: the message queue owns the block it gets as an integer (AddMessage; the message's handler deletes
+// it).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"")
 void TMapWindow::HandleEvent(int Event)
@@ -360,9 +349,6 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 		return false;
 	const TCreature *Player = GetCreature(GetPlayerID());
 	PATELLA_ASSERT(Player!=nullptr);
-	// The help position goes into x and y, so the original's catch wrapper
-	// printed it after an error in MoveHelpPosition or SetHelpSize (issue
-	// #34).
 	if (GetNoStretching()) {
 		x = FieldX * 32 - (480 - Width) / 2 - Player->GetDeltaX() - 32;
 		y = FieldY * 32 - (352 - Height) / 2 - Player->GetDeltaY() - 32;
@@ -378,8 +364,7 @@ bool TMapWindow::HelpMouseMove(int x, int y)
 	return true;
 }
 
-// The blocks with their own try follow the binary's exception table. MSVC's analysis (C6262, issue #111): the
-// original's buffers on the stack.
+// MSVC's analysis (C6262): the buffers on the stack.
 PATELLA_MSVC_WARNING(suppress : 6262)
 void TMapWindow::Draw(int Surface, int x, int y)
 {
@@ -535,8 +520,8 @@ void TMapWindow::Draw(int Surface, int x, int y)
 	const int ScreenHeight = Height;
 	int BorderX = 0, BorderY = 0;
 	if (GetNoStretching()) {
-		PATELLA_ASSERT_VALUES(getWidth()<=MAP_WIDTH*32, getWidth());
-		PATELLA_ASSERT_VALUES(getHeight()<=MAP_HEIGHT*32, getHeight());
+		PATELLA_ASSERT_VALUES(GetWidth()<=MAP_WIDTH*32, GetWidth());
+		PATELLA_ASSERT_VALUES(GetHeight()<=MAP_HEIGHT*32, GetHeight());
 		if (Width >= 480 && Height >= 352) {
 			GetSurface()->BlitRect(Surface, x, y, 2, TRect(0, 0, 480, 352));
 		} else {
@@ -651,7 +636,7 @@ void TMapWindow::Draw(int Surface, int x, int y)
 					Icon1 = Skull;
 					Icon2 = SKIN_NONE;
 				}
-				if (Creature->SkullTime != 0) // a kept skull (issue #62: its 32 bits are negative from 2038 to 2106)
+				if (Creature->SkullTime != 0) // a kept skull
 					Blink = GetBlinkState();
 			}
 			if (Icon1 != SKIN_NONE) {
@@ -788,7 +773,6 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		if (Elevation > 24)
 			Elevation = 24;
 	}
-	// The catch block prints the object ("Obj" and the type; issue #34).
 	if (Lying) {
 		if (FieldX > 0) {
 			if (FieldY > 0)
@@ -934,7 +918,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 		}
 	}
 	for (const int EffectNumber : TMapEffects(FieldX, FieldY, FieldZ)) {
-		if (EffectNumber < 0 || EffectNumber > EFFECTS - 1) {
+		if (EffectNumber < 0 || EffectNumber >= EFFECTS) {
 			std::stringstream s;
 			s << "EffectNumber: " << EffectNumber << " X: " << FieldX << " Y: " << FieldY << " Z: " << FieldZ;
 			const TCreature *Player = GetCreature(GetPlayerID());
@@ -1012,7 +996,7 @@ void TMapWindow::DrawField(int posx, int posy, int FieldX, int FieldY, int Field
 // The pattern comes from the absolute position (x, y, z), the count, the
 // liquid or the hook; objects with several phases are animated and bypass the
 // field cache. A pattern size or phase count of 0 in Tibia.dat throws a
-// TMyException (PATELLA_DIVISOR, issue #67).
+// TMyException (PATELLA_DIVISOR).
 void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, int y, int z)
 {
 	PATELLA_ASSERT(Obj.Type!=0);
@@ -1045,7 +1029,7 @@ void TMapWindow::DrawObject(int posx, int posy, int Level, TObject Obj, int x, i
 
 // Outfits are always animated; the second layer is the colour mask (head,
 // body, legs, feet). A phase count of 0 in Tibia.dat throws a TMyException
-// (PATELLA_DIVISOR, issue #67).
+// (PATELLA_DIVISOR).
 void TMapWindow::DrawCreature(int posx, int posy, int Level, TCreature *Creature)
 {
 	PATELLA_ASSERT(Creature!=nullptr);
@@ -1194,8 +1178,8 @@ void TMapWindow::CacheSprite(int FieldX, int FieldY, int SpriteNumber, int dx, i
 		Field->SpriteX[Field->CachedSprites] = dx;
 		Field->SpriteY[Field->CachedSprites] = dy;
 		Field->CachedSprites++;
-		// MSVC's analysis (C28020 on the next line, issue #111) takes Sprites as any int: it is below CachedSprites
-		// there (they differ, and Sprites only counts up to it), and a field with 10 was flushed above.
+		// MSVC's analysis (C28020 on the next line) takes Sprites as any int: it is below CachedSprites there (they
+		// differ, and Sprites only counts up to it), and a field with 10 was flushed above.
 		PATELLA_MSVC_WARNING(suppress : 28020)
 	} else if (Field->Sprite[Field->Sprites] != SpriteNumber || Field->SpriteX[Field->Sprites] != dx
 		|| Field->SpriteY[Field->Sprites] != dy) {
@@ -1261,10 +1245,10 @@ TCacheField *TMapWindow::GetCacheField(int FieldX, int FieldY)
 }
 
 // Lights the fields within Brightness fields of map surface position
-// posx/posy (which are moved to field pixels first; the catch blocks print
-// the moved values): the colour falls off linearly over Brightness*32
-// pixels (scaled by 1/160), by a further 1/5 on fields without a ground,
-// and each field keeps the brightest value of each component.
+// posx/posy (which are moved to field pixels first): the colour falls off
+// linearly over Brightness*32 pixels (scaled by 1/160), by a further 1/5 on
+// fields without a ground, and each field keeps the brightest value of each
+// component.
 void TMapWindow::AddLightSource(int posx, int posy, int z, int Brightness, TRGBColor Color)
 {
 	if (Brightness <= 0)
@@ -1593,14 +1577,14 @@ void TMapFrame::SetSize(int Width, int Height)
 	Arrange();
 }
 
-int TMapFrame::getMinimumWidth()
+int TMapFrame::GetMinimumWidth()
 {
-	return MapWindow->getMinimumWidth() + SkinProperties().MapFrameBorder * 2;
+	return MapWindow->GetMinimumWidth() + SkinProperties().MapFrameBorder * 2;
 }
 
-int TMapFrame::getMinimumHeight()
+int TMapFrame::GetMinimumHeight()
 {
-	return MapWindow->getMinimumHeight() + SkinProperties().MapFrameBorder * 2;
+	return MapWindow->GetMinimumHeight() + SkinProperties().MapFrameBorder * 2;
 }
 
 // The border (skins 8-11) and skin 7 tiled over the rest, its pattern

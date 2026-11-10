@@ -1,17 +1,13 @@
-// Status.cpp: the client's shared state. Account, character list and
-// connection state; the message queue that the network code and the GUI use
-// to talk to the main loop; mouse and drag state; the player's rights; the
-// clipboard link check. (The error reports read from error.txt are gone
-// since Patella-Modern issue #74, decision D2.)
+// Status.h: the client's shared state (Status.cpp). Account, character list
+// and connection state; the message queue that the network code and the GUI
+// use to talk to the main loop; mouse and drag state; the player's rights;
+// the clipboard link check.
 //
-// Names are ours unless a comment says they come from the binary.
-//
-// Patella-Modern issue #105 (M7, notes/decisions.md, "#104: TClient and the subsystem objects" and "#105"): the
-// session (the connection state, the account, the character list, the rights) is TSession's, which TCommunication
+// The session (the connection state, the account, the character list, the rights) is TSession's, which TCommunication
 // owns (Communication.h); the free functions of the original's names are the bridge that the callers use until they
-// hold the object (bridge::Session(), defined in Client.cpp). Issue #107: the rest of the file's data, the user
-// interaction (the action, drag, trade and use state, the mouse, the message queue, the blink, the mouse-over text, the
-// clipboard's link check), is TInteraction's, which TGUI owns (GUI.h); bridge::Interaction() the same way.
+// hold the object (bridge::Session(), defined in Client.cpp). The rest of the file's data, the user interaction (the
+// action, drag, trade and use state, the mouse, the message queue, the blink, the mouse-over text, the clipboard's link
+// check), is TInteraction's, which TGUI owns (GUI.h); bridge::Interaction() the same way.
 
 #pragma once
 
@@ -21,7 +17,6 @@
 #include "Objects.h" // TObject
 #include "types/Regexp.h"
 #include <array>
-#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -36,33 +31,28 @@ inline constexpr int RIGHT_ANY = 50;
 inline constexpr int MESSAGE_NONE = 0;
 inline constexpr int MESSAGE_STARTPATCHER = 72;
 
-// One queued message (12 bytes). Type is named in the assertions.
+// One queued message. Type is named in the assertions.
 struct TMessage {
 	int Type;
 	std::intptr_t Param1;
 	std::intptr_t Param2;
 };
 
-// One entry of the character list (0x54 bytes). The 30-byte limits come
+// One entry of the character list. The 30-byte limits come
 // from "strlen(Name)<30" and "strlen(World)<30".
 struct TCharacter {
-	TFixedString<30> Name;      // +0x00
-	TFixedString<30> World;     // +0x1e
-	uint32 IP;                  // +0x3c, as received
-	TFixedString<16> IPAddress; // +0x40, dotted text
-	int Port;                   // +0x50
+	TFixedString<30> Name;
+	TFixedString<30> World;
+	uint32 IP;                  // as received
+	TFixedString<16> IPAddress; // dotted text
+	int Port;
 };
-// The original's layout (no pointers: the same on x64), with the names TFixedStrings (issue #57).
-static_assert(sizeof(TCharacter) == 0x54 && offsetof(TCharacter, World) == 0x1e && offsetof(TCharacter, IP) == 0x3c
-		&& offsetof(TCharacter, IPAddress) == 0x40 && offsetof(TCharacter, Port) == 0x50,
-	"TCharacter's layout");
 
 namespace patella {
 
-// Status.cpp's session (issue #105): the globals of the original are the members, in its order
-// with the same initial values (0, as the original's .bss), and the functions that read and write only them the
-// members of the same names. InitSession and ExitSession are InitStatus's and ExitStatus's part of them (not functions
-// of the original: InitStatus inlined ClearRights).
+// Status.cpp's session: the globals of the original are the members, with the same initial values (0), and the
+// functions that read and write only them the members of the same names. InitSession and ExitSession are InitStatus's
+// and ExitStatus's part of them (not functions of the original).
 class TSession {
 public:
 	TSession() = default;
@@ -76,8 +66,6 @@ public:
 	void ClearRights();
 	void SetConnectionState(int State);
 	[[nodiscard]] int GetConnectionState() const;
-	void SetProgress(int Value);
-	[[nodiscard]] int GetProgress() const;
 	[[nodiscard]] int GetAccountNumber() const;
 	[[nodiscard]] const char *GetAccountNumberString() const;
 	[[nodiscard]] const char *GetAccountPassword() const;
@@ -99,39 +87,25 @@ public:
 	void InitSession(bool Value);
 	void ExitSession();
 
-	// The test mode's views (ClientView.h's ViewConnectionState and ViewCharacters read through them).
-	[[nodiscard]] const int *ViewConnectionState() const { return &ConnectionState; }
-	[[nodiscard]] const TCharacter *ViewCharacters() const { return Characters.get(); }
-	[[nodiscard]] const int *ViewAccountCharacters() const { return &AccountCharacters; }
-
 private:
-	// Data, in the original's .bss order.
 	std::array<int, RIGHT_ANY> Rights{};
 	bool Gamemaster{}; // sent in the game login packet
 	int PremiumDays{};
 	int ActiveCharacter{};
-	std::unique_ptr<TCharacter[]> Characters; // issue #58
-
-public:
-	int AccountCharacters{}; // name from an assertion; public: the golden Errors test sets it (TestErrorStatics)
-
-private:
+	std::unique_ptr<TCharacter[]> Characters;
+	int AccountCharacters{}; // name from an assertion
 	TFixedString<30> AccountPassword{};
 	TFixedString<12> AccountNumberString{};
 	int AccountNumber{};
-	int Progress{};        // -1 = none
 	int ConnectionState{}; // see SetConnectionState
 
-	// The arrays std::arrays and TFixedStrings (issue #60).
-	static_assert(sizeof(Rights) == RIGHT_ANY * sizeof(int) && sizeof(AccountPassword) == 30
-			&& sizeof(AccountNumberString) == 12,
-		"Status.cpp's arrays");
+	// SetAccount copies up to 30 bytes of the password and ends the number's text at its twelfth byte.
+	static_assert(sizeof(AccountPassword) == 30 && sizeof(AccountNumberString) == 12, "SetAccount's buffers");
 };
 
-// Status.cpp's user interaction (issue #107): the globals that are not the session's are the
-// members, in the original's .bss order with the same initial values (0, as its .bss), and the functions that read and
-// write them the members of the same names. TGUI owns it (GUI.h). GetRightName and GetActionName read no data and
-// stay free functions.
+// Status.cpp's user interaction: the globals that are not the session's are the members, with the same initial values
+// (0), and the functions that read and write them the members of the same names. TGUI owns it (GUI.h). GetRightName and
+// GetActionName read no data and stay free functions.
 class TInteraction {
 public:
 	TInteraction() = default;
@@ -186,8 +160,7 @@ public:
 	void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
 
 private:
-	// Data, in the original's .bss order.
-	TRegexp LinkRegexp;                  // LinkPattern compiled (issue #129: owned, TRegexp)
+	TRegexp LinkRegexp;                  // LinkPattern compiled (owned)
 	char *TaintedClipboardText{};        // name from an assertion
 	void (*LinkWarningEventHandler)(){}; // from "linkwarningeventhandler!=NULL"
 	bool BlinkState{};                   // toggled every 300 ms
@@ -220,9 +193,8 @@ private:
 	int MouseCursor{};
 	int ActionState{}; // from "GetActionState()" in Control.cpp
 	int ActionNumber{};
-	// NumberOfMessages and the original's vector<TMessage>(0, 9, 10): a
-	// queue that appends at its count (AddMessage), inserts at 0 (AddMessageFirst), pops at 0 and reads below the
-	// count only, so a std::vector, its size the count (issue #100; notes/decisions.md, "#100").
+	// NumberOfMessages and the original's vector<TMessage>(0, 9, 10): a queue that appends at its count (AddMessage),
+	// inserts at 0 (AddMessageFirst), pops at 0 and reads below the count only, so a std::vector, its size the count.
 	std::vector<TMessage> Messages;
 	int MouseX{};
 	int MouseY{};
@@ -231,19 +203,18 @@ private:
 	TObject UseObject{};   // "SrcObj" in MapWindow.cpp
 };
 
-// The transition's access path (issue #105; notes/decisions.md, "#104: TClient and the subsystem objects"): the
-// session of the one TClient's TCommunication (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the session of the one TClient's TCommunication (Client.cpp). It goes when no free
+// function needs it.
 namespace bridge {
 TSession &Session();
-TInteraction &Interaction(); // issue #107: the one TClient's TGUI's
+TInteraction &Interaction(); // the one TClient's TGUI's
 } // namespace bridge
 
 } // namespace patella
 
-// The session's functions (issue #105): each calls TSession's member of the same name on bridge::Session(); the
-// others are Status.cpp's own.
+// The session's functions: each calls TSession's member of the same name on bridge::Session(); the others are
+// Status.cpp's own.
 bool CheckAnyRight();
-void ClearRights();
 int GetActionNumber();
 void IncrementActionNumber();
 // The action states. ACTIONSTATE_NONE, no action, is the original's name
@@ -304,17 +275,12 @@ TObject *GetUseObject(int *Index, int *x, int *y, int *z);
 int GetTradeInfo();
 void SetConnectionState(int State);
 int GetConnectionState();
-void SetProgress(int Progress);
-int GetProgress();
 int GetAccountNumber();
 const char *GetAccountNumberString();
 const char *GetAccountPassword();
-void SetAccountCharacters(int Number);
-void SetPremiumDays(int Days);
 int GetAccountCharacters();
 int GetPremiumDays();
 int GetActiveCharacter();
-bool IsGamemaster();
 void SetMouseOverText(const char *Text);
 void SetMouseOverTextPosition(int x, int y);
 const char *GetMouseOverText();
@@ -325,42 +291,17 @@ int PeekMessageType();
 void FetchMessage(int *Type, std::intptr_t *Param1, std::intptr_t *Param2);
 void ClearMessages();
 void ExitStatus();
-void SetRight(int rightid, int Value);
 bool CheckRight(int rightid, int Bit);
 const char *GetRightName(int rightid);
 const char *GetActionName(int actionid);
 void AddMessage(int Type, std::intptr_t Param1, std::intptr_t Param2);
 void AddMessageFirst(int Type, std::intptr_t Param1, std::intptr_t Param2);
 void SetAccount(int Number, const char *Password);
-void SetCharacter(int Number, const char *Name, const char *World, const uint8 *Address, int Port);
 void SetActiveCharacter(int Number);
 const char *GetCharacterName(int Number);
 const char *GetCharacterWorld(int Number);
 const char *GetCharacterIPAddress(int Number);
 int GetCharacterPort(int Number);
-
-namespace {
-
-// The regular expression of a link (a domain or an IPv4 address), which
-// CheckClipboardText looks for in copied text; InitStatus compiles it. Defined
-// here with internal linkage: every object that includes this header has its own
-// copy of the pointer. Only Status.cpp reads it (the others' copies are unused:
-// [[maybe_unused]] for GCC and Clang, issue #91). The name is ours.
-[[maybe_unused]] const char *LinkPattern =
-	"(^|[ .,:;/@<>|()\"\n\r%])(([a-z0-9-]+(\\.|\\%2e))+(ac|ad|ae|aero|af|ag|ai|al|am|an|ao|aq|a"
-	"r|arpa|as|at|au|aw|az|ba|bb|bd|be|bf|bg|bh|bi|biz|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|c"
-	"d|cf|cg|ch|ci|ck|cl|cm|cn|co|com|coop|cr|cu|cv|cx|cy|cz|de|dj|dk|dm|do|dz|ec|edu|ee|eg|er|"
-	"es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gov|gp|gq|gr|gs|gt|gu|gw|gy|hk"
-	"|hm|hn|hr|ht|hu|id|ie|il|im|in|info|int|io|iq|ir|is|it|je|jm|jo|jobs|jp|ke|kg|kh|ki|km|kn|"
-	"kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|mg|mh|mil|mk|ml|mm|mn|mo|mobi|mp|mq|"
-	"mr|ms|mt|mu|museum|mv|mw|mx|my|mz|na|name|nc|ne|net|nf|ng|ni|nl|no|np|nr|nu|nz|om|org|pa|p"
-	"e|pf|pg|ph|pk|pl|pm|pn|pr|pro|ps|pt|pw|py|qa|re|ro|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|"
-	"sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|travel|tt|tv|tw|tz|ua|ug"
-	"|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\\.?|[0-9][0-9]?[0-9]?(\\.|\\"
-	"%2e)[0-9][0-9]?[0-9]?(\\.|\\%2e)[0-9][0-9]?[0-9]?(\\.|\\%2e)[0-9][0-9]?[0-9]?)([?#& .,:;/@"
-	"<>|()\"\r\n%]|$)";
-
-} // namespace
 
 void CheckClipboardText(patella::TSpan<const char> Characters); // the copied characters, no NUL needed
 void CopyToClipboard(const char *text);
@@ -368,5 +309,5 @@ void CopyTaintedClipboardText();
 void InitStatus(bool Gamemaster, void (*linkwarningeventhandler)());
 
 // Events.h, the message and event numbers, comes last on purpose: included at the top of this file, its enumerators
-// moved data in the executable (measured; the Release build is compared byte for byte).
+// moved data in the executable (measured when the build was compared with the original byte for byte).
 #include "Events.h"

@@ -13,14 +13,6 @@
 // body (the content, made by ContentWindows.cpp), a frame of eight skins, a
 // title, an icon, the buttons "up", "minimize" and "close" and optionally
 // two resizers (DialogElements.cpp).
-//
-// Names from the binary: TDialogWindow (MainWindow.cpp's
-// "DialogWindow!=NULL" and the file name), hasContentWindow (which gives the
-// class name TContentWindow and GetContentWindow), getBody, Body, _Body,
-// _Identifier, IsMinimized, Search, Work, DeltaHeight, Strategy and the
-// parameter names in the catch blocks (Surface, Identifier, x, y, Width,
-// Height, Event). The other names are ours (notes/decisions.md,
-// "DialogWindow.cpp").
 
 #pragma once
 
@@ -31,17 +23,16 @@
 class TResizer;    // DialogElements.h
 class TSkinButton; // DialogElements.h
 
-// The dialog window's identifier of the trade window ("hasContentWindow(
-// TRADE_WINDOW)", MainWindow.cpp). The skill, battle and VIP windows are 6, 7 and 9, a
-// container's window is 0x40 plus the container number. MainWindow.h's until issue #118: here, where both of its
-// users (MainWindow.cpp and ContentWindows.cpp's CreateTradeWindow) find it without ContentWindows.cpp including
+// The dialog window's identifier of the trade window ("HasContentWindow(TRADE_WINDOW)", MainWindow.cpp). The skill,
+// battle and VIP windows are 6, 7 and 9, a container's window is 0x40 plus the container number. Here, where both of
+// its users (MainWindow.cpp and ContentWindows.cpp's CreateTradeWindow) find it without ContentWindows.cpp including
 // MainWindow.h.
 inline constexpr int TRADE_WINDOW = 8;
 // A container's window: this plus the container number. An enumerator for the reason in GUI.h.
 enum : int { CONTAINER_WINDOW = 0x40 }; // NOLINT(cppcoreguidelines-use-enum-class): an int constant
 // The other identifiers, named as TRADE_WINDOW is, after the windows' classes and creators (ContentWindows.h). The
 // first five are the side panel's fixed windows, the others the dialog window's, which the buttons open and close.
-// They are also the numbers of Tibia.cfg's OpenDialogs and, for the three with a stored height, ContentWindow.
+// They are also the numbers of Patella.ini's OpenDialogs and, for the three with a stored height, ContentWindow.
 // Enumerators for the reason in GUI.h.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	INVENTORY_WINDOW = 1,
@@ -67,19 +58,16 @@ public:
 	bool LeftButtonUp(int x, int y, int Flags) override;
 	void ReleaseCapture(TComponent *Component) override;
 
-	int Identifier;  // +0x2c
-	int BackgroundY; // +0x30, the background skin's row at the top edge
-	bool Background; // +0x34, draw the tiled skin 7 behind the children
-	bool Dragging;   // +0x35
-	int DragX;       // +0x38, where the drag started (window coordinates)
-	int DragY;       // +0x3c
-	int DragBottom;  // +0x40, from the drag start to the bottom edge; set, never read
+	int Identifier;
+	int BackgroundY; // the background skin's row at the top edge
+	bool Background; // draw the tiled skin 7 behind the children
+	bool Dragging;
+	int DragX; // where the drag started (window coordinates)
+	int DragY;
 };
 
-// The content of a TSubWindow (ContentWindows.h's bodies derive from it; here since issue #118, so that
-// DialogWindow.cpp, which calls its virtual functions, does not include ContentWindows.h). Its constructor and its virtual functions
-// are inline; no vtable of its own is left (the constructors of the
-// subclasses store theirs right after Minimized).
+// The content of a TSubWindow (ContentWindows.h's bodies derive from it; here, so that DialogWindow.cpp, which calls
+// its virtual functions, does not include ContentWindows.h).
 class TSubWindowBody : public TWindow {
 public:
 	TSubWindowBody() { Minimized = false; }
@@ -93,11 +81,11 @@ public:
 	virtual int GetMaximumHeight() { return INT_MAX; }
 	virtual int GetContentHeight() = 0;
 
-	bool Minimized; // +0x2c
+	bool Minimized;
 };
 
-// Not in the original (issue #118): TSubWindow::Arrange's call of a container body's UpdateUpButton
-// (TContainerWindowBody, ContentWindows.h), defined in ContentWindows.cpp where that class is complete.
+// TSubWindow::Arrange's call of a container body's UpdateUpButton (TContainerWindowBody, ContentWindows.h), defined in
+// ContentWindows.cpp where that class is complete.
 void UpdateContainerUpButton(TSubWindowBody *Body);
 
 // A content window with a body and a frame (MainWindow.cpp's containers and
@@ -109,7 +97,7 @@ public:
 	TSubWindow(int _Identifier, TSubWindowBody *_Body, bool _Resizable, bool _Background);
 	~TSubWindow() override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	void Arrange() override;
 	bool MouseMove(int x, int y) override;
 	bool LeftButtonDown(int x, int y, int Flags) override;
@@ -125,25 +113,23 @@ public:
 	void SetIcon(TComponent *_Icon);
 	void SetTitle(TComponent *_Title);
 	static int GetFrameHeight(); // the title bar and the bottom edge
-	// Inline ("Window->getBody()!=NULL", MainWindow.cpp).
-	[[nodiscard]] TSubWindowBody *getBody() const { return Body; }
+	[[nodiscard]] TSubWindowBody *GetBody() const { return Body; }
 
 	// The parts are owned by the child list while they are children and by the member while they are not (a minimized
-	// window's, a hidden "up" button), so they stay raw (notes/ownership.md, section 7; issue #108).
-	TSubWindowBody *Body;        // +0x44
-	TResizer *Resizer1;          // +0x48, area SubWindow.Resizer1
-	TResizer *Resizer2;          // +0x4c, area SubWindow.Resizer2
-	TComponent *UpButton;        // +0x50, a container's "up" button, shown while it has a parent
-	TComponent *CloseButton;     // +0x54, event 10
-	TSkinButton *MinimizeButton; // +0x58, event 9
-	TComponent *Icon;            // +0x5c
-	TComponent *Title;           // +0x60
-	bool IsMinimized;            // +0x64
-	int Data68;                  // +0x68, cleared by the constructor, not used here
-	int RestoreHeight;           // +0x6c, the height before Minimize
+	// window's, a hidden "up" button), so they stay raw.
+	TSubWindowBody *Body;
+	TResizer *Resizer1;          // area SubWindow.Resizer1
+	TResizer *Resizer2;          // area SubWindow.Resizer2
+	TComponent *UpButton;        // a container's "up" button, shown while it has a parent
+	TComponent *CloseButton;     // event 10
+	TSkinButton *MinimizeButton; // event 9
+	TComponent *Icon;
+	TComponent *Title;
+	bool IsMinimized;
+	int RestoreHeight; // the height before Minimize
 
 protected:
-	void OnClose() override; // the destructor's preferences and the parts that are not children (issue #108)
+	void OnClose() override; // the preferences and the parts that are not children
 };
 
 // A column of content windows.
@@ -155,8 +141,8 @@ public:
 	void DeleteChild(TComponent *Child) override;
 	void InsertChildAfter(TComponent *Previous, TComponent *Child) override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumWidth() override;
-	int getMinimumHeight() override;
+	int GetMinimumWidth() override;
+	int GetMinimumHeight() override;
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	// Strategy: 1 a child is dragged (Work, NULL when the drag ends), 2 a
@@ -165,8 +151,7 @@ public:
 	virtual void Rearrange(int Strategy, TComponent *Work);
 	TContentWindow *GetContentWindow(int Identifier);
 	void StoreOpenDialogs();
-	// Inline ("!DialogWindow->hasContentWindow(TRADE_WINDOW)", MainWindow.cpp).
-	bool hasContentWindow(int Identifier) { return GetContentWindow(Identifier) != nullptr; }
+	bool HasContentWindow(int Identifier) { return GetContentWindow(Identifier) != nullptr; }
 	void PositionChildren(bool SkipDragged);
 	void FitChildren();
 	bool Shrink();
@@ -175,9 +160,9 @@ public:
 	void Grow(TComponent *Work);
 	int GetFreeHeight();
 
-	TRect Area;            // +0x2c, where the children go (x, y, width, height)
-	TComponent *Dragged;   // +0x3c
-	bool Busy;             // +0x40, Rearrange is running
-	int FreeHeight;        // +0x44, GetFreeHeight's last result while UpdateFreeHeight
-	bool UpdateFreeHeight; // +0x48
+	TRect Area; // where the children go (x, y, width, height)
+	TComponent *Dragged;
+	bool Busy;      // Rearrange is running
+	int FreeHeight; // GetFreeHeight's last result while UpdateFreeHeight
+	bool UpdateFreeHeight;
 };

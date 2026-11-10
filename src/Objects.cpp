@@ -1,32 +1,16 @@
-// Objects.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The properties of objects, outfits, effects and missiles from Tibia.dat,
-// one array<TProperties> each, and their accessors. Functions in line order.
-// Where the binary order differs: the entry loader (line 939) sits right
-// after GetEntrySpriteNumber, and ExitObjects (line 1023) before
-// ReloadObjects (line 1012).
-//
-// The source has unreferenced functions the linker dropped: the line gaps
-// 70-91 and 281-303 fit an accessor of MaxLength (+0x2c) at each level, and
-// lines 166-238 had room for more.
+// Objects.cpp: the properties of objects, outfits, effects and missiles from Tibia.dat, one array<TProperties> each,
+// and their accessors.
 
 #include "Objects.h"
+#include "Help.h" // HELP_NONE
 #include "Script.h"
 #include "Container.h"
 #include "common.h"
-#include <memory>
 
-// The tables as std::unique_ptr (issue #58): each a pointer, as the original's.
-static_assert(sizeof(std::unique_ptr<array<TProperties>>) == sizeof(array<TProperties> *)
-		&& alignof(std::unique_ptr<array<TProperties>>) == alignof(array<TProperties> *),
-	"std::unique_ptr<array<TProperties>> is a pointer");
-
-// The data is TObjectTypes' (Objects.h, issue #106).
+// The data is TObjectTypes' (Objects.h).
 
 namespace {
 
-// Inlined everywhere: "GetEntryFlag(Entry,BANK)". Flag%8 and Flag/8 are
-// signed divisions in the binary.
 inline bool GetEntryFlag(TProperties &Entry, int Flag)
 {
 	return (FlagByte(Entry, Flag) & (1 << (Flag % 8))) != 0;
@@ -359,7 +343,7 @@ int patella::TObjectTypes::GetMissileSpriteNumber(int Number, int X, int Y, int 
 		return GetEntrySpriteNumber((*MissileProperties)(Number), X, Y, Layer, 1, 2, 1, 1);
 	case 7:
 		return GetEntrySpriteNumber((*MissileProperties)(Number), X, Y, Layer, 1, 1, 1, 1);
-	default: // the 0 below, as without it (bugprone-switch-missing-default-case, issue #110)
+	default: // the 0 below, as without it (bugprone-switch-missing-default-case)
 		break;
 	}
 	return 0;
@@ -367,9 +351,8 @@ int patella::TObjectTypes::GetMissileSpriteNumber(int Number, int X, int Y, int 
 
 // --- Patterns ----------------------------------------------------------------
 
-// Obj.Data is the count: 1, 2, 3, 4, then up to 9, 24, 49 and more in the second row.
-// Both results wrap around the object's pattern size. A pattern size of 0 in Tibia.dat
-// throws a TMyException (PATELLA_DIVISOR, issue #67).
+// Obj.Data is the count: 1, 2, 3, 4, then up to 9, 24, 49 and more in the second row. Both results wrap around the
+// object's pattern size. A pattern size of 0 in Tibia.dat throws a TMyException (PATELLA_DIVISOR).
 void patella::TObjectTypes::GetCumulativePattern(TObject &Obj, int *PatternX, int *PatternY) const
 {
 	PATELLA_ASSERT(GetObjectFlag(Obj,CUMULATIVE));
@@ -401,8 +384,8 @@ void patella::TObjectTypes::GetCumulativePattern(TObject &Obj, int *PatternX, in
 	*PatternY = *PatternY % PATELLA_DIVISOR(GetObjectPatternHeight(Obj.Type)) + 1;
 }
 
-// Obj.Data is the liquid: four columns per row. A pattern size of 0 in Tibia.dat
-// throws a TMyException (PATELLA_DIVISOR, issue #67).
+// Obj.Data is the liquid: four columns per row. A pattern size of 0 in Tibia.dat throws a TMyException
+// (PATELLA_DIVISOR).
 void patella::TObjectTypes::GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY) const
 {
 	PATELLA_ASSERT(GetObjectFlag(Obj,LIQUIDPOOL) || GetObjectFlag(Obj,LIQUIDCONTAINER));
@@ -465,8 +448,7 @@ namespace {
 // Reads one entry: flags with their values up to 0xff, then the sizes and
 // the sprite numbers. Unknown flags are only recorded; a flag above 31 (not
 // in Tibia.dat) sets a bit in the fields after Flags, up to offset 0x43, as
-// in the binary. The binary stores Waypoints when the BANK case jumps back
-// into the zeroing code, which ends with that store.
+// in the original.
 void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 {
 	for (int i = 0; i < 4; i++)
@@ -479,7 +461,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 	Entry->ShiftY = 0;
 	Entry->Elevation = 0;
 	Entry->AutomapColor = 0;
-	Entry->LensHelp = 0;
+	Entry->LensHelp = HELP_NONE;
 	while (true) {
 		const int Flag = File->readByte();
 		if (Flag == 0xff)
@@ -489,7 +471,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 		case BANK:
 			Entry->Waypoints = File->readWord();
 			break;
-		case WRITE: // and WRITEONCE: the same read (two identical cases until issue #110, bugprone-branch-clone)
+		case WRITE: // and WRITEONCE: the same read
 		case WRITEONCE:
 			Entry->MaxLength = File->readWord();
 			break;
@@ -510,7 +492,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 		case LENSHELP:
 			Entry->LensHelp = File->readWord();
 			break;
-		default: // nothing, as without it (bugprone-switch-missing-default-case, issue #110)
+		default: // nothing, as without it (bugprone-switch-missing-default-case)
 			break;
 		}
 	}
@@ -527,7 +509,7 @@ void LoadProperties(TReadBinaryFile *File, TProperties *Entry)
 	Entry->Phases = File->readByte();
 	const int Count = Entry->Width * Entry->Height * Entry->Layers * Entry->PatternWidth * Entry->PatternHeight
 		* Entry->PatternDepth * Entry->Phases;
-	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the entry's sprite table, deleted by ReleaseObjects (notes/ownership.md)
+	// NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the entry's sprite table, deleted by ReleaseObjects
 	Entry->Sprites = new uint16[Count];
 	for (int i = 0; i < Count; i++)
 		Entry->Sprites[i] = File->readWord();
@@ -549,10 +531,10 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 	const int Outfits = File.readWord();
 	const int Effects = File.readWord();
 	const int Missiles = File.readWord();
-	// Patella-Modern issue #139, item 1, a deliberate difference (notes/decisions.md, "#139"): every entry's sprite
-	// table starts empty, each table's as soon as it is allocated, so ReleaseObjects, after a file that ends before
-	// the last entry (or a count of 0, which the next table's constructor refuses), deletes only the tables
-	// LoadProperties allocated. The binary left the entries' Sprites indeterminate and deleted them.
+	// A deliberate difference from the original: every entry's sprite table starts empty, each table's as soon as it is
+	// allocated, so ReleaseObjects, after a file that ends before the last entry (or a count of 0, which the next
+	// table's constructor refuses), deletes only the tables LoadProperties allocated. The original left the entries'
+	// Sprites indeterminate and deleted them.
 	const auto ClearSprites = [](array<TProperties> &Table) {
 		for (int i = Table.low(); i <= Table.high(); i++)
 			Table(i).Sprites = nullptr;
@@ -580,16 +562,13 @@ void patella::TObjectTypes::LoadObjects(const char *FileName)
 	File.close();
 }
 
-// An exception while loading becomes PROGRAM_ERROR 1 (name of the value
-// unknown); InitControl then shuts down. The original catches a
-// TMyException; its LoadObjects' catch wrapper made every other exception
-// one (LoadProperties' new[] of a size from Tibia.dat can throw
-// std::bad_array_new_length or std::bad_alloc). That wrapper is gone (issue
-// #78), so the boundary catches everything (LoadObjects throws no
-// PROGRAM_ERROR): the outcome is the original's.
+// An exception while loading becomes PROGRAM_ERROR 1; InitControl then shuts
+// down. Every exception is caught, not only a TMyException: LoadProperties'
+// new[] of a size from Tibia.dat can throw std::bad_array_new_length or
+// std::bad_alloc (LoadObjects throws no PROGRAM_ERROR).
 void patella::TObjectTypes::InitObjects()
 {
-	// Cleared, not freed, as the original does (issue #58: release, not reset).
+	// Cleared, not freed, as the original does (release, not reset).
 	static_cast<void>(ObjectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
 	static_cast<void>(OutfitProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
 	static_cast<void>(EffectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
@@ -601,28 +580,16 @@ void patella::TObjectTypes::InitObjects()
 	}
 }
 
-// After Tibia.dat was patched (event 0x45).
-void patella::TObjectTypes::ReloadObjects()
-{
-	ExitObjects();
-	InitObjects();
-}
-
 void patella::TObjectTypes::ExitObjects()
 {
 	ReleaseObjects();
 }
 
-// The original's functions (issue #106): each calls its member on the one TClient's TObjectTypes.
+// The original's functions: each calls its member on the one TClient's TObjectTypes.
 
 bool GetObjectFlag(int Type, int Flag)
 {
 	return patella::bridge::ObjectTypes().GetObjectFlag(Type, Flag);
-}
-
-int GetObjectWaypoints(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectWaypoints(Type);
 }
 
 int GetObjectBrightness(int Type)
@@ -648,11 +615,6 @@ int GetObjectShiftY(int Type)
 int GetObjectElevation(int Type)
 {
 	return patella::bridge::ObjectTypes().GetObjectElevation(Type);
-}
-
-int GetObjectAutomapColor(int Type)
-{
-	return patella::bridge::ObjectTypes().GetObjectAutomapColor(Type);
 }
 
 int GetObjectLensHelp(int Type)
@@ -850,24 +812,9 @@ void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY)
 	patella::bridge::ObjectTypes().GetHangPattern(Obj, PatternX, PatternY);
 }
 
-void ReleaseObjects()
-{
-	patella::bridge::ObjectTypes().ReleaseObjects();
-}
-
-void LoadObjects(const char *FileName)
-{
-	patella::bridge::ObjectTypes().LoadObjects(FileName);
-}
-
 void InitObjects()
 {
 	patella::bridge::ObjectTypes().InitObjects();
-}
-
-void ReloadObjects()
-{
-	patella::bridge::ObjectTypes().ReloadObjects();
 }
 
 void ExitObjects()

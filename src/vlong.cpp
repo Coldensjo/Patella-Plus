@@ -1,7 +1,5 @@
-// vlong.cpp: reconstructed from Tibia.exe 7.72.
-// George Barwood's public-domain vlong (1999) with CipSoft's additions; see
-// vlong.h. Functions are in binary order. Barwood functions the client does not
-// use (gcd, the unsigned conversion) are absent from the binary and left out.
+// vlong.cpp: George Barwood's public-domain vlong (1999) with CipSoft's additions; see vlong.h. The Barwood functions
+// the client does not use (gcd, the unsigned conversion) are left out.
 
 #include "vlong.h"
 #include "common.h"
@@ -17,11 +15,8 @@ constexpr auto BPU = 8 * sizeof(unsigned); // bits per unit (size_t, as the macr
 #define hi(x) ((x) >> (BPU / 2))
 #define lh(x) ((x) << (BPU / 2))
 
-// flex_unit::a as a std::unique_ptr<unsigned[]> (issue #58): a pointer at the original's offset. reserve() frees the
-// old block (reset()) before it moves the new one in, the destructor frees it where the original had delete[].
-static_assert(sizeof(std::unique_ptr<unsigned[]>) == sizeof(unsigned *)
-		&& alignof(std::unique_ptr<unsigned[]>) == alignof(unsigned *),
-	"std::unique_ptr<unsigned[]> is a pointer");
+// flex_unit::a is a std::unique_ptr<unsigned[]>: reserve() frees the old block (reset()) before it moves the new one
+// in, the destructor frees it where the original had delete[].
 
 void flex_unit::reserve(unsigned x)
 {
@@ -36,8 +31,8 @@ void flex_unit::reserve(unsigned x)
 	}
 }
 
-// GCC's analyzer (issue #63) follows vlong_value::copy into a reserve that keeps a null a, which needs i + 1 to
-// wrap to 0: i is below a source's n, which never reaches UINT_MAX (a false positive).
+// GCC's analyzer follows vlong_value::copy into a reserve that keeps a null a, which needs i + 1 to wrap to 0: i is
+// below a source's n, which never reaches UINT_MAX (a false positive).
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-null-dereference\"")
 void flex_unit::set(unsigned i, unsigned x)
@@ -70,7 +65,7 @@ void flex_unit::fast_mul(flex_unit &x, flex_unit &y, unsigned keep)
 	for (i = 0; i < min; i += 1) {
 		const unsigned m = x.a[i];
 		unsigned c = 0; // carry
-		// jmin, not min, which hid the outer one (MSVC /analyze's C6246, issue #63).
+		// jmin, not min, which hid the outer one (MSVC /analyze's C6246).
 		unsigned jmin = i + y.n;
 		if (jmin > limit)
 			jmin = limit;
@@ -102,8 +97,8 @@ void flex_unit::fast_mul(flex_unit &x, flex_unit &y, unsigned keep)
 			j += 1;
 		}
 	}
-	// eliminate unwanted bits (1u: with keep 31 the int (1 << keep) - 1 overflowed, which UBSan
-	// reports; the mask has the same bits; issue #7)
+	// eliminate unwanted bits (1u: with keep 31 the int (1 << keep) - 1 overflowed, which UBSan reports; the mask has
+	// the same bits)
 	keep %= BPU;
 	if (keep)
 		a[limit - 1] &= (1u << keep) - 1;
@@ -143,7 +138,6 @@ int vlong_value::cf(vlong_value &x) const
 	return 0;
 }
 
-// Inlined into divide.
 void vlong_value::shl()
 {
 	unsigned carry = 0;
@@ -155,7 +149,6 @@ void vlong_value::shl()
 	}
 }
 
-// Inlined into divide.
 void vlong_value::shr()
 {
 	unsigned carry = 0;
@@ -262,8 +255,8 @@ void vlong::docopy()
 	}
 }
 
-// Barwood's, as in the binary: a self-assignment of an unshared value deletes it before taking it again
-// (issue #63: kept until M6; nothing in the client assigns a vlong to itself).
+// Barwood's, as in the binary: a self-assignment of an unshared value deletes it before taking it again (nothing in the
+// client assigns a vlong to itself).
 vlong &vlong::operator=(const vlong &x) // NOLINT(bugprone-unhandled-self-assignment): the binary's, above
 {
 	if (value->share)
@@ -276,8 +269,8 @@ vlong &vlong::operator=(const vlong &x) // NOLINT(bugprone-unhandled-self-assign
 	return *this;
 }
 
-// The first byte is the most significant. The original's parameters from the span (issue #60): a null pointer
-// throws as before, and the size is cut to the uint16 the original took.
+// The first byte is the most significant. The original's parameters from the span: a null pointer throws as before, and
+// the size is cut to the uint16 the original took.
 void ByteArrayToVlong(patella::TSpan<const uint8> Data, vlong &Number)
 {
 	const uint8 *pData = Data.data();
@@ -420,9 +413,9 @@ vlong operator%(const vlong &x, const vlong &y)
 
 // Montgomery modular exponentiation.
 class monty {
-	vlong R, R1, m, n1; // +0x00, +0x0c, +0x18, +0x24
-	vlong T, k;         // +0x30, +0x3c, work registers
-	unsigned N;         // +0x48, bits for R
+	vlong R, R1, m, n1;
+	vlong T, k; // work registers
+	unsigned N; // bits for R
 	void mul(vlong &x, const vlong &y);
 
 public:
@@ -430,7 +423,7 @@ public:
 	monty(const vlong &M);
 };
 
-// Fills Size bytes, most significant first; the parameters from the span as above (issue #60).
+// Fills Size bytes, most significant first; the parameters from the span as above.
 void VlongToByteArray(vlong Number, patella::TSpan<uint8> Data)
 {
 	uint8 *pData = Data.data();

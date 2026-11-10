@@ -1,11 +1,8 @@
-// DataLocationWin32.cpp: where the Windows client's files are (Patella-Modern issue #130, plan M8, D14; notes/decisions.md,
-// "#130"). Not part of the original source. Patella.exe and the test build compile it; the golden runner never calls it
-// (its files stay the working folder's: tests/golden/client_stubs.cpp).
-//
-// The inputs of settings::ChooseLocations from the process: the working folder (std::filesystem::current_path), the
-// executable's folder (GetModuleFileNameW), the command line's --data <folder> (CommandLineToArgvW: a folder with
-// spaces in quotes, any characters). Windows' file system finds names without regard to case itself, so the lookup's
-// own (FindNoCase) is off, and the XDG option is Linux's.
+// DataLocationWin32.cpp: where the Windows client's files are: the inputs of settings::ChooseLocations from the
+// process. The working folder (std::filesystem::current_path), the executable's folder (GetModuleFileNameW), the
+// command line's --data <folder> (CommandLineToArgvW: a folder with spaces in quotes, any characters). Windows' file
+// system finds names without regard to case itself, so the lookup's own (FindNoCase) is off, and the XDG option is
+// Linux's.
 
 #include "platform/Win32Platform.h"
 

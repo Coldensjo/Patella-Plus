@@ -1,7 +1,5 @@
-// LinuxPlatform.cpp: the Linux client's platform services (Patella-Modern issue #131, plan M8; notes/decisions.md,
-// "#131"). The counterpart of Win32Platform.cpp, for the Linux Patella and the test build (cmake/LinuxX64.cmake): the system
-// clock over std::chrono, the file system with the original names found without regard to ASCII case, the SDL3 window's
-// input, and the process's Platform().
+// LinuxPlatform.cpp: the Linux client's platform services, the counterpart of Win32Platform.cpp: the system clock over
+// std::chrono, the file system, the SDL3 window's input, the program's arguments and the process's Platform().
 
 #include "platform/LoopTimer.h"
 #include "platform/Platform.h"
@@ -42,8 +40,8 @@ public:
 constinit TLinuxClock LinuxClockInstance;
 constinit TSdlLoopInput SdlLoopInputInstance;
 
-// The program's arguments, read once (the test mode's start reads them before main, as Windows' GetCommandLine answers
-// at any time): /proc/self/cmdline, NUL-separated, without the program's name.
+// The program's arguments, read once, at any time (also before main, as Windows' GetCommandLine answers):
+// /proc/self/cmdline, NUL-separated, without the program's name.
 std::vector<std::string> &ArgumentList()
 {
 	static std::vector<std::string> &List = *[] {
@@ -67,11 +65,6 @@ std::vector<std::string> &ArgumentList()
 }
 
 } // namespace
-
-IClock &SystemClock()
-{
-	return LinuxClockInstance;
-}
 
 // SDL's global mouse position: where SDL cannot tell the screen's position (Wayland has none for a client) it is the
 // position in the window with the mouse, which the client's ScreenToClient (SDL_GetWindowPosition, 0 there) leaves as it

@@ -1,13 +1,12 @@
-// KeyInput.h: the client's keyboard and mouse rules, apart from the platform's events (Patella-Modern issue #123,
-// plan M8; notes/decisions.md, "#123: input over SDL3"). Not part of the original source. Portable: no platform header.
+// KeyInput.h: the client's keyboard and mouse rules, apart from the platform's events. Portable: no platform header.
 //
-// CMainFrame's input handlers (MainFrm.cpp) read Windows' virtual keys and messages: TranslateKey's table of the keys
-// the client tells apart, the modifier flags KeyDown and KeyUp keep, OnChar's characters, the double clicks Windows
-// makes (CS_DBLCLKS) and the wheel's notches. The SDL3 window (SdlFrame.cpp) describes each key as a TKeyEvent and
-// leaves the rules to these classes, so the client gets the calls the original's handlers made. On Windows its keys,
-// characters and buttons are still the window's messages (SDL's events differ from them: notes/decisions.md, "#123"),
-// so TranslateKey, TKeyFlags and TWheel are used there; KeyCharacter and TClickCounter are for a platform where SDL's
-// events (scan codes, printable UTF-8 text, click counts) are the only source:
+// The original's input handlers (CMainFrame's) read Windows' virtual keys and messages: TranslateKey's table of the
+// keys the client tells apart, the modifier flags KeyDown and KeyUp keep, OnChar's characters, the double clicks
+// Windows makes (CS_DBLCLKS) and the wheel's notches. The SDL3 window (SdlFrame.cpp) describes each key as a
+// TKeyEvent and leaves the rules to these classes, so the client gets the calls the original's handlers made. On
+// Windows its keys, characters and buttons are still the window's messages (SDL's events differ from them), so
+// TranslateKey, TKeyFlags and TWheel are used there; KeyCharacter and TClickCounter are for Linux, where SDL's events
+// (scan codes, printable UTF-8 text, click counts) are the only source:
 //
 //	TKeyEvent       a key: which of the keys the client tells apart (TKey), its letter in the active layout, the
 //	                platform's NumLock, Shift, Control and Alt state at the key
@@ -25,7 +24,7 @@
 
 namespace patella::platform {
 
-// The client's modifier flags (MainFrm.h's KEY_SHIFT, KEY_CONTROL, KEY_ALT; SdlFrame.cpp checks they are the same).
+// The client's modifier flags: GUI.h's KEY_SHIFT, KEY_CONTROL and KEY_ALT take these values.
 inline constexpr int KeyFlagShift = 0x200;
 inline constexpr int KeyFlagControl = 0x400;
 inline constexpr int KeyFlagAlt = 0x800;
@@ -127,7 +126,7 @@ struct TKeyEvent {
 
 // A keypad key acts as its navigation key where Windows gives it the navigation key's virtual key: NumLock off, or
 // on with Shift held (Windows then also sends a Shift up and down around it, which SDL does not pass on for the left
-// Shift: notes/decisions.md, "#123").
+// Shift).
 [[nodiscard]] constexpr bool PadNavigates(const TKeyEvent &Key) noexcept
 {
 	return !Key.NumLock || Key.Shift;

@@ -1,11 +1,10 @@
-// Quads.h: the Direct3D 9 quads of the Vulkan engine, as Vulkan vertices (issue #19;
-// notes/vulkan.md, "Pixels").
+// Quads.h: the Direct3D 9 quads of the Vulkan engine, as Vulkan vertices.
 //
-// surfaceDX9.cpp, the reference engine (plan D7), draws every copy as a textured quad: integer corners
-// on the target, texture coordinates (x + 0.5) / width of its corners, one colour per corner. Direct3D
-// 9 puts pixel centres on integer coordinates, Vulkan (and the hardware under a Direct3D 9 driver) at
-// + 0.5. ConvertQuad gives the vertices that make Vulkan compute what Direct3D 9 computes at every
-// pixel, in two ways:
+// The original's Direct3D 9 engine (surfaceDX9.cpp), whose pixels this engine reproduces, draws every
+// copy as a textured quad: integer corners on the target, texture coordinates (x + 0.5) / width of its
+// corners, one colour per corner. Direct3D 9 puts pixel centres on integer coordinates, Vulkan (and the
+// hardware under a Direct3D 9 driver) at + 0.5. ConvertQuad gives the vertices that make Vulkan compute
+// what Direct3D 9 computes at every pixel, in two ways:
 //
 // - A one-colour quad that maps texels one to one (the texture's texel centres on the pixel centres:
 //   every unscaled blit) is a copy, marked Nearest: its corners stay on whole pixels (no pixel centre
@@ -14,15 +13,14 @@
 // - Every other quad (a stretch, the light's coloured corners, a coordinate between texels) goes to
 //   the hardware as a Direct3D 9 driver gives it: the corners half a pixel on, the attributes as they
 //   are. The hardware then covers, interpolates and filters as under Direct3D 9; its filter is the
-//   device's, so these pixels are as exact as the device's bilinear filter (notes/vulkan.md, "Pixels").
+//   device's, so these pixels are as exact as the device's bilinear filter.
 //
-// Portable C++ without Vulkan: tests_render checks it on every preset.
+// Portable C++ without Vulkan.
 
 #pragma once
 
 #include <array>
 #include <cstdint>
-#include <type_traits>
 
 namespace patella::vulkan {
 
@@ -40,8 +38,6 @@ enum class TFilter : int {
 	Point,
 	Linear,
 };
-static_assert(sizeof(TFilter) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<TFilter>, int>);
 
 // A quad as surfaceDX9.cpp's AddQuad and AddShadeQuad take it: the corners on the target, the texture
 // coordinates of the left/right and top/bottom edges (Direct3D 9 gets them as floats), and the corner

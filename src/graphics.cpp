@@ -1,17 +1,8 @@
-// graphics.cpp: reconstructed from Tibia.exe 7.72.
+// graphics.cpp: sprites (Tibia.spr), pictures (Tibia.pic), the fonts cut from pictures, the memory and video caches of
+// 32x32 tiles, and the functions that draw sprites, objects, outfits, pictures and text through the engine's surface
+// (Surface.h).
 //
-// Sprites (Tibia.spr), pictures (Tibia.pic), the fonts cut from pictures, the memory and video caches of
-// 32x32 tiles, and the functions that draw sprites, objects, outfits, pictures and text through the
-// engine's surface (Surface.h). Functions in line order. Those without line evidence stay where the
-// binary has them: the three of the DialogWindow/graphics gap first, the Find functions next to the
-// other cache functions, GetTextPosition after GetFittingTextLength. The compiler placed InitFont and
-// InitFonts after ReloadSprites, GetTextWidth before ReloadPictures, DrawObject and DrawOutfit at the
-// end.
-//
-// The original's catch wrappers (common.h) are gone since issue #78; the functions here have no handlers
-// apart from the loaders' inner handlers, which turn a file error into a PROGRAM_ERROR.
-//
-// Names: see graphics.h and notes/decisions.md ("graphics.cpp").
+// Only the loaders catch errors: they turn a file error into a PROGRAM_ERROR.
 
 #include "graphics.h"
 #include "Objects.h"
@@ -24,50 +15,26 @@
 #include "types/FixedString.h"
 #include "Skins.h"
 #include <array>
-#include <cstddef>
 #include <cstring>
-#include <memory>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory off for the file: the original's raw owners: the window tree owns its children, the
+// message queue its blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-// Data: TGraphics' members since issue #116 (graphics.h), in the original's .bss order.
+// The data is TGraphics' (graphics.h).
 
-// The six tables as std::unique_ptr (issue #58): each a pointer, as the original's. Their elements have no
-// destructors that act (a picture's Offsets stays raw: ExitGraphics and ReloadPictures free them first), so a table
-// still set when FatalError calls exit(1) is only memory freed during static destruction. Where the original stored a
-// new table over one it may still have held (InitMemoryCache, InitFonts, LoadSprites, LoadPictures, InitVideoCache;
-// the golden tests call them again), release() drops the old one unfreed first: the leak is the original's.
-static_assert(sizeof(std::unique_ptr<uint8[]>) == sizeof(uint8 *) && alignof(std::unique_ptr<uint8[]>) == alignof(uint8 *)
-		&& sizeof(std::unique_ptr<TVideoCacheItem[]>) == sizeof(TVideoCacheItem *)
-		&& sizeof(std::unique_ptr<TMemoryCacheItem[]>) == sizeof(TMemoryCacheItem *)
-		&& sizeof(std::unique_ptr<TSprite[]>) == sizeof(TSprite *) && sizeof(std::unique_ptr<TPicture[]>) == sizeof(TPicture *)
-		&& sizeof(std::unique_ptr<TFontInfo[]>) == sizeof(TFontInfo *),
-	"the graphics tables' std::unique_ptrs are pointers");
+// The six tables are std::unique_ptrs. Their elements have no destructors that act (a picture's Offsets stays raw:
+// ExitGraphics frees them first), so a table still set when FatalError calls exit(1) is only memory freed during static
+// destruction. Where the original stored a new table over one it may still have held (InitMemoryCache, InitFonts,
+// LoadSprites, LoadPictures, InitVideoCache), release() drops the old one unfreed first: the leak is the original's.
 
-// The arrays std::arrays (issue #60): the original's layouts (no pointers: the same on x64).
-static_assert(sizeof(TFontInfo) == 0x71c && offsetof(TFontInfo, Widths) == 0x010 && offsetof(TFontInfo, Heights) == 0x390
-		&& sizeof(TFontInfo::Widths) == 0x380,
-	"TFontInfo's layout");
-static_assert(sizeof(TVideoCacheItem) == 0x5c && offsetof(TVideoCacheItem, Colors) == 0x18 && sizeof(TVideoCacheItem::Colors) == 0x30,
-	"TVideoCacheItem's layout");
-static_assert(sizeof(patella::TGraphics::MemoryHashTable) == HASH_TABLE_SIZE * sizeof(int)
-		&& sizeof(patella::TGraphics::VideoHashTable) == HASH_TABLE_SIZE * sizeof(int),
-	"the hash tables");
-
-// Passed to the eh vector constructor iterator by InitVideoCache. It clears
-// the four colours, then the font colour, which overlaps them (the binary
-// stores both).
+// Clears the four colours, then the font colour, which overlaps them.
 TVideoCacheItem::TVideoCacheItem()
 {
 	for (int i = 0; i < 4; i++)
 		Colors[i] = TRGBColor(0, 0, 0);
 	Tile.Color = TRGBColor(0, 0, 0);
 }
-
-// --- The DialogWindow/graphics gap -------------------------------------------
 
 // The line distance of a font. Numbers below 0 or above NumberOfFonts
 // give font 3's; 0 is not caught and reads before the table (sic).
@@ -76,15 +43,6 @@ int patella::TGraphics::GetFontLineHeight(int FontNumber) const
 	if (FontNumber < 0 || FontNumber > NumberOfFonts)
 		FontNumber = FONT_SMALL;
 	return Fonts[FontNumber - 1].LineHeight;
-}
-
-// Empties every memory cache item without touching the LRU list.
-void patella::TGraphics::ClearMemoryCache()
-{
-	for (int i = 0; i < MemoryCacheSize; i++)
-		MemoryCache[i].Type = EMPTY_ITEM;
-	for (int i = 0; i < HASH_TABLE_SIZE; i++)
-		MemoryHashTable[i] = -1;
 }
 
 // Called by ExitControl.
@@ -132,10 +90,10 @@ void patella::TGraphics::LoadSprites(const char *FileName)
 }
 
 // Decodes a sprite into 32*32 RGB triples: the colour key, then runs of transparent and coloured pixels. Opens
-// Tibia.spr for every sprite. An empty sprite (offset 0) gets the colour key 0,0,0. A file error becomes
-// PROGRAM_ERROR 4. Patella-Modern issue #139, item 3, a deliberate difference (notes/decisions.md, "#139"): a run
-// past the 1024th pixel is a data error too (each byte is read, then the pixel checked, then written, so every
-// sprite the binary decoded without writing past the buffer decodes as before); the binary wrote past the buffer.
+// Tibia.spr for every sprite. An empty sprite (offset 0) gets the colour key 0,0,0. A file error becomes PROGRAM_ERROR
+// 4. A deliberate difference from the original: a run past the 1024th pixel is a data error too (each byte is read,
+// then the pixel checked, then written, so every sprite the original decoded without writing past the buffer decodes as
+// before); the original wrote past the buffer.
 void patella::TGraphics::LoadSprite(int SpriteNumber, uint8 *Buffer)
 {
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
@@ -202,9 +160,9 @@ void patella::TGraphics::LoadPictures(const char *FileName)
 		NumberOfPictures = File.readWord();
 		static_cast<void>(Pictures.release()); // NOLINT(bugprone-unused-return-value): a table still held leaks, as in the original
 		Pictures.reset(new TPicture[NumberOfPictures]);
-		// Patella-Modern issue #139, item 2, a deliberate difference (notes/decisions.md, "#139"): every picture's
-		// offsets start empty, so ExitGraphics and ReloadPictures, after a file that ends before the last picture,
-		// delete only the tables allocated here. The binary left the later pictures' Offsets indeterminate.
+		// A deliberate difference from the original: every picture's offsets start empty, so ExitGraphics, after a file
+		// that ends before the last picture, deletes only the tables allocated here. The original left the later
+		// pictures' Offsets indeterminate.
 		for (int i = 0; i < NumberOfPictures; i++)
 			Pictures[i].Offsets = nullptr;
 		for (int i = 0; i < NumberOfPictures; i++) {
@@ -224,9 +182,8 @@ void patella::TGraphics::LoadPictures(const char *FileName)
 	}
 }
 
-// Decodes one tile of a picture like a sprite. The tile assertions are inside the inner try block, so a bad tile
-// also becomes PROGRAM_ERROR 5, like a file error; since Patella-Modern issue #139, item 3, so does a run past the
-// 1024th pixel (as in LoadSprite).
+// Decodes one tile of a picture like a sprite. The tile assertions are inside the inner try block, so a bad tile also
+// becomes PROGRAM_ERROR 5, like a file error; so does a run past the 1024th pixel (as in LoadSprite).
 void patella::TGraphics::LoadPictureTile(int PictureNumber, int TileX, int TileY, uint8 *Buffer)
 {
 	PATELLA_ASSERT_VALUES(In(PictureNumber,1,NumberOfPictures), PictureNumber, NumberOfPictures);
@@ -630,8 +587,7 @@ void patella::TGraphics::InsertVideoItem(int Position, int HashValue)
 	VideoHashTable[HashValue] = Position;
 }
 
-// OpenGL and DirectX 9 (engines 1 and 2) get the colour key of the slot's
-// surface first.
+// The slot's surface gets the sprite's colour key first.
 TVideoCacheItem *patella::TGraphics::GetVideoSprite(int SpriteNumber)
 {
 	PATELLA_ASSERT_VALUES(In(SpriteNumber,1,NumberOfSprites), SpriteNumber, NumberOfSprites);
@@ -642,8 +598,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoSprite(int SpriteNumber)
 		Position = LeastRecentVideoItem;
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemorySprite(SpriteNumber);
-		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
-			GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
+		GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
 		GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
 		Item.Type = SPRITE_ITEM;
 		Item.Number = SpriteNumber;
@@ -666,8 +621,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoMaskedSprite(int SpriteNumber, int 
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemorySprite(SpriteNumber);
 		const TMemoryCacheItem *Mask = GetMemorySprite(MaskNumber);
-		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
-			GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
+		GetSurface()->SetColorKey(Item.Surface + 6, Sprites[SpriteNumber - 1].ColorKey);
 		GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, Mask->Data,
 			Colors);
 		Item.MaskNumber = MaskNumber;
@@ -681,9 +635,9 @@ TVideoCacheItem *patella::TGraphics::GetVideoMaskedSprite(int SpriteNumber, int 
 	return &VideoCache[Position];
 }
 
-// The colour key test reads the next picture's key (Pictures[PictureNumber], past the end for the last
-// picture), and both of its branches set the same key (sic). Under AddressSanitizer that read is a heap
-// overflow (issue #70), in TRGBColor::operator== (graphics.h).
+// The colour key test reads the next picture's key (Pictures[PictureNumber], past the end for the last picture), and
+// both of its branches set the same key (sic). Under AddressSanitizer that read is a heap overflow, in
+// TRGBColor::operator== (graphics.h).
 TVideoCacheItem *patella::TGraphics::GetVideoPicture(int PictureNumber, int TileX, int TileY)
 {
 	PATELLA_ASSERT_VALUES(In(PictureNumber,1,NumberOfPictures), PictureNumber, NumberOfPictures);
@@ -694,13 +648,11 @@ TVideoCacheItem *patella::TGraphics::GetVideoPicture(int PictureNumber, int Tile
 		Position = LeastRecentVideoItem;
 		TVideoCacheItem &Item = VideoCache[LeastRecentVideoItem];
 		const TMemoryCacheItem *Tile = GetMemoryPicture(PictureNumber, TileX, TileY);
-		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9) {
-			// NOLINTNEXTLINE(bugprone-branch-clone): the original's two identical branches (both the previous picture's key)
-			if (Pictures[PictureNumber].ColorKey != TRGBColor(1, 1, 1))
-				GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
-			else
-				GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
-		}
+		// NOLINTNEXTLINE(bugprone-branch-clone): the original's two identical branches (both the previous picture's key)
+		if (Pictures[PictureNumber].ColorKey != TRGBColor(1, 1, 1))
+			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
+		else
+			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
 		GetSurface()->WriteImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data);
 		Item.Tile.TileY = TileY;
 		Item.TileX = TileX;
@@ -728,8 +680,7 @@ TVideoCacheItem *patella::TGraphics::GetVideoFontChar(int FontNumber, int TileX,
 		const TMemoryCacheItem *Tile = GetMemoryPicture(PictureNumber, TileX, TileY);
 		std::array<TRGBColor, 4> Colors = {Color, Pictures[PictureNumber - 1].ColorKey, TRGBColor(0, 0, 0),
 			TRGBColor(0, 0, 0)};
-		if (Engine.curEngine == ENGINE_OPENGL || Engine.curEngine == ENGINE_DIRECTX9)
-			GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
+		GetSurface()->SetColorKey(Item.Surface + 6, Pictures[PictureNumber - 1].ColorKey);
 		GetSurface()->WriteMaskedImage(Item.Surface + 6, Item.x, Item.y, 32, 32, Tile->Data, nullptr,
 			Colors.data());
 		Item.TileX = TileX;
@@ -806,10 +757,10 @@ void patella::TGraphics::DrawMaskedSpriteScaled(int Surface, int x, int y, int W
 
 // An object in a Size x Size box whose bottom right corner is x+Size,
 // y+Size, in the animation phase of the action counter; the count of a
-// cumulative object above 1 (or any count with ShowCount) is written in
-// its bottom right corner. Count holds three digits; more overflow it
-// (sic). A phase count or exact size of 0 in Tibia.dat throws a
-// TMyException (PATELLA_DIVISOR, issue #67).
+// cumulative object above 1 (or any count with ShowCount) is written in its
+// bottom right corner. Count holds three digits; more overflow it (sic). A
+// phase count or exact size of 0 in Tibia.dat throws a TMyException
+// (PATELLA_DIVISOR).
 void patella::TGraphics::DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip,
 	TFont Font, bool ShowCount)
 {
@@ -845,7 +796,7 @@ void patella::TGraphics::DrawObject(int Surface, int x, int y, int Size, TObject
 // A creature's outfit facing south (direction 2) in its four colours
 // (indices of the outfit palette), with the colour mask on layer 2. Outfit 0
 // shows the object Colors[0] instead (none if 0). An exact size of 0 in
-// Tibia.dat throws a TMyException (PATELLA_DIVISOR, issue #67).
+// Tibia.dat throws a TMyException (PATELLA_DIVISOR).
 void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int OutfitNumber, patella::TSpan<const int, 4> Colors,
 	TRGBColor Highlight, TRect Clip, TFont Font)
 {
@@ -856,7 +807,7 @@ void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int Out
 		}
 		return;
 	}
-	std::array<TRGBColor, 4> OutfitColors; // zeroed by the constructor (the binary's array loop)
+	std::array<TRGBColor, 4> OutfitColors; // zeroed by the constructor
 	int R, G, B;
 	GetOutfitColor(Colors[0], &R, &G, &B);
 	OutfitColors[0] = TRGBColor(R, G, B);
@@ -1188,7 +1139,7 @@ void patella::TGraphics::GetTextPosition(int *TextX, int *TextY, int x, int y, i
 // --- Start-up and shut-down ----------------------------------------------------
 
 // Empties the video cache and builds it again for the current surface
-// (ChangeEngine calls it after a new surface is set up).
+// (ChangeDevice calls it after a new surface is set up).
 void patella::TGraphics::ResetVideoCache()
 {
 	if (VideoCache != nullptr) {
@@ -1203,31 +1154,6 @@ void patella::TGraphics::ResetVideoCache()
 	InitVideoCache();
 }
 
-// After Tibia.spr was patched (event 0x46).
-void patella::TGraphics::ReloadSprites()
-{
-	ResetVideoCache();
-	ClearMemoryCache();
-	Sprites.reset();
-	Sprites = nullptr;
-	LoadSprites("Tibia.spr");
-}
-
-// After Tibia.pic was patched (event 0x47).
-void patella::TGraphics::ReloadPictures()
-{
-	ResetVideoCache();
-	ClearMemoryCache();
-	Fonts.reset();
-	Fonts = nullptr;
-	for (int i = 0; i < NumberOfPictures; i++)
-		delete[] Pictures[i].Offsets;
-	Pictures.reset();
-	Pictures = nullptr;
-	LoadPictures("Tibia.pic");
-	InitFonts();
-}
-
 // Called by InitControl with 10 MB. The video cache comes later
 // (InitVideoCache), when the surfaces exist.
 void patella::TGraphics::InitGraphics(int MemoryCacheBytes)
@@ -1238,8 +1164,8 @@ void patella::TGraphics::InitGraphics(int MemoryCacheBytes)
 	InitFonts();
 }
 
-// The original's free functions (issue #116): each calls its member on the one TClient's TGraphics. The other files
-// call them, and the golden tests fake them by these symbols (the window tests' drawing and text functions).
+// The original's free functions: each calls its member on the one TClient's TGraphics. The other files call them, and
+// the golden tests fake them by these symbols (the window tests' drawing and text functions).
 
 void InitGraphics(int MemoryCacheBytes)
 {
@@ -1256,149 +1182,9 @@ void ResetVideoCache()
 	patella::bridge::Graphics().ResetVideoCache();
 }
 
-void ReloadSprites()
-{
-	patella::bridge::Graphics().ReloadSprites();
-}
-
-void ReloadPictures()
-{
-	patella::bridge::Graphics().ReloadPictures();
-}
-
 void ExitGraphics()
 {
 	patella::bridge::Graphics().ExitGraphics();
-}
-
-void LoadSprites(const char *FileName)
-{
-	patella::bridge::Graphics().LoadSprites(FileName);
-}
-
-void LoadSprite(int SpriteNumber, uint8 *Buffer)
-{
-	patella::bridge::Graphics().LoadSprite(SpriteNumber, Buffer);
-}
-
-void LoadPictures(const char *FileName)
-{
-	patella::bridge::Graphics().LoadPictures(FileName);
-}
-
-void LoadPictureTile(int PictureNumber, int TileX, int TileY, uint8 *Buffer)
-{
-	patella::bridge::Graphics().LoadPictureTile(PictureNumber, TileX, TileY, Buffer);
-}
-
-void InitFont(int FontName, int PictureNumber, int CharsPerLine, int CharWidth, int CharHeight, int Spacing, int LineHeight)
-{
-	patella::bridge::Graphics().InitFont(FontName, PictureNumber, CharsPerLine, CharWidth, CharHeight, Spacing, LineHeight);
-}
-
-void InitFonts()
-{
-	patella::bridge::Graphics().InitFonts();
-}
-
-void InitMemoryCache(int MemoryCacheBytes)
-{
-	patella::bridge::Graphics().InitMemoryCache(MemoryCacheBytes);
-}
-
-void ClearMemoryCache()
-{
-	patella::bridge::Graphics().ClearMemoryCache();
-}
-
-void TouchMemoryItem(int Position)
-{
-	patella::bridge::Graphics().TouchMemoryItem(Position);
-}
-
-int FindMemorySprite(int SpriteNumber)
-{
-	return patella::bridge::Graphics().FindMemorySprite(SpriteNumber);
-}
-
-int FindMemoryPicture(int PictureNumber, int TileX, int TileY)
-{
-	return patella::bridge::Graphics().FindMemoryPicture(PictureNumber, TileX, TileY);
-}
-
-void RemoveMemoryItem(int Position)
-{
-	patella::bridge::Graphics().RemoveMemoryItem(Position);
-}
-
-void InsertMemoryItem(int Position, int HashValue)
-{
-	patella::bridge::Graphics().InsertMemoryItem(Position, HashValue);
-}
-
-TMemoryCacheItem *GetMemorySprite(int SpriteNumber)
-{
-	return patella::bridge::Graphics().GetMemorySprite(SpriteNumber);
-}
-
-TMemoryCacheItem *GetMemoryPicture(int PictureNumber, int TileX, int TileY)
-{
-	return patella::bridge::Graphics().GetMemoryPicture(PictureNumber, TileX, TileY);
-}
-
-void TouchVideoItem(int Position)
-{
-	patella::bridge::Graphics().TouchVideoItem(Position);
-}
-
-int FindVideoSprite(int SpriteNumber)
-{
-	return patella::bridge::Graphics().FindVideoSprite(SpriteNumber);
-}
-
-int FindVideoMaskedSprite(int SpriteNumber, int MaskNumber, TRGBColor *Colors)
-{
-	return patella::bridge::Graphics().FindVideoMaskedSprite(SpriteNumber, MaskNumber, Colors);
-}
-
-int FindVideoPicture(int PictureNumber, int TileX, int TileY)
-{
-	return patella::bridge::Graphics().FindVideoPicture(PictureNumber, TileX, TileY);
-}
-
-int FindVideoFontChar(int PictureNumber, int TileX, int TileY, TRGBColor Color)
-{
-	return patella::bridge::Graphics().FindVideoFontChar(PictureNumber, TileX, TileY, Color);
-}
-
-void RemoveVideoItem(int Position)
-{
-	patella::bridge::Graphics().RemoveVideoItem(Position);
-}
-
-void InsertVideoItem(int Position, int HashValue)
-{
-	patella::bridge::Graphics().InsertVideoItem(Position, HashValue);
-}
-
-TVideoCacheItem *GetVideoSprite(int SpriteNumber)
-{
-	return patella::bridge::Graphics().GetVideoSprite(SpriteNumber);
-}
-
-TVideoCacheItem *GetVideoMaskedSprite(int SpriteNumber, int MaskNumber, TRGBColor *Colors)
-{
-	return patella::bridge::Graphics().GetVideoMaskedSprite(SpriteNumber, MaskNumber, Colors);
-}
-
-TVideoCacheItem *GetVideoPicture(int PictureNumber, int TileX, int TileY)
-{
-	return patella::bridge::Graphics().GetVideoPicture(PictureNumber, TileX, TileY);
-}
-
-TVideoCacheItem *GetVideoFontChar(int FontNumber, int TileX, int TileY, TRGBColor Color)
-{
-	return patella::bridge::Graphics().GetVideoFontChar(FontNumber, TileX, TileY, Color);
 }
 
 void DrawSprite(int Surface, int x, int y, int SpriteNumber)
@@ -1411,19 +1197,9 @@ void DrawSpriteClipped(int Surface, int x, int y, int SpriteNumber, TRect Clip)
 	patella::bridge::Graphics().DrawSpriteClipped(Surface, x, y, SpriteNumber, Clip);
 }
 
-void DrawSpriteScaled(int Surface, int x, int y, int Width, int Height, int SpriteNumber, TRGBColor Highlight, TRect Clip)
-{
-	patella::bridge::Graphics().DrawSpriteScaled(Surface, x, y, Width, Height, SpriteNumber, Highlight, Clip);
-}
-
 void DrawMaskedSprite(int Surface, int x, int y, int SpriteNumber, int MaskNumber, TRGBColor *Colors)
 {
 	patella::bridge::Graphics().DrawMaskedSprite(Surface, x, y, SpriteNumber, MaskNumber, Colors);
-}
-
-void DrawMaskedSpriteScaled(int Surface, int x, int y, int Width, int Height, int SpriteNumber, int MaskNumber, TRGBColor *Colors, TRGBColor Highlight, TRect Clip)
-{
-	patella::bridge::Graphics().DrawMaskedSpriteScaled(Surface, x, y, Width, Height, SpriteNumber, MaskNumber, Colors, Highlight, Clip);
 }
 
 void DrawObject(int Surface, int x, int y, int Size, TObject Obj, TRGBColor Highlight, TRect Clip, TFont Font, bool ShowCount)
@@ -1516,8 +1292,8 @@ void GetTextPosition(int *TextX, int *TextY, int x, int y, int Width, int Height
 	patella::bridge::Graphics().GetTextPosition(TextX, TextY, x, y, Width, Height, Format);
 }
 
-// Skins.cpp's free functions (Skins.h), here because Skins.cpp is patella_core's, which has no TClient (issue #116):
-// each calls its member on the one TClient's TSkins. Control.cpp calls them, the golden tests call and fake them.
+// Skins.cpp's free functions (Skins.h), here because Skins.cpp is patella_core's, which has no TClient: each calls its
+// member on the one TClient's TSkins. Control.cpp calls them, the golden tests call and fake them.
 void InitSkins()
 {
 	patella::bridge::Skins().InitSkins();

@@ -1,52 +1,49 @@
-// Log.h: the developer log (Patella-Modern issue #77; plan D16). Not part of the original source.
+// Log.h: the developer log.
 //
-// A small log of our own, no library: four levels, each line written to stderr (through TConsole: the unit tests
-// capture the lines there) and, when one is open, to a log file, as "[<level>] <message>\n" (a message may hold line breaks of its own). Nothing is sent anywhere.
+// A small log of our own, no library: four levels, each line written to stderr (through TConsole) and, when one is
+// open, to a log file, as "[<level>] <message>\n" (a message may hold line breaks of its own). Nothing is sent
+// anywhere.
 //
 //	patella::log::Error("Debug Assertion 7.72 {}", Message);   // std::format's language
 //	if (patella::log::Enabled(patella::log::TLevel::Debug)) ... // work done only for a debug line
 //
 // The levels, most severe first: error (the fatal path: FatalError's box text, HandleException's message), warn
-// (a setting that could not be used), info (the default level) and debug (the diagnostics error.txt held until issue
-// #74: the engine, the last packet types, the last packet's first bytes and the player's position). A line is
+// (a setting that could not be used), info (the default level) and debug (the diagnostics the original's error.txt
+// held: the engine, the last packet types, the last packet's first bytes and the player's position). A line is
 // written when its level is the log's level or a more severe one. The level and the file come from Patella.ini
-// (log/LogSettings.h, the x64 client: LogLevel, LogFile); without them, or where nothing reads them (the tests),
-// the log is at info and writes to stderr only.
+// (log/LogSettings.h: LogLevel, LogFile); without them the log is at info and writes to stderr only.
 //
-// The text comes from std::format where the library has it (PATELLA_HAS_FORMAT), elsewhere (a C++17 library and
-// tests_unit_cxx26_standin) from compat/format.h's stand-in, as compat/print.h and TFile::Print do. Nothing here
-// throws: a message that cannot be formatted (the stand-in's TFormatError, std::bad_alloc) is dropped, and a failed
-// write is ignored (a GUI client's stderr is valid only when it is redirected). The file is opened for appending, in
-// binary ('\n' line ends on every platform); stderr's own mode does the rest (the Microsoft C runtime writes "\r\n").
-// Each line is flushed at once: the next thing the fatal path does may be the end of the process.
+// The text comes from std::format, as compat/print.h's and TFile::Print's do. Nothing here throws: a message that
+// cannot be formatted (std::bad_alloc) is dropped, and a failed write is ignored (a GUI client's stderr is valid only
+// when it is redirected). The file is opened for appending, in binary ('\n' line ends on every platform); stderr's
+// own mode does the rest (the Microsoft C runtime writes "\r\n"). Each line is flushed at once: the next thing the
+// fatal path does may be the end of the process.
 //
-// The messages are the client's text, Windows-1252 (plan D4); the lines go out in UTF-8 (issue #112,
-// types/Cp1252.h), to stderr and to the file alike, so that a terminal, an editor and M8's Linux console show them as
-// they are. An ASCII message is written unchanged. LogFile's name is the client's text too (TFile::Open).
+// The messages are the client's text, Windows-1252; the lines go out in UTF-8 (types/Cp1252.h), to stderr and to the
+// file alike, so that a terminal, an editor and the Linux console show them as they are. An ASCII message is written
+// unchanged. LogFile's name is the client's text too (TFile::Open).
 //
-// The fatal path's extras for Debug builds (Player.cpp FatalError), here so that every compiler tests them:
-// CurrentStacktrace (std::stacktrace's text where the standard library has it: MSVC's, and libstdc++'s with
-// libstdc++exp, GCC 16 and Clang 23 on Linux; nothing on mingw-w64's GCC 16 and on the oracle's C++17), and
-// BreakIfDebugged (a breakpoint when a debugger is attached: IsDebuggerPresent and DebugBreak on Windows, the
-// TracerPid of /proc/self/status and SIGTRAP on Linux; nothing elsewhere).
+// The fatal path's extras for Debug builds (Player.cpp FatalError): CurrentStacktrace (std::stacktrace's text where
+// the standard library has it: MSVC's, and libstdc++'s with libstdc++exp, GCC 16 and Clang 23 on Linux; nothing on
+// mingw-w64's GCC 16), and BreakIfDebugged (a breakpoint when a debugger is attached: IsDebuggerPresent and
+// DebugBreak on Windows, the TracerPid of /proc/self/status and SIGTRAP on Linux; nothing elsewhere).
 
 #pragma once
 
-#include "compat/format.h"
 #include "platform/FileSystem.h"
 #include "types/Cp1252.h"
 #include "types/File.h"
-#include "types/FixedString.h" // IWYU pragma: keep (std::format's branch: TFormatArgument)
+#include "types/FixedString.h" // TFormatArgument, PassFormatArgument
 
 #include <atomic>
 #include <cstddef>
 #include <cstdio>
+#include <format>
 #include <mutex>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <utility> // IWYU pragma: keep (std::format's branch below)
-#include <version> // IWYU pragma: keep (the feature-test macro of the #if line)
+#include <utility>
 
 #if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L
 #define PATELLA_HAS_STACKTRACE 1
@@ -109,7 +106,7 @@ inline std::optional<TLevel> ParseLevel(std::string_view Name) noexcept
 	return std::nullopt;
 }
 
-// The line written for a message (the client's text, Windows-1252): "[<level>] <message>\n", in UTF-8 (issue #112).
+// The line written for a message (the client's text, Windows-1252): "[<level>] <message>\n", in UTF-8.
 inline std::string FormatLine(TLevel Level, std::string_view Message)
 {
 	const std::string_view Name = LevelName(Level);
@@ -123,8 +120,8 @@ inline std::string FormatLine(TLevel Level, std::string_view Message)
 	return Line;
 }
 
-// Where a log writes its lines besides the file: a function given each whole line (WriteToStderr by default; the
-// unit tests capture them), or nullptr for nowhere.
+// Where a log writes its lines besides the file: a function given each whole line (WriteToStderr by default), or
+// nullptr for nowhere.
 using TConsole = void (*)(std::string_view Line) noexcept;
 
 // The C library's stderr: the line in one write, then flushed.
@@ -149,36 +146,18 @@ public:
 	// Whether a line of this level is written.
 	[[nodiscard]] bool Enabled(TLevel LineLevel) const noexcept { return LineLevel <= GetLevel(); }
 
-	void SetConsole(TConsole Target) noexcept
-	{
-		const std::lock_guard<std::mutex> Lock(Mutex);
-		Console = Target;
-	}
-
-	// Opens Path for appending (created where it does not exist) through Files (the platform's IFileSystem, issue
-	// #119), instead of an open one. False (and no file) where that fails.
+	// Opens Path for appending (created where it does not exist) through Files (the platform's IFileSystem), instead
+	// of an open one. False (and no file) where that fails.
 	bool OpenFile(patella::platform::IFileSystem &Files, const std::string &Path) noexcept
 	{
 		const std::lock_guard<std::mutex> Lock(Mutex);
 		File.Close();
 		try {
 			return Files.Open(File, Path.c_str(), TFile::TAccess::Append, TFile::TContent::Binary);
-		} catch (...) { // an implementation's std::bad_alloc (TFolderFileSystem's list)
+		} catch (...) { // an implementation's std::bad_alloc
 			File.Close();
 			return false;
 		}
-	}
-
-	void CloseFile() noexcept
-	{
-		const std::lock_guard<std::mutex> Lock(Mutex);
-		File.Close();
-	}
-
-	[[nodiscard]] bool HasFile() noexcept
-	{
-		const std::lock_guard<std::mutex> Lock(Mutex);
-		return File.IsOpen();
 	}
 
 	// Writes the message's line (FormatLine) when its level is enabled.
@@ -199,7 +178,6 @@ public:
 		}
 	}
 
-#if PATELLA_HAS_FORMAT
 	template <typename... Arguments>
 	void Print(TLevel LineLevel, std::format_string<TFormatArgument<Arguments>...> Format, Arguments &&...Values) noexcept
 	{
@@ -231,42 +209,6 @@ public:
 	{
 		Print(TLevel::Debug, Format, std::forward<Arguments>(Values)...);
 	}
-#else
-	template <typename... Arguments>
-	void Print(TLevel LineLevel, std::string_view Format, const Arguments &...Values) noexcept
-	{
-		if (!Enabled(LineLevel))
-			return;
-		try {
-			const std::ptrdiff_t Size = patella::compat::FormatToNStandIn(nullptr, 0, Format, Values...).Size;
-			std::string Text(static_cast<std::size_t>(Size), '\0');
-			patella::compat::FormatToNStandIn(Text.data(), Size, Format, Values...);
-			Write(LineLevel, Text);
-		} catch (...) { // NOLINT(bugprone-empty-catch): the stand-in's TFormatError or std::bad_alloc; dropped
-		}
-	}
-
-	template <typename... Arguments>
-	void Error(std::string_view Format, const Arguments &...Values) noexcept
-	{
-		Print(TLevel::Error, Format, Values...);
-	}
-	template <typename... Arguments>
-	void Warn(std::string_view Format, const Arguments &...Values) noexcept
-	{
-		Print(TLevel::Warn, Format, Values...);
-	}
-	template <typename... Arguments>
-	void Info(std::string_view Format, const Arguments &...Values) noexcept
-	{
-		Print(TLevel::Info, Format, Values...);
-	}
-	template <typename... Arguments>
-	void Debug(std::string_view Format, const Arguments &...Values) noexcept
-	{
-		Print(TLevel::Debug, Format, Values...);
-	}
-#endif
 
 private:
 	std::mutex Mutex;
@@ -287,7 +229,6 @@ inline bool Enabled(TLevel Level) noexcept
 	return Log().Enabled(Level);
 }
 
-#if PATELLA_HAS_FORMAT
 template <typename... Arguments>
 void Error(std::format_string<TFormatArgument<Arguments>...> Format, Arguments &&...Values) noexcept
 {
@@ -308,28 +249,6 @@ void Debug(std::format_string<TFormatArgument<Arguments>...> Format, Arguments &
 {
 	Log().Print(TLevel::Debug, Format, std::forward<Arguments>(Values)...);
 }
-#else
-template <typename... Arguments>
-void Error(std::string_view Format, const Arguments &...Values) noexcept
-{
-	Log().Print(TLevel::Error, Format, Values...);
-}
-template <typename... Arguments>
-void Warn(std::string_view Format, const Arguments &...Values) noexcept
-{
-	Log().Print(TLevel::Warn, Format, Values...);
-}
-template <typename... Arguments>
-void Info(std::string_view Format, const Arguments &...Values) noexcept
-{
-	Log().Print(TLevel::Info, Format, Values...);
-}
-template <typename... Arguments>
-void Debug(std::string_view Format, const Arguments &...Values) noexcept
-{
-	Log().Print(TLevel::Debug, Format, Values...);
-}
-#endif
 
 // The stack of the caller (Skip frames of it left out: 0, the caller's own frame first), as std::stacktrace's
 // to_string writes it; nothing where the standard library has no std::stacktrace or the text cannot be made.

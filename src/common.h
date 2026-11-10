@@ -1,44 +1,39 @@
-// Shared definitions for the reconstructed Tibia 7.72 client.
+// common.h: what every file of the client shares: the platform's headers and types, the integer types, the range
+// helpers, the PROGRAM_ERROR codes and the error macros.
 //
-// The error macros reproduce the client's error messages as seen in the
-// binary. Their names are ours; the strings they produce (expression text,
-// "assertion failed", "exception occurred", "unknown exception occurred")
-// match the original's, the file and line are the site's own (issues #79, #80).
+// The error macros make the client's error messages. Their texts (the expression, "assertion failed", "exception
+// occurred", "unknown exception occurred") are the original's; the file and line are the site's own.
 
 #pragma once
 
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-// PATELLA_CORE: the portable code of the patella_core library (cmake/Core.cmake, issue #7), built
-// without the Windows headers (notes/modernization-plan.md, section 8). The rest of the client's code: the Windows
-// headers (issue #127: MFC's afxwin.h until then; WinSock 2 first, it must come before windows.h); on Linux the
-// golden runner's stand-ins of tests/golden/linux, of the same names.
+// PATELLA_CORE: the portable code of the patella_core library (cmake/Core.cmake), built without the Windows headers.
+// The rest of the client's code: the Windows headers (WinSock 2 first, it must come before windows.h).
 #if !defined(PATELLA_CORE)
 #include <winsock2.h>
 #include <windows.h>
 #elif defined(PATELLA_WIN32_TYPES)
-// The Linux client (issue #131, cmake/LinuxX64.cmake): the Windows types and constants its platform layer still names
-// (POINT, UINT, WM_*, VK_*), without any Windows function.
+// The Linux client (cmake/LinuxX64.cmake): the Windows types and constants its platform layer still names (POINT, UINT,
+// WM_*, VK_*), without any Windows function.
 #include "compat/win32_types.h" // IWYU pragma: export
 #endif
-// <string>, <cstring>, <cstdio> and <cstdlib>: nothing of them is used here, and every file that uses them
-// includes them itself (issue #40), but here they come before compat/msvc.h's C headers. Without
-// them every translation unit declares these names in another order, and MSVC, which orders an object's globals
-// by the names its translation unit declares (issue #43), places the test build's in another order (measured:
-// the test build's .data moves; issue #49).
+// <string>, <cstring>, <cstdio> and <cstdlib>: nothing of them is used here, and every file that uses them includes
+// them itself. Here they come before compat/msvc.h's C headers, which keeps the order in which every translation unit
+// declares their names.
 #include <cstdint>
 #include <string> // IWYU pragma: keep
 #include <type_traits>
 #include <cstring> // IWYU pragma: keep
 #include <cstdio>  // IWYU pragma: keep
 #include <cstdlib> // IWYU pragma: keep
-// The Microsoft CRT's and compiler's spellings behind portable names (issue #43).
+// The Microsoft CRT's and compiler's spellings behind portable names.
 #include "compat/msvc.h" // IWYU pragma: export
 
-// The original's unsigned integer types, as aliases of the std types (Patella-Modern issue #35). They
-// are the same types as before, not only the same sizes: std::uint8_t, std::uint16_t and std::uint32_t
-// are unsigned char, unsigned short and unsigned int with MSVC (x86 and x64), mingw-w64 GCC, and GCC and
-// Clang on Linux, so mangled names, overloads and the PDB's type names stay as they were.
+// The original's unsigned integer types, as aliases of the std types. They are the same types as before, not only the
+// same sizes: std::uint8_t, std::uint16_t and std::uint32_t are unsigned char, unsigned short and unsigned int with
+// MSVC (x86 and x64), mingw-w64 GCC, and GCC and Clang on Linux, so mangled names, overloads and the PDB's type names
+// stay as they were.
 using uint8 = std::uint8_t;
 using uint16 = std::uint16_t;
 using uint32 = std::uint32_t;
@@ -73,10 +68,8 @@ inline void Limit(int *Value, int Min, int Max)
 
 // The client's second exception: an error code, PROGRAM_ERROR, that
 // CPlayerApp::HandleProgramError shows with sysinc.cpp's texts. The original
-// throws the enum by value (".?AW4PROGRAM_ERROR@@"); since Patella-Modern
-// issue #80 it is an enum class carried by its own exception type,
-// TProgramError (golden_eh.h's OurThrow gives it the original's kind: a
-// PROGRAM_ERROR with its value). The enumerator names are ours, after
+// throws the enum by value; here it is an enum class carried by its own
+// exception type, TProgramError. The enumerator names are ours, after
 // GetErrorText's texts and the sites that throw them.
 enum class PROGRAM_ERROR : int {
 	OBJECTS_FILE = 1,  // "Cannot find file "Tibia.dat"." (InitObjects)
@@ -98,30 +91,20 @@ enum class PROGRAM_ERROR : int {
 	AUTOMAP_SURFACE = 17,
 	SPRITE_SURFACE = 18,
 };
-static_assert(sizeof(PROGRAM_ERROR) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<PROGRAM_ERROR>, int>);
 
-// A thrown PROGRAM_ERROR (issue #80). Caught by reference: catch (const
-// TProgramError &Error), Error.Code. The size of the original's thrown enum.
+// A thrown PROGRAM_ERROR. Caught by reference: catch (const TProgramError &Error), Error.Code.
 struct TProgramError {
 	PROGRAM_ERROR Code;
 };
-static_assert(sizeof(TProgramError) == sizeof(PROGRAM_ERROR) && std::is_trivially_copyable_v<TProgramError>);
 
-// The assertions: PATELLA_ASSERT and PATELLA_ASSERT_VALUES (Patella-Modern issue
-// #79; until then three macros here, which named the original's line).
+// The assertions: PATELLA_ASSERT and PATELLA_ASSERT_VALUES.
 #include "compat/assertion.h" // IWYU pragma: export
 
-// The error sites' exception (Patella-Modern issue #80): a TMyException with
-// ErrorText's message ("<file> <line>: <Kind>[ (<V1's text> = <V1>)]...[,
-// reason:\n<Reason>]") and the site's own source location, as PATELLA_ASSERT
-// has since issue #79. Until issue #80 every site named the original's source
-// line as its first argument (TERROR1(1274, "unknown packet type during game",
-// Type)); the lines stay in git history, in the image and in the comments that
-// name a function's lines. Since issue #76 the oracle and the golden corpus
-// compare the outcome only (thrown or not, and the kind), not the messages.
-// TMYEXCEPTION's Reason is a text or a caught TMyException, whose message
-// becomes the reason (the original's wrapping constructor).
+// The error sites' exception: a TMyException with ErrorText's message
+// ("<file> <line>: <Kind>[ (<V1's text> = <V1>)]...[, reason:\n<Reason>]")
+// and the site's own source location, as PATELLA_ASSERT has. TMYEXCEPTION's
+// Reason is a text or a caught TMyException, whose message becomes the
+// reason (the original's wrapping constructor).
 #define TMYEXCEPTION(Kind, N1, V1, N2, V2, Reason) \
 	::patella::MakeError(PATELLA_SOURCE_LOCATION(), Kind, N1, (int)(V1), N2, (int)(V2), Reason)
 
@@ -129,25 +112,14 @@ static_assert(sizeof(TProgramError) == sizeof(PROGRAM_ERROR) && std::is_triviall
 	throw TMYEXCEPTION(Message, "", 0, "", 0, "")
 #define TERROR1(Message, V1) \
 	throw TMYEXCEPTION(Message, #V1, V1, "", 0, "")
-#define TERROR2(Message, V1, V2) \
-	throw TMYEXCEPTION(Message, #V1, V1, #V2, V2, "")
 // An error with a text as its reason (Script.cpp: the file name), in the
 // place of an assertion's expression: "<Message>, reason:\n<Reason>".
 #define TERROR_REASON(Message, Reason) \
 	throw TMYEXCEPTION(Message, "", 0, "", 0, Reason)
 #define TERROR1_REASON(Message, V1, Reason) \
 	throw TMYEXCEPTION(Message, #V1, V1, "", 0, Reason)
-// TERROR_REASON's failure returned instead of thrown (issue #80): a
+// TERROR_REASON's failure returned instead of thrown: a
 // patella::TUnexpected<TError> for a function that returns a
 // patella::TExpected<T, TError> (compat/expected.h).
 #define TUNEXPECTED_REASON(Message, Reason) \
 	::patella::TUnexpected<TError>(::patella::MakeFailure(PATELLA_SOURCE_LOCATION(), Message, "", 0, "", 0, Reason))
-
-// The original's catch wrappers: until Patella-Modern issue #78 most functions
-// wrapped their body in a try block with three handlers, visible in the binary
-// as catch blocks after each function: a PROGRAM_ERROR passed through
-// unchanged, a TMyException was wrapped with the wrapper's line and up to two
-// values ("exception occurred"), and anything else became "unknown exception
-// occurred". A hand-written stack trace for error.txt (gone since issue #74).
-// Since issue #78 an exception passes unchanged to the first handler that
-// really handles it (notes/decisions.md, issue #78's section).

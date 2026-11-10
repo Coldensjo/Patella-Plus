@@ -1,8 +1,6 @@
-// LoopTimer.h: TLoopTimer, the main frame's timer as a check of the event loop (Patella-Modern issue #122, plan M8;
-// notes/decisions.md, "#122: the SDL3 window and its event loop"). Not part of the original source. Portable: no
-// platform header.
+// LoopTimer.h: TLoopTimer, the main frame's timer as a check of the event loop. Portable: no platform header.
 //
-// The MFC frame's 100 ms timer is Windows' SetTimer: a WM_TIMER message, made by the message queue only when it is
+// The original's 100 ms timer was Windows' SetTimer: a WM_TIMER message, made by the message queue only when it is
 // otherwise empty, and at most one at a time (ticks that come due while one waits are not queued: no backlog). The
 // SDL3 window's loop asks Due once per pass instead, with the platform's clock (IClock::Milliseconds, a 32-bit
 // millisecond count that wraps): true once Interval milliseconds have passed since the last tick (or the start), and
@@ -27,7 +25,6 @@ public:
 	}
 	// Stops it (KillTimer): no tick is due until the next Start.
 	void Stop() { Running = false; }
-	[[nodiscard]] bool IsRunning() const { return Running; }
 	// One tick when it is due at Now (the elapsed time computed modulo 2^32, so it holds across the clock's wrap).
 	[[nodiscard]] bool Due(std::uint32_t Now)
 	{

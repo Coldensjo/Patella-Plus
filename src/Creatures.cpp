@@ -1,54 +1,20 @@
-// Creatures.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The creature table, the player's statistics and walk, the battle list and
-// the VIP list. Functions in line order. Where the binary order differs: the
-// compiler emits a function only after the bodies of the functions it calls,
-// so the ones that call a function defined further down (lines 278-592,
-// InitCreatures at line 1366 and SetPosition at line 108) come after
-// ResetCreatures (line 1414) in the binary. The functions without exception
-// frame have no line evidence; they come first in the binary, before the
-// line-142 function, and keep that place and order here
-// (notes/decisions.md).
+// Creatures.cpp: the creature table, the player's statistics and walk, the battle list and the VIP list.
 
 #include "Creatures.h"
-#include "types/Callback.h"      // TCallback (NoCallback)
 #include "types/GraphicsTypes.h" // TRGBColor
 #include "Map.h"
 #include "Objects.h"
 #include "Preferences.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "sysinc.h"
 #include "common.h"
 #include "platform/Platform.h"
 #include "types/FixedString.h"
-#include "types/Time32.h"
 #include <array>
-#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 
-// The data is TCreatures' and TPlayerState's (Creatures.h, issue #106).
-
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
-
-static_assert(sizeof(TCreature) == 0x9c, "TCreature is 0x9c bytes");
-static_assert(offsetof(TCreature, SkullTime) == 0x98 && sizeof(TCreature::SkullTime) == 4, "TCreature's 4-byte skull time (Time32, issue #62)");
-static_assert(sizeof(TBuddyEntry) == 0x2c, "TBuddyEntry is 0x2c bytes");
-// Name a TFixedString (issue #57): the original's offsets.
-static_assert(offsetof(TBuddyEntry, Name) == 0x04 && offsetof(TBuddyEntry, Online) == 0x22
-		&& offsetof(TBuddyEntry, LoginAction) == 0x24 && offsetof(TBuddyEntry, Icon) == 0x28,
-	"TBuddyEntry's fields");
-// Name a TFixedString and Colors a std::array (issue #60); the globals std::arrays.
-static_assert(offsetof(TCreature, Name) == 0x04 && sizeof(TCreature::Name) == 32 && offsetof(TCreature, Colors) == 0x64
-		&& sizeof(TCreature::Colors) == 16,
-	"TCreature's arrays");
-// The globals' arrays: TCreatures' and TPlayerState's static_asserts (Creatures.h).
+// The data is TCreatures' and TPlayerState's (Creatures.h).
 
 patella::TCreatures::TCreatures(TCreaturesPlayer &PlayerStateRef, TCreaturesGUI &GUIRef)
 	: PlayerState(PlayerStateRef), GUI(GUIRef)
@@ -103,7 +69,7 @@ bool TCreature::IsMarked() const
 void TCreature::SetSkull(int Skull, bool Delay)
 {
 	if (Delay && this->PKFlag != PK_NONE && Skull == PK_NONE) {
-		SkullTime = StoreTime32(patella::platform::Platform().Clock.WallSeconds());
+		SkullTime = patella::platform::Platform().Clock.WallSeconds();
 		return;
 	}
 	SkullTime = 0;
@@ -319,7 +285,6 @@ uint32 patella::TCreatures::GetHighlightID() const
 	return HighlightID;
 }
 
-// Inlined into SetBuddyState and RemoveBuddy.
 int patella::TCreatures::GetBuddyPosition(uint32 CharacterID) const
 {
 	for (int i = 0; i < NumberOfBuddies; i++) {
@@ -410,8 +375,8 @@ void TCreature::StartMovement(int dx, int dy, int Waypoints)
 		Duration = Waypoints * 1000 / Speed;
 	else
 		Duration = 1000;
-	// Beat is the game login's word (Communication.cpp ReceiveGameLogin): 0 from the server trapped here in the
-	// original, whose catch wrapper made it a TMyException (issue #67).
+	// Beat is the game login's word (Communication.cpp ReceiveGameLogin): a 0 from the server throws a TMyException
+	// here (PATELLA_DIVISOR).
 	const int Beat = patella::bridge::Creatures().Beat;
 	Duration = (Beat - 1 + Duration) / PATELLA_DIVISOR(Beat) * Beat;
 	DeltaX = -dx * 32;
@@ -486,7 +451,7 @@ void patella::TPlayerState::StartPlayerStep()
 	case STEP_SOUTHWEST: dx = -1; dy = 1; break;
 	case STEP_SOUTH: dx = 0; dy = 1; break;
 	case STEP_SOUTHEAST: dx = 1; dy = 1; break;
-	default: break; // no step: dx and dy stay 0, as without it (bugprone-switch-missing-default-case, issue #110)
+	default: break; // no step: dx and dy stay 0, as without it (bugprone-switch-missing-default-case)
 		// clang-format on
 	}
 	const TObject Bank = Map.GetFirstObject(dx + 8, dy + 6, Map.GetMapLevel());
@@ -551,7 +516,7 @@ int patella::TPlayerState::FindPlayerPath()
 	case -1:
 		GUI.SetStatusMessage("First go upstairs.", false);
 		return 0;
-	default: // the 0 below, as without it (bugprone-switch-missing-default-case, issue #110)
+	default: // the 0 below, as without it (bugprone-switch-missing-default-case)
 		break;
 	}
 	return 0;
@@ -739,7 +704,7 @@ void patella::TCreatures::CheckMonsterHint(TCreature *Creature)
 				GUI.CheckEventHelpName(Opponent->Name);
 		}
 	} else if (!IsPlayer(Creature->CreatureID) && IsOpponent(Creature)
-		// IsOpponent asserts the player creature (a null Player throws there; MSVC /analyze's C6011, issue #110).
+		// IsOpponent asserts the player creature (a null Player throws there; MSVC /analyze's C6011).
 		PATELLA_MSVC_WARNING(suppress : 6011)
 		&& abs(Creature->RealX - Player->RealX) <= 2 && abs(Creature->RealY - Player->RealY) <= 2) {
 		GUI.CheckEventHelpName(Creature->Name);
@@ -928,7 +893,7 @@ bool patella::TCreatures::CompareBuddies(int i, int j) const
 			if (!Buddies[i].Online && Buddies[j].Online)
 				return false;
 			break;
-		default: // another method compares nothing, as without it (bugprone-switch-missing-default-case, issue #110)
+		default: // another method compares nothing, as without it (bugprone-switch-missing-default-case)
 			break;
 		}
 	}
@@ -1161,8 +1126,8 @@ void patella::TCreatures::ResetCreatures()
 	}
 }
 
-// Ours (issue #106; TCreaturesPlayer): ResetCreatures' writes of the player's state, in its order (it wrote
-// AttackID and FollowID between PlayerCapacity and PlayerState; nothing reads between the writes).
+// Ours (TCreaturesPlayer): ResetCreatures' writes of the player's state, in its order (it wrote AttackID and FollowID
+// between PlayerCapacity and PlayerState; nothing reads between the writes).
 void patella::TPlayerState::ResetPlayer()
 {
 	PlayerStepDX = 0;
@@ -1189,8 +1154,8 @@ void patella::TPlayerState::ResetPlayer()
 	}
 }
 
-// Ours (issue #106; TCreaturesPlayer): MoveCreatures' code for the player's creature once its step is over: the
-// next step of the walk, or the path again; true if a new walk is to be sent.
+// Ours (TCreaturesPlayer): MoveCreatures' code for the player's creature once its step is over: the next step of the
+// walk, or the path again; true if a new walk is to be sent.
 bool patella::TPlayerState::ContinuePlayerWalk()
 {
 	if (CurrentPlayerStep < NumberOfPlayerSteps) {
@@ -1200,18 +1165,12 @@ bool patella::TPlayerState::ContinuePlayerWalk()
 	return FindPlayerPath() == 1;
 }
 
-// Empty. ExitControl calls it where Creatures.cpp's exit belongs in the reverse
-// order of InitControl (name ours, low confidence).
+// Empty. ExitControl calls it where Creatures.cpp's exit belongs in the reverse order of InitControl.
 void patella::TCreatures::ExitCreatures()
 {
 }
 
-// The original's functions (issue #106): each calls its member on the one TClient's TPlayerState or TCreatures.
-
-int GetNumberOfPlayerSteps()
-{
-	return patella::bridge::PlayerState().GetNumberOfPlayerSteps();
-}
+// The original's functions: each calls its member on the one TClient's TPlayerState or TCreatures.
 
 void GetPlayerPosition(int *x, int *y, int *z)
 {
@@ -1221,41 +1180,6 @@ void GetPlayerPosition(int *x, int *y, int *z)
 void ClearPlayerSteps()
 {
 	patella::bridge::PlayerState().ClearPlayerSteps();
-}
-
-void SetPlayerID(uint32 CreatureID)
-{
-	patella::bridge::PlayerState().SetPlayerID(CreatureID);
-}
-
-void SetPlayerHealth(int Health, int MaxHealth)
-{
-	patella::bridge::PlayerState().SetPlayerHealth(Health, MaxHealth);
-}
-
-void SetPlayerMagicLevel(int Level, int Progress)
-{
-	patella::bridge::PlayerState().SetPlayerMagicLevel(Level, Progress);
-}
-
-void SetPlayerMana(int Mana, int MaxMana)
-{
-	patella::bridge::PlayerState().SetPlayerMana(Mana, MaxMana);
-}
-
-void SetPlayerSoul(int Soul)
-{
-	patella::bridge::PlayerState().SetPlayerSoul(Soul);
-}
-
-void SetPlayerCapacity(int Capacity)
-{
-	patella::bridge::PlayerState().SetPlayerCapacity(Capacity);
-}
-
-void SetPlayerState(int State)
-{
-	patella::bridge::PlayerState().SetPlayerState(State);
 }
 
 uint32 GetPlayerID()
@@ -1358,44 +1282,9 @@ bool IsPlayerInFight()
 	return patella::bridge::PlayerState().IsPlayerInFight();
 }
 
-int GetPlayerStep(int Step)
-{
-	return patella::bridge::PlayerState().GetPlayerStep(Step);
-}
-
-void StartPlayerStep()
-{
-	patella::bridge::PlayerState().StartPlayerStep();
-}
-
-int FindPlayerPath()
-{
-	return patella::bridge::PlayerState().FindPlayerPath();
-}
-
 int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal)
 {
 	return patella::bridge::PlayerState().SetPlayerDestination(x, y, z, Exact, Diagonal);
-}
-
-void StopPlayer()
-{
-	patella::bridge::PlayerState().StopPlayer();
-}
-
-bool CancelPlayerWalk(int NewDirection)
-{
-	return patella::bridge::PlayerState().CancelPlayerWalk(NewDirection);
-}
-
-void SetPlayerExperience(int Experience, int Level, int Progress)
-{
-	patella::bridge::PlayerState().SetPlayerExperience(Experience, Level, Progress);
-}
-
-void SetPlayerSkill(int SkillNumber, int Value, int Progress)
-{
-	patella::bridge::PlayerState().SetPlayerSkill(SkillNumber, Value, Progress);
 }
 
 int GetPlayerSkillValue(int SkillNumber)
@@ -1426,16 +1315,6 @@ bool IsPlayerInParty()
 int GetPlayerPartyFlag()
 {
 	return patella::bridge::PlayerState().GetPlayerPartyFlag();
-}
-
-void HideAllCreatures()
-{
-	patella::bridge::Creatures().HideAllCreatures();
-}
-
-void SetBeat(int Beat)
-{
-	patella::bridge::Creatures().SetBeat(Beat);
 }
 
 bool IsPlayer(uint32 CreatureID)
@@ -1483,11 +1362,6 @@ bool IsBuddy(const char *Name)
 	return patella::bridge::Creatures().IsBuddy(Name);
 }
 
-TCreature *AddCreature(uint32 RemoveID, uint32 NewCreatureID)
-{
-	return patella::bridge::Creatures().AddCreature(RemoveID, NewCreatureID);
-}
-
 TCreature *GetCreature(uint32 CreatureID)
 {
 	return patella::bridge::Creatures().GetCreature(CreatureID);
@@ -1513,11 +1387,6 @@ void CheckMonsterHint(TCreature *Creature)
 	patella::bridge::Creatures().CheckMonsterHint(Creature);
 }
 
-void NotifySkull(int Flag)
-{
-	patella::bridge::Creatures().NotifySkull(Flag);
-}
-
 bool IsOpponent(TCreature *Creature)
 {
 	return patella::bridge::Creatures().IsOpponent(Creature);
@@ -1531,36 +1400,6 @@ int GetNumberOfOpponents()
 TCreature *GetOpponent(int Number)
 {
 	return patella::bridge::Creatures().GetOpponent(Number);
-}
-
-bool CompareBuddies(int i, int j)
-{
-	return patella::bridge::Creatures().CompareBuddies(i, j);
-}
-
-void SwapBuddies(int i, int j)
-{
-	patella::bridge::Creatures().SwapBuddies(i, j);
-}
-
-void SortBuddies()
-{
-	patella::bridge::Creatures().SortBuddies();
-}
-
-void MoveBuddyToSortedPlace(int i)
-{
-	patella::bridge::Creatures().MoveBuddyToSortedPlace(i);
-}
-
-void AddBuddy(uint32 CharacterID, const char *Name, bool Online)
-{
-	patella::bridge::Creatures().AddBuddy(CharacterID, Name, Online);
-}
-
-void SetBuddyState(uint32 CharacterID, bool Online)
-{
-	patella::bridge::Creatures().SetBuddyState(CharacterID, Online);
 }
 
 void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify)

@@ -1,13 +1,4 @@
-// Inventory.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The body slots, open containers and trade offers. The functions without line evidence
-// come where the binary has them: four at the start and InitInventory before
-// ResetInventory. The others are in line order; the compiler placed
-// InsertContainerObject last.
-//
-// Most functions assert before doing anything and have no try block; the
-// original's catch wrappers (common.h) around the calls to other functions of this file
-// are gone (issue #78).
+// Inventory.cpp: the player's body slots, the open containers and the trade offers, as the server last sent them.
 
 #include "Inventory.h"
 #include "Objects.h"
@@ -18,7 +9,7 @@
 #include <cstring>
 
 
-// The data is TInventory's (Inventory.h, issue #106).
+// The data is TInventory's (Inventory.h).
 
 patella::TInventory::TInventory(TObjectTypes &ObjectTypesRef) : ObjectTypes(ObjectTypesRef) {}
 
@@ -99,7 +90,7 @@ void patella::TInventory::InsertContainerObject(int Container, TObject Object)
 {
 	PATELLA_ASSERT_VALUES(In(Container,0,OPEN_CONTAINERS-1), Container);
 	PATELLA_ASSERT(Containers[Container].IsOpen);
-	if (Containers[Container].Count > CONTAINER_OBJECTS - 1)
+	if (Containers[Container].Count >= CONTAINER_OBJECTS)
 		DeleteContainerObject(Container, Containers[Container].Count - 1);
 	for (int i = Containers[Container].Count; i > 0; i--)
 		Containers[Container].Objects[i] = Containers[Container].Objects[i - 1];
@@ -268,18 +259,12 @@ void patella::TInventory::ResetInventory()
 	InitInventory();
 }
 
-// Empty. ExitControl calls it where Inventory.cpp's exit belongs in the reverse
-// order of InitControl (name ours, low confidence).
+// Empty. ExitControl calls it where Inventory.cpp's exit belongs in the reverse order of InitControl.
 void patella::TInventory::ExitInventory()
 {
 }
 
-// The original's functions (issue #106): each calls its member on the one TClient's TInventory.
-
-void ClearBody()
-{
-	patella::bridge::Inventory().ClearBody();
-}
+// The original's functions: each calls its member on the one TClient's TInventory.
 
 void ClearOffers()
 {
@@ -296,54 +281,14 @@ int GetCounterOfferCount()
 	return patella::bridge::Inventory().GetCounterOfferCount();
 }
 
-void SetBodyObject(int Position, TObject Object)
-{
-	patella::bridge::Inventory().SetBodyObject(Position, Object);
-}
-
-void DeleteBodyObject(int Position)
-{
-	patella::bridge::Inventory().DeleteBodyObject(Position);
-}
-
 TObject *GetBodyObject(int Position)
 {
 	return patella::bridge::Inventory().GetBodyObject(Position);
 }
 
-void OpenContainer(int Container, TObject Object, const char *Name, int Capacity, bool HasParent)
-{
-	patella::bridge::Inventory().OpenContainer(Container, Object, Name, Capacity, HasParent);
-}
-
-void CloseContainer(int Container)
-{
-	patella::bridge::Inventory().CloseContainer(Container);
-}
-
 bool IsContainerOpen(int Container)
 {
 	return patella::bridge::Inventory().IsContainerOpen(Container);
-}
-
-void InsertContainerObject(int Container, TObject Object)
-{
-	patella::bridge::Inventory().InsertContainerObject(Container, Object);
-}
-
-void AppendContainerObject(int Container, TObject Object)
-{
-	patella::bridge::Inventory().AppendContainerObject(Container, Object);
-}
-
-void ChangeContainerObject(int Container, int Position, TObject Object)
-{
-	patella::bridge::Inventory().ChangeContainerObject(Container, Position, Object);
-}
-
-bool DeleteContainerObject(int Container, int Position)
-{
-	return patella::bridge::Inventory().DeleteContainerObject(Container, Position);
 }
 
 int GetContainerObjectCount(int Container)
@@ -379,26 +324,6 @@ bool HasContainerParent(int Container)
 int GetFreeContainer()
 {
 	return patella::bridge::Inventory().GetFreeContainer();
-}
-
-bool SetOwnOffer(const char *Name)
-{
-	return patella::bridge::Inventory().SetOwnOffer(Name);
-}
-
-bool SetCounterOffer(const char *Name)
-{
-	return patella::bridge::Inventory().SetCounterOffer(Name);
-}
-
-void AddOwnOfferObject(TObject Object)
-{
-	patella::bridge::Inventory().AddOwnOfferObject(Object);
-}
-
-void AddCounterOfferObject(TObject Object)
-{
-	patella::bridge::Inventory().AddCounterOfferObject(Object);
 }
 
 char *GetOwnOfferName()

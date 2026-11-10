@@ -1,11 +1,9 @@
-// MapPoint.h: a map point's stack of objects (Patella-Modern issue #102, plan M7's fixed-capacity lists): TMapPoint
-// and the operations on its stack that Map.cpp's InsertObject, AddObject, AppendObject, DeleteObject, ClearField and
-// the GetTop*Object functions make of it. Not part of the original source; TMapPoint, ObjectCount and EffectNumber are
-// the original's names (Map.h before #102).
+// MapPoint.h: a map point's stack of objects: TMapPoint and the operations on its stack that Map.cpp's InsertObject,
+// AddObject, AppendObject, DeleteObject, ClearField and the GetTop*Object functions make of it.
 //
-// The original's point (0xac bytes) held ObjectCount and an array of OBJECTS_PER_POINT objects; here the objects are a
+// The original's point held ObjectCount and an array of OBJECTS_PER_POINT objects; here the objects are a
 // TStaticVector<TObject, OBJECTS_PER_POINT> (compat/cxx26.h: std::inplace_vector where the library has it), its size
-// the count. What happens when the stack is full is the original's (notes/decisions.md, "#102b"):
+// the count. What happens when the stack is full is the original's:
 // 	- InsertObject shifts the objects from Position up by one, but from index 9 at most: on a full point the
 // 	  top object falls off and the count stays OBJECTS_PER_POINT (InsertPointObject).
 // 	- AddObject inserts only when its position is below OBJECTS_PER_POINT: an object that belongs above
@@ -28,9 +26,9 @@
 
 inline constexpr int OBJECTS_PER_POINT = 10;
 
-// An entry of the effect table (Map.h), as the map points and the entries' Previous and Next links hold it (issue
-// #103; ints until then). Its value is the original's effect number, the entry's index (0 to EFFECTS - 1), which the
-// golden corpus records; None is the original's -1: no effect (the end of a point's list, a full table).
+// An entry of the effect table (Map.h), as the map points and the entries' Previous and Next links hold it. Its value
+// is the original's effect number, the entry's index (0 to EFFECTS - 1); None is the original's -1: no effect (the end
+// of a point's list, a full table).
 enum class TEffectId : int { None = -1 };
 
 // The original's effect number of an id, and the id of a number (the original's functions take and give numbers).
@@ -94,7 +92,7 @@ inline void ClearPointObjects(TMapPoint &Point) noexcept
 
 // AddObject's position for Obj: ground objects first, then borders, bottom objects, top objects, and new creatures
 // above the creatures, other objects below them. OBJECTS_PER_POINT on a full point when Obj belongs on top: AddObject
-// then drops it. GetFlag is GetObjectFlag (a parameter, so that the tests need no Tibia.dat).
+// then drops it. GetFlag is GetObjectFlag, passed as a parameter.
 template <class FlagFunction>
 [[nodiscard]] int AddPosition(const TMapPoint &Point, const TObject &Obj, FlagFunction GetFlag)
 {

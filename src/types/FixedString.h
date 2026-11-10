@@ -1,15 +1,13 @@
 // FixedString.h: TFixedString<N>, the client's fixed text buffers (char[N]) with bounded writes, and
-// TStringBuffer, the same writes into a buffer the code has only a pointer to and knows the size of. Patella-Modern
-// issue #57 (notes/modernization-plan.md, section 7, M4). Not part of the original source.
+// TStringBuffer, the same writes into a buffer the code has only a pointer to and knows the size of.
 //
 // TFixedString<N> is exactly char[N]: its only member is that array, so it has the array's size and alignment
 // (1), it is standard layout, trivially copyable and an aggregate (no constructor: a local is as uninitialised as
-// the array was, `= {}` zeroes it, `= {"Text"}` initialises it from a literal). A char[N] member of a frozen
-// structure becomes a TFixedString<N> without moving anything (plan, section 2, rule 4: each structure checks it
-// with static_asserts in the oracle build; IsFixedStringLayout<N> below for the type itself).
+// the array was, `= {}` zeroes it, `= {"Text"}` initialises it from a literal). IsFixedStringLayout<N> below
+// checks it.
 //
 // It converts to char * and const char * as the array did, so the code that reads it (strlen, strcmp, the error
-// macros' expressions, whose text must not change until M5: `strlen(Address)<100`) stays as it is. Never pass it
+// macros' expressions, whose text must not change: `strlen(Address)<100`) stays as it is. Never pass it
 // through "..." (MsvcSnprintf, a varargs constructor): that copies the N bytes, not a pointer; pass the Chars
 // member or View().
 //
@@ -26,16 +24,14 @@
 // there (at N - 1 without a NUL). Assign(const char *) reads a null pointer as strcpy did (it faults). A source
 // inside the buffer itself is allowed (memmove).
 //
-// Format and AppendFormat take std::format's language: std::format_to_n on the product presets, the C++17
-// stand-in of compat/format.h in the oracle (PATELLA_HAS_FORMAT 0), with the same output. A TFixedString passed to
-// them is its text.
+// Format and AppendFormat take std::format's language (std::format_to_n). A TFixedString passed to them is its
+// text.
 
 #pragma once
 
-#include "compat/format.h"
-
 #include <cstddef>
 #include <cstring>
+#include <format>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -77,8 +73,6 @@ public:
 		return Result;
 	}
 
-	[[nodiscard]] std::string_view View() const noexcept { return {Chars, Length()}; }
-
 	// strcpy: the text and its NUL, at most Capacity - 1 characters. Returns the characters written.
 	std::size_t Assign(std::string_view Text) noexcept { return Write(0, Text.data(), Text.size()); }
 	std::size_t Assign(const char *Text) noexcept { return Write(0, Text, BoundedLength(Text, Capacity - 1)); }
@@ -96,7 +90,6 @@ public:
 		return Start + Write(Start, Text, BoundedLength(Text, Capacity - 1 - Start));
 	}
 
-#if PATELLA_HAS_FORMAT
 	// What sprintf wrote into Chars, with std::format's language. Returns the characters written.
 	template <typename... Arguments>
 	std::size_t Format(std::format_string<TFormatArgument<Arguments>...> Text, Arguments &&...Values)
@@ -112,19 +105,6 @@ public:
 		return Start
 			+ Terminate(Start, std::format_to_n(Chars + Start, Limit(Start), Text, PassFormatArgument(std::forward<Arguments>(Values))...).out);
 	}
-#else
-	template <typename... Arguments>
-	std::size_t Format(std::string_view Text, const Arguments &...Values)
-	{
-		return Terminate(0, patella::compat::FormatToNStandIn(Chars, Limit(0), Text, Values...).Out);
-	}
-	template <typename... Arguments>
-	std::size_t AppendFormat(std::string_view Text, const Arguments &...Values)
-	{
-		const std::size_t Start = End();
-		return Start + Terminate(Start, patella::compat::FormatToNStandIn(Chars + Start, Limit(Start), Text, Values...).Out);
-	}
-#endif
 
 private:
 	char *Chars;
@@ -176,7 +156,7 @@ struct TFixedString {
 	static_assert(N > 0, "a fixed string holds at least its terminating NUL");
 
 	// The original's array, the only member (public: the type is an aggregate, as the array was).
-	char Chars[N]; // NOLINT(modernize-avoid-c-arrays): the type is the array (issue #57); .Chars is the C string varargs need
+	char Chars[N]; // NOLINT(modernize-avoid-c-arrays): the type is the array; .Chars is the C string varargs need
 
 	// As the array decays: the code that reads the buffer as a C string is unchanged.
 	operator char *() noexcept { return Chars; }
@@ -198,10 +178,7 @@ struct TFixedString {
 
 	std::size_t Assign(std::string_view Text) noexcept { return Buffer().Assign(Text); }
 	std::size_t Assign(const char *Text) noexcept { return Buffer().Assign(Text); }
-	std::size_t Append(std::string_view Text) noexcept { return Buffer().Append(Text); }
-	std::size_t Append(const char *Text) noexcept { return Buffer().Append(Text); }
 
-#if PATELLA_HAS_FORMAT
 	template <typename... Arguments>
 	std::size_t Format(std::format_string<TFormatArgument<Arguments>...> Text, Arguments &&...Values)
 	{
@@ -212,21 +189,10 @@ struct TFixedString {
 	{
 		return Buffer().AppendFormat(Text, std::forward<Arguments>(Values)...);
 	}
-#else
-	template <typename... Arguments>
-	std::size_t Format(std::string_view Text, const Arguments &...Values)
-	{
-		return Buffer().Format(Text, Values...);
-	}
-	template <typename... Arguments>
-	std::size_t AppendFormat(std::string_view Text, const Arguments &...Values)
-	{
-		return Buffer().AppendFormat(Text, Values...);
-	}
-#endif
 };
 
-// The layout the frozen structures rely on: exactly char[N].
+// The layout the code relies on, exactly char[N]: sizeof is the capacity, and a fixed string is cleared and
+// copied as bytes, alone and inside the structures that hold one.
 template <std::size_t N>
 inline constexpr bool IsFixedStringLayout = sizeof(TFixedString<N>) == N && alignof(TFixedString<N>) == 1
 	&& std::is_standard_layout_v<TFixedString<N>> && std::is_trivially_copyable_v<TFixedString<N>>

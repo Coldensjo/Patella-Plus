@@ -1,5 +1,4 @@
-# The hardening settings of the product targets (notes/modernization-plan.md, section 5; issue #8),
-# applied by the presets windows-x64 (issue #5) and linux-x64-gcc / linux-x64-clang (issue #7):
+# The hardening settings of the product targets, applied by the presets windows-x64 and linux-x64-gcc:
 #
 #	include(cmake/Hardening.cmake)
 #	patella_target_hardening(<target>)
@@ -7,26 +6,22 @@
 # - MSVC: Control Flow Guard (/guard:cf, compiler and linker) and CET shadow stack compatibility
 #   (/CETCOMPAT); ASLR and DEP (/DYNAMICBASE /NXCOMPAT) are the linker's defaults. The MSVC STL's hardened mode,
 #   _MSVC_STL_HARDENING=1 (since MSVC 14.44, VS 2022 17.14; every container's, string's, span's, mdspan's, optional's
-#   and expected's preconditions, a violation __fastfail(5)), for C++ in every configuration (issue #133; Debug's
+#   and expected's preconditions, a violation __fastfail(5)), for C++ in every configuration (Debug's
 #   _ITERATOR_DEBUG_LEVEL 2 checks them already).
 # - GCC and Clang: -fstack-protector-strong; _FORTIFY_SOURCE=3 where the code is optimised (it needs
 #   optimisation and warns without it; any level the compiler predefines is replaced);
 #   libstdc++'s hardened mode, _GLIBCXX_ASSERTIONS (the one -fhardened defines; libstdc++ 16 has no other that keeps
-#   the ABI, _GLIBCXX_DEBUG changes it), for C++ in every configuration (issue #133; Debug only until then; a
-#   violation __glibcxx_assert_fail, an abort); position-independent executables; on Linux full RELRO.
-# - PATELLA_SANITIZE (GCC and Clang; the preset linux-x64-clang sets it to address,undefined, plan
-#   section 5): -fsanitize=<list> for compiling and linking, every finding fatal
-#   (-fno-sanitize-recover=all), frame pointers kept for the reports.
-# - PATELLA_SANITIZE with MSVC (issue #70; the preset windows-x64-asan sets it to address): only address,
-#   MSVC's AddressSanitizer (/fsanitize=address, compiling and linking; MSVC has no UBSan or LeakSanitizer).
+#   the ABI, _GLIBCXX_DEBUG changes it), for C++ in every configuration (a violation __glibcxx_assert_fail, an
+#   abort); position-independent executables; on Linux full RELRO.
+# - PATELLA_SANITIZE (GCC and Clang; no preset sets it): -fsanitize=<list> for compiling and linking, every finding
+#   fatal (-fno-sanitize-recover=all), frame pointers kept for the reports.
+# - PATELLA_SANITIZE with MSVC (no preset sets it): only address, MSVC's AddressSanitizer (/fsanitize=address,
+#   compiling and linking; MSVC has no UBSan or LeakSanitizer).
 #   Every executable is linked with /DEBUG and /INCREMENTAL:NO (ASan's metadata cannot be linked
 #   incrementally) and gets the ASan runtime DLL, clang_rt.asan_dynamic-x86_64.dll (the one runtime of every
 #   CRT and configuration since MSVC 14.37: Debug imports it too), copied next to it from the compiler's
-#   folder, where Windows looks first (not only on a developer prompt's PATH). /RTC is incompatible: the preset leaves it out
-#   of CMAKE_<LANG>_FLAGS_DEBUG, and the configure stops when it is still there.
-#
-# Until M6 (Patella-Modern issue #94) never for the 32-bit oracle's targets, which kept exactly the former
-# Patella.vcxproj's options; the oracle has left the fork.
+#   folder, where Windows looks first (not only on a developer prompt's PATH). /RTC is incompatible: the configure
+#   stops when a configuration's CMAKE_<LANG>_FLAGS still have it.
 
 include_guard(GLOBAL)
 
@@ -69,8 +64,6 @@ endfunction()
 function(patella_target_hardening target)
 	get_target_property(type ${target} TYPE)
 	if(MSVC)
-		# Options, not compile definitions: patella_target_import_std gives the std module the target's
-		# COMPILE_OPTIONS, and MSVC warns (C5050) when a macro of the importer's is not the module's.
 		target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:/guard:cf>
 			$<$<COMPILE_LANGUAGE:CXX>:/D_MSVC_STL_HARDENING=1>)
 		if(type STREQUAL "EXECUTABLE" OR type STREQUAL "SHARED_LIBRARY" OR type STREQUAL "MODULE_LIBRARY")

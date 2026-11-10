@@ -1,15 +1,15 @@
 # The resource pictures (cursors, icon, bitmaps) of the local Tibia.exe, which src/res/Patella.rc
-# includes (notes/resources.md): extracted at configure time by tools/extract_resources.py. Used by
-# cmake/WindowsX64.cmake:
+# includes: extracted at configure time by tools/extract_resources.py. Used by cmake/WindowsX64.cmake and
+# cmake/LinuxX64.cmake:
 #
 #	include(cmake/Resources.cmake)
 #	patella_extract_resources(<Tibia.exe> <output directory>)
 #	patella_placeholder_resources(<output directory>)
 #
 # Tibia.exe and the script are configure dependencies, so a new Tibia.exe configures again. Needs
-# Python3_EXECUTABLE (find_package(Python3 ... Interpreter)). The placeholders (issue #127,
-# tools/placeholder_resources.py; only for the hosted CI, which has no Tibia.exe): neutral pictures under the same
-# file names, generated from nothing but the script.
+# Python3_EXECUTABLE (find_package(Python3 ... Interpreter)). The placeholders (tools/placeholder_resources.py; only
+# for the hosted CI and the packages, which have no Tibia.exe): neutral pictures under the same file names, generated
+# from nothing but the script.
 
 include_guard(GLOBAL)
 

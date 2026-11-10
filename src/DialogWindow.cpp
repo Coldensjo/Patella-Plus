@@ -1,15 +1,6 @@
-// DialogWindow.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The columns of content windows (TDialogWindow), their base class
-// (TContentWindow) and the windows with a body and a frame (TSubWindow); see
-// DialogWindow.h. The object opens with six functions without exception
-// frames or line evidence; they stay at the start, where the binary has them.
-// GetFrameHeight and TContentWindow's constructor are called by
-// ContentWindows.obj, which comes earlier in the link order, so they are not
-// inline header code (a header copy would have been kept from that object).
-// The other functions follow in line order. The binary moves four of them to
-// the end of the object (Arrange, Shrink, Grow, Rearrange): each calls a
-// function defined further down.
+// DialogWindow.cpp: the columns of content windows (TDialogWindow), their
+// base class (TContentWindow) and the windows with a body and a frame
+// (TSubWindow); see DialogWindow.h.
 //
 // A column lays its children out from the top of Area, each as wide as the
 // column. Rearrange is called after every change with a strategy: when a
@@ -25,36 +16,25 @@
 #include "Preferences.h"
 #include "Skins.h"
 #include "Surface.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "GUI.h"
 #include "common.h"
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory is off for the file, for the original's raw owners: the window tree owns its
+// children, the message queue its blocks, the lists their entries.
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
-
 // A column is as wide as the side bar.
-int TDialogWindow::getMinimumWidth()
+int TDialogWindow::GetMinimumWidth()
 {
 	return SkinProperties().SideBarWidth;
 }
 
-// Also inlined into TSubWindow's constructor.
 TContentWindow::TContentWindow(int _Identifier, bool _Background)
 {
 	Identifier = _Identifier;
 	Dragging = false;
 	DragX = 0;
 	DragY = 0;
-	DragBottom = 0;
 	BackgroundY = 0;
 	Background = _Background;
 }
@@ -83,10 +63,9 @@ TSubWindow::~TSubWindow()
 		delete Resizer2;
 }
 
-// The destructor's work until issue #108, in its order: the skill, battle and
-// VIP windows store their body's height in the preferences ("ContentWindow"),
-// the parts that are not children are closed where it deleted them (a
-// minimized container's body sends its close); then the children.
+// The skill, battle and VIP windows store their body's height in the
+// preferences ("ContentWindow"), the parts that are not children are closed
+// (a minimized container's body sends its close); then the children.
 void TSubWindow::OnClose()
 {
 	try {
@@ -122,11 +101,11 @@ int TSubWindow::GetFrameHeight()
 }
 
 // A minimized window is its frame only.
-int TSubWindow::getMinimumHeight()
+int TSubWindow::GetMinimumHeight()
 {
 	int Result = GetFrameHeight();
 	if (Body != nullptr && !IsMinimized)
-		Result += Body->getMinimumHeight();
+		Result += Body->GetMinimumHeight();
 	return Result;
 }
 
@@ -144,16 +123,13 @@ TDialogWindow::TDialogWindow()
 
 // --- TDialogWindow ---------------------------------------------------------
 
-// The catch blocks name no parameter.
-//
-// Issue #65: a sub-window's SetSize ends with the column's Rearrange(8)
-// (FitChildren), which can delete the child being sized. The original then
-// reads the deleted child's Next (a use after free); RemoveChild had set it
-// to NULL before the delete, so its loop ends there. Ours ends there too,
-// without the read: a child that is no longer in the column was deleted
-// (strategies 2, 4, 8 and 32 delete children but never insert one, so the
-// pointer compared is not a new child's). A child still in it goes on to its
-// Next, as before.
+// A sub-window's SetSize ends with the column's Rearrange(8) (FitChildren),
+// which can delete the child being sized. The original then read the deleted
+// child's Next (a use after free); RemoveChild had set it to NULL before the
+// delete, so its loop ended there. This loop ends there too, without the
+// read: a child that is no longer in the column was deleted (strategies 2, 4,
+// 8 and 32 delete children but never insert one, so the pointer compared is
+// not a new child's). A child still in it goes on to its Next.
 void TDialogWindow::SetSize(int Width, int Height)
 {
 	TWindow::SetSize(Width, Height);
@@ -168,7 +144,7 @@ void TDialogWindow::SetSize(int Width, int Height)
 }
 
 // The children's heights, whatever their minimum heights.
-int TDialogWindow::getMinimumHeight()
+int TDialogWindow::GetMinimumHeight()
 {
 	int Result = 0;
 	for (TComponent *Child = FirstChild; Child != nullptr; Child = Child->GetNext())
@@ -360,7 +336,7 @@ void TDialogWindow::FitChildren()
 	while (Child != nullptr) {
 		if (Space < Child->Height) {
 			TComponent *Delete = nullptr;
-			if (Space < Child->getMinimumHeight()) {
+			if (Space < Child->GetMinimumHeight()) {
 				Delete = Child;
 			} else if (Space < Child->Height) {
 				Child->SetSize(Area.width, Space);
@@ -399,8 +375,8 @@ bool TDialogWindow::Shrink()
 				return false;
 			Shrinking = Child;
 			Child = Child->GetPrevious();
-		} while (Shrinking->Height == Shrinking->getMinimumHeight());
-		int DeltaHeight = Shrinking->Height - Shrinking->getMinimumHeight();
+		} while (Shrinking->Height == Shrinking->GetMinimumHeight());
+		int DeltaHeight = Shrinking->Height - Shrinking->GetMinimumHeight();
 		if (Missing < DeltaHeight)
 			DeltaHeight = Missing;
 		PATELLA_ASSERT_VALUES(DeltaHeight>0, DeltaHeight);
@@ -446,7 +422,7 @@ void TDialogWindow::MakeRoom(TComponent *Work)
 	for (TComponent *Child = GetFirstChild(); Child != nullptr; Child = Child->GetNext())
 		Space -= Child->Height;
 	if (Space < Work->Height) {
-		int Needed = Work->getMinimumHeight();
+		int Needed = Work->GetMinimumHeight();
 		if (Space > Needed)
 			Needed = Space;
 		TComponent *Child = GetLastChild();
@@ -522,7 +498,6 @@ void TContentWindow::Arrange()
 	BackgroundY = OffsetY % Skins()[SKIN_BACKGROUND].height;
 }
 
-// The catch blocks name no parameter.
 void TContentWindow::ReleaseCapture(TComponent *Component)
 {
 	Dragging = false;
@@ -556,7 +531,6 @@ bool TContentWindow::LeftButtonDown(int x, int y, int Flags)
 		SetCapture(nullptr);
 		DragX = x;
 		DragY = y;
-		DragBottom = Height + OffsetY - y;
 	}
 	return true;
 }
@@ -580,7 +554,6 @@ TSubWindow::TSubWindow(int _Identifier, TSubWindowBody *_Body, bool _Resizable, 
 {
 	IsMinimized = false;
 	RestoreHeight = 0;
-	Data68 = 0;
 	DrawingListLength = 8;
 	DrawingList.reset(new TDrawing[8]);
 	UpButton = nullptr;
@@ -616,8 +589,8 @@ void TSubWindow::SetSize(int Width, int Height)
 			Change = 1;
 		if (Height < this->Height)
 			Change = -1;
-		if (Height < getMinimumHeight())
-			Height = getMinimumHeight();
+		if (Height < GetMinimumHeight())
+			Height = GetMinimumHeight();
 		TWindow::SetSize(Width, Height);
 		SetChildArea(Body, SkinProperties().SubWindow.Body);
 		FitToChild(Body, SkinProperties().SubWindow.Body, false);
@@ -720,7 +693,7 @@ void TSubWindow::HandleEvent(int Event)
 	}
 }
 
-// The body is told first (+0xa0, without a NULL check) and leaves the
+// The body is told first (without a NULL check) and leaves the
 // window with the resizers.
 void TSubWindow::Minimize()
 {

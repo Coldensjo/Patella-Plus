@@ -1,4 +1,4 @@
-# CipSoft client files: proprietary and large; CLAUDE.md records the Tibia.exe hash
+# CipSoft client files: proprietary and large
 Tibia.exe
 Tibia.dat
 Tibia.spr
@@ -11,9 +11,8 @@ unins000.*
 # CipSoft gameserver files
 gameserver/
 
-# The decompilation workspace (the analysis of Tibia.exe), kept out of the repository since November 2, 2026.
-# tools\decompilation.ps1 -Stash keeps it in decompilation\ (same relative paths), -Restore moves it back to
-# the paths below; ignored in both places. decompilation\MANIFEST.txt names the last commit that has the files.
+# The decompilation workspace of Patella-Modern (the analysis of Tibia.exe), which this repository does not have:
+# its paths stay ignored, should a checkout hold it.
 decompilation/
 decomp/
 rea-out/
@@ -32,11 +31,10 @@ rea-out/
 /tools/xctable.py
 /tools/listing.cmd
 
-# The build trees, and build/golden: the golden corpus (tests/golden, issue #24), derived from Tibia.exe,
-# never committed
+# The build trees: they hold pictures and executables derived from Tibia.exe, never committed
 build/
 
-# Visual Studio state (it opens the CMake folder; issue #10 removed Patella.sln)
+# Visual Studio state (it opens the CMake folder)
 .vs/
 CMakeUserPresets.json
 

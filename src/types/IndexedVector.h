@@ -1,6 +1,5 @@
 // IndexedVector.h: TIndexedVector<T>, CipSoft's growable vector<T> of Container.h (c:\mud\tibiaplayer\Container.h,
-// and its operator()) over a std::vector. Patella-Modern issue #99 (notes/modernization-plan.md, section
-// 7, M7; notes/decisions.md, "TIndexedVector over std::vector"). The semantics are the original's, unchanged:
+// and its operator()) over a std::vector. The semantics are the original's, unchanged:
 //
 // - The entries are indexed from min to max, the lowest and highest index used so far; entry[0] is index start, and
 //   space entries are allocated (start <= min <= max < start + space).
@@ -9,14 +8,12 @@
 //   values and indices, each swapped into the new storage as the original swaps it (SwapIndexedEntries).
 // - Indexing below min or above max moves min or max to the index; with initialized set (the four-argument
 //   constructor) every entry so taken into the range is set to init first, as is every entry at construction.
-// - New storage is allocated as the original's new T[n]: through operator new[] (the golden corpus's Container test
-//   fills that memory with its pattern and compares every allocated entry), each entry default-initialised (a type
+// - New storage is allocated as the original's new T[n]: through operator new[], each entry default-initialised (a type
 //   without a constructor keeps the memory's bytes, one with a constructor runs it). std::vector's own allocator
 //   value-initialises (zeros an int), so the storage has its own allocator, TArrayNewAllocator.
 //
-// The members are the original's, in its order and with its names (the Container test compares min ... init, with their
-// padding, by the original's offsets; the storage, the original's T *entry, is the last member). The members are
-// initialised with braces: <windows.h>'s min and max macros take a parenthesis after the name.
+// The members are the original's, in its order and with its names; the storage, the original's T *entry, is the last
+// member. The members are initialised with braces: <windows.h>'s min and max macros take a parenthesis after the name.
 
 #pragma once
 
@@ -42,8 +39,8 @@ public:
 	T *allocate(std::size_t Count) { return static_cast<T *>(::operator new[](Count * sizeof(T))); }
 	void deallocate(T *Entries, std::size_t /*Count*/) noexcept { ::operator delete[](static_cast<void *>(Entries)); }
 
-	// new T[n]'s initialisation of each entry; with arguments a plain construction. GCC's analyzer (issue #111) takes
-	// the null storage of a vector of no entries into the loop that constructs none (-Wanalyzer-null-dereference).
+	// new T[n]'s initialisation of each entry; with arguments a plain construction. GCC's analyzer takes the null
+	// storage of a vector of no entries into the loop that constructs none (-Wanalyzer-null-dereference).
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wanalyzer-null-dereference"
@@ -64,9 +61,8 @@ public:
 };
 
 // Swaps two entries as the original does when its vector<T> grows: through a copy, each entry copied as a block of
-// bytes with its padding (VC7.1 copies a structure so, and so does MSVC). The golden corpus compares the entries'
-// padding (Patella-Modern issue #91), which GCC and Clang do not copy when they copy a structure member by member; a
-// type that is not trivially copyable is copied with its assignment.
+// bytes with its padding (VC7.1 copies a structure so, and so does MSVC; GCC and Clang do not copy the padding when
+// they copy a structure member by member); a type that is not trivially copyable is copied with its assignment.
 template <class T> inline void SwapIndexedEntries(T &A, T &B)
 {
 	if constexpr (std::is_trivially_copyable_v<T>) {

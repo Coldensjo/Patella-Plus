@@ -1,6 +1,4 @@
-// ContextMenus.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The help bubble and the context menus; see ContextMenus.h.
+// ContextMenus.cpp: the help bubble and the context menus; see ContextMenus.h.
 //
 // A menu is built by its constructor: AddEntry for every entry (Separator =
 // true starts a new group, AddSeparator draws the line), then Show, which
@@ -23,7 +21,6 @@
 #include "Status.h"
 #include "Surface.h"
 #include "Talk.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "Utils.h"
 #include "graphics.h"
 #include "sysinc.h"
@@ -33,18 +30,10 @@
 #include <cstdint>
 #include <cstring>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-owning-memory and cppcoreguidelines-pro-type-vararg are off for the file, for the original's raw
+// owners (the window tree owns its children, the message queue its blocks, the lists their entries) and its varargs
+// (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
-
-namespace {
-
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
-TCallback NoCallback(nullptr, 0);
-
-} // namespace
-
 
 // The skill window forgets the menu.
 TSkillContextMenu::~TSkillContextMenu()
@@ -79,7 +68,7 @@ void THelpBubble::SetSize(int Width, int Height)
 		Width += SkinProperties().HelpBubbleSizeRemainder - Width % SkinProperties().HelpBubbleSizeStep;
 	if (Height % SkinProperties().HelpBubbleSizeStep != SkinProperties().HelpBubbleSizeRemainder)
 		Height += SkinProperties().HelpBubbleSizeRemainder - Height % SkinProperties().HelpBubbleSizeStep;
-	const int MinWidth = getMinimumWidth();
+	const int MinWidth = GetMinimumWidth();
 	const int MaxHeight = SkinProperties().HelpBubbleMaximumHeight;
 	if (MaxWidth < MinWidth) {
 		if (Width < MaxWidth)
@@ -92,7 +81,7 @@ void THelpBubble::SetSize(int Width, int Height)
 		if (Width > MaxWidth)
 			Width = MaxWidth;
 	}
-	const int MinHeight = getMinimumHeight();
+	const int MinHeight = GetMinimumHeight();
 	if (MaxHeight < MinHeight) {
 		if (Height < MaxHeight)
 			Height = MaxHeight;
@@ -273,7 +262,7 @@ bool TContextMenuEntry::LeftButtonUp([[maybe_unused]] int x, [[maybe_unused]] in
 // The last entry loses the space below the font.
 void TContextMenuEntry::SetLast()
 {
-	// The original's order: the left operand first (MSVC; GCC and Clang may differ, issue #91).
+	// The original's order: the left operand first (MSVC; GCC and Clang may differ).
 	const int LineHeight = GetFontLineHeight(SkinProperties().MenuFont.FontNumber);
 	SetSize(Width, Height - (LineHeight - GetFontHeight(SkinProperties().MenuFont.FontNumber)));
 }
@@ -443,10 +432,8 @@ TObjectContextMenu::TObjectContextMenu(int x, int y, int ParentWidth, int Parent
 					AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
 				if (!IsBuddy(Creature->Name))
 					AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-				Text.Format("{} {}", IsTalkIgnored(0, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
+				Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 				AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
-				// The binary passes the name to "Invite to Party" as well
-				// (unused; left out here, the compiler warns about it).
 				switch (GetPlayerPartyFlag()) {
 				case PARTY_NONE:
 				case PARTY_INVITEE:
@@ -569,7 +556,7 @@ void TObjectContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_IGNORE: {
 		TCreature *Creature = GetCreature(CreatureID);
 		if (Creature != nullptr) {
-			if (IsTalkIgnored(0, Creature->Name, -1))
+			if (IsTalkIgnored(TALK_NONE, Creature->Name, -1))
 				UnignoreName(Creature->Name);
 			else
 				IgnoreName(Creature->Name, false);
@@ -650,7 +637,7 @@ TCreatureContextMenu::TCreatureContextMenu(uint32 CreatureID, int x, int y, int 
 			AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite to private chat", nullptr);
 		if (!IsBuddy(Creature->Name))
 			AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-		Text.Format("{} {}", IsTalkIgnored(0, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
+		Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Creature->Name, -1) ? "Unignore" : "Ignore", Creature->Name);
 		AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
 		switch (GetPlayerPartyFlag()) {
 		case PARTY_NONE:
@@ -737,7 +724,7 @@ void TCreatureContextMenu::HandleEvent(int Event)
 	case EVENT_MENU_IGNORE: {
 		TCreature *Creature = GetCreature(CreatureID);
 		if (Creature != nullptr) {
-			if (!IsTalkIgnored(0, Creature->Name, -1))
+			if (!IsTalkIgnored(TALK_NONE, Creature->Name, -1))
 				IgnoreName(Creature->Name, false);
 			else
 				UnignoreName(Creature->Name);
@@ -922,7 +909,7 @@ TTextContextMenu::TTextContextMenu(TTextWindow *_TextWindow, int _LineNumber, in
 			}
 			if (!IsBuddy(Speaker))
 				AddEntry(EVENT_MENU_ADD_VIP, "Add to VIP list", nullptr);
-			Text.Format("{} {}", IsTalkIgnored(0, Speaker, -1) ? "Unignore" : "Ignore", Speaker);
+			Text.Format("{} {}", IsTalkIgnored(TALK_NONE, Speaker, -1) ? "Unignore" : "Ignore", Speaker);
 			AddEntry(EVENT_MENU_IGNORE, Text, nullptr);
 			Separator = true;
 		}
@@ -960,7 +947,7 @@ void TTextContextMenu::HandleEvent(int Event)
 		if (Speaker != nullptr) {
 			TFixedString<200> Text;
 			const char *Format;
-			if (!IsTalkIgnored(0, Speaker, -1)) {
+			if (!IsTalkIgnored(TALK_NONE, Speaker, -1)) {
 				IgnoreName(Speaker, false);
 				Format = "You are now ignoring player %s.";
 			} else {
@@ -1089,7 +1076,7 @@ TChannelContextMenu::TChannelContextMenu(TConsoleWindow *_ConsoleWindow, int x, 
 	ConsoleWindow = _ConsoleWindow;
 	TTalkBuffer *TextBuffer = ConsoleWindow->GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
-	if (!TextBuffer->isDefault()) {
+	if (!TextBuffer->IsDefault()) {
 		if (TextBuffer->IsSelected() && TextBuffer->IsPrivateChannel()) {
 			AddEntry(EVENT_MENU_INVITE_PRIVATE, "Invite player", nullptr);
 			AddEntry(EVENT_MENU_EXCLUDE_PRIVATE, "Exclude player", nullptr);
@@ -1220,7 +1207,7 @@ void TMarkContextMenu::HandleEvent(int Event)
 				SendWalk();
 				break;
 			case 2:
-				SendStop();
+				SendStopWalk();
 				break;
 			default:
 				break;

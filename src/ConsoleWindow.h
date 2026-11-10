@@ -1,23 +1,12 @@
-// ConsoleWindow.h: the console below the map (c:\mud\tibiaplayer\ConsoleWindow.h).
+// ConsoleWindow.h: the console below the map.
 //
 // TConsoleWindow is MainWindow.cpp's Console: a tab bar (TTabBar) with one tab
 // (TTab) per open channel, the view of the current channel (TConsole: a
 // TTextWindow and a scroll bar), the edit line and the buttons. A TTextWindow
-// shows the lines of a Talk.cpp text buffer, broken into TLineFormats (0x28
-// bytes) that fit its width, with a selection. Tabs that do not fit into the bar
-// are moved into two hidden windows of the bar (LeftTabs, RightTabs), whose arrow
-// buttons scroll them back in.
-//
-// Names from the binary: TLineFormat's LineText and its constructor's
-// parameters (_TextLine, _LineText, _LineLength, _OriginalOffset, _Indent),
-// getFirstLineNumber, getLastLineNumber, _CurrentLineNumber, InvisibleLines
-// (an error message), getTextBuffer, isDefault, getCaption, CurrentConsole,
-// CurrentTab, DefaultTab, NewTab, Input, TextBuffer, _Caption, _TextBuffer,
-// _Active, Tab, Container ("failed to get composite"), Search, Question,
-// Addressee, ChannelID, TalkMode, MessageSeparator and the catch-block
-// parameters (Surface, x, y, Width, Height, Code, Event, Key, LineNumber,
-// Active, RecvMode, SendMode). The class names and the other names are ours;
-// see notes/decisions.md, "ConsoleWindow.cpp".
+// shows the lines of a Talk.cpp text buffer, broken into TLineFormats that fit
+// its width, with a selection. Tabs that do not fit into the bar are moved into
+// two hidden windows of the bar (LeftTabs, RightTabs), whose arrow buttons
+// scroll them back in.
 
 #pragma once
 
@@ -42,8 +31,7 @@ class TMultiStateButton; // DialogElements.h
 struct TLineFormat {
 	// The colour is cleared by its own constructor first.
 	TLineFormat()
-		: LineText(nullptr), LineLength(0), OriginalOffset(0), Indent(0), FontNumber(FONT_SMOOTH), TextLine(nullptr),
-		  LineEnd(true)
+		: LineText(nullptr), LineLength(0), Indent(0), FontNumber(FONT_SMOOTH), TextLine(nullptr), LineEnd(true)
 	{
 		Color = DefaultFontColor;
 	}
@@ -60,23 +48,21 @@ struct TLineFormat {
 		LineText = _LineText;
 		Indent = _Indent;
 		LineLength = _LineLength;
-		OriginalOffset = _OriginalOffset;
 		LineEnd = _LineEnd;
 		FontNumber = _FontNumber;
 	}
 
-	const char *LineText; // +0x00, points into the talk line's text
-	int LineLength;       // +0x04
-	int OriginalOffset;   // +0x08, offset of LineText in the talk line's text
-	int Indent;           // +0x0c
-	TRGBColor Color;      // +0x10
-	int FontNumber;       // +0x1c
-	TTalkLine *TextLine;  // +0x20
-	bool LineEnd;         // +0x24
+	const char *LineText; // points into the talk line's text
+	int LineLength;
+	int Indent;
+	TRGBColor Color;
+	int FontNumber;
+	TTalkLine *TextLine;
+	bool LineEnd;
 };
 
 // The text of a channel (ContextMenus.cpp's _TextWindow). Lines are numbered
-// from getFirstLineNumber() (Lines.min, always 0) to getLastLineNumber();
+// from GetFirstLineNumber() (Lines.min, always 0) to GetLastLineNumber();
 // CurrentLineNumber is the bottom line shown (the scroll bar's value). A
 // selection runs from (SelectionStartLine, SelectionStartOffset) to
 // (SelectionEndLine, SelectionEndOffset) in either order; -1 is none.
@@ -116,8 +102,8 @@ public:
 	bool GetSelectionEnd(int *Line, int *Offset);
 	bool SelectAll();
 	const char *GetSelectedText();
-	[[nodiscard]] int getFirstLineNumber() const { return Lines.min; }
-	[[nodiscard]] int getLastLineNumber() const { return LastLineNumber; }
+	[[nodiscard]] int GetFirstLineNumber() const { return Lines.min; }
+	[[nodiscard]] int GetLastLineNumber() const { return LastLineNumber; }
 	// A selection of at least one character exists.
 	[[nodiscard]] bool HasSelection() const
 	{
@@ -132,18 +118,18 @@ public:
 			&& (SelectionStartLine != SelectionEndLine || SelectionStartOffset != SelectionEndOffset);
 	}
 
-	TTalkBuffer *TextBuffer;              // +0x24
-	TIndexedVector<TLineFormat> Lines;    // +0x28 (entry +0x68)
-	int CurrentLineNumber;                // +0x6c
-	int InvisibleLines;                   // +0x70, lines above the window when the last one is at the bottom
-	int LastLineNumber;                   // +0x74
-	int SelectionStartLine;               // +0x78
-	int SelectionStartOffset;             // +0x7c
-	int SelectionEndLine;                 // +0x80
-	int SelectionEndOffset;               // +0x84
-	bool Selecting;                       // +0x88, the left button is down
-	std::unique_ptr<char[]> SelectedText; // +0x8c, GetSelectedText's result (issue #58)
-	bool AtEnd;                           // +0x90, the last line is shown
+	TTalkBuffer *TextBuffer;
+	TIndexedVector<TLineFormat> Lines;
+	int CurrentLineNumber;
+	int InvisibleLines; // lines above the window when the last one is at the bottom
+	int LastLineNumber;
+	int SelectionStartLine;
+	int SelectionStartOffset;
+	int SelectionEndLine;
+	int SelectionEndOffset;
+	bool Selecting;                       // the left button is down
+	std::unique_ptr<char[]> SelectedText; // GetSelectedText's result
+	bool AtEnd;                           // the last line is shown
 };
 
 // The view of the current channel: the text window with a scroll bar on its
@@ -151,15 +137,15 @@ public:
 class TConsole final : public TWindow {
 public:
 	TConsole();
-	int getMinimumHeight() override;
+	int GetMinimumHeight() override;
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool MouseWheel(int x, int y, int Code) override;
-	[[nodiscard]] TTalkBuffer *getTextBuffer() const { return TextWindow->TextBuffer; }
+	[[nodiscard]] TTalkBuffer *GetTextBuffer() const { return TextWindow->TextBuffer; }
 
-	TTextWindow *TextWindow; // +0x2c
-	TScrollBar *ScrollBar;   // +0x30
-	bool ScrollToEnd;        // +0x34
+	TTextWindow *TextWindow;
+	TScrollBar *ScrollBar;
+	bool ScrollToEnd;
 };
 
 // The tab of a channel. Caption is the trimmed and, where it is too wide,
@@ -172,7 +158,7 @@ public:
 	TTab(const char *_Caption, TTalkBuffer *_TextBuffer, TCallback Callback);
 	~TTab() override;
 	// The tab height.
-	int getMinimumHeight() override { return SkinProperties().Tab.Height; }
+	int GetMinimumHeight() override { return SkinProperties().Tab.Height; }
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool MouseMove(int x, int y) override;
@@ -187,25 +173,22 @@ public:
 		TElement::ReleaseCapture(Component);
 	}
 	void SetActive(bool _Active);
-	[[nodiscard]] const char *getCaption() const { return Shortened ? FullCaption.get() : Caption.get(); }
-	[[nodiscard]] TTalkBuffer *getTextBuffer() const { return TextBuffer; }
+	[[nodiscard]] const char *GetCaption() const { return Shortened ? FullCaption.get() : Caption.get(); }
 
-	TTalkBuffer *TextBuffer;             // +0x24 (with the console's filter list: not one owner, notes/ownership.md 7)
-	int LineCount;                       // +0x28, the buffer's lines when the tab last looked
-	std::unique_ptr<char[]> Caption;     // +0x2c (issue #58)
-	std::unique_ptr<char[]> FullCaption; // +0x30
-	int Dragging;                        // +0x34
-	int DragX;                           // +0x38
-	int DragY;                           // +0x3c, set and never read
-	int DragRight;                       // +0x40, set and never read
-	bool Active;                         // +0x44
-	bool Unread;                         // +0x45
-	int BlinkEnd;                        // +0x48, action number; 0 = not blinking
-	TCallback Callback;                  // +0x4c, sent when the tab is pressed
-	bool Shortened;                      // +0x54
+	TTalkBuffer *TextBuffer; // with the console's filter list: not one owner
+	int LineCount;           // the buffer's lines when the tab last looked
+	std::unique_ptr<char[]> Caption;
+	std::unique_ptr<char[]> FullCaption;
+	int Dragging;
+	int DragX;
+	bool Active;
+	bool Unread;
+	int BlinkEnd;       // action number; 0 = not blinking
+	TCallback Callback; // sent when the tab is pressed
+	bool Shortened;
 
 protected:
-	void OnClose() override; // the destructor's sends and DeleteTextBuffer (issue #108)
+	void OnClose() override; // the sends and DeleteTextBuffer
 };
 
 // The tab bar: its own tabs and the two hidden windows with the tabs that do
@@ -231,7 +214,7 @@ public:
 	void SwapChildren(TComponent *Child1, TComponent *Child2) override;
 	bool IsChild(TComponent *Child) override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumHeight() override { return SkinProperties().Tab.Height; }
+	int GetMinimumHeight() override { return SkinProperties().Tab.Height; }
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool HelpMouseMove(int x, int y) override;
@@ -244,15 +227,15 @@ public:
 	void ShowTab(TTab *Tab);
 	void StoreOpenChannels();
 
-	TTab *Moved;                        // +0x2c
-	TTab *CurrentTab;                   // +0x30
-	std::unique_ptr<TWindow> LeftTabs;  // +0x34 (issue #108: the bar is their only owner, they are not its children)
-	std::unique_ptr<TWindow> RightTabs; // +0x38
-	bool Busy;                          // +0x3c, Rearrange is running
-	bool Changed;                       // +0x3d, the console updates its buttons when it is set
+	TTab *Moved;
+	TTab *CurrentTab;
+	std::unique_ptr<TWindow> LeftTabs; // the bar is their only owner, they are not its children
+	std::unique_ptr<TWindow> RightTabs;
+	bool Busy;    // Rearrange is running
+	bool Changed; // the console updates its buttons when it is set
 
 protected:
-	void OnClose() override; // the two windows' tabs, then the bar's own (issue #108)
+	void OnClose() override; // the two windows' tabs, then the bar's own
 };
 
 // The console. TalkMode is the volume of the default channel (1 say,
@@ -265,7 +248,7 @@ public:
 	TConsoleWindow();
 	~TConsoleWindow() override;
 	void SetSize(int Width, int Height) override;
-	int getMinimumHeight() override { return SkinProperties().ConsoleWindow.MinimumHeight; }
+	int GetMinimumHeight() override { return SkinProperties().ConsoleWindow.MinimumHeight; }
 	void Draw(int Surface, int x, int y) override;
 	void Arrange() override;
 	bool LeftButtonDown(int x, int y, int Flags) override;
@@ -289,17 +272,15 @@ public:
 	void ParseInput(char **Text, char **Addressee, int *TalkMode, char *MessageSeparator) const;
 	[[nodiscard]] bool SaveChannel() const;
 
-	TTabBar *TabBar;          // +0x2c
-	int Data30;               // +0x30, not used
-	TConsole *CurrentConsole; // +0x34
-	TTab *DefaultTab;         // +0x38
-	TEditLine *Input;         // +0x3c
-	int SwitchTime;           // +0x40, new channels become current only from this action number on
-	int HistoryPosition;      // +0x44
-	// The input history, a plain TTalkBuffer (+0x48, issue #81). TTalkBuffer's destructor is not virtual (the
-	// original's; Talk.cpp's DeleteTextBuffer destroys the derived buffers through it), so the deleter calls it
-	// as a delete would, by its qualified name, which Clang's -Wdelete-non-abstract-non-virtual-dtor does not take for
-	// a virtual call (issue #111).
+	TTabBar *TabBar;
+	TConsole *CurrentConsole;
+	TTab *DefaultTab;
+	TEditLine *Input;
+	int SwitchTime; // new channels become current only from this action number on
+	int HistoryPosition;
+	// The input history, a plain TTalkBuffer. TTalkBuffer's destructor is not virtual (the original's; Talk.cpp's
+	// DeleteTextBuffer destroys the derived buffers through it), so the deleter calls it as a delete would, by its
+	// qualified name, which Clang's -Wdelete-non-abstract-non-virtual-dtor does not take for a virtual call.
 	struct THistoryDelete {
 		void operator()(TTalkBuffer *Buffer) const noexcept
 		{
@@ -308,17 +289,17 @@ public:
 		}
 	};
 	std::unique_ptr<TTalkBuffer, THistoryDelete> History;
-	// The buttons shown by need (UpdateButtons) are owned by the child list while they are children and by the
-	// member while they are not, so they stay raw (notes/ownership.md, section 7; issue #108).
-	TMultiStateButton *VolumeButton;     // +0x4c, events 206-208
-	TSkinButton *CloseButton;            // +0x50, event 202
-	TToggleButton *ServerMessagesButton; // +0x54, event 203
-	TSkinButton *IgnoreButton;           // +0x58, event 204
-	TSkinButton *NewChannelButton;       // +0x5c, event 205
-	TSkinButton *MoveRightButton;        // +0x60, the tab bar's event 5
-	TSkinButton *MoveLeftButton;         // +0x64, the tab bar's event 6
-	int TalkMode;                        // +0x68
+	// The buttons shown by need (UpdateButtons) are owned by the child list while they are children and by the member
+	// while they are not, so they stay raw.
+	TMultiStateButton *VolumeButton;     // events 206-208
+	TSkinButton *CloseButton;            // event 202
+	TToggleButton *ServerMessagesButton; // event 203
+	TSkinButton *IgnoreButton;           // event 204
+	TSkinButton *NewChannelButton;       // event 205
+	TSkinButton *MoveRightButton;        // the tab bar's event 5
+	TSkinButton *MoveLeftButton;         // the tab bar's event 6
+	int TalkMode;
 
 protected:
-	void OnClose() override; // the destructor's preferences and hotkeys, the buttons that are not children (issue #108)
+	void OnClose() override; // the preferences and hotkeys, the buttons that are not children
 };

@@ -1,10 +1,9 @@
-// vlong: arbitrary-precision unsigned arithmetic for RSA.
+// vlong.h: arbitrary-precision unsigned arithmetic for RSA.
 //
 // This is George Barwood's public-domain vlong library (1999), with CipSoft's
 // changes: a virtual destructor, conversions between vlong and big-endian byte
-// arrays or decimal text, and overloads taking an integer by reference. The file
-// name "vlong" matches the link order (right after Utils). Errors are thrown as
-// const char*.
+// arrays or decimal text, and overloads taking an integer by reference. Errors
+// are thrown as const char*.
 
 #pragma once
 
@@ -14,10 +13,10 @@
 
 class flex_unit {
 public:
-	unsigned n; // +0x0, units in use
+	unsigned n; // units in use
 private:
-	std::unique_ptr<unsigned[]> a; // +0x4, the units (issue #58: their only owner)
-	unsigned z;                    // +0x8, units allocated
+	std::unique_ptr<unsigned[]> a; // the units (their only owner)
+	unsigned z;                    // units allocated
 public:
 	flex_unit()
 	{
@@ -41,7 +40,7 @@ public:
 
 class vlong_value : public flex_unit {
 public:
-	unsigned share; // +0xc, number of extra vlongs sharing this value
+	unsigned share; // number of extra vlongs sharing this value
 
 	vlong_value() { share = 0; }
 	[[nodiscard]] int is_zero() const { return n == 0; }
@@ -80,8 +79,7 @@ public:
 	friend inline int operator>(const vlong &x, const vlong &y) { return x.cf(y) > 0; }
 	friend inline int operator<(const vlong &x, const vlong &y) { return x.cf(y) < 0; }
 
-	// CipSoft additions. The
-	// casts are the conversions the 32-bit build does implicitly; long has 8 bytes on Linux (issue #7).
+	// CipSoft additions. The casts are the conversions the 32-bit build does implicitly; long has 8 bytes on Linux.
 	friend vlong operator+(const vlong &x, const long &y) { return x + vlong((unsigned)y); }
 	friend vlong operator*(const vlong &x, const long &y) { return x * vlong((unsigned)y); }
 	friend int operator<(const vlong &x, const long &y) { return x.cf(vlong((unsigned)y)) < 0; }
@@ -92,8 +90,8 @@ public:
 	vlong &operator=(const vlong &x);
 
 private:
-	vlong_value *value; // +0x4
-	int negative;       // +0x8
+	vlong_value *value;
+	int negative;
 	[[nodiscard]] int cf(const vlong x) const;
 	void docopy();
 	friend class monty;
@@ -104,7 +102,7 @@ private:
 vlong modexp(const vlong &x, const vlong &e, const vlong &m); // m must be odd
 vlong modinv(const vlong &a, const vlong &m);
 
-// CipSoft additions. Byte arrays are big-endian. The original's pointer and uint16 size are a span (issue #60).
+// CipSoft additions. Byte arrays are big-endian. The original's pointer and uint16 size are a span.
 void ByteArrayToVlong(patella::TSpan<const uint8> Data, vlong &Number);
 void VlongToByteArray(vlong Number, patella::TSpan<uint8> Data);
 void DecimalToVlong(const char *pDecimal, vlong &Number);

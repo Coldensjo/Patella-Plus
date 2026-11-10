@@ -1,5 +1,5 @@
-// TMyException.cpp: reconstructed from Tibia.exe 7.72. Since Patella-Modern
-// issue #80 the constructors' formatting is ErrorText's (TMyException.h).
+// TMyException.cpp: TMyException, the texts of its messages (ErrorText), and the functions that make the exceptions of
+// the error macros and the assertions (TMyException.h).
 
 #include "TMyException.h"
 #include "compat/assertion.h"
@@ -61,12 +61,9 @@ int GetLine(const patella::TSourceLocation &Location)
 
 TMyException::~TMyException() = default;
 
-TMyException::TMyException(std::string Message_, const patella::TSourceLocation &Location_)
-	: Message(std::move(Message_)), Location(Location_)
-{
-}
+TMyException::TMyException(std::string Message_) : Message(std::move(Message_)) {}
 
-TMyException::TMyException(TError Error) : Message(std::move(Error.Message)), Location(Error.Location) {}
+TMyException::TMyException(TError Error) : Message(std::move(Error.Message)) {}
 
 namespace patella {
 
@@ -101,41 +98,26 @@ std::string ErrorText(std::string_view File, int Line, std::string_view Kind, st
 	return Text.str();
 }
 
-std::string ErrorOrigin(std::string_view File, int Line)
-{
-	std::stringstream Text;
-	Text << GetFileName(File) << " " << Line;
-	return Text.str();
-}
-
-std::string ErrorOrigin(const TMyException &Exception)
-{
-	return ErrorOrigin(Exception.GetLocation().file_name(), GetLine(Exception.GetLocation()));
-}
-
 TMyException MakeError(const TSourceLocation &Location, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, std::string_view Reason)
 {
-	return TMyException(ErrorText(Location.file_name(), GetLine(Location), Kind, Name1, Value1, Name2, Value2, Reason),
-		Location);
+	return TMyException(ErrorText(Location.file_name(), GetLine(Location), Kind, Name1, Value1, Name2, Value2, Reason));
 }
 
 TMyException MakeError(const TSourceLocation &Location, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, const TMyException &Inner)
 {
-	return TMyException(ErrorText(Location.file_name(), GetLine(Location), Kind, Name1, Value1, Name2, Value2, Inner),
-		Location);
+	return TMyException(ErrorText(Location.file_name(), GetLine(Location), Kind, Name1, Value1, Name2, Value2, Inner));
 }
 
 TError MakeFailure(const TSourceLocation &Location, std::string_view Kind, std::string_view Name1, int Value1,
 	std::string_view Name2, int Value2, std::string_view Reason)
 {
-	return TError{ErrorText(Location.file_name(), GetLine(Location), Kind, Name1, Value1, Name2, Value2, Reason),
-		Location};
+	return TError{ErrorText(Location.file_name(), GetLine(Location), Kind, Name1, Value1, Name2, Value2, Reason)};
 }
 
-// The failures of PATELLA_ASSERT and PATELLA_ASSERT_VALUES (compat/assertion.h, issue #79): the TMyException of
-// common.h's assertion macros before it, with the assertion's own file and line.
+// The failures of PATELLA_ASSERT and PATELLA_ASSERT_VALUES (compat/assertion.h): the TMyException of the original's
+// assertion macros, with the assertion's own file and line.
 void AssertionFailed(const char *Expression, const TSourceLocation &Location)
 {
 	throw MakeError(Location, "assertion failed", "", 0, "", 0, Expression);
@@ -152,7 +134,7 @@ void AssertionFailed(const char *Expression, const TSourceLocation &Location, co
 		Expression);
 }
 
-// PATELLA_DIVISOR's failure (compat/assertion.h, issue #67): a divisor from input that is zero.
+// PATELLA_DIVISOR's failure (compat/assertion.h): a divisor from input that is zero.
 void DivisionByZero(const char *Expression, const TSourceLocation &Location)
 {
 	throw MakeError(Location, "integer division by zero", "", 0, "", 0, Expression);

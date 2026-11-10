@@ -1,6 +1,5 @@
-// WindowIcon.h: the Linux client's window icon (Patella-Modern issue #162; notes/decisions.md, "#162"). Not part of the
-// original source. The decoder is portable (no platform header); on Windows the icon is the window class's, resource 128
-// (SdlFrame.cpp), and nothing here is used.
+// WindowIcon.h: the Linux client's window icon. The decoder is portable (no platform header); on Windows the icon is
+// the window class's, resource 128 (SdlFrame.cpp), and nothing here is used.
 //
 // An RT_ICON resource is a DIB: a BITMAPINFOHEADER with twice the height, a palette, the colour bitmap (1, 4 or 8 bits a
 // pixel) and the AND bitmap (1 bit a pixel), rows bottom-up, each padded to 4 bytes. AND 1 is transparent, AND 0 the

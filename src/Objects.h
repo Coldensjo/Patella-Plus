@@ -1,13 +1,5 @@
 // Objects.h: the object, outfit, effect and missile properties read from
 // Tibia.dat, and their accessors.
-//
-// Names from the binary: ObjectProperties, the Entry fields in the
-// assertions (Flags, Width, Height, Layers, PatternWidth, PatternHeight,
-// PatternDepth, Phases), the flags BANK, CUMULATIVE, LIQUIDCONTAINER,
-// LIQUIDPOOL, HANG, LIGHT, SHIFT, HEIGHT, AUTOMAP and LENSHELP, CREATURE
-// (MapWindow.cpp), and the parameter names Entry, Type, Number, Flag,
-// Direction, Obj, X, Y, Layer, PatternX/Y/Z, Phase and FileName. The rest is
-// ours (notes/decisions.md, "Objects.cpp").
 
 #pragma once
 
@@ -15,16 +7,10 @@
 #include "Container.h"
 #include <cstddef>
 #include <memory>
-#include <type_traits>
 
-// A reference to an object (12 bytes, passed by value). Type is named in
-// MapWindow.cpp's "SrcObj.Type!=CREATURE" (CREATURE is 99), Data in Dialogs.cpp's
-// "In(DraggedObject.Data,1,100)" (the count); Data2 is ours. The default constructor
-// clears the object: Map.cpp's TMapPoint, ten TObjects and plain ints, has a
-// compiler-generated constructor that zeroes exactly the ten objects. Written with
-// default member initializers so that the type stays an aggregate. MapWindow.cpp
-// compares objects with numbers ("SrcObj!=0", "Obj!=CREATURE") and prints one as the
-// int value of Obj in its catch wrapper: the original converts a TObject to its Type.
+// A reference to an object (passed by value); Data is the count where the object has one. The default constructor
+// clears the object, written with default member initializers so that the type stays an aggregate. An object converts
+// to its Type, as the original's does: MapWindow.cpp compares objects with numbers ("SrcObj!=0", "Obj!=CREATURE").
 struct TObject {
 	int Type = 0;
 	int Data = 0;
@@ -94,37 +80,34 @@ enum : int {  // NOLINT(cppcoreguidelines-use-enum-class): int constants ("The o
 	LENSHELP = 29, // reads LensHelp
 	FULLBANK = 30, // ours: a ground that covers the whole field; MapWindow.cpp hides the levels below
 };
-static_assert(sizeof(decltype(BANK)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(BANK)>, int>);
 
-// One Tibia.dat entry (0x4c bytes); the same layout serves objects, outfits,
+// One Tibia.dat entry; the same layout serves objects, outfits,
 // effects and missiles.
 struct TProperties {
-	int Width;         // +0x00
-	int Height;        // +0x04
-	int ExactSize;     // +0x08, 32 unless Width or Height is above 1
-	int Layers;        // +0x0c
-	int PatternWidth;  // +0x10
-	int PatternHeight; // +0x14
-	int PatternDepth;  // +0x18
-	int Phases;        // +0x1c
-	uint16 *Sprites;   // +0x20, Width*Height*Layers*PatternWidth*PatternHeight*PatternDepth*Phases
-	uint8 Flags[4];    // +0x24, bit Flag%8 of Flags[Flag/8]; NOLINT(modernize-avoid-c-arrays): an assertion reads *(int*)Entry.Flags, frozen until M5 (issue #60)
-	int Waypoints;     // +0x28, BANK
-	int MaxLength;     // +0x2c, WRITE and WRITEONCE
-	int Brightness;    // +0x30, LIGHT
-	int LightColor;    // +0x34, LIGHT
-	int ShiftX;        // +0x38, SHIFT
-	int ShiftY;        // +0x3c, SHIFT
-	int Elevation;     // +0x40, HEIGHT
-	int AutomapColor;  // +0x44, AUTOMAP
-	int LensHelp;      // +0x48, LENSHELP
+	int Width;
+	int Height;
+	int ExactSize; // 32 unless Width or Height is above 1
+	int Layers;
+	int PatternWidth;
+	int PatternHeight;
+	int PatternDepth;
+	int Phases;
+	uint16 *Sprites;  // Width*Height*Layers*PatternWidth*PatternHeight*PatternDepth*Phases
+	uint8 Flags[4];   // bit Flag%8 of Flags[Flag/8]; NOLINT(modernize-avoid-c-arrays): an assertion reads *(int*)Entry.Flags
+	int Waypoints;    // BANK
+	int MaxLength;    // WRITE and WRITEONCE
+	int Brightness;   // LIGHT
+	int LightColor;   // LIGHT
+	int ShiftX;       // SHIFT
+	int ShiftY;       // SHIFT
+	int Elevation;    // HEIGHT
+	int AutomapColor; // AUTOMAP
+	int LensHelp;     // LENSHELP
 };
 
 // The byte of Flag's bit, Flags[Flag / 8], for every flag up to 0xff as the original indexes it: a flag above 31 is a
-// bit of the members after Flags (inside TProperties, up to +0x43; on x64 +0x47). Through the entry's bytes
-// (Patella-Modern issue #91): Flags indexed past its four elements is undefined behaviour, which UBSan's bounds check
-// reports.
+// bit of the members after Flags (inside TProperties). Through the entry's bytes: Flags indexed past its four elements
+// is undefined behaviour, which UBSan's bounds check reports.
 inline uint8 &FlagByte(TProperties &Entry, int Flag)
 {
 	static_assert(offsetof(TProperties, Flags) + 0xff / 8 < sizeof(TProperties), "every flag's byte is in TProperties");
@@ -137,12 +120,10 @@ inline uint8 FlagByte(const TProperties &Entry, int Flag)
 
 namespace patella {
 
-// Objects.cpp's data and functions (Patella-Modern issue #106, M7; notes/decisions.md, "#104: TClient and the
-// subsystem objects" and "#106"): Tibia.dat's four tables, read once, then read-only, and the functions of the same
-// names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. The data (.bss:
-// every member starts empty) is public: the golden Objects, Divisions, Errors, Graphics, Map and MapWindow tests read
-// the tables, the Objects test NoObject and DatSignature, the Communication world sets both; Communication.cpp sends
-// DatSignature and compares with NoObject, Inventory.cpp and Map.cpp return NoObject.
+// Objects.cpp's data and functions: Tibia.dat's four tables, read once, then read-only, and the functions of the same
+// names as members. TMapState owns it (MapState.h), first: TMap, TCreatures and TInventory read it. Of the data (every
+// member starts empty) DatSignature and NoObject are public: Communication.cpp sends DatSignature and compares with
+// NoObject, Inventory.cpp and Map.cpp return NoObject.
 class TObjectTypes {
 public:
 	TObjectTypes() = default;
@@ -214,21 +195,22 @@ public:
 	void ReleaseObjects();
 	void LoadObjects(const char *FileName);
 	void InitObjects();
-	void ReloadObjects();
 	void ExitObjects();
 
-	// Data, in .bss order. The four tables own their arrays (std::unique_ptr since issue #58; the entries' Sprites
-	// stay raw, freed by ReleaseObjects).
+private:
+	// The four tables own their arrays (std::unique_ptr; the entries' Sprites stay raw, freed by ReleaseObjects).
 	std::unique_ptr<array<TProperties>> MissileProperties;
 	std::unique_ptr<array<TProperties>> EffectProperties;
 	std::unique_ptr<array<TProperties>> OutfitProperties;
 	std::unique_ptr<array<TProperties>> ObjectProperties; // from 100
-	uint32 DatSignature{};                                // sent at login and when patching
-	TObject NoObject;                                     // never written; owner inferred from the address
+
+public:
+	uint32 DatSignature{}; // sent at login
+	TObject NoObject;      // never written
 };
 
-// The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the object
-// types of the one TClient (Client.cpp). It goes when no free function needs it.
+// The transition's access path: the object types of the one TClient (Client.cpp). It goes when no free function needs
+// it.
 namespace bridge {
 TObjectTypes &ObjectTypes();
 } // namespace bridge
@@ -240,13 +222,11 @@ TObjectTypes &ObjectTypes();
 // Object types. Type CREATURE has only UNPASS.
 bool GetObjectFlag(int Type, int Flag);
 inline bool GetObjectFlag(TObject &Obj, int Flag) { return GetObjectFlag(Obj.Type, Flag); }
-int GetObjectWaypoints(int Type);
 int GetObjectBrightness(int Type);
 int GetObjectLightColor(int Type);
 int GetObjectShiftX(int Type);
 int GetObjectShiftY(int Type);
 int GetObjectElevation(int Type);
-int GetObjectAutomapColor(int Type);
 int GetObjectLensHelp(int Type);
 int GetObjectWidth(int Type);
 int GetObjectHeight(int Type);
@@ -296,8 +276,5 @@ void GetCumulativePattern(TObject &Obj, int *PatternX, int *PatternY);
 void GetLiquidPattern(TObject &Obj, int *PatternX, int *PatternY);
 void GetHangPattern(TObject &Obj, int *PatternX, int *PatternY);
 
-void ReleaseObjects();
-void LoadObjects(const char *FileName);
 void InitObjects();
-void ReloadObjects();
 void ExitObjects();

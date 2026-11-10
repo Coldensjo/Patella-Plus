@@ -1,15 +1,6 @@
 // Creatures.h: the creatures known to the client, the player's own data
 // (statistics, skills, attack/follow targets, the steps of the current walk)
 // and the VIP list ("buddies").
-//
-// Names from the binary: GetCreature, GetPlayerID and GetPlayerPartyFlag
-// (assertion texts in ContextMenus.cpp and ConsoleWindow.cpp), CreatureID
-// (catch blocks of the TCreature members), NumberOfPlayerSteps,
-// CurrentPlayerStep, NumberOfBuddies, BUDDIES, SKILLS, Opponent, and the
-// parameter names in the assertions and catch blocks (Step, NewCreatureID,
-// AvailablePhases, Flag, Progress, SkillNumber, Value, Number, Position,
-// CharacterID, Name, Description, Method, NewDirection, i, j). The rest is
-// ours (notes/decisions.md, "Creatures.cpp").
 
 #pragma once
 
@@ -17,7 +8,6 @@
 #include "Events.h"
 #include "Help.h" // HINT_*
 #include "types/FixedString.h"
-#include "types/Time32.h"
 #include "types/GraphicsTypes.h" // TRGBColor
 #include "Preferences.h"         // SKILLS
 
@@ -56,7 +46,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumera
 	PARTY_LEADER = 4, // the player: may invite, revoke an invitation and pass the leadership
 };
 
-// One entry of the creature table (0x9c bytes).
+// One entry of the creature table.
 class TCreature {
 public:
 	[[nodiscard]] TRGBColor GetHealthColor() const;
@@ -69,57 +59,54 @@ public:
 	void StartMovement(int dx, int dy, int Waypoints);
 	void SetMark(int Value);
 	[[nodiscard]] int GetAnimationPhase(int AvailablePhases) const;
-	// Ours (issue #62): the skull SetSkull kept (Delay) is still shown at Now, the wall clock's 64-bit time:
-	// SkullTime is set, and Now is from it to four seconds after it. SkullTime holds the original's 4 bytes of the
-	// time (StoreTime32, types/Time32.h); the comparison is in 64 bits (LoadTime32), the original's 32-bit one up
-	// to 2038.
+	// Ours: the skull SetSkull kept (Delay) is still shown at Now, the wall clock's 64-bit time: SkullTime is set, and
+	// Now is from it to four seconds after it.
 	[[nodiscard]] bool SkullKept(std::int64_t Now) const
 	{
 		if (SkullTime == 0)
 			return false;
-		const std::int64_t Removed = LoadTime32(SkullTime, Now);
-		return Now >= Removed && Now <= Removed + 4;
+		return Now >= SkullTime && Now <= SkullTime + 4;
 	}
 
-	uint32 CreatureID;         // +0x00, 0 marks a free slot; players have IDs below 0x40000000
-	TFixedString<32> Name;     // +0x04
-	int RealX;                 // +0x24, map position
-	int RealY;                 // +0x28
-	int RealZ;                 // +0x2c
-	int DeltaX;                // +0x30, pixel offset of the walk animation, counts down to 0
-	int DeltaY;                // +0x34
-	int StepEnd;               // +0x38, GetMilliseconds() time the step animation ends
-	int NextStep;              // +0x3c, time the next step may start (three steps' time after a diagonal one)
-	int StepX;                 // +0x40, abs(dx)*32
-	int StepY;                 // +0x44, abs(dy)*32
-	int StepDuration;          // +0x48, milliseconds, a multiple of Beat
-	bool Moving;               // +0x4c
-	int Direction;             // +0x50, 0 north, 1 east, 2 south, 3 west (DIRECTION_*, Objects.h)
-	int MoveDirection;         // +0x54, Direction when the current step started
-	int PrevOpponent;          // +0x58, battle list links (slot numbers, -1 at the ends)
-	int NextOpponent;          // +0x5c, NOT_AN_OPPONENT when not in the list
-	int OutfitType;            // +0x60
-	std::array<int, 4> Colors; // +0x64, head, body, legs, feet; Colors[0] is the object type when OutfitType is 0
-	int LightStrength;         // +0x74
-	int LightColor;            // +0x78
-	int Mark;                  // +0x7c, colour of the square around the creature
-	int MarkTime;              // +0x80, shown up to this GetMilliseconds() time
-	int Health;                // +0x84, percent
-	int Speed;                 // +0x88
-	bool Visible;              // +0x8c
-	int PKFlag;                // +0x90, the skull (PK_*); name from "Creature->PKFlag" (MapWindow.cpp)
-	int PARTYFlag;             // +0x94, the party shield (PARTY_*); "Creature->PARTYFlag" (MapWindow.cpp)
-	Time32 SkullTime;          // +0x98, time a skull was removed (StoreTime32, 0: none); it stays four seconds longer
+	uint32 CreatureID; // 0 marks a free slot; players have IDs below 0x40000000
+	TFixedString<32> Name;
+	int RealX; // map position
+	int RealY;
+	int RealZ;
+	int DeltaX; // pixel offset of the walk animation, counts down to 0
+	int DeltaY;
+	int StepEnd;      // GetMilliseconds() time the step animation ends
+	int NextStep;     // time the next step may start (three steps' time after a diagonal one)
+	int StepX;        // abs(dx)*32
+	int StepY;        // abs(dy)*32
+	int StepDuration; // milliseconds, a multiple of Beat
+	bool Moving;
+	int Direction;     // 0 north, 1 east, 2 south, 3 west (DIRECTION_*, Objects.h)
+	int MoveDirection; // Direction when the current step started
+	int PrevOpponent;  // battle list links (slot numbers, -1 at the ends)
+	int NextOpponent;  // NOT_AN_OPPONENT when not in the list
+	int OutfitType;
+	std::array<int, 4> Colors; // head, body, legs, feet; Colors[0] is the object type when OutfitType is 0
+	int LightStrength;
+	int LightColor;
+	int Mark;     // colour of the square around the creature
+	int MarkTime; // shown up to this GetMilliseconds() time
+	int Health;   // percent
+	int Speed;
+	bool Visible;
+	int PKFlag;             // the skull (PK_*); name from "Creature->PKFlag" (MapWindow.cpp)
+	int PARTYFlag;          // the party shield (PARTY_*); "Creature->PARTYFlag" (MapWindow.cpp)
+	std::int64_t SkullTime; // the wall clock's time when a skull was removed (0: none); it stays four seconds longer
 };
 
-// A VIP list entry (0x2c bytes). Preferences.h has the stored data
+// A VIP list entry. Preferences.h has the stored data
 // (icon, description, notification) as TBuddy.
 struct TBuddyEntry {
-	uint32 CharacterID;    // +0x00
-	TFixedString<30> Name; // +0x04, "strlen(Name)<30"
-	bool Online;           // +0x22
-	int LoginAction;       // +0x24, GetActionNumber() at the last change of Online
-	int Icon;              // +0x28
+	uint32 CharacterID;
+	TFixedString<30> Name; // "strlen(Name)<30"
+	bool Online;
+	int LoginAction; // GetActionNumber() at the last change of Online
+	int Icon;
 };
 
 namespace patella {
@@ -127,12 +114,11 @@ namespace patella {
 class TMap;
 class TObjectTypes;
 
-// What TCreatures asks of the player's state (Patella-Modern issue #106; rule 5 of notes/decisions.md, "#104"):
-// TPlayerState is made after TCreatures (it reads the creature table), so TCreatures reaches it only through this
-// interface, which TMapState implements (MapState.h). GetPlayerID is the original's (IsOpponent, CheckMonsterHint and
-// MoveCreatures call it); ContinuePlayerWalk is MoveCreatures' step of the walk once the player's step animation is
-// over, ResetPlayer ResetCreatures' writes of the player's state (both ours: the original's code of those two
-// functions, moved into TPlayerState).
+// What TCreatures asks of the player's state: TPlayerState is made after TCreatures (it reads the creature table), so
+// TCreatures reaches it only through this interface, which TMapState implements (MapState.h). GetPlayerID is the
+// original's (IsOpponent, CheckMonsterHint and MoveCreatures call it); ContinuePlayerWalk is MoveCreatures' step of the
+// walk once the player's step animation is over, ResetPlayer ResetCreatures' writes of the player's state (both ours:
+// the original's code of those two functions, moved into TPlayerState).
 class TCreaturesPlayer {
 public:
 	TCreaturesPlayer() = default;
@@ -148,10 +134,9 @@ protected:
 	~TCreaturesPlayer() = default;
 };
 
-// What TCreatures and TPlayerState ask of the GUI (Patella-Modern issue #118; rule 5 of notes/decisions.md, "#104"):
-// Talk.cpp's status message, Help.cpp's hints, Status.cpp's message queue and action number, all TGUI's, a later
-// subsystem than TMapState, so they reach them only through this interface. Client.cpp implements it with those
-// files' free functions (the golden tests fake them by their symbols). Each member is the original's call of the same
+// What TCreatures and TPlayerState ask of the GUI: Talk.cpp's status message, Help.cpp's hints, Status.cpp's message
+// queue and action number, all TGUI's, a later subsystem than TMapState, so they reach them only through this
+// interface. Client.cpp implements it with those files' free functions. Each member is the original's call of the same
 // name and parameters.
 class TCreaturesGUI {
 public:
@@ -170,12 +155,10 @@ protected:
 	~TCreaturesGUI() = default;
 };
 
-// Creatures.cpp's creature table, battle list and VIP list (Patella-Modern issue #106, M7; notes/decisions.md, "#104:
-// TClient and the subsystem objects" and "#106"): Creatures, FirstOpponent, LastOpponent, Beat, the attack, follow and
-// highlight targets and the buddy window's list, in the original's .bss order, every member 0 at the start; the
-// functions that use them are the members of the same names. NumberOfBuddies is public (the golden Errors test sets
-// it, TestErrorStatics), the others private as the file-local statics were; TCreature's StartMovement reads Beat (a
-// friend). TMapState owns it (MapState.h), after TMap.
+// Creatures.cpp's creature table, battle list and VIP list: Creatures, FirstOpponent, LastOpponent, Beat, the attack,
+// follow and highlight targets and the buddy window's list, every member 0 at the start; the functions that use them
+// are the members of the same names. The data is private; TCreature's StartMovement reads Beat (a friend). TMapState
+// owns it (MapState.h), after TMap.
 class TCreatures {
 public:
 	TCreatures(TCreaturesPlayer &PlayerState, TCreaturesGUI &GUI);
@@ -240,17 +223,12 @@ private:
 	friend class ::TCreature;
 
 	TCreaturesPlayer &PlayerState;
-	TCreaturesGUI &GUI; // issue #118
+	TCreaturesGUI &GUI;
 
-	// Data, in .bss order.
 	std::array<int, 3> BuddySortMethods{}; // 0 name, 1 icon, 2 online; most significant first
 	std::array<TBuddyEntry, BUDDIES> Buddies{};
 	int NumberOfOnlineBuddies{};
-
-public:
-	int NumberOfBuddies{}; // public: the golden Errors test
-
-private:
+	int NumberOfBuddies{};
 	uint32 HighlightID{};
 	uint32 FollowID{};
 	uint32 AttackID{};
@@ -259,18 +237,14 @@ private:
 	int FirstOpponent{};
 	std::array<TCreature, CREATURES> Creatures{};
 
-	// The arrays std::arrays (issue #60).
-	static_assert(sizeof(BuddySortMethods) == 3 * sizeof(int) && sizeof(Buddies) == BUDDIES * sizeof(TBuddyEntry)
-			&& sizeof(Creatures) == CREATURES * sizeof(TCreature),
-		"TCreatures' arrays");
+	// ResetCreatures clears the table with a memset over its size.
+	static_assert(sizeof(Creatures) == CREATURES * sizeof(TCreature), "Creatures");
 };
 
-// Creatures.cpp's player state (Patella-Modern issue #106; notes/decisions.md, "#104" and "#106"): PlayerID, the
-// statistics and skills, the state icons and the walk (the steps, the destination, the step not confirmed yet), in the
-// original's .bss order, every member 0 at the start; the functions that use them are the members of the same names.
-// NumberOfPlayerSteps is public (the golden Errors test sets it), the others private; TCreature's members read and
-// write the step not confirmed yet (a friend). TMapState owns it, after TCreatures, whose creature table it reads; it
-// reads the map and the object types too.
+// Creatures.cpp's player state: PlayerID, the statistics and skills, the state icons and the walk (the steps, the
+// destination, the step not confirmed yet), every member 0 at the start; the functions that use them are the members of
+// the same names. The data is private; TCreature's members read and write the step not confirmed yet (a friend).
+// TMapState owns it, after TCreatures, whose creature table it reads; it reads the map and the object types too.
 class TPlayerState {
 public:
 	TPlayerState(TObjectTypes &ObjectTypes, TMap &Map, TCreatures &Creatures, TCreaturesGUI &GUI);
@@ -337,9 +311,8 @@ private:
 	TObjectTypes &ObjectTypes;
 	TMap &Map;
 	TCreatures &Creatures;
-	TCreaturesGUI &GUI; // issue #118
+	TCreaturesGUI &GUI;
 
-	// Data, in .bss order.
 	int PlayerState{}; // the state icons, one bit each
 	std::array<int, SKILLS> PlayerSkillProgress{};
 	std::array<int, SKILLS> PlayerSkillValue{};
@@ -357,11 +330,7 @@ private:
 	uint32 PlayerID{};
 	bool NewPlayerDestination{}; // a destination came while the old path was walked
 	int CurrentPlayerStep{};
-
-public:
-	int NumberOfPlayerSteps{}; // public: the golden Errors test
-
-private:
+	int NumberOfPlayerSteps{};
 	std::array<int, 10> PlayerSteps{}; // 1 east, 2 north-east, ..., 8 south-east (STEP_*, Map.h); the path finder stops at 10
 	bool DestinationDiagonal{};        // passed on to the path finder
 	bool DestinationExact{};           // passed on to the path finder
@@ -372,14 +341,12 @@ private:
 	int PlayerStepDY{};        // the step sent but not confirmed by the server
 	int PlayerStepDX{};
 
-	// The arrays std::arrays (issue #60).
-	static_assert(sizeof(PlayerSkillProgress) == SKILLS * sizeof(int) && sizeof(PlayerSkillValue) == SKILLS * sizeof(int)
-			&& sizeof(PlayerSteps) == 10 * sizeof(int),
-		"TPlayerState's arrays");
+	// TMap::FindPath writes up to ten steps into PlayerSteps through a pointer.
+	static_assert(sizeof(PlayerSteps) == 10 * sizeof(int), "PlayerSteps");
 };
 
-// The transition's access path (issue #106; notes/decisions.md, "#104: TClient and the subsystem objects"): the
-// creatures and the player's state of the one TClient (Client.cpp). They go when no free function needs them.
+// The transition's access path: the creatures and the player's state of the one TClient (Client.cpp). They go when no
+// free function needs them.
 namespace bridge {
 TCreatures &Creatures();
 TPlayerState &PlayerState();
@@ -390,19 +357,9 @@ TPlayerState &PlayerState();
 // The original's functions (the callers' names, and the golden tests'): each calls the member of the same name of
 // TCreatures on bridge::Creatures() or of TPlayerState on bridge::PlayerState().
 // The player's creature, steps and statistics.
-int GetNumberOfPlayerSteps();
 void GetPlayerPosition(int *x, int *y, int *z); // including the step not confirmed yet
 void ClearPlayerSteps();
-void HideAllCreatures();
-void SetBeat(int Beat);
 bool IsPlayer(uint32 CreatureID);
-void SetPlayerID(uint32 CreatureID);
-void SetPlayerHealth(int Health, int MaxHealth);
-void SetPlayerMagicLevel(int Level, int Progress);
-void SetPlayerMana(int Mana, int MaxMana);
-void SetPlayerSoul(int Soul);
-void SetPlayerCapacity(int Capacity);
-void SetPlayerState(int State);
 uint32 GetPlayerID();
 int GetPlayerHealth();
 int GetPlayerMaxHealth();
@@ -431,25 +388,16 @@ uint32 GetFollowID();
 uint32 GetHighlightID();
 int GetBuddyPosition(uint32 CharacterID); // position or -1
 bool IsBuddy(const char *Name);
-int GetPlayerStep(int Step);
-void StartPlayerStep();
-int FindPlayerPath();
 int SetPlayerDestination(int x, int y, int z, bool Exact, bool Diagonal);
-void StopPlayer();
-bool CancelPlayerWalk(int NewDirection);
 
 // The creature table.
-TCreature *AddCreature(uint32 RemoveID, uint32 NewCreatureID);
 TCreature *GetCreature(uint32 CreatureID);
 void UpdateSkulls();
 void HideCreature(int CreatureID); // a callback for Map.cpp
 bool MoveCreatures();
 void CheckMonsterHint(TCreature *Creature);
-void NotifySkull(int Flag);
 
 // Experience and skills.
-void SetPlayerExperience(int Experience, int Level, int Progress);
-void SetPlayerSkill(int SkillNumber, int Value, int Progress);
 int GetPlayerSkillValue(int SkillNumber);
 int GetPlayerSkillProgress(int SkillNumber);
 const char *GetSkillName(int SkillNumber);
@@ -463,12 +411,6 @@ int GetNumberOfOpponents(); // also updates the list
 TCreature *GetOpponent(int Number);
 
 // The VIP list.
-bool CompareBuddies(int i, int j);
-void SwapBuddies(int i, int j);
-void SortBuddies();
-void MoveBuddyToSortedPlace(int i);
-void AddBuddy(uint32 CharacterID, const char *Name, bool Online);
-void SetBuddyState(uint32 CharacterID, bool Online);
 void EditBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
 void RemoveBuddy(uint32 CharacterID);
 void SetBuddySortMethod(int Method);

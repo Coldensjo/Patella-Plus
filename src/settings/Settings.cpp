@@ -1,4 +1,4 @@
-// Settings.cpp: Patella.ini (Settings.h; Patella-Modern issues #31, #45, plan D12).
+// Settings.cpp: Patella.ini (Settings.h).
 
 #include "settings/Settings.h"
 
@@ -75,9 +75,7 @@ TSettingsFile::TLine TSettingsFile::ParseLine(std::string Text, bool First)
 	if (!Trimmed.empty() && Trimmed.front() != '#' && Trimmed.front() != ';') {
 		const size_t Equals = Trimmed.find('=');
 		const std::string_view Key = Equals == std::string_view::npos ? std::string_view() : Trim(Trimmed.substr(0, Equals));
-		if (Key.empty())
-			Line.Bad = true;
-		else {
+		if (!Key.empty()) {
 			Line.Key = std::string(Key);
 			Line.Value = std::string(Trim(Trimmed.substr(Equals + 1)));
 		}
@@ -101,7 +99,7 @@ TSettingsFile TSettingsFile::Parse(std::string_view Text, std::string_view Newli
 			End = Text.size();
 		std::string_view Line = Text.substr(Start, End - Start);
 		// With CRLF line ends the CR belongs to the end; a lone CR stays in the line (and is a blank), and so does a CR
-		// at the end of a last line without a line end (Patella-Modern issue #132: it went, so Text() lost it).
+		// at the end of a last line without a line end (else Text() would lose it).
 		if (Crlf && Ended && Line.ends_with('\r'))
 			Line.remove_suffix(1);
 		Result.Lines.push_back(ParseLine(std::string(Line), Result.Lines.empty()));
@@ -121,8 +119,8 @@ std::optional<std::string> TSettingsFile::Get(std::string_view Key) const
 
 bool TSettingsFile::Set(std::string_view Key, std::string_view Value)
 {
-	// A key that starts with a byte order mark (Patella-Modern issue #132): on the first line the next parse would take
-	// the mark as the file's, and the key would be another.
+	// A key that starts with a byte order mark: on the first line the next parse would take the mark as the file's, and
+	// the key would be another.
 	if (Key.empty() || Key.find('=') != std::string_view::npos || Key.front() == '#' || Key.front() == ';'
 		|| Key.starts_with(ByteOrderMark) || HasLineEnd(Key) || Padded(Key) || HasLineEnd(Value) || Padded(Value))
 		return false;
@@ -172,16 +170,6 @@ std::string TSettingsFile::Text() const
 	}
 	if (!Lines.empty() && FinalNewline)
 		Result += LineEnd;
-	return Result;
-}
-
-std::vector<int> TSettingsFile::BadLines() const
-{
-	std::vector<int> Result;
-	for (size_t i = 0; i < Lines.size(); i++) {
-		if (Lines[i].Bad)
-			Result.push_back(static_cast<int>(i + 1));
-	}
 	return Result;
 }
 
@@ -254,8 +242,8 @@ bool Save(patella::platform::IFileSystem &Files, const std::string &Path, const 
 	return File.Close() == 0 && Written;
 }
 
-// GCC's analyzer (-fanalyzer, issue #130) follows a std::filesystem::path copy whose string throws length_error into
-// "use of uninitialized value" after the throw: a false positive of its exception paths through libstdc++.
+// GCC's analyzer (-fanalyzer) follows a std::filesystem::path copy whose string throws length_error into "use of
+// uninitialized value" after the throw: a false positive of its exception paths through libstdc++.
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wanalyzer-use-of-uninitialized-value\"")
 

@@ -1,12 +1,5 @@
-// ContentWindows.cpp: the windows of the side bar and of the dialog column
-// (c:\mud\tibiaplayer\ContentWindows.cpp); see ContentWindows.h.
-//
-// Order: the functions follow the source's line numbers. The binary moves the
-// creators and most constructors behind the rest (each calls functions defined
-// further down, the pattern of Creatures.cpp): the creators come last, after
-// the constructors of the bodies and of TAutomapWindow, TInventoryView's
-// mouse handlers, TStatusWindow's and the container body's constructors.
-// Functions without line evidence go where the binary has them.
+// ContentWindows.cpp: the windows of the side bar and of the dialog column;
+// see ContentWindows.h.
 
 #include "ContentWindows.h"
 #include <cstdint>
@@ -22,7 +15,6 @@
 #include "Skins.h"
 #include "Status.h"
 #include "Surface.h"
-#include "Text.h"
 #include "Utils.h"
 #include "graphics.h"
 #include "DialogElements.h"
@@ -41,9 +33,62 @@
 #include <memory>
 #include <vector>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+namespace {
+
+// The texts of the user interface that this file shows. The numbers are their places in the original's table of
+// texts, a header every file included.
+const char *TextPoisoned = "You are poisoned";                                  // 0
+const char *TextOnFire = "You are on fire";                                     // 1
+const char *TextMagicShield = "You are protected by a magic shield";            // 2
+const char *TextParalysed = "You are paralysed";                                // 3
+const char *TextHasted = "You are hasted";                                      // 4
+const char *TextNoLogoutInFight = "You may not logout during a fight";          // 5
+const char *TextDrunk = "You are drunk";                                        // 6
+const char *TextStruckByEnergy = "You are struck by magical energy";            // 7
+const char *TextMayBeAttacked = "You may be attacked by other players";         // 8
+const char *TextPartyMember = "You are a member of a party";                    // 9
+const char *TextAttackedUnmarked = "You have attacked an unmarked player";      // 10
+const char *TextKilledTooMany = "You have killed too many unmarked players";    // 11
+const char *TextMaximiseInventory = "Maximise inventory";                       // 20
+const char *TextMinimiseInventory = "Minimise inventory";                       // 21
+const char *TextCloseWindow = "Close this window";                              // 22
+const char *TextMaximiseOrMinimise = "Maximise or minimise window";             // 23
+const char *TextShowHigherContainer = "Show higher container";                  // 24
+const char *TextOpenSkillsWindow = "Open skills window (Ctrl+S)";               // 25
+const char *TextCloseSkillsWindow = "Close skills window (Ctrl+S)";             // 26
+const char *TextOpenBattleWindow = "Open battle window (Ctrl+B)";               // 27
+const char *TextCloseBattleWindow = "Close battle window (Ctrl+B)";             // 28
+const char *TextOpenVIPWindow = "Open VIP window (Ctrl+P)";                     // 29
+const char *TextCloseVIPWindow = "Close VIP window (Ctrl+P)";                   // 30
+const char *TextLeaveGame = "Leave the game (Ctrl+Q or Ctrl+L)";                // 31
+const char *TextCentreAroundPlayer = "Centre around player";                    // 32
+const char *TextShowHigherFloor = "Show higher floor (Alt+PageUp)";             // 33
+const char *TextShowLowerFloor = "Show lower floor (Alt+PageDown)";             // 34
+const char *TextZoomIn = "Zoom in (Alt+End)";                                   // 35
+const char *TextZoomOut = "Zoom out (Alt+Home)";                                // 36
+const char *TextScrollAutomap = "Scroll automap (Alt+Cursor)";                  // 37
+const char *TextOffensiveFighting = "Offensive fighting";                       // 38
+const char *TextBalancedFighting = "Balanced fighting";                         // 39
+const char *TextDefensiveFighting = "Defensive fighting";                       // 40
+const char *TextStandWhileFighting = "Stand while fighting";                    // 41
+const char *TextChaseOpponent = "Chase opponent";                               // 42
+const char *TextCannotAttackUnmarked = "You cannot attack unmarked characters"; // 43
+const char *TextCanAttackAny = "You can attack any character";                  // 44
+const char *TextStopCurrentAction = "Stop current action (ESC)";                // 45
+const char *TextOpenOptions = "Open options";                                   // 46
+const char *TextOpenHelpMenu = "Open help menu";                                // 47
+const char *TextCancelOffer = "Cancel offer";                                   // 48
+const char *TextRejectOffer = "Reject offer";                                   // 49
+const char *TextAcceptOffer = "Accept offer";                                   // 50
+const char *TextPercentToGo = "You have %d percent to go";                      // 52
+const char *TextWaitForCounterOffer = "Please wait for a\ncounteroffer";        // 56
+const char *TextWaitForPartner = "Please wait for \nyour partner to accept.";   // 57
+
+} // namespace
+
+// cppcoreguidelines-owning-memory and cppcoreguidelines-pro-type-vararg are off for the file, for the original's raw
+// owners (the window tree owns its children, the message queue its blocks, the lists their entries) and its varargs
+// (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
 
@@ -54,8 +99,8 @@ TCallback NoCallback(nullptr, 0);
 
 } // namespace
 
-// The texts TFixedStrings (issue #60).
-static_assert(sizeof(patella::bridge::GUI().AutomapMouseOverText) == 100 && sizeof(patella::bridge::GUI().SkillMouseOverText) == 256, "the mouse-over texts");
+// TSkillsWindowBody::MouseHover formats the skill's text with this size.
+static_assert(sizeof(patella::bridge::GUI().SkillMouseOverText) == 256, "the skill's mouse-over text");
 
 // --- The creators -----------------------------------------------------------------
 
@@ -218,9 +263,9 @@ TButtonsWindow::TButtonsWindow(TDialogWindow *_CheckObject, TWindow *Receiver)
 // A button shows as pressed while its window is open.
 void TButtonsWindow::Draw(int Surface, int x, int y)
 {
-	SkillsButton->State = CheckObject->hasContentWindow(SKILLS_WINDOW);
-	BattleButton->State = CheckObject->hasContentWindow(BATTLE_WINDOW);
-	BuddyButton->State = CheckObject->hasContentWindow(BUDDYLIST_WINDOW);
+	SkillsButton->State = CheckObject->HasContentWindow(SKILLS_WINDOW);
+	BattleButton->State = CheckObject->HasContentWindow(BATTLE_WINDOW);
+	BuddyButton->State = CheckObject->HasContentWindow(BUDDYLIST_WINDOW);
 	TContentWindow::Draw(Surface, x, y);
 }
 
@@ -280,14 +325,14 @@ TAutomapWindow::TAutomapWindow()
 	AddHotkey(KEY_ALT | KEY_DOWN, TCallback(this, EVENT_AUTOMAP_SOUTH));
 }
 
-// Its work is the close since issue #108.
+// Its work is the close's (OnClose).
 TAutomapWindow::~TAutomapWindow()
 {
 	CheckClosed("TAutomapWindow");
 }
 
-// The destructor's work until issue #108: the zoom goes back into the
-// preferences, the hotkeys are removed; then the children.
+// The zoom goes back into the preferences, the hotkeys are removed; then the
+// children.
 void TAutomapWindow::OnClose()
 {
 	try {
@@ -518,7 +563,7 @@ void TAutomapView::Draw(int Surface, int x, int y)
 		const int Top = CentreY - 106 / Window->Zoom;
 		for (int BlockX = Left / 256; BlockX < Left / 256 + 2; BlockX++) {
 			for (int BlockY = Top / 256; BlockY < Top / 256 + 2; BlockY++) {
-				std::vector<TMark> Marks; // the original's vector<TMark>(0, 0, 10) (issue #100)
+				std::vector<TMark> Marks;
 				int Count;
 				GetAutomapMarks(BlockX, BlockY, PosZ, &Marks, &Count);
 				for (int i = 0; i < Count; i++) {
@@ -552,7 +597,7 @@ bool TAutomapView::LeftButtonUp(int x, int y, [[maybe_unused]] int Flags)
 	if (Result == 1)
 		SendWalk();
 	else if (Result == 2)
-		SendStop();
+		SendStopWalk();
 	return true;
 }
 
@@ -562,7 +607,6 @@ bool TAutomapView::RightButtonUp(int x, int y, [[maybe_unused]] int Flags)
 {
 	TMarkMenuData *Data = new TMarkMenuData;
 	TAutomapWindow *Window = static_cast<TAutomapWindow *>(GetParent());
-	Data->Window = Window;
 	if (Window->Centred)
 		GetMapPosition(&Window->ViewX, &Window->ViewY, &Window->ViewZ);
 	Data->Coordinate.x = (x - Width / 2) * 2 / Window->Zoom + Window->ViewX;
@@ -584,7 +628,7 @@ TMark TAutomapView::GetMark(int x, int y)
 	const int Top = Window->ViewY - 106 / Window->Zoom;
 	for (int BlockX = Left / 256; BlockX < Left / 256 + 2; BlockX++) {
 		for (int BlockY = Top / 256; BlockY < Top / 256 + 2; BlockY++) {
-			std::vector<TMark> Marks; // the original's vector<TMark>(0, 0, 10) (issue #100)
+			std::vector<TMark> Marks;
 			int Count;
 			GetAutomapMarks(BlockX, BlockY, Window->ViewZ, &Marks, &Count);
 			for (int i = Count - 1; i >= 0; i--) {
@@ -806,11 +850,7 @@ int TPlayerStates::GetIconAt(int x, int y) const
 }
 
 // The skin of the Position'th state that is on; 0 when fewer states are on.
-// State 9 has no icon. The original's default, never reached (i is 0-9), was
-// TERROR1(1063, "index out of range", i); it does nothing here (issue #79):
-// MSVC x86 removed its code but kept the function's exception frame, without
-// the frame's handler in the SafeSEH table, so an exception of a callee ended
-// the program (notes/decisions.md, issue #79).
+// State 9 has no icon.
 int TPlayerStates::GetIcon(int Position)
 {
 	PATELLA_ASSERT_VALUES(In(Position,0,SkinProperties().PlayerStates.NumberOfIcons-1), Position,
@@ -893,7 +933,7 @@ int TPlayerStates::GetIcon(int Position)
 		case 9:
 			Skin = SKIN_NONE;
 			break;
-		default: // never reached (i is 0-9): the original's TERROR1, see above
+		default: // never reached (i is 0-9)
 			break;
 		}
 	}
@@ -1293,8 +1333,6 @@ TStatusWindow::TStatusWindow()
 {
 	DrawingListLength = 4;
 	DrawingList.reset(new TDrawing[4]);
-	Data44 = 100;
-	Data48 = 100;
 	SetSize(SkinProperties().SideBarWidth, SkinProperties().StatusWindow.Height);
 	Arrange();
 }
@@ -1363,14 +1401,13 @@ TContainerWindowBody::TContainerWindowBody(int _Container)
 	Arrange();
 }
 
-// Its work is the close since issue #108.
+// Its work is the close's (OnClose).
 TContainerWindowBody::~TContainerWindowBody()
 {
 	CheckClosed("TContainerWindowBody");
 }
 
-// The destructor's work until issue #108: closing the window closes the
-// container; then the children.
+// Closing the window closes the container; then the children.
 void TContainerWindowBody::OnClose()
 {
 	try {
@@ -1449,9 +1486,9 @@ void TContainerWindowBody::SetSize(int Width, int Height)
 	Arrange();
 }
 
-int TContainerWindowBody::getMinimumHeight()
+int TContainerWindowBody::GetMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().ContainerMinimumHeight);
+	return (std::max)(ScrollBar->GetMinimumHeight(), SkinProperties().ContainerMinimumHeight);
 }
 
 int TContainerWindowBody::GetMaximumHeight()
@@ -1617,8 +1654,6 @@ void TContainerWindowBody::Update()
 // none, or, with Occupied, for an empty one.
 int TContainerWindowBody::GetSlotAt(int x, int y, bool Occupied) const
 {
-	// x and y become positions in the slot grid in their own variables: the
-	// original's catch wrapper printed them (issue #34).
 	x -= SkinProperties().ContainerFirstSlot.x;
 	y += ScrollBar->Range->Value - SkinProperties().ContainerFirstSlot.y;
 	const int Column = x / SkinProperties().ContainerColumnWidth;
@@ -1667,8 +1702,8 @@ TSkillsWindowBody::~TSkillsWindowBody()
 		ContextMenu->SkillsWindow = nullptr;
 }
 
-// Not in the original (issue #118; ContextMenus.h): TSkillContextMenu's stores into the window and its call of the
-// window's Arrange, here where the class is complete.
+// TSkillContextMenu's stores into the window and its call of the window's Arrange (ContextMenus.h), here where the
+// class is complete.
 void SetSkillsWindowMenu(TSkillsWindowBody *Window, TSkillContextMenu *Menu) noexcept
 {
 	Window->ContextMenu = Menu;
@@ -1679,7 +1714,7 @@ void ArrangeSkillsWindow(TSkillsWindowBody *Window)
 	Window->Arrange();
 }
 
-// Not in the original (issue #118; DialogWindow.h): TSubWindow::Arrange's call for a container's window.
+// TSubWindow::Arrange's call for a container's window (DialogWindow.h).
 void UpdateContainerUpButton(TSubWindowBody *Body)
 {
 	(static_cast<TContainerWindowBody *>(Body))->UpdateUpButton();
@@ -1848,22 +1883,22 @@ void TSkillsWindowBody::Arrange()
 }
 
 // At least one line.
-int TSkillsWindowBody::getMinimumHeight()
+int TSkillsWindowBody::GetMinimumHeight()
 {
-	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ, issue #91).
+	// The original's order: a call's arguments right to left (MSVC; GCC and Clang may differ).
 	const int LineHeight = GetFontLineHeight(SkinProperties().SkillsFont.FontNumber);
-	return (std::max)(ScrollBar->getMinimumHeight(), LineHeight);
+	return (std::max)(ScrollBar->GetMinimumHeight(), LineHeight);
 }
 
-// The stored height ("ContentWindow" 6 in Tibia.cfg) or the full height,
+// The stored height ("ContentWindow" 6 in Patella.ini) or the full height,
 // at least the minimum.
 int TSkillsWindowBody::GetInitialHeight()
 {
 	int Height = GetContentWindowSize(SKILLS_WINDOW);
 	if (Height == 0)
 		Height = GetMaximumHeight();
-	if (Height < getMinimumHeight())
-		return getMinimumHeight();
+	if (Height < GetMinimumHeight())
+		return GetMinimumHeight();
 	return Height;
 }
 
@@ -1973,8 +2008,7 @@ TBattleWindowBody::TBattleWindowBody()
 	Arrange();
 }
 
-// The inline destructor's work until issue #108: no creature is
-// highlighted any more; then the children.
+// No creature is highlighted any more; then the children.
 void TBattleWindowBody::OnClose()
 {
 	try {
@@ -2028,8 +2062,7 @@ void TBattleWindowBody::Draw(int Surface, int x, int y)
 			ClipY += y;
 			bool Framed = false;
 			TRGBColor Color = SkinProperties().BattleWindow.NameFont.Color;
-			// GetOpponentAt's arguments in the original's order, right to left (MSVC; GCC and Clang may differ, issue
-			// #91).
+			// GetOpponentAt's arguments in the original's order, right to left (MSVC; GCC and Clang may differ).
 			const auto OpponentAtMouse = [&] {
 				const int MouseY = GetMouseY();
 				return GetOpponentAt(GetMouseX() - x, MouseY - y);
@@ -2273,9 +2306,9 @@ bool TBattleWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] i
 }
 
 // At least one row.
-int TBattleWindowBody::getMinimumHeight()
+int TBattleWindowBody::GetMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BattleWindow.RowHeight);
+	return (std::max)(ScrollBar->GetMinimumHeight(), SkinProperties().BattleWindow.RowHeight);
 }
 
 // The stored height ("ContentWindow" 7) or the content.
@@ -2284,8 +2317,8 @@ int TBattleWindowBody::GetInitialHeight()
 	int Height = GetContentWindowSize(BATTLE_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
-	if (Height < getMinimumHeight())
-		Height = getMinimumHeight();
+	if (Height < GetMinimumHeight())
+		Height = GetMinimumHeight();
 	return Height;
 }
 
@@ -2372,9 +2405,9 @@ void TTradeOffers::SetSize(int Width, int Height)
 	Arrange();
 }
 
-int TTradeOffers::getMinimumHeight()
+int TTradeOffers::GetMinimumHeight()
 {
-	return ScrollBar->getMinimumHeight();
+	return ScrollBar->GetMinimumHeight();
 }
 
 // The rows of the longer offer. Odd, kept: the top margin added is
@@ -2387,7 +2420,7 @@ int TTradeOffers::GetContentHeight()
 	const int Result = SkinProperties().TradeWindow.RowHeight
 			* (Count / SkinProperties().TradeWindow.SlotsPerRow + (Count % SkinProperties().TradeWindow.SlotsPerRow > 0))
 		+ 1 + SkinProperties().TradeWindow.OwnOffer.x;
-	return (std::max)(getMinimumHeight(), Result);
+	return (std::max)(GetMinimumHeight(), Result);
 }
 
 void TTradeOffers::Arrange()
@@ -2595,14 +2628,13 @@ TTradeWindowBody::TTradeWindowBody()
 	SetSize(170, 100);
 }
 
-// Its work is the close since issue #108.
+// Its work is the close's (OnClose).
 TTradeWindowBody::~TTradeWindowBody()
 {
 	CheckClosed("TTradeWindowBody");
 }
 
-// The destructor's work until issue #108: closing the window rejects an
-// open offer; then the children.
+// Closing the window rejects an open offer; then the children.
 void TTradeWindowBody::OnClose()
 {
 	try {
@@ -2618,21 +2650,20 @@ void TTradeWindowBody::OnClose()
 
 int TTradeWindowBody::GetContentHeight()
 {
-	return getMinimumHeight();
+	return GetMinimumHeight();
 }
 
 // The height is limited to the range between the minimum and the maximum
-// height (both read twice, in either order). The calls go in the binary's
-// order (maximum, minimum, for the lower bound, then again for the upper
-// one) in their own variables: in one expression our compiler called them
-// in another order (issue #34).
+// height (both read twice, in either order). The calls go in the original's
+// order (maximum, minimum, for the lower bound, then again for the upper one)
+// in their own variables: in one expression their order is the compiler's.
 void TTradeWindowBody::SetSize(int Width, int Height)
 {
 	int Maximum = GetMaximumHeight();
-	int Minimum = getMinimumHeight();
+	int Minimum = GetMinimumHeight();
 	const int Lower = (std::min)(Maximum, Minimum);
 	Maximum = GetMaximumHeight();
-	Minimum = getMinimumHeight();
+	Minimum = GetMinimumHeight();
 	Limit(&Height, Lower, (std::max)(Maximum, Minimum));
 	TWindow::SetSize(Width, Height);
 	SetChildArea(Buttons, SkinProperties().TradeWindow.Buttons);
@@ -2651,9 +2682,9 @@ bool TTradeWindowBody::HelpMouseMove([[maybe_unused]] int x, [[maybe_unused]] in
 	return true;
 }
 
-int TTradeWindowBody::getMinimumHeight()
+int TTradeWindowBody::GetMinimumHeight()
 {
-	return (std::max)(Offers->getMinimumHeight(), SkinProperties().TradeWindow.MinimumHeight);
+	return (std::max)(Offers->GetMinimumHeight(), SkinProperties().TradeWindow.MinimumHeight);
 }
 
 int TTradeWindowBody::GetInitialHeight()
@@ -2827,9 +2858,9 @@ void TBuddylistWindowBody::Arrange()
 }
 
 // At least one row.
-int TBuddylistWindowBody::getMinimumHeight()
+int TBuddylistWindowBody::GetMinimumHeight()
 {
-	return (std::max)(ScrollBar->getMinimumHeight(), SkinProperties().BuddylistWindow.RowHeight);
+	return (std::max)(ScrollBar->GetMinimumHeight(), SkinProperties().BuddylistWindow.RowHeight);
 }
 
 // The stored height ("ContentWindow" 9) or the content.
@@ -2838,14 +2869,14 @@ int TBuddylistWindowBody::GetInitialHeight()
 	int Height = GetContentWindowSize(BUDDYLIST_WINDOW);
 	if (Height == 0)
 		Height = GetContentHeight();
-	if (Height < getMinimumHeight())
-		return getMinimumHeight();
+	if (Height < GetMinimumHeight())
+		return GetMinimumHeight();
 	return Height;
 }
 
 int TBuddylistWindowBody::GetContentHeight()
 {
-	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().Data868;
+	return GetNumberOfBuddies() * SkinProperties().BuddylistWindow.RowHeight + SkinProperties().BuddylistWindowExtraHeight;
 }
 
 // The row under x, y; -1 for none. Odd, kept: y is not tested against the top. y

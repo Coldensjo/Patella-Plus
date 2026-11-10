@@ -1,16 +1,10 @@
 // sysinc.h: system helpers (time, files, the clipboard, error texts).
-//
-// Names from the binary: GetMilliseconds and RemoveFile were named before
-// from their use; textdata and help come from the assertions. The rest are
-// ours.
 
 #pragma once
 
 #include <array>
 
 int GetMilliseconds();
-bool FileExists(const char *FileName);
-bool RemoveFile(const char *FileName);
 bool IsClipboardEmpty();
 const char *GetErrorText(int Error);
 const char *GetErrorHint(int Error);

@@ -1,6 +1,5 @@
-// BuildConfigDefaults.h: the values someone fixes when building the client for their own server (Patella-Modern issue
-// #169, the owner's decision after #166). Not part of the original source. BuildConfig.h includes this file and checks
-// every value at compile time; include BuildConfig.h, not this.
+// BuildConfigDefaults.h: the values someone fixes when building the client for their own server. BuildConfig.h includes
+// this file and checks every value at compile time; include BuildConfig.h, not this.
 //
 // To build for your own server, copy this file somewhere outside the repository, change the values in the copy and
 // configure with -DPATELLA_BUILD_CONFIG=<your copy>: your file replaces this one, so pulling updates never conflicts with
@@ -8,9 +7,8 @@
 // (Patella-Plus); the other values are the original's, byte for byte. README.md, "Building for your own server".
 //
 // Every value must be ASCII. A bad value fails the compile with a message that says what is wrong. Nothing here is read
-// from Patella.ini or the environment (the test build's PATELLA_LOGIN_SERVER and PATELLA_RSA_MODULUS are the test build's,
-// issue #158), but Patella.ini's ServerAddress, ServerPort and RsaModulus replace those values unless the overrides below are set.
-// The values end up as plain text in the program: they are not a secret.
+// from Patella.ini or the environment, but Patella.ini's ServerAddress, ServerPort and RsaModulus replace those values
+// unless the overrides below are set. The values end up as plain text in the program: they are not a secret.
 
 #pragma once
 

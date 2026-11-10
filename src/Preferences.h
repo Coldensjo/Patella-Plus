@@ -1,11 +1,7 @@
-// Preferences.cpp: the options stored in Tibia.cfg by the original, in Patella.ini by the x64 client
-// (Patella-Modern issue #45). The option names in the comments are the keys that the Tibia.cfg loader and
-// saver use, which give the names of the globals.
+// Preferences.h: the options, stored in Tibia.cfg by the original and in Patella.ini by this client (Preferences.cpp).
+// The option names in the comments are the keys that the Tibia.cfg loader uses, which give the names of the members.
 //
-// Names are ours unless a comment says they come from the binary.
-//
-// Patella-Modern issue #104 (M7, notes/decisions.md, "#104: TClient and the subsystem objects"): the data is
-// TPreferences', which TClient owns (Client.h); the free functions of the original's names are the bridge
+// The data is TPreferences', which TClient owns (Client.h); the free functions of the original's names are the bridge
 // that the callers use until they hold the object (bridge::Preferences(), defined in Client.cpp).
 
 #pragma once
@@ -25,21 +21,8 @@ inline constexpr int HOTKEY_LENGTH = 256;
 inline constexpr int BUDDYDESCRIPTION_LENGTH = 128;
 inline constexpr int SKILLS = 7;
 
-// The fight modes of the combat controls: "AttackMode" and "ChaseMode" in the configuration, and the first two bytes
-// that SendFightModes sends (Communication.cpp). The names are ours, from the buttons of TCombatControls
-// (ContentWindows.cpp: offensive, balanced, defensive; stand, chase) and their events EVENT_ATTACK_* and
-// EVENT_CHASE_*. A saved ChaseMode of 2 is read as CHASE_STAND; the code does not show what 2 was, so it stays a
-// number. The modes in settings/PreferenceKeys.h stay numbers too: this file includes that one, which keeps the
-// configuration's values without the client's names.
-enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
-	ATTACK_OFFENSIVE = 1,
-	ATTACK_BALANCED = 2, // the default
-	ATTACK_DEFENSIVE = 3,
-};
-enum : int {         // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
-	CHASE_STAND = 0, // the default; PrepareMovement's with AutoChaseOff, when the player walks while attacking
-	CHASE_ON = 1,    // chase the opponent
-};
+// The fight modes of the combat controls (ATTACK_*, CHASE_*) are in settings/PreferenceKeys.h, because the reader
+// of the configuration names them too.
 
 // "FullscreenMode = (Width,Height,Depth)"; the fourth value is not saved.
 struct TFullscreenMode {
@@ -58,18 +41,18 @@ struct TContentWindowSize {
 // "Buddy = (CharacterID,Icon,Description,Notify)", 0x8c bytes. Notify
 // shows "%s has logged in."; CharacterID 0 marks a deleted entry.
 struct TBuddy {
-	// strcpy(Description, Text) as the original's Tibia.cfg reader wrote it (issue #85): the text and its NUL
-	// within the rest of the entry (Description, Notify and the padding, 132 bytes). A description of 128
-	// characters is kept whole, its NUL in Notify, which the reader sets next, and up to 131 characters the
-	// bytes are the original's; a longer one, which the original wrote past the entry, is cut at 131.
+	// strcpy(Description, Text) as the original's Tibia.cfg reader wrote it: the text and its NUL within the rest of
+	// the entry (Description, Notify and the padding, 132 bytes). A description of 128 characters is kept whole, its
+	// NUL in Notify, which the reader sets next, and up to 131 characters the bytes are the original's; a longer one,
+	// which the original wrote past the entry, is cut at 131.
 	void AssignDescriptionRead(const char *Text) noexcept
 	{
 		TStringBuffer(reinterpret_cast<char *>(this) + offsetof(TBuddy, Description), sizeof(TBuddy) - offsetof(TBuddy, Description))
 			.Assign(Text);
 	}
-	// The description as a C string, at most its 128 characters (issue #86, a deliberate difference): one of 128
-	// has no NUL of its own (its 129th byte is Notify), and Tibia.exe's readers read on past it (with Notify set,
-	// into the padding and the next entry).
+	// The description as a C string, at most its 128 characters (a deliberate difference): one of 128 has no NUL of its
+	// own (its 129th byte is Notify), and Tibia.exe's readers read on past it (with Notify set, into the padding and
+	// the next entry).
 	[[nodiscard]] TFixedString<BUDDYDESCRIPTION_LENGTH + 1> DescriptionText() const noexcept
 	{
 		TFixedString<BUDDYDESCRIPTION_LENGTH + 1> Text;
@@ -82,14 +65,14 @@ struct TBuddy {
 	TFixedString<BUDDYDESCRIPTION_LENGTH> Description;
 	bool Notify;
 };
-// The original's layout (no pointers: the same on x64), with Description a TFixedString (issue #57).
+// AssignDescriptionRead writes through the entry's bytes from Description on: Notify and the padding follow it.
 static_assert(sizeof(TBuddy) == 0x8c && offsetof(TBuddy, Description) == 0x08 && offsetof(TBuddy, Notify) == 0x88,
 	"TBuddy's layout");
 
 namespace patella {
 
-// The two lists of Talk.cpp that the options hold (Tibia.cfg's White and Ignore; issue #104): TPreferences reaches
-// them only through this, so that it does not depend on Talk. The functions are Talk.h's of the same names.
+// The two lists of Talk.cpp that the options hold (Tibia.cfg's White and Ignore): TPreferences reaches them only
+// through this, so that it does not depend on Talk. The functions are Talk.h's of the same names.
 class TTalkLists {
 public:
 	TTalkLists() = default;
@@ -109,10 +92,10 @@ protected:
 	~TTalkLists() = default;
 };
 
-// Preferences.cpp's data and functions (issue #104): the globals of the original are the members, with the same
-// initial values (the others 0, as the original's .bss), and the functions the members of the same names. The ones
-// that reach Talk's lists take them as Lists. The files are the platform's (issue #109: IFileSystem,
-// platform/FileSystem.h; Tibia.cfg's existence; Script.cpp opens the file itself).
+// Preferences.cpp's data and functions: the globals of the original are the members, with the same initial values (the
+// others 0), and the functions the members of the same names. The ones that reach Talk's lists take them as Lists. The
+// files are the platform's (IFileSystem, platform/FileSystem.h; Tibia.cfg's existence; Script.cpp opens the file
+// itself).
 class TPreferences {
 public:
 	explicit TPreferences(patella::platform::IFileSystem &FileSystemRef) : FileSystem(FileSystemRef) {}
@@ -207,7 +190,6 @@ public:
 	[[nodiscard]] bool GetSkillBar(int SkillNumber) const;
 	void SetSkillBar(int SkillNumber, bool Value);
 	void ReadTibiaCfg(TTalkLists &Lists);
-	void WriteTibiaCfg(TTalkLists &Lists);
 	patella::settings::TPreferenceValues GetPreferenceValues(TTalkLists &Lists);
 	void SetPreferenceValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists);
 	void InitPreferences(TTalkLists &Lists);
@@ -215,14 +197,13 @@ public:
 	void ExitPreferences(TTalkLists &Lists);
 
 private:
-	// Data, in the original's .data/.bss order.
 	int WindowedWidth = 600; // "WindowedMode = (x,y,Width,Height,Maximized)"
 	int WindowedHeight = 400;
 	std::array<bool, SKILLS> SkillBars{}; // "SkillBars = {...}"
 	bool MagLevelBar{};
 	bool LevelBar{};
 	bool ShowNewHints{};
-	// NumberOfKnownHints and NumberOfBuddyEntries: KnownHints.size() and Buddies.size() (issue #100).
+	// NumberOfKnownHints and NumberOfBuddyEntries: KnownHints.size() and Buddies.size().
 	bool SecureMode{};
 	int ChaseMode{};
 	int AttackMode{};
@@ -254,15 +235,15 @@ private:
 	bool LightEffects{};
 	bool WindowsMousepointer{};
 	TFullscreenMode FullscreenMode{}; // Width 0 = not set
-	int ViewMode{};                   // "ViewMode" in a MainFrm.cpp catch block
-	bool TestServerLogin{};           // "TestServer = yes"
-	bool PreferencesLoaded{};         // set by InitPreferences; SavePreferences writes only then
+	int ViewMode{};
+	bool TestServerLogin{};   // "TestServer = yes"
+	bool PreferencesLoaded{}; // set by InitPreferences; SavePreferences writes only then
 	int WindowedX{};
 	int WindowedY{};
-	// The original's vector<T>(0, 9, 10) each, with the counts above (issue #100; notes/decisions.md, "#100"): the
-	// lists that append at their count and read below it are std::vectors, their size the count. OpenDialogs stays
-	// a TIndexedVector: ReadTibiaCfg's duplicate check reads its entries from min to max - 1, the init fill (-1) and
-	// the entries past NumberOfOpenDialogs that ClearOpenDialogs left.
+	// The original's vector<T>(0, 9, 10) each, with the counts above: the lists that append at their count and read
+	// below it are std::vectors, their size the count. OpenDialogs stays a TIndexedVector: ReadTibiaCfg's duplicate
+	// check reads its entries from min to max - 1, the init fill (-1) and the entries past NumberOfOpenDialogs that
+	// ClearOpenDialogs left.
 	std::vector<TContentWindowSize> ContentWindows; // "ContentWindow = (...)"
 	TIndexedVector<int> OpenDialogs{0, 9, 10, -1};
 	std::vector<int> OpenChannels; // "OpenChannel = ..."
@@ -271,17 +252,15 @@ private:
 
 	patella::platform::IFileSystem &FileSystem;
 	patella::settings::TServerValues ServerValues; // Patella-Plus, not in the original
-	// Not the original's: GetBuddyDescription's text, the entry's description with a NUL (issue #86).
+	// Not the original's: GetBuddyDescription's text, the entry's description with a NUL.
 	TFixedString<BUDDYDESCRIPTION_LENGTH + 1> BuddyDescription{};
 
-	// The arrays std::arrays (issue #60).
-	static_assert(sizeof(SkillBars) == SKILLS && sizeof(BuddySortmethods) == 3 * sizeof(int)
-			&& sizeof(HotkeyAutoSend) == HOTKEYS && sizeof(Hotkeys) == HOTKEYS * HOTKEY_LENGTH,
-		"Preferences' arrays");
+	// SetDefaultPreferences clears HotkeyAutoSend with a memset over its size.
+	static_assert(sizeof(HotkeyAutoSend) == HOTKEYS, "HotkeyAutoSend");
 };
 
-// The transition's access path (issue #104; notes/decisions.md, "#104: TClient and the subsystem objects"): the
-// options of the one TClient (Client.cpp), and the Talk lists they hold. They go when no free function needs them.
+// The transition's access path: the options of the one TClient (Client.cpp), and the Talk lists they hold. They go when
+// no free function needs them.
 namespace bridge {
 TPreferences &Preferences();
 TTalkLists &TalkLists();
@@ -354,7 +333,6 @@ bool GetLevelBar();
 bool GetMagLevelBar();
 void SetLevelBar(bool Value);
 void SetMagLevelBar(bool Value);
-void SetDefaultPreferences();
 void SetContentWindowSize(int ID, int Size);
 int GetContentWindowSize(int ID);
 int GetOpenDialogs(int **List);
@@ -366,7 +344,6 @@ const char *GetHotkey(int Number, bool *AutoSend);
 void AddOpenDialog(int Identifier);
 bool SetMessageOfTheDay(const char *Text);
 void AddOpenChannel(int Identifier);
-int FindBuddy(int CharacterID);
 void SetBuddy(int CharacterID, int Icon, const char *Description, bool Notify);
 void DeleteBuddy(int CharacterID);
 int GetBuddyIcon(int CharacterID);
@@ -374,13 +351,8 @@ const char *GetBuddyDescription(int CharacterID);
 bool GetBuddyNotify(int CharacterID);
 bool GetSkillBar(int SkillNumber);
 void SetSkillBar(int SkillNumber, bool Value);
-// The original's Tibia.cfg reader and writer (issue #45): the import and the golden
-// corpus's reference. The client calls InitPreferences, SavePreferences and ExitPreferences, which read and
-// write Patella.ini (settings/PreferenceKeys.h); it never writes Tibia.cfg.
-void ReadTibiaCfg();
-void WriteTibiaCfg();
-patella::settings::TPreferenceValues GetPreferenceValues();
-void SetPreferenceValues(const patella::settings::TPreferenceValues &Values);
+// InitPreferences, SavePreferences and ExitPreferences read and write Patella.ini (settings/PreferenceKeys.h); the
+// client never writes Tibia.cfg.
 void InitPreferences();
 void SavePreferences();
 void ExitPreferences();

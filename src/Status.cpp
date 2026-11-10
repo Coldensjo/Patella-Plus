@@ -1,12 +1,6 @@
-// Status.cpp: reconstructed from Tibia.exe 7.72.
-//
-// The functions without line evidence (all of them small accessors) come
-// first, in binary order (the error report list's and its vector are gone
-// since Patella-Modern issue #74, decision D2); the rest follow the assertion
-// and catch line numbers, which are also their binary order.
-//
-// Of all functions here only CheckClipboardText had a try block (its catch
-// wrapper, gone since issue #78); the others have assertions only.
+// Status.cpp: the client's shared state: the session (the account, the character list, the connection state, the
+// rights) and the user interaction (the action, drag, trade and use state, the mouse, the message queue, the clipboard
+// link check).
 
 #include "Status.h"
 #include "Utils.h"
@@ -20,22 +14,33 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <memory>
 #include <vector>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries
+// cppcoreguidelines-owning-memory off for the file: the original's raw owners: the window tree owns its children, the
+// message queue its blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-owning-memory)
 
-// Characters owns its array as a std::unique_ptr<TCharacter[]> (issue #58): a pointer, as the original's.
-static_assert(sizeof(std::unique_ptr<TCharacter[]>) == sizeof(TCharacter *)
-		&& alignof(std::unique_ptr<TCharacter[]>) == alignof(TCharacter *),
-	"std::unique_ptr<TCharacter[]> is a pointer");
+// The data is TInteraction's (the user interaction) and TSession's (the session), both in Status.h.
 
-// Status.obj's only .data, LinkPattern, is its copy of Status.h's. The .bss is TInteraction's (the user interaction,
-// issue #107) and TSession's (the session, issue #105), both in Status.h.
+namespace {
 
+// The regular expression of a link (a domain or an IPv4 address), which
+// CheckClipboardText looks for in copied text; InitStatus compiles it. The name is ours.
+const char *LinkPattern =
+	"(^|[ .,:;/@<>|()\"\n\r%])(([a-z0-9-]+(\\.|\\%2e))+(ac|ad|ae|aero|af|ag|ai|al|am|an|ao|aq|a"
+	"r|arpa|as|at|au|aw|az|ba|bb|bd|be|bf|bg|bh|bi|biz|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|c"
+	"d|cf|cg|ch|ci|ck|cl|cm|cn|co|com|coop|cr|cu|cv|cx|cy|cz|de|dj|dk|dm|do|dz|ec|edu|ee|eg|er|"
+	"es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gov|gp|gq|gr|gs|gt|gu|gw|gy|hk"
+	"|hm|hn|hr|ht|hu|id|ie|il|im|in|info|int|io|iq|ir|is|it|je|jm|jo|jobs|jp|ke|kg|kh|ki|km|kn|"
+	"kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|mg|mh|mil|mk|ml|mm|mn|mo|mobi|mp|mq|"
+	"mr|ms|mt|mu|museum|mv|mw|mx|my|mz|na|name|nc|ne|net|nf|ng|ni|nl|no|np|nr|nu|nz|om|org|pa|p"
+	"e|pf|pg|ph|pk|pl|pm|pn|pr|pro|ps|pt|pw|py|qa|re|ro|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|"
+	"sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|travel|tt|tv|tw|tz|ua|ug"
+	"|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\\.?|[0-9][0-9]?[0-9]?(\\.|\\"
+	"%2e)[0-9][0-9]?[0-9]?(\\.|\\%2e)[0-9][0-9]?[0-9]?(\\.|\\%2e)[0-9][0-9]?[0-9]?)([?#& .,:;/@"
+	"<>|()\"\r\n%]|$)";
+
+} // namespace
 
 // Only the first 32 rights are checked, the ones GetRightName has names
 // for; rights 32-49 never count.
@@ -48,7 +53,6 @@ bool patella::TSession::CheckAnyRight() const
 	return false;
 }
 
-// Inlined into InitStatus.
 void patella::TSession::ClearRights()
 {
 	for (int i = 0; i < RIGHT_ANY; i++)
@@ -253,17 +257,6 @@ int patella::TSession::GetConnectionState() const
 	return ConnectionState;
 }
 
-// Download progress in percent, -1 when there is none.
-void patella::TSession::SetProgress(int Value)
-{
-	Progress = Value;
-}
-
-int patella::TSession::GetProgress() const
-{
-	return Progress;
-}
-
 int patella::TSession::GetAccountNumber() const
 {
 	return AccountNumber;
@@ -432,12 +425,11 @@ void patella::TInteraction::ClearMessages()
 }
 
 // TaintedClipboardText is freed but not cleared, and the queued messages are
-// not freed. The original cleared the error reports first (gone since issue
-// #74). LinkRegexp is freed and, since issue #129 (TRegexp), cleared too:
-// the original left it dangling until InitStatus.
+// not freed. LinkRegexp is freed and cleared (TRegexp): the original left it
+// dangling until InitStatus.
 void patella::TInteraction::ExitStatus()
 {
-	patella::bridge::Session().ExitSession(); // the character list (issue #105)
+	patella::bridge::Session().ExitSession(); // the character list
 	if (TaintedClipboardText != nullptr)
 		delete[] TaintedClipboardText;
 	LinkRegexp.Reset();
@@ -541,7 +533,7 @@ void patella::TSession::SetAccount(int Number, const char *Password)
 	TStringBuffer(AccountNumberString, sizeof(AccountNumberString)).Format("{}", Number); // at most 11 characters
 	AccountNumberString[11] = 0;
 	// The original's copy, up to the buffer's 30 bytes (the assertion keeps the password shorter; GCC's
-	// -Wstringop-truncation sees the bound only, issue #111).
+	// -Wstringop-truncation sees the bound only).
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic push")
 	PATELLA_GCC_DIAGNOSTIC("GCC diagnostic ignored \"-Wstringop-truncation\"")
 	strncpy(AccountPassword, Password, 30);
@@ -596,9 +588,9 @@ int patella::TSession::GetCharacterPort(int Number) const
 	return Characters[Number].Port;
 }
 
-// Keeps a copy of the text; if its lower-case form contains something like a web or IP address, the
-// link warning handler is called instead of copying (it can copy later with CopyTaintedClipboardText).
-// Text and Length are the span's pointer and its size as an int (issue #69).
+// Keeps a copy of the text; if its lower-case form contains something like a web or IP address, the link warning
+// handler is called instead of copying (it can copy later with CopyTaintedClipboardText). Text and Length are the
+// span's pointer and its size as an int.
 void patella::TInteraction::CheckClipboardText(patella::TSpan<const char> Characters)
 {
 	const char *const Text = Characters.data();
@@ -640,9 +632,9 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	LinkWarningEventHandler = linkwarningeventhandler;
 	TaintedClipboardText = nullptr;
 	// The original set LinkRegexp to NULL first, so a second InitStatus without ExitStatus leaked the program;
-	// TRegexp's assignment frees it (issue #129).
+	// TRegexp's assignment frees it.
 	LinkRegexp = patella::TRegexp(LinkPattern);
-	patella::bridge::Session().InitSession(Gamemaster); // the session's part (issue #105), in its order below
+	patella::bridge::Session().InitSession(Gamemaster); // the session's part, in its order below
 	Messages.clear();                                   // the parameters not freed, as the original
 	ActionNumber = 0;
 	DraggedObject.Type = 0;
@@ -661,8 +653,8 @@ void patella::TInteraction::InitStatus(bool Gamemaster, void (*linkwarningeventh
 	PendingActionNumber = 0;
 }
 
-// InitStatus's part (issue #105): the session's members in the order InitStatus wrote them (Gamemaster and
-// the rights first, ClearRights inlined there; the rest after its other data).
+// InitStatus's part: the session's members in the order InitStatus wrote them (Gamemaster and the rights first, the
+// rest after its other data).
 void patella::TSession::InitSession(bool Value)
 {
 	Gamemaster = Value;
@@ -674,10 +666,9 @@ void patella::TSession::InitSession(bool Value)
 	Characters = nullptr;
 	PremiumDays = 0;
 	ActiveCharacter = 0;
-	Progress = -1;
 }
 
-// ExitStatus's part (issue #105): the character list, freed first.
+// ExitStatus's part: the character list, freed first.
 void patella::TSession::ExitSession()
 {
 	if (Characters != nullptr)
@@ -685,16 +676,11 @@ void patella::TSession::ExitSession()
 	Characters = nullptr;
 }
 
-// The session's functions of the original (issue #105): each calls its member on the one TClient's TSession.
+// The session's functions of the original: each calls its member on the one TClient's TSession.
 
 bool CheckAnyRight()
 {
 	return patella::bridge::Session().CheckAnyRight();
-}
-
-void ClearRights()
-{
-	patella::bridge::Session().ClearRights();
 }
 
 void SetConnectionState(int State)
@@ -705,16 +691,6 @@ void SetConnectionState(int State)
 int GetConnectionState()
 {
 	return patella::bridge::Session().GetConnectionState();
-}
-
-void SetProgress(int Progress)
-{
-	patella::bridge::Session().SetProgress(Progress);
-}
-
-int GetProgress()
-{
-	return patella::bridge::Session().GetProgress();
 }
 
 int GetAccountNumber()
@@ -732,16 +708,6 @@ const char *GetAccountPassword()
 	return patella::bridge::Session().GetAccountPassword();
 }
 
-void SetAccountCharacters(int Number)
-{
-	patella::bridge::Session().SetAccountCharacters(Number);
-}
-
-void SetPremiumDays(int Days)
-{
-	patella::bridge::Session().SetPremiumDays(Days);
-}
-
 int GetAccountCharacters()
 {
 	return patella::bridge::Session().GetAccountCharacters();
@@ -757,16 +723,6 @@ int GetActiveCharacter()
 	return patella::bridge::Session().GetActiveCharacter();
 }
 
-bool IsGamemaster()
-{
-	return patella::bridge::Session().IsGamemaster();
-}
-
-void SetRight(int rightid, int Value)
-{
-	patella::bridge::Session().SetRight(rightid, Value);
-}
-
 bool CheckRight(int rightid, int Bit)
 {
 	return patella::bridge::Session().CheckRight(rightid, Bit);
@@ -775,11 +731,6 @@ bool CheckRight(int rightid, int Bit)
 void SetAccount(int Number, const char *Password)
 {
 	patella::bridge::Session().SetAccount(Number, Password);
-}
-
-void SetCharacter(int Number, const char *Name, const char *World, const uint8 *Address, int Port)
-{
-	patella::bridge::Session().SetCharacter(Number, Name, World, Address, Port);
 }
 
 void SetActiveCharacter(int Number)
@@ -807,7 +758,7 @@ int GetCharacterPort(int Number)
 	return patella::bridge::Session().GetCharacterPort(Number);
 }
 
-// The functions of the original (issue #107): each calls its member on the one TClient's TInteraction.
+// The functions of the original: each calls its member on the one TClient's TInteraction.
 
 int GetActionNumber()
 {

@@ -1,15 +1,5 @@
-// DialogElements.cpp: the controls of the dialogs and windows
-// (c:\mud\tibiaplayer\DialogElements.cpp); see DialogElements.h.
-//
-// Order: the functions follow the source's line numbers. The binary moves
-// most constructors and a few members that call functions defined further
-// down (the labels' constructors, TFormattedText's constructor and Arrange,
-// the buttons' constructors, TCheckBox's constructor and SetEnabled, the edit
-// lines' first constructor, LeftButtonDown, KeyPress and SetFocusGroup,
-// TEditText's Arrange, KeyPress and SetText, the scroll bars' and the list
-// boxes' constructors and several list box members, TLink's constructor) to
-// the end of the object, Creatures.cpp's pattern. Functions without line
-// evidence go where the binary has them.
+// DialogElements.cpp: the controls of the dialogs and windows; see
+// DialogElements.h.
 
 #include "DialogElements.h"
 #include <cstdint>
@@ -19,7 +9,6 @@
 #include "Status.h"
 #include "Surface.h"
 #include "Utils.h"
-#include "Text.h" // IWYU pragma: keep (the object's own copy of the text table, see Text.h)
 #include "sysinc.h"
 #include "GUI.h"
 #include "Skins.h"
@@ -30,9 +19,9 @@
 #include <cstddef>
 #include <memory>
 
-// Issue #111 (clang-tidy, the first look at this file in patella_core): cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg off for the file:
-// the original's raw owners (notes/ownership.md): the window tree owns its children, the message queue its blocks,
-// the lists their entries; the original's varargs (TMultiStateButton's constructor, _snprintf)
+// cppcoreguidelines-owning-memory and cppcoreguidelines-pro-type-vararg are off for the file, for the original's raw
+// owners (the window tree owns its children, the message queue its blocks, the lists their entries) and its varargs
+// (TMultiStateButton's constructor, _snprintf).
 // NOLINTBEGIN(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)
 
 
@@ -195,8 +184,8 @@ TBorder::TBorder(TComponent *_Window, int _TopLeft, int _Top, int _TopRight, int
 
 void TBorder::SetSize(int Width, int Height)
 {
-	PATELLA_ASSERT_VALUES(Width>=getMinimumWidth(), Width);
-	PATELLA_ASSERT_VALUES(Height>=getMinimumHeight(), Height);
+	PATELLA_ASSERT_VALUES(Width>=GetMinimumWidth(), Width);
+	PATELLA_ASSERT_VALUES(Height>=GetMinimumHeight(), Height);
 	TComponent::SetSize(Width, Height);
 	Arrange();
 	Window->SetPosition(WindowArea.x, WindowArea.y);
@@ -207,7 +196,7 @@ void TBorder::SetSize(int Width, int Height)
 // The frame's size for Window's size.
 void TBorder::FitToWindow()
 {
-	SetSize(getMinimumWidth() + Window->Width, getMinimumHeight() + Window->Height);
+	SetSize(GetMinimumWidth() + Window->Width, GetMinimumHeight() + Window->Height);
 }
 
 void TBorder::Arrange()
@@ -359,7 +348,6 @@ void TLabel::SetText(const char *_Text, bool Shorten)
 TFormattedText::TFormattedText(const char *_Text)
 {
 	AutoWidth = true;
-	AutoHeight = true;
 	Text = nullptr;
 	Line = nullptr;
 	SetText(_Text, false);
@@ -368,15 +356,12 @@ TFormattedText::TFormattedText(const char *_Text)
 void TFormattedText::SetSize(int Width, int Height)
 {
 	AutoWidth = true;
-	AutoHeight = true;
 	if (Width < 1)
 		Width = 0;
 	else
 		AutoWidth = false;
 	if (Height < 1)
 		Height = 0;
-	else
-		AutoHeight = false;
 	TComponent::SetSize(Width, Height);
 	Arrange();
 }
@@ -688,7 +673,7 @@ TOutfitIcon::TOutfitIcon(int _Outfit, int _Direction, int *ColorData, const TRGB
 void TOutfitIcon::Draw(int Surface, int x, int y)
 {
 	const int Size = Width;
-	PATELLA_ASSERT_VALUES(getWidth()==getHeight(), getWidth()-getHeight());
+	PATELLA_ASSERT_VALUES(GetWidth()==GetHeight(), GetWidth()-GetHeight());
 	DrawOutfit(Surface, x, y, Size, Outfit, Colors, Highlight, TRect(x, y, Size, Height), SkinProperties().ObjectCountFont);
 }
 
@@ -740,7 +725,7 @@ void TObjectIcon::Draw(int Surface, int x, int y)
 		ClipWidth -= 2 * SkinProperties().ObjectIconFrameWidth;
 		ClipHeight -= 2 * SkinProperties().ObjectIconFrameWidth;
 	}
-	PATELLA_ASSERT_VALUES(getWidth()==getHeight(), getWidth()-getHeight());
+	PATELLA_ASSERT_VALUES(GetWidth()==GetHeight(), GetWidth()-GetHeight());
 	DrawObject(Surface, x, y, Width, Obj, Highlight, TRect(ClipX, ClipY, ClipWidth, ClipHeight),
 		SkinProperties().ObjectCountFont, false);
 }
@@ -817,8 +802,7 @@ bool TSkinButton::IsPressed()
 	return Pressed && MouseInside;
 }
 
-// The assertions print the skin only (the binary's messages,
-// issue #34).
+// The assertions print the skin only (the binary's messages).
 void TSkinButton::SetSkins(int _ButtonUp, int _ButtonDown)
 {
 	PATELLA_ASSERT_VALUES(_ButtonUp<patella::bridge::Skins().NumberOfSkins, _ButtonUp);
@@ -921,8 +905,8 @@ void TTextButton::Draw(int Surface, int x, int y)
 }
 
 // The base gets the button's own Tooltip, which is not set yet: the original's read of the memory's value, which
-// TSkinButton stores back (the golden DialogElements test compares it), and which nothing reads (MouseHover shows
-// Tooltip1 or Tooltip2). GCC's and Clang's -Wuninitialized name the read: allowed here (issue #111).
+// TSkinButton stores back, and which nothing reads (MouseHover shows Tooltip1 or Tooltip2). GCC's and Clang's
+// -Wuninitialized name the read: allowed here.
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuninitialized"
@@ -1019,7 +1003,7 @@ TMultiStateButton::TMultiStateButton(int x, int y, const char *_Tooltip, int _St
 		ButtonUps[i] = va_arg(Arguments, int);
 		ButtonDowns[i] = va_arg(Arguments, int);
 		// TCallback is trivially copyable (passed through ... as the caller's copy), but not a POD (its constructors),
-		// which Clang's va_arg refuses by default (-Wnon-pod-varargs, issue #111).
+		// which Clang's va_arg refuses by default (-Wnon-pod-varargs).
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-pod-varargs"
@@ -1335,11 +1319,9 @@ void TEditLine::KeyPress(int Key)
 				else
 					HandleEvent(EVENT_DELETE);
 			}
-			// Past the modifier test the binary keeps the code in Key's stack slot:
-			// the original's catch wrapper then prints the code.
 			if ((Key & KEY_CONTROL) == 0 || (Key & KEY_ALT) != 0) {
 				Key = Code;
-				if (Key > 0x1f && Key < KEY_F1 && (int)strlen(Text.get()) < MaxLength) {
+				if (Key >= ' ' && Key < KEY_F1 && (int)strlen(Text.get()) < MaxLength) {
 					if (HasSelection())
 						HandleEvent(EVENT_DELETE);
 					InsertChar(Cursor, (char)Key);
@@ -1521,14 +1503,12 @@ void TPasswordEditLine::Draw(int Surface, int x, int y)
 	for (i = 0; i < (int)strlen(Text.get()); i++)
 		Stars[i] = '*';
 	Stars[strlen(Text.get())] = 0;
-	// The original swapped the two pointers through a local (issue #81: the
-	// owners swap their blocks).
 	Text.swap(Stars);
 	TEditLine::Draw(Surface, x, y);
 	Text.swap(Stars);
 }
 
-// Only pasting; the catch blocks name Event with the constant 18.
+// Only pasting.
 void TPasswordEditLine::HandleEvent(int Event)
 {
 	if (Event == EVENT_PASTE) {
@@ -1841,7 +1821,6 @@ void TEditText::FormatText()
 
 // --- TFocusGroup ------------------------------------------------------------------
 
-// No EH frame.
 TFocusGroup::TFocusGroup() : MemberList(0, 2, 2, nullptr)
 {
 	Members = 0;
@@ -1938,7 +1917,7 @@ void THorizontalScrollBarRange::SetSize(int Width, int Height)
 	Arrange();
 }
 
-// The slider's share is computed on the x87 stack (double precision here).
+// The slider's share is computed in double precision.
 void THorizontalScrollBarRange::Arrange()
 {
 	DrawingList[0] = TDrawing(SKIN_HSCROLLBAR_TRACK, 0, 0, Width, Height, 0, 0);
@@ -2066,8 +2045,6 @@ void THorizontalScrollBarRange::KeyPress(int Key)
 
 // --- THorizontalScrollBar ---------------------------------------------------------
 
-// The catch block prints the minimum and maximum under the names Min and
-// Max (the binary's message; the range's assertion says _Min and _Max).
 THorizontalScrollBar::THorizontalScrollBar(int Min, int Max, int _Value, int _Visible, int _ButtonRange,
 	TCallback _Callback)
 {
@@ -2082,14 +2059,13 @@ THorizontalScrollBar::THorizontalScrollBar(int Min, int Max, int _Value, int _Vi
 	TWindow::InsertChild(Range);
 }
 
-// The parameters are changed in place (the catch blocks report the
-// changed values).
+// The parameters are changed in place.
 void THorizontalScrollBar::SetSize(int Width, int Height)
 {
 	Height = SkinProperties().HorizontalScrollBarHeight;
 	Width -= RightButton->Width + LeftButton->Width;
-	if (Width < Range->getMinimumWidth())
-		Width = Range->getMinimumWidth();
+	if (Width < Range->GetMinimumWidth())
+		Width = Range->GetMinimumWidth();
 	Range->SetSize(Width, Height);
 	Range->Arrange();
 	TComponent::SetSize(Width + RightButton->Width + LeftButton->Width, Height);
@@ -2289,7 +2265,6 @@ void TScrollBarRange::KeyPress(int Key)
 
 // --- TScrollBar -------------------------------------------------------------------
 
-// The catch block prints Min and Max, as THorizontalScrollBar's.
 TScrollBar::TScrollBar(TRect Area, int Min, int Max, int _Value, int _Visible, int _ButtonRange)
 {
 	PATELLA_ASSERT_VALUES(_ButtonRange>0, _ButtonRange);
@@ -2311,8 +2286,8 @@ void TScrollBar::SetSize(int Width, int Height)
 {
 	Width = SkinProperties().ScrollBarWidth;
 	Height -= DownButton->Height + UpButton->Height;
-	if (Height < Range->getMinimumHeight())
-		Height = Range->getMinimumHeight();
+	if (Height < Range->GetMinimumHeight())
+		Height = Range->GetMinimumHeight();
 	Range->SetSize(Width, Height);
 	Range->Arrange();
 	TComponent::SetSize(Width, Height + DownButton->Height + UpButton->Height);
@@ -2478,7 +2453,7 @@ void TListBox::KeyPress(int _Key)
 			StopEdit();
 		Selected = Selected + 1;
 	} else if (!Editing) {
-		if ((Code > 0x60 && Code < 0x7b) || (Code > 0x40 && Code < 0x5b)) {
+		if ((Code >= 'a' && Code <= 'z') || (Code >= 'A' && Code <= 'Z')) {
 			const char c = ToLower(Code);
 			for (int i = LineText.min; i <= LineText.max; i++) {
 				if (LineText(i) != nullptr && (char)ToLower(*LineText(i)) >= c) {
@@ -2773,9 +2748,4 @@ void TProgressBar::SetCurrent(int current)
 	Arrange();
 }
 
-void TProgressBar::SetComplete()
-{
-	Current = Maximum;
-	Arrange();
-}
 // NOLINTEND(cppcoreguidelines-owning-memory,cppcoreguidelines-pro-type-vararg)

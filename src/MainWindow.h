@@ -10,13 +10,6 @@
 // windows) above the dialog window that holds the containers and the skill,
 // battle, VIP and trade windows. The keys and hotkeys of the game window are
 // handled here (walking, turning and the Ctrl shortcuts).
-//
-// Names from the binary: MainWindow and ModalWindow (assertions in
-// Control.cpp), DialogWindow ("DialogWindow!=NULL"), getBody, OldWindow,
-// TRADE_WINDOW, ACTIONSTATE_NONE and the parameter names in the catch blocks
-// (Width, Height, Surface, Key, Event, ConsoleHeight, dx, dy, Container,
-// Identifier, x, y). The class names and the other names are ours
-// (notes/decisions.md, "MainWindow.cpp").
 
 #pragma once
 
@@ -29,7 +22,7 @@ class TConsoleWindow; // ConsoleWindow.h
 class TStartWindow;
 class TSplitter;
 
-// TRADE_WINDOW is DialogWindow.h's since issue #118 (ContentWindows.cpp no longer includes this header).
+// TRADE_WINDOW is DialogWindow.h's (ContentWindows.cpp does not include this header).
 
 class TMainWindow : public TWindow {
 public:
@@ -53,17 +46,17 @@ public:
 	void SetConsoleActive(bool Active) const;
 
 	// The children; all NULL in the mode that does not use them.
-	TMapFrame *MapFrame;         // +0x2c
-	TBorder *SideBar;            // +0x30, the frame around SidePanel
-	TDialogWindow *DialogWindow; // +0x34, containers, skills, battle, VIP and trade
-	TDialogWindow *SidePanel;    // +0x38, inventory and the other side-bar windows
-	TConsoleWindow *Console;     // +0x3c
-	TSplitter *Splitter;         // +0x40
-	TStartWindow *StartWindow;   // +0x44
-	bool InGame;                 // +0x48
+	TMapFrame *MapFrame;
+	TBorder *SideBar;            // the frame around SidePanel
+	TDialogWindow *DialogWindow; // containers, skills, battle, VIP and trade
+	TDialogWindow *SidePanel;    // inventory and the other side-bar windows
+	TConsoleWindow *Console;
+	TSplitter *Splitter;
+	TStartWindow *StartWindow;
+	bool InGame;
 
 protected:
-	void OnClose() override; // the destructor's preferences (issue #108)
+	void OnClose() override; // the preferences
 };
 
 // The window behind the start dialogs.
@@ -74,7 +67,7 @@ public:
 	void SetSize(int Width, int Height) override;
 	void HandleEvent(int Event) override;
 
-	TBorder *Frame; // +0x2c, around the buttons
+	TBorder *Frame; // around the buttons
 };
 
 // The bar between the map and the console: dragging it changes the
@@ -92,12 +85,12 @@ public:
 		TElement::ReleaseCapture(Component);
 	}
 
-	bool Dragging; // +0x24
-	int DragX;     // +0x28, where the button was pressed
-	int DragY;     // +0x2c
+	bool Dragging;
+	int DragX; // where the button was pressed
+	int DragY;
 };
 
-// ModalWindow and MainWindow are TGUI's members (GUI.h, issue #107):
+// ModalWindow and MainWindow are TGUI's members (GUI.h):
 // patella::bridge::GUI().ModalWindow and .MainWindow.
 
 void InitMainWindow(int Width, int Height, void (*ExitProgram)(), void (*SetDisplayMode)(int Mode),

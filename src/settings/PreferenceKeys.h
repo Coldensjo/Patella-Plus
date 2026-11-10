@@ -1,11 +1,11 @@
-// PreferenceKeys.h: the options of Tibia.cfg as keys of Patella.ini (Patella-Modern issue #45; plan D12).
+// PreferenceKeys.h: the options of Tibia.cfg as keys of Patella.ini.
 //
-// Since issue #45 the x64 client keeps every option the original kept in Tibia.cfg (Preferences.cpp) in
+// The x64 client keeps every option the original kept in Tibia.cfg (Preferences.cpp) in
 // Patella.ini (settings/Settings.h), one `key=value` line each, and writes Tibia.cfg no more. The keys are
 // Tibia.cfg's names (ASCII case-insensitive, as every key of Patella.ini), written in this case:
 //
 //	PreferencesVersion=2                  the file has the options (without it an existing Tibia.cfg is imported);
-//	                                      2: the file is UTF-8 (issue #117), 1: Windows-1252 (below)
+//	                                      2: the file is UTF-8, 1: Windows-1252 (below)
 //	TestServer=no                         yes or no, as every flag below
 //	FullscreenMode=640,480,32             width, height, depth; no line while none was chosen (width 0)
 //	WindowsMousepointer, LightEffects, TextualEffects, NoStretching
@@ -33,22 +33,21 @@
 // writes every other byte below 0x20 and 0x7f as `\xHH`, and so the five bytes Windows-1252 leaves undefined (0x81,
 // 0x8d, 0x8f, 0x90, 0x9d: the C1 controls of their value, types/Cp1252.h). `\xHH` is always the client's byte HH.
 //
-// The encoding (issue #117, plan D4; notes/decisions.md "#117"): the client's texts are Windows-1252 (#112), the file
-// is UTF-8. Every other character of a text is written as the UTF-8 of its Windows-1252 byte, and read back as the
-// byte of its character: '?' for a character Windows-1252 does not have (typed in an editor) and for each ill-formed
-// part of the UTF-8 (Utf8ToCp1252). A file of PreferencesVersion 1 (#45's client) has the bytes from 0x80 on as they
-// are; ReadPreferences reads it so (TEncoding::Cp1252, Settings.h EncodingOf), and WritePreferences converts the
-// whole file to UTF-8 first (its comments and other keys too) and writes it as version 2: a version-1 file is
-// converted once, at the next save, its options unchanged by value.
+// The encoding: the client's texts are Windows-1252, the file is UTF-8. Every other character of a text is written as
+// the UTF-8 of its Windows-1252 byte, and read back as the byte of its character: '?' for a character Windows-1252
+// does not have (typed in an editor) and for each ill-formed part of the UTF-8 (Utf8ToCp1252). A file of
+// PreferencesVersion 1 has the bytes from 0x80 on as they are; ReadPreferences reads it so (TEncoding::Cp1252,
+// Settings.h EncodingOf), and WritePreferences converts the whole file to UTF-8 first (its comments and other keys
+// too) and writes it as version 2: a version-1 file is converted once, at the next save, its options unchanged by
+// value.
 //
-// The reading mirrors the original's Tibia.cfg reader on the file its writer wrote (Preferences.cpp
-// ReadTibiaCfg, WriteTibiaCfg), so the options after a restart are the original's: ChaseMode 2 reads as 0, a
-// repeated OpenDialogs number once, a hotkey's line breaks as spaces (a final one: sent at once), its text
-// cut to 255 bytes. Unlike the original's reader, a line it cannot read leaves that option as it was (the
-// client passes the defaults) and is reported, instead of resetting every option. Keys it does not know are
-// not its own (Device, LogLevel, ...): left alone, as the comments.
+// The reading mirrors the original's Tibia.cfg reader (Preferences.cpp ReadTibiaCfg), so the options after a restart
+// are the original's: ChaseMode 2 reads as 0, a repeated OpenDialogs number once, a hotkey's line breaks as spaces (a
+// final one: sent at once), its text cut to 255 bytes. Unlike the original's reader, a line it cannot read leaves
+// that option as it was (the client passes the defaults) and is reported, instead of resetting every option. Keys it
+// does not know are not its own (Device, LogLevel, ...): left alone, as the comments.
 //
-// No platform header: part of patella_core, tested on every preset (tests/unit/core_preferences_test.cpp).
+// No platform header.
 
 #pragma once
 
@@ -60,6 +59,23 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+// The fight modes of the combat controls: "AttackMode" and "ChaseMode" in the configuration, and the first two bytes
+// that SendFightModes sends (Communication.cpp). The names are ours, from the buttons of TCombatControls
+// (ContentWindows.cpp: offensive, balanced, defensive; stand, chase) and their events EVENT_ATTACK_* and
+// EVENT_CHASE_*. They are here, below Preferences.h, because the reader of the configuration names them as well.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	ATTACK_OFFENSIVE = 1,
+	ATTACK_BALANCED = 2, // the default
+	ATTACK_DEFENSIVE = 3,
+};
+enum : int {         // NOLINT(cppcoreguidelines-use-enum-class): int constants, enumerators for the reason in GUI.h
+	CHASE_STAND = 0, // the default; PrepareMovement's with AutoChaseOff, when the player walks while attacking
+	CHASE_ON = 1,    // chase the opponent
+	// No button sets it and the client never sends it. A configuration that holds it is read as CHASE_STAND, as the
+	// original's reader read it; the code does not show what the mode was.
+	CHASE_OBSOLETE = 2,
+};
 
 namespace patella::settings {
 
@@ -118,8 +134,8 @@ struct TPreferenceValues {
 	bool ClassicControl = false;
 	bool AutoChaseOff = true;
 	bool DragFullStacks = false;
-	int AttackMode = 2;
-	int ChaseMode = 0;
+	int AttackMode = ATTACK_BALANCED;
+	int ChaseMode = CHASE_STAND;
 	bool SecureMode = true;
 	std::vector<TBuddyValue> Buddies;
 	std::vector<std::string> White;

@@ -1,7 +1,4 @@
-// Utils.cpp: Latin-1 character and string helpers, outfit colours, and the
-// packet buffers. Member and parameter names come from the assertion strings
-// ("data", "size", "Position", "Size", "NewSize", "s", "s1", "Destination",
-// "Source", "Text", "Buffer", "Number"); function and class names are ours.
+// Utils.h: Latin-1 character and string helpers, the outfit colours, and the packet buffers.
 
 #pragma once
 
@@ -25,7 +22,7 @@ void TrimString(char *Destination, const char *Source);
 bool ShortenString(char *Text, int MaxLength);
 void FormatNumber(int Number, patella::TSpan<char> BufferBytes); // "1,234,567"
 // CompareStrings and ShortenString keep the original's parameters: Count limits the comparison of two C strings (-1:
-// none) and MaxLength is the length Text is cut to, not the size of a buffer (issue #69).
+// none) and MaxLength is the length Text is cut to, not the size of a buffer.
 
 class TBuffer {
 public:
@@ -35,9 +32,9 @@ public:
 		Size = NewSize;
 	}
 
-	uint8 *Data;  // +0x0
-	int Size;     // +0x4
-	int Position; // +0x8
+	uint8 *Data;
+	int Size;
+	int Position;
 };
 
 // Little-endian reads; strings are a u16 length followed by the characters.
@@ -49,7 +46,6 @@ public:
 	uint32 GetQuad();
 	void GetString(patella::TSpan<char> Text); // see Utils.cpp
 	char *GetString();                         // returns a new[] copy
-	void GetBytes(patella::TSpan<uint8> Bytes);
 };
 
 class TWriteBuffer : public TBuffer {

@@ -1,46 +1,35 @@
 // types/GraphicsTypes.h: the value types of the drawing interface (TRect, TRGBColor, TFont and the text
-// alignments), moved here from graphics.h (Patella-Modern issue #116) so that Surface.cpp (TSurface's slots take them)
-// and Skins.h (SkinProperties holds them) need them without graphics.cpp's module: the {Surface, graphics} module cycle
-// was Surface.cpp's include of graphics.h for these types (notes/decisions.md, "#116"). Header only, portable
-// (patella_core's header list). graphics.h exports it, so the files that include graphics.h see them as before.
+// alignments). A header of their own so that Surface.cpp (TSurface's functions take them) and Skins.h (SkinProperties
+// holds them) need them without graphics.h. Header only, portable. graphics.h exports it.
 
 #pragma once
 
 #include "compat/msvc.h" // PATELLA_NO_SANITIZE_ADDRESS
-#include <type_traits>
 
 // Text alignment (TFont::Alignment, the Alignment parameters).
-// An unnamed enum of int constants (TFont's int Alignment), unscoped as the other unnamed ones (notes/decisions.md,
-// "The other ten stay unscoped"); clang-tidy's image checks it since it is a core header (issue #116).
+// An unnamed enum of int constants (TFont's int Alignment), unscoped as the other unnamed ones.
 enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants, above
 	LEFT_ALIGN = 0,
 	CENTER_ALIGN = 1,
 	RIGHT_ALIGN = 2,
 };
-static_assert(sizeof(decltype(LEFT_ALIGN)) == 4);
-static_assert(std::is_same_v<std::underlying_type_t<decltype(LEFT_ALIGN)>, int>);
 
 // --- Graphics types -----------------------------------------------------------
 // The types of the drawing interface, used by every window file (GUI.h
-// includes graphics.h, which exports this header). Default construction zeroes them, as the binary's
-// compiler-generated constructors do (SkinProperties' constructor,
-// the new TSprite[] and new TPicture[] loops, DrawOutfit's colours).
+// includes graphics.h, which exports this header). Default construction
+// zeroes them.
 
-// A rectangle: position and size. The members are named by the assertions
-// "FromRect.width>0 && FromRect.height>0" (the surfaces' Blit and BlitRect)
-// and "ToRect.width<=..." (StretchBlit), and by the TRect members of
-// SkinProperties that GUI.cpp's assertions name with .x and .y
-// (StatusWindow.HitpointsBar.x, BuddylistWindow.Logo.y); TSkin (Skins.h) and
-// TDrawing (GUI.h) have the same lower-case names (issue #29).
-struct TRect { // passed by value (16 bytes)
+// A rectangle: position and size. The lower-case names are the original's
+// (its assertions' texts have them), as TSkin's (Skins.h) and TDrawing's
+// (GUI.h).
+struct TRect { // passed by value
 	constexpr TRect() : x(0), y(0), width(0), height(0) {}
-	// The parameters are not named as the members (Patella-Modern issue #116): patella_core's GCC -Wshadow, since
-	// Skins.h includes this header.
+	// The parameters are not named as the members: patella_core's GCC -Wshadow, since Skins.h includes this header.
 	constexpr TRect(int X, int Y, int Width, int Height) : x(X), y(Y), width(Width), height(Height) {}
 	int x, y, width, height;
 };
 
-struct TRGBColor { // passed by value (12 bytes)
+struct TRGBColor { // passed by value
 	constexpr TRGBColor() : R(0), G(0), B(0) {}
 	constexpr TRGBColor(int Red, int Green, int Blue) : R(Red), G(Green), B(Blue) {}
 	// A colour of the 6x6x6 palette, Color = R*36 + G*6 + B with steps of 51.
@@ -50,9 +39,8 @@ struct TRGBColor { // passed by value (12 bytes)
 		B = Color % 6 * 51;
 		G = Color / 6 % 6 * 51;
 	}
-	// operator!= negates the inlined operator==, as the binary's does.
-	// Not checked by AddressSanitizer (issue #70): GetVideoPicture compares the colour key of the picture after
-	// the one it draws, past the end of Pictures for the last one, as the original does (graphics.cpp).
+	// Not checked by AddressSanitizer: GetVideoPicture compares the colour key of the picture after the one it
+	// draws, past the end of Pictures for the last one, as the original does (graphics.cpp).
 	PATELLA_NO_SANITIZE_ADDRESS bool operator==(TRGBColor Other) const
 	{
 		return R == Other.R && G == Other.G && B == Other.B;
@@ -64,10 +52,8 @@ struct TRGBColor { // passed by value (12 bytes)
 	int R, G, B;
 };
 
-// The colour TFont's default constructor reads from memory. Every object
-// that constructs a TFont has its own copy, so it is a constant defined in a
-// header (internal linkage). The name is ours.
-constexpr TRGBColor DefaultFontColor(224, 224, 224); // constexpr since issue #116 (constant-initialised as before)
+// The colour of TFont's default constructor.
+constexpr TRGBColor DefaultFontColor(224, 224, 224);
 
 // The numbers of the four fonts (TFont::FontNumber, the FontNumber parameters, InitFont's FontName), 1 to
 // NumberOfFonts. The original's names are not known; these say what graphics.cpp's InitFonts and the fonts' pictures
@@ -79,9 +65,8 @@ enum : int {           // NOLINT(cppcoreguidelines-use-enum-class): int constant
 	FONT_SMOOTH = 4,   // picture 8, FONT_SHARP's characters with smoothed edges: TFont's default and the console's text
 };
 
-// A text format: font, colour and alignment ("Format.Alignment" in
-// PrintFormattedText's assertion).
-struct TFont { // passed by value (20 bytes)
+// A text format: font, colour and alignment.
+struct TFont { // passed by value
 	TFont() : FontNumber(FONT_SMOOTH), Color(DefaultFontColor), Alignment(LEFT_ALIGN) {}
 	int FontNumber;
 	TRGBColor Color;

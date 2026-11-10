@@ -1,28 +1,21 @@
-// Socket.h: ISocket, the platform's network (Patella-Modern issue #109, plan M7; notes/decisions.md, "#109: the
-// platform interfaces"). Not part of the original source. Portable: no platform header.
+// Socket.h: ISocket, the platform's network. Portable: no platform header.
 //
 // TNetwork (Network.cpp) has one connection at a time, to the login server or the game server, and resolves the
-// login servers' names. What it asked of WinSock and of MFC's CAsyncSocket it asks of the process's ISocket
-// (platform/Platform.h), call for call: the same calls, in the same order, with the same arguments, so the golden
-// Network test's fakes of WinSock and CAsyncSocket see what they saw.
+// login servers' names. What the original asked of WinSock and of MFC's CAsyncSocket it asks of the process's ISocket
+// (platform/Platform.h), call for call: the same calls, in the same order, with the same arguments. The implementation
+// is TPortableSocket (platform/PortableSocket.h): Winsock or POSIX sockets, non-blocking, polled from the loop, the
+// name lookup on a std::jthread.
 //
-//	TPortableSocket   Winsock or POSIX sockets, non-blocking, polled from the loop, the name lookup on a std::jthread
-//	                  (platform/PortableSocket.h, issue #125): Patella.exe's, and the test build's live runs'
-//	TPipeSocketWin32  the test build's server replay inside the process (PipeSocketWin32.h, issue #120)
-//	TMfcSocket        MFC's CAsyncSocket and WinSock, the original's calls (tests/golden/network/MfcSocket.h): the
-//	                  golden runner's, whose Network test fakes those calls (Patella.exe's too until issue #125)
-//
-// A connection is a TSocket, which each executable defines once (PortableSocket.h's in Patella.exe and the test build,
-// a CAsyncSocket in the golden runner); TNetwork holds it as the original held its CAsyncSocket, and the golden Network
-// test reaches its events through it. Its events go to the ISocketEvents it was made for (TNetwork).
+// A connection is a TSocket (PortableSocket.h); TNetwork holds it as the original held its CAsyncSocket. Its events go
+// to the ISocketEvents it was made for (TNetwork).
 
 #pragma once
 
 namespace patella::platform {
 
-// The numbers the interface carries (issue #110): WinSock's, which every implementation reports and TNetwork's error
-// messages name (GetErrorMessage's table; the protocol's numbers here, whatever the system's own are). PortableSocket.cpp
-// asserts on Windows that they are WinSock's, and gives them for POSIX's errno and getaddrinfo's codes (issue #125).
+// The numbers the interface carries: WinSock's, which every implementation reports and TNetwork's error messages name
+// (GetErrorMessage's table; the protocol's numbers here, whatever the system's own are). PortableSocket.cpp asserts on
+// Windows that they are WinSock's, and gives them for POSIX's errno and getaddrinfo's codes.
 namespace socket_error {
 inline constexpr int Interrupted = 10004;         // WSAEINTR
 inline constexpr int AccessDenied = 10013;        // WSAEACCES
@@ -112,9 +105,9 @@ public:
 	// CAsyncSocket::Close: no event of the connection after it.
 	virtual void Close(TSocket *Connection) = 0;
 
-	// WSAAsyncGetHostByName: the request (nullptr where it could not start, LastError says why); Window gets Message
-	// (HOSTNAME_RESOLVED_MESSAGE, WM_USER + 1: the frames' OnHostResolved) when it is done, with the host's entry in
-	// Buffer. TPortableSocket's lookup is done at a later Poll.
+	// WSAAsyncGetHostByName: the request (nullptr where it could not start, LastError says why). The lookup is done at
+	// a later Poll, with the host's entry in Buffer: the frame's OnHostResolved is then called, where the original's
+	// Window got Message (HOSTNAME_RESOLVED_MESSAGE, WM_USER + 1).
 	[[nodiscard]] virtual void *ResolveHostname(void *Window, unsigned int Message, const char *Hostname, char *Buffer,
 		int Length) = 0;
 	// WSACancelAsyncRequest: no message for the request (nullptr, or one that is done: nothing).
@@ -123,10 +116,9 @@ public:
 	// call.
 	[[nodiscard]] virtual const char *ResolvedAddress(const char *Buffer) = 0;
 
-	// The loop's turn (issue #125): the connections' events (OnConnect, OnReceive, OnClose) and the finished name
-	// lookups, on the calling thread (the client's), where the message loop dispatched WinSock's messages. The client
-	// calls it at the start of every idle step (Player.cpp's OnIdle, on both window paths). Nothing where the events
-	// come otherwise (the golden runner's fakes, the replay's window messages).
+	// The loop's turn: the connections' events (OnConnect, OnReceive, OnClose) and the finished name lookups, on the
+	// calling thread (the client's), where the original's message loop dispatched WinSock's messages. The client calls
+	// it at the start of every idle step (Player.cpp's OnIdle).
 	virtual void Poll() = 0;
 
 protected:
