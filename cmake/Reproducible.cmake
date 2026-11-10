@@ -25,7 +25,7 @@
 # Release only otherwise: Debug keeps absolute paths, which debuggers open without being told where the sources are. The source
 # folder is removed from the paths (MSVC) or replaced by "." (GCC, Clang), so __FILE__ reads "src\Map.cpp" or "./src/Map.cpp"
 # (from the build folder, "../../src/Map.cpp" under the launcher); what shows it to a person takes the file's name alone
-# (patella::ErrorOrigin, src/TMyException.cpp). A build folder outside the source folder gets the same treatment; one inside
+# (patella::ErrorText, src/TMyException.cpp). A build folder outside the source folder gets the same treatment; one inside
 # it (the presets') is covered by the source folder's.
 #
 # The hardening and analysis settings are not touched (cmake/Hardening.cmake, cmake/Core.cmake), and the 32-bit capture

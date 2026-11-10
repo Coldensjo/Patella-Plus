@@ -14,8 +14,7 @@
 // SDL_SetWindowFullscreenMode on every system since issue #152).
 //
 // Headless (issue #145; platform/Window.h IWindow::Headless, the test build's --test-headless): the device gets no
-// surface (TRenderer renders into its images and presents nothing; the frame observer reads the canvas back before
-// Present as always), and fullscreen mode does not change the display's mode. The devices' windows are made as always.
+// surface (TRenderer renders into its images and presents nothing), and fullscreen mode does not change the display's mode. The devices' windows are made as always.
 
 #include "common.h"
 #include "vulkan/SurfaceVulkan.h"

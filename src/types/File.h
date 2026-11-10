@@ -9,7 +9,7 @@
 //
 // The functions are the C library's, with their results and their errors: Open is fopen (false where fopen
 // returned NULL, errno set by the library), Close is fclose (its result; nothing to do on a closed TFile),
-// Read/Write are fread/fwrite (the number of whole items), PutChar is fputc, Seek is fseek, Flush is fflush, and
+// Read/Write are fread/fwrite (the number of whole items), Seek is fseek, Flush is fflush, and
 // Descriptor is _fileno/fileno (the descriptor under the FILE, for _eof). Nothing throws, nothing reports: the
 // callers check the results and raise their own errors (TERROR texts, frozen until M5), as they did. Print
 // writes a text formatted with std::format's language (fprintf with the client's conversions, which give the same
@@ -21,7 +21,7 @@
 //	  Microsoft C runtime's text mode wrote it (MSVC 7.1's and the UCRT's lowio _write). On Windows that is the
 //	  runtime's own text mode (the original's fopen "at" itself); elsewhere the stream is a glibc fopencookie
 //	  stream whose write function adds the '\r' and writes to the descriptor (POSIX has no text mode). The FILE
-//	  itself translates, so every write (Write, PutChar, Print) and every flush point is the same as on Windows.
+//	  itself translates, so every write (Write, Print) and every flush point is the same as on Windows.
 //	  Reading in text mode is refused (false, errno EINVAL): the client reads only binary files.
 // Open is fopen with the original's sharing on Windows (_fsopen with _SH_DENYNO, which is what fopen calls);
 // the UTF-16 name overload of the Windows-only test mode is _wfopen_s, as its callers had (not shared).
