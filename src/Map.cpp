@@ -1300,25 +1300,25 @@ int patella::TMap::FindPath(int StartX, int StartY, int StartZ, int DestX, int D
 			return 0;
 		if (DistanceY + DistanceX == 1) {
 			if (DestX == StartX + 1 && DestY == StartY)
-				Directions[0] = 1;
+				Directions[0] = STEP_EAST;
 			if (DestX == StartX && DestY == StartY - 1)
-				Directions[0] = 3;
+				Directions[0] = STEP_NORTH;
 			if (DestX == StartX - 1 && DestY == StartY)
-				Directions[0] = 5;
+				Directions[0] = STEP_WEST;
 			if (DestX == StartX && DestY == StartY + 1)
-				Directions[0] = 7;
+				Directions[0] = STEP_SOUTH;
 			*Steps = 1;
 			return 1;
 		}
 		if (ForceDiagonal && DistanceX == 1 && DistanceY == 1) {
 			if (DestX == StartX + 1 && DestY == StartY - 1)
-				Directions[0] = 2;
+				Directions[0] = STEP_NORTHEAST;
 			if (DestX == StartX - 1 && DestY == StartY - 1)
-				Directions[0] = 4;
+				Directions[0] = STEP_NORTHWEST;
 			if (DestX == StartX - 1 && DestY == StartY + 1)
-				Directions[0] = 6;
+				Directions[0] = STEP_SOUTHWEST;
 			if (DestX == StartX + 1 && DestY == StartY + 1)
-				Directions[0] = 8;
+				Directions[0] = STEP_SOUTHEAST;
 			*Steps = 1;
 			return 1;
 		}
@@ -1408,21 +1408,21 @@ int patella::TMap::FindPath(int StartX, int StartY, int StartZ, int DestX, int D
 			}
 			if (Count >= 0) {
 				if (Node->x == LastX + 1 && Node->y == LastY)
-					Directions[Count] = 1;
+					Directions[Count] = STEP_EAST;
 				if (Node->x == LastX + 1 && Node->y == LastY - 1)
-					Directions[Count] = 2;
+					Directions[Count] = STEP_NORTHEAST;
 				if (Node->x == LastX && Node->y == LastY - 1)
-					Directions[Count] = 3;
+					Directions[Count] = STEP_NORTH;
 				if (Node->x == LastX - 1 && Node->y == LastY - 1)
-					Directions[Count] = 4;
+					Directions[Count] = STEP_NORTHWEST;
 				if (Node->x == LastX - 1 && Node->y == LastY)
-					Directions[Count] = 5;
+					Directions[Count] = STEP_WEST;
 				if (Node->x == LastX - 1 && Node->y == LastY + 1)
-					Directions[Count] = 6;
+					Directions[Count] = STEP_SOUTHWEST;
 				if (Node->x == LastX && Node->y == LastY + 1)
-					Directions[Count] = 7;
+					Directions[Count] = STEP_SOUTH;
 				if (Node->x == LastX + 1 && Node->y == LastY + 1)
-					Directions[Count] = 8;
+					Directions[Count] = STEP_SOUTHEAST;
 			}
 			LastX = Node->x;
 			LastY = Node->y;

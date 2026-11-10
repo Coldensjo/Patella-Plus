@@ -1075,7 +1075,7 @@ TOutfitDialog::TOutfitDialog(const int *Data)
 	Colors[2] = Data[3];
 	Colors[3] = Data[4];
 	TComponent::SetSize(SkinProperties().DataC58, SkinProperties().DataC5C);
-	OutfitIcon = new TOutfitIcon(Outfit, 2, Colors.data(), &SkinProperties().DataC74);
+	OutfitIcon = new TOutfitIcon(Outfit, DIRECTION_SOUTH, Colors.data(), &SkinProperties().DataC74);
 	TBorder *Border = new TBorder(OutfitIcon, 0, 9, 0, 11, 10, 0, 8, 0, SkinProperties().DataC70);
 	InsertChild(Border);
 	SetChildArea(Border, SkinProperties().DataC60);

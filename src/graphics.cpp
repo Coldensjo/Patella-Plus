@@ -897,10 +897,10 @@ void patella::TGraphics::DrawOutfit(int Surface, int x, int y, int Size, int Out
 	const int Scale = Size * 32 / PATELLA_DIVISOR(GetOutfitExactSize(OutfitNumber));
 	for (int px = 1; px <= GetOutfitWidth(OutfitNumber); px++) {
 		for (int py = 1; py <= GetOutfitHeight(OutfitNumber); py++) {
-			const int SpriteNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 1, 2, 1);
+			const int SpriteNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 1, DIRECTION_SOUTH, 1);
 			int MaskNumber;
 			if (GetOutfitLayers(OutfitNumber) == 2)
-				MaskNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 2, 2, 1);
+				MaskNumber = GetOutfitSpriteNumber(OutfitNumber, px, py, 2, DIRECTION_SOUTH, 1);
 			else
 				MaskNumber = 0;
 			DrawMaskedSpriteScaled(Surface, x - px * Scale + Size, y - py * Scale + Size, Scale, Scale,

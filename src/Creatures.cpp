@@ -443,13 +443,13 @@ int TCreature::GetDrawDirection() const
 void TCreature::StartMovement(int dx, int dy, int Waypoints)
 {
 	if (dx > 0)
-		Direction = 1;
+		Direction = DIRECTION_EAST;
 	else if (dx < 0)
-		Direction = 3;
+		Direction = DIRECTION_WEST;
 	else if (dy < 0)
-		Direction = 0;
+		Direction = DIRECTION_NORTH;
 	else if (dy > 0)
-		Direction = 2;
+		Direction = DIRECTION_SOUTH;
 	patella::TPlayerState &Player = patella::bridge::PlayerState();
 	if (Waypoints != 0 && CreatureID == Player.PlayerID) {
 		const bool Predicted = Player.PlayerStepDX == dx && Player.PlayerStepDY == dy;
@@ -536,14 +536,14 @@ void patella::TPlayerState::DoPlayerStep()
 	int dy = 0;
 	switch (PlayerSteps[CurrentPlayerStep]) {
 		// clang-format off
-	case 1: dx = 1; dy = 0; break;
-	case 2: dx = 1; dy = -1; break;
-	case 3: dx = 0; dy = -1; break;
-	case 4: dx = -1; dy = -1; break;
-	case 5: dx = -1; dy = 0; break;
-	case 6: dx = -1; dy = 1; break;
-	case 7: dx = 0; dy = 1; break;
-	case 8: dx = 1; dy = 1; break;
+	case STEP_EAST: dx = 1; dy = 0; break;
+	case STEP_NORTHEAST: dx = 1; dy = -1; break;
+	case STEP_NORTH: dx = 0; dy = -1; break;
+	case STEP_NORTHWEST: dx = -1; dy = -1; break;
+	case STEP_WEST: dx = -1; dy = 0; break;
+	case STEP_SOUTHWEST: dx = -1; dy = 1; break;
+	case STEP_SOUTH: dx = 0; dy = 1; break;
+	case STEP_SOUTHEAST: dx = 1; dy = 1; break;
 	default: break; // no step: dx and dy stay 0, as without it (bugprone-switch-missing-default-case, issue #110)
 		// clang-format on
 	}
@@ -559,13 +559,13 @@ void patella::TPlayerState::DoPlayerStep()
 	PlayerStepDX = dx;
 	PlayerStepDY = dy;
 	if (dx > 0)
-		PlayerStepDirection = 1;
+		PlayerStepDirection = DIRECTION_EAST;
 	else if (dx < 0)
-		PlayerStepDirection = 3;
+		PlayerStepDirection = DIRECTION_WEST;
 	else if (dy < 0)
-		PlayerStepDirection = 0;
+		PlayerStepDirection = DIRECTION_NORTH;
 	else if (dy > 0)
-		PlayerStepDirection = 2;
+		PlayerStepDirection = DIRECTION_SOUTH;
 }
 
 // 0x4510f0, line 347. Computes the path to the destination and starts its

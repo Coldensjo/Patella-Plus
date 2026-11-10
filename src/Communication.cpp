@@ -233,14 +233,14 @@ void patella::TCommunication::SendWalk()
 	PATELLA_ASSERT_VALUES(Steps>0, Steps);
 	if (Steps == 1) {
 		switch (PlayerState.GetPlayerStep(0)) {
-		case 1: Network.BeginCommand(GAME_SEND_WALK_EAST); break;
-		case 2: Network.BeginCommand(GAME_SEND_WALK_NORTH_EAST); break;
-		case 3: Network.BeginCommand(GAME_SEND_WALK_NORTH); break;
-		case 4: Network.BeginCommand(GAME_SEND_WALK_NORTH_WEST); break;
-		case 5: Network.BeginCommand(GAME_SEND_WALK_WEST); break;
-		case 6: Network.BeginCommand(GAME_SEND_WALK_SOUTH_WEST); break;
-		case 7: Network.BeginCommand(GAME_SEND_WALK_SOUTH); break;
-		case 8: Network.BeginCommand(GAME_SEND_WALK_SOUTH_EAST); break;
+		case STEP_EAST: Network.BeginCommand(GAME_SEND_WALK_EAST); break;
+		case STEP_NORTHEAST: Network.BeginCommand(GAME_SEND_WALK_NORTH_EAST); break;
+		case STEP_NORTH: Network.BeginCommand(GAME_SEND_WALK_NORTH); break;
+		case STEP_NORTHWEST: Network.BeginCommand(GAME_SEND_WALK_NORTH_WEST); break;
+		case STEP_WEST: Network.BeginCommand(GAME_SEND_WALK_WEST); break;
+		case STEP_SOUTHWEST: Network.BeginCommand(GAME_SEND_WALK_SOUTH_WEST); break;
+		case STEP_SOUTH: Network.BeginCommand(GAME_SEND_WALK_SOUTH); break;
+		case STEP_SOUTHEAST: Network.BeginCommand(GAME_SEND_WALK_SOUTH_EAST); break;
 		default: break; // another step sends nothing, as without it (bugprone-switch-missing-default-case, issue #110)
 		}
 	} else {
@@ -1279,13 +1279,13 @@ void patella::TCommunication::ReceiveMoveCreature()
 				if (Creature->CreatureID == PlayerState.GetPlayerID())
 					PlayerState.StopPlayer();
 				if (dx > 0)
-					Creature->Direction = 1;
+					Creature->Direction = DIRECTION_EAST;
 				else if (dx < 0)
-					Creature->Direction = 3;
+					Creature->Direction = DIRECTION_WEST;
 				else if (dy < 0)
-					Creature->Direction = 0;
+					Creature->Direction = DIRECTION_NORTH;
 				else if (dy > 0)
-					Creature->Direction = 2;
+					Creature->Direction = DIRECTION_SOUTH;
 				if (Creature->CreatureID != PlayerState.GetPlayerID())
 					Creature->StartMovement(0, 0, 0);
 			} else {

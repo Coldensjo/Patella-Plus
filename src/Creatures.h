@@ -94,7 +94,7 @@ public:
 	int StepY;                 // +0x44, abs(dy)*32
 	int StepDuration;          // +0x48, milliseconds, a multiple of Beat
 	bool Moving;               // +0x4c
-	int Direction;             // +0x50, 0 north, 1 east, 2 south, 3 west
+	int Direction;             // +0x50, 0 north, 1 east, 2 south, 3 west (DIRECTION_*, Objects.h)
 	int MoveDirection;         // +0x54, Direction when the current step started
 	int PrevOpponent;          // +0x58, battle list links (slot numbers, -1 at the ends)
 	int NextOpponent;          // +0x5c, NOT_AN_OPPONENT when not in the list
@@ -362,7 +362,7 @@ public:
 	int NumberOfPlayerSteps{}; // 0x5c6858; public: the golden Errors test
 
 private:
-	std::array<int, 10> PlayerSteps{}; // 0x5c685c, 1 east, 2 north-east, ..., 8 south-east; the path finder stops at 10
+	std::array<int, 10> PlayerSteps{}; // 0x5c685c, 1 east, 2 north-east, ..., 8 south-east (STEP_*, Map.h); the path finder stops at 10
 	bool DestinationDiagonal{};        // 0x5c6884, passed on to the path finder
 	bool DestinationExact{};           // 0x5c6885, passed on to the path finder
 	int DestinationZ{};                // 0x5c6888

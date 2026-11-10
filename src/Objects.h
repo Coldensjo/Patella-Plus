@@ -47,6 +47,18 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	POSITION_PARENT_CONTAINER = 0xfe,
 };
 
+// The way a creature faces: TCreature::Direction and MoveDirection, the player's PlayerStepDirection (Creatures.h),
+// the direction the server sends with a creature and with a refused step (CancelPlayerWalk's NewDirection), and the
+// Direction of GetOutfitSpriteNumber, which is the outfit's pattern column less one. Clockwise from north; the names
+// are ours, from StartMovement, which turns a step's dx and dy into them (east or west for a diagonal step). The steps
+// of a path have their own numbers, STEP_* in Map.h. Enumerators for the reason in GUI.h.
+enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
+	DIRECTION_NORTH = 0,
+	DIRECTION_EAST = 1,
+	DIRECTION_SOUTH = 2, // the outfit dialog's and DrawOutfit's
+	DIRECTION_WEST = 3,
+};
+
 // Tibia.dat flags: the bit numbers in TProperties::Flags. The names of
 // 1-20 follow CipSoft's game server (medium confidence); 22, 23, 26 and 27
 // are ours (low).
