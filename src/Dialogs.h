@@ -204,6 +204,7 @@ public:
 
 	TPasswordEditLine *Account;
 	TPasswordEditLine *Password;
+	TCheckBox *Remember; // Patella-Plus, not in the original
 	std::unique_ptr<TFocusGroup> FocusGroup;
 };
 

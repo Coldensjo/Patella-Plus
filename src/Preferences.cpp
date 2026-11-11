@@ -320,6 +320,33 @@ bool TPreferences::GetWasdWalking() const
 	return WasdWalking;
 }
 
+// Patella-Plus, not in the original: the login dialog's "Remember account and password". Without Remember the account
+// and password are forgotten.
+void TPreferences::SetLogin(bool Remember, int Account, const char *Password)
+{
+	RememberLogin = Remember;
+	LoginAccount = Remember ? Account : 0;
+	LoginPassword = Remember ? Password : "";
+}
+
+// Patella-Plus, not in the original.
+bool TPreferences::GetRememberLogin() const
+{
+	return RememberLogin;
+}
+
+// Patella-Plus, not in the original: 0 when none is saved.
+int TPreferences::GetLoginAccount() const
+{
+	return LoginAccount;
+}
+
+// Patella-Plus, not in the original: empty when none is saved.
+const char *TPreferences::GetLoginPassword() const
+{
+	return LoginPassword.c_str();
+}
+
 // Patella-Plus, not in the original: the engine smooths what it stretches (the original always does).
 void TPreferences::SetAntialiasing(bool Value)
 {
@@ -447,6 +474,9 @@ void TPreferences::SetDefaults(TTalkLists &Lists)
 	DragFullStacks = false;
 	Antialiasing = false;
 	WasdWalking = false;
+	RememberLogin = false;
+	LoginAccount = 0;
+	LoginPassword.clear();
 	AttackMode = ATTACK_BALANCED;
 	ChaseMode = CHASE_STAND;
 	SecureMode = true;
@@ -918,6 +948,9 @@ patella::settings::TPreferenceValues TPreferences::GetValues(TTalkLists &Lists)
 	Values.DragFullStacks = DragFullStacks;
 	Values.Antialiasing = Antialiasing;
 	Values.WasdWalking = WasdWalking;
+	Values.RememberLogin = RememberLogin;
+	Values.LoginAccount = LoginAccount;
+	Values.LoginPassword = LoginPassword;
 	Values.AttackMode = AttackMode;
 	Values.ChaseMode = ChaseMode;
 	Values.SecureMode = SecureMode;
@@ -1014,6 +1047,9 @@ void TPreferences::SetValues(const patella::settings::TPreferenceValues &Values,
 	DragFullStacks = Values.DragFullStacks;
 	Antialiasing = Values.Antialiasing;
 	WasdWalking = Values.WasdWalking;
+	RememberLogin = Values.RememberLogin;
+	LoginAccount = RememberLogin ? Values.LoginAccount : 0;
+	LoginPassword = RememberLogin ? Values.LoginPassword : std::string();
 	AttackMode = Values.AttackMode;
 	ChaseMode = Values.ChaseMode;
 	SecureMode = Values.SecureMode;

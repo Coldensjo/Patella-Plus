@@ -13,6 +13,7 @@
 #include "types/FixedString.h"
 #include <array>
 #include <cstddef>
+#include <string>
 #include <vector>
 
 // From the assertions.
@@ -157,6 +158,10 @@ public:
 	[[nodiscard]] bool GetDragFullStacks() const;
 	void SetWasdWalking(bool Value);
 	[[nodiscard]] bool GetWasdWalking() const;
+	void SetLogin(bool Remember, int Account, const char *Password);
+	[[nodiscard]] bool GetRememberLogin() const;
+	[[nodiscard]] int GetLoginAccount() const;
+	[[nodiscard]] const char *GetLoginPassword() const;
 	void SetAntialiasing(bool Value);
 	[[nodiscard]] bool GetAntialiasing() const;
 	[[nodiscard]] const patella::settings::TServerValues &GetServerValues() const;
@@ -218,6 +223,10 @@ private:
 	bool DragFullStacks{}; // Patella-Plus, not in the original
 	bool WasdWalking{};    // Patella-Plus, not in the original: W, A, S and D walk, the console's line is off
 	bool Antialiasing{};   // Patella-Plus, not in the original: stretched pictures are smoothed
+	// Patella-Plus, not in the original: the login dialog's saved account number and password (0 and empty without).
+	bool RememberLogin{};
+	int LoginAccount{};
+	std::string LoginPassword;
 	// NumberOfOpenChannels: OpenChannels.size().
 	bool PrivateMessages{};
 	bool TimeStamps{};

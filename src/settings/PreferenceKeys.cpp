@@ -439,6 +439,14 @@ void WritePreferences(TSettingsFile &File, const TPreferenceValues &Values)
 	Put(File, "DragFullStacks", YesNo(Values.DragFullStacks));
 	Put(File, "Antialiasing", YesNo(Values.Antialiasing));
 	Put(File, "WasdWalking", YesNo(Values.WasdWalking));
+	Put(File, "RememberLogin", YesNo(Values.RememberLogin));
+	if (Values.RememberLogin) {
+		Put(File, "LoginAccount", Number(Values.LoginAccount));
+		Put(File, "LoginPassword", QuoteText(Values.LoginPassword));
+	} else {
+		File.Remove("LoginAccount");
+		File.Remove("LoginPassword");
+	}
 	Put(File, "AttackMode", Number(Values.AttackMode));
 	Put(File, "ChaseMode", Number(Values.ChaseMode));
 	Put(File, "SecureMode", YesNo(Values.SecureMode));
@@ -540,6 +548,10 @@ std::vector<std::string> ReadPreferences(const TSettingsFile &File, TPreferenceV
 	Read.Flag("DragFullStacks", Values.DragFullStacks);
 	Read.Flag("Antialiasing", Values.Antialiasing);
 	Read.Flag("WasdWalking", Values.WasdWalking);
+	Read.Flag("RememberLogin", Values.RememberLogin);
+	Read.Number("LoginAccount", Values.LoginAccount);
+	if (const auto Fields = Read.Fields("LoginPassword", "t"))
+		Values.LoginPassword = (*Fields)[0].Text;
 	Read.Number("AttackMode", Values.AttackMode);
 	Read.Number("ChaseMode", Values.ChaseMode);
 	if (Values.ChaseMode == CHASE_OBSOLETE)
