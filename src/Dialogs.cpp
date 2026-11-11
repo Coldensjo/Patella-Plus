@@ -827,9 +827,17 @@ void TReconnectWindow::HandleEvent(int Event)
 
 // --- TLoginDialog -------------------------------------------------------------------
 
+// Patella-Plus: "Remember login" is a row below the link, a gap apart. The body grows by both, and TDialog fits itself
+// and its bottom-anchored buttons around the body. With a saved account the fields are filled in and the
+// password has the focus, so Enter logs in.
 TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 {
-	TComponent::SetSize(SkinProperties().LoginDialogWidth, SkinProperties().LoginDialogHeight);
+	constexpr int RememberGap = 8;
+	constexpr int RememberRowHeight = 22;
+	TRect RememberArea = SkinProperties().LoginDialogLink;
+	RememberArea.y += RememberArea.height + RememberGap;
+	RememberArea.height = RememberRowHeight;
+	TComponent::SetSize(SkinProperties().LoginDialogWidth, SkinProperties().LoginDialogHeight + RememberGap + RememberRowHeight);
 	FocusGroup.reset(new TFocusGroup());
 	Account = new TPasswordEditLine(8);
 	Account->SetFocusGroup(FocusGroup.get());
@@ -848,7 +856,21 @@ TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 	Label = new TLabel(SkinProperties().Dialog.TextFont, TextPassword);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().LoginDialogPasswordLabel);
-	FocusGroup->SetActive(Account);
+	Remember = new TCheckBox("Remember login");
+	InsertChild(Remember);
+	SetChildArea(Remember, RememberArea);
+	Remember->SetChecked(Preferences().GetRememberLogin());
+	if (Preferences().GetRememberLogin() && Preferences().GetLoginAccount() > 0) {
+		TFixedString<16> Number;
+		Number.Format("{}", Preferences().GetLoginAccount());
+		Account->SetText(Number);
+		Password->SetText(Preferences().GetLoginPassword());
+		Account->SetCursor((int)strlen(Account->Text.get()));
+		Password->SetCursor((int)strlen(Password->Text.get()));
+		FocusGroup->SetActive(Password);
+	} else {
+		FocusGroup->SetActive(Account);
+	}
 	Arrange();
 }
 
@@ -865,11 +887,16 @@ void TLoginDialog::KeyPress(int Key)
 	}
 }
 
-// OK (1) logs in with the account and password.
+// OK (1) logs in with the account and password. Patella-Plus: it saves them, or forgets saved ones, by the check box.
 void TLoginDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		Session().SetAccount(atoi(Account->Text.get()), Password->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
+		const int Number = atoi(Account->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
+		Session().SetAccount(Number, Password->Text.get());
+		if (Remember->IsChecked() || Preferences().GetRememberLogin()) {
+			Preferences().SetLogin(Remember->IsChecked(), Number, Password->Text.get());
+			Preferences().SavePreferences(Talk());
+		}
 		Interaction().AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
 		Interaction().AddMessage(MESSAGE_CONNECTING_LOGIN_DIALOG, 0, 0);
 	}
