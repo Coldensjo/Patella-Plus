@@ -39,4 +39,5 @@ is refused where a `Tibia.exe` exists. `python -I tools/package_check.py <packag
 - Stage files by exact name.
 - Indent with tabs, except where a format or `.editorconfig` requires spaces.
 - No tests or docs are added.
+- Only commit once the feature is completely done, try to keep each feature into one big commit. If you see uncommitted changes in the repo, stop and ask the owner what to do with them.
 - A feature's agent compiles, then places the executable into the play folder, the owner tries it and says when it merges.
