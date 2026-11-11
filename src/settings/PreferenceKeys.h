@@ -20,6 +20,7 @@
 //	OpenChannel=5,7                       the same
 //	ClassicControl, AutoChaseOff, SecureMode
 //	DragFullStacks                        Patella-Plus, not in Tibia.cfg
+//	Antialiasing                          Patella-Plus, not in Tibia.cfg: stretched pictures are smoothed
 //	Buddy<n>=CharacterID,Icon,"description",notify   n 1, 2, ...
 //	White="name","name"                   the permanent entries of the buddy (white) list
 //	Ignore="name"                         the permanent entries of the ignore list
@@ -134,6 +135,7 @@ struct TPreferenceValues {
 	bool ClassicControl = false;
 	bool AutoChaseOff = true;
 	bool DragFullStacks = false;
+	bool Antialiasing = false;
 	int AttackMode = ATTACK_BALANCED;
 	int ChaseMode = CHASE_STAND;
 	bool SecureMode = true;

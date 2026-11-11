@@ -104,8 +104,10 @@ public:
 
 	// Ends the frame: with a surface, the rectangle of Image is shown in the window (WindowWidth x
 	// WindowHeight; nothing is shown while that is 0, as for a minimised window); without one the
-	// frame's work is only submitted. Returns true when a picture was shown.
-	bool Present(int Image, int x, int y, int Width, int Height, uint32_t WindowWidth, uint32_t WindowHeight);
+	// frame's work is only submitted. Returns true when a picture was shown. Smooth (Patella-Plus, not in the
+	// original): a rectangle of another size than the window is filtered, otherwise its nearest pixels are shown.
+	bool Present(int Image, int x, int y, int Width, int Height, uint32_t WindowWidth, uint32_t WindowHeight,
+		bool Smooth);
 
 private:
 	struct TState;

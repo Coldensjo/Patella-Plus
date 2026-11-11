@@ -34,9 +34,13 @@ struct TVertex {
 
 // The texture filter of the quad's draw (surfaceDX9.cpp's sampler state: linear, point for the
 // automap's upload).
+//
+// Patella-Plus, not in the original: Nearest is Linear without the smoothing (the anti-aliasing option turned off).
+// What Linear copies is copied the same; a one-colour stretch reads the nearest texel instead of blending four.
 enum class TFilter : int {
 	Point,
 	Linear,
+	Nearest,
 };
 
 // A quad as surfaceDX9.cpp's AddQuad and AddShadeQuad take it: the corners on the target, the texture

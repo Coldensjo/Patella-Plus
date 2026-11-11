@@ -37,7 +37,7 @@ TAxis MapAxis(int From, int To, float FromCoordinate, float ToCoordinate, int Si
 {
 	TAxis Axis{};
 	const int Pixels = To - From;
-	const double Offset = Filter == TFilter::Linear ? 0.5 : 0.0;
+	const double Offset = Filter == TFilter::Point ? 0.0 : 0.5;
 	Axis.Start = static_cast<double>(FromCoordinate) * Size - Offset;
 	if (Pixels <= 0 || Size <= 0) {
 		Axis.Scale = 0.0;
@@ -96,6 +96,20 @@ TQuadVertices ConvertQuad(const TQuad &Quad, int TextureWidth, int TextureHeight
 		RightU = static_cast<double>(Horizontal.CopyStart + (Quad.Right - Quad.Left)) / TextureWidth;
 		TopV = static_cast<double>(Vertical.CopyStart) / TextureHeight;
 		BottomV = static_cast<double>(Vertical.CopyStart + (Quad.Bottom - Quad.Top)) / TextureHeight;
+	} else if (Filter == TFilter::Nearest && OneColor) {
+		// Patella-Plus, not in the original: a stretch without smoothing. The corners stay on whole pixels and the
+		// source's texel edges go on them (the coordinates are Direct3D 9's, half a texel on), so every pixel centre
+		// reads the texel it lies in: each texel covers the same number of pixels, to within one.
+		Result.Nearest = true;
+		Result.Clamp = false;
+		Left = Quad.Left;
+		Top = Quad.Top;
+		Right = Quad.Right;
+		Bottom = Quad.Bottom;
+		LeftU = static_cast<double>(Quad.LeftU) - 0.5 / TextureWidth;
+		RightU = static_cast<double>(Quad.RightU) - 0.5 / TextureWidth;
+		TopV = static_cast<double>(Quad.TopV) - 0.5 / TextureHeight;
+		BottomV = static_cast<double>(Quad.BottomV) - 0.5 / TextureHeight;
 	} else {
 		// Filtered or shaded: what a Direct3D 9 driver gives the hardware, the corners half a pixel
 		// on (Direct3D 9's pixel centre (x, y) is the hardware's (x + 0.5, y + 0.5)) with the

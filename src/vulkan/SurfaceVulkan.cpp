@@ -172,13 +172,20 @@ void TSurfaceVulkan::AddShadeQuad(int Left, int Top, int Right, int Bottom, uint
 		TopRight, BottomRight, BottomLeft});
 }
 
+// Patella-Plus, not in the original: without the anti-aliasing option the linear sampler state draws unsmoothed
+// (Quads.h's Nearest).
+static TFilter DrawFilter(TFilter Filter)
+{
+	return Filter == TFilter::Linear && !Preferences().GetAntialiasing() ? TFilter::Nearest : Filter;
+}
+
 // FlushVertices: the queued quads into the device's target with its texture and sampler.
 void TSurfaceVulkan::FlushVertices()
 {
 	if (!Vertices.empty()) {
 		if (Renderer != nullptr && DeviceTarget >= 0) {
-			Renderer->Draw(DeviceTarget, DeviceTexture >= 0 ? DeviceTexture : WhiteTexture, Filter, Vertices.data(),
-				Vertices.size());
+			Renderer->Draw(DeviceTarget, DeviceTexture >= 0 ? DeviceTexture : WhiteTexture, DrawFilter(Filter),
+				Vertices.data(), Vertices.size());
 		}
 		Vertices.clear();
 	}
@@ -397,8 +404,8 @@ void TSurfaceVulkan::FlushShade()
 	SetTexture(PRIMARY_SURFACE);
 	SetRenderTarget(TEMP_SURFACE);
 	if (Renderer != nullptr && DeviceTarget >= 0) {
-		Renderer->Draw(DeviceTarget, DeviceTexture >= 0 ? DeviceTexture : WhiteTexture, Filter, Shade.data(),
-			Shade.size());
+		Renderer->Draw(DeviceTarget, DeviceTexture >= 0 ? DeviceTexture : WhiteTexture, DrawFilter(Filter),
+			Shade.data(), Shade.size());
 	}
 	Shade.clear();
 }
@@ -436,7 +443,8 @@ void TSurfaceVulkan::FinishFrame()
 				// window of the device before it goes.
 				PresentWindows.Fit();
 				if (Renderer->Present(Image[SCREEN_SURFACE], x, y, ShownWidth, ShownHeight,
-						(uint32_t)(WindowRect.right - WindowRect.left), (uint32_t)(WindowRect.bottom - WindowRect.top)))
+						(uint32_t)(WindowRect.right - WindowRect.left), (uint32_t)(WindowRect.bottom - WindowRect.top),
+						Preferences().GetAntialiasing()))
 					PresentWindows.Presented();
 			} catch (const TVulkanError &) {
 				Fail();
