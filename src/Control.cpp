@@ -524,7 +524,8 @@ void patella::TGUI::KeyPress(int Key)
 			ModalWindow = nullptr;
 			MainWindow->SetConsoleActive(true);
 		}
-	} else if (!CheckHotkey(Key)) {
+	} else if (MainWindow->WasdKey(Key) != 0 || !CheckHotkey(Key)) {
+		// Patella-Plus: a key of the WASD walking is not looked up as a hotkey (Ctrl+W, Ctrl+S and Ctrl+D turn).
 		MainWindow->KeyPress(Key);
 	}
 	LastMouseMove = 0;

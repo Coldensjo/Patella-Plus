@@ -155,6 +155,8 @@ public:
 	[[nodiscard]] bool GetAutoChaseOff() const;
 	void SetDragFullStacks(bool Value);
 	[[nodiscard]] bool GetDragFullStacks() const;
+	void SetWasdWalking(bool Value);
+	[[nodiscard]] bool GetWasdWalking() const;
 	void SetAntialiasing(bool Value);
 	[[nodiscard]] bool GetAntialiasing() const;
 	[[nodiscard]] const patella::settings::TServerValues &GetServerValues() const;
@@ -214,6 +216,7 @@ private:
 	bool AutoChaseOff{};
 	bool ClassicControl{};
 	bool DragFullStacks{}; // Patella-Plus, not in the original
+	bool WasdWalking{};    // Patella-Plus, not in the original: W, A, S and D walk, the console's line is off
 	bool Antialiasing{};   // Patella-Plus, not in the original: stretched pictures are smoothed
 	// NumberOfOpenChannels: OpenChannels.size().
 	bool PrivateMessages{};

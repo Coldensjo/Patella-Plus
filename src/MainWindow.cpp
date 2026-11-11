@@ -179,11 +179,15 @@ void TMainWindow::SetSize(int Width, int Height)
 
 // Only in connection state 8 (in the game): the arrow keys and the keypad
 // walk (the diagonals with Diagonal set), Ctrl with an arrow key turns,
-// every other key goes to the console.
+// every other key goes to the console. Patella-Plus, not in the original: while the console's WASD walking is on, the
+// letters of WasdKey are the keys it names.
 void TMainWindow::KeyPress(int Key)
 {
 	if (Session().GetConnectionState() != CONNECTION_IN_GAME)
 		return;
+	const int Wasd = WasdKey(Key);
+	if (Wasd != 0)
+		Key = Wasd;
 	switch (Key) {
 	case KEY_UP: Walk(0, -1, false); break;
 	case KEY_LEFT: Walk(-1, 0, false); break;
@@ -200,6 +204,39 @@ void TMainWindow::KeyPress(int Key)
 	default:
 		Console->KeyPress(Key);
 		break;
+	}
+}
+
+// Patella-Plus, not in the original: the walking or turning key a letter stands for while the console's WASD walking is
+// on in the game, 0 for every other key. W, A, S and D are the arrow keys, with Control too (which turns); Q, E, Z and
+// C are the keypad's diagonal keys 7, 9, 1 and 3. Shift and Caps Lock make no difference. Control.cpp's KeyPress asks
+// before it looks for a hotkey, so that Ctrl+W, Ctrl+S and Ctrl+D turn instead of being their hotkeys.
+int TMainWindow::WasdKey(int Key) const
+{
+	if (Session().GetConnectionState() != CONNECTION_IN_GAME || !Console->GetWasdWalking())
+		return 0;
+	const int Turn = Key & KEY_CONTROL;
+	switch (Key & ~(KEY_SHIFT | KEY_CONTROL)) {
+	case 'w':
+	case 'W': return Turn | KEY_UP;
+	case 'a':
+	case 'A': return Turn | KEY_LEFT;
+	case 's':
+	case 'S': return Turn | KEY_DOWN;
+	case 'd':
+	case 'D': return Turn | KEY_RIGHT;
+	default: break;
+	}
+	switch (Key & ~KEY_SHIFT) {
+	case 'q':
+	case 'Q': return KEY_PAD_HOME;
+	case 'e':
+	case 'E': return KEY_PAD_PAGE_UP;
+	case 'z':
+	case 'Z': return KEY_PAD_END;
+	case 'c':
+	case 'C': return KEY_PAD_PAGE_DOWN;
+	default: return 0;
 	}
 }
 

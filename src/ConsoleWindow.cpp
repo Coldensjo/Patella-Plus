@@ -3,7 +3,7 @@
 // The console's skin properties are SkinProperties.ConsoleWindow (the console),
 // Tab (the tabs) and EditLine.Font (the font of the default channel);
 // the frames are skins 169-176 (TConsole) and 177-185 (TConsoleWindow). Events
-// (201-213, 403) and AddMessage's numbers are named in Events.h; the comments
+// (201-214, 403) and AddMessage's numbers are named in Events.h; the comments
 // give events in decimal, as in ContextMenus.cpp, and messages in hex.
 
 #include "ConsoleWindow.h"
@@ -56,6 +56,16 @@ const char *TextHelpChannelWelcome =                                            
 	"general conversations. Therefore please limit your statements to relevant questions and "
 	"answers.";
 const char *TextReportRuleViolation = "Report Rule Violation"; // 146
+// Patella-Plus, not in the original: the WASD check box's two tooltips and the status line of the switch.
+const char *TextWasdOn = "Walk with W, A, S and D instead of writing (Enter)";
+const char *TextWasdOff = "Write in the console instead of walking with W, A, S and D (Enter)";
+const char *TextWasdStatus = "Walking with W, A, S and D. Press Enter to write.";
+
+// Patella-Plus, not in the original: the WASD check box (12x12) stands in the console's top left corner, where the
+// original has the left arrow button, with the tab bar beside it. The arrow button, shown while tabs are hidden on the
+// left, stands between the two, and the tab bar starts the button's width further right for as long (TabBarArea).
+constexpr int WasdButtonX = 4;
+constexpr int WasdButtonY = 3;
 
 } // namespace
 
@@ -1178,6 +1188,10 @@ TConsoleWindow::TConsoleWindow()
 	InsertChild(MoveRightButton);
 	MoveLeftButton = new TSkinButton(0, 0, SKIN_TABS_LEFT_BUTTON_UP, SKIN_TABS_LEFT_BUTTON_DOWN, TCallback(TabBar, EVENT_TABS_MOVE_LEFT), TextMoveChannelsLeft, false);
 	InsertChild(MoveLeftButton);
+	WasdButton = new TToggleButton(0, 0, SKIN_CHECKBOX_UNCHECKED, SKIN_CHECKBOX_CHECKED, TCallback(this, EVENT_WASD_WALKING), TextWasdOn, TextWasdOff,
+		Preferences().GetWasdWalking());
+	InsertChild(WasdButton);
+	ReturnToWasd = false;
 	GUI().AddHotkey(KEY_CONTROL | 'I', TCallback(this, EVENT_IGNORE_LIST));
 	GUI().AddHotkey(KEY_CONTROL | 'O', TCallback(this, EVENT_REQUEST_CHANNELS));
 	GUI().AddHotkey(KEY_CONTROL | 'E', TCallback(this, EVENT_CLOSE_CHANNEL));
@@ -1220,6 +1234,7 @@ void TConsoleWindow::OnClose()
 	try {
 		TabBar->StoreOpenChannels();
 		Preferences().SetConsoleHeight(Height);
+		Preferences().SetWasdWalking(WasdButton->State || ReturnToWasd);
 		if (!IsChild(VolumeButton) && VolumeButton != nullptr)
 			VolumeButton->Close();
 		if (!IsChild(CloseButton) && CloseButton != nullptr)
@@ -1246,7 +1261,8 @@ void TConsoleWindow::OnClose()
 void TConsoleWindow::SetSize(int Width, int Height)
 {
 	TComponent::SetSize(Width, Height);
-	SetChildArea(TabBar, SkinProperties().ConsoleWindow.TabBar);
+	SetChildArea(TabBar, TabBarArea());
+	SetChildPosition(WasdButton, WasdButtonX, WasdButtonY);
 	SetChildArea(Input, SkinProperties().ConsoleWindow.Input);
 	SetChildArea(CurrentConsole, SkinProperties().ConsoleWindow.CurrentConsole);
 	if (IsChild(VolumeButton))
@@ -1258,7 +1274,7 @@ void TConsoleWindow::SetSize(int Width, int Height)
 	if (IsChild(ServerMessagesButton))
 		SetChildPosition(ServerMessagesButton, SkinProperties().ConsoleWindow.ServerMessagesButton.x, SkinProperties().ConsoleWindow.ServerMessagesButton.y);
 	if (MoveRightButton != nullptr && IsChild(MoveRightButton))
-		SetChildPosition(MoveRightButton, SkinProperties().ConsoleWindow.MoveRightButton.x, SkinProperties().ConsoleWindow.MoveRightButton.y);
+		SetChildPosition(MoveRightButton, SkinProperties().ConsoleWindow.TabBar.x, SkinProperties().ConsoleWindow.MoveRightButton.y);
 	if (MoveLeftButton != nullptr && IsChild(MoveLeftButton))
 		SetChildPosition(MoveLeftButton, SkinProperties().ConsoleWindow.MoveLeftButton.x, SkinProperties().ConsoleWindow.MoveLeftButton.y);
 	Arrange();
@@ -1306,7 +1322,7 @@ void TConsoleWindow::Arrange()
 		Height - Skins()[SKIN_CONSOLE_EDGE_BOTTOM].height - Skins()[SKIN_CONSOLE_EDGE_TOP].height, 0, OffsetY % Skins()[SKIN_CONSOLE_BACKGROUND].height);
 }
 
-// A click clears both selections.
+// A click clears both selections. Patella-Plus: a click into the edit line while WASD walks opens the line, as Enter.
 bool TConsoleWindow::LeftButtonDown(int x, int y, int Flags)
 {
 	TTextWindow *TextWindow = CurrentConsole->TextWindow;
@@ -1315,7 +1331,10 @@ bool TConsoleWindow::LeftButtonDown(int x, int y, int Flags)
 	TextWindow->SelectionEndLine = -1;
 	TextWindow->SelectionEndOffset = -1;
 	Input->SelectionLength = 0;
-	return TWindow::LeftButtonDown(x, y, Flags);
+	const bool Handled = TWindow::LeftButtonDown(x, y, Flags);
+	if (WasdButton->State && Input->Active)
+		SetWasdWalking(false, true);
+	return Handled;
 }
 
 // The console's own help (handle 22) where no child has one.
@@ -1334,7 +1353,10 @@ bool TConsoleWindow::HelpMouseMove(int x, int y)
 // key goes to the edit line: Enter sends it, F1-F12 (+12 with Shift, +24
 // with Ctrl) insert a hotkey text (and send it when it is an automatic one),
 // the arrow keys 0x10f and 0x10c walk through the sent lines (one step below
-// the last stores the edit line).
+// the last stores the edit line). Patella-Plus: Enter on an empty line turns
+// the WASD walking on, Enter while walking opens the line; while walking the
+// edit line and the history get no key, a hotkey text that is not sent opens
+// the line, and a line opened out of the walking walks again once it is sent.
 void TConsoleWindow::KeyPress(int Key)
 {
 	if (Key == KEY_TAB)
@@ -1376,13 +1398,24 @@ void TConsoleWindow::KeyPress(int Key)
 		if (Done)
 			return;
 	}
+	const bool Walking = WasdButton->State;
+	if (Key == KEY_RETURN && (Walking || strlen(Input->Text.get()) == 0)) {
+		SetWasdWalking(!Walking, Walking);
+		if (!Walking)
+			Talk().SetStatusMessage(TextWasdStatus, false);
+		return;
+	}
 	TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
 	if (!TextBuffer->CanWrite())
 		return;
-	Input->KeyPress(Key);
-	if (Key == KEY_RETURN)
+	if (!Walking)
+		Input->KeyPress(Key);
+	if (Key == KEY_RETURN) {
 		SendInput();
+		if (ReturnToWasd)
+			SetWasdWalking(true, false);
+	}
 	int Number;
 	switch (Key & KEY_CODE_MASK) {
 	case KEY_F1: Number = 0; break;
@@ -1398,6 +1431,8 @@ void TConsoleWindow::KeyPress(int Key)
 	case KEY_F11: Number = 10; break;
 	case KEY_F12: Number = 11; break;
 	default: {
+		if (Walking)
+			return;
 		bool Moved = false;
 		const int Code = Key % (KEY_CODE_MASK + 1);
 		if (Code == KEY_DOWN && HistoryPosition > -2) {
@@ -1432,8 +1467,13 @@ void TConsoleWindow::KeyPress(int Key)
 	const char *Text = Preferences().GetHotkey(Number, &AutoSend);
 	if (Text != nullptr) {
 		Input->SetText(Text);
-		if (AutoSend)
+		if (AutoSend) {
 			SendInput();
+			if (ReturnToWasd)
+				SetWasdWalking(true, false);
+		} else if (Walking) {
+			SetWasdWalking(false, true);
+		}
 	}
 }
 
@@ -1443,10 +1483,16 @@ void TConsoleWindow::KeyPress(int Key)
 // channel list, 206-208 set the volume, 211 (Ctrl+D) goes to the default
 // channel, 212 and 213 (Tab, Shift+Tab) to the next and the previous one,
 // scrolling the hidden tabs in (all of them at the ends), 403 (Ctrl+K) opens
-// the hotkey options (message 0x26).
+// the hotkey options (message 0x26). Patella-Plus: 214 is the WASD check box,
+// which has switched its state already.
 void TConsoleWindow::HandleEvent(int Event)
 {
 	switch (Event) {
+	case EVENT_WASD_WALKING:
+		SetWasdWalking(WasdButton->State, false);
+		if (WasdButton->State)
+			Talk().SetStatusMessage(TextWasdStatus, false);
+		break;
 	case EVENT_CLOSE_CHANNEL:
 		CloseChannel();
 		[[fallthrough]];
@@ -1517,13 +1563,14 @@ void TConsoleWindow::HandleEvent(int Event)
 	}
 }
 
-// Activates the edit line, never in a channel the player may not write in;
-// it is not deactivated while a context menu is open (action state 11).
+// Activates the edit line, never in a channel the player may not write in
+// nor (Patella-Plus) while WASD walks; it is not deactivated while a context
+// menu is open (action state 11).
 void TConsoleWindow::SetActive(bool Active) const
 {
 	TTalkBuffer *TextBuffer = CurrentConsole->GetTextBuffer();
 	PATELLA_ASSERT(TextBuffer!=nullptr);
-	if (!TextBuffer->CanWrite())
+	if (!TextBuffer->CanWrite() || WasdButton->State)
 		Active = false;
 	PATELLA_ASSERT(Input!=nullptr);
 	if (!Active && Interaction().GetActionState() == ACTIONSTATE_CONTEXT_MENU)
@@ -1549,8 +1596,12 @@ void TConsoleWindow::UpdateButtons()
 		RemoveChild(MoveRightButton);
 	if (!IsChild(MoveRightButton) && TabBar->LeftTabs->GetFirstChild() != nullptr) {
 		InsertChild(MoveRightButton);
-		SetChildPosition(MoveRightButton, SkinProperties().ConsoleWindow.MoveRightButton.x, SkinProperties().ConsoleWindow.MoveRightButton.y);
+		SetChildPosition(MoveRightButton, SkinProperties().ConsoleWindow.TabBar.x, SkinProperties().ConsoleWindow.MoveRightButton.y);
 	}
+	// Patella-Plus: the tab bar makes room for the arrow button or takes its place (only when that changed: the tab
+	// bar's SetSize sets Changed, which calls this function again).
+	if (Width > 0 && Height > 0 && TabBar->OffsetX != TabBarArea().x)
+		SetChildArea(TabBar, TabBarArea());
 	if (IsChild(MoveLeftButton) && TabBar->RightTabs->GetFirstChild() == nullptr)
 		RemoveChild(MoveLeftButton);
 	if (!IsChild(MoveLeftButton) && TabBar->RightTabs->GetFirstChild() != nullptr) {
@@ -1573,6 +1624,30 @@ void TConsoleWindow::UpdateButtons()
 	Input->SetFont(Font);
 	Input->SetDisabled(!TextBuffer->CanWrite());
 	SetActive(TextBuffer->CanWrite());
+}
+
+// Patella-Plus, not in the original: the tab bar's area, beside the WASD check box or, while the left arrow button is
+// shown, beside that button.
+TRect TConsoleWindow::TabBarArea()
+{
+	TRect Area = SkinProperties().ConsoleWindow.TabBar;
+	if (MoveRightButton != nullptr && IsChild(MoveRightButton))
+		Area.x += MoveRightButton->Width;
+	return Area;
+}
+
+// Patella-Plus, not in the original: W, A, S and D walk (TMainWindow::KeyPress) and the edit line takes no keys.
+bool TConsoleWindow::GetWasdWalking() const
+{
+	return WasdButton->State;
+}
+
+// Patella-Plus, not in the original. Return: the line is opened for one message, sending it walks again.
+void TConsoleWindow::SetWasdWalking(bool Walking, bool Return)
+{
+	WasdButton->State = Walking;
+	ReturnToWasd = Return && !Walking;
+	SetActive(!Walking);
 }
 
 // MainWindow.cpp opens the default channel ("Default").
