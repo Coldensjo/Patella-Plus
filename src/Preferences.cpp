@@ -320,7 +320,7 @@ bool TPreferences::GetWasdWalking() const
 	return WasdWalking;
 }
 
-// Patella-Plus, not in the original: the login dialog's "Remember account and password". Without Remember the account
+// Patella-Plus, not in the original: the login dialog's "Remember login". Without Remember the account
 // and password are forgotten.
 void TPreferences::SetLogin(bool Remember, int Account, const char *Password)
 {

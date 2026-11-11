@@ -827,16 +827,17 @@ void TReconnectWindow::HandleEvent(int Event)
 
 // --- TLoginDialog -------------------------------------------------------------------
 
-// Patella-Plus: "Remember account and password" is a row below the link. The body grows by that row, and TDialog fits
-// itself and its bottom-anchored buttons around the body. With a saved account the fields are filled in and the
+// Patella-Plus: "Remember login" is a row below the link, a gap apart. The body grows by both, and TDialog fits itself
+// and its bottom-anchored buttons around the body. With a saved account the fields are filled in and the
 // password has the focus, so Enter logs in.
 TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 {
+	constexpr int RememberGap = 8;
 	constexpr int RememberRowHeight = 22;
 	TRect RememberArea = SkinProperties().LoginDialogLink;
-	RememberArea.y += RememberArea.height;
+	RememberArea.y += RememberArea.height + RememberGap;
 	RememberArea.height = RememberRowHeight;
-	TComponent::SetSize(SkinProperties().LoginDialogWidth, SkinProperties().LoginDialogHeight + RememberRowHeight);
+	TComponent::SetSize(SkinProperties().LoginDialogWidth, SkinProperties().LoginDialogHeight + RememberGap + RememberRowHeight);
 	FocusGroup.reset(new TFocusGroup());
 	Account = new TPasswordEditLine(8);
 	Account->SetFocusGroup(FocusGroup.get());
@@ -855,7 +856,7 @@ TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 	Label = new TLabel(SkinProperties().Dialog.TextFont, TextPassword);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().LoginDialogPasswordLabel);
-	Remember = new TCheckBox("Remember account and password");
+	Remember = new TCheckBox("Remember login");
 	InsertChild(Remember);
 	SetChildArea(Remember, RememberArea);
 	Remember->SetChecked(Preferences().GetRememberLogin());
