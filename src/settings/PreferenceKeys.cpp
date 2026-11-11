@@ -438,6 +438,7 @@ void WritePreferences(TSettingsFile &File, const TPreferenceValues &Values)
 	Put(File, "AutoChaseOff", YesNo(Values.AutoChaseOff));
 	Put(File, "DragFullStacks", YesNo(Values.DragFullStacks));
 	Put(File, "Antialiasing", YesNo(Values.Antialiasing));
+	Put(File, "WasdWalking", YesNo(Values.WasdWalking));
 	Put(File, "AttackMode", Number(Values.AttackMode));
 	Put(File, "ChaseMode", Number(Values.ChaseMode));
 	Put(File, "SecureMode", YesNo(Values.SecureMode));
@@ -538,6 +539,7 @@ std::vector<std::string> ReadPreferences(const TSettingsFile &File, TPreferenceV
 	Read.Flag("AutoChaseOff", Values.AutoChaseOff);
 	Read.Flag("DragFullStacks", Values.DragFullStacks);
 	Read.Flag("Antialiasing", Values.Antialiasing);
+	Read.Flag("WasdWalking", Values.WasdWalking);
 	Read.Number("AttackMode", Values.AttackMode);
 	Read.Number("ChaseMode", Values.ChaseMode);
 	if (Values.ChaseMode == CHASE_OBSOLETE)

@@ -36,6 +36,7 @@ public:
 	void ResizeConsole(int ConsoleHeight) const;
 	[[nodiscard]] int GetConsoleWindowHeight() const;
 	void Walk(int dx, int dy, bool Diagonal);
+	[[nodiscard]] int WasdKey(int Key) const;
 	void OpenContainer(int Container) const;
 	void CloseContainer(int Container) const;
 	void OpenTrade() const;

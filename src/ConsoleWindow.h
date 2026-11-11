@@ -241,6 +241,12 @@ protected:
 // The console. TalkMode is the volume of the default channel (1 say,
 // 2 whisper, 3 yell), back to 1 after every message; History keeps the sent
 // lines (HistoryPosition -1 is the edit line itself).
+//
+// Patella-Plus, not in the original: WASD walking. While the check box in the corner left of the tabs (WasdButton) is ticked, the
+// edit line takes no keys and TMainWindow::KeyPress walks and turns with the letters of TMainWindow::WasdKey. Enter
+// switches: on an empty line it turns the walking on, while walking it opens the line; a line opened that way (by
+// Enter, a click into it or a hotkey text) goes back to walking when it is sent (ReturnToWasd). The check box switches
+// for good. Patella.ini keeps it.
 class TConsoleWindow : public TWindow {
 public:
 	TConsoleWindow(const TConsoleWindow &) = delete;
@@ -271,6 +277,9 @@ public:
 	void AddToHistory();
 	void ParseInput(char **Text, char **Addressee, int *TalkMode, char *MessageSeparator) const;
 	[[nodiscard]] bool SaveChannel() const;
+	[[nodiscard]] bool GetWasdWalking() const;
+	void SetWasdWalking(bool Walking, bool Return);
+	TRect TabBarArea();
 
 	TTabBar *TabBar;
 	TConsole *CurrentConsole;
@@ -299,6 +308,8 @@ public:
 	TSkinButton *MoveRightButton;        // the tab bar's event 5
 	TSkinButton *MoveLeftButton;         // the tab bar's event 6
 	int TalkMode;
+	TToggleButton *WasdButton; // Patella-Plus: event 214; State is the WASD walking
+	bool ReturnToWasd;         // Patella-Plus: the line was opened out of the walking, sending it walks again
 
 protected:
 	void OnClose() override; // the preferences and hotkeys, the buttons that are not children

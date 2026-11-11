@@ -21,6 +21,7 @@
 //	ClassicControl, AutoChaseOff, SecureMode
 //	DragFullStacks                        Patella-Plus, not in Tibia.cfg
 //	Antialiasing                          Patella-Plus, not in Tibia.cfg: stretched pictures are smoothed
+//	WasdWalking                           Patella-Plus, not in Tibia.cfg: W, A, S and D walk, Enter opens the console's line
 //	Buddy<n>=CharacterID,Icon,"description",notify   n 1, 2, ...
 //	White="name","name"                   the permanent entries of the buddy (white) list
 //	Ignore="name"                         the permanent entries of the ignore list
@@ -136,6 +137,7 @@ struct TPreferenceValues {
 	bool AutoChaseOff = true;
 	bool DragFullStacks = false;
 	bool Antialiasing = false;
+	bool WasdWalking = false;
 	int AttackMode = ATTACK_BALANCED;
 	int ChaseMode = CHASE_STAND;
 	bool SecureMode = true;

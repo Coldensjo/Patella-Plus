@@ -119,6 +119,7 @@ enum : int { // NOLINT(cppcoreguidelines-use-enum-class): int constants
 	EVENT_DEFAULT_CHANNEL = 211,
 	EVENT_NEXT_CHANNEL = 212,
 	EVENT_PREVIOUS_CHANNEL = 213,
+	EVENT_WASD_WALKING = 214, // Patella-Plus, not in the original: the check box left of the tabs
 
 	// TAutomapWindow.
 	EVENT_AUTOMAP_FLOOR_UP = 3,

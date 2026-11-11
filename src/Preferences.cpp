@@ -308,6 +308,18 @@ bool TPreferences::GetDragFullStacks() const
 	return DragFullStacks;
 }
 
+// Patella-Plus, not in the original: W, A, S and D walk and the console's edit line takes no keys (ConsoleWindow.cpp).
+void TPreferences::SetWasdWalking(bool Value)
+{
+	WasdWalking = Value;
+}
+
+// Patella-Plus, not in the original.
+bool TPreferences::GetWasdWalking() const
+{
+	return WasdWalking;
+}
+
 // Patella-Plus, not in the original: the engine smooths what it stretches (the original always does).
 void TPreferences::SetAntialiasing(bool Value)
 {
@@ -434,6 +446,7 @@ void TPreferences::SetDefaults(TTalkLists &Lists)
 	AutoChaseOff = true;
 	DragFullStacks = false;
 	Antialiasing = false;
+	WasdWalking = false;
 	AttackMode = ATTACK_BALANCED;
 	ChaseMode = CHASE_STAND;
 	SecureMode = true;
@@ -904,6 +917,7 @@ patella::settings::TPreferenceValues TPreferences::GetValues(TTalkLists &Lists)
 	Values.AutoChaseOff = AutoChaseOff;
 	Values.DragFullStacks = DragFullStacks;
 	Values.Antialiasing = Antialiasing;
+	Values.WasdWalking = WasdWalking;
 	Values.AttackMode = AttackMode;
 	Values.ChaseMode = ChaseMode;
 	Values.SecureMode = SecureMode;
@@ -999,6 +1013,7 @@ void TPreferences::SetValues(const patella::settings::TPreferenceValues &Values,
 	AutoChaseOff = Values.AutoChaseOff;
 	DragFullStacks = Values.DragFullStacks;
 	Antialiasing = Values.Antialiasing;
+	WasdWalking = Values.WasdWalking;
 	AttackMode = Values.AttackMode;
 	ChaseMode = Values.ChaseMode;
 	SecureMode = Values.SecureMode;
