@@ -39,4 +39,4 @@ is refused where a `Tibia.exe` exists. `python -I tools/package_check.py <packag
 - Stage files by exact name.
 - Indent with tabs, except where a format or `.editorconfig` requires spaces.
 - No tests or docs are added.
-- A feature's agent proves it compiles, then the owner tries it and says when it merges.
+- A feature's agent compiles, then places the executable into the play folder, the owner tries it and says when it merges.
