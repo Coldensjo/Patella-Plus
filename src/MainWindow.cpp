@@ -12,6 +12,7 @@
 // them again.
 
 #include "MainWindow.h"
+#include "BuildTexts.h"
 #include "ContentWindows.h"
 #include "Communication.h"
 #include "ConsoleWindow.h"
@@ -344,7 +345,7 @@ void TMainWindow::HandleEvent(int Event)
 		// A question with an answer event; message 6 deletes the block.
 		std::intptr_t *Data = new std::intptr_t[4];
 		Data[0] = reinterpret_cast<std::intptr_t>("Warning");
-		Data[1] = reinterpret_cast<std::intptr_t>("Are you sure you want to leave Tibia?");
+		Data[1] = reinterpret_cast<std::intptr_t>(patella::buildtexts::LeaveQuestion);
 		Data[2] = reinterpret_cast<std::intptr_t>(this);
 		Data[3] = EVENT_LOGOUT;
 		Interaction().AddMessage(MESSAGE_QUESTION_DIALOG, reinterpret_cast<std::intptr_t>(Data), 0);

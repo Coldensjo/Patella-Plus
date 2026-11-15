@@ -1,6 +1,7 @@
 // Renderer.cpp: the Vulkan 1.3 back end of the Vulkan engine (Renderer.h).
 
 #include "vulkan/Renderer.h"
+#include "BuildConfig.h"
 
 #include "compat/msvc.h"
 
@@ -219,7 +220,7 @@ constexpr std::array<const char *, 3> PlatformSurfaceExtensions = {"VK_KHR_xlib_
 vkb::InstanceBuilder NewInstanceBuilder(const std::string &SurfaceExtension)
 {
 	vkb::InstanceBuilder Builder(vkGetInstanceProcAddr);
-	Builder.set_app_name("Patella").set_engine_name("Patella").require_api_version(1, 3, 0).set_headless(true);
+	Builder.set_app_name(patella::buildconfig::ClientName).set_engine_name("Patella").require_api_version(1, 3, 0).set_headless(true);
 	auto System = vkb::SystemInfo::get_system_info(vkGetInstanceProcAddr);
 	std::vector<const char *> Wanted = {VK_KHR_SURFACE_EXTENSION_NAME, VK_EXT_DEBUG_UTILS_EXTENSION_NAME};
 	Wanted.insert(Wanted.begin() + 1, PlatformSurfaceExtensions.begin(), PlatformSurfaceExtensions.end());

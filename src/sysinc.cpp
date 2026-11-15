@@ -17,11 +17,6 @@
 // blocks, the lists their entries
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
 
-// The other half of Player.cpp's XOR-encoded window title ("Tibia   ") and class name ("TibiaClient"); the keys are
-// Player.cpp's.
-const std::array<int, 8> TitleCode = {68, 75, 129, 81, 98, 78, 96, 141};
-const std::array<int, 11> ClassNameCode = {57, 193, 225, 58, 140, 118, 195, 214, 239, 244, 137};
-
 namespace {
 
 char *ClipboardBuffer;
@@ -44,20 +39,39 @@ bool IsClipboardEmpty()
 	return !patella::platform::Platform().Clipboard.HasText();
 }
 
+namespace {
+
+// The data files' errors name BuildConfig.h's file names (the original's Tibia.dat, Tibia.spr and Tibia.pic).
+constexpr const char *CannotFind = "Cannot find file \"";
+constexpr const char *CannotOpen = "Cannot open file \"";
+constexpr const char *FileEnd = "\".";
+constexpr auto MissingDataFile = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(CannotFind,
+	patella::buildconfig::DataFileName, FileEnd)>(CannotFind, patella::buildconfig::DataFileName, FileEnd);
+constexpr auto MissingSpriteFile = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(CannotFind,
+	patella::buildconfig::SpriteFileName, FileEnd)>(CannotFind, patella::buildconfig::SpriteFileName, FileEnd);
+constexpr auto MissingPictureFile = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(CannotFind,
+	patella::buildconfig::PictureFileName, FileEnd)>(CannotFind, patella::buildconfig::PictureFileName, FileEnd);
+constexpr auto UnreadableSpriteFile = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(CannotOpen,
+	patella::buildconfig::SpriteFileName, FileEnd)>(CannotOpen, patella::buildconfig::SpriteFileName, FileEnd);
+constexpr auto UnreadablePictureFile = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(CannotOpen,
+	patella::buildconfig::PictureFileName, FileEnd)>(CannotOpen, patella::buildconfig::PictureFileName, FileEnd);
+
+} // namespace
+
 // What failed, for a PROGRAM_ERROR code (Player.cpp).
 const char *GetErrorText(int Error)
 {
 	switch (Error) {
 	case 1:
-		return "Cannot find file \"Tibia.dat\".";
+		return MissingDataFile.data();
 	case 2:
-		return "Cannot find file \"Tibia.spr\".";
+		return MissingSpriteFile.data();
 	case 3:
-		return "Cannot find file \"Tibia.pic\".";
+		return MissingPictureFile.data();
 	case 4:
-		return "Cannot open file \"Tibia.spr\".";
+		return UnreadableSpriteFile.data();
 	case 5:
-		return "Cannot open file \"Tibia.pic\".";
+		return UnreadablePictureFile.data();
 	case 6:
 		return "Cannot initialize Windows Sockets.";
 	case 7:

@@ -41,7 +41,7 @@ namespace patella {
 
 bool TPreferences::GetTestServerLogin() const
 {
-	return TestServerLogin;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionTestServerLogin, TestServerLogin);
 }
 
 void TPreferences::SetTestServerLogin(bool Value)
@@ -113,28 +113,28 @@ TFullscreenMode *TPreferences::GetFullscreenMode()
 
 bool TPreferences::GetWindowsMousepointer() const
 {
-	return WindowsMousepointer;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionWindowsMousepointer, WindowsMousepointer);
 }
 
 bool TPreferences::GetLightEffects() const
 {
-	return LightEffects;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionLightEffects, LightEffects);
 }
 
 bool TPreferences::GetTextualEffects() const
 {
-	return TextualEffects;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionTextualEffects, TextualEffects);
 }
 
 int TPreferences::GetCreatureInfo() const
 {
-	return CreatureInfo;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionCreatureInfo, CreatureInfo);
 }
 
 // "Not set yet" (2) reads as false.
 bool TPreferences::GetNoStretching() const
 {
-	return NoStretching == 1;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionNoStretching, NoStretching) == 1;
 }
 
 int TPreferences::GetConfineFramerate() const
@@ -206,7 +206,7 @@ void TPreferences::SetBuddyHideOffline(bool Value)
 
 bool TPreferences::GetBuddyHideOffline() const
 {
-	return BuddyHideOffline;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionBuddyHideOffline, BuddyHideOffline);
 }
 
 void TPreferences::ClearOpenDialogs()
@@ -248,27 +248,27 @@ void TPreferences::SetPrivateMessages(bool Value)
 
 bool TPreferences::GetInfoMessages() const
 {
-	return InfoMessages;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionInfoMessages, InfoMessages);
 }
 
 bool TPreferences::GetEventMessages() const
 {
-	return EventMessages;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionEventMessages, EventMessages);
 }
 
 bool TPreferences::GetStatusMessages() const
 {
-	return StatusMessages;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionStatusMessages, StatusMessages);
 }
 
 bool TPreferences::GetTimeStamps() const
 {
-	return TimeStamps;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionTimeStamps, TimeStamps);
 }
 
 bool TPreferences::GetPrivateMessages() const
 {
-	return PrivateMessages;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionPrivateMessages, PrivateMessages);
 }
 
 void TPreferences::ClearOpenChannels()
@@ -288,12 +288,12 @@ void TPreferences::SetAutoChaseOff(bool Value)
 
 bool TPreferences::GetClassicControl() const
 {
-	return ClassicControl;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionClassicControl, ClassicControl);
 }
 
 bool TPreferences::GetAutoChaseOff() const
 {
-	return AutoChaseOff;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionAutoChaseOff, AutoChaseOff);
 }
 
 // Patella-Plus, not in the original.
@@ -305,7 +305,7 @@ void TPreferences::SetDragFullStacks(bool Value)
 // Patella-Plus, not in the original.
 bool TPreferences::GetDragFullStacks() const
 {
-	return DragFullStacks;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionDragFullStacks, DragFullStacks);
 }
 
 // Patella-Plus, not in the original: W, A, S and D walk and the console's edit line takes no keys (ConsoleWindow.cpp).
@@ -317,7 +317,7 @@ void TPreferences::SetWasdWalking(bool Value)
 // Patella-Plus, not in the original.
 bool TPreferences::GetWasdWalking() const
 {
-	return WasdWalking;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionWasdWalking, WasdWalking);
 }
 
 // Patella-Plus, not in the original: the login dialog's "Remember login". Without Remember the account
@@ -332,19 +332,19 @@ void TPreferences::SetLogin(bool Remember, int Account, const char *Password)
 // Patella-Plus, not in the original.
 bool TPreferences::GetRememberLogin() const
 {
-	return RememberLogin;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionRememberLogin, RememberLogin);
 }
 
 // Patella-Plus, not in the original: 0 when none is saved.
 int TPreferences::GetLoginAccount() const
 {
-	return LoginAccount;
+	return GetRememberLogin() ? LoginAccount : 0;
 }
 
 // Patella-Plus, not in the original: empty when none is saved.
 const char *TPreferences::GetLoginPassword() const
 {
-	return LoginPassword.c_str();
+	return GetRememberLogin() ? LoginPassword.c_str() : "";
 }
 
 // Patella-Plus, not in the original: the engine smooths what it stretches (the original always does).
@@ -356,7 +356,7 @@ void TPreferences::SetAntialiasing(bool Value)
 // Patella-Plus, not in the original.
 bool TPreferences::GetAntialiasing() const
 {
-	return Antialiasing;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionAntialiasing, Antialiasing);
 }
 
 // Patella-Plus, not in the original.
@@ -393,17 +393,17 @@ void TPreferences::SetSecureMode(bool Value)
 
 int TPreferences::GetAttackMode() const
 {
-	return AttackMode;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionAttackMode, AttackMode);
 }
 
 int TPreferences::GetChaseMode() const
 {
-	return ChaseMode;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionChaseMode, ChaseMode);
 }
 
 bool TPreferences::GetSecureMode() const
 {
-	return SecureMode;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionSecureMode, SecureMode);
 }
 
 void TPreferences::SetShowNewHints(bool Value)
@@ -413,17 +413,17 @@ void TPreferences::SetShowNewHints(bool Value)
 
 bool TPreferences::GetShowNewHints() const
 {
-	return ShowNewHints;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionShowNewHints, ShowNewHints);
 }
 
 bool TPreferences::GetLevelBar() const
 {
-	return LevelBar;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionLevelBar, LevelBar);
 }
 
 bool TPreferences::GetMagLevelBar() const
 {
-	return MagLevelBar;
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionMagLevelBar, MagLevelBar);
 }
 
 void TPreferences::SetLevelBar(bool Value)
@@ -437,7 +437,8 @@ void TPreferences::SetMagLevelBar(bool Value)
 }
 
 // Not reset: the windowed position and size, and the hotkey texts past
-// their first byte. MotD is cleared without being freed.
+// their first byte. MotD is cleared without being freed. Patella-Plus: the options a developer forced (BuildConfig.h)
+// take their values in ApplyFixedOptions, and their getters return them whatever the members hold.
 void TPreferences::SetDefaults(TTalkLists &Lists)
 {
 	memset(HotkeyAutoSend.data(), 0, sizeof(HotkeyAutoSend));
@@ -660,7 +661,10 @@ bool TPreferences::GetBuddyNotify(int CharacterID)
 bool TPreferences::GetSkillBar(int SkillNumber) const
 {
 	PATELLA_ASSERT_VALUES(In(SkillNumber,0,SKILLS-1), SkillNumber);
-	return SkillBars[SkillNumber];
+	if constexpr (patella::buildconfig::IsForced(patella::buildconfig::OptionSkillBars))
+		return (*patella::buildconfig::OptionSkillBars)[SkillNumber];
+	else
+		return SkillBars[SkillNumber];
 }
 
 void TPreferences::SetSkillBar(int SkillNumber, bool Value)
@@ -680,7 +684,7 @@ void TPreferences::ReadTibiaCfg(TTalkLists &Lists)
 	SetDefaults(Lists);
 	try {
 		TReadScriptFile Script;
-		Script.open("Tibia.cfg");
+		Script.open(patella::buildconfig::ImportFileName); // BuildConfig.h: Tibia.cfg unless a developer changed it
 		for (;;) {
 			Script.nextToken();
 			if (Script.Token == TOKEN::ENDOFFILE) {
@@ -1072,6 +1076,46 @@ void TPreferences::SetValues(const patella::settings::TPreferenceValues &Values,
 		SkillBars[i] = Values.SkillBars[i];
 }
 
+// Patella-Plus, not in the original: every option the developer forced (BuildConfig.h) takes its value, whatever the
+// file said, and a forced "Remember login" that is off forgets the saved account and password. The getters
+// enforce the same values; this makes the members, and so the next save of Patella.ini, agree with them.
+void TPreferences::ApplyFixedOptions()
+{
+	using namespace patella::buildconfig;
+	TestServerLogin = Enforce(OptionTestServerLogin, TestServerLogin);
+	WindowsMousepointer = Enforce(OptionWindowsMousepointer, WindowsMousepointer);
+	LightEffects = Enforce(OptionLightEffects, LightEffects);
+	TextualEffects = Enforce(OptionTextualEffects, TextualEffects);
+	CreatureInfo = Enforce(OptionCreatureInfo, CreatureInfo);
+	NoStretching = Enforce(OptionNoStretching, NoStretching);
+	BuddyHideOffline = Enforce(OptionBuddyHideOffline, BuddyHideOffline);
+	InfoMessages = Enforce(OptionInfoMessages, InfoMessages);
+	EventMessages = Enforce(OptionEventMessages, EventMessages);
+	StatusMessages = Enforce(OptionStatusMessages, StatusMessages);
+	TimeStamps = Enforce(OptionTimeStamps, TimeStamps);
+	PrivateMessages = Enforce(OptionPrivateMessages, PrivateMessages);
+	ClassicControl = Enforce(OptionClassicControl, ClassicControl);
+	AutoChaseOff = Enforce(OptionAutoChaseOff, AutoChaseOff);
+	DragFullStacks = Enforce(OptionDragFullStacks, DragFullStacks);
+	Antialiasing = Enforce(OptionAntialiasing, Antialiasing);
+	WasdWalking = Enforce(OptionWasdWalking, WasdWalking);
+	RememberLogin = Enforce(OptionRememberLogin, RememberLogin);
+	if (!RememberLogin) {
+		LoginAccount = 0;
+		LoginPassword.clear();
+	}
+	AttackMode = Enforce(OptionAttackMode, AttackMode);
+	ChaseMode = Enforce(OptionChaseMode, ChaseMode);
+	SecureMode = Enforce(OptionSecureMode, SecureMode);
+	ShowNewHints = Enforce(OptionShowNewHints, ShowNewHints);
+	LevelBar = Enforce(OptionLevelBar, LevelBar);
+	MagLevelBar = Enforce(OptionMagLevelBar, MagLevelBar);
+	if constexpr (IsForced(OptionSkillBars)) {
+		for (int i = 0; i < SKILLS; i++)
+			SkillBars[i] = (*OptionSkillBars)[i];
+	}
+}
+
 // Loads the options from Patella.ini; when it has none (no PreferencesVersion
 // key), imports Tibia.cfg once: the original's reader (ReadTibiaCfg; the
 // defaults without a Tibia.cfg or with one it cannot read), then the options
@@ -1095,15 +1139,22 @@ void TPreferences::Init(TTalkLists &Lists)
 		if (EncodingOf(*File) == TEncoding::Cp1252)
 			patella::log::Info("{}: PreferencesVersion 1 (Windows-1252) read; written as version 2 (UTF-8) at the next save", FileName);
 		SetValues(Values, Lists);
+		ApplyFixedOptions();
 		PreferencesLoaded = true;
 		return;
 	}
-	const bool Import = FileSystem.Exists("Tibia.cfg");
-	ReadTibiaCfg(Lists);
+	constexpr const char *ImportFile = patella::buildconfig::ImportFileName;
+	const bool Import = ImportFile[0] != '\0' && FileSystem.Exists(ImportFile);
+	// Without the file ReadTibiaCfg gives the defaults, which SetDefaults above set already.
 	if (Import)
-		patella::log::Info("{}: the options imported from Tibia.cfg (Tibia.cfg is not written)", FileName);
+		ReadTibiaCfg(Lists);
 	else
-		patella::log::Info("{}: no options and no Tibia.cfg: the default options", FileName);
+		PreferencesLoaded = true;
+	ApplyFixedOptions();
+	if (Import)
+		patella::log::Info("{}: the options imported from {} ({} is not written)", FileName, ImportFile, ImportFile);
+	else
+		patella::log::Info("{}: no options and no file to import: the default options", FileName);
 	SavePreferences(Lists);
 }
 

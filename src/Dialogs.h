@@ -560,7 +560,8 @@ public:
 	void HandleEvent(int Event) override;
 };
 
-// "General Options".
+// "General Options". Patella-Plus: in this dialog and the other options dialogs, the login dialog's Remember too, the
+// check box of an option a developer forced (BuildConfig.h) is nullptr.
 class TGeneralOptionsDialog final : public TWindow {
 public:
 	TGeneralOptionsDialog(void (*_OpenURL)(const char *URL));
@@ -613,7 +614,7 @@ public:
 	TCheckBox *LightEffects;
 	TCheckBox *NoStretching;
 	TCheckBox *Antialiasing; // Patella-Plus, not in the original
-	int RowPitch;            // Patella-Plus: how far the Anti-aliasing row moves the frame rate's bar and texts down
+	int RowPitch;            // Patella-Plus: how far the frame rate's bar and texts move down (Anti-aliasing's row, less the hidden rows)
 	TCheckBox *WindowsMousepointer;
 	THorizontalScrollBar *Framerate; // 10-201 (201 is no limit), event 30
 	void (*OpenURL)(const char *URL);

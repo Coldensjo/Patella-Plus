@@ -1,6 +1,7 @@
 // Settings.cpp: Patella.ini (Settings.h).
 
 #include "settings/Settings.h"
+#include "BuildConfig.h"
 
 #include "compat/msvc.h"
 #include "types/Cp1252.h"
@@ -255,8 +256,8 @@ bool HasData(const std::filesystem::path &Folder, bool CaseInsensitive)
 	if (Folder.empty())
 		return false;
 	try {
-		const std::filesystem::path DataFile = CaseInsensitive ? patella::platform::FindNoCase(Folder, "Tibia.dat")
-															   : Folder / "Tibia.dat";
+		const std::filesystem::path DataFile = CaseInsensitive ? patella::platform::FindNoCase(Folder, patella::buildconfig::DataFileName)
+															   : Folder / patella::buildconfig::DataFileName;
 		std::error_code Error;
 		return std::filesystem::is_regular_file(DataFile, Error);
 	} catch (...) { // std::bad_alloc of the path
@@ -349,12 +350,26 @@ std::filesystem::path XdgSettingsFolder(const char *XdgConfigHome, const char *H
 	if (XdgConfigHome != nullptr && *XdgConfigHome != 0) {
 		const std::filesystem::path Folder(XdgConfigHome);
 		if (Folder.is_absolute())
-			return Folder / "patella";
+			return Folder / patella::buildconfig::SettingsFolderName;
 	}
 	if (Home != nullptr && *Home != 0)
-		return std::filesystem::path(Home) / ".config" / "patella";
+		return std::filesystem::path(Home) / ".config" / patella::buildconfig::SettingsFolderName;
 	return {};
 }
+
+namespace {
+
+// The settings file's DataFolder key, by the file's name (BuildConfig.h).
+constexpr const char *SettingsSourceBefore = "DataFolder of ";
+constexpr auto SettingsSourceName = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(SettingsSourceBefore,
+	patella::buildconfig::SettingsFileName)>(SettingsSourceBefore, patella::buildconfig::SettingsFileName);
+// The fallback when no folder has the data file.
+constexpr const char *FallbackBefore = "the working folder (no ";
+constexpr const char *FallbackAfter = " found)";
+constexpr auto FallbackSourceName = patella::buildconfig::ComposeText<patella::buildconfig::ComposedSize(FallbackBefore,
+	patella::buildconfig::DataFileName, FallbackAfter)>(FallbackBefore, patella::buildconfig::DataFileName, FallbackAfter);
+
+} // namespace
 
 const char *SourceName(TDataSource Source)
 {
@@ -366,11 +381,11 @@ const char *SourceName(TDataSource Source)
 	case TDataSource::Executable:
 		return "the executable's folder";
 	case TDataSource::Settings:
-		return "DataFolder of Patella.ini";
+		return SettingsSourceName.data();
 	case TDataSource::Default:
 		break;
 	}
-	return "the working folder (no Tibia.dat found)";
+	return FallbackSourceName.data();
 }
 
 } // namespace patella::settings

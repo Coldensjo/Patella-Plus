@@ -28,9 +28,13 @@ is refused where a `Tibia.exe` exists. `python -I tools/package_check.py <packag
 ## Where values live
 
 - `src/BuildConfigDefaults.h`: what the builder fixes at compile time (web links, login servers and port, RSA modulus,
-  test server, the site named in texts, the bug report address). A developer's own copy is `-DPATELLA_BUILD_CONFIG=<file>`,
-  and the `static_assert`s of `src/BuildConfig.h` check it.
-- `Patella.ini` (`src/settings/`): what players may change.
+  test server, the site named in texts, the bug report address, the names, and each option: the player's, or forced). A
+  developer's own copy is `-DPATELLA_BUILD_CONFIG=<file>`, and the `static_assert`s of `src/BuildConfig.h` check it.
+  Every new option of `Patella.ini` gets an `Option*` entry there, enforced in its `Preferences.cpp` getter,
+  with no control shown when it is forced.
+- `src/BuildTextsDefaults.h`: the texts naming the game, client or world, the help bubbles, the hints and their triggers.
+  A developer's own copy is `-DPATELLA_BUILD_TEXTS=<file>`, checked by `src/BuildTexts.h`.
+- `Patella.ini` (`src/settings/`): what players may change, within those policies.
 
 ## Rules
 

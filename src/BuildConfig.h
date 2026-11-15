@@ -7,11 +7,13 @@
 //
 // These are the only copies of the values in the product: the login servers and port (Network.cpp), the RSA modulus
 // (Preferences.cpp GetRsaModulus), the test server (Player.cpp), the links (Dialogs.cpp, MainWindow.cpp), Info's
-// caption (Dialogs.cpp), the site named in texts (Network.cpp, Help.cpp), the bug report address (sysinc.cpp). The
-// values are plain text in the program: someone with a hex editor can still change them, and only the server can
-// enforce anything.
+// caption (Dialogs.cpp), the site named in texts (Network.cpp, Help.cpp), the bug report address (sysinc.cpp), the
+// names (ClientName also in cmake/BuildConfig.cmake: the executable and its version information), and the options'
+// defaults and policies (Preferences.cpp, which enforces them in its getters, and the dialogs, menus and buttons that
+// show them). The values are plain text in the program: someone with a hex editor can still change them, and only the
+// server can enforce anything.
 //
-// Portable and C++17: nothing but the standard library.
+// Portable and C++20 (the options' designated initializers): nothing but the standard library.
 
 #pragma once
 
@@ -21,8 +23,11 @@
 #include "BuildConfigDefaults.h" // IWYU pragma: export
 #endif
 
+#include "BuildConfigTypes.h"
+
 #include <array>
 #include <cstddef>
+#include <optional>
 #include <string_view>
 
 namespace patella::buildconfig {
@@ -31,6 +36,12 @@ namespace patella::buildconfig {
 // TFixedString<50>). Network.cpp and Dialogs.cpp hold these to the fields' sizes.
 inline constexpr std::size_t MaxHostName = 99;
 inline constexpr std::size_t MaxCaption = 49;
+
+// The names: the client's (part of an executable's and a window class's name), the window's title and class name (the
+// start's count of the windows reads 30 bytes of each, Player.cpp CountTibiaWindows), a file's or a folder's.
+inline constexpr std::size_t MaxClientName = 31;
+inline constexpr std::size_t MaxWindowName = 29;
+inline constexpr std::size_t MaxFileName = 63;
 
 // The digits a modulus can have with the protocol's 128-byte block: it must be at most 2^1024, and larger than the block's
 // text, which starts with a zero byte, so at least about 2^1016 (306 to 309 digits). A bound on the digit count, not an
@@ -130,6 +141,56 @@ constexpr bool IsCaption(const char *Value) noexcept
 	return IsPrintable(Value) && std::string_view(Value).size() <= MaxCaption;
 }
 
+constexpr bool IsNameCharacter(char c) noexcept
+{
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_';
+}
+
+constexpr bool IsClientName(const char *Value) noexcept
+{
+	if (Value == nullptr)
+		return false;
+	const std::string_view Text(Value);
+	if (Text.empty() || Text.size() > MaxClientName)
+		return false;
+	for (const char c : Text) {
+		if (!IsNameCharacter(c))
+			return false;
+	}
+	return true;
+}
+
+constexpr bool IsWindowName(const char *Value) noexcept
+{
+	return IsPrintable(Value) && std::string_view(Value).size() <= MaxWindowName;
+}
+
+// The name of a file in a folder: no path, no drive, nothing Windows or Linux would read as something else.
+constexpr bool IsFileName(const char *Value) noexcept
+{
+	if (Value == nullptr)
+		return false;
+	const std::string_view Text(Value);
+	if (Text.empty() || Text.size() > MaxFileName || Text[0] == '.')
+		return false;
+	for (const char c : Text) {
+		if (!IsNameCharacter(c) && c != '.')
+			return false;
+	}
+	return true;
+}
+
+constexpr bool IsFileNameOrEmpty(const char *Value) noexcept
+{
+	return Value != nullptr && (Value[0] == '\0' || IsFileName(Value));
+}
+
+// A forced int option is from Min to Max; one the player chooses is not checked.
+constexpr bool IsOption(const std::optional<int> &Option, int Min, int Max) noexcept
+{
+	return !Option || (*Option >= Min && *Option <= Max);
+}
+
 } // namespace check
 
 static_assert(LoginServers.size() == 4, "LoginServers must have exactly four entries: repeat one if you have fewer");
@@ -153,6 +214,35 @@ static_assert(check::IsLink(LinkSignup), "LinkSignup must start with http:// or 
 static_assert(check::IsCaption(WebsiteCaption), "WebsiteCaption must be 1 to 49 printable ASCII characters");
 static_assert(check::IsPrintable(SiteName), "SiteName must be printable ASCII and not empty");
 static_assert(check::IsPrintable(BugReportAddress), "BugReportAddress must be printable ASCII and not empty");
+static_assert(check::IsClientName(ClientName), "ClientName must be 1 to 31 letters, digits, '-' or '_'");
+static_assert(check::IsWindowName(WindowTitle), "WindowTitle must be 1 to 29 printable ASCII characters");
+static_assert(check::IsWindowName(WindowClassName), "WindowClassName must be 1 to 29 printable ASCII characters");
+static_assert(check::IsFileName(SettingsFileName), "SettingsFileName must be 1 to 63 letters, digits, '.', '-' or '_', not starting with '.'");
+static_assert(check::IsFileName(SettingsFolderName), "SettingsFolderName must be 1 to 63 letters, digits, '.', '-' or '_', not starting with '.'");
+static_assert(check::IsFileName(DataFileName), "DataFileName must be 1 to 63 letters, digits, '.', '-' or '_', not starting with '.'");
+static_assert(check::IsFileName(SpriteFileName), "SpriteFileName must be 1 to 63 letters, digits, '.', '-' or '_', not starting with '.'");
+static_assert(check::IsFileName(PictureFileName), "PictureFileName must be 1 to 63 letters, digits, '.', '-' or '_', not starting with '.'");
+static_assert(check::IsFileNameOrEmpty(ImportFileName), "ImportFileName must be empty or 1 to 63 letters, digits, '.', '-' or '_', not starting with '.'");
+static_assert(std::string_view(SettingsFileName) != std::string_view(ImportFileName), "SettingsFileName and ImportFileName must differ");
+
+static_assert(check::IsOption(OptionCreatureInfo, 0, 2) && OptionCreatureInfo != 1, "OptionCreatureInfo: a forced value must be 2 (names and bars) or 0 (none)");
+static_assert(check::IsOption(OptionNoStretching, 0, 1), "OptionNoStretching: a forced value must be 1 (don't stretch) or 0 (stretch)");
+static_assert(check::IsOption(OptionAttackMode, 1, 3), "OptionAttackMode: a forced value must be 1 (offensive), 2 (balanced) or 3 (defensive)");
+static_assert(check::IsOption(OptionChaseMode, 0, 1), "OptionChaseMode: a forced value must be 0 (stand) or 1 (chase)");
+
+// An option the developer forced (the player cannot change it, and its control is not shown), and the value the client
+// uses: the forced one, else Value (the player's).
+template <typename T>
+constexpr bool IsForced(const std::optional<T> &Option) noexcept
+{
+	return Option.has_value();
+}
+
+template <typename T>
+constexpr T Enforce(const std::optional<T> &Option, const T &Value) noexcept
+{
+	return Option.value_or(Value);
+}
 
 // A text with a value inside it, composed at compile time: no run-time work and no allocation, the original's literal in
 // another form. ComposedSize(A, B, ...) is the size of the array ComposeText<Size>(A, B, ...) returns, with its NUL.

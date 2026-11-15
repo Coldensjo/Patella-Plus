@@ -24,5 +24,5 @@ public:
 
 extern CPlayerApp theApp;
 
-void GetWindowTitle(char *Text);     // "Tibia   "
-void GetWindowClassName(char *Text); // "TibiaClient"
+void GetWindowTitle(char *Text);     // BuildConfig.h's WindowTitle ("Tibia   "); 30 bytes
+void GetWindowClassName(char *Text); // BuildConfig.h's WindowClassName ("TibiaClient"); 30 bytes

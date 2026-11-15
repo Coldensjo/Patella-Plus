@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "BuildConfig.h"
 #include "compat/msvc.h"
 #include "types/Cp1252.h"
 #include "types/File.h"
@@ -58,7 +59,7 @@ inline std::filesystem::path PathOfName(std::string_view Name)
 
 // The fork's settings file (settings/Settings.h's FileName), which TDataFileSystem opens in its settings folder; every
 // other name is the data folder's.
-inline constexpr const char *SettingsFileName = "Patella.ini";
+inline constexpr const char *SettingsFileName = patella::buildconfig::SettingsFileName; // Patella.ini unless a developer changed it
 
 // Equal without regard to ASCII case (A-Z and a-z only: the original names are ASCII, and a byte or unit outside ASCII
 // is compared as it is), in the system's form of a name (std::filesystem::path's value_type).

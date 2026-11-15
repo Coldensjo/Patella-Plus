@@ -16,6 +16,7 @@
 // event and are deleted here.
 
 #include "ConsoleWindow.h"
+#include "BuildTexts.h"
 #include "ContextMenus.h"
 #include "Dialogs.h"
 #include "Help.h"
@@ -57,12 +58,8 @@ const char *TextLinkCopyWarning =                                               
 	"Warning!\n"
 	"You are about to copy a link. Keep in mind that unofficial\n"
 	"websites may be used to hack your account! Continue?";
-const char *TextNeverGiveAccount = // 115
-	"Warning!\n"
-	"Never give your account number or your password to anybody!\n"
-	"Not even gamemasters or CipSoft members will need this data.\n"
-	"People asking you for this information are trying to hack you!";
-const char *TextRuleViolations = "Rule Violations"; // 145
+const char *TextNeverGiveAccount = patella::buildtexts::NeverGiveAccountWarning; // 115
+const char *TextRuleViolations = "Rule Violations";                              // 145
 
 } // namespace
 

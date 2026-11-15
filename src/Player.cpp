@@ -18,6 +18,7 @@
 #include "log/Log.h"
 #include "types/FixedString.h"
 #include "BuildConfig.h"
+#include "BuildTexts.h"
 #include "log/LogSettings.h"
 #include "platform/Platform.h"
 #include "platform/Process.h"
@@ -33,20 +34,14 @@ namespace {
 
 // The texts of the user interface that this file shows. The numbers are their places in the original's table of
 // texts, a header every file included.
-// 116: the first sentence of the original's text (there is no error file).
+// 116: the first sentence of the original's text (there is no error file), BuildTexts.h's InternalErrorText.
 // The original went on: "\r\n\r\nA detailed error report has been written to the error file which\r\nyou are asked
 // to submit at your next login." 117 and 118, the error report dialog's texts, are gone with that dialog.
-const char *TextCriticalError = "The Tibia client encountered a critical error and had to be stopped.";
+const char *TextCriticalError = patella::buildtexts::InternalErrorText;
 
 } // namespace
 
 namespace {
-
-// The window title and class name are stored XOR-encoded. The key of each
-// string is here; the other half, TitleCode and ClassNameCode, is
-// sysinc.cpp's.
-const std::array<int, 8> TitleKey = {16, 34, 227, 56, 3, 110, 64, 173};
-const std::array<int, 11> ClassNameKey = {109, 168, 131, 83, 237, 53, 175, 191, 138, 154, 253};
 
 int LastMouseCursor = CURSOR_ARROW;
 int NumberOfTibiaWindows; // counted by CountTibiaWindows
@@ -159,22 +154,19 @@ void CPlayerApp::FatalError(const char *Text, const char *Caption)
 	exit(1);
 }
 
-// Text needs 9 bytes.
+// BuildConfig.h's WindowTitle and WindowClassName, at most MaxWindowName characters: Text needs 30 bytes. The original
+// kept its "Tibia   " and "TibiaClient" XOR-encoded, a key here and the codes in sysinc.cpp; Patella-Plus keeps them as
+// the plain text they always were to anyone who looked.
 void GetWindowTitle(char *Text)
 {
 	PATELLA_ASSERT(Text != nullptr);
-	for (int i = 0; i < 8; i++)
-		Text[i] = (char)(TitleCode[i] ^ TitleKey[i]);
-	Text[8] = 0;
+	TStringBuffer(Text, patella::buildconfig::MaxWindowName + 1).Assign(patella::buildconfig::WindowTitle);
 }
 
-// Text needs 12 bytes.
 void GetWindowClassName(char *Text)
 {
 	PATELLA_ASSERT(Text != nullptr);
-	for (int i = 0; i < 11; i++)
-		Text[i] = (char)(ClassNameCode[i] ^ ClassNameKey[i]);
-	Text[11] = 0;
+	TStringBuffer(Text, patella::buildconfig::MaxWindowName + 1).Assign(patella::buildconfig::WindowClassName);
 }
 
 namespace {
@@ -209,7 +201,7 @@ void CPlayerApp::HandleProgramError(PROGRAM_ERROR Error)
 	std::stringstream Message;
 	Message << GetErrorText(Code) << " (Error Code " << Code << ")\r\n\r\n"
 			<< GetErrorHint(Code);
-	FatalError(Message.str().c_str(), "Tibia Error");
+	FatalError(Message.str().c_str(), patella::buildtexts::ErrorCaption);
 }
 
 // Ends the program with the critical error box. The original appended a report
@@ -232,7 +224,7 @@ void CPlayerApp::HandleException(TMyException &Exception)
 	} catch (...) { // NOLINT(bugprone-empty-catch): GetMessage's std::bad_alloc; the box still ends the client
 	}
 	LogDiagnostics();
-	FatalError(TextCriticalError, "Tibia Error - Debug Assertion");
+	FatalError(TextCriticalError, patella::buildtexts::InternalErrorCaption);
 }
 
 namespace {
@@ -258,14 +250,14 @@ BOOL InitSdlWindow(bool Gamemaster, const char *ClassName)
 		NumberOfTibiaWindows = 0;
 		patella::platform::Platform().Window.VisitWindows(CountTibiaWindows); // EnumWindows
 		if (NumberOfTibiaWindows == 0) {
-			patella::platform::Platform().Window.ShowMessageBox(nullptr, "Application is corrupted! Please re-install Tibia.",
-				"Tibia - Error", patella::platform::TMessageBoxIcon::Warning); // MB_ICONEXCLAMATION
+			patella::platform::Platform().Window.ShowMessageBox(nullptr, patella::buildtexts::StartCorruptedText,
+				patella::buildtexts::StartErrorCaption, patella::platform::TMessageBoxIcon::Warning); // MB_ICONEXCLAMATION
 			patella::sdlframe::ExitProgram();
 			return FALSE;
 		}
 		if (NumberOfTibiaWindows > 1) {
-			patella::platform::Platform().Window.ShowMessageBox(nullptr, "A Tibia client is already running!", "Tibia - Error",
-				patella::platform::TMessageBoxIcon::Warning); // MB_ICONEXCLAMATION
+			patella::platform::Platform().Window.ShowMessageBox(nullptr, patella::buildtexts::StartAlreadyRunningText,
+				patella::buildtexts::StartErrorCaption, patella::platform::TMessageBoxIcon::Warning); // MB_ICONEXCLAMATION
 			patella::sdlframe::ExitProgram();
 			return FALSE;
 		}

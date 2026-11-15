@@ -5,6 +5,7 @@
 // Only the loaders catch errors: they turn a file error into a PROGRAM_ERROR.
 
 #include "graphics.h"
+#include "BuildConfig.h"
 #include "Objects.h"
 #include "Script.h"
 #include "Status.h"
@@ -1159,8 +1160,8 @@ void patella::TGraphics::ResetVideoCache()
 // (InitVideoCache), when the surfaces exist.
 void patella::TGraphics::Init(int MemoryCacheBytes)
 {
-	LoadSprites("Tibia.spr");
-	LoadPictures("Tibia.pic");
+	LoadSprites(patella::buildconfig::SpriteFileName);
+	LoadPictures(patella::buildconfig::PictureFileName);
 	InitMemoryCache(MemoryCacheBytes);
 	InitFonts();
 }

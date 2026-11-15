@@ -2,6 +2,7 @@
 // windows of the desktop and the display's modes. The clipboard is in SdlClipboard.cpp.
 
 #include "platform/SdlPlatform.h"
+#include "BuildConfig.h"
 
 #include "log/Log.h"
 #include "platform/DisplayModeList.h"
@@ -82,13 +83,14 @@ namespace {
 
 // The start's count of the Tibia windows (Player.cpp CountTibiaWindows, "A Tibia client is already running!"):
 // no call of SDL3 lists another process's windows, so another client of this user is told by a lock. Taken at the first
-// count (the client's own, before its window shows) and held to the end of the process (exit releases it).
+// count (the client's own, before its window shows) and held to the end of the process (exit releases it). Its name is
+// BuildConfig.h's SettingsFolderName's, so a client of another name runs beside this one.
 bool AnotherClientRuns()
 {
 	static const bool Result = [] {
 		const char *const Runtime = std::getenv("XDG_RUNTIME_DIR");
 		std::string Path = Runtime != nullptr && Runtime[0] == '/' ? std::string(Runtime) : "/tmp";
-		Path += "/patella-client-" + std::to_string(::getuid()) + ".lock";
+		Path += std::string("/") + buildconfig::SettingsFolderName + "-client-" + std::to_string(::getuid()) + ".lock";
 		const int File = ::open(Path.c_str(), O_CREAT | O_RDWR | O_CLOEXEC, 0600); // NOLINT(cppcoreguidelines-pro-type-vararg): open's mode argument
 		if (File < 0)
 			return false;

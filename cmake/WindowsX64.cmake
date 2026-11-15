@@ -63,7 +63,8 @@ list(SORT patella_cpp_sources CASE INSENSITIVE)
 file(GLOB patella_c_sources CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/Extern/regexp/*.c")
 list(SORT patella_c_sources CASE INSENSITIVE)
 set(patella_rc "${PROJECT_SOURCE_DIR}/src/res/Patella.rc")
-set_source_files_properties("${patella_rc}" PROPERTIES OBJECT_DEPENDS "${PATELLA_RES_DIR}/resources.tsv")
+set_source_files_properties("${patella_rc}" PROPERTIES OBJECT_DEPENDS
+	"${PATELLA_RES_DIR}/resources.tsv;${PATELLA_BUILD_CONFIG_GENERATED}/ClientName.rc.h")
 
 # The Vulkan engine: cmake/Vulkan.cmake builds the back end and the CPU driver; the client adds
 # TSurfaceVulkan (src/vulkan, which the glob of src/*.cpp above does not reach) and the definition
@@ -101,7 +102,7 @@ function(patella_client_compile_settings target)
 		MSVC_DEBUG_INFORMATION_FORMAT ProgramDatabase)
 	target_include_directories(${target} PRIVATE
 		"$<$<COMPILE_LANGUAGE:C,CXX>:${PROJECT_SOURCE_DIR}/src>"
-		"$<$<COMPILE_LANGUAGE:RC>:${PATELLA_RES_DIR}>")
+		"$<$<COMPILE_LANGUAGE:RC>:${PATELLA_RES_DIR};${PATELLA_BUILD_CONFIG_GENERATED}>")
 	target_compile_definitions(${target} PRIVATE
 		$<$<CONFIG:Debug>:_DEBUG>
 		$<$<CONFIG:Release>:NDEBUG>
@@ -121,6 +122,8 @@ endfunction()
 function(patella_client target)
 	add_executable(${target} WIN32 ${patella_cpp_sources} ${patella_c_sources} "${patella_rc}"
 		${patella_vulkan_client_sources} ${ARGN})
+	# <ClientName>.exe (cmake/BuildConfig.cmake): Patella.exe unless a developer named it.
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${PATELLA_CLIENT_NAME}")
 	patella_client_compile_settings(${target})
 	target_link_libraries(${target} PRIVATE
 		winmm kernel32 user32 gdi32 advapi32 shell32 comctl32 ws2_32 SDL3::SDL3-static)

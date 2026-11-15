@@ -201,6 +201,8 @@ public:
 	void ReadTibiaCfg(TTalkLists &Lists);
 	patella::settings::TPreferenceValues GetValues(TTalkLists &Lists);
 	void SetValues(const patella::settings::TPreferenceValues &Values, TTalkLists &Lists);
+	// Patella-Plus: the options a developer fixed (BuildConfig.h) take their values, after a load.
+	void ApplyFixedOptions();
 	// Init, SavePreferences and Exit read and write Patella.ini (settings/PreferenceKeys.h); the
 	// client never writes Tibia.cfg. Lists is the one client's TTalk.
 	void Init(TTalkLists &Lists);
