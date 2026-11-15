@@ -290,6 +290,7 @@ public:
 	void StartStep();
 	int FindPath();
 	int SetDestination(int x, int y, int z, bool Exact, bool Diagonal);
+	[[nodiscard]] bool IsStanding() const; // Patella-Plus
 	void Stop();
 	bool CancelWalk(int NewDirection);
 	void SetExperience(int Experience, int Level, int Progress);

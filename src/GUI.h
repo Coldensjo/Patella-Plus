@@ -341,6 +341,8 @@ public:
 	void RightButtonUp(int x, int y, int Flags);
 	void MouseWheel(int x, int y, int Direction);
 	void KeyPress(int Key);
+	void KeyRelease(int Key); // Patella-Plus
+	void ReleaseKeys();       // Patella-Plus
 	[[nodiscard]] bool CloseRequest();
 	static void LinkCopyWarning();
 	void ConnectionEstablished();
@@ -381,6 +383,7 @@ private:
 	void (*ExitCallback)(){}; // stored but not used
 	platform::TWindowHandle WindowHandle{};
 	bool ShowFPS{}; // toggled by key 0x907
+	int KeyFlags{}; // Patella-Plus: the modifiers held (KEY_SHIFT, KEY_CONTROL, KEY_ALT), for TMainWindow::WalkHeldKey
 
 	// GUI.cpp's (SkinProperties is TGraphics': Skins.h).
 	// AddTimer takes the first NULL entry from 0 or appends, RemoveTimer sets the entry to NULL, UpdateTimers goes

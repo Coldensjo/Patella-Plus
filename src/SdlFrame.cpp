@@ -274,10 +274,12 @@ void OnSize(int cx, int cy)
 	GUI().Resize(cx < 550 ? 550 : cx, cy < 450 ? 450 : cy);
 }
 
-// CMainFrame::OnActivateApp: forgets the held modifiers and leaves fullscreen mode (after the message).
+// CMainFrame::OnActivateApp: forgets the held modifiers and leaves fullscreen mode (after the message). Patella-Plus:
+// the GUI forgets its held keys too, whose releases may go to another window.
 void OnActivateApp()
 {
 	Keys.Reset();
+	GUI().ReleaseKeys();
 	if (Preferences().GetViewMode() == 2)
 		LeaveFullscreen = true;
 }
@@ -511,6 +513,19 @@ void KeyDown(const platform::TKeyEvent &Key)
 	}
 }
 
+// CMainFrame::KeyUp: a modifier forgotten. Patella-Plus, not in the original: the released key also goes to
+// TGUI::KeyRelease, named as KeyPress got it but without the flags (a modifier its flag, a letter in lower case), so
+// that a walk the key holds ends.
+void KeyUp(const platform::TKeyEvent &Key)
+{
+	Keys.Up(Key);
+	const int Code = platform::TranslateKey(Key, 0);
+	if (Code > 0)
+		GUI().KeyRelease(Code);
+	else if (Key.Letter != 0)
+		GUI().KeyRelease(Key.Letter);
+}
+
 #if !defined(_WIN32)
 // SDL_EVENT_KEY_DOWN and SDL_EVENT_KEY_UP, where SDL's key events are the keys' source (not on Windows: OnKeyMessage).
 // SDL's repeats are the platform's repeated presses.
@@ -520,7 +535,7 @@ void OnKey(const SDL_KeyboardEvent &Event)
 	if (Event.down)
 		KeyDown(Key);
 	else
-		Keys.Up(Key);
+		KeyUp(Key);
 }
 #endif
 
@@ -555,6 +570,9 @@ platform::TKeyEvent KeyOfMessage(WPARAM VirtualKey, LPARAM LParam)
 	default:
 		if (VirtualKey >= VK_F1 && VirtualKey <= VK_F12)
 			Key.Key = static_cast<TKey>(static_cast<int>(TKey::F1) + static_cast<int>(VirtualKey - VK_F1));
+		// Patella-Plus: the letter keys' letters, for KeyUp (their characters still come as WM_CHAR).
+		if (VirtualKey >= 'A' && VirtualKey <= 'Z')
+			Key.Letter = static_cast<char>('a' + (VirtualKey - 'A'));
 		break;
 	}
 	return Key;
@@ -566,7 +584,7 @@ void OnKeyMessage(UINT Message, WPARAM WParam, LPARAM LParam)
 	if (Message == WM_KEYDOWN || Message == WM_SYSKEYDOWN)
 		KeyDown(Key);
 	else
-		Keys.Up(Key);
+		KeyUp(Key);
 }
 #endif
 
