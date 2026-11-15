@@ -2,6 +2,7 @@
 // first, then the frame TDialog and the dialog bodies.
 
 #include "Dialogs.h"
+#include "BuildTexts.h"
 #include "vulkan/DeviceSettings.h"
 #include "vulkan/DeviceChoice.h"
 
@@ -38,6 +39,8 @@ const char *TextUseCpuDevice = "CPU (compatibility): draw without the graphics c
 #include "compat/span.h"
 #include "types/FixedString.h"
 #include "graphics.h"
+#include <array>
+#include <optional>
 #include <cstddef>
 #include <memory>
 
@@ -82,7 +85,7 @@ const char *TextAdvancedSettings = "Advanced settings";                         
 const char *TextAvailableResolutions = "Available resolutions:";                                                     // 93
 const char *TextAvailableHotkeys = "Available hotkeys:";                                                             // 95
 const char *TextEditHotkeyText = "Edit hotkey text:";                                                                // 96
-const char *TextClientVersion = "Patella\nVersion 7.72";                                                             // 97
+const char *TextClientVersion = patella::buildtexts::ClientVersion;                                                  // 97
 const char *TextOfficialWebsite = "Official Website";                                                                // 98
 const char *TextCharactersToIgnore = "Characters you wish to ignore:";                                               // 99
 const char *TextGlobalIgnoreSettings = "Global settings for ignoring messages:";                                     // 100
@@ -126,6 +129,37 @@ namespace {
 
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): the binary's global; TCallback's constructor (GUI.cpp) stores two values
 TCallback NoCallback(nullptr, 0);
+
+// Patella-Plus: the check box of an option of Patella.ini, none when a developer forced the option (BuildConfig.h).
+template <typename T>
+TCheckBox *NewOptionCheckBox(const char *Text, const std::optional<T> &Option)
+{
+	return patella::buildconfig::IsForced(Option) ? nullptr : new TCheckBox(Text);
+}
+
+// Patella-Plus: an options dialog's column of check boxes, top to bottom. Each box that is shown takes the next of
+// Rows, so the boxes below a forced option (no box) move up a row. Returns the number of rows left empty at the bottom,
+// by which the dialog shrinks.
+struct TOptionRow {
+	TCheckBox *Box; // nullptr: forced
+	bool Greyed;    // shown but not to be changed (Light without a surface that shades rectangles)
+};
+
+template <std::size_t Count>
+int PlaceOptionRows(TWindow &Dialog, const std::array<TOptionRow, Count> &Boxes, const std::array<TRect, Count> &Rows)
+{
+	auto Row = Rows.begin(); // never passes the box it is placing: one row per box at most
+	for (const TOptionRow &Entry : Boxes) {
+		if (Entry.Box == nullptr)
+			continue;
+		Dialog.InsertChild(Entry.Box);
+		Dialog.SetChildArea(Entry.Box, *Row);
+		++Row;
+		if (Entry.Greyed)
+			Entry.Box->SetEnabled(false);
+	}
+	return static_cast<int>(Rows.end() - Row);
+}
 
 } // namespace
 
@@ -430,7 +464,7 @@ TDialog *CreateHelpDialog(void (*OpenURL)(const char *URL))
 TDialog *CreateHintsDialog()
 {
 	THintsDialog *Body = new THintsDialog();
-	TDialog *Dialog = new TDialog("Hints for Tibia", Body);
+	TDialog *Dialog = new TDialog(patella::buildtexts::HintsCaption, Body);
 	Dialog->SetOkButton("Ok", TCallback(Body, 1));
 	Dialog->SetCancelButton("Cancel", TCallback(Dialog, EVENT_CANCEL));
 	return Dialog;
@@ -829,15 +863,17 @@ void TReconnectWindow::HandleEvent(int Event)
 
 // Patella-Plus: "Remember login" is a row below the link, a gap apart. The body grows by both, and TDialog fits itself
 // and its bottom-anchored buttons around the body. With a saved account the fields are filled in and the
-// password has the focus, so Enter logs in.
+// password has the focus, so Enter logs in. A developer's forced "Remember login" (BuildConfig.h) has no row.
 TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 {
 	constexpr int RememberGap = 8;
 	constexpr int RememberRowHeight = 22;
+	constexpr bool RememberShown = !patella::buildconfig::IsForced(patella::buildconfig::OptionRememberLogin);
 	TRect RememberArea = SkinProperties().LoginDialogLink;
 	RememberArea.y += RememberArea.height + RememberGap;
 	RememberArea.height = RememberRowHeight;
-	TComponent::SetSize(SkinProperties().LoginDialogWidth, SkinProperties().LoginDialogHeight + RememberGap + RememberRowHeight);
+	TComponent::SetSize(SkinProperties().LoginDialogWidth,
+		SkinProperties().LoginDialogHeight + (RememberShown ? RememberGap + RememberRowHeight : 0));
 	FocusGroup.reset(new TFocusGroup());
 	Account = new TPasswordEditLine(8);
 	Account->SetFocusGroup(FocusGroup.get());
@@ -856,10 +892,11 @@ TLoginDialog::TLoginDialog(void (*OpenURL)(const char *URL))
 	Label = new TLabel(SkinProperties().Dialog.TextFont, TextPassword);
 	InsertChild(Label);
 	SetChildArea(Label, SkinProperties().LoginDialogPasswordLabel);
-	Remember = new TCheckBox("Remember login");
-	InsertChild(Remember);
-	SetChildArea(Remember, RememberArea);
-	Remember->SetChecked(Preferences().GetRememberLogin());
+	Remember = NewOptionCheckBox("Remember login", patella::buildconfig::OptionRememberLogin);
+	PlaceOptionRows(*this, std::array<TOptionRow, 1>{{{Remember, false}}},
+		std::array<TRect, 1>{RememberArea});
+	if (Remember != nullptr)
+		Remember->SetChecked(Preferences().GetRememberLogin());
 	if (Preferences().GetRememberLogin() && Preferences().GetLoginAccount() > 0) {
 		TFixedString<16> Number;
 		Number.Format("{}", Preferences().GetLoginAccount());
@@ -893,8 +930,10 @@ void TLoginDialog::HandleEvent(int Event)
 	if (Event == 1) {
 		const int Number = atoi(Account->Text.get()); // NOLINT(bugprone-unchecked-string-to-number-conversion): the original's; the field takes digits only
 		Session().SetAccount(Number, Password->Text.get());
-		if (Remember->IsChecked() || Preferences().GetRememberLogin()) {
-			Preferences().SetLogin(Remember->IsChecked(), Number, Password->Text.get());
+		// Without a box (forced) the developer's value decides.
+		const bool Remembered = Remember != nullptr ? Remember->IsChecked() : Preferences().GetRememberLogin();
+		if (Remembered || Preferences().GetRememberLogin()) {
+			Preferences().SetLogin(Remembered, Number, Password->Text.get());
 			Preferences().SavePreferences(Talk());
 		}
 		Interaction().AddMessage(MESSAGE_CONNECT_LOGIN_SERVER, 0, 0);
@@ -2385,50 +2424,62 @@ TGeneralOptionsDialog::TGeneralOptionsDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
 	// Patella-Plus: Drag Full Stacks is a sixth row below the original five, one row's pitch further down. The body
-	// grows by that pitch, and TDialog fits itself and its bottom-anchored buttons around the body.
+	// grows by that pitch, and TDialog fits itself and its bottom-anchored buttons around the body. The options a
+	// developer forced (BuildConfig.h) have no box: the rows below move up and the body shrinks by a pitch each.
+	using namespace patella::buildconfig;
 	const int RowPitch = SkinProperties().GeneralOptionsDialogAutoChaseOff.y - SkinProperties().GeneralOptionsDialogClassicControl.y;
 	TRect DragFullStacksArea = SkinProperties().GeneralOptionsDialogTextualEffects;
 	DragFullStacksArea.y += RowPitch;
+	ClassicControl = NewOptionCheckBox(patella::buildtexts::ClassicControlLabel, OptionClassicControl);
+	AutoChaseOff = NewOptionCheckBox("Auto Chase Off", OptionAutoChaseOff);
+	ShowHints = NewOptionCheckBox("Show Hints", OptionShowNewHints);
+	CreatureNames = NewOptionCheckBox("Show Names of Creatures", OptionCreatureInfo);
+	TextualEffects = NewOptionCheckBox("Show Textual Effects", OptionTextualEffects);
+	DragFullStacks = NewOptionCheckBox("Drag Full Stacks", OptionDragFullStacks);
+	// SetChildArea needs the dialog's size: the full one first, the forced options' rows taken off below.
 	TComponent::SetSize(SkinProperties().GeneralOptionsDialogWidth, SkinProperties().GeneralOptionsDialogHeight + RowPitch);
-	ClassicControl = new TCheckBox("Tibia Classic Control");
-	AutoChaseOff = new TCheckBox("Auto Chase Off");
-	ShowHints = new TCheckBox("Show Hints");
-	CreatureNames = new TCheckBox("Show Names of Creatures");
-	TextualEffects = new TCheckBox("Show Textual Effects");
-	DragFullStacks = new TCheckBox("Drag Full Stacks");
-	InsertChild(ClassicControl);
-	InsertChild(AutoChaseOff);
-	InsertChild(ShowHints);
-	InsertChild(CreatureNames);
-	InsertChild(TextualEffects);
-	InsertChild(DragFullStacks);
-	SetChildArea(ClassicControl, SkinProperties().GeneralOptionsDialogClassicControl);
-	SetChildArea(AutoChaseOff, SkinProperties().GeneralOptionsDialogAutoChaseOff);
-	SetChildArea(ShowHints, SkinProperties().GeneralOptionsDialogShowHints);
-	SetChildArea(CreatureNames, SkinProperties().GeneralOptionsDialogCreatureNames);
-	SetChildArea(TextualEffects, SkinProperties().GeneralOptionsDialogTextualEffects);
-	SetChildArea(DragFullStacks, DragFullStacksArea);
-	ClassicControl->SetChecked(Preferences().GetClassicControl());
-	AutoChaseOff->SetChecked(Preferences().GetAutoChaseOff());
-	ShowHints->SetChecked(Preferences().GetShowNewHints());
-	CreatureNames->SetChecked(Preferences().GetCreatureInfo() != 0);
-	TextualEffects->SetChecked(Preferences().GetTextualEffects());
-	DragFullStacks->SetChecked(Preferences().GetDragFullStacks());
+	const int EmptyRows = PlaceOptionRows(*this,
+		std::array<TOptionRow, 6>{{{ClassicControl, false}, {AutoChaseOff, false},
+			{ShowHints, false}, {CreatureNames, false},
+			{TextualEffects, false}, {DragFullStacks, false}}},
+		std::array<TRect, 6>{SkinProperties().GeneralOptionsDialogClassicControl, SkinProperties().GeneralOptionsDialogAutoChaseOff,
+			SkinProperties().GeneralOptionsDialogShowHints, SkinProperties().GeneralOptionsDialogCreatureNames,
+			SkinProperties().GeneralOptionsDialogTextualEffects, DragFullStacksArea});
+	TComponent::SetSize(SkinProperties().GeneralOptionsDialogWidth,
+		SkinProperties().GeneralOptionsDialogHeight + RowPitch - EmptyRows * RowPitch);
+	if (ClassicControl != nullptr)
+		ClassicControl->SetChecked(Preferences().GetClassicControl());
+	if (AutoChaseOff != nullptr)
+		AutoChaseOff->SetChecked(Preferences().GetAutoChaseOff());
+	if (ShowHints != nullptr)
+		ShowHints->SetChecked(Preferences().GetShowNewHints());
+	if (CreatureNames != nullptr)
+		CreatureNames->SetChecked(Preferences().GetCreatureInfo() != 0);
+	if (TextualEffects != nullptr)
+		TextualEffects->SetChecked(Preferences().GetTextualEffects());
+	if (DragFullStacks != nullptr)
+		DragFullStacks->SetChecked(Preferences().GetDragFullStacks());
 	Arrange();
 }
 
 // The creature names are creature info 2 (names and bars) or 0. Help (701)
-// keeps the dialog open.
+// keeps the dialog open. Patella-Plus: a forced option has no box and keeps its value.
 void TGeneralOptionsDialog::HandleEvent(int Event)
 {
 	switch (Event) {
 	case 1:
-		Preferences().SetClassicControl(ClassicControl->IsChecked());
-		Preferences().SetAutoChaseOff(AutoChaseOff->IsChecked());
-		Preferences().SetShowNewHints(ShowHints->IsChecked());
-		Preferences().SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
-		Preferences().SetTextualEffects(TextualEffects->IsChecked());
-		Preferences().SetDragFullStacks(DragFullStacks->IsChecked());
+		if (ClassicControl != nullptr)
+			Preferences().SetClassicControl(ClassicControl->IsChecked());
+		if (AutoChaseOff != nullptr)
+			Preferences().SetAutoChaseOff(AutoChaseOff->IsChecked());
+		if (ShowHints != nullptr)
+			Preferences().SetShowNewHints(ShowHints->IsChecked());
+		if (CreatureNames != nullptr)
+			Preferences().SetCreatureInfo(CreatureNames->IsChecked() ? 2 : 0);
+		if (TextualEffects != nullptr)
+			Preferences().SetTextualEffects(TextualEffects->IsChecked());
+		if (DragFullStacks != nullptr)
+			Preferences().SetDragFullStacks(DragFullStacks->IsChecked());
 		Interaction().SetActionState(ACTIONSTATE_NONE);
 		break;
 	case EVENT_CANCEL:
@@ -2549,16 +2600,28 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	Receiver = _Receiver;
 	DeviceGroup.reset(new TRadioButtonGroup);
 	// Patella-Plus: Anti-aliasing is a fourth row below the original three, one row's pitch further down. The frame
-	// rate's bar and texts move down by that pitch and the body grows by it (TDialog fits itself around the body).
-	RowPitch = SkinProperties().AdvancedGraphicsDialog.NoStretching.y - SkinProperties().AdvancedGraphicsDialog.LightEffects.y;
+	// rate's bar and texts move down by that pitch and the body grows by it (TDialog fits itself around the body). The
+	// options a developer forced (BuildConfig.h) have no box: the rows below, the bar and its texts move up a pitch each.
+	using namespace patella::buildconfig;
+	const int Pitch = SkinProperties().AdvancedGraphicsDialog.NoStretching.y - SkinProperties().AdvancedGraphicsDialog.LightEffects.y;
 	TRect AntialiasingArea = SkinProperties().AdvancedGraphicsDialog.WindowsMousepointer;
-	AntialiasingArea.y += RowPitch;
+	AntialiasingArea.y += Pitch;
+	LightEffects = NewOptionCheckBox("Show Light Effects", OptionLightEffects);
+	NoStretching = NewOptionCheckBox("Don't stretch/shrink the Map", OptionNoStretching);
+	Antialiasing = NewOptionCheckBox("Anti-aliasing", OptionAntialiasing);
+	WindowsMousepointer = NewOptionCheckBox("Windows Mouse Pointer", OptionWindowsMousepointer);
+	// SetChildArea needs the dialog's size: the full one first, the forced options' rows taken off below.
+	TComponent::SetSize(SkinProperties().AdvancedGraphicsDialog.Width, SkinProperties().AdvancedGraphicsDialog.Height + Pitch);
+	// Light needs a surface that shades rectangles; without one its box is greyed, as the original's.
+	const int EmptyRows = PlaceOptionRows(*this,
+		std::array<TOptionRow, 4>{{{LightEffects, !GraphicsEngine().GetSurface()->CanShadeRectangles()},
+			{NoStretching, false}, {WindowsMousepointer, false},
+			{Antialiasing, false}}},
+		std::array<TRect, 4>{SkinProperties().AdvancedGraphicsDialog.LightEffects, SkinProperties().AdvancedGraphicsDialog.NoStretching,
+			SkinProperties().AdvancedGraphicsDialog.WindowsMousepointer, AntialiasingArea});
+	RowPitch = Pitch - EmptyRows * Pitch;
 	TRect FramerateArea = SkinProperties().AdvancedGraphicsDialog.Framerate;
 	FramerateArea.y += RowPitch;
-	LightEffects = new TCheckBox("Show Light Effects");
-	NoStretching = new TCheckBox("Don't stretch/shrink the Map");
-	Antialiasing = new TCheckBox("Anti-aliasing");
-	WindowsMousepointer = new TCheckBox("Windows Mouse Pointer");
 	Framerate = new THorizontalScrollBar(10, 201, 10, 11, 1, TCallback(this, EVENT_FRAMERATE));
 	// The graphics device choice in the original's engine buttons' places, with their events (MainWindow.cpp:
 	// 800, 801, 802; Control.cpp ChangeDevice). The buttons are 58 pixels wide (skin 16), which
@@ -2583,23 +2646,17 @@ TAdvancedGraphicsDialog::TAdvancedGraphicsDialog(void (*_OpenURL)(const char *UR
 	InsertChild(AutomaticButton);
 	InsertChild(GpuButton);
 	InsertChild(CpuButton);
-	InsertChild(LightEffects);
-	InsertChild(NoStretching);
-	InsertChild(WindowsMousepointer);
-	InsertChild(Antialiasing);
 	InsertChild(Framerate);
 	TComponent::SetSize(SkinProperties().AdvancedGraphicsDialog.Width, SkinProperties().AdvancedGraphicsDialog.Height + RowPitch);
-	SetChildArea(LightEffects, SkinProperties().AdvancedGraphicsDialog.LightEffects);
-	SetChildArea(NoStretching, SkinProperties().AdvancedGraphicsDialog.NoStretching);
-	SetChildArea(WindowsMousepointer, SkinProperties().AdvancedGraphicsDialog.WindowsMousepointer);
-	SetChildArea(Antialiasing, AntialiasingArea);
 	SetChildArea(Framerate, FramerateArea);
-	LightEffects->SetChecked(Preferences().GetLightEffects());
-	if (!GraphicsEngine().GetSurface()->CanShadeRectangles())
-		LightEffects->SetEnabled(false);
-	NoStretching->SetChecked(Preferences().GetNoStretching());
-	WindowsMousepointer->SetChecked(Preferences().GetWindowsMousepointer());
-	Antialiasing->SetChecked(Preferences().GetAntialiasing());
+	if (LightEffects != nullptr)
+		LightEffects->SetChecked(Preferences().GetLightEffects());
+	if (NoStretching != nullptr)
+		NoStretching->SetChecked(Preferences().GetNoStretching());
+	if (WindowsMousepointer != nullptr)
+		WindowsMousepointer->SetChecked(Preferences().GetWindowsMousepointer());
+	if (Antialiasing != nullptr)
+		Antialiasing->SetChecked(Preferences().GetAntialiasing());
 	int FramerateLimit = Preferences().GetConfineFramerate();
 	if (FramerateLimit < 10)
 		FramerateLimit = 201;
@@ -2671,11 +2728,16 @@ void TAdvancedGraphicsDialog::Draw(int Surface, int x, int y)
 void TAdvancedGraphicsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		const bool Rearrange = !Preferences().GetNoStretching() && NoStretching->IsChecked();
-		Preferences().SetNoStretching(NoStretching->IsChecked());
-		Preferences().SetWindowsMousepointer(WindowsMousepointer->IsChecked());
-		Preferences().SetLightEffects(LightEffects->IsChecked());
-		Preferences().SetAntialiasing(Antialiasing->IsChecked());
+		// Patella-Plus: a forced option has no box and keeps its value.
+		const bool Rearrange = NoStretching != nullptr && !Preferences().GetNoStretching() && NoStretching->IsChecked();
+		if (NoStretching != nullptr)
+			Preferences().SetNoStretching(NoStretching->IsChecked());
+		if (WindowsMousepointer != nullptr)
+			Preferences().SetWindowsMousepointer(WindowsMousepointer->IsChecked());
+		if (LightEffects != nullptr)
+			Preferences().SetLightEffects(LightEffects->IsChecked());
+		if (Antialiasing != nullptr)
+			Preferences().SetAntialiasing(Antialiasing->IsChecked());
 		Preferences().SetConfineFramerate(Framerate->Range->Value);
 		GraphicsEngine().GetSurface()->SetFramerateLimit(Preferences().GetConfineFramerate());
 		if (Rearrange)
@@ -2697,38 +2759,52 @@ void TAdvancedGraphicsDialog::HandleEvent(int Event)
 TConsoleOptionsDialog::TConsoleOptionsDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
+	// Patella-Plus: the options a developer forced (BuildConfig.h) have no box; the rows below move up and the body shrinks
+	// by a row's pitch each.
+	using namespace patella::buildconfig;
+	const int RowPitch = SkinProperties().ConsoleOptionsDialogEventMessages.y - SkinProperties().ConsoleOptionsDialogInfoMessages.y;
+	InfoMessages = NewOptionCheckBox("Show Info Messages in Console", OptionInfoMessages);
+	EventMessages = NewOptionCheckBox("Show Event Messages in Console", OptionEventMessages);
+	StatusMessages = NewOptionCheckBox("Show Status Messages in Console", OptionStatusMessages);
+	TimeStamps = NewOptionCheckBox("Show Timestamp in Console", OptionTimeStamps);
+	PrivateMessages = NewOptionCheckBox("Show Private Messages in Game Window", OptionPrivateMessages);
+	// SetChildArea needs the dialog's size: the full one first, the forced options' rows taken off below.
 	TComponent::SetSize(SkinProperties().ConsoleOptionsDialogWidth, SkinProperties().ConsoleOptionsDialogHeight);
-	InfoMessages = new TCheckBox("Show Info Messages in Console");
-	EventMessages = new TCheckBox("Show Event Messages in Console");
-	StatusMessages = new TCheckBox("Show Status Messages in Console");
-	TimeStamps = new TCheckBox("Show Timestamp in Console");
-	PrivateMessages = new TCheckBox("Show Private Messages in Game Window");
-	InsertChild(InfoMessages);
-	InsertChild(EventMessages);
-	InsertChild(StatusMessages);
-	InsertChild(TimeStamps);
-	InsertChild(PrivateMessages);
-	SetChildArea(InfoMessages, SkinProperties().ConsoleOptionsDialogInfoMessages);
-	SetChildArea(EventMessages, SkinProperties().ConsoleOptionsDialogEventMessages);
-	SetChildArea(StatusMessages, SkinProperties().ConsoleOptionsDialogStatusMessages);
-	SetChildArea(TimeStamps, SkinProperties().ConsoleOptionsDialogTimeStamps);
-	SetChildArea(PrivateMessages, SkinProperties().ConsoleOptionsDialogPrivateMessages);
-	InfoMessages->SetChecked(Preferences().GetInfoMessages());
-	EventMessages->SetChecked(Preferences().GetEventMessages());
-	StatusMessages->SetChecked(Preferences().GetStatusMessages());
-	TimeStamps->SetChecked(Preferences().GetTimeStamps());
-	PrivateMessages->SetChecked(Preferences().GetPrivateMessages());
+	const int EmptyRows = PlaceOptionRows(*this,
+		std::array<TOptionRow, 5>{{{InfoMessages, false}, {EventMessages, false},
+			{StatusMessages, false}, {TimeStamps, false},
+			{PrivateMessages, false}}},
+		std::array<TRect, 5>{SkinProperties().ConsoleOptionsDialogInfoMessages, SkinProperties().ConsoleOptionsDialogEventMessages,
+			SkinProperties().ConsoleOptionsDialogStatusMessages, SkinProperties().ConsoleOptionsDialogTimeStamps,
+			SkinProperties().ConsoleOptionsDialogPrivateMessages});
+	TComponent::SetSize(SkinProperties().ConsoleOptionsDialogWidth, SkinProperties().ConsoleOptionsDialogHeight - EmptyRows * RowPitch);
+	if (InfoMessages != nullptr)
+		InfoMessages->SetChecked(Preferences().GetInfoMessages());
+	if (EventMessages != nullptr)
+		EventMessages->SetChecked(Preferences().GetEventMessages());
+	if (StatusMessages != nullptr)
+		StatusMessages->SetChecked(Preferences().GetStatusMessages());
+	if (TimeStamps != nullptr)
+		TimeStamps->SetChecked(Preferences().GetTimeStamps());
+	if (PrivateMessages != nullptr)
+		PrivateMessages->SetChecked(Preferences().GetPrivateMessages());
 	Arrange();
 }
 
+// Patella-Plus: a forced option has no box and keeps its value.
 void TConsoleOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		Preferences().SetInfoMessages(InfoMessages->IsChecked());
-		Preferences().SetEventMessages(EventMessages->IsChecked());
-		Preferences().SetStatusMessages(StatusMessages->IsChecked());
-		Preferences().SetTimeStamps(TimeStamps->IsChecked());
-		Preferences().SetPrivateMessages(PrivateMessages->IsChecked());
+		if (InfoMessages != nullptr)
+			Preferences().SetInfoMessages(InfoMessages->IsChecked());
+		if (EventMessages != nullptr)
+			Preferences().SetEventMessages(EventMessages->IsChecked());
+		if (StatusMessages != nullptr)
+			Preferences().SetStatusMessages(StatusMessages->IsChecked());
+		if (TimeStamps != nullptr)
+			Preferences().SetTimeStamps(TimeStamps->IsChecked());
+		if (PrivateMessages != nullptr)
+			Preferences().SetPrivateMessages(PrivateMessages->IsChecked());
 		Talk().SetConsoleChanged();
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextConsoleOptionsURL);
@@ -2743,17 +2819,20 @@ TNetworkOptionsDialog::TNetworkOptionsDialog(void (*_OpenURL)(const char *URL))
 {
 	OpenURL = _OpenURL;
 	TComponent::SetSize(SkinProperties().NetworkOptionsDialogWidth, SkinProperties().NetworkOptionsDialogHeight);
-	TestServerLogin = new TCheckBox("Test Server Login");
-	InsertChild(TestServerLogin);
-	SetChildArea(TestServerLogin, SkinProperties().NetworkOptionsDialogTestServerLogin);
-	TestServerLogin->SetChecked(Preferences().GetTestServerLogin());
+	// Patella-Plus: a forced option (BuildConfig.h) leaves the dialog with its buttons only.
+	TestServerLogin = NewOptionCheckBox("Test Server Login", patella::buildconfig::OptionTestServerLogin);
+	PlaceOptionRows(*this, std::array<TOptionRow, 1>{{{TestServerLogin, false}}},
+		std::array<TRect, 1>{SkinProperties().NetworkOptionsDialogTestServerLogin});
+	if (TestServerLogin != nullptr)
+		TestServerLogin->SetChecked(Preferences().GetTestServerLogin());
 	Arrange();
 }
 
 void TNetworkOptionsDialog::HandleEvent(int Event)
 {
 	if (Event == 1) {
-		Preferences().SetTestServerLogin(TestServerLogin->IsChecked());
+		if (TestServerLogin != nullptr)
+			Preferences().SetTestServerLogin(TestServerLogin->IsChecked());
 	} else if (Event == EVENT_HELP) {
 		OpenURL(TextNetworkOptionsURL);
 		return;

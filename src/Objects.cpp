@@ -2,6 +2,7 @@
 // and their accessors.
 
 #include "Objects.h"
+#include "BuildConfig.h"
 #include "Help.h" // HELP_NONE
 #include "Script.h"
 #include "Container.h"
@@ -574,7 +575,7 @@ void patella::TObjectTypes::Init()
 	static_cast<void>(EffectProperties.release());  // NOLINT(bugprone-unused-return-value): the leak is the original's
 	static_cast<void>(MissileProperties.release()); // NOLINT(bugprone-unused-return-value): the leak is the original's
 	try {
-		Load("Tibia.dat");
+		Load(patella::buildconfig::DataFileName);
 	} catch (...) {
 		throw TProgramError{PROGRAM_ERROR::OBJECTS_FILE};
 	}

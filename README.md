@@ -59,17 +59,24 @@ on every push and pull request, without any CipSoft file.
 
 ## Building for your own server
 
-If you build the client for your own server, you fix these values when you compile: the web links, the caption of Info's
-website button, the four login servers and their port, the RSA modulus, the test server, the site named in the connection
-errors and the first hint, and the bug report address. They are in one header, `src/BuildConfigDefaults.h`, with today's
-values as its defaults.
+If you build the client for your own server, you fix these values when you compile, in two headers with today's values as
+their defaults:
 
-1. Copy `src/BuildConfigDefaults.h` somewhere outside the repository, and change the values in your copy. Pulling updates
-   then never conflicts with them.
-2. Configure a build folder with your copy, and build it:
+- `src/BuildConfigDefaults.h`: the web links, the caption of Info's website button, the four login servers and their port,
+  the RSA modulus, the test server, the site named in the connection errors and the first hint, the bug report address;
+  the names (the executable and its version information, the window's title and class, the settings file and its folder,
+  the data files, the options file imported once); and every option of the settings file, which is either the player's
+  (`optional`) or a value you force (`OptionLightEffects = true;`): players then cannot change it, and its check
+  box or menu entry is gone, the dialog closing up.
+- `src/BuildTextsDefaults.h`: the texts that name the game, the client, its world or its makers, the help mode's bubbles,
+  the hints, and the creatures and places that show a hint.
+
+1. Copy either header, or both, somewhere outside the repository, and change the values in your copy. Pulling updates
+   then never conflicts with them. Keep every name in it: a missing one stops the compile.
+2. Configure a build folder with your copies, and build it:
 
 ```
-python -I tools/build.py --env windows-x64 cmake --preset windows-x64 -B build/own -DPATELLA_BUILD_CONFIG=C:/your/BuildConfig.h
+python -I tools/build.py --env windows-x64 cmake --preset windows-x64 -B build/own -DPATELLA_BUILD_CONFIG=C:/your/BuildConfig.h -DPATELLA_BUILD_TEXTS=C:/your/BuildTexts.h
 python -I tools/build.py --env windows-x64 cmake --build build/own --config Release
 ```
 
@@ -77,12 +84,15 @@ A bad value stops the compile with a message that says what is wrong. Links must
 something after that, and hold no space or control character, because opening a link hands it to the operating system,
 which would otherwise start a program named there. Host names are at most 99 characters, ports 1 to 65535, the modulus 306
 to 309 decimal digits, the caption at most 49 characters (the button is 86 pixels wide, so keep it to about 17), and every
-value is ASCII. There are always four login servers: if you have fewer, repeat one.
+value is ASCII. There are always four login servers: if you have fewer, repeat one. The client's name is letters, digits,
+`-` and `_`; file names have no path. A help text must have exactly as many `{}` (a button's picture each) as its comment
+says. Each header's comments give the rest.
 
 The values are fixed in the program: `Patella.ini` and the environment do not change them, except that `ServerAddress`,
 `ServerPort` and `RsaModulus` in `Patella.ini` replace the login server and its key unless the header's
-`ServerAddressOverride`, `ServerPortOverride` and `RsaModulusOverride` are set. They are plain text in the program, so
-someone with a hex editor could still change them; only your server can enforce anything.
+`ServerAddressOverride`, `ServerPortOverride` and `RsaModulusOverride` are set. A forced option is enforced where
+the client reads it, whatever `Patella.ini` says. They are plain text in the program, so someone with a hex editor could
+still change them; only your server can enforce anything.
 
 ## License
 

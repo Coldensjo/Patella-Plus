@@ -103,6 +103,8 @@ endfunction()
 
 function(patella_client target)
 	add_executable(${target} ${patella_cpp_sources} ${patella_c_sources} ${patella_linux_client_sources} ${ARGN})
+	# <ClientName> (cmake/BuildConfig.cmake): Patella unless a developer named it.
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${PATELLA_CLIENT_NAME}")
 	patella_client_compile_settings(${target})
 	target_link_libraries(${target} PRIVATE
 		$<IF:$<TARGET_EXISTS:SDL3::SDL3-static>,SDL3::SDL3-static,SDL3::SDL3> Threads::Threads ${CMAKE_DL_LIBS})

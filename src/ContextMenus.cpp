@@ -8,6 +8,7 @@
 // release or Escape ends the action state, and Control.cpp deletes the menu.
 
 #include "ContextMenus.h"
+#include "BuildConfig.h"
 #include "Communication.h"
 #include "ConsoleWindow.h"
 #include "Creatures.h"
@@ -809,8 +810,10 @@ TBuddyContextMenu::TBuddyContextMenu(uint32 _CharacterID, int x, int y, int Pare
 	AddEntry(EVENT_MENU_SORT_BY_TYPE, "Sort by type", nullptr);
 	if (!Preferences().GetBuddyHideOffline())
 		AddEntry(EVENT_MENU_SORT_BY_STATUS, "Sort by status", nullptr);
-	AddEntry(EVENT_MENU_HIDE_OFFLINE, Preferences().GetBuddyHideOffline() ? "Show offline VIPs" : "Hide offline VIPs",
-		nullptr);
+	// Patella-Plus: not when a developer fixed it (BuildConfig.h).
+	if constexpr (!patella::buildconfig::IsForced(patella::buildconfig::OptionBuddyHideOffline))
+		AddEntry(EVENT_MENU_HIDE_OFFLINE, Preferences().GetBuddyHideOffline() ? "Show offline VIPs" : "Hide offline VIPs",
+			nullptr);
 	Separator = true;
 	if (Position != -1) {
 		AddEntry(EVENT_MENU_COPY_NAME, "Copy Name", nullptr);
@@ -1239,21 +1242,30 @@ TSkillContextMenu::TSkillContextMenu(TSkillsWindowBody *_SkillsWindow, int x, in
 	PATELLA_ASSERT(_SkillsWindow);
 	SkillsWindow = _SkillsWindow;
 	SetSkillsWindowMenu(_SkillsWindow, this);
-	AddEntry(EVENT_MENU_LEVEL_BAR, Preferences().GetLevelBar() ? "Hide Level" : "Show Level", nullptr);
-	AddEntry(EVENT_MENU_MAGIC_LEVEL_BAR, Preferences().GetMagLevelBar() ? "Hide Magic Level" : "Show Magic Level",
-		nullptr);
-	AddEntry(EVENT_MENU_FIST_BAR, Preferences().GetSkillBar(0) ? "Hide Fist Fighting" : "Show Fist Fighting", nullptr);
-	AddEntry(EVENT_MENU_CLUB_BAR, Preferences().GetSkillBar(1) ? "Hide Club Fighting" : "Show Club Fighting", nullptr);
-	AddEntry(EVENT_MENU_SWORD_BAR, Preferences().GetSkillBar(2) ? "Hide Sword Fighting" : "Show Sword Fighting",
-		nullptr);
-	AddEntry(EVENT_MENU_AXE_BAR, Preferences().GetSkillBar(3) ? "Hide Axe Fighting" : "Show Axe Fighting", nullptr);
-	AddEntry(EVENT_MENU_DISTANCE_BAR,
-		Preferences().GetSkillBar(4) ? "Hide Distance Fighting" : "Show Distance Fighting", nullptr);
-	AddEntry(EVENT_MENU_SHIELDING_BAR, Preferences().GetSkillBar(5) ? "Hide Shielding" : "Show Shielding", nullptr);
-	AddEntry(EVENT_MENU_FISHING_BAR, Preferences().GetSkillBar(6) ? "Hide Fishing" : "Show Fishing", nullptr);
-	AddSeparator();
-	AddEntry(EVENT_MENU_SHOW_ALL_BARS, "Show all Skill Bars", nullptr);
-	AddEntry(EVENT_MENU_HIDE_ALL_BARS, "Hide all Skill Bars", nullptr);
+	// Patella-Plus: the bars a developer fixed (BuildConfig.h) have no entries, and "all" is left out when every bar is
+	// fixed (the client keeps the fixed bars as they are either way).
+	using namespace patella::buildconfig;
+	if constexpr (!IsForced(OptionLevelBar))
+		AddEntry(EVENT_MENU_LEVEL_BAR, Preferences().GetLevelBar() ? "Hide Level" : "Show Level", nullptr);
+	if constexpr (!IsForced(OptionMagLevelBar))
+		AddEntry(EVENT_MENU_MAGIC_LEVEL_BAR, Preferences().GetMagLevelBar() ? "Hide Magic Level" : "Show Magic Level",
+			nullptr);
+	if constexpr (!IsForced(OptionSkillBars)) {
+		AddEntry(EVENT_MENU_FIST_BAR, Preferences().GetSkillBar(0) ? "Hide Fist Fighting" : "Show Fist Fighting", nullptr);
+		AddEntry(EVENT_MENU_CLUB_BAR, Preferences().GetSkillBar(1) ? "Hide Club Fighting" : "Show Club Fighting", nullptr);
+		AddEntry(EVENT_MENU_SWORD_BAR, Preferences().GetSkillBar(2) ? "Hide Sword Fighting" : "Show Sword Fighting",
+			nullptr);
+		AddEntry(EVENT_MENU_AXE_BAR, Preferences().GetSkillBar(3) ? "Hide Axe Fighting" : "Show Axe Fighting", nullptr);
+		AddEntry(EVENT_MENU_DISTANCE_BAR,
+			Preferences().GetSkillBar(4) ? "Hide Distance Fighting" : "Show Distance Fighting", nullptr);
+		AddEntry(EVENT_MENU_SHIELDING_BAR, Preferences().GetSkillBar(5) ? "Hide Shielding" : "Show Shielding", nullptr);
+		AddEntry(EVENT_MENU_FISHING_BAR, Preferences().GetSkillBar(6) ? "Hide Fishing" : "Show Fishing", nullptr);
+	}
+	if constexpr (!IsForced(OptionLevelBar) || !IsForced(OptionMagLevelBar) || !IsForced(OptionSkillBars)) {
+		AddSeparator();
+		AddEntry(EVENT_MENU_SHOW_ALL_BARS, "Show all Skill Bars", nullptr);
+		AddEntry(EVENT_MENU_HIDE_ALL_BARS, "Hide all Skill Bars", nullptr);
+	}
 	Show(x, y, ParentWidth, ParentHeight);
 }
 

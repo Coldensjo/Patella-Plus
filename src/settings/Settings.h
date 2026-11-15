@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "BuildTexts.h"
 #include "platform/FileSystem.h"
 
 #include <cstddef>
@@ -38,8 +39,8 @@ namespace patella::settings {
 // The file's name, next to the data files by default (ChooseLocations below).
 inline constexpr const char *FileName = patella::platform::SettingsFileName;
 
-// The first line of a file the client creates, and its line ends.
-inline constexpr const char *NewFileComment = "# Patella-Modern's settings";
+// The first line of a file the client creates (BuildTexts.h), and its line ends.
+inline constexpr const char *NewFileComment = patella::buildtexts::SettingsFileComment;
 inline constexpr const char *NewFileNewline = "\r\n";
 
 // The largest file Load reads (a settings file is a few lines; anything larger is not one).

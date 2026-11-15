@@ -5,6 +5,7 @@
 // Linux's.
 
 #include "platform/Win32Platform.h"
+#include "BuildConfig.h"
 
 #include "log/Log.h"
 #include "platform/FileSystem.h"
@@ -95,8 +96,8 @@ void LogDataFiles()
 	log::Info("data files: {} ({}); {}: {}", Shown(Choice.DataFolder), settings::SourceName(Choice.Source),
 		settings::FileName, Shown(Choice.SettingsFolder));
 	std::error_code Error;
-	if (Choice.Source == settings::TDataSource::Option && !std::filesystem::exists(Choice.DataFolder / "Tibia.dat", Error))
-		log::Warn("--data {}: no Tibia.dat there", Shown(Choice.DataFolder));
+	if (Choice.Source == settings::TDataSource::Option && !std::filesystem::exists(Choice.DataFolder / buildconfig::DataFileName, Error))
+		log::Warn("--data {}: no {} there", Shown(Choice.DataFolder), buildconfig::DataFileName);
 }
 
 } // namespace patella::platform

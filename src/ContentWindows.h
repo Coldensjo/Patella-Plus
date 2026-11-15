@@ -172,6 +172,9 @@ public:
 	bool IsLarge;
 	std::unique_ptr<TRadioButtonGroup> AttackModes; // offensive, balanced, defensive
 	std::unique_ptr<TRadioButtonGroup> ChaseModes;  // stand, chase
+	TSkinButton *OffensiveButton;                   // Patella-Plus: members, for Draw's selection of a fixed attack mode (BuildConfig.h)
+	TSkinButton *BalancedButton;
+	TSkinButton *DefensiveButton;
 	TSkinButton *StandButton;
 	TSkinButton *ChaseButton;
 	TToggleButton *SecureButton; // State: attacks on unmarked players allowed

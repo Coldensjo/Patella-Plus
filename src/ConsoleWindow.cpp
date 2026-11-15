@@ -7,6 +7,7 @@
 // give events in decimal, as in ContextMenus.cpp, and messages in hex.
 
 #include "ConsoleWindow.h"
+#include "BuildConfig.h"
 #include "Communication.h"
 #include "Creatures.h"
 #include "DialogElements.h"
@@ -1190,7 +1191,9 @@ TConsoleWindow::TConsoleWindow()
 	InsertChild(MoveLeftButton);
 	WasdButton = new TToggleButton(0, 0, SKIN_CHECKBOX_UNCHECKED, SKIN_CHECKBOX_CHECKED, TCallback(this, EVENT_WASD_WALKING), TextWasdOn, TextWasdOff,
 		Preferences().GetWasdWalking());
-	InsertChild(WasdButton);
+	// Patella-Plus: a developer's forced WASD (BuildConfig.h) shows no check box.
+	if constexpr (!patella::buildconfig::IsForced(patella::buildconfig::OptionWasdWalking))
+		InsertChild(WasdButton);
 	ReturnToWasd = false;
 	GUI().AddHotkey(KEY_CONTROL | 'I', TCallback(this, EVENT_IGNORE_LIST));
 	GUI().AddHotkey(KEY_CONTROL | 'O', TCallback(this, EVENT_REQUEST_CHANNELS));
@@ -1223,6 +1226,8 @@ TConsoleWindow::~TConsoleWindow()
 		delete MoveRightButton;
 	if (!IsChild(MoveLeftButton) && MoveLeftButton != nullptr)
 		delete MoveLeftButton;
+	if (!IsChild(WasdButton) && WasdButton != nullptr)
+		delete WasdButton;
 }
 
 // Stores the open channels and the console height, closes the buttons that
@@ -1241,6 +1246,8 @@ void TConsoleWindow::OnClose()
 			CloseButton->Close();
 		if (!IsChild(ServerMessagesButton) && ServerMessagesButton != nullptr)
 			ServerMessagesButton->Close();
+		if (!IsChild(WasdButton) && WasdButton != nullptr)
+			WasdButton->Close();
 		if (!IsChild(MoveRightButton) && MoveRightButton != nullptr)
 			MoveRightButton->Close();
 		if (!IsChild(MoveLeftButton) && MoveLeftButton != nullptr)
@@ -1262,7 +1269,8 @@ void TConsoleWindow::SetSize(int Width, int Height)
 {
 	TComponent::SetSize(Width, Height);
 	SetChildArea(TabBar, TabBarArea());
-	SetChildPosition(WasdButton, WasdButtonX, WasdButtonY);
+	if (IsChild(WasdButton))
+		SetChildPosition(WasdButton, WasdButtonX, WasdButtonY);
 	SetChildArea(Input, SkinProperties().ConsoleWindow.Input);
 	SetChildArea(CurrentConsole, SkinProperties().ConsoleWindow.CurrentConsole);
 	if (IsChild(VolumeButton))
@@ -1401,7 +1409,7 @@ void TConsoleWindow::KeyPress(int Key)
 	const bool Walking = WasdButton->State;
 	if (Key == KEY_RETURN && (Walking || strlen(Input->Text.get()) == 0)) {
 		SetWasdWalking(!Walking, Walking);
-		if (!Walking)
+		if (!Walking && WasdButton->State) // not with a developer's WASD that is always off
 			Talk().SetStatusMessage(TextWasdStatus, false);
 		return;
 	}
@@ -1642,9 +1650,18 @@ bool TConsoleWindow::GetWasdWalking() const
 	return WasdButton->State;
 }
 
-// Patella-Plus, not in the original. Return: the line is opened for one message, sending it walks again.
+// Patella-Plus, not in the original. Return: the line is opened for one message, sending it walks again. A developer's
+// forced WASD (BuildConfig.h): always off, or always on but for one message at a time.
 void TConsoleWindow::SetWasdWalking(bool Walking, bool Return)
 {
+	if constexpr (patella::buildconfig::IsForced(patella::buildconfig::OptionWasdWalking)) {
+		if (!*patella::buildconfig::OptionWasdWalking) {
+			Walking = false;
+			Return = false;
+		} else if (!Walking && !Return) {
+			Walking = true;
+		}
+	}
 	WasdButton->State = Walking;
 	ReturnToWasd = Return && !Walking;
 	SetActive(!Walking);

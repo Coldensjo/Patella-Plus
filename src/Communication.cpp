@@ -6,6 +6,7 @@
 // exception passes to the caller.
 
 #include "Communication.h"
+#include "BuildConfig.h"
 #include "Help.h"
 #include "Inventory.h"
 #include "Creatures.h"
@@ -186,7 +187,8 @@ void patella::TCommunication::SendPing()
 
 void patella::TCommunication::PrepareMovement()
 {
-	if (Preferences().GetAutoChaseOff()) {
+	// Patella-Plus: not with a chase mode a developer fixed (BuildConfig.h), which would only send the same modes again.
+	if (Preferences().GetAutoChaseOff() && !patella::buildconfig::IsForced(patella::buildconfig::OptionChaseMode)) {
 		if (Creatures.GetAttackID() != 0) {
 			if (Preferences().GetChaseMode() != CHASE_STAND) {
 				Preferences().SetChaseMode(CHASE_STAND);

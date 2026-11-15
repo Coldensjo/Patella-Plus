@@ -2,6 +2,7 @@
 // see ContentWindows.h.
 
 #include "ContentWindows.h"
+#include "BuildConfig.h"
 #include <cstdint>
 #include <algorithm>
 #include <array>
@@ -1209,18 +1210,18 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 	AttackModes.reset(new TRadioButtonGroup);
 	ChaseModes.reset(new TRadioButtonGroup);
 	SetSize(Layout.Width, Layout.Height);
-	TSkinButton *Offensive = new TSkinButton(Layout.Buttons[0].x, Layout.Buttons[0].y, SKIN_OFFENSIVE_BUTTON_UP, SKIN_OFFENSIVE_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_OFFENSIVE),
+	OffensiveButton = new TSkinButton(Layout.Buttons[0].x, Layout.Buttons[0].y, SKIN_OFFENSIVE_BUTTON_UP, SKIN_OFFENSIVE_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_OFFENSIVE),
 		TextOffensiveFighting, false);
-	Offensive->SetRadioButtonGroup(AttackModes.get());
-	InsertChild(Offensive);
-	TSkinButton *Balanced = new TSkinButton(Layout.Buttons[1].x, Layout.Buttons[1].y, SKIN_BALANCED_BUTTON_UP, SKIN_BALANCED_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_BALANCED),
+	OffensiveButton->SetRadioButtonGroup(AttackModes.get());
+	InsertChild(OffensiveButton);
+	BalancedButton = new TSkinButton(Layout.Buttons[1].x, Layout.Buttons[1].y, SKIN_BALANCED_BUTTON_UP, SKIN_BALANCED_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_BALANCED),
 		TextBalancedFighting, false);
-	Balanced->SetRadioButtonGroup(AttackModes.get());
-	InsertChild(Balanced);
-	TSkinButton *Defensive = new TSkinButton(Layout.Buttons[2].x, Layout.Buttons[2].y, SKIN_DEFENSIVE_BUTTON_UP, SKIN_DEFENSIVE_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_DEFENSIVE),
+	BalancedButton->SetRadioButtonGroup(AttackModes.get());
+	InsertChild(BalancedButton);
+	DefensiveButton = new TSkinButton(Layout.Buttons[2].x, Layout.Buttons[2].y, SKIN_DEFENSIVE_BUTTON_UP, SKIN_DEFENSIVE_BUTTON_DOWN, TCallback(this, EVENT_ATTACK_DEFENSIVE),
 		TextDefensiveFighting, false);
-	Defensive->SetRadioButtonGroup(AttackModes.get());
-	InsertChild(Defensive);
+	DefensiveButton->SetRadioButtonGroup(AttackModes.get());
+	InsertChild(DefensiveButton);
 	StandButton = new TSkinButton(Layout.Buttons[3].x, Layout.Buttons[3].y, SKIN_STAND_BUTTON_UP, SKIN_STAND_BUTTON_DOWN, TCallback(this, EVENT_CHASE_STAND),
 		TextStandWhileFighting, false);
 	StandButton->SetRadioButtonGroup(ChaseModes.get());
@@ -1247,13 +1248,13 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 	}
 	switch (Preferences().GetAttackMode()) {
 	case ATTACK_OFFENSIVE:
-		AttackModes->Selected = Offensive;
+		AttackModes->Selected = OffensiveButton;
 		break;
 	case ATTACK_BALANCED:
-		AttackModes->Selected = Balanced;
+		AttackModes->Selected = BalancedButton;
 		break;
 	case ATTACK_DEFENSIVE:
-		AttackModes->Selected = Defensive;
+		AttackModes->Selected = DefensiveButton;
 		break;
 	default:
 		break;
@@ -1273,9 +1274,28 @@ TCombatControls::TCombatControls(TWindow *Receiver, bool Large)
 }
 
 // The chase mode can change elsewhere (Escape): the selection
-// follows it.
+// follows it. Patella-Plus: so do the attack and secure modes, which a
+// developer may fix (BuildConfig.h): a click on a fixed mode's button changes
+// nothing, and the button shows the mode again.
 void TCombatControls::Draw(int Surface, int x, int y)
 {
+	if constexpr (patella::buildconfig::IsForced(patella::buildconfig::OptionAttackMode)) {
+		switch (Preferences().GetAttackMode()) {
+		case ATTACK_OFFENSIVE:
+			AttackModes->Selected = OffensiveButton;
+			break;
+		case ATTACK_BALANCED:
+			AttackModes->Selected = BalancedButton;
+			break;
+		case ATTACK_DEFENSIVE:
+			AttackModes->Selected = DefensiveButton;
+			break;
+		default:
+			break;
+		}
+	}
+	if constexpr (patella::buildconfig::IsForced(patella::buildconfig::OptionSecureMode))
+		SecureButton->State = !Preferences().GetSecureMode();
 	switch (Preferences().GetChaseMode()) {
 	case CHASE_STAND:
 		if (ChaseModes->Selected != StandButton)
@@ -1861,10 +1881,13 @@ void TSkillsWindowBody::MouseHover(int x, int y)
 	}
 }
 
-// Opens the skill menu (Control.cpp's message 60).
+// Opens the skill menu (Control.cpp's message 60). Patella-Plus: not when a developer fixed every bar (BuildConfig.h),
+// which leaves the menu nothing to offer.
 bool TSkillsWindowBody::RightButtonUp([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int Flags)
 {
-	Interaction().AddMessage(MESSAGE_SKILL_MENU, reinterpret_cast<std::intptr_t>(this), 0);
+	using namespace patella::buildconfig;
+	if constexpr (!IsForced(OptionLevelBar) || !IsForced(OptionMagLevelBar) || !IsForced(OptionSkillBars))
+		Interaction().AddMessage(MESSAGE_SKILL_MENU, reinterpret_cast<std::intptr_t>(this), 0);
 	return true;
 }
 

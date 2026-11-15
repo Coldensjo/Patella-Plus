@@ -5,6 +5,7 @@
 // $XDG_CONFIG_HOME/patella, else $HOME/.config/patella).
 
 #include "platform/FileSystem.h"
+#include "BuildConfig.h"
 #include "platform/Process.h"
 
 #include "log/Log.h"
@@ -85,8 +86,8 @@ void LogDataFiles()
 	log::Info("data files: {} ({}); {}: {}", Choice.DataFolder.string(), settings::SourceName(Choice.Source),
 		settings::FileName, Choice.SettingsFolder.string());
 	std::error_code Error;
-	if (Choice.Source == settings::TDataSource::Option && !std::filesystem::exists(Choice.DataFolder / "Tibia.dat", Error))
-		log::Warn("--data {}: no Tibia.dat there", Choice.DataFolder.string());
+	if (Choice.Source == settings::TDataSource::Option && !std::filesystem::exists(Choice.DataFolder / buildconfig::DataFileName, Error))
+		log::Warn("--data {}: no {} there", Choice.DataFolder.string(), buildconfig::DataFileName);
 }
 
 } // namespace patella::platform
