@@ -26,6 +26,7 @@
 #include "Surface.h"
 #include "Talk.h"
 #include "graphics.h"
+#include "sysinc.h"
 #include "DialogWindow.h"
 #include "GUI.h"
 #include "BuildConfig.h"
@@ -36,6 +37,7 @@
 #include <cstdlib>
 #include <memory>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -43,6 +45,30 @@ namespace {
 // texts, a header every file included.
 const char *TextNoBugReportRight = "You are not authorised to send bug reports."; // 124
 const char *TextAccountURL = patella::buildconfig::LinkAccount;                   // 143
+
+// The step of a walking key of TMainWindow::KeyPress into dx and dy: the arrow keys, and the keypad's diagonal keys
+// (which walk with Diagonal set); false for every other key, a walking key with a modifier included. The original's
+// cases of KeyPress, here (Patella-Plus) because TMainWindow::WalkHeldKey walks with the same keys.
+bool StepOfKey(int Key, int &dx, int &dy)
+{
+	switch (Key) {
+		// clang-format off
+	case KEY_UP: dx = 0; dy = -1; return true;
+	case KEY_LEFT: dx = -1; dy = 0; return true;
+	case KEY_RIGHT: dx = 1; dy = 0; return true;
+	case KEY_DOWN: dx = 0; dy = 1; return true;
+	case KEY_PAD_END: dx = -1; dy = 1; return true;
+	case KEY_PAD_PAGE_DOWN: dx = 1; dy = 1; return true;
+	case KEY_PAD_HOME: dx = -1; dy = -1; return true;
+	case KEY_PAD_PAGE_UP: dx = 1; dy = -1; return true;
+	default: return false;
+		// clang-format on
+	}
+}
+
+// Patella-Plus, not in the original: the fastest the keyboard repeats a key (about 30 times a second), in
+// milliseconds; TMainWindow::WalkHeldKey walks no more often, as the repeated presses of the original.
+constexpr int HeldWalkInterval = 33;
 
 } // namespace
 
@@ -178,25 +204,29 @@ void TMainWindow::SetSize(int Width, int Height)
 }
 
 // Only in connection state 8 (in the game): the arrow keys and the keypad
-// walk (the diagonals with Diagonal set), Ctrl with an arrow key turns,
+// walk (the diagonals with Diagonal set, StepOfKey), Ctrl with an arrow key turns,
 // every other key goes to the console. Patella-Plus, not in the original: while the console's WASD walking is on, the
-// letters of WasdKey are the keys it names.
+// letters of WasdKey are the keys it names; a key that walks is held from now on, the newest of the held keys, until it
+// is released (WalkHeldKey).
 void TMainWindow::KeyPress(int Key)
 {
 	if (Session().GetConnectionState() != CONNECTION_IN_GAME)
 		return;
+	int Held = Key & KEY_CODE_MASK;
+	if (Held >= 'A' && Held <= 'Z')
+		Held += 'a' - 'A';
 	const int Wasd = WasdKey(Key);
 	if (Wasd != 0)
 		Key = Wasd;
+	int dx = 0;
+	int dy = 0;
+	if (StepOfKey(Key, dx, dy)) {
+		std::erase(HeldKeys, Held);
+		HeldKeys.push_back(Held);
+		Walk(dx, dy, dx != 0 && dy != 0);
+		return;
+	}
 	switch (Key) {
-	case KEY_UP: Walk(0, -1, false); break;
-	case KEY_LEFT: Walk(-1, 0, false); break;
-	case KEY_RIGHT: Walk(1, 0, false); break;
-	case KEY_DOWN: Walk(0, 1, false); break;
-	case KEY_PAD_END: Walk(-1, 1, true); break;
-	case KEY_PAD_PAGE_DOWN: Walk(1, 1, true); break;
-	case KEY_PAD_HOME: Walk(-1, -1, true); break;
-	case KEY_PAD_PAGE_UP: Walk(1, -1, true); break;
 	case KEY_CONTROL | KEY_UP: Communication().SendTurnNorth(); break;
 	case KEY_CONTROL | KEY_LEFT: Communication().SendTurnWest(); break;
 	case KEY_CONTROL | KEY_RIGHT: Communication().SendTurnEast(); break;
@@ -204,6 +234,50 @@ void TMainWindow::KeyPress(int Key)
 	default:
 		Console->KeyPress(Key);
 		break;
+	}
+}
+
+// Patella-Plus, not in the original: a key released (TGUI::KeyRelease), as KeyPress names it without the flags and with
+// a letter in lower case, is no longer held.
+void TMainWindow::KeyRelease(int Key)
+{
+	std::erase(HeldKeys, Key);
+}
+
+// Patella-Plus, not in the original: no key is held any more (TGUI::ReleaseKeys).
+void TMainWindow::ReleaseKeys()
+{
+	HeldKeys.clear();
+}
+
+// Patella-Plus, not in the original: the newest held key that walks with the modifiers held now (Flags; as KeyPress would
+// take it: with Control an arrow key turns instead, a letter walks only while the WASD walking is on) takes the next
+// step as soon as the player stands (TPlayerState::IsStanding), every time ProcessEvents runs. The original walked on
+// only with the keyboard's repeated presses, which start after the repeat delay (a quarter to a whole second, half a
+// second by default on Windows) once a key goes down and stop when another key goes down: a step shorter than that delay
+// was followed by a pause after the first step in a new direction (and after the first step from standing), and a
+// hotkey pressed while walking stopped the walk. The repeated presses still
+// come and still walk, as before. A key released before its step is over walks no further. A step that does not start
+// (the server refused it, or the field is blocked) is tried again at most every HeldWalkInterval, as by those presses.
+void TMainWindow::WalkHeldKey(int Flags)
+{
+	if (HeldKeys.empty() || !PlayerState().IsStanding())
+		return;
+	const int Now = GetMilliseconds();
+	if (Now - LastHeldWalk < HeldWalkInterval)
+		return;
+	for (auto Held = HeldKeys.rbegin(); Held != HeldKeys.rend(); ++Held) {
+		int Key = Flags | *Held;
+		const int Wasd = WasdKey(Key);
+		if (Wasd != 0)
+			Key = Wasd;
+		int dx = 0;
+		int dy = 0;
+		if (StepOfKey(Key, dx, dy)) {
+			LastHeldWalk = Now;
+			Walk(dx, dy, dx != 0 && dy != 0);
+			return;
+		}
 	}
 }
 

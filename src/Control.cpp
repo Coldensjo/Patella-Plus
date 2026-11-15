@@ -508,9 +508,10 @@ void patella::TGUI::MouseWheel(int x, int y, int Direction)
 	Interaction.SetMouseOverText(nullptr);
 }
 
-// Key 0x907 switches the frame rate display.
+// Key 0x907 switches the frame rate display. Patella-Plus: every key notes the modifiers held with it (KeyFlags).
 void patella::TGUI::KeyPress(int Key)
 {
+	KeyFlags = Key & (KEY_SHIFT | KEY_CONTROL | KEY_ALT);
 	if (Key == (KEY_ALT | KEY_F8)) {
 		ShowFPS = !ShowFPS;
 		return;
@@ -530,6 +531,25 @@ void patella::TGUI::KeyPress(int Key)
 	}
 	LastMouseMove = 0;
 	Interaction.SetMouseOverText(nullptr);
+}
+
+// Patella-Plus, not in the original: a key released (SdlFrame.cpp's KeyUp), named as KeyPress got it but without the
+// flags (a modifier its flag, a letter in lower case). A modifier leaves KeyFlags, any other key goes to the main
+// window, whose walk it may hold (TMainWindow::KeyRelease), whichever window took its press.
+void patella::TGUI::KeyRelease(int Key)
+{
+	if ((Key & (KEY_SHIFT | KEY_CONTROL | KEY_ALT)) != 0)
+		KeyFlags &= ~Key;
+	else
+		MainWindow->KeyRelease(Key);
+}
+
+// Patella-Plus, not in the original: the window lost or got the focus (SdlFrame.cpp's OnActivateApp), so the releases
+// of the keys held now may never come: no key counts as held any more.
+void patella::TGUI::ReleaseKeys()
+{
+	KeyFlags = 0;
+	MainWindow->ReleaseKeys();
 }
 
 // False while a character is in the game; then the logout warning is posted (event 7) unless another window is open.
@@ -1100,6 +1120,10 @@ void patella::TGUI::ProcessEvents()
 	}
 	if (Session().GetConnectionState() == CONNECTION_IN_GAME && Creatures().MoveCreatures())
 		Communication.SendWalk();
+	// Patella-Plus, not in the original: a walking key still held walks on as soon as the step is over, not when the
+	// keyboard's repeat starts (TMainWindow::WalkHeldKey); not while a dialog or menu is open, which takes the keys.
+	if (Session().GetConnectionState() == CONNECTION_IN_GAME && ModalWindow == nullptr)
+		MainWindow->WalkHeldKey(KeyFlags);
 	Redraw(false);
 }
 

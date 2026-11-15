@@ -558,6 +558,18 @@ int patella::TPlayerState::SetDestination(int x, int y, int z, bool Exact, bool 
 	return 0;
 }
 
+// Patella-Plus, not in the original: whether the player's creature stands with nothing of a walk left: no step that the
+// server has not confirmed, no step of the path, no destination waiting. TMainWindow::WalkHeldKey takes the next step
+// with a held walking key then.
+bool patella::TPlayerState::IsStanding() const
+{
+	if (PlayerID == 0 || PlayerStepDX != 0 || PlayerStepDY != 0 || NewPlayerDestination || DestinationX != 0
+		|| CurrentPlayerStep < NumberOfPlayerSteps)
+		return false;
+	const TCreature *Player = Creatures.GetCreature(PlayerID);
+	return Player != nullptr && !Player->Moving;
+}
+
 void patella::TPlayerState::Stop()
 {
 	DestinationX = 0;

@@ -15,6 +15,8 @@
 
 #include "GUI.h"
 
+#include <vector>
+
 class TMapFrame;      // MapWindow.h
 class TBorder;        // DialogElements.h
 class TDialogWindow;  // DialogWindow.h
@@ -37,6 +39,9 @@ public:
 	[[nodiscard]] int GetConsoleWindowHeight() const;
 	void Walk(int dx, int dy, bool Diagonal);
 	[[nodiscard]] int WasdKey(int Key) const;
+	void KeyRelease(int Key); // Patella-Plus: the held walking keys (below)
+	void ReleaseKeys();
+	void WalkHeldKey(int Flags);
 	void OpenContainer(int Container) const;
 	void CloseContainer(int Container) const;
 	void OpenTrade() const;
@@ -58,6 +63,12 @@ public:
 
 protected:
 	void OnClose() override; // the preferences
+
+private:
+	// Patella-Plus, not in the original: the walking keys held, as KeyPress got them without the flags and with a
+	// letter in lower case, the newest last, each once (KeyPress adds a key that walks, KeyRelease takes it out).
+	std::vector<int> HeldKeys;
+	int LastHeldWalk{}; // when WalkHeldKey last walked (GetMilliseconds)
 };
 
 // The window behind the start dialogs.
