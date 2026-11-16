@@ -141,5 +141,10 @@ inline constexpr std::optional<bool> OptionMagLevelBar = optional;              
 inline constexpr std::optional<std::array<bool, 7>> OptionSkillBars = optional; // (all true)
 // The VIP list's menu: "Hide offline VIPs".
 inline constexpr std::optional<bool> OptionBuddyHideOffline = optional; // (false)
+// Only in Patella.ini, no control (Patella-Plus): WalkFrameTime, the shortest time in milliseconds a walking creature
+// shows each frame of its walk, 0 to 1000. 0 is the original: a step changes the frame every 8 pixels, however fast, so a
+// very fast creature's legs flicker. With a value, a creature whose frames would change sooner changes them every
+// WalkFrameTime instead; a slower one looks as before. 60 calms the fastest walkers down a little.
+inline constexpr std::optional<int> OptionWalkFrameTime = optional; // (0)
 
 } // namespace patella::buildconfig

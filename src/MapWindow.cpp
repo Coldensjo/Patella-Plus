@@ -1069,7 +1069,7 @@ void TMapWindow::DrawCreature(int posx, int posy, int Level, TCreature *Creature
 	if (ObjectTypes().GetOutfitFlag(OutfitType, ANIMATEALWAYS))
 		Phase = Interaction().GetActionNumber() / 3 % PATELLA_DIVISOR(ObjectTypes().GetOutfitPhases(OutfitType)) + 1;
 	else
-		Phase = Creature->GetAnimationPhase(ObjectTypes().GetOutfitPhases(OutfitType));
+		Phase = Creature->GetAnimationPhase(ObjectTypes().GetOutfitPhases(OutfitType), Preferences().GetWalkFrameTime());
 	for (int X = 1; X <= ObjectTypes().GetOutfitWidth(OutfitType); X++) {
 		for (int Y = 1; Y <= ObjectTypes().GetOutfitHeight(OutfitType); Y++) {
 			const int SpriteNumber = ObjectTypes().GetOutfitSpriteNumber(OutfitType, X, Y, 1,
