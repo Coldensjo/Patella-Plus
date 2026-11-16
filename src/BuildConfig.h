@@ -43,6 +43,10 @@ inline constexpr std::size_t MaxClientName = 31;
 inline constexpr std::size_t MaxWindowName = 29;
 inline constexpr std::size_t MaxFileName = 63;
 
+// The longest WalkFrameTime (OptionWalkFrameTime, Patella.ini's key), in milliseconds; Preferences.cpp keeps the key's
+// value from 0 to it.
+inline constexpr int MaxWalkFrameTime = 1000;
+
 // The digits a modulus can have with the protocol's 128-byte block: it must be at most 2^1024, and larger than the block's
 // text, which starts with a zero byte, so at least about 2^1016 (306 to 309 digits). A bound on the digit count, not an
 // exact check of the number's range.
@@ -229,6 +233,7 @@ static_assert(check::IsOption(OptionCreatureInfo, 0, 2) && OptionCreatureInfo !=
 static_assert(check::IsOption(OptionNoStretching, 0, 1), "OptionNoStretching: a forced value must be 1 (don't stretch) or 0 (stretch)");
 static_assert(check::IsOption(OptionAttackMode, 1, 3), "OptionAttackMode: a forced value must be 1 (offensive), 2 (balanced) or 3 (defensive)");
 static_assert(check::IsOption(OptionChaseMode, 0, 1), "OptionChaseMode: a forced value must be 0 (stand) or 1 (chase)");
+static_assert(check::IsOption(OptionWalkFrameTime, 0, MaxWalkFrameTime), "OptionWalkFrameTime: a forced value must be 0 (the original) to 1000 milliseconds");
 
 // An option the developer forced (the player cannot change it, and its control is not shown), and the value the client
 // uses: the forced one, else Value (the player's).

@@ -447,6 +447,7 @@ void WritePreferences(TSettingsFile &File, const TPreferenceValues &Values)
 		File.Remove("LoginAccount");
 		File.Remove("LoginPassword");
 	}
+	Put(File, "WalkFrameTime", Number(Values.WalkFrameTime));
 	Put(File, "AttackMode", Number(Values.AttackMode));
 	Put(File, "ChaseMode", Number(Values.ChaseMode));
 	Put(File, "SecureMode", YesNo(Values.SecureMode));
@@ -552,6 +553,7 @@ std::vector<std::string> ReadPreferences(const TSettingsFile &File, TPreferenceV
 	Read.Number("LoginAccount", Values.LoginAccount);
 	if (const auto Fields = Read.Fields("LoginPassword", "t"))
 		Values.LoginPassword = (*Fields)[0].Text;
+	Read.Number("WalkFrameTime", Values.WalkFrameTime);
 	Read.Number("AttackMode", Values.AttackMode);
 	Read.Number("ChaseMode", Values.ChaseMode);
 	if (Values.ChaseMode == CHASE_OBSOLETE)

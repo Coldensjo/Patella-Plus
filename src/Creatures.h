@@ -59,7 +59,7 @@ public:
 	[[nodiscard]] int GetDrawDirection() const;
 	void StartMovement(int dx, int dy, int Waypoints);
 	void SetMark(int Value);
-	[[nodiscard]] int GetAnimationPhase(int AvailablePhases) const;
+	[[nodiscard]] int GetAnimationPhase(int AvailablePhases, int FrameTime) const; // FrameTime: Patella-Plus
 	// Ours: the skull SetSkull kept (Delay) is still shown at Now, the wall clock's 64-bit time: SkullTime is set, and
 	// Now is from it to four seconds after it.
 	[[nodiscard]] bool SkullKept(std::int64_t Now) const

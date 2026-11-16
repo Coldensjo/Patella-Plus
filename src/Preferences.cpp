@@ -359,6 +359,13 @@ bool TPreferences::GetAntialiasing() const
 	return patella::buildconfig::Enforce(patella::buildconfig::OptionAntialiasing, Antialiasing);
 }
 
+// Patella-Plus, not in the original: the shortest time in milliseconds a walking creature shows each frame of its walk
+// (TCreature::GetAnimationPhase), 0 for the original's frames. Patella.ini's WalkFrameTime: no control sets it.
+int TPreferences::GetWalkFrameTime() const
+{
+	return patella::buildconfig::Enforce(patella::buildconfig::OptionWalkFrameTime, WalkFrameTime);
+}
+
 // Patella-Plus, not in the original.
 const patella::settings::TServerValues &TPreferences::GetServerValues() const
 {
@@ -474,6 +481,7 @@ void TPreferences::SetDefaults(TTalkLists &Lists)
 	AutoChaseOff = true;
 	DragFullStacks = false;
 	Antialiasing = false;
+	WalkFrameTime = 0;
 	WasdWalking = false;
 	RememberLogin = false;
 	LoginAccount = 0;
@@ -951,6 +959,7 @@ patella::settings::TPreferenceValues TPreferences::GetValues(TTalkLists &Lists)
 	Values.AutoChaseOff = AutoChaseOff;
 	Values.DragFullStacks = DragFullStacks;
 	Values.Antialiasing = Antialiasing;
+	Values.WalkFrameTime = WalkFrameTime;
 	Values.WasdWalking = WasdWalking;
 	Values.RememberLogin = RememberLogin;
 	Values.LoginAccount = LoginAccount;
@@ -1050,6 +1059,8 @@ void TPreferences::SetValues(const patella::settings::TPreferenceValues &Values,
 	AutoChaseOff = Values.AutoChaseOff;
 	DragFullStacks = Values.DragFullStacks;
 	Antialiasing = Values.Antialiasing;
+	// Patella-Plus: a WalkFrameTime outside 0 to MaxWalkFrameTime is taken as the nearer end.
+	WalkFrameTime = std::clamp(Values.WalkFrameTime, 0, patella::buildconfig::MaxWalkFrameTime);
 	WasdWalking = Values.WasdWalking;
 	RememberLogin = Values.RememberLogin;
 	LoginAccount = RememberLogin ? Values.LoginAccount : 0;
@@ -1098,6 +1109,7 @@ void TPreferences::ApplyFixedOptions()
 	AutoChaseOff = Enforce(OptionAutoChaseOff, AutoChaseOff);
 	DragFullStacks = Enforce(OptionDragFullStacks, DragFullStacks);
 	Antialiasing = Enforce(OptionAntialiasing, Antialiasing);
+	WalkFrameTime = Enforce(OptionWalkFrameTime, WalkFrameTime);
 	WasdWalking = Enforce(OptionWasdWalking, WasdWalking);
 	RememberLogin = Enforce(OptionRememberLogin, RememberLogin);
 	if (!RememberLogin) {

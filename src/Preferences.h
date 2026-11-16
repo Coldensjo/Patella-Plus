@@ -164,6 +164,7 @@ public:
 	[[nodiscard]] const char *GetLoginPassword() const;
 	void SetAntialiasing(bool Value);
 	[[nodiscard]] bool GetAntialiasing() const;
+	[[nodiscard]] int GetWalkFrameTime() const;
 	[[nodiscard]] const patella::settings::TServerValues &GetServerValues() const;
 	[[nodiscard]] const char *GetRsaModulus() const;
 	void SetAttackMode(int Value);
@@ -225,6 +226,7 @@ private:
 	bool DragFullStacks{}; // Patella-Plus, not in the original
 	bool WasdWalking{};    // Patella-Plus, not in the original: W, A, S and D walk, the console's line is off
 	bool Antialiasing{};   // Patella-Plus, not in the original: stretched pictures are smoothed
+	int WalkFrameTime{};   // Patella-Plus, not in the original: the shortest time a walking frame is shown (ms, 0: original)
 	// Patella-Plus, not in the original: the login dialog's saved account number and password (0 and empty without).
 	bool RememberLogin{};
 	int LoginAccount{};

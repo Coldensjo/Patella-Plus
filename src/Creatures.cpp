@@ -402,14 +402,20 @@ void TCreature::SetMark(int Value)
 }
 
 // Phase 1 stands still; walking runs through phases 2 to
-// AvailablePhases, one every 8 pixels.
-int TCreature::GetAnimationPhase(int AvailablePhases) const
+// AvailablePhases, one every 8 pixels. Patella-Plus, not in the original: a step's 32 pixels change the frame four
+// times, so a step shorter than four FrameTime (milliseconds, Patella.ini's WalkFrameTime; 0: no such step) would show
+// a frame for less than FrameTime. Such a creature changes its frame every FrameTime on the clock instead, offset by its
+// ID so that fast walkers side by side do not move their legs in step; a slower one keeps the original's frames.
+int TCreature::GetAnimationPhase(int AvailablePhases, int FrameTime) const
 {
 	PATELLA_ASSERT_VALUES(AvailablePhases>=1, AvailablePhases);
 	if (AvailablePhases == 1)
 		return 1;
-	if (DeltaX == 0 && DeltaY == 0 && GetMilliseconds() > StepEnd)
+	const int Now = GetMilliseconds();
+	if (DeltaX == 0 && DeltaY == 0 && Now > StepEnd)
 		return 1;
+	if (FrameTime > 0 && StepDuration < 4 * FrameTime)
+		return (Now + static_cast<int>(CreatureID % 1024)) / FrameTime % (AvailablePhases - 1) + 2;
 	int Distance = abs(DeltaX);
 	if (Distance <= abs(DeltaY))
 		Distance = abs(DeltaY);

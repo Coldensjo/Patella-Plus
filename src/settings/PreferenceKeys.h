@@ -25,6 +25,8 @@
 //	RememberLogin                         Patella-Plus, not in Tibia.cfg: the login dialog fills in the next two
 //	LoginAccount=123456                   Patella-Plus: the account number, a line only with RememberLogin
 //	LoginPassword="text"                  Patella-Plus: the password as typed (not encrypted), only with RememberLogin
+//	WalkFrameTime=0                       Patella-Plus, not in Tibia.cfg: the shortest time a walking frame is shown, in
+//	                                      ms, 0 to 1000 (0: the original); no control sets it, the user writes it
 //	Buddy<n>=CharacterID,Icon,"description",notify   n 1, 2, ...
 //	White="name","name"                   the permanent entries of the buddy (white) list
 //	Ignore="name"                         the permanent entries of the ignore list
@@ -144,6 +146,7 @@ struct TPreferenceValues {
 	bool RememberLogin = false;
 	int LoginAccount = 0;      // with RememberLogin
 	std::string LoginPassword; // with RememberLogin
+	int WalkFrameTime = 0;
 	int AttackMode = ATTACK_BALANCED;
 	int ChaseMode = CHASE_STAND;
 	bool SecureMode = true;
